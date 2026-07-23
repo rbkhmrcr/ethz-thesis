@@ -2,22 +2,14 @@
 \usepackage[utf8]{inputenc}
 
 % Languages
-\usepackage[main=english,ngerman]{babel}
+\usepackage[main=english]{babel}
 
 % classicthesis setup
-\PassOptionsToPackage{%
-  %drafting,%
-  %dottedtoc,%
-  eulerchapternumbers,
-  %listings,%
-  %parts,%
+\PassOptionsToPackage{
+  eulerchapternumbers,%
   floatperchapter, pdfspacing,%
   beramono,%
-  %minionprospacing,
-  %subfig,%
-  %eulermath,%
-  a5paper,%
-}{classicthesis}
+  a5paper}{classicthesis}
 
 % Meta
 \input{preamble/meta}
@@ -74,20 +66,13 @@
 
 % Hyperref
 \usepackage[dvipsnames]{xcolor}
-\usepackage[%
+\usepackage[
   hyperfootnotes=false,%
   pdfpagelabels,%
-  % pdfa,%
 ]{hyperref}
 \usepackage{hyperxmp}
-%\pdfcompresslevel=9
-%\pdfadjustspacing=1
-\hypersetup{%
-  %pdfstartpage=3, pdfstartview=FitV,%
-  % following line: colored links (web version)
+\hypersetup{
   colorlinks=true, linktocpage=true,%
-  % following line: all links in black (for printing)
-  %colorlinks=false, linktocpage=false, pdfborder={0 0 0},%
   breaklinks=true, pdfpagemode=UseNone, pageanchor=true, pdfpagemode=UseOutlines,%
   plainpages=false, bookmarksnumbered, bookmarksopen=true, bookmarksopenlevel=1,%
   hypertexnames=true, pdfhighlight=/O,%nesting=true,%frenchlinks,%
@@ -114,9 +99,6 @@
           minimum size=0.8\baselineskip] (char) {\figureversion{lining}#1};
   }
 }
-
-% \tikzexternalize
-% \tikzsetexternalprefix{externalized/}
 
 % Autoreferences
 \renewcommand*{\figureautorefname}{Figure}
@@ -186,18 +168,6 @@
 % Chapter font
 \let\chapterNumber\undefined%
 \newfont{\chapterNumber}{eurb10 scaled 5500}
-%\newfont{\chapterNumber}{MinionPro-Regular-lf-t1 scaled 5500}
-
-% SI units
-\usepackage{siunitx}
-\sisetup{
-  separate-uncertainty,
-  repeatunits=false,
-  detect-family,
-  unit-mode=text,
-}
-\DeclareSIUnit\au{a.u.}
-\let\u=\SI%
 
 % Product type codes
 \newcommand{\productcode}[1]{\figureversion{lining}#1}
@@ -220,18 +190,6 @@
   \par
   \endgroup
 }
-
-% Chapter quotes
-% Adapted from: <http://tex.stackexchange.com/questions/53377/inspirational-quote-at-start-of-chapter>
-\setkomafont{dictumtext}{\itshape\small}%
-\setkomafont{dictumauthor}{\normalfont}
-\renewcommand*{\dictumwidth}{0.6\textwidth}
-\renewcommand*{\dictumrule}{}
-\renewcommand*\dictumauthorformat[1]{--- #1}
-
-% Subfigure labels (manual)
-%\newcommand{\subfig}[1]{#1)}
-\newcommand{\subfig}[1]{(#1)}
 
 % CV
 \newcommand{\cvleft}[1]{\begin{minipage}[t]{2.5cm}\begin{flushright}#1\end{flushright}\end{minipage}\hspace{5mm}}
