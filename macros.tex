@@ -1,0 +1,74 @@
+% new environments
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{definition}{Definition}
+
+\newcommand{\algo}[1]{\mathsf{#1}}
+\newcommand{\sample}{\overset{\$}{\leftarrow}}
+\newcommand{\secparam}{\kappa}
+
+% commitments
+\newcommand{\COM}{\algo{Com}}
+\newcommand{\COMgen}{\COM\algo{.Gen}}
+\newcommand{\COMcommit}{\COM\algo{.Commit}}
+\newcommand{\COMopen}{\COM\algo{.Open}}
+\newcommand{\openinfo}{\algo{open}}
+\newcommand{\com}{\algo{com}}
+\newcommand{\msg}{\algo{msg}}
+\newcommand{\key}{\algo{key}}
+
+% com sec
+\newcommand{\adv}{\mathcal{A}}
+\newcommand{\Adv}{\algo{Adv}}
+
+% digital signatures
+\newcommand{\DS}{\algo{DS}}
+\newcommand{\DSgen}{\DS\algo{.Gen}}
+\newcommand{\DSsign}{\DS\algo{.Sign}}
+\newcommand{\DSverify}{\DS\algo{.Verify}}
+\newcommand{\signature}{\algo{sig}}
+\newcommand{\pk}{\algo{pk}}
+\newcommand{\sk}{\algo{sk}}
+
+% ds sec
+\newcommand{\DSsigno}{\mathcal{O}_{\DSsign}}
+
+% encryption
+\newcommand{\PKE}{\algo{PKE}}
+\newcommand{\PKEgen}{\PKE\algo{.Gen}}
+\newcommand{\PKEencrypt}{\PKE\algo{.Enc}}
+\newcommand{\PKEdecrypt}{\PKE\algo{.Dec}}
+\newcommand{\ciph}{\algo{ciph}}
+
+% enc sec
+\newcommand{\deco}{\mathcal{O}_{\PKEdecrypt}}
+
+% nizks
+\newcommand{\NIZK}{\algo{NIZK}}
+\newcommand{\NIZKgen}{\NIZK\algo{.Gen}}
+\newcommand{\NIZKprove}{\NIZK\algo{.Prove}}
+\newcommand{\NIZKverify}{\NIZK\algo{.Verify}}
+\newcommand{\nizkproof}{\algo{proof}}
+
+% nizk sec 
+\newcommand{\NIZKsimgen}{\NIZK\algo{.SimGen}}
+\newcommand{\NIZKsimprove}{\NIZK\algo{.SimProve}}
+\newcommand{\NIZKext}{\NIZK\algo{.Extract}}
+\newcommand{\lang}{\algo{lang}}
+\newcommand{\crs}{\algo{crs}}
+\newcommand{\proof}{\algo{proof}}
+\newcommand{\state}{\algo{state}}
+\newcommand{\inst}{\algo{inst}}
+\newcommand{\witness}{\algo{wit}}
+
+% soks
+\newcommand{\SOK}{\algo{SoK}}
+\newcommand{\sokgen}{\SOK\algo{.Gen}}
+\newcommand{\soksign}{\SOK\algo{.Sign}}
+\newcommand{\sokverify}{\SOK\algo{.Verify}}
+\newcommand{\soksig}{\algo{sig}}
+
+% sok sec
+\newcommand{\soksimgen}{\SOK\algo{.SimGen}}
+\newcommand{\soksimsign}{\SOK\algo{.SimSign}}
+\newcommand{\sokext}{\SOK\algo{.Extract}}

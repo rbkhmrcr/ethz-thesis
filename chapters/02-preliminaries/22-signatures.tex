@@ -1,0 +1,50 @@
+\section{Digital Signatures}
+
+Digital signature schemes enable a signer to produce publicly verifiable
+signatures on messages using a secret signing key.
+
+\paragraph{Interfaces.} A digital signature scheme consists of three algorithms
+defined as follows:
+
+\begin{itemize}
+
+  \item $(\pk,\sk) \sample \DSgen(\secparam)$ : the key generation algorithm
+    outputs a public verification key $\pk$ and a secret signing key $\sk$.
+
+  \item $\signature \sample \DSsign(\sk, \msg)$ : the signing algorithm takes as
+    input the secret key $\sk$ and a message $\msg$, and outputs a signature
+    $\signature$.
+
+  \item $\{0,1\} \leftarrow \DSverify(\pk,\msg,\signature)$ : the verification
+    algorithm takes as input the public key $\pk$, a message $\msg$, and a
+    signature $\signature$, and outputs $0$ or $1$.
+
+\end{itemize}
+
+\paragraph{Correctness.} A digital signature scheme must satisfy the following
+correctness requirement: for every key pair $(\pk,\sk)$ output by
+$\DSgen(\secparam)$ and every message $\msg$, it holds that $\DSverify(\pk,
+\msg, \DSsign(\sk, \msg)) = 1$.
+
+\paragraph{Unforgeability.} We define existential unforgeability under
+chosen-message attack (EUF-CMA) using the following security experiment:
+%
+\begin{enumerate}
+
+  \item $(\pk,\sk)\sample\DSgen(\secparam)$.
+
+  \item The adversary is given $\pk$ and oracle access to $\DSsigno$.
+
+  \item The adversary outputs $(\msg^\star,\signature^\star)$.
+
+\end{enumerate}
+%
+We say that the adversary wins if
+$\DSverify(\pk,\msg^\star,\signature^\star)=1$, and $\msg^\star$ was not
+submitted to the signing oracle.
+
+The adversary's advantage is then defined as follows:
+\begin{equation*}
+\Adv^{\mathsf{euf\text{-}cma}}_{\DS, \ \adv}(\secparam) = \Pr[ \ \adv\text{ wins} \ ].
+\end{equation*}
+The signature scheme is EUF-CMA secure if this advantage is small.

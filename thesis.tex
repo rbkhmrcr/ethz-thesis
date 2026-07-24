@@ -35,7 +35,7 @@
 %
 % Frontmatter
 %
-
+\include{macros}
 \include{frontbackmatter/dirtytitlepage}
 \include{frontbackmatter/titlepage}
 \include{frontbackmatter/titleback}
@@ -49,11 +49,11 @@
 % Mainmatter
 %
 \cleardoublepage\pagenumbering{arabic}%
-\def\dir{chapters/introduction}
+\def\dir{chapters/01-introduction}
 \include{\dir/main}
 
 \cleardoublepage%
-\def\dir{chapters/sample-chapter}
+\def\dir{chapters/02-preliminaries}
 \include{\dir/main}
 
 % Include some blind text
