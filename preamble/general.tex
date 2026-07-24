@@ -4,6 +4,9 @@
 % Languages
 \usepackage[main=english]{babel}
 
+\usepackage[sfdefault]{plex-sans}
+\renewcommand{\familydefault}{\sfdefault}
+
 % classicthesis setup
 \PassOptionsToPackage{
   eulerchapternumbers,%
@@ -43,11 +46,10 @@
 \let\origcite\cite%
 \def\cite#1{\unskip~\origcite{#1}}
 
-% Math stuff
+% Maths stuff
+\usepackage{newtxmath}
 \usepackage{amsmath}
-%\usepackage{amssymb}
 \usepackage{mathtools}
-\usepackage{isomath}
 
 % Figures, tables, and captions
 \usepackage{tabularx}
@@ -122,6 +124,9 @@
 \usepackage{scrhack}
 \usepackage{classicthesis}
 
+\renewcommand{\spacedlowsmallcaps}[1]{#1}
+\renewcommand{\spacedallcaps}[1]{\MakeUppercase{#1}}
+
 % Customize text width and length
 
 \KOMAoptions{headinclude=true,footinclude=false}
@@ -165,9 +170,13 @@
   urlcolor=Black, linkcolor=Black, citecolor=Black, %pagecolor=Black,%
 }
 
-% Chapter font
-\let\chapterNumber\undefined%
-\newfont{\chapterNumber}{eurb10 scaled 5500}
+% Chapter number font
+\let\chapterNumber\undefined
+\newcommand{\chapterNumber}{%
+  \sffamily
+  \mdseries
+  \fontsize{50}{50}\selectfont
+}
 
 % Product type codes
 \newcommand{\productcode}[1]{\figureversion{lining}#1}
@@ -175,11 +184,25 @@
 % TOC
 \renewcommand{\cftpartfont}{\color{chapter-color}\normalfont}%
 \renewcommand{\cftpartpagefont}{\normalfont}%
+% TOC: align page numbers with dotted leaders
+\renewcommand{\cftdotsep}{2}
+\renewcommand{\cftchapleader}{\cftdotfill{\cftdotsep}}
+\renewcommand{\cftsecleader}{\cftdotfill{\cftdotsep}}
+\renewcommand{\cftsubsecleader}{\cftdotfill{\cftdotsep}}
+
+\renewcommand{\cftchapafterpnum}{\cftparfillskip}
+\renewcommand{\cftsecafterpnum}{\cftparfillskip}
+\renewcommand{\cftsubsecafterpnum}{\cftparfillskip}
 
 % Chapter number on inside
 \titleformat{\chapter}[display]%
-  {\relax}{\vspace*{-3\baselineskip}\makebox[\linewidth][r]{\color{halfgray}\chapterNumber\thechapter}}{10pt}%
-  {\raggedright\spacedallcaps}[\normalsize\vspace*{.8\baselineskip}\titlerule]%
+  {\relax}
+  {\vspace*{-3\baselineskip}%
+   \makebox[\linewidth][r]{%
+     \color{halfgray}\chapterNumber\thechapter}}
+  {10pt}%
+  {\raggedright\sffamily\Large}
+  [\normalsize\vspace*{.8\baselineskip}\titlerule]%
 
 % Chapter abstract
 \def\chapterabstract#1{%
