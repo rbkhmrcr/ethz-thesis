@@ -12,6 +12,7 @@
 \newcommand{\COMgen}{\COM\algo{.Gen}}
 \newcommand{\COMcommit}{\COM\algo{.Commit}}
 \newcommand{\COMopen}{\COM\algo{.Open}}
+\newcommand{\ck}{\algo{ck}}
 \newcommand{\openinfo}{\algo{open}}
 \newcommand{\com}{\algo{com}}
 \newcommand{\msg}{\algo{msg}}
@@ -32,6 +33,14 @@
 
 % ds sec
 \newcommand{\DSsigno}{\mathcal{O}_{\DSsign}}
+
+% sps
+\newcommand{\SPS}{\algo{SPS}}
+\newcommand{\SPSgen}{\SPS\algo{.Gen}}
+\newcommand{\SPSsign}{\SPS\algo{.Sign}}
+\newcommand{\SPSrandomise}{\SPS\algo{.Randomise}}
+\newcommand{\SPSverify}{\SPS\algo{.Verify}}
+\newcommand{\SPSsig}{\SPS\algo{.sig}}
 
 % encryption
 \newcommand{\PKE}{\algo{PKE}}
@@ -55,6 +64,7 @@
 \newcommand{\NIZKsimprove}{\NIZK\algo{.SimProve}}
 \newcommand{\NIZKext}{\NIZK\algo{.Extract}}
 \newcommand{\lang}{\algo{lang}}
+\newcommand{\rel}{\algo{rel}}
 \newcommand{\crs}{\algo{crs}}
 \newcommand{\proof}{\algo{proof}}
 \newcommand{\state}{\algo{state}}
@@ -67,8 +77,104 @@
 \newcommand{\soksign}{\SOK\algo{.Sign}}
 \newcommand{\sokverify}{\SOK\algo{.Verify}}
 \newcommand{\soksig}{\algo{sig}}
+\newcommand{\rand}{\algo{rand}}
 
 % sok sec
 \newcommand{\soksimgen}{\SOK\algo{.SimGen}}
 \newcommand{\soksimsign}{\SOK\algo{.SimSign}}
 \newcommand{\sokext}{\SOK\algo{.Extract}}
+
+% txid
+\newcommand{\ID}{\algo{ID}}
+\newcommand{\IDregister}{\ID\algo{.Register}}
+\newcommand{\IDsubmit}{\ID\algo{.Submit}}
+\newcommand{\IDexecute}{\ID\algo{.Execute}}
+\newcommand{\IDidkeygen}{\ID\algo{.IDKeyGen}}
+\newcommand{\IDidentify}{\ID\algo{.Identify}}
+
+% tagging scheme
+\newcommand{\TAG}{\algo{TAG}}
+\newcommand{\TAGsetup}{\TAG\algo{.Setup}}
+\newcommand{\TAGkeygen}{\TAG\algo{.Gen}}
+\newcommand{\TAGepochkeygen}{\TAG\algo{.EpochKeyGen}}
+\newcommand{\TAGgen}{\TAG\algo{.Gen}}
+\newcommand{\TAGverify}{\TAG\algo{.Verify}}
+\newcommand{\epoch}{\algo{epoch}}
+\newcommand{\ledger}{\algo{ledger}}
+\newcommand{\Tag}{\algo{tag}}
+\newcommand{\ek}{\algo{ek}}
+\newcommand{\utk}{\algo{tk}}
+\newcommand{\payload}{\algo{payload}}
+
+% anon creds
+\newcommand{\AC}{\algo{AC}}
+\newcommand{\ackeygen}{\AC\algo{.Gen}}
+\newcommand{\acissue}{\AC\algo{.Issue}}
+\newcommand{\acpresent}{\AC\algo{.Present}}
+\newcommand{\attrs}{\algo{attrs}}
+\newcommand{\att}[1]{\algo{att_{#1}}}
+\newcommand{\atv}[1]{\algo{atv_{#1}}}
+\newcommand{\cred}{\algo{cred}}
+
+% agg creds
+\newcommand{\AAC}{\algo{AAC}}
+\newcommand{\AACsetup}{\AAC\algo{.Setup}}
+\newcommand{\AACregister}{\AAC\algo{.Register}}
+\newcommand{\AACissue}{\AAC\algo{.Issue}}
+\newcommand{\AACaggregate}{\AAC\algo{.Aggregate}}
+\newcommand{\AACpresent}{\AAC\algo{.Present}}
+\newcommand{\AACverify}{\AAC\algo{.Verify}}
+\newcommand{\AACverifyagg}{\AAC\algo{.VerifyAgg}}
+
+% ATS
+\newcommand{\ATS}{\algo{ATS}}
+\newcommand{\ATSkeygen}{\ATS\algo{.Gen}}
+\newcommand{\ATSsign}{\ATS\algo{.Sign}}
+\newcommand{\ATSverify}{\ATS\algo{.Verify}}
+\newcommand{\ATSaggregate}{\ATS\algo{.Aggregate}}
+\newcommand{\ATSverifyagg}{\ATS\algo{.VerifyAgg}}
+\newcommand{\ATSrandomise}{\ATS\algo{.Randomise}}
+
+%%% instantiation details %%%%
+
+%%% maths, fields, groups, etc %%%
+
+\newcommand{\gen}{g}
+\newcommand{\ggen}{\tilde{g}}
+
+\newcommand{\group}[1]{\mathbb{G}_{#1}}
+\newcommand{\Zp}{\mathbb{Z}_p}
+\newcommand{\F}[1]{\mathcal{F}_{#1}}
+
+%% hashes, owfs, prfs
+\newcommand{\hash}{H}
+\newcommand{\hashone}{H_1}
+\newcommand{\hashtwo}{H_2}
+\newcommand{\G}{\mathcal{G}}
+\newcommand{\FE}{\mathcal{F}_\epoch}
+\newcommand{\FT}{\mathcal{F}_\Tag}
+\newcommand{\HE}{\mathcal{H}_\epoch}
+\newcommand{\HT}{\mathcal{H}_\Tag}
+
+%% txid things
+\newcommand{\PSK}{\mathcal{S}}
+\newcommand{\PTK}{\mathcal{T}}
+\newcommand{\Max}{\algo{max}}
+
+%% sig parts
+\newcommand{\signatureone}{\signature_1}
+\newcommand{\signaturetwo}{\signature_2}
+
+%% issuer keys
+\newcommand{\ipk}[1]{\algo{ipk}_{#1}}
+\newcommand{\isk}[1]{\algo{isk}_{#1}}
+
+%% BBS
+
+% digital signatures
+\newcommand{\BBS}{\algo{BBS}}
+\newcommand{\BBSgen}{\BBS\algo{.Gen}}
+\newcommand{\BBSsign}{\BBS\algo{.Sign}}
+\newcommand{\BBSverify}{\BBS\algo{.Verify}}
+
+%% ra keys

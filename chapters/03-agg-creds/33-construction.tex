@@ -1,0 +1,56 @@
+\section{Construction}\label{sec:agg-creds-construction}
+
+In the following, we show how to construct an aggregate anonymous credentials
+scheme in a black-box manner, using digital signatures, aggregate tag-based
+signatures and signatures of knowledge.
+
+\paragraph{Setup.} The registration authority (RA) samples a key pair
+$(\sk, \pk) \leftarrow \DSgen(\secparam)$ for the digital signature scheme~$\DS$ and
+publishes~$\pk$, and generates system-wide public parameters $\crs$ for the
+necessary signatures of knowledge, needed throughout.  Each issuer
+then generates a keypair $(\isk{i}, \ipk{i}) \leftarrow \ATSkeygen(\secparam)$ for
+the aggregate tag-based signature scheme~$\ATS$ and publishes~$\ipk{i}$.
+
+\paragraph{Registration.} A user samples $(\sk, \pk) \leftarrow \DSgen(\secparam)$,
+and sends $\pk$ to the RA together with a SoK on a fresh $\msg$ from RA that
+proves the user knows the corresponding secret key $\sk$.  If the SoK verifies,
+then the RA assigns the user a unique tag~$\tau$ and issues $\psi \leftarrow
+\DSsign(\sk,  \pk \| \tau)$.
+
+The user initialises their credential state as $(\tau, \sk, \pk, \psi, 
+\cred_1, \ldots, \cred_N)$, with $\cred_i = \varnothing$ for
+all $i \in [N]$.
+
+\paragraph{Issuance.} On input $(\tau, \pk, \psi, \atv{i})$ from the user,
+issuer first sets $m =  (\pk, \tau)$, and checks that
+$\DSverify(\pk, m, \psi) = 1$.  If not, it rejects.  Otherwise, it verifies
+that the user knows $\sk$ via a SoK.  If this check succeeds and the user holds
+attribute value $\atv{i}$, the issuers sends back $\sigma_i \leftarrow
+\ATSsign(\isk{i}, \tau, \atv{i})$, and the user, subsequently, sets $\cred_i =
+(\atv{i}, \sigma_i)$.
+
+\paragraph{Aggregation.}
+
+\paragraph{Presentation,} The user has $(\tau, \sk, \pk, \psi, \cred_1, \ldots,
+\cred_N)$, where $\cred_i = (\atv{i}, \sigma_i)$.  To prove possession of
+attribute values $(\atv{i})_{i \in \mathbb{I}}$ to some verifier that
+provides a fresh $\msg$, the user computes $\sigma \leftarrow
+\ATSaggregate(\{\sigma_i\}_{i \in \mathbb{I}})$, and SoK $ \proof \leftarrow
+\soksign(\crs, \inst, \witness, \msg)$, where $\inst = (\pk, \mathbb{I}, \{\ipk{i},
+\atv{i}\}_{i \in \mathbb{I}})$ and $\witness = (\tau, \sk, \pk, \psi, \sigma)$, and
+which proves the following: 
+\begin{align*} (\sk, \pk) \leftarrow &\DSgen(\secparam)
+  \quad \wedge \quad  \DSverify(\pk, \pk \|  \tau, \psi) = 1 \\ \wedge &\quad
+  \ATSverifyagg(\{\ipk{i}\}_{i \in \mathbb{I}}, \tau, \{\atv{i}\}_{i \in
+\mathbb{I}}, \sigma) = 1.  \end{align*}
+
+\paragraph{Verification.} On input $(\{\atv{i}\}_{i \in \mathbb{I}}, \msg,
+\proof)$, the verifier returns the output of
+$\sokverify(\crs,\inst,\msg,\proof)$, with $\inst = (\pk, \mathbb{I},
+\{\ipk{i}, \atv{i}\}_{i \in \mathbb{I}})$.
+
+\begin{theorem}\label{thm:bb-security} If $\DS$ is an existentially unforgeable
+  digital signature scheme, $\ATS$ an existentially unforgeable aggregate
+  tag-based signature scheme under tag-based aggregation, and $\SOK$ a secure
+  signature of knowledge, then the above protocol securely realises ideal
+functionality~$\F{}$ in the standalone model.  \end{theorem}

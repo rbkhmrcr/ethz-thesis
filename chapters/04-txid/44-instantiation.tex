@@ -1,0 +1,190 @@
+\section{Instantiation}\label{sec:inst}
+
+We describe a concrete instantiation of the black-box construction in
+pairing-based groups using algebraic PRFs and tailored Sigma protocols,
+yielding a transparent setup.
+
+\subsection{Algebraic PRF-based Instantiation}\label{sec:algebraic}
+
+\paragraph{Setup.} Let $\group{1}$, $\group{2}$, and $\group{T}$ be cyclic
+groups of large prime order $p$ admitting an efficient bilinear pairing $e :
+\group{1} \times \group{2} \to \group{T}$.  Let $\gen_0$, $\gen_1$, $\gen_2$,
+$\gen_3$ be random generators of $\group{1}$.  Let $\ggen$, $\ggen_1, ...,
+\ggen_\ell$ be $\ell+1$ random generators of $\group{2}$.  One-way functions
+$\G$ and $\G'$ are instantiated as $\G(\sk) = \gen_1^{\sk}$ and $\G'(\utk) =
+\gen_2^{\utk}$.  PRF $\FE$ is defined as $\FE(\utk, \epoch) =
+\HE(\epoch)^{\utk}$, with $\HE:\{0,1\}^* \rightarrow \group{1}$ being a
+cryptographic hash function.  Let $\Max = 2^{\ell}$, and $\forall \ \gamma <
+\Max$, PRF $\FT$ is implemented as $\FT(\ek, \gamma) = e(\ek,
+\prod_{i=1}^{\ell} \ggen_i^{\gamma_i})$, where $(\gamma_1, ..., \gamma_{\ell})$
+is $\gamma$'s bit decomposition.  $\COM$ is instantiated using Pedersen
+commitments and commitment key $\ck = (\gen_2, \gen_3)$, giving
+$(\gen_2^{\utk}\cdot \gen_3^{\openinfo}, \openinfo) \leftarrow \COMcommit(\ck,
+\utk, \openinfo)$.  Finally, the RA's signatures are instantiated using the
+BBS+ signature scheme~\cite{bbs}.
+
+The RA holds BBS+ keys $(\sk, \pk) \leftarrow \BBSgen(\secparam, 2)$ to sign
+pairs $(\sk, \utk) \in \Zp^2$, where $\sk = z \in \Zp$ and $\pk = (\gen_0,
+\gen_1, \gen_2, \gen_3, \ggen,\ggen_Z)$ with $\ggen_Z = \ggen^z$.
+
+\paragraph{Registration.} A key requirement is that the user must obtain a
+credential binding both $\sk$ and $\utk$ without revealing $(\sk, \utk)$ to the
+RA in the clear.  This is achieved via signing over committed inputs.  To do
+this, the user sends $(S, T) \in \group{1}\times\group{1}$ and produces a SoK
+that attests that $\exists(\sk, \utk): S = \gen_1^{\sk} \ \wedge \ T =
+\gen_2^{\utk}$.  The RA verifies the resulting transcript and issues a BBS+
+signature $\signature$.  Concretely, $\rel_0$ is defined for $\inst_0 =
+(\gen_1, \gen_2, S, T)$, $\witness_0 = (\sk, \utk)$, $\rel_0(\inst_0,
+\witness_0) = 1$ if and only if $S = \gen_1^{\sk} \wedge\ T = \gen_2^{\utk}$.
+$\crs_0 \leftarrow \sokgen(\rel_0)$ is set to hash function $\hash:\{0,
+1\}^*\rightarrow \Zp$.
+
+On receiving a nonce $\rand$ from the RA, the user samples $\sk, \utk \sample
+\Zp$, and sends $(S = \gen_1^{\sk}, T= \gen_2^{\utk}, \soksig)$ where $\soksig
+\leftarrow \soksign(\crs_0, \inst_0, \witness_0, \rand)$ corresponds to $(A,
+B,\eta, \upsilon)$ with $(A, B) = (\gen_1^{\alpha}, \gen_2^{\beta})$, $\eta =
+\alpha+c\cdot\sk$, and $\upsilon = (\beta + c\cdot\utk)$ where $c =
+\hash(\inst_0, A, B, \rand)$.  Given $\soksig$, the RA computes $c =
+\hash(\inst_0, A, B, \rand)$, and checks if $ A\cdot{S}^c = \gen_1^{\eta}
+\wedge B\cdot{T}^c = \gen_2^{\upsilon}$.  If so, it returns $\signature = (e,
+r, E = ({\gen_0}\cdot{S}\cdot{T}\cdot\gen_3^r)^{1/(z+e)})$; otherwise, it
+rejects.  $S = \gen_1^{\sk}$ serves as the user's public key.
+
+\paragraph{Epoch Key Computation.} the user computes epoch keys $\ek =
+\FE(\utk, \epoch)$ as $\HE(\epoch)^{\utk}$.  In the random oracle model, $\FE$
+is a PRF under the decisional Diffie-Hellman (DDH) assumption.  Relation
+$\rel_1$ is defined for $\inst_1 = (\HE,\gen_2, T, \epoch, \ek)$;$\witness_1
+=\utk$; and $(\varnothing, \crs_1)\leftarrow \NIZKgen(\rel_1)$ with $\crs_1$
+set to hash function $\hash$, and $\rel_1(\inst_1, \witness_1) = 1$ if and only
+if $\ek = \HE(\epoch)^{\utk} \quad \wedge \quad T = \gen_2^{\utk}$.
+
+On receiving $\rand$ from the auditor, the user computes proof $\pi = (A,B,
+\eta)$ where $(A, B) = (\gen_2^{\alpha}, \HE(\epoch)^{\alpha})$, $\eta = \alpha
++ c\cdot\utk$, and $c = \hash(\gen_2, \epoch, A, B)$.  the user also produces
+SoK $\psi$ for relation $\rel_0$ on input $\rand$, and responds with $(S, T,
+\signature, \ek, \pi, \psi)$.  The auditor first parses $\signature$ as $(e, r,
+E)$ and $\pi$ as $(A, B, \eta)$, and computes $c=\hash(\gen_2, \epoch, A, B)$.
+The auditor accepts if $\psi$ is valid,
+$e({\gen_0}\cdot{S}\cdot{T}\cdot\gen_3^r, \ggen) = e(E,
+\ggen_Z\cdot\ggen^{e})$, $A\cdot{T}^c = \gen_2^{\eta}$, and $B\cdot\ek^c =
+\HE(\epoch)^\eta$.
+
+\paragraph{Verifiable Tag Computation.} The user first computes Pedersen
+commitment $\com = \gen_2^{\utk}\cdot\gen_3^{\openinfo}$ and $\Tag = \FT(\ek,
+\gamma)$, where $ \FT(\ek, \gamma)$ is defined as $e\!\left(\ek,\,
+\prod_{i=1}^{\ell} \ggen_i^{\gamma_i}\right)$.  Under the DDH assumption, and
+the Bilinear Decisional Diffie-Hellman (BDDH) assumption, $\FT$ can be shown to
+be a PRF, in the random oracle model.
+
+Relation $\rel_3$ is defined for $\inst_3 = (\HE, \{\ggen_i\}_{i\in[1,\ell]},
+\gen_2, \gen_3, \com, \Max, \epoch, \Tag)$; $\witness_3 = (\utk, \openinfo,
+\ek, \{\gamma_i\}_{i\in[1,\ell]})$; and $(\varnothing, \crs_3)\leftarrow
+\NIZKgen(\rel_3)$ with $\crs_3$ describing a hash function
+$\hash:\{0,1\}^*\rightarrow \Zp$, and $\rel_3(\inst_3, \witness_3) =1$ if and
+only if the following holds: \begin{equation*} \com =
+  \gen_2^{\utk}\cdot\gen_3^{\openinfo} \ \wedge \ \ek = \HE(\epoch)^{\utk}\
+\wedge \ \Tag_{\gamma} = e(\ek,\prod_{i=1}^{\ell} \ggen_i^{\gamma_i}) \ \wedge
+\ \forall i \in[1, \ell]: \gamma_i \in \{0,1\}.  \end{equation*}
+
+Proving $\rel_3$ directly would require an argument that proves quadratic
+equations over pairings, which would be expensive in practice.
+
+Instead, the user randomly samples $r, s \leftarrow \Zp$, and with them
+computes auxiliary values $\Gamma = \ggen^r\prod_{i=1}^{\ell}
+\ggen_i^{\gamma_i}, U = H(\epoch)^s, V = \ek^{s}$. The user then proves the
+equivalent relation $\widehat{\rel}_3$ defined for $\widehat{\inst}_3
+=(\inst_3, \ggen, \Gamma, U, V)$; $\widehat{\witness}_3 = (\witness_3, r, s)$;
+and $\widehat{\crs}_3 = \crs_3$, that together verify: \begin{gather*} \com =
+  \gen_2^{\utk}\cdot\gen_3^{\openinfo} \quad \wedge \quad \Gamma =
+  \ggen^r\prod_{i=1}^{\ell} \ggen_i^{\gamma_i} \quad \wedge \quad \forall i \in
+  [1,\ell]: \gamma_i \in \{0,1\} \\ \wedge \quad U = \HE(\epoch)^s \quad \wedge
+  \quad V = U^{\utk} \quad \wedge \quad e(V, \Gamma) = \Tag^s \cdot e(V,
+\ggen)^r.  \end{gather*}
+
+We prove this in two parts. The first is a Sigma protocol proving the following
+equalities for witness $\widehat{\witness}_3$: \begin{gather*} \com =
+  \gen_2^{\utk}\cdot\gen_3^{\openinfo} \quad \wedge \quad \Gamma =
+  \ggen^{r}\prod_{i=1}^{\ell} \ggen_i^{\gamma_i} \quad \wedge \quad  U =
+\HE(\epoch)^{s} \\ \wedge \quad  V = U^{\utk} \quad \wedge \quad e(V, \Gamma) =
+\Tag^s \cdot e(V, \ggen)^r.  \end{gather*} the user samples $\alpha, \beta,
+\eta, \nu \sample \Zp$ and $\delta_i \sample \Zp$ for $i \in [1,\ell]$,
+computes and sends the following:
+
+\begin{gather*} A = \gen_2^{\alpha}\cdot\gen_3^{\beta}, \quad \Delta =
+\ggen^{\eta}\prod_{i=1}^{\ell} \ggen_i^{\delta_i}, \quad B = \HE(\epoch)^{\nu},
+\\ D = U^{\alpha}, \quad F =  \Tag^{\nu} \cdot e(V, \ggen)^{\eta}.
+\end{gather*} With challenge $c = \hash(\widehat{\inst}_3, A, \Delta, B, D,
+F)$, the user computes and sends the following values: \begin{equation*} \theta
+  = \alpha + c\cdot\utk, \quad  \omega = \beta + c\cdot\openinfo, \quad
+  \upsilon = \eta + c\cdot r, \quad \forall i \in [1,\ell]: \xi_i = \delta_i +
+  c\cdot\gamma_i, \quad \chi = \nu + c\cdot s.  \end{equation*} The verifier
+  computes challenge $c$ and accepts if and only if the following hold:
+  \begin{gather*} \gen_2^{\theta}\cdot\gen_3^{\omega} = A \cdot \com^c, \quad
+  \ggen^{\upsilon}\prod_{i=1}^{\ell} \ggen_i^{\xi_i} = \Delta \cdot \Gamma^c,
+\quad \HE(\epoch)^{\chi} = B \cdot U^c, \\ U^{\chi} = D \cdot V^c, \quad
+\Tag^\chi \cdot e(V, \ggen)^\upsilon = F \cdot e(V,\Gamma)^c.  \end{gather*}
+
+The second step is proving that $(\gamma_1, \ldots, \gamma_\ell)$ are bits.
+For each $i \in [1, \ell]$, bit validity is argued by transforming the relation
+$\forall i \in [1, \ell] : \quad \gamma_i(1-\gamma_i) = 0$ into an inner
+product argument following the techniques introduced in \cite{bulletproofs}.
+
+\paragraph{Transaction Authorisation.} Each transaction carries a signature of knowledge that attests it has
+originated from a registered user, following relation $\rel_2$ defined in
+Equations~\ref{eq:sok} and~\ref{eq:rel2}.
+
+Since the user is registered using BBS+ signature $\signature = (e, r, E =
+({\gen_0}\cdot\gen_2^{\sk} \cdot \gen_1^{\utk}\cdot\gen_3^r)^{1/(z+e)})$,
+$\rel_2$ is defined for $\inst_2 = (\pk, \com) = (\gen_0, \gen_1, \gen_2,
+\gen_3, \ggen, \ggen_Z, \com)$, $\witness_2 = (\sk, \utk, \rho, e, r, E)$,
+$\rel_2(\inst_2, \witness_2) = 1$ if and only if the following holds:
+\begin{equation*} \com = \gen_2^{\utk}\cdot\gen_3^{\rho} \ \wedge \ e(E,
+  \ggen^e\cdot\ggen_Z) =
+e({\gen_0}\cdot\gen_2^{\sk}\cdot\gen_1^{\utk}\cdot\gen_3^r, \ggen),
+\end{equation*} and $\crs_2 \leftarrow \sokgen(\rel_2)$ is set to hash function
+$\hash:\{0, 1\}^*\rightarrow \Zp$.
+
+Concretely, the SoK for $\rel_2$ on some message $\msg$ can be formed by
+transforming $\rel_2$ into an equivalent relation $\widehat{\rel}_2$ that does
+not require the generation of proofs over bilinear equations, following the
+techniques presented in~\cite{CamenischDL16,HesseSS23}.  $\widehat{\rel}_2$ is
+defined for  $\widehat{\inst}_2 = (\pk, \com, U, V, W)$ defined as follows:
+\begin{equation*} U = E^{\zeta/\eta}; \quad V=
+  ({\gen_0}\cdot{\gen_2}^{\sk}\cdot{\gen_1}^{\utk}\cdot{\gen_3}^r)^{-1/\zeta};
+\quad W= U^eV^{\zeta}, \end{equation*} and $\widehat{\witness}_2 = (\sk, \utk,
+\rho, e, r', \zeta, \eta)$ such that $\widehat{\rel}_2(\widehat{\inst}_2,
+\widehat{\witness}_2) = 1$ if and only if the following holds:
+\begin{equation*} \com = \gen_2^{\utk}\cdot\gen_3^{\rho}\ \wedge \ e(U,
+  \ggen_Z)\cdot{e(W, \ggen)}=1  \ \wedge \ W = U^e\cdot{V^{\zeta}} \ \wedge \
+  (\gen_0\cdot\com)^{-1} = V^{\eta}\cdot \gen_1^{\sk}\cdot\gen_3^{r'}.
+\end{equation*}
+
+$\widehat{\rel}_2$ can be proven using Sigma protocols and the Fiat Shamir
+heuristic is used to transform the resulting proofs into a signature of
+knowledge.
+
+More specifically, the user samples $\alpha, \beta, \delta, \upsilon, \chi,
+\xi, \theta \in \Zp$ computes the following: \begin{equation*} A =
+  \gen_2^{\alpha}\cdot\gen_3^{\beta}; \quad B = U^{\delta}\cdot{V^{\upsilon}};
+  \quad D = V^{\chi}\cdot\gen_1^{\xi}\cdot \gen_3^{\theta}; \quad c =
+  \hash(\widehat{\inst}_2, A, B, D, \msg), \end{equation*} followed by tuple
+  $\vec{\phi} = (\phi_1, \phi_2, \phi_3, \phi_4, \phi_5, \phi_6, \phi_7)$
+  defined as follows: \begin{align*} \phi_1 = \alpha + c\cdot &\utk; \quad
+  \phi_2 = \beta + c\cdot \rho; \quad \phi_3 = \delta + c\cdot e; \quad \phi_4
+= \upsilon + c\cdot\zeta; \\ \phi_5 &= \chi + c\cdot \eta ; \quad \phi_6 = \xi
++ c\cdot\sk; \quad  \phi_7 = \theta + c\cdot{r'}, \end{align*} and outputs SoK
+$\soksig = (U, V, W, A, B, D, \vec{\phi}).$
+
+On input commitment $\com$, message $\msg$, and SoK $\soksig$, a verifier
+checks first whether $e(U, \ggen_Z)e(W, \ggen) = 1$, then computes $c =
+\hash(\widehat{\inst}_2, A, B, D, \msg)$, and only accepts if the following set
+of equalities hold: \begin{align*} A\cdot\com^c =
+\gen_2^{\phi_1}\cdot\gen_3^{\phi_2}; \quad B\cdot{W}^c = U^{\phi_3}V^{\phi_4} ;
+\quad D\cdot(\gen_0\cdot\com)^{-c} = V^{\phi_5}\cdot
+\gen_1^{\phi_6}\cdot\gen_3^{\phi_7}.  \end{align*}
+
+\paragraph{Security.} \begin{theorem}\label{thm:inst} The instantiation,
+  presented in Section \ref{sec:algebraic}, securely realises $\F{txid}$, in
+  the random oracle model, under the Decisional Diffie-Hellman assumption in
+  $\group{1}$; the Bilinear Decisional Diffie-Hellman assumption, and the
+q-Strong Diffie-Hellman assumption.  \end{theorem}

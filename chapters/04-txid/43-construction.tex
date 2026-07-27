@@ -1,0 +1,142 @@
+\section{Construction}\label{sec:txid-construction} Let $\ledger$ denote the
+ledger that processes user transactions.  Let $\G$ and $\G'$ be two one-way
+functions and $\FE$ and $\FT$ be two PRF families.  Let $\Max$ be the
+upper-bound of the number of transactions a user can submit during any given
+epoch $\epoch$.  Epochs are defined with respect to the ledger's block height.
+Specifically, an epoch $\epoch$ is the interval spanning from block
+$\lambda\times\epoch$ to block $\lambda\times(\epoch + 1) - 1$, where $\lambda$
+denotes the epoch duration in terms of number of blocks.
+
+At a high level, the protocol operates as follows. Each user is provisioned
+with a long-term signing key $\sk$ and a long-term tracing key $\utk$, which
+are cryptographically bound via a credential issued by the registration
+authority.  For each epoch $\epoch$, the user derives an epoch tracing key
+$\ek$ as a function of their tracing key $\utk$ and the epoch identifier
+$\epoch$.  All transactions submitted during epoch $\epoch$ are tagged using a
+PRF evaluated under $\ek$ and an index in the range $[0,\Max)$.  Users
+accompany each transaction with zero-knowledge proofs and SoKs attesting to the
+correctness of the tag generation, which can be efficiently verified by
+transaction validators.  For audit purposes, the epoch tracing key $\ek$ is
+disclosed to the appropriate auditors.  This enables auditors to locally
+compute all valid transaction tags corresponding to a given user and epoch.
+Finally, when the system transitions to a new epoch, users derive a fresh epoch
+tracing key. Tracing capabilities granted for prior epochs automatically
+expire.
+
+Without loss of generality, we assume that system participants establish secure
+channels to communicate with each other.
+
+\paragraph{Setup.} During setup, the registration authority calls $(\sk, \pk)
+\leftarrow \DSgen(\secparam)$ and communicates $\pk$ to the ledger operator.
+The ledger operator calls $ \ck \leftarrow \COMgen(\secparam)$ and produces
+four sets of public parameters:
+
+\begin{itemize}
+
+  \item $\crs_0 \leftarrow \sokgen(\rel_0)$ for relation $\rel_0$ defined for
+    instance and witness: \begin{equation} \label{eq:sok2} \inst_0 = (\G, \G',
+      \PSK, \PTK), \quad \witness_0 =  (\sk, \utk), \end{equation} such that
+      $\rel_0(\inst_0, \witness_0) = 1$ if and only if: \begin{equation}
+      \label{eq:rel0} \PSK = \G(\sk) \quad \wedge \quad \PTK = \G'(\utk).
+    \end{equation}
+
+  \item $(\tau_1, \crs_1) \leftarrow \NIZKgen(\rel_1)$ for relation $\rel_1$
+    defined for instance and witness: \begin{equation} \label{eq:nizk1} \inst_1
+    = (\FE, \G', \PTK, \epoch,  \ek), \quad \witness_1 =  \utk, \end{equation}
+    such that $\rel_1(\inst_1, \witness_1) = 1$ if and only if:
+    \begin{equation} \label{eq:rel1} \PTK = \G'(\utk) \quad \wedge \quad \ek =
+    \FE(\utk, \epoch).  \end{equation}
+
+  \item  $\crs_2  \leftarrow \sokgen(\rel_2)$ for relation $\rel_2$ defined for
+    instance and witness: \begin{equation} \label{eq:sok} \inst_2 = (\G, \G',
+    \pk, \ck, \com), \quad \witness_2 = (\signature, \sk, \utk, \openinfo),
+  \end{equation} such that $\rel_2(\inst_2, \witness_2) = 1$ if and only if:
+  \begin{equation} \label{eq:rel2} \DSverify(\pk, \G(\sk) \| \G'(\utk),
+  \signature) = 1 \ \wedge  \ \COMopen(\ck, \openinfo, \com) = \utk.
+\end{equation}
+
+\item  $(\tau_3, \crs_3) \leftarrow \NIZKgen(\rel_3)$ for relation $\rel_3$
+  defined for instance and witness: \begin{equation}  \label{eq:nizk} \inst_3 =
+  (\FE, \FT, \ck, \com, \epoch, \Max, \Tag), \quad \witness_3 =  (\utk,
+\openinfo, \ek, \gamma), \end{equation} such that $\rel_3(\inst_3, \witness_3)
+= 1$ if and only if: \begin{align} \label{eq:rel3} \COMopen(\ck, \openinfo,
+  \com) = \utk \quad \wedge \quad \ek = \FE(\utk, \epoch) \\ \wedge \quad \Tag
+  = \FT(\ek, \gamma) \quad  \wedge  \quad 0 \leq \gamma < \Max. \nonumber
+\end{align}
+
+\end{itemize}
+
+The ledger operator concludes the setup by recording in the ledger entry:
+$$\ledger[\crs] \leftarrow (\G, \G', \FE, \FT, \pk, \ck, \crs_0, \crs_1,
+\crs_2, \crs_3, \Max).$$ These parameters reflect the SoK that will be used
+during initial user registration, the argument that will be used to prove the
+correctness of an epoch tracing key to an auditor, the SoK each user employs to
+authorise transactions, and the argument that will be leveraged to prove the
+correctness of transaction tags.
+
+\paragraph{Registration.} The registration authority the registration authority
+first checks if user the user has never registered before.  Then, the user
+randomly selects a signing key $\sk$ and a tag key $\utk$, computes $\PSK =
+\G(\sk)$ and $\PTK = \G'(\utk)$, and then engages in an interactive protocol
+with registration authority the registration authority.  During this
+interaction, the user receives a nonce $\mathfrak{n}$, computes and sends back
+$\soksig \leftarrow \soksign(\crs_0, \inst_0, \witness_0, \mathfrak{n})$, for
+$(\inst_0, \witness_0)$ as defined in Equations~\ref{eq:sok2} and
+\ref{eq:rel0}.
+
+If the registration authority accepts $\soksig$, then it calls $\DSsign(\sk,
+\PSK \| \PTK)$, records that the user registered with pair $(\PSK, \PTK)$, and
+sends the resulting signature $\signature$ to the user.  From this point
+onward, we assume that the user uses $\G(\sk)$ as their public key in the
+system.
+
+\paragraph{Authorisation.}  Before the start of epoch $\epoch$, auditors issue requests
+to get tracing authorisation for user the user.  In response, the user computes
+the epoch's tracing key $\ek = \FE(\utk, \epoch)$, and generates a
+zero-knowledge proof $\proof \leftarrow \NIZKprove(\crs_1, \inst_1,
+\witness_1)$, where $\inst_1$ and $\witness_1$ are defined in
+Equations~\ref{eq:nizk1} and \ref{eq:rel1}.  This can be reused for all
+authorisation requests for epoch $\epoch$.  An authorisation request identifies
+the auditor the auditor and contains pair $(\epoch, \rand)$.  the user grants
+the auditor the tracing authorisation by sending tuple $(\PSK, \PTK,
+\signature, \ek, \proof, \soksig)$, where $\soksig \leftarrow \soksign(\crs_0,
+\inst_0, \witness_0, \proof \| \rand)$ and $(\inst_0, \witness_0)$ are defined
+as in Equations~\ref{eq:sok2} and \ref{eq:rel0}.  If $1 \leftarrow
+\DSverify(\pk, \PSK \| \PTK, \signature)$, and $\proof$ and $\soksig$ are
+valid, then the auditor accepts tracing key $\ek$.
+
+\paragraph{Transaction submission.} Let $\epoch$ denote the current epoch and $\ek$ the
+corresponding epoch tracing key.  the user first prepares confidential payload
+of their transaction denoted $\payload$, selects a fresh counter $0 \leq \gamma
+< \Max$, and computes $\Tag= \FT(\ek, \gamma)$.  Next, the user computes
+commitment $\com \leftarrow \COMcommit(\ck, \utk, \openinfo)$ and generates
+$\proof \leftarrow \NIZKprove(\crs_3, \inst_3, \witness_3)$, for $(\inst_3,
+\witness_3)$ are defined as in Equations~\ref{eq:nizk} and \ref{eq:rel3}.  the
+user produces then $\soksig \leftarrow \soksign(\crs_2, \inst_2, \witness_2,
+\msg)$, where $\msg = \payload \| \Tag\| \com \| \proof$ and $(\inst_2,
+\witness_2)$ are defined as in Equations~\ref{eq:sok} and \ref{eq:rel2}.
+Finally, the user submits transaction $(\payload, \Tag, \com, \proof, \soksig)$
+to the ledger for validation.
+
+Once the transaction is appended to the ledger, the transaction validators
+check if the following hold: $\Tag$ has never accompanied a previous
+transaction that was marked valid; and $\proof$ is a valid ZK proof for
+relation $\rel_3$ and current epoch $\epoch$, $\soksig$ is a valid SoK on
+message $\msg = \payload \| \Tag\| \com \| \proof$ relative to
+relation~$\rel_2$.
+
+If these checks succeed, the transaction validators mark the transaction as
+valid by adding entry $\ledger[\Tag] \leftarrow \payload$.
+
+\paragraph{Transaction identification.} Given key $\ek$ for epoch $\epoch$, auditor the auditor
+traces the transactions that the user submitted during epoch $\epoch$ as
+follows.  $\forall \ 0 \leq \gamma < \Max:$  the auditor computes $\Tag=
+\FT(\ek, \gamma)$ and retrieves entry $\ledger[\Tag]$ if not empty.
+
+\paragraph{Increment Epoch.} When the ledger reaches block height
+$(\epoch+1)\times \lambda$, the system participants move to epoch $\epoch + 1$.
+
+\begin{theorem}\label{thm:bb} Assuming that $\DS$ satisfies existential
+unforgeability, $\FE$ and $\FT$ are psuedorandom, $\G$ and $\G'$ are one way,
+and $\SOK$ is secure, the protocol described above securely realises
+$\F{txid}$.  \end{theorem}

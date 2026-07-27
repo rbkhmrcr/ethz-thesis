@@ -1,0 +1,63 @@
+% This thesis argues that practical privacy is achieved not by assuming away
+% existing infrastructure, but by modelling it accurately and using cryptography
+% to constrain the information available to each participant according to their
+% operational role.to start making the point that, though researchers interested
+% in privacy usually use decentralisation to a very ... admirable? pov, a lot of
+% the time in practice, solutions have a variety of parties and are not
+% explicitly p2p, for example. and a way to successfully get privacy in practice
+% is to embrace this.  think of privacy pass, apple private relay, ... apple hide
+% my email, (finance stuff?) (physical cash itself?!) ... then looks at design
+% docs for self sovereign identity, for ... digital assets? ??? and we see that
+% to empower users is often through systems which allow them to achieve what they
+% want in a frictionless, fast, secure, way, and this means that more powerful
+% parties can be taken advantage of ...?  Privacy-enhancing technologies are
+% increasingly deployed in systems that serve millions of users. These systems
+% rarely consist of mutually distrustful peers. Instead, they involve service
+% providers, issuers, auditors, validators, or other accountable entities that
+% already have operational responsibilities.  Then examples.  Privacy Pass.
+% Apple Private Relay.  Hide My Email.  Anonymous credential deployments.  CBDC
+% proposals.  Enterprise blockchains.
+%
+% we dont (usually) trust them with privacy. they're honest but curious. they're
+% trusted for availability, and to follow the protocol. and we can use this to
+% build more lightweight systems.
+%
+% Real financial systems have legitimate accountability requirements.
+%
+% Modern privacy-preserving systems are rarely deployed in environments
+% consisting solely of mutually distrusting peers. Instead, they are deployed
+% within infrastructures that already contain organisations responsible for
+% service provision, policy enforcement, auditing, or transaction validation.
+% These organisations are not entrusted with users' privacy. Rather, they are
+% assumed to execute prescribed protocols while cryptography limits the
+% information available to them. This thesis explores how acknowledging these
+% existing operational roles enables practical and efficient privacy-preserving
+% systems.
+%
+% then the thesis,
+%
+% the aggregate credentials paper says, the credential systems we have at the
+% moment don't reflect reality, so we make a nice neat construction that better
+% reflects what is desired. and it's fast.
+%
+% the tracing paper, again, if we want financial privacy with digital money, we
+% may need ability to both people at a transaction, and identify the user, and to
+% point at a user, and identify all transactions associated with that user. this
+% is what this paper enables. it uses epochs so that transactions aren't strictly
+% sequential. i know tracing is a bad word for a lot of people. but maybe adding
+% these features will allow us to have more privacy in digital money. (cite some
+% stuff idk)
+%
+% offline payments. accessibility. develop the scheme, prove it secure, again
+% there is an auditor. again talk about the power given to this person, contrast
+% with solving for double spenders only, the efficiency / impossibility of that
+%
+% tsps. this is for a specific problem in hyperledger fabric style systems. there
+% are known endorsers rather than untrusted anonymous miners, and so we want them
+% to sign each transaction to confirm that it is legitimate. here is how you do
+% that.
+%
+% This thesis argues that in practice, privacy is achieved not by assuming away
+% existing infrastructure, but by modelling it accurately and using cryptography
+% to constrain the information available to each participant according to their
+% operational role.
