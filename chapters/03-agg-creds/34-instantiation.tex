@@ -1,4 +1,6 @@
-\paragraph{Our Tag-Based Aggregate Signature ($\ATS$)} \label{sec:tag-scheme}
+\section{Instantiation}
+
+\subsection{Our Tag-Based Aggregate Signature ($\ATS$)} \label{sec:tag-scheme}
 
 Our tag-based aggregate signature scheme is an enhanced aggregate BLS signature
 scheme~\cite{boneh2001short,boneh2003aggregate} that signs pairs of messages
@@ -58,7 +60,7 @@ structure preserving signatures \cite{abe2011optimal}, to sign a pair $(\pk,
 key and $\Tag$ their unique tag.  The aggregate tag-based signature $\ATS$ is
 instantiated with our construction.
 
-\paragraph{AGHO Structure-Preserving Signature Scheme}
+\paragraph{AGHO Structure-Preserving Signature Scheme.}
 
 The AGHO scheme supports signing vectors of elements in $\group{1}$,
 $\group{2}$, or both.  In the following, we only describe signing elements of
@@ -119,7 +121,7 @@ signatures to implement digital signature $\DS$.
 
 \end{itemize}
 
-\paragraph{Signatures of Knowledge}
+\paragraph{Signatures of Knowledge.}
 
 The user proves that they possess (i) a valid registration signature, (ii) an
 aggregate credential under a single tag, and (iii) the secret key corresponding
@@ -182,7 +184,7 @@ equation~\ref{eq:sok-rel}, and the following equalities hold: \begin{gather*}
 e(\bar{\Gamma}, \widehat{U}_2) \ ; \\ e(\bar{V}, \widehat{R}')= e(\bar{\gen},
 \widehat{S}').  \end{gather*}
 
-\paragraph{Extensions} The construction supports also several straightforward
+\paragraph{Extensions.} The construction supports also several straightforward
 extensions.
 
 New issuers can join the system without impacting the construction.  In fact,
@@ -212,7 +214,7 @@ signatures from the relevant issuers, for the current epoch.
 We leave the study of accumulator-based revocation and the revocation of
 individual attribute credentials to future work.
 
-\section{Instantiation of the SoK} The user is equipped with a key pair $(\sk,
+\subsection{Instantiation of the SoK.} The user is equipped with a key pair $(\sk,
 \pk) = (\sk, \gen^{\sk})$ , an AGHO signature  $\SPSsig = (\widehat{R},
 \widehat{S}, T)$ on pair $(\pk, \Gamma = \hashtwo(\Tag))$ from the registration
 authority, and a tag-based aggregate signature $\signature = (\signatureone,
@@ -346,7 +348,7 @@ the pre-image of $\bar{\Gamma}^{1/\delta}$ and attributes $\atv{i}$, and that
 $(\widehat{R}, \widehat{S}, \bar{T}^{1/\delta})$ is a valid AGHO signature on
 pair $\pk'^{1/\delta}, \bar{\Gamma}^{1/\delta}$.
 
-\paragraph{Simulatability}
+\paragraph{Simulatability.}
 
 We now show that if DDH holds in $\group{1}$, we can simulate a valid
 presentation $\proof$ without access to a valid witness.
