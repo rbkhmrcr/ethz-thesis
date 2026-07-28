@@ -8,7 +8,7 @@ signatures and signatures of knowledge.
 $(\sk, \pk) \leftarrow \DSgen(\secparam)$ for the digital signature scheme~$\DS$ and
 publishes~$\pk$, and generates system-wide public parameters $\crs$ for the
 necessary signatures of knowledge, needed throughout.  Each issuer
-then generates a keypair $(\isk{i}, \ipk{i}) \leftarrow \ATSkeygen(\secparam)$ for
+then generates a keypair $(\isk{i}, \ipk{i}) \leftarrow \ATSgen(\secparam)$ for
 the aggregate tag-based signature scheme~$\ATS$ and publishes~$\ipk{i}$.
 
 \paragraph{Registration.} A user samples $(\sk, \pk) \leftarrow \DSgen(\secparam)$,
@@ -31,7 +31,7 @@ attribute value $\atv{i}$, the issuers sends back $\sigma_i \leftarrow
 
 \paragraph{Aggregation.}
 
-\paragraph{Presentation,} The user has $(\tau, \sk, \pk, \psi, \cred_1, \ldots,
+\paragraph{Presentation.} The user has $(\tau, \sk, \pk, \psi, \cred_1, \ldots,
 \cred_N)$, where $\cred_i = (\atv{i}, \sigma_i)$.  To prove possession of
 attribute values $(\atv{i})_{i \in \mathbb{I}}$ to some verifier that
 provides a fresh $\msg$, the user computes $\sigma \leftarrow

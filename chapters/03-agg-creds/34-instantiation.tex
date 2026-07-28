@@ -3,13 +3,14 @@
 \subsection{Our Tag-Based Aggregate Signature ($\ATS$)} \label{sec:tag-scheme}
 
 Our tag-based aggregate signature scheme is an enhanced aggregate BLS signature
-scheme~\cite{boneh2001short,boneh2003aggregate} that signs pairs of messages
-and tags.  The key differences are tag-restricted aggregation and ability to
+scheme that signs pairs of messages
+and tags~\cite{JC:BonLynSha04,EC:BGLS03}.  
+The key differences are tag restricted aggregation and ability to
 randomise signatures.  Our scheme is comprised of the following algorithms:
 
 \begin{itemize}
 
-  \item $(\sk, \pk) \leftarrow \ATSkeygen(\secparam)$: Randomly select $x \in
+  \item $(\sk, \pk) \leftarrow \ATSgen(\secparam)$: Randomly select $x \in
     \Zp$, compute $\gen^x = \pk \in \group{2}$, and output key pair $(\sk, \pk)
     = (x, \gen^x)$.
 
@@ -51,12 +52,12 @@ random oracle model under the Bilinear Computational Diffie-Hellman (BCDH)
 assumption and a modified variant of the same assumption. To the best of our
 knowledge, the modified BCDH assumption has not been explicitly introduced in
 prior work. However, it fits within the Uber assumption framework and can be
-shown to hold in the generic bilinear group model~\cite{BonehBG05,Boyen08}.
+shown to hold in the generic bilinear group model~\cite{EC:BonBoyGoh05,PAIRING:Boyen08}.
 
 \paragraph{Overview.} In this instantiation, each user has a pair of secret and
 public keys $(\sk, \pk = \gen^\sk)$.  The digital signature $\DS$ uses AGHO
-structure preserving signatures \cite{abe2011optimal}, to sign a pair $(\pk,
-\hashtwo(\Tag)) \in \group{1}\times\group{1}$, where $\pk$ is the user's public
+structure preserving signatures~\cite{C:AGHO11}. The message that we sign 
+is the pair $(\pk, \hashtwo(\Tag)) \in \group{1}\times\group{1}$, where $\pk$ is the user's public
 key and $\Tag$ their unique tag.  The aggregate tag-based signature $\ATS$ is
 instantiated with our construction.
 
@@ -172,17 +173,20 @@ defined as $\rel(\inst, \witness) = 1$, if and only if,  the following holds:
 \begin{equation} \label{eq:sok-rel} \bar{\gen} = \gen^{\delta} \quad ; \quad
 \bar{V} = V^{\delta} \quad ;  \quad  H_i = \hashone(\atv{i})^{\delta} \quad ;
 \quad \pk' = \bar{\gen}^{\sk}.  \end{equation} Next, the user produces $\eta$,
-a SoK for $\rel$, and defines presentation $\proof$ as $$\phi = (\eta,
-\bar{\gen}, \bar{V}, \widehat{R}', \widehat{S}', \bar{T}, \allowbreak
+a SoK for $\rel$, and defines presentation $\proof$ as:
+$$\phi = (\eta, \bar{\gen}, \bar{V}, \widehat{R}', \widehat{S}', \bar{T}, \allowbreak
 \signatureone', \bar{\signaturetwo}, \bar{\Gamma}, \pk', \{\atv{i}, H_i\}_{i\in
-\mathbb{I}}).$$ The verifier accepts $\proof$ if and only if, $\bar{\gen} \neq
-1$, $\eta$ is a valid SoK for the relation depicted in
-equation~\ref{eq:sok-rel}, and the following equalities hold: \begin{gather*}
+\mathbb{I}}).$$ 
+The verifier accepts $\proof$ if and only if, $\bar{\gen} \neq 1$, $\eta$ is a valid SoK for the relation depicted in
+equation~\ref{eq:sok-rel}, and the following equalities hold: 
+\begin{gather*}
   e(\bar{\signaturetwo}, \ggen)  = \prod_{i\in \mathbb{I}}e(H_{i},
-  {\gen^x}_{i})\cdot e(\bar{\Gamma}, \signatureone') \ ; \ \\ e(\bar{\gen},
-\ggen) = e(\bar{T}, \widehat{R}')\cdot e(\pk', \widehat{U}_1)\cdot
-e(\bar{\Gamma}, \widehat{U}_2) \ ; \\ e(\bar{V}, \widehat{R}')= e(\bar{\gen},
-\widehat{S}').  \end{gather*}
+  {\gen^x}_{i})\cdot e(\bar{\Gamma}, \signatureone') \ ; \ \\ 
+  e(\bar{\gen}, \ggen) = e(\bar{T}, \widehat{R}')\cdot e(\pk', \widehat{U}_1)\cdot
+e(\bar{\Gamma}, \widehat{U}_2) \ ; \\ 
+e(\bar{V}, \widehat{R}')= e(\bar{\gen},
+\widehat{S}').  
+\end{gather*}
 
 \paragraph{Extensions.} The construction supports also several straightforward
 extensions.
@@ -244,11 +248,14 @@ $\rel$, and outputs presentation $$\proof = (\eta, \bar{\gen}, \bar{V},
 
 The verifier accepts $\proof$ if $\bar{\gen} \neq 1$, $\eta$ is a valid SoK for
 the relation depicted in equation~\ref{eq:sok-rel} and the following equalities
-hold: \begin{align} \label{eq:app-sok-rel-2} e(\bar{\gen}, \ggen) &= e(\bar{T},
+hold: 
+\begin{align} \label{eq:app-sok-rel-2}
+ e(\bar{\gen}, \ggen) &= e(\bar{T},
   \widehat{R}')\cdot e(\pk', \widehat{U}_1)\cdot e(\bar{\Gamma}, \widehat{U}_2)
-\ ; \ e(\bar{V}, \widehat{R}') = e(\bar{\gen}, \widehat{S}') \ ; \ \\ &
-e(\bar{\signaturetwo}, \ggen) = \prod_{i\in \mathbb{I}}e(H_{i},
-{\gen^x}_{i})\cdot e(\bar{\Gamma}, \signatureone').  \end{align}
+\ ; \ e(\bar{V}, \widehat{R}') = e(\bar{\gen}, \widehat{S}') \ ; \ \\ 
+& e(\bar{\signaturetwo}, \ggen) = \prod_{i\in \mathbb{I}}e(H_{i},
+{\gen^x}_{i})\cdot e(\bar{\Gamma}, \signatureone'). 
+ \end{align}
 
 Next, we describe first how $\eta$ is computed.  This is followed by showing
 that if the user is able to produce a valid $\eta$, then we can extract a valid
@@ -301,15 +308,17 @@ $\bar{\gen} = \gen^{\delta} \  ; \ \bar{V} = V^{\delta} \ ; \ H_i =
 $\bar{\gen} \neq 1$, then $\delta \neq 0$ and we can write $\gen =
 \bar{\gen}^{1/\delta}$, $V = \bar{V}^{1/\delta}$ and $\pk'^{1/\delta} =
 \bar{\gen}^{\sk/\delta} = \gen^{\sk}$.  Furthermore, given the equalities in
-equation~\ref{eq:app-sok-rel-2}, we can deduce that: \begin{gather*}
+equation~\ref{eq:app-sok-rel-2}, we can deduce that: 
+\begin{gather*}
   e(\bar{V}^{1/\delta}, \widehat{R}) = e(V, \widehat{R}) =
   e(\bar{\gen}^{1/\delta}, \widehat{S}) = e(\gen, \widehat{S}) \ ; \\
   e(\bar{T}^{1/\delta}, \widehat{R}) \cdot e( \pk'^{1/\delta}, \widehat{U}_1)
   \cdot e(\bar{\Gamma}^{1/\delta},  \widehat{U}_2) = e(\bar{\gen}^{1/\delta},
-  \ggen)= e(\gen, \ggen) \ ; \\ e(\bar{\signaturetwo}^{1/\delta}, \ggen) =
-e(\bar{\Gamma}^{1/\delta},
+  \ggen)= e(\gen, \ggen) \ ; \\ 
+  e(\bar{\signaturetwo}^{1/\delta}, \ggen) = e(\bar{\Gamma}^{1/\delta},
 \signatureone)\cdot\prod_{i\in\mathbb{I}}e(H_i^{1/\delta}, {\gen^x}_i).
-\end{gather*} That is, $(\signatureone, \bar{\signaturetwo}^{1/\delta})$ is a
+\end{gather*} 
+That is, $(\signatureone, \bar{\signaturetwo}^{1/\delta})$ is a
 valid tag-based aggregate signature on the pre-image of
 $\bar{\Gamma}^{1/\delta}$ and attributes $\atv{i}$, and that $(\widehat{R},
 \widehat{S}, \bar{T}^{1/\delta})$ is a valid AGHO signature on pair

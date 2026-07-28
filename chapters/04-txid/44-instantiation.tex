@@ -21,7 +21,7 @@ is $\gamma$'s bit decomposition.  $\COM$ is instantiated using Pedersen
 commitments and commitment key $\ck = (\gen_2, \gen_3)$, giving
 $(\gen_2^{\utk}\cdot \gen_3^{\openinfo}, \openinfo) \leftarrow \COMcommit(\ck,
 \utk, \openinfo)$.  Finally, the RA's signatures are instantiated using the
-BBS+ signature scheme~\cite{bbs}.
+BBS+ signature scheme~\cite{SCN:AuSusMu06,EC:TesZhu23b}.
 
 The RA holds BBS+ keys $(\sk, \pk) \leftarrow \BBSgen(\secparam, 2)$ to sign
 pairs $(\sk, \utk) \in \Zp^2$, where $\sk = z \in \Zp$ and $\pk = (\gen_0,
@@ -102,11 +102,15 @@ and $\widehat{\crs}_3 = \crs_3$, that together verify: \begin{gather*} \com =
 \ggen)^r.  \end{gather*}
 
 We prove this in two parts. The first is a Sigma protocol proving the following
-equalities for witness $\widehat{\witness}_3$: \begin{gather*} \com =
-  \gen_2^{\utk}\cdot\gen_3^{\openinfo} \quad \wedge \quad \Gamma =
+equalities for witness $\widehat{\witness}_3$: 
+\begin{gather*} 
+\com = \gen_2^{\utk}\cdot\gen_3^{\openinfo} \quad \wedge \quad \Gamma =
   \ggen^{r}\prod_{i=1}^{\ell} \ggen_i^{\gamma_i} \quad \wedge \quad  U =
-\HE(\epoch)^{s} \\ \wedge \quad  V = U^{\utk} \quad \wedge \quad e(V, \Gamma) =
-\Tag^s \cdot e(V, \ggen)^r.  \end{gather*} the user samples $\alpha, \beta,
+\HE(\epoch)^{s} \\ 
+\wedge \quad  V = U^{\utk} \quad \wedge \quad e(V, \Gamma) =
+\Tag^s \cdot e(V, \ggen)^r. 
+ \end{gather*}
+  The user samples $\alpha, \beta,
 \eta, \nu \sample \Zp$ and $\delta_i \sample \Zp$ for $i \in [1,\ell]$,
 computes and sends the following:
 
@@ -119,15 +123,16 @@ F)$, the user computes and sends the following values: \begin{equation*} \theta
   \upsilon = \eta + c\cdot r, \quad \forall i \in [1,\ell]: \xi_i = \delta_i +
   c\cdot\gamma_i, \quad \chi = \nu + c\cdot s.  \end{equation*} The verifier
   computes challenge $c$ and accepts if and only if the following hold:
-  \begin{gather*} \gen_2^{\theta}\cdot\gen_3^{\omega} = A \cdot \com^c, \quad
+  \begin{gather*} 
+  \gen_2^{\theta}\cdot\gen_3^{\omega} = A \cdot \com^c, \quad
   \ggen^{\upsilon}\prod_{i=1}^{\ell} \ggen_i^{\xi_i} = \Delta \cdot \Gamma^c,
-\quad \HE(\epoch)^{\chi} = B \cdot U^c, \\ U^{\chi} = D \cdot V^c, \quad
-\Tag^\chi \cdot e(V, \ggen)^\upsilon = F \cdot e(V,\Gamma)^c.  \end{gather*}
+\quad \HE(\epoch)^{\chi} = B \cdot U^c, \\ 
+U^{\chi} = D \cdot V^c, \quad
+\Tag^\chi \cdot e(V, \ggen)^\upsilon = F \cdot e(V,\Gamma)^c.  
+\end{gather*}
 
-The second step is proving that $(\gamma_1, \ldots, \gamma_\ell)$ are bits.
-For each $i \in [1, \ell]$, bit validity is argued by transforming the relation
-$\forall i \in [1, \ell] : \quad \gamma_i(1-\gamma_i) = 0$ into an inner
-product argument following the techniques introduced in \cite{bulletproofs}.
+The second step is proving that $(\gamma_1,\ldots,\gamma_\ell)$ are bits. For each
+$i\in[\ell]$, bit validity is established using an inner product argument~\cite{SP:BBBPWM18}.
 
 \paragraph{Transaction Authorisation.} Each transaction carries a signature of knowledge that attests it has
 originated from a registered user, following relation $\rel_2$ defined in
@@ -144,10 +149,10 @@ e({\gen_0}\cdot\gen_2^{\sk}\cdot\gen_1^{\utk}\cdot\gen_3^r, \ggen),
 \end{equation*} and $\crs_2 \leftarrow \sokgen(\rel_2)$ is set to hash function
 $\hash:\{0, 1\}^*\rightarrow \Zp$.
 
-Concretely, the SoK for $\rel_2$ on some message $\msg$ can be formed by
-transforming $\rel_2$ into an equivalent relation $\widehat{\rel}_2$ that does
-not require the generation of proofs over bilinear equations, following the
-techniques presented in~\cite{CamenischDL16,HesseSS23}.  $\widehat{\rel}_2$ is
+The SoK for $\rel_2$ on message $\msg$ is obtained by rewriting $\rel_2$ 
+as an equivalent relation $\widehat{\rel}_2$ that avoids
+proofs over bilinear equations~\cite{EPRINT:CamDriLeh16,USENIX:HesSinSor23}.
+ $\widehat{\rel}_2$ is
 defined for  $\widehat{\inst}_2 = (\pk, \com, U, V, W)$ defined as follows:
 \begin{equation*} U = E^{\zeta/\eta}; \quad V=
   ({\gen_0}\cdot{\gen_2}^{\sk}\cdot{\gen_1}^{\utk}\cdot{\gen_3}^r)^{-1/\zeta};
