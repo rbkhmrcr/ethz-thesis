@@ -4,23 +4,23 @@ Non interactive zero knowledge proof systems enable a prover to convince a
 verifier that a statement is true without revealing any information beyond the
 validity of the statement.
 
-\paragraph{Interfaces.} A non interactive zero knowledge proof (NIZK) system
+\paragraph{Syntax.} A non interactive zero knowledge proof (NIZK) system
 consists of the following algorithms:
 
-\begin{itemize}
+\begin{description}
 
-  \item $\crs \sample \NIZKgen(\secparam)$ : the setup algorithm outputs a
+  \item[$\crs \sample \NIZKgen(\secparam)$ :] The setup algorithm outputs a
     common reference string $\crs$.
 
-  \item $\proof \leftarrow \NIZKprove(\crs, \inst, \witness)$ : the proving
+  \item[$\proof \leftarrow \NIZKprove(\crs, \inst, \witness)$ :] The proving
     algorithm takes as input a common reference string $\crs$, statement
     $\inst$, and witness $\witness$, and outputs a proof $\proof$.
 
-  \item $ \{0, 1\} \leftarrow \NIZKverify(\crs, \inst, \proof)$ : the verification
+  \item[$\{0, 1\} \leftarrow \NIZKverify(\crs, \inst, \proof)$ :] The verification
     algorithm takes as input a common reference string $\crs$, statement
     $\inst$, and proof $\proof$, and outputs $0$ or $1$.
 
-\end{itemize}
+\end{description}
 
 \paragraph{Correctness.} A non interactive zero knowledge proof system must
 satisfy the following correctness requirement: for every common reference

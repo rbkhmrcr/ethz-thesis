@@ -1,25 +1,27 @@
 \section{Instantiation}\label{sec:inst}
 
-We describe a concrete instantiation of the black-box construction in
-pairing-based groups using algebraic PRFs and tailored Sigma protocols,
+We describe a concrete instantiation of the black box construction in
+pairing based groups using algebraic PRFs and tailored sigma protocols,
 yielding a transparent setup.
 
-\subsection{Algebraic PRF-based Instantiation}\label{sec:algebraic}
+\subsection{Algebraic PRF based Instantiation}\label{sec:algebraic}
 
 \paragraph{Setup.} Let $\group{1}$, $\group{2}$, and $\group{T}$ be cyclic
 groups of large prime order $p$ admitting an efficient bilinear pairing $e :
 \group{1} \times \group{2} \to \group{T}$.  Let $\gen_0$, $\gen_1$, $\gen_2$,
 $\gen_3$ be random generators of $\group{1}$.  Let $\ggen$, $\ggen_1, ...,
-\ggen_\ell$ be $\ell+1$ random generators of $\group{2}$.  One-way functions
+\ggen_\ell$ be $\ell+1$ random generators of $\group{2}$.  One way functions
 $\G$ and $\G'$ are instantiated as $\G(\sk) = \gen_1^{\sk}$ and $\G'(\utk) =
 \gen_2^{\utk}$.  PRF $\FE$ is defined as $\FE(\utk, \epoch) =
 \HE(\epoch)^{\utk}$, with $\HE:\{0,1\}^* \rightarrow \group{1}$ being a
 cryptographic hash function.  Let $\Max = 2^{\ell}$, and $\forall \ \gamma <
 \Max$, PRF $\FT$ is implemented as $\FT(\ek, \gamma) = e(\ek,
 \prod_{i=1}^{\ell} \ggen_i^{\gamma_i})$, where $(\gamma_1, ..., \gamma_{\ell})$
-is $\gamma$'s bit decomposition.  $\COM$ is instantiated using Pedersen
+is $\gamma$'s bit decomposition.  
+
+$\Com$ is instantiated using Pedersen
 commitments and commitment key $\ck = (\gen_2, \gen_3)$, giving
-$(\gen_2^{\utk}\cdot \gen_3^{\openinfo}, \openinfo) \leftarrow \COMcommit(\ck,
+$(\gen_2^{\utk}\cdot \gen_3^{\openinfo}, \openinfo) \leftarrow \ComCommit(\ck,
 \utk, \openinfo)$.  Finally, the RA's signatures are instantiated using the
 BBS+ signature scheme~\cite{SCN:AuSusMu06,EC:TesZhu23b}.
 
@@ -52,7 +54,7 @@ rejects.  $S = \gen_1^{\sk}$ serves as the user's public key.
 
 \paragraph{Epoch Key Computation.} the user computes epoch keys $\ek =
 \FE(\utk, \epoch)$ as $\HE(\epoch)^{\utk}$.  In the random oracle model, $\FE$
-is a PRF under the decisional Diffie-Hellman (DDH) assumption.  Relation
+is a PRF under the decisional Diffie Hellman (DDH) assumption.  Relation
 $\rel_1$ is defined for $\inst_1 = (\HE,\gen_2, T, \epoch, \ek)$;$\witness_1
 =\utk$; and $(\varnothing, \crs_1)\leftarrow \NIZKgen(\rel_1)$ with $\crs_1$
 set to hash function $\hash$, and $\rel_1(\inst_1, \witness_1) = 1$ if and only
@@ -73,7 +75,7 @@ $e({\gen_0}\cdot{S}\cdot{T}\cdot\gen_3^r, \ggen) = e(E,
 commitment $\com = \gen_2^{\utk}\cdot\gen_3^{\openinfo}$ and $\Tag = \FT(\ek,
 \gamma)$, where $ \FT(\ek, \gamma)$ is defined as $e\!\left(\ek,\,
 \prod_{i=1}^{\ell} \ggen_i^{\gamma_i}\right)$.  Under the DDH assumption, and
-the Bilinear Decisional Diffie-Hellman (BDDH) assumption, $\FT$ can be shown to
+the Bilinear Decisional Diffie Hellman (BDDH) assumption, $\FT$ can be shown to
 be a PRF, in the random oracle model.
 
 Relation $\rel_3$ is defined for $\inst_3 = (\HE, \{\ggen_i\}_{i\in[1,\ell]},
@@ -101,7 +103,7 @@ and $\widehat{\crs}_3 = \crs_3$, that together verify: \begin{gather*} \com =
   \quad V = U^{\utk} \quad \wedge \quad e(V, \Gamma) = \Tag^s \cdot e(V,
 \ggen)^r.  \end{gather*}
 
-We prove this in two parts. The first is a Sigma protocol proving the following
+We prove this in two parts. The first is a sigma protocol proving the following
 equalities for witness $\widehat{\witness}_3$: 
 \begin{gather*} 
 \com = \gen_2^{\utk}\cdot\gen_3^{\openinfo} \quad \wedge \quad \Gamma =
@@ -155,16 +157,16 @@ proofs over bilinear equations~\cite{EPRINT:CamDriLeh16,USENIX:HesSinSor23}.
  $\widehat{\rel}_2$ is
 defined for  $\widehat{\inst}_2 = (\pk, \com, U, V, W)$ defined as follows:
 \begin{equation*} U = E^{\zeta/\eta}; \quad V=
-  ({\gen_0}\cdot{\gen_2}^{\sk}\cdot{\gen_1}^{\utk}\cdot{\gen_3}^r)^{-1/\zeta};
+  ({\gen_0}\cdot{\gen_2}^{\sk}\cdot{\gen_1}^{\utk}\cdot{\gen_3}^r)^{ 1/\zeta};
 \quad W= U^eV^{\zeta}, \end{equation*} and $\widehat{\witness}_2 = (\sk, \utk,
 \rho, e, r', \zeta, \eta)$ such that $\widehat{\rel}_2(\widehat{\inst}_2,
 \widehat{\witness}_2) = 1$ if and only if the following holds:
 \begin{equation*} \com = \gen_2^{\utk}\cdot\gen_3^{\rho}\ \wedge \ e(U,
   \ggen_Z)\cdot{e(W, \ggen)}=1  \ \wedge \ W = U^e\cdot{V^{\zeta}} \ \wedge \
-  (\gen_0\cdot\com)^{-1} = V^{\eta}\cdot \gen_1^{\sk}\cdot\gen_3^{r'}.
+  (\gen_0\cdot\com)^{ 1} = V^{\eta}\cdot \gen_1^{\sk}\cdot\gen_3^{r'}.
 \end{equation*}
 
-$\widehat{\rel}_2$ can be proven using Sigma protocols and the Fiat Shamir
+$\widehat{\rel}_2$ can be proven using sigma protocols and the Fiat Shamir
 heuristic is used to transform the resulting proofs into a signature of
 knowledge.
 
@@ -185,11 +187,11 @@ checks first whether $e(U, \ggen_Z)e(W, \ggen) = 1$, then computes $c =
 \hash(\widehat{\inst}_2, A, B, D, \msg)$, and only accepts if the following set
 of equalities hold: \begin{align*} A\cdot\com^c =
 \gen_2^{\phi_1}\cdot\gen_3^{\phi_2}; \quad B\cdot{W}^c = U^{\phi_3}V^{\phi_4} ;
-\quad D\cdot(\gen_0\cdot\com)^{-c} = V^{\phi_5}\cdot
+\quad D\cdot(\gen_0\cdot\com)^{ c} = V^{\phi_5}\cdot
 \gen_1^{\phi_6}\cdot\gen_3^{\phi_7}.  \end{align*}
 
 \paragraph{Security.} \begin{theorem}\label{thm:inst} The instantiation,
   presented in Section \ref{sec:algebraic}, securely realises $\F{txid}$, in
-  the random oracle model, under the Decisional Diffie-Hellman assumption in
-  $\group{1}$; the Bilinear Decisional Diffie-Hellman assumption, and the
-q-Strong Diffie-Hellman assumption.  \end{theorem}
+  the random oracle model, under the Decisional Diffie Hellman assumption in
+  $\group{1}$; the Bilinear Decisional Diffie Hellman assumption, and the
+q Strong Diffie Hellman assumption.  \end{theorem}

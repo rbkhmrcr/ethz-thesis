@@ -1,3 +1,6 @@
+\usepackage{amssymb}
+\usepackage{mathtools}
+
 % new environments
 \newtheorem{theorem}{Theorem}
 \newtheorem{lemma}{Lemma}
@@ -8,10 +11,10 @@
 \newcommand{\secparam}{\kappa}
 
 % commitments
-\newcommand{\COM}{\algo{Com}}
-\newcommand{\COMgen}{\COM\algo{.Gen}}
-\newcommand{\COMcommit}{\COM\algo{.Commit}}
-\newcommand{\COMopen}{\COM\algo{.Open}}
+\newcommand{\Com}{\algo{Com}}
+\newcommand{\ComGen}{\Com\algo{.Gen}}
+\newcommand{\ComCommit}{\Com\algo{.Commit}}
+\newcommand{\ComOpen}{\Com\algo{.Open}}
 \newcommand{\ck}{\algo{ck}}
 \newcommand{\openinfo}{\algo{open}}
 \newcommand{\com}{\algo{com}}
@@ -20,6 +23,7 @@
 
 % com sec
 \newcommand{\adv}{\mathcal{A}}
+\newcommand{\simu}{\mathcal{S}}
 \newcommand{\Adv}{\algo{Adv}}
 
 % digital signatures
@@ -94,8 +98,6 @@
 
 % tagging scheme
 \newcommand{\TAG}{\algo{TAG}}
-\newcommand{\TAGsetup}{\TAG\algo{.Setup}}
-\newcommand{\TAGkeygen}{\TAG\algo{.Gen}}
 \newcommand{\TAGepochkeygen}{\TAG\algo{.EpochKeyGen}}
 \newcommand{\TAGgen}{\TAG\algo{.Gen}}
 \newcommand{\TAGverify}{\TAG\algo{.Verify}}
@@ -128,12 +130,12 @@
 
 % ATS
 \newcommand{\ATS}{\algo{ATS}}
-\newcommand{\ATSkeygen}{\ATS\algo{.Gen}}
+\newcommand{\ATSgen}{\ATS\algo{.Gen}}
 \newcommand{\ATSsign}{\ATS\algo{.Sign}}
+\newcommand{\ATSrandomise}{\ATS\algo{.Randomise}}
 \newcommand{\ATSverify}{\ATS\algo{.Verify}}
 \newcommand{\ATSaggregate}{\ATS\algo{.Aggregate}}
 \newcommand{\ATSverifyagg}{\ATS\algo{.VerifyAgg}}
-\newcommand{\ATSrandomise}{\ATS\algo{.Randomise}}
 
 %%% instantiation details %%%%
 

@@ -1,56 +1,87 @@
-\section{Construction}\label{sec:agg-creds-construction}
+\section{Construction}\label{sec:agg creds construction}
 
-In the following, we show how to construct an aggregate anonymous credentials
-scheme in a black-box manner, using digital signatures, aggregate tag-based
-signatures and signatures of knowledge.
+The protocol involves a registration authority and a collection of issuers.
+Each user first establishes a pseudonymous identity with the registration
+authority. Issuers then issue credentials to that identity for the attributes
+they certify. Before presentation, the user aggregates the credentials
+corresponding to the attributes they wish to disclose into a single aggregate
+signature. Finally, the user proves knowledge of the aggregate credential and
+their registered identity using a signature of knowledge.
 
-\paragraph{Setup.} The registration authority (RA) samples a key pair
-$(\sk, \pk) \leftarrow \DSgen(\secparam)$ for the digital signature scheme~$\DS$ and
-publishes~$\pk$, and generates system-wide public parameters $\crs$ for the
-necessary signatures of knowledge, needed throughout.  Each issuer
-then generates a keypair $(\isk{i}, \ipk{i}) \leftarrow \ATSgen(\secparam)$ for
-the aggregate tag-based signature scheme~$\ATS$ and publishes~$\ipk{i}$.
+Throughout this construction, we refer simply to proofs. These are instantiated
+using signatures of knowledge, allowing the resulting proofs to be bound to
+protocol messages where required.
 
-\paragraph{Registration.} A user samples $(\sk, \pk) \leftarrow \DSgen(\secparam)$,
-and sends $\pk$ to the RA together with a SoK on a fresh $\msg$ from RA that
-proves the user knows the corresponding secret key $\sk$.  If the SoK verifies,
-then the RA assigns the user a unique tag~$\tau$ and issues $\psi \leftarrow
-\DSsign(\sk,  \pk \| \tau)$.
+\paragraph{Setup.} During setup, the registration authority generates a key
+pair for the digital signature scheme and public parameters for the proofs used
+throughout the protocol. Each issuer independently generates a key pair for the
+aggregate tag based signature scheme. The registration authority's public key,
+each issuer's public key, and the public parameters are published.
 
-The user initialises their credential state as $(\tau, \sk, \pk, \psi, 
-\cred_1, \ldots, \cred_N)$, with $\cred_i = \varnothing$ for
-all $i \in [N]$.
+The registration authority (RA) samples a key pair $(\sk, \pk) \leftarrow
+\DSgen(\secparam)$ and publishes~$\pk$. They generates system wide public
+parameters $\crs$ for the necessary signatures of knowledge, needed throughout.
+Each issuer then generates a key pair $(\isk{i}, \ipk{i}) \leftarrow
+\ATSgen(\secparam)$ for the aggregate tag based signature scheme~$\ATS$ and
+publishes~$\ipk{i}$.
 
-\paragraph{Issuance.} On input $(\tau, \pk, \psi, \atv{i})$ from the user,
-issuer first sets $m =  (\pk, \tau)$, and checks that
-$\DSverify(\pk, m, \psi) = 1$.  If not, it rejects.  Otherwise, it verifies
-that the user knows $\sk$ via a SoK.  If this check succeeds and the user holds
-attribute value $\atv{i}$, the issuers sends back $\sigma_i \leftarrow
-\ATSsign(\isk{i}, \tau, \atv{i})$, and the user, subsequently, sets $\cred_i =
-(\atv{i}, \sigma_i)$.
+\paragraph{Registration.} During registration, the user establishes a long term
+pseudonymous identity with the registration authority. The user proves
+knowledge of the secret key corresponding to their public key, after which the
+registration authority binds that public key to a unique user tag.
 
-\paragraph{Aggregation.}
+The user samples $(\sk, \pk) \leftarrow \DSgen(\secparam)$, and sends $\pk$ to
+the RA together with a proof on a fresh $\msg$ from the RA that proves the user
+knows the corresponding secret key $\sk$.  If the proof verifies, then the RA
+assigns the user a unique tag~$\tau$ and issues $\psi \leftarrow \DSsign(\sk,
+\pk \| \tau)$.
 
-\paragraph{Presentation.} The user has $(\tau, \sk, \pk, \psi, \cred_1, \ldots,
-\cred_N)$, where $\cred_i = (\atv{i}, \sigma_i)$.  To prove possession of
-attribute values $(\atv{i})_{i \in \mathbb{I}}$ to some verifier that
-provides a fresh $\msg$, the user computes $\sigma \leftarrow
-\ATSaggregate(\{\sigma_i\}_{i \in \mathbb{I}})$, and SoK $ \proof \leftarrow
-\soksign(\crs, \inst, \witness, \msg)$, where $\inst = (\pk, \mathbb{I}, \{\ipk{i},
-\atv{i}\}_{i \in \mathbb{I}})$ and $\witness = (\tau, \sk, \pk, \psi, \sigma)$, and
-which proves the following: 
-\begin{align*} (\sk, \pk) \leftarrow &\DSgen(\secparam)
-  \quad \wedge \quad  \DSverify(\pk, \pk \|  \tau, \psi) = 1 \\ \wedge &\quad
-  \ATSverifyagg(\{\ipk{i}\}_{i \in \mathbb{I}}, \tau, \{\atv{i}\}_{i \in
-\mathbb{I}}, \sigma) = 1.  \end{align*}
+The user initialises their credential state as $(\tau, \sk, \pk, \psi, \cred_1,
+\ldots, \cred_N)$, with $\cred_i = \varnothing$ for all $i \in [N]$.
 
-\paragraph{Verification.} On input $(\{\atv{i}\}_{i \in \mathbb{I}}, \msg,
-\proof)$, the verifier returns the output of
-$\sokverify(\crs,\inst,\msg,\proof)$, with $\inst = (\pk, \mathbb{I},
-\{\ipk{i}, \atv{i}\}_{i \in \mathbb{I}})$.
+\paragraph{Issuance.} To obtain an attribute credential, the user authenticates
+their registered identity to an issuer. If the issuer is satisfied that the
+user possesses the requested attribute value, it issues an aggregate tag-based
+signature on that attribute.
 
-\begin{theorem}\label{thm:bb-security} If $\DS$ is an existentially unforgeable
-  digital signature scheme, $\ATS$ an existentially unforgeable aggregate
-  tag-based signature scheme under tag-based aggregation, and $\SOK$ a secure
+On input $(\tau, \pk, \psi, \atv{i})$ from the user, issuer first sets $m =
+(\pk, \tau)$, and checks that $\DSverify(\pk, m, \psi) = 1$.  If not, it
+rejects.  Otherwise, it verifies that the user knows $\sk$ via a proof.  If
+this check succeeds and the user holds attribute value $\atv{i}$, the issuers
+sends back $\sigma_i \leftarrow \ATSsign(\isk{i}, \tau, \atv{i})$, and the
+user, subsequently, sets $\cred_i = (\atv{i}, \sigma_i)$.
+
+\paragraph{Aggregation.} Before presenting credentials, the user aggregates the
+signatures corresponding to the attributes they wish to disclose into a single
+aggregate signature.
+
+\paragraph{Presentation.} To prove possession of a collection of attributes,
+the user aggregates the corresponding credentials and produces a proof.  This
+simultaneously demonstrates possession of a valid registration credential and
+that the aggregate signature verifies under the disclosed issuer public keys
+and attribute values.
+
+The user has $(\tau, \sk, \pk, \psi, \cred_1, \ldots, \cred_N)$, where $\cred_i
+= (\atv{i}, \sigma_i)$.  To prove possession of attribute values $(\atv{i})_{i
+\in \ISSUERS}$ to a verifier providing a fresh message $\msg$, the user
+computes $\sigma \leftarrow \ATSaggregate(\{\sigma_i\}_{i \in \ISSUERS})$, and
+proof $ \proof \leftarrow \soksign(\crs, \inst, \witness, \msg)$, where $\inst
+= (\pk, \ISSUERS, \{\ipk{i}, \atv{i}\}_{i \in \ISSUERS})$ and $\witness =
+(\tau, \sk, \pk, \psi, \sigma)$, and which proves the following: \begin{align*}
+(\sk, \pk) \leftarrow &\DSgen(\secparam) \quad \wedge \quad  \DSverify(\pk, \pk
+\|  \tau, \psi) = 1 \\ \wedge &\quad \ATSverifyagg(\{\ipk{i}\}_{i \in
+\ISSUERS}, \tau, \{\atv{i}\}_{i \in \ISSUERS}, \sigma) = 1.  \end{align*}
+
+\paragraph{Verification.} The verifier checks the proof with respect to the
+disclosed attributes and issuer public keys. The presentation is accepted if
+and only if the verification succeeds.
+
+On input $(\{\atv{i}\}_{i \in \ISSUERS}, \msg, \proof)$, the verifier returns
+the output of $\sokverify(\crs,\inst,\msg,\proof)$, with $\inst = (\pk,
+\ISSUERS, \{\ipk{i}, \atv{i}\}_{i \in \ISSUERS})$.
+
+\begin{theorem}\label{thm:bbsecurity} If $\DS$ is an existentially unforgeable
+  digital signature scheme, $\ATS$ an existentially unforgeable aggregate tag
+  based signature scheme under tag based aggregation, and $\SOK$ a secure
   signature of knowledge, then the above protocol securely realises ideal
-functionality~$\F{}$ in the standalone model.  \end{theorem}
+functionality~$\F{\ATS}$ in the standalone model.  \end{theorem}
