@@ -1,11 +1,25 @@
+
+\newcommand{\rebekah}[1]{\textcolor{orange}{{Rebekah}:#1}}
+
 % new environments
 \newtheorem{theorem}{Theorem}
 \newtheorem{lemma}{Lemma}
 \newtheorem{definition}{Definition}
 
+% fancyref item for theorem
+\newcommand*{\fancyrefthmlabelprefix}{thm}
+\fancyrefaddcaptions{english}{\newcommand*{\Frefthmname}{Theorem}
+\newcommand*{\frefthmname}{\MakeLowercase{\Frefthmname}}}
+\frefformat{vario}{\fancyrefthmlabelprefix}{{\frefthmname}\fancyrefdefaultspacing#1 on page #2}
+\Frefformat{vario}{\fancyrefthmlabelprefix}{{\Frefthmname}\fancyrefdefaultspacing#1 on page #2}
+\frefformat{plain}{\fancyrefthmlabelprefix}{{\frefthmname}\fancyrefdefaultspacing#1}
+\Frefformat{plain}{\fancyrefthmlabelprefix}{{\Frefthmname}\fancyrefdefaultspacing#1}
+
+
 \newcommand{\algo}[1]{\mathsf{#1}}
 \newcommand{\sample}{\overset{\$}{\leftarrow}}
 \newcommand{\secparam}{\kappa}
+
 
 % commitments
 \newcommand{\Com}{\algo{Com}}
@@ -20,6 +34,7 @@
 
 % com sec
 \newcommand{\adv}{\mathcal{A}}
+\newcommand{\advB}{\mathcal{B}}
 \newcommand{\simu}{\mathcal{S}}
 \newcommand{\Adv}{\algo{Adv}}
 
@@ -115,6 +130,9 @@
 \newcommand{\att}[1]{\algo{att_{#1}}}
 \newcommand{\atv}[1]{\algo{atv_{#1}}}
 \newcommand{\cred}{\algo{cred}}
+\newcommand{\creds}{\algo{creds}}
+\newcommand{\aggcreds}{\algo{ac}}
+\newcommand{\proven}{\algo{proven}}
 
 % agg creds
 \newcommand{\AAC}{\algo{AAC}}
@@ -126,6 +144,10 @@
 \newcommand{\AACverify}{\AAC\algo{.Verify}}
 \newcommand{\AACverifyagg}{\AAC\algo{.VerifyAgg}}
 
+%% func
+\newcommand{\user}{\algo{U}}
+\newcommand{\issuer}{\algo{I}}
+
 % ATS
 \newcommand{\ATS}{\algo{ATS}}
 \newcommand{\ATSgen}{\ATS\algo{.Gen}}
@@ -134,6 +156,11 @@
 \newcommand{\ATSverify}{\ATS\algo{.Verify}}
 \newcommand{\ATSaggregate}{\ATS\algo{.Aggregate}}
 \newcommand{\ATSverifyagg}{\ATS\algo{.VerifyAgg}}
+
+\newcommand{\signo}{\mathcal{O}_{\ATSsign}}
+\newcommand{\corrupto}{\mathcal{O}_{\mathcal{C}}}
+\newcommand{\Cor}{\mathcal{C}}
+\newcommand{\Query}{\mathcal{Q}}
 
 %%% instantiation details %%%%
 
@@ -148,8 +175,8 @@
 
 %% hashes, owfs, prfs
 \newcommand{\hash}{H}
-\newcommand{\hashone}{H_1}
-\newcommand{\hashtwo}{H_2}
+\newcommand{\hashone}{{H_1}}
+\newcommand{\hashtwo}{{H_2}}
 \newcommand{\G}{\mathcal{G}}
 \newcommand{\FE}{\mathcal{F}_\epoch}
 \newcommand{\FT}{\mathcal{F}_\Tag}
@@ -166,8 +193,8 @@
 \newcommand{\signaturetwo}{\signature_2}
 
 %% issuer keys
-\newcommand{\ipk}[1]{\algo{ipk}_{#1}}
-\newcommand{\isk}[1]{\algo{isk}_{#1}}
+\newcommand{\ipk}[1]{\algo{pk_{I,#1}}}
+\newcommand{\isk}[1]{\algo{sk_{I,#1}}}
 \newcommand{\ISSUERS}{\mathcal{I}}
 
 %% BBS
@@ -179,3 +206,5 @@
 \newcommand{\BBSverify}{\BBS\algo{.Verify}}
 
 %% ra keys
+\newcommand{\rapk}{\algo{pk_{RA}}}
+\newcommand{\rask}{\algo{sk_{RA}}}

@@ -1,70 +1,118 @@
 \section{Definitions}
 
+\subsection{Aggregate Anonymous Credentials}
+
+\begin{description}
+
+  \item[$\AACregister$ :] \rebekah{}
+
+  \item[$\AACissue$ :] \rebekah{}
+
+  \item[$\AACaggregate$ :] \rebekah{}
+
+  \item[$\AACpresent$ :] \rebekah{}
+
+  \item[$\AACverify$ :] \rebekah{}
+
+\end{description}
+
+We define security of aggregate anonymous credentials through an ideal
+functionality that represents a trusted third party which executes the
+operations of the credential system on behalf of system participants in a way
+that perfectly meets the system requirements.
+
+The ideal functionality captures the properties of aggregate anonymous
+credentials: unforgeability, unlinkability, and aggregatability.
+Unforgeability is enforced by ensuring that only validly issued attributes can
+be successfully presented or verified. Unlinkability is achieved as randomness
+is returned in each query to present, which prevents presentations from being
+correlated.
+
 \subsection{Aggregate Tag-Based Signatures}
 
-We define an aggregate tag-based signature scheme as one that allows signatures
+We define an aggregate tag based signature scheme as one that allows signatures
 computed over the same tag to be aggregated into a compact signature. An
 aggregate tag-based signature scheme is defined by the following algorithms:
 
-\begin{itemize}
+\begin{description}
 
-  \item $(\sk, \pk) \leftarrow \ATSgen(\secparam)$: on input security parameter
-    $\secparam$, output key pair $(\sk,\pk)$.
+  \item[$(\sk, \pk) \sample \ATSgen(\secparam)$ :] The generation algorithm, on
+    input security parameter $\secparam$, outputs key pair $(\sk,\pk)$.
 
-  \item $\signature \leftarrow \ATSsign(\sk, \tau, \msg)$: On input secret key
-    $\sk$, tag $\tau \in \{0,1\}^*$, and message $\msg \in \{0,1\}^*$, output
-    signature $\signature$.
+  \item[$\signature \sample \ATSsign(\sk, \Tag, \msg)$ :] The signing
+    algorithm, on input secret key $\sk$, tag $\Tag \in \{0,1\}^*$, and message
+    $\msg \in \{0,1\}^*$, outputs signature $\signature$.
 
-  \item $ \signature' \leftarrow \ATSrandomise(\tau, \signature)$: On input tag
-    $\tau$ and signature $\signature$, output randomised signature
-    $\signature'$.
+  \item[$ \signature' \sample \ATSrandomise(\Tag, \signature)$ :] The
+    randomisation algorithm, on input tag $\Tag$ and signature $\signature$,
+    outputs randomised signature $\signature'$.
 
-  \item $ \{0,1\} \leftarrow \ATSverify(\pk, \tau, \msg, \signature)$: on input
-    public key $\pk$, tag $\tau$, message $\msg$, and signature $\signature$,
-    return 0 or 1.
+  \item[$ \{0,1\} \leftarrow \ATSverify(\pk, \Tag, \msg, \signature)$ :] The
+    verification algorithm, on input public key $\pk$, tag $\Tag$, message
+    $\msg$, and signature $\signature$, returns 0 or 1.
 
-\item $\signature \leftarrow \ATSaggregate(\signature_1, \ldots,
-\signature_n)$: on input signatures $\signature_1,\ldots,\signature_n$ (all
-under the same tag $\tau$), output aggregate signature $\signature$.
+  \item[$\signature \leftarrow \ATSaggregate(\signature_1, \ldots,
+    \signature_n)$ :] The aggregation algorithm, for general $n$, on input
+    signatures $\signature_1,\ldots,\signature_n$, all under the same tag
+    $\Tag$, outputs aggregate signature $\signature$.
 
-\item $\{0,1\} \leftarrow \ATSverifyagg((\pk_i)_{i\in [1 , n]}, \tau,
-  (\msg_i)_{i\in [1 , n]}, \signature)$: on input public keys
-  $(\pk_i)_{i\in [1 , n]}$, tag $\tau$, messages $(\msg_i)_{i\in [1 ,
-  n]}$, and aggregate signature $\signature$, return 0 or 1.
+  \item[$\{0,1\} \leftarrow \ATSverifyagg((\pk_i)_{i\in [1 , n]}, \Tag,
+    (\msg_i)_{i\in [1 , n]}, \signature)$ :] The aggregate verification
+    algorithm, on input public keys $(\pk_i)_{i\in [1 , n]}$, tag $\Tag$,
+    messages $(\msg_i)_{i\in [1 , n]}$, and aggregate signature $\signature$,
+    returns 0 or 1.
 
-\end{itemize}
+\end{description}
 
 An aggregate tag based signature scheme should satisfy correctness and
 existentially unforgeability, as defined below.
 
-\begin{definition}[Correctness] An ATS scheme satisfies correctness if for all
-  security parameters $\secparam$, all $n \geq 1$, all tags $\tau \in
-  \{0,1\}^*$, and all messages $\msg_i \in \{0,1\}^*$, the following holds.
+\paragraph{Correctness.} We say that an ATS scheme satisfies correctness if for
+all security parameters $\secparam$, all $n \geq 1$, all tags $\Tag \in
+\{0,1\}^*$, and all messages $\msg_i \in \{0,1\}^*$, the following holds.
 
-  Let $\ISSUERS \subseteq [1 , n]$. For all $i \in \ISSUERS$, sample $(\sk_i,
-  \pk_i) \gets \ATSgen(\secparam)$ and let $\signature_i \gets \ATSsign(\sk_i,
-  \tau, \msg_i)$.  Then $\signature$ is produced as follows: $$ \signature
-  \gets \ATSaggregate((\signature_i)_{i \in \ISSUERS}).$$
+Let $\ISSUERS \subseteq [1, n]$. For all $i \in \ISSUERS$, do the following:
+\begin{gather*} (\sk_i, \pk_i) \gets \ATSgen(\secparam), \\ \signature_i \gets
+  \ATSsign(\sk_i, \Tag, \msg_i), \\ \signature \gets
+  \ATSaggregate((\signature_i)_{i \in \ISSUERS}).
+    %
+\end{gather*}
+%
+Then we have the following:
+  %
+\begin{gather*}
+%
+  \forall i \in \ISSUERS : \ATSverify(\pk_i, \Tag, \msg_i, \signature_i) = 1 \\
+  \land \ \ \ATSverifyagg((\pk_i)_{i \in \ISSUERS}, \Tag, (\msg_i)_{i \in
+  \ISSUERS}, \signature) = 1.
+    %
+\end{gather*}
+%
 
-  Then we have the following: $$ \forall i \in \ISSUERS : \ATSverify(\pk_i, \tau,
-  \msg_i, \signature_i) = 1 \ \ \land \ \ \ATSverifyagg\bigl((\pk_i)_{i \in
-  \ISSUERS}, \tau, (\msg_i)_{i \in \ISSUERS}, \signature\bigr) = 1.$$
+Randomisation also preserves validity, meaning that the following holds:
+  %
+\begin{gather*}
+%
+  \forall \signature' \leftarrow \ATSrandomise(\Tag, \signature) \\ \text{with}
+  \ \ \ATSverify(\pk, \Tag, \msg, \signature) = 1, \\ \ATSverify(\pk, \Tag,
+  \msg, \signature') = 1.
+    %
+\end{gather*}
+%
 
-Randomisation also preserves validity, meaning that for all $\signature'
-\leftarrow \ATSrandomise(\tau, \signature)$ and $\ATSverify(\pk, \tau, \msg,
-\signature) = 1$, we also have $\ATSverify(\pk, \tau, \msg, \signature') = 1$
-\end{definition}
+\paragraph{Existential unforgeability under tag based aggregation .} We say an
+ATS scheme is existentially unforgeable under tag based aggregation if for any
+probabilistic polynomial time adversary $\adv$, with access to corruption
+oracle $\corrupto$ and signing oracle $\signo$, the probability that $\adv$
+wins the experiment depicted in \fref{fig:exp} is negligible in security
+parameter $\secparam$.
 
-\begin{definition}[Existential Unforgeability Under Tag-Based Aggregation] An
-  ATS scheme $\ATS$ is existentially unforgeable under tag-based aggregation if
-  for any probabilistic polynomial-time adversary $\adv$, with access to
-  corruption oracle $\Corrupt$ and signing oracle $\Sign$, the probability that
-$\adv$ wins the experiment depicted in \fref{fig:exp} is negligible in security
-parameter $\secparam$.  \end{definition}
-
-\begin{figure}[t] \begin{framed}[1.1\linewidth] \centering
-  \begin{minipage}{0.42\linewidth} \parbox{\linewidth}{
-      \underline{$\Corrupt(\pk_i)$}\\[0.3em] If $\pk_i \in \pk$, then:
+\begin{figure}[t] \begin{framed}
+ \centering
+  \begin{minipage}{0.42\linewidth}
+   \parbox{\linewidth}{ \underline{$\corrupto(\pk_i)$}\\
+   
+   If $\pk_i \in \pk$, then:
 
       \begin{itemize}
 
@@ -73,45 +121,40 @@ parameter $\secparam$.  \end{definition}
         \item return $\sk_i$.
 
         \end{itemize} } \end{minipage} \hfill \begin{minipage}{0.42\linewidth}
-        \parbox{\linewidth}{ \underline{$\Sign(\pk_i, \tau, \msg)$}\\[0.3em] If
-          $\pk_i \in \pk$, then:
+        \parbox{\linewidth}{ \underline{$\signo(\pk_i, \Tag, \msg)$}\\[0.3em]
+          If $\pk_i \in \pk$, then:
 
           \begin{itemize}
 
-            \item $\Query \gets \Query \cup \{(\pk_i, \tau, \msg)\}$;
+            \item $\Query \gets \Query \cup \{(\pk_i, \Tag, \msg)\}$;
 
-            \item return $\signature \gets \ATSsign(\sk_i, \tau, \msg)$.
+            \item return $\signature \gets \ATSsign(\sk_i, \Tag, \msg)$.
 
-            \end{itemize} } \end{minipage} \medbreak
-            \begin{minipage}{\linewidth} \parbox{\linewidth}{ \underline{{\sc
-                Experiment for Existential Unforgeability Under Tag-Based
-            Aggregation}}
+            \end{itemize} 
+            }
+            \end{minipage}
+             \medbreak
+            \begin{minipage}{\linewidth} 
+            \parbox{\linewidth}{ \underline{ Experiment for Existential Unforgeability Under Tag Based
+            Aggregation}
 
             \begin{itemize}
 
-              \item $(\ISSUERS \subseteq [1, n], (\pk_i)_{i \in \ISSUERS}, \tau,
-                (\msg_i)_{i \in \ISSUERS}, \signature) \gets
-                \adv^{\Sign,\Corrupt}(\pk);$
+              \item $(\ISSUERS \subseteq [1, n], (\pk_i)_{i \in \ISSUERS},
+                \Tag, (\msg_i)_{i \in \ISSUERS}, \signature) \gets
+                \adv^{\signo,\corrupto}(\pk);$
 
-              \item $b \gets \ATSverifyagg\bigl((\pk_i)_{i \in \ISSUERS}, \tau,
+              \item $b \gets \ATSverifyagg\bigl((\pk_i)_{i \in \ISSUERS}, \Tag,
                 (\msg_i)_{i \in \ISSUERS}, \signature\bigr).$
 
             \end{itemize}
 
-        $\adv$ wins the experiment if and only if $b = 1  \ \ \land \ \exists
-    \ i \in \ISSUERS : \pk_i \notin \Cor \ \ \land \ \  (\pk_i, \tau, \msg_i)
-\notin \Query.$ } \end{minipage} \end{framed} \caption{Definition of the
+        $\adv$ wins the experiment if and only if $b = 1  \ \ \land \ \exists \
+    i \in \ISSUERS : \pk_i \notin \Cor \ \ \land \ \  (\pk_i, \Tag, \msg_i)
+\notin \Query.$ } 
+\end{minipage} 
+\end{framed} 
+\caption{Definition of the
   oracles available to the adversary and the experiment for Existential
-Unforgeability Under Tag Based Aggregation.} \label{fig:exp} \end{figure}
-
-We define security of the scheme through an ideal functionality that represents
-a trusted third party, which executes the operations of aggregate anonymous
-credentials on behalf of system participants in a way that perfectly meets the
-system requirements.
-
-The ideal functionality captures the properties of aggregate
-anonymous credentials: unforgeability, unlinkability, and aggregatability.
-Unforgeability is enforced by ensuring that only validly issued attributes can
-be successfully presented or verified. Unlinkability is achieved as randomness
-is returned in each query to present, which prevents presentations from being
-correlated.
+Unforgeability Under Tag Based Aggregation.}
+ \label{fig:exp} \end{figure}
