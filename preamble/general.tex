@@ -39,6 +39,7 @@
 \usepackage{textcomp}
 \usepackage{mparhack}
 \usepackage{relsize}
+\usepackage{framed}
 
 % Biblatex
 \input{preamble/biblatex}
@@ -226,6 +227,47 @@
   \addtocounter{footnote}{-1}%
   \endgroup
 }
+
+% Chapter title
+\titleformat{\chapter}[display]
+  {\relax}
+  {\vspace*{-3\baselineskip}%
+   \makebox[\linewidth][r]{%
+     \color{halfgray}\chapterNumber\thechapter}}
+  {10pt}
+  {\raggedright\rmfamily\bfseries\LARGE}
+  [\normalsize\vspace*{.8\baselineskip}\titlerule]
+
+% Section hierarchy
+\titleformat{\section}
+  {\normalfont\Large\bfseries}
+  {\thesection}
+  {0.75em}
+  {}
+
+\titleformat{\subsection}
+  {\normalfont\large\bfseries}
+  {\thesubsection}
+  {0.75em}
+  {}
+
+\titleformat{\subsubsection}
+  {\normalfont\normalsize\bfseries}
+  {}
+  {0.75em}
+  {}
+
+% Bold run-in paragraph headings
+\titleformat{\paragraph}[runin]
+  {\normalfont\normalsize\bfseries}
+  {}
+  {0.75em}
+  {}
+
+\titlespacing*{\paragraph}
+  {0pt}
+  {1.25\baselineskip}
+  {0.75em}
 
 % Put pages on A4 w/ crop marks
 %\usepackage[a4,center,cam]{crop}

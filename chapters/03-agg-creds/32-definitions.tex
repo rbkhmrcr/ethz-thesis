@@ -25,11 +25,11 @@ aggregate tag-based signature scheme is defined by the following algorithms:
 
 \item $\signature \leftarrow \ATSaggregate(\signature_1, \ldots,
 \signature_n)$: on input signatures $\signature_1,\ldots,\signature_n$ (all
-under the same} tag $\tau$), output aggregate signature $\signature$.
+under the same tag $\tau$), output aggregate signature $\signature$.
 
-\item $\{0,1\} \leftarrow \ATSverifyagg((\pk_i)_{i\in [1 \isep n]}, \tau,
-  (\msg_i)_{i\in [1 \isep n]}, \signature)$: on input public keys
-  $(\pk_i)_{i\in [1 \isep n]}$, tag $\tau$, messages $(\msg_i)_{i\in [1 \isep
+\item $\{0,1\} \leftarrow \ATSverifyagg((\pk_i)_{i\in [1 , n]}, \tau,
+  (\msg_i)_{i\in [1 , n]}, \signature)$: on input public keys
+  $(\pk_i)_{i\in [1 , n]}$, tag $\tau$, messages $(\msg_i)_{i\in [1 ,
   n]}$, and aggregate signature $\signature$, return 0 or 1.
 
 \end{itemize}
@@ -41,14 +41,14 @@ existentially unforgeability, as defined below.
   security parameters $\secparam$, all $n \geq 1$, all tags $\tau \in
   \{0,1\}^*$, and all messages $\msg_i \in \{0,1\}^*$, the following holds.
 
-  Let $\ind \subseteq [1 \isep n]$. For all $i \in \ind$, sample $(\sk_i,
+  Let $\ISSUERS \subseteq [1 , n]$. For all $i \in \ISSUERS$, sample $(\sk_i,
   \pk_i) \gets \ATSgen(\secparam)$ and let $\signature_i \gets \ATSsign(\sk_i,
   \tau, \msg_i)$.  Then $\signature$ is produced as follows: $$ \signature
-  \gets \ATSaggregate((\signature_i)_{i \in \ind}).$$
+  \gets \ATSaggregate((\signature_i)_{i \in \ISSUERS}).$$
 
-  Then we have the following: $$ \forall i \in \ind : \ATSverify(\pk_i, \tau,
+  Then we have the following: $$ \forall i \in \ISSUERS : \ATSverify(\pk_i, \tau,
   \msg_i, \signature_i) = 1 \ \ \land \ \ \ATSverifyagg\bigl((\pk_i)_{i \in
-  \ind}, \tau, (\msg_i)_{i \in \ind}, \signature\bigr) = 1.$$
+  \ISSUERS}, \tau, (\msg_i)_{i \in \ISSUERS}, \signature\bigr) = 1.$$
 
 Randomisation also preserves validity, meaning that for all $\signature'
 \leftarrow \ATSrandomise(\tau, \signature)$ and $\ATSverify(\pk, \tau, \msg,
@@ -89,17 +89,17 @@ parameter $\secparam$.  \end{definition}
 
             \begin{itemize}
 
-              \item $(\ind \subseteq [1 \isep n], (\pk_i)_{i \in \ind}, \tau,
-                (\msg_i)_{i \in \ind}, \signature) \gets
+              \item $(\ISSUERS \subseteq [1, n], (\pk_i)_{i \in \ISSUERS}, \tau,
+                (\msg_i)_{i \in \ISSUERS}, \signature) \gets
                 \adv^{\Sign,\Corrupt}(\pk);$
 
-              \item $b \gets \ATSverifyagg\bigl((\pk_i)_{i \in \ind}, \tau,
-                (\msg_i)_{i \in \ind}, \signature\bigr).$
+              \item $b \gets \ATSverifyagg\bigl((\pk_i)_{i \in \ISSUERS}, \tau,
+                (\msg_i)_{i \in \ISSUERS}, \signature\bigr).$
 
             \end{itemize}
 
         $\adv$ wins the experiment if and only if $b = 1  \ \ \land \ \exists
-    \ i \in \ind : \pk_i \notin \Cor \ \ \land \ \  (\pk_i, \tau, \msg_i)
+    \ i \in \ISSUERS : \pk_i \notin \Cor \ \ \land \ \  (\pk_i, \tau, \msg_i)
 \notin \Query.$ } \end{minipage} \end{framed} \caption{Definition of the
   oracles available to the adversary and the experiment for Existential
 Unforgeability Under Tag Based Aggregation.} \label{fig:exp} \end{figure}

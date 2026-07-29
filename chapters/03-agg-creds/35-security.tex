@@ -54,8 +54,8 @@ checks succeed, then $\F{\ATS}$ refers to $\simu$ and returns what $\simu$
 returns; otherwise, it records the presentation, flags it as invalid, and
 outputs false.
 
-\noindent \sf{register}. On input \sf{register} from user the user, send
-$(\sf{register}, user)$ to the registration authority and wait for its
+\paragraph{Register}. On input register from the user, send
+$(register, user)$ to the registration authority and wait for its
 confirmation.  Upon receiving the confirmation, do the following:
 
 \begin{enumerate}
@@ -63,7 +63,7 @@ confirmation.  Upon receiving the confirmation, do the following:
 \item If $\creds[\user] \not\rightarrow \nil$, then abort; else continue.  (a
 user can be registered only once})
 
-\item Send $(\sf{register}, \user)$ to \simu and wait for the go-ahead; on
+\item Send $(register, \user)$ to \simu and wait for the go-ahead; on
   receiving the go-ahead continue.
 
 \item Set $\creds[\user] \leftarrow [\varnothing, \ldots, \varnothing]$
@@ -74,7 +74,7 @@ user can be registered only once})
 
 \end{enumerate}
 
-\noindent \issuecred. On input $(\issuecred, \att{i},\atv{i})$ from the user,
+\paragraph{Issuance}. On input $(\issuecred, \att{i},\atv{i})$ from the user,
 with $\atv{i}$ being value of attribute $\att{i}$, send $(\issuecred, \user,
 \atv{i})$ to issuer $\issuer{i}$ associated with $\att{i}$ and wait for its
 confirmation.  Upon confirmation, do:
@@ -112,7 +112,7 @@ honest issuer will issue at most one valid credential per user.)}
 \item Return $(\issueend, \att{i}, \atv{i})$ to \user and $(\issueend, \user,
 \atv{i})$ to $\issuer{i}$.  \end{enumerate}
 
-\noindent \sf{aggregate}. On input $(\sf{aggregate}, \vec{\atv{}})$ from the
+\paragraph{Aggregate}. On input $(aggregate, \vec{\atv{}})$ from the
 user , where $\vec{\atv{}} = (\atv{1}, ..., \atv{N})$ and $\atv{i} \in
 \{\varnothing\} \cup \{0, 1\}^*$, do:
 
@@ -136,7 +136,7 @@ corresponding credentials.)}
 
 \end{enumerate}
 
-\noindent \present. On input $(\present, \vec{\atv{}}, \signature, \rand)$ from
+\paragraph{Present.} On input $(\present, \vec{\atv{}}, \signature, \rand)$ from
 the user , where $\vec{\atv{}} = (\atv{1}, ..., \atv{N})$ s.t. $\atv{i} =
 \varnothing$ if $\atv{i}$ is not disclosed, do:
 
@@ -174,7 +174,7 @@ sign messages even if they did not call \sf{aggregate} before.)}
 
 \end{enumerate}
 
-\noindent \verif. Upon receiving message $(\verif, \vec{\atv{}}, \msg, \proof)$
+\paragraph{Verification.} Upon receiving message $(\verif, \vec{\atv{}}, \msg, \proof)$
 from a verifier, do:
 
 \begin{enumerate}
@@ -186,10 +186,10 @@ from a verifier, do:
 
     \begin{enumerate}
 
-    \item Return $(\verifend, \true)$ to the verifier.  (Completeness.)}
-            %
+    \item Return $(\verifend, 1)$ to the verifier.  (Completeness.)}
+            
   \item Send $(\verifend, \verifr, \vec{\atv{}}, \msg, \proof, \allowbreak
-\true)$ to \simu.  \end{enumerate}
+1)$ to \simu.  \end{enumerate}
 
 \item Else if $\proven[\vec{\atv{}}, \msg, \proof] \rightarrow \nil$, then:
 
@@ -200,10 +200,10 @@ from a verifier, do:
       \atv{i} \neq \varnothing$, we either have $\atv{i} = \atvprime{i}$, or
       have $\atv{i} \neq \atvprime{i}$ but issuer $\issuer{i}$ is dishonest,
       then query \simu with $(\verif, \vec{\atv{}}, \msg,\proof)$. On receiving
-      the response $(\verifend, \bool)$, do: \begin{enumerate} \item Set
-        $\proven[\vec{\atv{}}, \msg, \proof] \leftarrow \bool$.
+      the response $(\verifend, b)$, do: \begin{enumerate} \item Set
+        $\proven[\vec{\atv{}}, \msg, \proof] \leftarrow b$.
 
-        \item Return $(\verifend, \bool)$ to $\verifr$.
+        \item Return $(\verifend, b)$ to $\verifr$.
 
       \end{enumerate}
 
@@ -213,10 +213,10 @@ from a verifier, do:
 
         \item Set $\proven[\vec{\atv{}}, \msg, \proof] \leftarrow \invalid$.
 
-      \item Return $(\verifend, \false)$ to $\verifr$. (Unforgeability.)}
+      \item Return $(\verifend, 0)$ to $\verifr$. (Unforgeability.)}
 
       \item Send $(\verifend, \verifr, \vec{\atv{}}, \msg, \proof,\allowbreak
-        \false)$ to \simu.
+        0)$ to \simu.
 
     \end{enumerate}
 
@@ -225,8 +225,8 @@ from a verifier, do:
 \end{enumerate}
 
 We assume there are $N$ issuers in the system, so the system supports $N$
-attributes.  When $\F{\ATS}$ is called through $\sf{aggregate}$, $\present$, or
-$\verif$, it receives vector $\vec{\atv{}} = (\atv{1}, \ldots, \atv{N})$  such
+attributes.  When $\F{\ATS}$ is called through aggregate, present, or
+verify, it receives vector $\vec{\atv{}} = (\atv{1}, \ldots, \atv{N})$  such
 that $\atv{i} = \varnothing$ or $\atv{i} \in \{0, 1\}^*$.  We remark that
 $\atv{i} = \varnothing$ indicates that the value of attribute $\attr_{i}$ will
 be hidden during credential presentation, whereas $\atv{i} \neq  \varnothing$
@@ -253,24 +253,24 @@ parameter, and $\approx_c$ denotes computational indistinguishability.
   In the following, we show that the view of a real-world adversary $\adv$
   during an execution of $\Pi$ is indistinguishable from the view of an
   ideal-world simulator $\simu$ that interacts with system participants through
-  ideal functionality \(\F{\ATS}\).  We define a sequence of indistinguishable
+  ideal functionality $\F{\ATS}$.  We define a sequence of indistinguishable
   games that start with Game 0 representing the real world, and end with Game 8
   representing the ideal world.
 
-  \paragraph{Game 0.} This is the real-world execution of protocol \(\Pi\).
+  \paragraph{Game 0.} This is the real-world execution of protocol $\Pi$.
 
-  \paragraph{Game 1.} The simulator \(\simu\) executes real-world protocol
+  \paragraph{Game 1.} The simulator $\simu$ executes real-world protocol
   $\Pi$ on behalf of the honest parties.  That is, $\simu$ is provided with the
-  inputs (including secrets) of the honest parties, and at their behest,
-  interacts with corrupt parties (i.e., adversary \adv), in the real-world,
+  inputs (including secrets) of the honest parties, and
+  interacts with corrupt parties, through the adversary, in the real-world,
   following $\Pi$'s specifications, and returns the corresponding output.  Game
   1 is by construction indistinguishable from Game 0.
 
   \paragraph{Game 2.} We introduce dummy functionality $\F{\ATS}'$ that
-  forwards the inputs from the honest parties to \(\simu\) and returns the
+  forwards the inputs from the honest parties to $\simu$ and returns the
   respective outputs.  This modification is syntactic.
 
-  \paragraph{Game 3.} In this game, $\F{\ATS}'$ handles \register calls from
+  \paragraph{Game 3.} In this game, $\F{\ATS}'$ handles register calls from
   honest users following the description of ideal functionality $\F{\ATS}$.
   $\simu$ first assigns each honest user a key pair $(\sk, \pk)$.  Now, when an
   honest user $\user$ calls $\F{\ATS}'$ to register, $\simu$ learns the user's
@@ -290,9 +290,9 @@ parameter, and $\approx_c$ denotes computational indistinguishability.
   functionality $\F{\ATS}$.  When  $\F{\ATS}'$ receives issuance request
   $(\issue, \att{i}, \atv{i})$ from honest user $\user$, $\simu$ learns the
   triple $(\user, \att{i}, \atv{i})$.  To simulate the corresponding credential
-  issuance for $\user$ in the real world, $\simu$ retrieves  $(\sk, \pk)$ and
+  issuance for $\user$ in the real world, $\simu$ retrieves $(\sk, \pk)$ and
   $(\tau, \psi)$.  If the pair $(\tau, \psi)$ for $\user$ does not exist (i.e.,
-  $\user$ did not call \register before), then \simu aborts; otherwise, it
+  $\user$ did not call register before), then \simu aborts; otherwise, it
   honestly executes $\Pi$ with issuer $\issuer{i}$.  There are two cases to
   consider.
 
@@ -307,7 +307,7 @@ parameter, and $\approx_c$ denotes computational indistinguishability.
 
     \item $\issuer{i}$ is corrupt.  If the execution of $\Pi$ terminates with
       $\simu$ receiving signature $\signature_i : \ATSverify(\ipk{i}, \tau,
-      \atv{i}, \signature_i) \rightarrow 1$, then $\simu$ records entry
+      \atv{i}, \signature_i) = 1$, then $\simu$ records entry
       $\langle \user, \tau, \atv{i}, \signature_i \rangle$, and sends \accept.
 
   \end{enumerate}
@@ -319,9 +319,9 @@ parameter, and $\approx_c$ denotes computational indistinguishability.
   the issuer matches that of $\F{\ATS}'$ if the latter processes the credential
   request instead.  We also recall that when $\F{\ATS}'$ receives a  credential
   issuance request involving a dishonest issuer, $\F{\ATS}'$ follows $\simu$
-  instructions.  That is, if $\simu$ sends \accept, then $\F{\ATS}'$ accepts
+  instructions.  That is, if $\simu$ sends accept, then $\F{\ATS}'$ accepts
   the request and updates the credential map accordingly; otherwise,
-  $\F{\ATS}'$ just rejects.  Since $\simu$ sends \accept only if the dishonest
+  $\F{\ATS}'$ just rejects.  Since $\simu$ sends accept only if the dishonest
   issuer outputs a valid aggregate signature, then the output of the dishonest
   issuer in the real world is equivalent to the output of $\F{\ATS}'$.
   Therefore, this game is indistinguishable from Game 4 as long as $\simu$ does
@@ -343,8 +343,8 @@ parameter, and $\approx_c$ denotes computational indistinguishability.
   for $\vec{\atv{}} = (\atv{1}, \ldots, \atv{N})$, $\simu$ defines  $\inst =
   (\pk, (\ipk{i}, \atv{i})_{i \in \ind})$ such that $\forall i \in \ind:
   \atv{i} \neq \varnothing$, and outputs $\proof^{\star} \leftarrow
-  \soksimsign(\td, \inst, \msg, \crs)$, which yields $\sokverify(\inst,
-  \proof^{\star}, \crs)$ to return $\true$.
+  \soksimsign(\td, \inst, \msg, \crs)$, which gives $\sokverify(\inst,
+  \proof^{\star}, \crs) = 1$.
 
   \paragraph{Game 7.} In this game, $\F{\ATS}'$ processes verification requests
   from honest verifiers following the description of $\F{\ATS}$, whereas
@@ -355,12 +355,12 @@ parameter, and $\approx_c$ denotes computational indistinguishability.
   In the following, we describe $\simu$'s simulation.
 
   \paragraph{Registration.} For each registration request $\pk$ that a corrupt
-  user $\user$ sends, in the real world, to the honest registration authority
-  $\RA$, $\simu$ (acting as $\RA$) first checks if $\user$ knows the secret key
-  $\usk$ underlying $\pk$.  If not, then $\simu$ stops.  Otherwise, it executes
+  user sends, in the real world, to the honest registration authority, $\simu$ 
+  (acting as $\RA$) first checks if the user knows the secret key
+  $\sk$ underlying $\pk$.  If not, then $\simu$ stops.  Otherwise, it executes
   the rest of the registration protocol, records entry $\langle\user, \tau,
   \pk, \psi \rangle$, and then (acting as a user) transmits the corresponding
-  registration request $\register$ to $\F{\ATS}'$ which processes it in a
+  registration request $register$ to $\F{\ATS}'$ which processes it in a
   similar fashion to $\F{\ATS}$.
 
   As per the specifications of $\Pi$, the simulated $\RA$ in the real world
@@ -368,8 +368,8 @@ parameter, and $\approx_c$ denotes computational indistinguishability.
   and vice versa.  Therefore the output of $\Pi$ and the output of $\F{\ATS}'$
   when processing registration requests is indistinguishable.
 
-  \paragraph{Credential Issuance.} For each issuance request \((\tau, \pk,
-  \psi, \atv{i})\) that a corrupt user $\user$ sends, in the real world, to an
+  \paragraph{Credential Issuance.} For each issuance request $(\tau, \pk,
+  \psi, \atv{i})$ that a corrupt user $\user$ sends, in the real world, to an
   honest issuer $\issuer{i}$ (simulated by $\simu$), $\simu$ (acting as
   $\user$) sends $(\issue, \att{i}, \atv{i})$ to $\F{\ATS}'$.  We recall that
   if $\user$ is not registered or if this is not the first time that $\user$
@@ -383,30 +383,30 @@ parameter, and $\approx_c$ denotes computational indistinguishability.
 
   \paragraph{Signature Verification.} For each signature $(\vec{\atv{}} =
   (\atv{1}, ..., \atv{N}), \msg, \proof)$ that a user $\user$ presents, in the
-  real world, to an honest verifier $V$, $\simu$ (simulating $V$) calls $\bool
+  real world, to an honest verifier $V$, $\simu$ (simulating $V$) calls $b
   \leftarrow \sokverify(\crs, \vec{\atv{}}, \msg, \proof)$.  We recall that
   $\atv{i} = \varnothing$ if the attribute value is not disclosed.
 
-  If $\bool  = \false$,  $\simu$ sends $(\msg, \vec{\atv{}} = (\atv{1}, ...,
-  \atv{N}), \proof)$ to $\F{\ATS}'$, which returns $(\verifend, \bool^\star)$.
-  Two scenarios present themselves.  {\bf (1)} There exists a dishonest user
-  with attribute values $\vec{\atvprime{}} = (\atvprime{1}, ..., \atvprime{N})$
-  s.t.  $\forall \atv{i} \neq \varnothing$, we either have $\atv{i} =
+  If $b  = 0$,  $\simu$ sends $(\msg, \vec{\atv{}} = (\atv{1}, ...,
+  \atv{N}), \proof)$ to $\F{\ATS}'$, which returns $(\verifend, b^\star)$.
+  Two scenarios present themselves. Either rhere exists a dishonest user
+  with attribute values $\vec{\atvprime{}} = (\atvprime{1}, ..., \atvprime{N})$,
+   $\forall \atv{i} \neq \varnothing$, we either have $\atv{i} =
   \atvprime{i}$, or have $\atv{i} \neq \atvprime{i}$ but issuer $\issuer{i}$ is
-  dishonest.  {\bf (2)} $\forall i: \atv{i} \neq \varnothing$, issuers
+  dishonest.  Or $\forall i: \atv{i} \neq \varnothing$, issuers
   $\issuer{i}$ and users holding attribute values $\atv{i}$ are honest.
 
-  In case of scenario {\bf (1)}, the output of $\F{\ATS}'$ is defined by
-  $\simu$, which instructs $\F{\ATS}'$ to return $(\verifend, \false)$.  In
-  case of scenario {\bf (2)}, $\F{\ATS}'$ outputs $(\verifend, \true)$.
+  In case of scenario one, the output of $\F{\ATS}'$ is defined by
+  $\simu$, which instructs $\F{\ATS}'$ to return $(\verifend, 0)$.  In
+  case of scenario two, $\F{\ATS}'$ outputs $(\verifend, 1)$.
   However, thanks to the correctness of protocol $\Pi$ this scenario never
   occurs.  That is, given a signature of knowledge $\proof$ that was computed
-  honestly,  $\sokverify$ will never output $\false$.  Thus, the output of
+  honestly,  $\sokverify$ will never output $0$.  Thus, the output of
   $\F{\ATS}'$ matches that of $\Pi$.
 
-  If $\bool = \true$, then thanks to the extractability property of the
+  If $b = 1$, then thanks to the extractability property of the
   signature of knowledge $\sok$, $\simu$ extracts witness $\witness = (\tau,
-  \usk, \pk, \psi, \signature)$  and then executes the following steps:
+  \sk, \pk, \psi, \signature)$  and then executes the following steps:
 
   \begin{itemize}
 
@@ -431,33 +431,41 @@ parameter, and $\approx_c$ denotes computational indistinguishability.
 
       \end{itemize}
 
-      As a result, $\simu$ receives $(\verifend, \bool)$ and outputs $\bool$ in
+      As a result, $\simu$ receives $(\verifend, b)$ and outputs $b$ in
       turn.
 
   \end{itemize}
 
-  In what follows, we show that if $\simu$ does not abort, then $\bool =
-  \true$.
+  In what follows, we show that if $\simu$ does not abort, then $b =
+  1$.
 
   We call the two abort events $\abort{1}$ and $\abort{2}$.  If $\abort{1}$
   does not occur, then this implies that a registration request for $\user$ was
   successfully processed by $\simu$ and therefore $\user$ was successfully
   registered by $\F{\ATS}$.  If $\abort{2}$ does not occur then this implies
-  one of two things: {\bf (1)} $\forall i : \atv{i} \neq \varnothing$, there
-  exists an entry $\langle \star, \tau, \atv{i}, \star \rangle$; or {\bf (2)}
+  one of two things: 
+  
+case one $\forall i : \atv{i} \neq \varnothing$, there
+  exists an entry $\langle \star, \tau, \atv{i}, \star \rangle$; 
+  
+case two 
   $\exists j: \atv{j} \neq \varnothing$ such that there is no recorded entry
   $\langle \star, \tau, \atv{j}, \star \rangle$ but issuer $\issuer{j}$ is
-  dishonest.  {\bf (1)} implies that $\simu$ issued credentials for $\user$ for
+  dishonest.  
+  
+case one implies that $\simu$ issued credentials for $\user$ for
   the relevant attributes, and so did $\F{\ATS}'$.  Therefore, during the
   $\present$ call, $\F{\ATS}'$ will not abort and will return $(\presentend,
   \proof^{\star})$, and the subsequent call $(\verif, V, \vec{\atv{}},
-  \proof^{\star})$ will result in $\F{\ATS}'$ returning $(\verifend, \true)$.
-  This matches the output of the verification in the real world.  {\bf (2)}
+  \proof^{\star})$ will result in $\F{\ATS}'$ returning $(\verifend, 1)$.
+  This matches the output of the verification in the real world.  
+  
+case two 
   implies that $\user$ is in possession of a credential that was issued by a
   dishonest issuer and never recorded by either $\simu$ or $\F{\ATS}'$.  In
   this case,  $\F'{}$ aborts during $\present$, and when $\simu$ calls
   $\F{\ATS}'$ with  $(\verif, V, \vec{\atv{}}, \proof)$, the output of
-  $\F{\ATS}'$ is dictated by $\simu$.  $\simu$ sets this output to $\true$ to
+  $\F{\ATS}'$ is dictated by $\simu$.  $\simu$ sets this output to $1$ to
   match the output of the verification in the real world.
 
   Therefore, this game is indistinguishable from Game 6 as long as $\abort{1}$
@@ -469,16 +477,16 @@ parameter, and $\approx_c$ denotes computational indistinguishability.
   $\abort{1}$ occurs if there is no recorded entry $\langle \star, \tau, \pk,
   \star \rangle$ in the system.  Again due to extraction of the verifying
   signature of knowledge $\proof$, we can extract witness $\witness = (\tau,
-  \usk, \pk, \psi, \signature)$.  This means that $\user$ has knowledge of a
+  \sk, \pk, \psi, \signature)$.  This means that $\user$ has knowledge of a
   valid $\psi$ such that $1 \leftarrow \DSverify(\pk, \pk \| \tau, \psi)$ with
   no corresponding entry, contradicting the existential unforgeability of the
   digital signature scheme $\DS$.
 
-  $\abort{2}$ occurs if  $\exists j \in [1\isep N]$ such that $\atv{j} \neq
+  $\abort{2}$ occurs if $\exists j \in [1\isep N]$ such that $\atv{j} \neq
   \varnothing$ and $\issuer{j}$ is honest, and there is no recorded entry
   $\langle \star, \tau, \atv{j}, \star \rangle$.  Again, due to extraction of
   the correctly verifying signature of knowledge $\proof$, we can extract a
-  valid witness $\witness = (\tau, \usk, \pk, \psi, \signature)$.  This means
+  valid witness $\witness = (\tau, \sk, \pk, \psi, \signature)$.  This means
   that $\signature$ satisfies $\ATSverifyagg((\ipk{i})_{i\in \ind}, \tau,
   (\atv{i})_{i\in\ind}, \signature)$, where $\ind$ identifies the indices s.t.
   $\atv{i} \neq \varnothing$ and $j \in \ind$.  Given that there is no recorded
