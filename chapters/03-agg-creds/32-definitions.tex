@@ -1,383 +1,117 @@
 \section{Definitions}
-% %
-% % We formalise the security of anonymous aggregate credentials following the
-% % ideal world paradigm, using a simulation based definition.  In the ideal world,
-% % we find a functionality $\F{\ATS}$, which by construction, captures the desired
-% % security and privacy properties of anonymous aggregate credentials, together
-% % with a simulator $\simu$ that controls a subset of issuers, users, and
-% % verifiers.  On the other hand, in the real world, we find a candidate protocol
-% % $\Pi$ and an adversary $\adv$ that controls the same subset of system
-% % participants as $\simu$, and can instruct them to behave arbitrarily.  We use
-% % the real ideal world paradigm to capture all interactions between issuers,
-% % users, and verifiers in one instance. We consider a static corruption model
-% % that allows the simulator $\simu$ (and adversary $\adv$) to corrupt any number
-% % of issuers, users and verifiers but before any calls to $\F{\ATS}$'s interfaces
-% % (or $\Pi$'s functions) take place.  We note that since the registration
-% % authority is honest but curious, $\simu$ will not corrupt it. It will be given
-% % access to any information that the registration authority learns during its
-% % interactions with various system participants.
-% %
-% % \paragraph{Ideal Functionality $\F{\ATS}$.} The ideal functionality represents
-% % a trusted third party, which executes the operations of aggregate anonymous
-% % credentials on behalf of system participants in a way that perfectly meets the
-% % system requirements.  $\F{\ATS}$ receives inputs from the system participants
-% % and simulator $\simu$ and correctly generate the corresponding outputs, which
-% % are then transmitted to the parties authorised to access them.  $\F{\ATS}$
-% % exposes five interfaces: register, issue, verify. $\simu$ and honest system
-% % participants submit their inputs through these interfaces.
-% %
-% % At a high level, the ideal functionality captures the properties of aggregate
-% % anonymous credentials: unforgeability, unlinkability, and aggregatability.
-% % Unforgeability is enforced by ensuring that only validly issued attributes can
-% % be successfully presented or verified. Unlinkability is achieved as randomness
-% % is returned in each query to present, which prevents presentations from being
-% % correlated. Aggregation occurs through calling the $\ATSaggregate$ interface.
-% %
-% % \paragraph{Register.} This is called by a user to register into the system.  If
-% % the registration authority accepts, and the user has never been registered
-% % before, the user is successfully registered.
-% %
-% % \paragraph{Issuance.} This is invoked when a user wants to get a credential
-% % that certifies value $\atv{}$ of some attribute $\att{}$.  If the authorised
-% % issuer accepts the issuance request, the user obtains a credential that they
-% % can use in subsequent presentations.
-% %
-% % During a call, $\simu$ learns the identity of the user. During a call to issue,
-% % $\simu$ additionally learns the value of the user's attribute.
-% %
-% % \paragraph{Aggregation.} This is invoked by a user to aggregate the user's
-% % credentials for attribute values $\vec{\atv{}}$ in a way that enables them to
-% % present the aggregate credential later.  Aggregation is a local operation, and
-% % so $\simu$ does not learn any information during the call.  A successful call
-% % results in the user receiving a random string $\signature$ representing the
-% % aggregate credentials.
-% %
-% % \paragraph{Presentation.} Present is queried by a user to produce a
-% % presentation of attribute values ($\vec{\atv{}}$).  the user 's request
-% % consists of triple $(\vec{\atv{}}, \signature, \rand)$, with $\signature$ the
-% % aggregation of the credentials certifying $\vec{\atv{}}$ and $\rand$ a random
-% % number that identifies this presentation request.  If the user has previously
-% % successfully called aggregate with $\vec{\atv{}}$, then $\F{\ATS}$ accepts the
-% % query. Otherwise, it checks if the user actually holds the $\vec{\atv{}}$.
-% % This captures the fact that even if a corrupt the user does not call aggregate
-% % before calling present, $\F{\ATS}$ may still accept the presentation request as
-% % long as the user has previously received the relevant credentials.  If
-% % $\F{\ATS}$ accepts, then it generates a random string $\proof$; the randomness
-% % of $\proof$ ensures that triple $(\vec{\atv{}}, \msg, \proof)$ discloses no
-% % information about the user  beyond what's revealed by $\vec{\atv{}}$.
-% %
-% % \paragraph{Verification.} Verify is invoked by a verifier to check the validity
-% % of credential presentation $(\vec{\atv{}}, \msg, \proof)$.  If the presentation
-% % has already been produced by a valid present call, then $\F{\ATS}$ accepts and
-% % returns true.  If it has already been flagged as invalid, then $\F{\ATS}$
-% % rejects and returns false.  Finally, if the presentation has never been
-% % received before, then $\F{\ATS}$ verifies whether the presentation could have
-% % been created by corrupt users and issuers.  That is, $\F{\ATS}$ checks if there
-% % are corrupt users that hold all the disclosed attribute values, and if not,
-% % then $\F{\ATS}$ also checks if there are corrupt issuers that can produce valid
-% % credentials for the attribute values not held by corrupt users.  In these
-% % checks succeed, then $\F{\ATS}$ refers to $\simu$ and returns what $\simu$
-% % returns; otherwise, it records the presentation, flags it as invalid, and
-% % outputs false.
-% %
-% % \begin{figure*} \begin{framed}[1.3\textwidth] \small \begin{multicols}{2}
-% %   \noindent \sf{register}. On input \sf{register} from user the user, send
-% %   $(\sf{register}, user)$ to the registration authority and wait for its
-% %   confirmation.  Upon receiving the confirmation, do the following:
-% %
-% %   \begin{enumerate}
-% %
-% %   \item If $\creds[\user] \not\rightarrow \nil$, then abort; else continue.  (a
-% %   user can be registered only once})
-% %
-% % \item Send $(\sf{register}, \user)$ to \simu and wait for the go-ahead; on
-% %   receiving the go-ahead continue.
-% %
-% % \item Set $\creds[\user] \leftarrow [\varnothing, \ldots, \varnothing]$
-% %   ($\creds[\user]$ is an array of length $N$, and $\creds[\user][i]$ is the
-% %   $i^{th}$ element).
-% %
-% % \item Return $\sf{register}end$ to the user .
-% %
-% % \end{enumerate}
-% %
-% % \noindent \issuecred. On input $(\issuecred, \att{i},\atv{i})$ from the user,
-% % with $\atv{i}$ being value of attribute $\att{i}$, send $(\issuecred, \user,
-% % \atv{i})$ to issuer $\issuer{i}$ associated with $\att{i}$ and wait for its
-% % confirmation.  Upon confirmation, do:
-% %
-% % \begin{enumerate}
-% %
-% %   \item If issuer $\issuer{i}$ is honest, then:
-% %
-% %     \begin{enumerate}
-% %
-% %     \item If $\creds[\user] \rightarrow \nil$, then abort; else continue. (An
-% %     honest issuer will only issue credentials to a registered user.)}
-% %
-% % \item If $\creds[\user][i] \neq \varnothing$, then abort; else continue.  (An
-% % honest issuer will issue at most one valid credential per user.)}
-% %
-% % \item Send $(\issue, \user, \att{i}, \atv{i})$ to \simu and wait for the
-% %   go-ahead; on receiving the go ahead, continue.
-% %
-% % \end{enumerate}
-% %
-% % \item Else:
-% %
-% %   \begin{enumerate}
-% %
-% %     \item Send $(\issuecred, \user, \att{i}, \atv{i})$ to $\simu$, and waits
-% %       for its response.
-% %
-% %     \item If $\simu$ sends $\accept$, then continue; else abort.
-% %
-% %   \end{enumerate}
-% %
-% % \item Set $\creds[\user][i] \leftarrow \creds[\user][i] \cup \{\atv{i}\}$.
-% %
-% % \item Return $(\issueend, \att{i}, \atv{i})$ to \user and $(\issueend, \user,
-% % \atv{i})$ to $\issuer{i}$.  \end{enumerate}
-% %
-% % \noindent \sf{aggregate}. On input $(\sf{aggregate}, \vec{\atv{}})$ from the
-% % user , where $\vec{\atv{}} = (\atv{1}, ..., \atv{N})$ and $\atv{i} \in
-% % \{\varnothing\} \cup \{0, 1\}^*$, do:
-% %
-% % \begin{enumerate}
-% %
-% % \item If $\creds[\user] = \nil$, then abort; else continue.  (Unregistered
-% % users cannot successfully aggregate credentials.)}
-% %
-% % \item If $\forall i \in [1 \isep N]: \atv{i} = \varnothing \vee \atv{i} \in
-% %   \creds[\user][i]$, then: \begin{enumerate} \item Randomly generate
-% %     $\signature$.
-% %
-% %   \item Set $\aggcreds[\signature] \leftarrow \langle \user,
-% %   \vec{\atv{}}\rangle$.  \item Return $(\aggend, \signature)$ to the user .
-% % (Users who hold non-empty attribute values successfully aggregate the
-% % corresponding credentials.)}
-% %
-% % \end{enumerate}
-% %
-% % \item Else abort.
-% %
-% % \end{enumerate}
-% %
-% % \noindent \present. On input $(\present, \vec{\atv{}}, \signature, \rand)$ from
-% % the user , where $\vec{\atv{}} = (\atv{1}, ..., \atv{N})$ s.t. $\atv{i} =
-% % \varnothing$ if $\atv{i}$ is not disclosed, do:
-% %
-% % \begin{enumerate}
-% %
-% %   \item If $\aggcreds[\signature] \rightarrow \langle \user,
-% %     \vec{\atv{}}\rangle$, then:
-% %
-% %     \begin{enumerate}
-% %
-% %       \item Randomly generate $\proof$.  \item Set $\proven[\vec{\atv{}}, \msg,
-% %         \proof] \leftarrow \valid$.
-% %
-% %     \item Return $(\presentend, \proof)$ to the user  and $(\presentend,
-% %     \vec{\atv{}}, \msg, \proof)$ to $\simu$.  (Users who successfully
-% %   aggregated their credentials successfully sign messages.)}
-% %
-% % \end{enumerate}
-% %
-% % \item Else if $\creds[\user] = \nil$, then abort; else continue. (Unregistered
-% % users cannot successfully sign messages.)}
-% %
-% % \item If $\forall i \in [1\isep N]: \atv{i} = \varnothing \vee \atv{i} \in
-% %   \creds[\user][i]$, then: \begin{enumerate}
-% %
-% %     \item Randomly generate $\proof$.
-% %
-% %   \item Set $\proven[\vec{\atv{}}, \msg, \proof] \leftarrow \valid$.  \item
-% %   Return $(\presentend,  \proof)$ to the user  and $(\presentend, \vec{\atv{}},
-% % \msg, \proof)$ to $\simu$. (Users with disclosed attribute values successfully
-% % sign messages even if they did not call \sf{aggregate} before.)}
-% % \end{enumerate}
-% %
-% % \item Else abort.
-% %
-% % \end{enumerate}
-% %
-% % \noindent \verif. Upon receiving message $(\verif, \vec{\atv{}}, \msg, \proof)$
-% % from a verifier, do:
-% %
-% % \begin{enumerate}
-% %
-% %   \item If $\proven[\vec{\atv{}}, \msg, \proof] \rightarrow \invalid$, then
-% %     abort.
-% %
-% %   \item Else if $\proven[\vec{\atv{}}, \msg, \proof] \rightarrow \valid$, then:
-% %
-% %     \begin{enumerate}
-% %
-% %     \item Return $(\verifend, \true)$ to the verifier.  (Completeness.)}
-% %             %
-% %   \item Send $(\verifend, \verifr, \vec{\atv{}}, \msg, \proof, \allowbreak
-% % \true)$ to \simu.  \end{enumerate}
-% %
-% % \item Else if $\proven[\vec{\atv{}}, \msg, \proof] \rightarrow \nil$, then:
-% %
-% %   \begin{enumerate}
-% %
-% %     \item If there exists a dishonest user $\user'$ with attribute values
-% %       $\vec{\atvprime{}} = (\atvprime{1}, \ldots, \atvprime{N})$ s.t.  $\forall
-% %       \atv{i} \neq \varnothing$, we either have $\atv{i} = \atvprime{i}$, or
-% %       have $\atv{i} \neq \atvprime{i}$ but issuer $\issuer{i}$ is dishonest,
-% %       then query \simu with $(\verif, \vec{\atv{}}, \msg,\proof)$. On receiving
-% %       the response $(\verifend, \bool)$, do: \begin{enumerate} \item Set
-% %         $\proven[\vec{\atv{}}, \msg, \proof] \leftarrow \bool$.
-% %
-% %         \item Return $(\verifend, \bool)$ to $\verifr$.
-% %
-% %       \end{enumerate}
-% %
-% %     \item Else:
-% %
-% %       \begin{enumerate}
-% %
-% %         \item Set $\proven[\vec{\atv{}}, \msg, \proof] \leftarrow \invalid$.
-% %
-% %       \item Return $(\verifend, \false)$ to $\verifr$. (Unforgeability.)}
-% %
-% %       \item Send $(\verifend, \verifr, \vec{\atv{}}, \msg, \proof,\allowbreak
-% %         \false)$ to \simu.
-% %
-% %     \end{enumerate}
-% %
-% % \end{enumerate}
-% %
-% % \end{enumerate}
-% %
-% % \end{multicols}
-% %
-% % \end{framed} \caption{Ideal functionality \F{} for multi-issuer aggregate
-% % anonymous credentials} \label{fig:func} \end{figure*}
-% %
-% % \Fref{fig:func} describes ideal functionality $\F{\ATS}$.  We assume there are
-% % $N$ issuers in the system. So the system supports $N$ attributes.  When
-% % $\F{\ATS}$ is called through $\sf{aggregate}$, $\present$, or $\verif$, it
-% % receives vector $\vec{\atv{}} = (\atv{1}, \ldots, \atv{N})$  such that $\atv{i}
-% % = \varnothing$ or $\atv{i} \in \{0, 1\}^*$.  We remark that $\atv{i} =
-% % \varnothing$ indicates that the value of attribute $\attr_{i}$ will be hidden
-% % during credential presentation, whereas $\atv{i} \neq  \varnothing$ indicates
-% % that value is disclosed.
-% %
-% % Let  $\textsc{Exec}_{\Pi,\adv}(\secparam)$ denote the outputs of the honest
-% % parties and~$\adv$, during an execution of~$\Pi$ in the real world and
-% % $\textsc{Exec}_{\F{\ATS},\simu}(\secparam)$ denote the outputs of the honest
-% % parties and~$\simu$, interacting with~$\F{\ATS}$ in the ideal world.
-% %
-% % \begin{definition} A protocol~$\Pi$ securely realises} ideal
-% %   functionality~$\F{\ATS}$ in the standalone model if, for every probabilistic
-% %   polynomial time (PPT) adversary~$\adv$, there exists a PPT simulator~$\simu$
-% %   satisfying $\textsc{Exec}_{\Pi,\adv}(\secparam) \approx_c
-% % \textsc{Exec}_{\F{\ATS},\simu}(\secparam)$, where $\secparam$ is the security
-% % parameter, and $\approx_c$ denotes computational indistinguishability.
-% % \end{definition}
-% %
-% % \subsection{Aggregate Tag-Based Signatures (ATS)}
-% %
-% % We define an aggregate tag-based signature scheme as one that allows signatures
-% % computed over the same tag to be aggregated into a compact signature. An
-% % aggregate tag-based signature scheme is defined by the following algorithms:
-% %
-% % \begin{itemize}
-% %
-% %   \item $(\sk, \pk) \leftarrow \ATSgen(\secparam)$: on input security parameter
-% %     $\secparam$, output key pair $(\sk,\pk)$.
-% %
-% %   \item $\signature \leftarrow \ATSsign(\sk, \tau, \msg)$: On input secret key
-% %     $\sk$, tag $\tau \in \{0,1\}^*$, and message $\msg \in \{0,1\}^*$, output
-% %     signature $\signature$.
-% %
-% %   \item $ \signature' \leftarrow \ATSrandomise(\tau, \signature)$: On input tag
-% %     $\tau$ and signature $\signature$, output randomised signature
-% %     $\signature'$.
-% %
-% %   \item $ \{0,1\} \leftarrow \ATSverify(\pk, \tau, \msg, \signature)$: on input
-% %     public key $\pk$, tag $\tau$, message $\msg$, and signature $\signature$,
-% %     return 0 or 1.
-% %
-% % \item $\signature \leftarrow \ATSaggregate(\signature_1, \ldots,
-% % \signature_n)$: on input signatures $\signature_1,\ldots,\signature_n$ (all
-% % under the same} tag $\tau$), output aggregate signature $\signature$.
-% %
-% % \item $\{0,1\} \leftarrow \ATSverifyagg((\pk_i)_{i\in [1 \isep n]}, \tau,
-% %   (\msg_i)_{i\in [1 \isep n]}, \signature)$: on input public keys
-% %   $(\pk_i)_{i\in [1 \isep n]}$, tag $\tau$, messages $(\msg_i)_{i\in [1 \isep
-% %   n]}$, and aggregate signature $\signature$, return 0 or 1.
-% %
-% % \end{itemize}
-% %
-% % An aggregate tag based signature scheme should satisfy correctness and
-% % existentially unforgeability, as defined below.
-% %
-% % \begin{definition}[Correctness] An ATS scheme satisfies correctness if for all
-% %   security parameters $\secparam$, all $n \geq 1$, all tags $\tau \in
-% %   \{0,1\}^*$, and all messages $\msg_i \in \{0,1\}^*$, the following holds.
-% %
-% %   Let $\ind \subseteq [1 \isep n]$. For all $i \in \ind$, sample $(\sk_i,
-% %   \pk_i) \gets \ATSgen(\secparam)$ and let $\signature_i \gets \ATSsign(\sk_i,
-% %   \tau, \msg_i)$.  Then $\signature$ is produced as follows: $$ \signature
-% %   \gets \ATSaggregate((\signature_i)_{i \in \ind}).$$
-% %
-% %   Then we have the following: $$ \forall i \in \ind : \ATSverify(\pk_i, \tau,
-% %   \msg_i, \signature_i) = 1 \ \ \land \ \ \ATSverifyagg\bigl((\pk_i)_{i \in
-% %   \ind}, \tau, (\msg_i)_{i \in \ind}, \signature\bigr) = 1.$$
-% %
-% % Randomisation also preserves validity, meaning that for all $\signature'
-% % \leftarrow \ATSrandomise(\tau, \signature)$ and $\ATSverify(\pk, \tau, \msg,
-% % \signature) = 1$, we also have $\ATSverify(\pk, \tau, \msg, \signature') = 1$
-% % \end{definition}
-% %
-% % \begin{definition}[Existential Unforgeability Under Tag-Based Aggregation] An
-% %   ATS scheme $\ATS$ is existentially unforgeable under tag-based aggregation if
-% %   for any probabilistic polynomial-time adversary $\adv$, with access to
-% %   corruption oracle $\Corrupt$ and signing oracle $\Sign$, the probability that
-% % $\adv$ wins the experiment depicted in \fref{fig:exp} is negligible in security
-% % parameter $\secparam$.  \end{definition}
-% %
-% % \begin{figure}[t] \begin{framed}[1.1\linewidth] \centering
-% %   \begin{minipage}{0.42\linewidth} \parbox{\linewidth}{
-% %       \underline{$\Corrupt(\pk_i)$}\\[0.3em] If $\pk_i \in \pk$, then:
-% %
-% %       \begin{itemize}
-% %
-% %         \item $\Cor \gets \Cor \cup \{\pk_i\}$;
-% %
-% %         \item return $\sk_i$.
-% %
-% %         \end{itemize} } \end{minipage} \hfill \begin{minipage}{0.42\linewidth}
-% %         \parbox{\linewidth}{ \underline{$\Sign(\pk_i, \tau, \msg)$}\\[0.3em] If
-% %           $\pk_i \in \pk$, then:
-% %
-% %           \begin{itemize}
-% %
-% %             \item $\Query \gets \Query \cup \{(\pk_i, \tau, \msg)\}$;
-% %
-% %             \item return $\signature \gets \ATSsign(\sk_i, \tau, \msg)$.
-% %
-% %             \end{itemize} } \end{minipage} \medbreak
-% %             \begin{minipage}{\linewidth} \parbox{\linewidth}{ \underline{{\sc
-% %                 Experiment for Existential Unforgeability Under Tag-Based
-% %             Aggregation}}
-% %
-% %             \begin{itemize}
-% %
-% %               \item $(\ind \subseteq [1 \isep n], (\pk_i)_{i \in \ind}, \tau,
-% %                 (\msg_i)_{i \in \ind}, \signature) \gets
-% %                 \adv^{\Sign,\Corrupt}(\pk);$
-% %
-% %               \item $b \gets \ATSverifyagg\bigl((\pk_i)_{i \in \ind}, \tau,
-% %                 (\msg_i)_{i \in \ind}, \signature\bigr).$
-% %
-% %             \end{itemize}
-% %
-% %         $\adv$ wins the experiment if and only if $b = 1  \ \ \land \ \exists
-% %     \ i \in \ind : \pk_i \notin \Cor \ \ \land \ \  (\pk_i, \tau, \msg_i)
-% % \notin \Query.$ } \end{minipage} \end{framed} \caption{Definition of the
-% %   oracles available to the adversary and the experiment for Existential
-% % Unforgeability Under Tag Based Aggregation.} \label{fig:exp} \end{figure}
+
+\subsection{Aggregate Tag-Based Signatures}
+
+We define an aggregate tag-based signature scheme as one that allows signatures
+computed over the same tag to be aggregated into a compact signature. An
+aggregate tag-based signature scheme is defined by the following algorithms:
+
+\begin{itemize}
+
+  \item $(\sk, \pk) \leftarrow \ATSgen(\secparam)$: on input security parameter
+    $\secparam$, output key pair $(\sk,\pk)$.
+
+  \item $\signature \leftarrow \ATSsign(\sk, \tau, \msg)$: On input secret key
+    $\sk$, tag $\tau \in \{0,1\}^*$, and message $\msg \in \{0,1\}^*$, output
+    signature $\signature$.
+
+  \item $ \signature' \leftarrow \ATSrandomise(\tau, \signature)$: On input tag
+    $\tau$ and signature $\signature$, output randomised signature
+    $\signature'$.
+
+  \item $ \{0,1\} \leftarrow \ATSverify(\pk, \tau, \msg, \signature)$: on input
+    public key $\pk$, tag $\tau$, message $\msg$, and signature $\signature$,
+    return 0 or 1.
+
+\item $\signature \leftarrow \ATSaggregate(\signature_1, \ldots,
+\signature_n)$: on input signatures $\signature_1,\ldots,\signature_n$ (all
+under the same} tag $\tau$), output aggregate signature $\signature$.
+
+\item $\{0,1\} \leftarrow \ATSverifyagg((\pk_i)_{i\in [1 \isep n]}, \tau,
+  (\msg_i)_{i\in [1 \isep n]}, \signature)$: on input public keys
+  $(\pk_i)_{i\in [1 \isep n]}$, tag $\tau$, messages $(\msg_i)_{i\in [1 \isep
+  n]}$, and aggregate signature $\signature$, return 0 or 1.
+
+\end{itemize}
+
+An aggregate tag based signature scheme should satisfy correctness and
+existentially unforgeability, as defined below.
+
+\begin{definition}[Correctness] An ATS scheme satisfies correctness if for all
+  security parameters $\secparam$, all $n \geq 1$, all tags $\tau \in
+  \{0,1\}^*$, and all messages $\msg_i \in \{0,1\}^*$, the following holds.
+
+  Let $\ind \subseteq [1 \isep n]$. For all $i \in \ind$, sample $(\sk_i,
+  \pk_i) \gets \ATSgen(\secparam)$ and let $\signature_i \gets \ATSsign(\sk_i,
+  \tau, \msg_i)$.  Then $\signature$ is produced as follows: $$ \signature
+  \gets \ATSaggregate((\signature_i)_{i \in \ind}).$$
+
+  Then we have the following: $$ \forall i \in \ind : \ATSverify(\pk_i, \tau,
+  \msg_i, \signature_i) = 1 \ \ \land \ \ \ATSverifyagg\bigl((\pk_i)_{i \in
+  \ind}, \tau, (\msg_i)_{i \in \ind}, \signature\bigr) = 1.$$
+
+Randomisation also preserves validity, meaning that for all $\signature'
+\leftarrow \ATSrandomise(\tau, \signature)$ and $\ATSverify(\pk, \tau, \msg,
+\signature) = 1$, we also have $\ATSverify(\pk, \tau, \msg, \signature') = 1$
+\end{definition}
+
+\begin{definition}[Existential Unforgeability Under Tag-Based Aggregation] An
+  ATS scheme $\ATS$ is existentially unforgeable under tag-based aggregation if
+  for any probabilistic polynomial-time adversary $\adv$, with access to
+  corruption oracle $\Corrupt$ and signing oracle $\Sign$, the probability that
+$\adv$ wins the experiment depicted in \fref{fig:exp} is negligible in security
+parameter $\secparam$.  \end{definition}
+
+\begin{figure}[t] \begin{framed}[1.1\linewidth] \centering
+  \begin{minipage}{0.42\linewidth} \parbox{\linewidth}{
+      \underline{$\Corrupt(\pk_i)$}\\[0.3em] If $\pk_i \in \pk$, then:
+
+      \begin{itemize}
+
+        \item $\Cor \gets \Cor \cup \{\pk_i\}$;
+
+        \item return $\sk_i$.
+
+        \end{itemize} } \end{minipage} \hfill \begin{minipage}{0.42\linewidth}
+        \parbox{\linewidth}{ \underline{$\Sign(\pk_i, \tau, \msg)$}\\[0.3em] If
+          $\pk_i \in \pk$, then:
+
+          \begin{itemize}
+
+            \item $\Query \gets \Query \cup \{(\pk_i, \tau, \msg)\}$;
+
+            \item return $\signature \gets \ATSsign(\sk_i, \tau, \msg)$.
+
+            \end{itemize} } \end{minipage} \medbreak
+            \begin{minipage}{\linewidth} \parbox{\linewidth}{ \underline{{\sc
+                Experiment for Existential Unforgeability Under Tag-Based
+            Aggregation}}
+
+            \begin{itemize}
+
+              \item $(\ind \subseteq [1 \isep n], (\pk_i)_{i \in \ind}, \tau,
+                (\msg_i)_{i \in \ind}, \signature) \gets
+                \adv^{\Sign,\Corrupt}(\pk);$
+
+              \item $b \gets \ATSverifyagg\bigl((\pk_i)_{i \in \ind}, \tau,
+                (\msg_i)_{i \in \ind}, \signature\bigr).$
+
+            \end{itemize}
+
+        $\adv$ wins the experiment if and only if $b = 1  \ \ \land \ \exists
+    \ i \in \ind : \pk_i \notin \Cor \ \ \land \ \  (\pk_i, \tau, \msg_i)
+\notin \Query.$ } \end{minipage} \end{framed} \caption{Definition of the
+  oracles available to the adversary and the experiment for Existential
+Unforgeability Under Tag Based Aggregation.} \label{fig:exp} \end{figure}
+
+We define security of the scheme through an ideal functionality that represents
+a trusted third party, which executes the operations of aggregate anonymous
+credentials on behalf of system participants in a way that perfectly meets the
+system requirements.
+
+The ideal functionality captures the properties of aggregate
+anonymous credentials: unforgeability, unlinkability, and aggregatability.
+Unforgeability is enforced by ensuring that only validly issued attributes can
+be successfully presented or verified. Unlinkability is achieved as randomness
+is returned in each query to present, which prevents presentations from being
+correlated.

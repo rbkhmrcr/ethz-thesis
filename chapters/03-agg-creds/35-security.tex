@@ -1,1 +1,731 @@
-\section{Security arguments}
+\section{Security}
+
+\subsection{Ideal Functionality $\F{\ATS}$.} $\F{\ATS}$ receives inputs from
+the system participants and simulator $\simu$ and correctly generate the
+corresponding outputs, which are then transmitted to the parties authorised to
+access them.  $\F{\ATS}$ exposes five interfaces: register, issue, verify.
+$\simu$ and honest system participants submit their inputs through these
+interfaces.
+
+\paragraph{Register.} This is called by a user to register into the system.  If
+the registration authority accepts, and the user has never been registered
+before, the user is successfully registered.
+
+\paragraph{Issuance.} This is invoked when a user wants to get a credential
+that certifies value $\atv{}$ of some attribute $\att{}$.  If the authorised
+issuer accepts the issuance request, the user obtains a credential that they
+can use in subsequent presentations.
+
+During a call, $\simu$ learns the identity of the user. During a call to issue,
+$\simu$ additionally learns the value of the user's attribute.
+
+\paragraph{Aggregation.} This is invoked by a user to aggregate the user's
+credentials for attribute values $\vec{\atv{}}$ in a way that enables them to
+present the aggregate credential later.  Aggregation is a local operation, and
+so $\simu$ does not learn any information during the call.  A successful call
+results in the user receiving a random string $\signature$ representing the
+aggregate credentials.
+
+\paragraph{Presentation.} Present is queried by a user to produce a
+presentation of attribute values ($\vec{\atv{}}$).  the user 's request
+consists of triple $(\vec{\atv{}}, \signature, \rand)$, with $\signature$ the
+aggregation of the credentials certifying $\vec{\atv{}}$ and $\rand$ a random
+number that identifies this presentation request.  If the user has previously
+successfully called aggregate with $\vec{\atv{}}$, then $\F{\ATS}$ accepts the
+query. Otherwise, it checks if the user actually holds the $\vec{\atv{}}$.
+This captures the fact that even if a corrupt the user does not call aggregate
+before calling present, $\F{\ATS}$ may still accept the presentation request as
+long as the user has previously received the relevant credentials.  If
+$\F{\ATS}$ accepts, then it generates a random string $\proof$; the randomness
+of $\proof$ ensures that triple $(\vec{\atv{}}, \msg, \proof)$ discloses no
+information about the user  beyond what's revealed by $\vec{\atv{}}$.
+
+\paragraph{Verification.} Verify is invoked by a verifier to check the validity
+of credential presentation $(\vec{\atv{}}, \msg, \proof)$.  If the presentation
+has already been produced by a valid present call, then $\F{\ATS}$ accepts and
+returns true.  If it has already been flagged as invalid, then $\F{\ATS}$
+rejects and returns false.  Finally, if the presentation has never been
+received before, then $\F{\ATS}$ verifies whether the presentation could have
+been created by corrupt users and issuers.  That is, $\F{\ATS}$ checks if there
+are corrupt users that hold all the disclosed attribute values, and if not,
+then $\F{\ATS}$ also checks if there are corrupt issuers that can produce valid
+credentials for the attribute values not held by corrupt users.  In these
+checks succeed, then $\F{\ATS}$ refers to $\simu$ and returns what $\simu$
+returns; otherwise, it records the presentation, flags it as invalid, and
+outputs false.
+
+\noindent \sf{register}. On input \sf{register} from user the user, send
+$(\sf{register}, user)$ to the registration authority and wait for its
+confirmation.  Upon receiving the confirmation, do the following:
+
+\begin{enumerate}
+
+\item If $\creds[\user] \not\rightarrow \nil$, then abort; else continue.  (a
+user can be registered only once})
+
+\item Send $(\sf{register}, \user)$ to \simu and wait for the go-ahead; on
+  receiving the go-ahead continue.
+
+\item Set $\creds[\user] \leftarrow [\varnothing, \ldots, \varnothing]$
+  ($\creds[\user]$ is an array of length $N$, and $\creds[\user][i]$ is the
+  $i^{th}$ element).
+
+\item Return $\sf{register}end$ to the user .
+
+\end{enumerate}
+
+\noindent \issuecred. On input $(\issuecred, \att{i},\atv{i})$ from the user,
+with $\atv{i}$ being value of attribute $\att{i}$, send $(\issuecred, \user,
+\atv{i})$ to issuer $\issuer{i}$ associated with $\att{i}$ and wait for its
+confirmation.  Upon confirmation, do:
+
+\begin{enumerate}
+
+  \item If issuer $\issuer{i}$ is honest, then:
+
+    \begin{enumerate}
+
+    \item If $\creds[\user] \rightarrow \nil$, then abort; else continue. (An
+    honest issuer will only issue credentials to a registered user.)}
+
+\item If $\creds[\user][i] \neq \varnothing$, then abort; else continue.  (An
+honest issuer will issue at most one valid credential per user.)}
+
+\item Send $(\issue, \user, \att{i}, \atv{i})$ to \simu and wait for the
+  go-ahead; on receiving the go ahead, continue.
+
+\end{enumerate}
+
+\item Else:
+
+  \begin{enumerate}
+
+    \item Send $(\issuecred, \user, \att{i}, \atv{i})$ to $\simu$, and waits
+      for its response.
+
+    \item If $\simu$ sends $\accept$, then continue; else abort.
+
+  \end{enumerate}
+
+\item Set $\creds[\user][i] \leftarrow \creds[\user][i] \cup \{\atv{i}\}$.
+
+\item Return $(\issueend, \att{i}, \atv{i})$ to \user and $(\issueend, \user,
+\atv{i})$ to $\issuer{i}$.  \end{enumerate}
+
+\noindent \sf{aggregate}. On input $(\sf{aggregate}, \vec{\atv{}})$ from the
+user , where $\vec{\atv{}} = (\atv{1}, ..., \atv{N})$ and $\atv{i} \in
+\{\varnothing\} \cup \{0, 1\}^*$, do:
+
+\begin{enumerate}
+
+\item If $\creds[\user] = \nil$, then abort; else continue.  (Unregistered
+users cannot successfully aggregate credentials.)}
+
+\item If $\forall i \in [1 \isep N]: \atv{i} = \varnothing \vee \atv{i} \in
+  \creds[\user][i]$, then: \begin{enumerate} \item Randomly generate
+    $\signature$.
+
+  \item Set $\aggcreds[\signature] \leftarrow \langle \user,
+  \vec{\atv{}}\rangle$.  \item Return $(\aggend, \signature)$ to the user .
+(Users who hold non-empty attribute values successfully aggregate the
+corresponding credentials.)}
+
+\end{enumerate}
+
+\item Else abort.
+
+\end{enumerate}
+
+\noindent \present. On input $(\present, \vec{\atv{}}, \signature, \rand)$ from
+the user , where $\vec{\atv{}} = (\atv{1}, ..., \atv{N})$ s.t. $\atv{i} =
+\varnothing$ if $\atv{i}$ is not disclosed, do:
+
+\begin{enumerate}
+
+  \item If $\aggcreds[\signature] \rightarrow \langle \user,
+    \vec{\atv{}}\rangle$, then:
+
+    \begin{enumerate}
+
+      \item Randomly generate $\proof$.  \item Set $\proven[\vec{\atv{}}, \msg,
+        \proof] \leftarrow \valid$.
+
+    \item Return $(\presentend, \proof)$ to the user  and $(\presentend,
+    \vec{\atv{}}, \msg, \proof)$ to $\simu$.  (Users who successfully
+  aggregated their credentials successfully sign messages.)}
+
+\end{enumerate}
+
+\item Else if $\creds[\user] = \nil$, then abort; else continue. (Unregistered
+users cannot successfully sign messages.)}
+
+\item If $\forall i \in [1\isep N]: \atv{i} = \varnothing \vee \atv{i} \in
+  \creds[\user][i]$, then: \begin{enumerate}
+
+    \item Randomly generate $\proof$.
+
+  \item Set $\proven[\vec{\atv{}}, \msg, \proof] \leftarrow \valid$.  \item
+  Return $(\presentend,  \proof)$ to the user  and $(\presentend, \vec{\atv{}},
+\msg, \proof)$ to $\simu$. (Users with disclosed attribute values successfully
+sign messages even if they did not call \sf{aggregate} before.)}
+\end{enumerate}
+
+\item Else abort.
+
+\end{enumerate}
+
+\noindent \verif. Upon receiving message $(\verif, \vec{\atv{}}, \msg, \proof)$
+from a verifier, do:
+
+\begin{enumerate}
+
+  \item If $\proven[\vec{\atv{}}, \msg, \proof] \rightarrow \invalid$, then
+    abort.
+
+  \item Else if $\proven[\vec{\atv{}}, \msg, \proof] \rightarrow \valid$, then:
+
+    \begin{enumerate}
+
+    \item Return $(\verifend, \true)$ to the verifier.  (Completeness.)}
+            %
+  \item Send $(\verifend, \verifr, \vec{\atv{}}, \msg, \proof, \allowbreak
+\true)$ to \simu.  \end{enumerate}
+
+\item Else if $\proven[\vec{\atv{}}, \msg, \proof] \rightarrow \nil$, then:
+
+  \begin{enumerate}
+
+    \item If there exists a dishonest user $\user'$ with attribute values
+      $\vec{\atvprime{}} = (\atvprime{1}, \ldots, \atvprime{N})$ s.t.  $\forall
+      \atv{i} \neq \varnothing$, we either have $\atv{i} = \atvprime{i}$, or
+      have $\atv{i} \neq \atvprime{i}$ but issuer $\issuer{i}$ is dishonest,
+      then query \simu with $(\verif, \vec{\atv{}}, \msg,\proof)$. On receiving
+      the response $(\verifend, \bool)$, do: \begin{enumerate} \item Set
+        $\proven[\vec{\atv{}}, \msg, \proof] \leftarrow \bool$.
+
+        \item Return $(\verifend, \bool)$ to $\verifr$.
+
+      \end{enumerate}
+
+    \item Else:
+
+      \begin{enumerate}
+
+        \item Set $\proven[\vec{\atv{}}, \msg, \proof] \leftarrow \invalid$.
+
+      \item Return $(\verifend, \false)$ to $\verifr$. (Unforgeability.)}
+
+      \item Send $(\verifend, \verifr, \vec{\atv{}}, \msg, \proof,\allowbreak
+        \false)$ to \simu.
+
+    \end{enumerate}
+
+\end{enumerate}
+
+\end{enumerate}
+
+We assume there are $N$ issuers in the system, so the system supports $N$
+attributes.  When $\F{\ATS}$ is called through $\sf{aggregate}$, $\present$, or
+$\verif$, it receives vector $\vec{\atv{}} = (\atv{1}, \ldots, \atv{N})$  such
+that $\atv{i} = \varnothing$ or $\atv{i} \in \{0, 1\}^*$.  We remark that
+$\atv{i} = \varnothing$ indicates that the value of attribute $\attr_{i}$ will
+be hidden during credential presentation, whereas $\atv{i} \neq  \varnothing$
+indicates that value is disclosed.
+
+Let  $\textsc{Exec}_{\Pi,\adv}(\secparam)$ denote the outputs of the honest
+parties and~$\adv$, during an execution of~$\Pi$ in the real world and
+$\textsc{Exec}_{\F{\ATS},\simu}(\secparam)$ denote the outputs of the honest
+parties and~$\simu$, interacting with~$\F{\ATS}$ in the ideal world.
+
+\begin{definition} A protocol~$\Pi$ securely realises ideal
+  functionality~$\F{\ATS}$ in the standalone model if, for every probabilistic
+  polynomial time (PPT) adversary~$\adv$, there exists a PPT simulator~$\simu$
+  satisfying $\textsc{Exec}_{\Pi,\adv}(\secparam) \approx_c
+\textsc{Exec}_{\F{\ATS},\simu}(\secparam)$, where $\secparam$ is the security
+parameter, and $\approx_c$ denotes computational indistinguishability.
+\end{definition}
+
+\subsection{Proof of Theorem \ref{thm:agg-creds-bb-security}}
+\label{sec:proof-1}
+
+\begin{proof}
+
+  In the following, we show that the view of a real-world adversary $\adv$
+  during an execution of $\Pi$ is indistinguishable from the view of an
+  ideal-world simulator $\simu$ that interacts with system participants through
+  ideal functionality \(\F{\ATS}\).  We define a sequence of indistinguishable
+  games that start with Game 0 representing the real world, and end with Game 8
+  representing the ideal world.
+
+  \paragraph{Game 0.} This is the real-world execution of protocol \(\Pi\).
+
+  \paragraph{Game 1.} The simulator \(\simu\) executes real-world protocol
+  $\Pi$ on behalf of the honest parties.  That is, $\simu$ is provided with the
+  inputs (including secrets) of the honest parties, and at their behest,
+  interacts with corrupt parties (i.e., adversary \adv), in the real-world,
+  following $\Pi$'s specifications, and returns the corresponding output.  Game
+  1 is by construction indistinguishable from Game 0.
+
+  \paragraph{Game 2.} We introduce dummy functionality $\F{\ATS}'$ that
+  forwards the inputs from the honest parties to \(\simu\) and returns the
+  respective outputs.  This modification is syntactic.
+
+  \paragraph{Game 3.} In this game, $\F{\ATS}'$ handles \register calls from
+  honest users following the description of ideal functionality $\F{\ATS}$.
+  $\simu$ first assigns each honest user a key pair $(\sk, \pk)$.  Now, when an
+  honest user $\user$ calls $\F{\ATS}'$ to register, $\simu$ learns the user's
+  identity.  Given this information, $\simu$ retrieves the corresponding key
+  pair $(\sk,\pk)$ and contacts registration authority $\RA$ to register
+  $\user$.  $\simu$ receives a unique tag $\tau$ and a signature $\psi
+  \leftarrow \DSsign(\rask, \pk \| \tau)$ and stores entry $\langle \user,
+  \tau, \pk, \psi\rangle $.
+
+  Since $\RA$ is honest, they will register users only once and reject
+  duplicate requests, same as $\F{\ATS}'$.  In other words, when $\F{\ATS}'$
+  accepts a registration request, so will $\RA$ in the real world, and vice
+  versa.  Hence, this game is indistinguishable from Game 2.
+
+  \paragraph{Game 4.} In this game, $\F{\ATS}'$ also handles credential
+  issuance calls from honest users following the description of ideal
+  functionality $\F{\ATS}$.  When  $\F{\ATS}'$ receives issuance request
+  $(\issue, \att{i}, \atv{i})$ from honest user $\user$, $\simu$ learns the
+  triple $(\user, \att{i}, \atv{i})$.  To simulate the corresponding credential
+  issuance for $\user$ in the real world, $\simu$ retrieves  $(\sk, \pk)$ and
+  $(\tau, \psi)$.  If the pair $(\tau, \psi)$ for $\user$ does not exist (i.e.,
+  $\user$ did not call \register before), then \simu aborts; otherwise, it
+  honestly executes $\Pi$ with issuer $\issuer{i}$.  There are two cases to
+  consider.
+
+  \begin{enumerate}
+
+    \item $\issuer{i}$ is honest.  If this is the first time $\simu$ simulates
+      $\user$ for $\issuer{i}$, then as per $\Pi$'s specification,  $\simu$
+      will receive signature $\signature_i \leftarrow \ATSsign(\isk{i}, \tau,
+      \atv{i})$, and record entry $\langle \user, \tau, \atv{i}, \signature_i
+      \rangle$.  Otherwise, $\issuer{i}$ will reject the credential issuance
+      request.
+
+    \item $\issuer{i}$ is corrupt.  If the execution of $\Pi$ terminates with
+      $\simu$ receiving signature $\signature_i : \ATSverify(\ipk{i}, \tau,
+      \atv{i}, \signature_i) \rightarrow 1$, then $\simu$ records entry
+      $\langle \user, \tau, \atv{i}, \signature_i \rangle$, and sends \accept.
+
+  \end{enumerate}
+
+  We recall that, in the real world, an honest issuer rejects a credential
+  issuance request from a registered user if a preceding request from the same
+  user has already been processed.  Otherwise, the honest issuer accepts and
+  issues the credential.  It is easy to see that, in this case, the output of
+  the issuer matches that of $\F{\ATS}'$ if the latter processes the credential
+  request instead.  We also recall that when $\F{\ATS}'$ receives a  credential
+  issuance request involving a dishonest issuer, $\F{\ATS}'$ follows $\simu$
+  instructions.  That is, if $\simu$ sends \accept, then $\F{\ATS}'$ accepts
+  the request and updates the credential map accordingly; otherwise,
+  $\F{\ATS}'$ just rejects.  Since $\simu$ sends \accept only if the dishonest
+  issuer outputs a valid aggregate signature, then the output of the dishonest
+  issuer in the real world is equivalent to the output of $\F{\ATS}'$.
+  Therefore, this game is indistinguishable from Game 4 as long as $\simu$ does
+  not abort.  Since $\user$ is honest, she will always register first before
+  requesting credentials from the issuers, and hence, the abort event will
+  never occur.
+
+  \paragraph{Game 5.} During this game, $\F{\ATS}'$ executes aggregate requests
+  from honest users following the description of $\F{\ATS}$.  This game is
+  indistinguishable from Game 4, as credential aggregation, in the real world,
+  is a local operation during which adversary $\adv$ observes nothing, and
+  therefore, $\simu$ need not do anything.
+
+  \paragraph{Game 6.} In this game, $\F{\ATS}'$ takes charge of signature
+  requests from honest users, following the specifications of $\F{\ATS}$, and
+  $\simu$ successfully simulates their executions of $\Pi$ in the real world
+  thanks to the simulatability of the signature of knowledge $\sok$.  Namely,
+  given message $(\presentend, \vec{\atv{}}, \msg, \proof)$ from $\F{\ATS}'$
+  for $\vec{\atv{}} = (\atv{1}, \ldots, \atv{N})$, $\simu$ defines  $\inst =
+  (\pk, (\ipk{i}, \atv{i})_{i \in \ind})$ such that $\forall i \in \ind:
+  \atv{i} \neq \varnothing$, and outputs $\proof^{\star} \leftarrow
+  \soksimsign(\td, \inst, \msg, \crs)$, which yields $\sokverify(\inst,
+  \proof^{\star}, \crs)$ to return $\true$.
+
+  \paragraph{Game 7.} In this game, $\F{\ATS}'$ processes verification requests
+  from honest verifiers following the description of $\F{\ATS}$, whereas
+  $\simu$ simulates the honest verifiers in the real world.  Namely, upon
+  receiving a signature in the real world, $\simu$ translates the signature
+  into calls to $\F{\ATS}'$, and instead of returning the output of
+  $\sokverify$, it returns the verification result received from $\F{\ATS}'$.
+  In the following, we describe $\simu$'s simulation.
+
+  \paragraph{Registration.} For each registration request $\pk$ that a corrupt
+  user $\user$ sends, in the real world, to the honest registration authority
+  $\RA$, $\simu$ (acting as $\RA$) first checks if $\user$ knows the secret key
+  $\usk$ underlying $\pk$.  If not, then $\simu$ stops.  Otherwise, it executes
+  the rest of the registration protocol, records entry $\langle\user, \tau,
+  \pk, \psi \rangle$, and then (acting as a user) transmits the corresponding
+  registration request $\register$ to $\F{\ATS}'$ which processes it in a
+  similar fashion to $\F{\ATS}$.
+
+  As per the specifications of $\Pi$, the simulated $\RA$ in the real world
+  will not accept a registration request that will be rejected by $\F{\ATS}'$,
+  and vice versa.  Therefore the output of $\Pi$ and the output of $\F{\ATS}'$
+  when processing registration requests is indistinguishable.
+
+  \paragraph{Credential Issuance.} For each issuance request \((\tau, \pk,
+  \psi, \atv{i})\) that a corrupt user $\user$ sends, in the real world, to an
+  honest issuer $\issuer{i}$ (simulated by $\simu$), $\simu$ (acting as
+  $\user$) sends $(\issue, \att{i}, \atv{i})$ to $\F{\ATS}'$.  We recall that
+  if $\user$ is not registered or if this is not the first time that $\user$
+  requests a credential, $\F{\ATS}'$ rejects.  Otherwise, $\F{\ATS}'$ issues
+  the credential.  Similarly, in the real world, the simulated $\issuer{i}$
+  returns $\signature_i \leftarrow \ATSsign(\isk{i}, \tau, \atv{i})$ if the
+  same conditions are met.  Hence, the output of $\Pi$ and the output of
+  $\F{\ATS}'$ when processing credential issuance is indistinguishable.  After
+  each successful credential issuance, $\simu$ stores entry $\langle \user,
+  \tau, \att{i}, \atv{i}, \signature_i\rangle$.
+
+  \paragraph{Signature Verification.} For each signature $(\vec{\atv{}} =
+  (\atv{1}, ..., \atv{N}), \msg, \proof)$ that a user $\user$ presents, in the
+  real world, to an honest verifier $V$, $\simu$ (simulating $V$) calls $\bool
+  \leftarrow \sokverify(\crs, \vec{\atv{}}, \msg, \proof)$.  We recall that
+  $\atv{i} = \varnothing$ if the attribute value is not disclosed.
+
+  If $\bool  = \false$,  $\simu$ sends $(\msg, \vec{\atv{}} = (\atv{1}, ...,
+  \atv{N}), \proof)$ to $\F{\ATS}'$, which returns $(\verifend, \bool^\star)$.
+  Two scenarios present themselves.  {\bf (1)} There exists a dishonest user
+  with attribute values $\vec{\atvprime{}} = (\atvprime{1}, ..., \atvprime{N})$
+  s.t.  $\forall \atv{i} \neq \varnothing$, we either have $\atv{i} =
+  \atvprime{i}$, or have $\atv{i} \neq \atvprime{i}$ but issuer $\issuer{i}$ is
+  dishonest.  {\bf (2)} $\forall i: \atv{i} \neq \varnothing$, issuers
+  $\issuer{i}$ and users holding attribute values $\atv{i}$ are honest.
+
+  In case of scenario {\bf (1)}, the output of $\F{\ATS}'$ is defined by
+  $\simu$, which instructs $\F{\ATS}'$ to return $(\verifend, \false)$.  In
+  case of scenario {\bf (2)}, $\F{\ATS}'$ outputs $(\verifend, \true)$.
+  However, thanks to the correctness of protocol $\Pi$ this scenario never
+  occurs.  That is, given a signature of knowledge $\proof$ that was computed
+  honestly,  $\sokverify$ will never output $\false$.  Thus, the output of
+  $\F{\ATS}'$ matches that of $\Pi$.
+
+  If $\bool = \true$, then thanks to the extractability property of the
+  signature of knowledge $\sok$, $\simu$ extracts witness $\witness = (\tau,
+  \usk, \pk, \psi, \signature)$  and then executes the following steps:
+
+  \begin{itemize}
+
+    \item If there is no recorded entry $\langle \star, \tau, \pk,
+      \star\rangle$, then $\simu$ aborts.
+
+    \item Else if there exists $1 \leq i \leq N$ such that $\atv{i} \neq
+      \varnothing$ and $\issuer{i}$ is honest, and there is no recorded entry
+      $\langle \star, \tau, \atv{i}, \star \rangle$, then $\simu$ aborts.
+
+    \item Otherwise, $\simu$ sends to $\F{\ATS}'$ signature request $(\sign,
+      \vec{\atv{}}, \signature, \msg)$.
+
+      \begin{itemize}
+
+        \item If $\F{\ATS}'$ aborts, then $\simu$ sends request $(\verif,
+          V,\vec{\atv{}}, \proof)$ to $\F{\ATS}'$.
+
+        \item Otherwise, $\F{\ATS}'$ returns $(\presentend,  \proof^{\star})$,
+          and  $\simu$ sends request $(\verif, V, \vec{\atv{}},
+          \proof^{\star})$ to $\F{\ATS}'$.
+
+      \end{itemize}
+
+      As a result, $\simu$ receives $(\verifend, \bool)$ and outputs $\bool$ in
+      turn.
+
+  \end{itemize}
+
+  In what follows, we show that if $\simu$ does not abort, then $\bool =
+  \true$.
+
+  We call the two abort events $\abort{1}$ and $\abort{2}$.  If $\abort{1}$
+  does not occur, then this implies that a registration request for $\user$ was
+  successfully processed by $\simu$ and therefore $\user$ was successfully
+  registered by $\F{\ATS}$.  If $\abort{2}$ does not occur then this implies
+  one of two things: {\bf (1)} $\forall i : \atv{i} \neq \varnothing$, there
+  exists an entry $\langle \star, \tau, \atv{i}, \star \rangle$; or {\bf (2)}
+  $\exists j: \atv{j} \neq \varnothing$ such that there is no recorded entry
+  $\langle \star, \tau, \atv{j}, \star \rangle$ but issuer $\issuer{j}$ is
+  dishonest.  {\bf (1)} implies that $\simu$ issued credentials for $\user$ for
+  the relevant attributes, and so did $\F{\ATS}'$.  Therefore, during the
+  $\present$ call, $\F{\ATS}'$ will not abort and will return $(\presentend,
+  \proof^{\star})$, and the subsequent call $(\verif, V, \vec{\atv{}},
+  \proof^{\star})$ will result in $\F{\ATS}'$ returning $(\verifend, \true)$.
+  This matches the output of the verification in the real world.  {\bf (2)}
+  implies that $\user$ is in possession of a credential that was issued by a
+  dishonest issuer and never recorded by either $\simu$ or $\F{\ATS}'$.  In
+  this case,  $\F'{}$ aborts during $\present$, and when $\simu$ calls
+  $\F{\ATS}'$ with  $(\verif, V, \vec{\atv{}}, \proof)$, the output of
+  $\F{\ATS}'$ is dictated by $\simu$.  $\simu$ sets this output to $\true$ to
+  match the output of the verification in the real world.
+
+  Therefore, this game is indistinguishable from Game 6 as long as $\abort{1}$
+  and $\abort{2}$ do not occur.
+
+  Now we show that the probability that one of these two events occur is
+  negligible.
+
+  $\abort{1}$ occurs if there is no recorded entry $\langle \star, \tau, \pk,
+  \star \rangle$ in the system.  Again due to extraction of the verifying
+  signature of knowledge $\proof$, we can extract witness $\witness = (\tau,
+  \usk, \pk, \psi, \signature)$.  This means that $\user$ has knowledge of a
+  valid $\psi$ such that $1 \leftarrow \DSverify(\pk, \pk \| \tau, \psi)$ with
+  no corresponding entry, contradicting the existential unforgeability of the
+  digital signature scheme $\DS$.
+
+  $\abort{2}$ occurs if  $\exists j \in [1\isep N]$ such that $\atv{j} \neq
+  \varnothing$ and $\issuer{j}$ is honest, and there is no recorded entry
+  $\langle \star, \tau, \atv{j}, \star \rangle$.  Again, due to extraction of
+  the correctly verifying signature of knowledge $\proof$, we can extract a
+  valid witness $\witness = (\tau, \usk, \pk, \psi, \signature)$.  This means
+  that $\signature$ satisfies $\ATSverifyagg((\ipk{i})_{i\in \ind}, \tau,
+  (\atv{i})_{i\in\ind}, \signature)$, where $\ind$ identifies the indices s.t.
+  $\atv{i} \neq \varnothing$ and $j \in \ind$.  Given that there is no recorded
+  entry $\langle \star, \tau, \atv{j}, \star \rangle$, this implies that the
+  honest issuer $\issuer{j}$ has never issued a signature $\signature_j$ for
+  pair $(\tau, \atv{j})$, which contradicts the existentially unforgeability
+  under tag-based aggregation of $\ATS$.
+
+\paragraph{Game 8.} This is the ideal world.  This game is indistinguishable
+from Game 7 as functionality $\F{\ATS}'$ is identical to ideal functionality
+$\F{\ATS}$.  \end{proof}
+
+\subsection{Proof of Theorem \ref{thm:tag-uf}}\label{app:tag-uf}
+
+\begin{proof} Let $\pk = \{\pk_1, ..., \pk_N\}$ be the set of challenge
+  public keys from the existential unforgeability under tag-based aggregation
+  experiment.  Assume there exists an adversary $\adv$ that succeeds in the
+  unforgeability experiment by producing an aggregate signature
+  $(\signatureone, \signaturetwo)$ on a set of messages $(\mssg_i^*)_{i \in
+  \ind \subseteq [1 \isep N]}$ under a tag $\tau^*$ such that the following
+  holds: \begin{equation*} e(\signaturetwo,\ggen) = e(\hashtwo(\tau^*),
+    \signatureone)\cdot \prod_{i \in \ind} e(\hashone(\mssg_i^*), \pk_i).
+  \end{equation*} In addition, there exists an index $j \in \ind$ such that the
+  adversary does not control the secret key corresponding to $\pk_j$, and a
+  tag-based aggregate signature has not been issued by the signature oracle on
+  triple $(\pk_j, \tau^*, \mssg_j^*)$.  We distinguish between two types of
+  forgeries.
+
+  \begin{description}
+
+    \item[Type 1] \adv has never issued a signature request for $(\pk_j,
+      \star, \mssg^*_j)$.
+
+    \item[Type 2]  \adv has issued signature requests for $(\pk_j, \tau,
+      \mssg^*_j)$ but $\forall \tau: \tau \neq \tau^*$.
+
+  \end{description}
+
+  In the following, we show that: (1) if adversary $\adv$ outputs a Type 1
+  forgery, then there exists an adversary $\advB$ that leverages  $\adv$ to
+  break BCDH, and (2) if $\adv$ outputs a Type 2 forgery, then there exists an
+  adversary $\advB$ that leverages $\adv$ to break m-BCDH.
+
+  \textbf{Type 1 Forgery.} Let $\advB$ be an adversary whose goal is to break
+  BCDH, and hence, is given tuple $(\gen, X, Y, Z, \ggen, \widehat{X},
+  \widehat{Y}, \widehat{Z})= (\gen, \gen^x, \gen^y, \gen^z, \ggen, \ggen^x,
+  \ggen^y, \ggen^z)$.  To compute $\gen^{xy}$ and break BCDH, $\advB$ leverages
+  $\adv$ and the random oracle as depicted below.
+
+  \paragraph{Random Oracle Programming.} $\advB$ initialises two lists
+  $\ListOne$ and $\ListTwo$, and then computes $\hashone$ and $\hashtwo$ as
+  follows:
+
+  \begin{itemize}
+
+    \item $\hashone$: For each query $\mssg$, check if there exists an entry
+      $\langle \mssg, \star, \hashone(\mssg) \rangle \in \ListOne$, and if so,
+      return $\hashone(\mssg)$.  If not, then do the following:
+
+      \begin{itemize}
+
+        \item With probability $p_\hashone$, generate a random element $\rho
+          \leftarrow \Zp$, set $\hashone(\mssg) = \gen^{\rho}$, and store entry
+          $\langle \mssg, \rho, \hashone(\mssg)\rangle$ in $\ListOne$;
+
+        \item With probability $1 - p_\hashone$, set $\hashone(\mssg) = Y$ and
+          store entry $\langle \mssg, \perp, \hashone(\mssg)\rangle$ in
+          $\ListOne$.
+
+      \end{itemize}
+
+    \item $\hashtwo$: For each query $\tau$, check if there exists an entry
+      $\langle \tau, \star, \hashtwo(\tau) \rangle \in \ListTwo$, and if so,
+      return $\hashtwo(\tau)$.  If not, then select a random element $\eta
+      \leftarrow \Zp$, set $\hashtwo(\tau) = \gen^{\eta}$, and store entry
+      $\langle \tau, \eta, \hashtwo(\tau)\rangle$ in $\ListTwo$.
+
+  \end{itemize}
+
+  \paragraph{\Corrupt Simulation.} Without loss of generality, we assume that
+  $\adv$ corrupts all public keys except for one.  $\advB$ randomly selects $j
+  \in [1\isep N]$ and sets $\pk_j = \widehat{X}$, and for all $k \neq j$
+  randomly selects $x_k \in \Zp^*$ and has $\sk_k = x_k$ and $\pk_k =
+  \widehat{X}_k = \ggen^{x_k}$.  If $\adv$ sends a corruption request for
+  $\pk_i \neq \pk_j$, then $\advB$ returns $\sk_i = x_i$; otherwise, $\advB$
+  aborts the experiment.
+
+  \paragraph{\Sign Simulation.} On receiving a signature request $(\pk_i,
+  \tau, \mssg)$, $\advB$ proceeds as follows.  If $i \neq j$, then $\advB$
+  outputs $\signature \leftarrow \ATSsign(\tau, \sk, \mssg)$.  If $i = j$,
+  then $\advB$ checks if $\hashone(\mssg) = Y$. If so, then $\advB$ aborts,
+  otherwise,  $\advB$ retrieves entry $\langle \mssg, \rho, \hashone(\mssg) =
+  \gen^{\rho}\rangle$ and computes $\signature = (\signatureone, \signaturetwo)
+  = (\ggen^a, X^{\rho}\hashtwo(\tau)^a)$.  Note that $\signature$ is a valid
+  signature on pair $(\tau, \mssg)$ relative to public key $\pk_j =
+  \widehat{X} = \ggen^x$; in fact,  $\signature = (\ggen^a,
+  \hashone(\mssg)^{x}\hashtwo(\tau)^a)$.
+
+  \paragraph{Forgery.} After receiving $\adv$'s forgery $(\ind,
+  (\pk_i)_{i\in\ind}, \tau^*,  (\mssg^*_i)_{i \in \ind}, \signature^*)$,
+  $\advB$ proceeds as follows.  $\advB$ checks if $\hashone(\mssg^*_j) \neq Y$,
+  and if so, aborts.  If $\hashone(\mssg^*_j) = Y$, then $\advB$ parses
+  $\signature^*$ as $(\signatureone^*, \signaturetwo^*)$, retrieves entry
+  $\langle\tau^*, \eta^*, \hashtwo(\tau^*) \rangle$ from $\ListTwo$, and
+  computes $\Delta = \frac{\signaturetwo^*}{\prod_{i \in \ind, i \neq
+  j}\hashone(\mssg^*_i)^{x_i}}$ followed by $\Gamma = \frac{e(\Delta,
+\widehat{Z})}{e(Z^{\eta^*},\signatureone^*)}$.
+
+We now prove that $\Gamma = e(\gen, \ggen)^{xyz}$.  Note that  $\signature^* =
+(\signatureone^*, \signaturetwo^*)$ verifies the following equality:
+$e(\signaturetwo^*, \ggen) = e(\hashtwo(\tau^*), \signatureone^*) \cdot
+\prod_{i\in \ind}e(\hashone(\mssg^*_i), \widehat{X}_i).$
+
+Therefore, $e(\Delta, \ggen) = e(\hashtwo(\tau^*), \signatureone^*) \cdot
+e(\hashone(\mssg^*_j), \widehat{X}_j) = e(\gen^{\eta^*}, \signatureone^*)e(Y,
+\widehat{X})$.  It follows that we have $e(Y, \widehat{X}) = \frac{e(\Delta,
+\ggen)}{e(\gen^{\eta^*}, \signatureone^*)}$ and $e(Y, \widehat{X})^z =
+\frac{e(\Delta, \widehat{Z})}{e(Z^{\eta^*}, \signatureone^*)} = \Gamma$.
+
+To summarize, $\advB$ aborts in the following cases:
+
+\begin{itemize}
+
+  \item  If $\adv$ sends a corruption request for $\pk_i = \pk_j$. As we
+    assume that $\adv$ corrupts all public keys except one, and we have $j$
+    chosen uniformly at random, the probability that $\advB$ \emph{succeeds}
+    here is $1/N$.
+
+  \item If, for the forged message under the uncorrupted key $\pk_j$, we have
+    the case that $\hashone(\mssg^*_j) \neq Y$, then $\advB$ cannot extract
+    $e(\gen,\ggen)^{xyz}$ as required. This occurs with probability
+    $p_{\hashone}$.  Hence, the probability that $\advB$ \emph{succeeds} here
+    is $1 - p_{\hashone}$.
+
+  \item If any signing query $(\pk_j,\tau,\mssg)$ to the signing oracle is for
+    a message such that $\hashone(\mssg) = Y$, then $\advB$ cannot produce a
+    signature and must abort. The probability that all signing queries avoid
+    this is $p_{\hashone}^{\sigqueries}$, where $\sigqueries$ is the number of
+    signing queries made with $\pk_j$.
+
+\end{itemize}
+
+The probability of success is then $\frac{1}{N}\cdot (1-p_{\hashone}) \cdot
+p_{\hashone}^{\sigqueries}$, and so the probability of aborting in the case of
+Type 1 forgeries is given as follows: \[ \Pr[\text{Type 1 abort}] = 1 - \left(
+\frac{1}{N}\cdot (1-p_{\hashone}) \cdot p_{\hashone}^{\sigqueries} \right). \]
+
+\textbf{Type 2 Forgery.} Let $\advB$ be an adversary whose goal is to break
+m-BCDH, and therefore, has as input $(\gen, Y, \ggen, \widehat{X},
+\widehat{Y})= (\gen, \gen^{1/y}, \ggen, \ggen^x, \ggen^y)$.  To break m-BCDH,
+$\advB$ simulates the unforgeability experiment to $\adv$ as follows.
+
+\paragraph{Random Oracle Programming.} $\advB$ initializes two lists $\ListOne$
+and $\ListTwo$, and then computes $\hashone$ and $\hashtwo$ as described below:
+
+\begin{itemize}
+
+  \item $\hashone$: For each query $\mssg$, check if there exists an entry
+    $\langle \mssg, \star, \hashone(\mssg) \rangle \in \ListOne$, and if so,
+    return $\hashone(\mssg)$.  If not, then generate a random element $\rho
+    \leftarrow \Zp$, set $\hashone(\mssg) = \gen^{\rho}$, and store entry
+    $\langle \mssg, \rho, \hashone(\mssg)\rangle$ in $\ListOne$.
+
+  \item $\hashtwo$: For each query $\tau$, check if there exists an entry
+    $\langle \tau, \star, \hashtwo(\tau) \rangle \in \ListTwo$, and if so,
+    return $\hashtwo(\tau)$.  If not, then first generate a random element
+    $\eta \in \Zp$, then with probability $p_\hashtwo$, set $\hashtwo(\tau) =
+    Y^{\eta}$, and with probability $1 - p_\hashtwo$, set $\hashtwo(\tau) =
+    \gen^{\eta}$,  finally, store entry $\langle \tau, \eta,
+    \hashtwo(\tau)\rangle$ in $\ListTwo$.
+
+\end{itemize}
+
+\paragraph{\Corrupt Simulation.} Without loss of generality, we assume that
+$\adv$ corrupts all public keys except for one.  $\advB$ randomly selects $j
+\in [1\isep N]$ and sets $\pk_j = \widehat{X}$, and for all $k \neq j$
+randomly selects $x_k \in \Zp^*$ and has $\sk_k = x_k$ and $\pk_k =
+\widehat{X}_k = \ggen^{x_k}$.  If $\adv$ sends a corruption request for $\pk_i
+\neq \pk_j$, then $\advB$ returns $\sk_i = x_i$; otherwise, $\advB$ aborts
+the experiment.
+
+\paragraph{\Sign Simulation.} On receiving a signature request $(\pk_i, \tau,
+\mssg)$, $\advB$ proceeds as follows.  If $i \neq j$, then $\advB$ outputs
+$\signature \leftarrow \ATSsign(\tau, \sk, \mssg)$.  If $i = j$, then $\advB$
+first retrieves entries $\langle \mssg, \rho, \hashone(\mssg)\rangle$ and
+$\langle \tau, \eta, \hashtwo(\tau)\rangle$ from $\ListOne$ and $\ListTwo$
+respectively.  Now if $\hashtwo(\tau) \neq \gen^{\eta}$ or $\eta = 0$, then
+$\advB$ aborts.  Otherwise, $\advB$ randomly selects $a \in \Zp$, lets
+$\signaturetwo = \gen^{a}$ and  computes $\signatureone =
+(\ggen^a/\widehat{X}^{\rho})^{1/\eta}$.  Note that $\signature$ is a valid
+signature on pair $(\tau, \mssg)$ relative to public key $\pk_j = \widehat{X}
+= \ggen^x$; in fact, by construction, $e(\hashtwo(\tau), \signatureone) \cdot
+e(\hashone(\mssg), \widehat{X}) = e(\signaturetwo, \gen)$.
+
+\paragraph{Forgery.} After receiving $\adv$'s forgery $(\ind,
+(\pk_i)_{i\in\ind}, \tau^*,  (\mssg^*_i)_{i \in \ind}, \signature^*)$, $\advB$
+proceeds as follows.  $\advB$ first retrieves entries $\langle \mssg^*, \rho^*,
+\hashone(\mssg^*) = \gen^{\rho^*}\rangle$ and $\langle \tau^*, \eta^*,
+\hashtwo(\tau^*)\rangle$ from $\ListOne$ and $\ListTwo$ respectively.
+
+$\advB$ next checks if $\hashtwo(\tau^*) \neq Y^{\eta^*}$ or $\rho^* = 0$, and
+if so, aborts.  Otherwise, $\advB$ parses $\signature^*$ as $(\signatureone^*,
+\signaturetwo^*)$, and computes $\Delta = \frac{\signaturetwo^*}{\prod_{i \in
+\ind, i \neq j}\hashone(\mssg^*_i)^{x_i}}$ followed by $\Gamma =
+\left(\frac{e(\Delta,
+\widehat{Y})}{e(\gen^{\eta},\signatureone^*)}\right)^{1/\rho^*}$.
+
+We show now that $\Gamma = e(\gen, \ggen)^{xy}$.  Recall that  $\signature^* =
+(\signatureone^*, \signaturetwo^*)$ verifies the following equality:
+$e(\signaturetwo^*, \ggen) = e(\hashtwo(\tau^*), \signatureone^*) \cdot
+\prod_{i\in \ind}e(\hashone(\mssg^*_i), \widehat{X}_i).$ Therefore: $e(\Delta,
+\ggen) = e(\hashtwo(\tau^*), \signatureone^*) \cdot e(\hashone(\mssg^*_j),
+\widehat{X}_j) = e(Y^{\eta^*}, \signatureone^*) \cdot e(\gen^{\rho^*},
+\widehat{X})$.
+
+Hence, $e(\gen^{\rho^*}, \widehat{X})^y  = \frac{e(\Delta,
+\widehat{Y})}{e(\gen^{\eta^*}, \signatureone^*)}$.  This implies that $e(\gen,
+\widehat{X})^y = e(\gen, \ggen)^{xy} = \left(\frac{e(\Delta,
+\widehat{Y})}{e(\gen^{\eta^*}, \signatureone^*)}\right)^{1/\rho^*}$, which
+equals $\Gamma$.
+
+In the case of Type 2 forgeries, $\advB$ aborts in the following cases:
+
+\begin{itemize}
+
+  \item If $\adv$ sends a corruption request for $\pk_i = \pk_j$. As we again
+    assume $\adv$ corrupts all public keys except one, and $j$ is chosen
+    uniformly at random, the probability that $\advB$ \emph{succeeds} here is
+    again $1/N$.
+
+  \item If, for the forged tag $\tau^*$, we have that $\hashtwo(\tau^*) \neq
+    Y^{\eta^*}$, then $\advB$ cannot extract $e(\gen,\ggen)^{xy}$ as required.
+    This occurs with probability $1-p_{\hashtwo}$.  Hence, the probability that
+    $\advB$ \emph{succeeds} here is $p_{\hashtwo}$.
+
+  \item If any signing query $(\pk_j,\tau,\mssg)$ to the signing oracle is for
+    a tag such that $\hashtwo(\tau) \neq Y^{\eta}$, then $\advB$ cannot produce
+    a signature and must abort. The probability that all signing queries avoid
+    this is $p_{\hashtwo}^{\sigqueries}$, where $\sigqueries$ is the number of
+    signing queries made with $\pk_j$.
+
+\end{itemize}
+
+The probability of success is then $\frac{1}{N}\cdot
+p_{\hashtwo}^{\sigqueries+1}$, and so the probability of aborting in the case
+of Type 2 forgeries is given as follows: \begin{equation*} \Pr[\text{Type 2
+  abort}] = 1 - \left( \frac{1}{N}\cdot p_{\hashtwo}^{\sigqueries+1} \right).
+\end{equation*}
+
+\end{proof}
