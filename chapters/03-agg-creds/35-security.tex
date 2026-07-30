@@ -38,7 +38,7 @@ before calling present, $\F{\AAC}$ may still accept the presentation request as
 long as the user has previously received the relevant credentials.  If
 $\F{\AAC}$ accepts, then it generates a random string $\proof$; the randomness
 of $\proof$ ensures that triple $(\vec{\atv{}}, \msg, \proof)$ discloses no
-information about the user  beyond what's revealed by $\vec{\atv{}}$.
+information about the user beyond $\vec{\atv{}}$.
 
 \paragraph{Verify.} Verify is invoked by a verifier to check the validity
 of credential presentation $(\vec{\atv{}}, \msg, \proof)$.  If the presentation
@@ -54,7 +54,22 @@ checks succeed, then $\F{\AAC}$ refers to $\simu$ and returns what $\simu$
 returns; otherwise, it records the presentation, flags it as invalid, and
 outputs false.
 
-%% some sort of figure needs to go here - figure out why its not working?
+\begin{figure}
+\centering
+\hspace*{-0.05\textwidth}
+\begin{minipage}{1.1\textwidth}
+
+\begin{framed}
+\scriptsize
+
+\setlist[enumerate]{
+  topsep=2pt,
+  partopsep=0pt,
+  parsep=0pt,
+  itemsep=1pt
+}
+
+\begin{multicols}{2}
 
 \paragraph{$\AACregister$.} On input register from the user, send
 $(register, user)$ to the registration authority and wait for its
@@ -241,6 +256,15 @@ from a verifier, do:
 \end{enumerate}
 
 \end{enumerate}
+
+\end{multicols}
+\end{framed}
+
+\caption{Ideal functionality for aggregate anonymous credentials.}
+\label{fig:faac}
+\end{minipage}
+\end{figure}
+
 
 We assume there are $n$ issuers in the system, so the system supports $n$
 attributes.  When $\F{\AAC}$ is called through aggregate, present, or
