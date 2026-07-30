@@ -7,7 +7,7 @@ scheme that signs pairs of messages and tags~\cite{JC:BonLynSha04,EC:BGLS03}.
 The key differences are tag restricted aggregation and ability to randomise
 signatures.  Our scheme is comprised of the following algorithms:
 
-\begin{itemize}
+\begin{description}
 
   \item $(\sk, \pk) \sample \ATSgen(\secparam)$: On input the security 
   parameter, the generation algorithm outputs a key pair constructed as follows:
@@ -89,7 +89,7 @@ e(\signaturetwo,\ggen) = e(\hashone(\msg), \pk) \cdot e(\hashtwo(\Tag), \signatu
     %
     And otherwise it outputs $0$.
 
-\end{itemize}
+\end{description}
 
 This signature is existentially unforgeable under tag-based aggregation in the
 random oracle model under the Bilinear Computational Diffie-Hellman (BCDH)
@@ -181,6 +181,22 @@ us why we use this}
 
 The AGHO signature scheme is existentially unforgeable under chosen message
 attacks under the $q$-Strong Diffie-Hellman ($q$-SDH) assumption~\cite{}.
+
+\begin{description}
+
+  \item[$(\crs,\state) \sample \AACgen(\secparam)$ :] 
+
+  \item[$(\sk,\regcred) \sample \AACregister(\crs,\state)$ :] 
+
+  \item[$\cred \sample \AACissue(\crs,\isk{},\regcred,\att{})$ :] 
+
+  \item[$\aggcred \leftarrow \AACaggregate(\crs,\cred,\ldots,\cred)$ :] 
+
+  \item[$\proof \sample \AACpresent(\crs,\aggcred,\msg)$ :] 
+
+  \item[$\{0,1\} \leftarrow \AACverify(\crs,\msg,\proof)$ :] 
+
+\end{description}
 
 We now show how the registration authority uses this scheme to implement the
 generic digital signature scheme $\DS$.
