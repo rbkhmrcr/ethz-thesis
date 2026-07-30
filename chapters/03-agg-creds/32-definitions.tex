@@ -1,18 +1,34 @@
 \section{Definitions}
 
-\subsection{Aggregate Anonymous Credentials}
+\subsection{Aggregate anonymous credentials}
 
 \begin{description}
 
-  \item[$\AACregister$ :] \rebekah{}
+  \item[$(\crs,\state) \sample \AACgen(\secparam)$ :] The setup algorithm, on
+    input security parameter $\secparam$, generates the system public
+    parameters $\crs$ together with the initial state $\state$.
 
-  \item[$\AACissue$ :] \rebekah{}
+  \item[$(\sk,\regcred) \sample \AACregister(\crs,\state)$ :] The registration
+    algorithm, on input public parameters $\crs$ and state $\state$, outputs
+    user secret key $\sk$ and registration credential $\regcred$.
 
-  \item[$\AACaggregate$ :] \rebekah{}
+  \item[$\cred \sample \AACissue(\crs,\isk{},\regcred,\att{})$ :] The issuance
+    algorithm, on input public parameters $\crs$, issuer secret key $\isk{}$,
+    registration credential $\regcred$, and attribute $\att{}$, outputs
+    attribute credential $\cred$.
 
-  \item[$\AACpresent$ :] \rebekah{}
+  \item[$\aggcred \leftarrow \AACaggregate(\crs,\cred,\ldots,\cred)$ :] The
+    aggregation algorithm, on input public parameters $\crs$ and credentials
+    $\cred,\ldots,\cred$, outputs aggregate credential $\aggcred$.
 
-  \item[$\AACverify$ :] \rebekah{}
+  \item[$\proof \sample \AACpresent(\crs,\aggcred,\msg)$ :] The presentation
+    algorithm, on input public parameters $\crs$, aggregate credential
+    $\aggcred$, and message $\msg$, outputs presentation $\proof$.
+
+  \item[$\{0,1\} \leftarrow \AACverify(\crs,\msg,\proof)$ :] The verification
+    algorithm, on input public parameters $\crs$, message $\msg$, and
+    presentation proof $\proof$, returns 0 or 1.
+
 
 \end{description}
 
@@ -28,7 +44,7 @@ be successfully presented or verified. Unlinkability is achieved as randomness
 is returned in each query to present, which prevents presentations from being
 correlated.
 
-\subsection{Aggregate Tag-Based Signatures}
+\subsection{Aggregate tag based signatures}
 
 We define an aggregate tag based signature scheme as one that allows signatures
 computed over the same tag to be aggregated into a compact signature. An
@@ -107,36 +123,30 @@ oracle $\corrupto$ and signing oracle $\signo$, the probability that $\adv$
 wins the experiment depicted in \fref{fig:exp} is negligible in security
 parameter $\secparam$.
 
-\begin{figure}[t] \begin{framed}
- \centering
-  \begin{minipage}{0.42\linewidth}
-   \parbox{\linewidth}{ \underline{$\corrupto(\pk_i)$}\\
-   
-   If $\pk_i \in \pk$, then:
+\begin{figure}[t] \begin{framed} \centering \begin{minipage}{0.42\linewidth}
+  \parbox{\linewidth}{ \underline{$\corrupto(\pk_i)$}\\
 
-      \begin{itemize}
+    If $\pk_i \in \pk$, then:
 
-        \item $\Cor \gets \Cor \cup \{\pk_i\}$;
+    \begin{itemize}
 
-        \item return $\sk_i$.
+      \item $\Cor \gets \Cor \cup \{\pk_i\}$;
 
-        \end{itemize} } \end{minipage} \hfill \begin{minipage}{0.42\linewidth}
-        \parbox{\linewidth}{ \underline{$\signo(\pk_i, \Tag, \msg)$}\\[0.3em]
-          If $\pk_i \in \pk$, then:
+      \item return $\sk_i$.
 
-          \begin{itemize}
+      \end{itemize} } \end{minipage} \hfill \begin{minipage}{0.42\linewidth}
+      \parbox{\linewidth}{ \underline{$\signo(\pk_i, \Tag, \msg)$}\\[0.3em] If
+        $\pk_i \in \pk$, then:
 
-            \item $\Query \gets \Query \cup \{(\pk_i, \Tag, \msg)\}$;
+        \begin{itemize}
 
-            \item return $\signature \gets \ATSsign(\sk_i, \Tag, \msg)$.
+          \item $\Query \gets \Query \cup \{(\pk_i, \Tag, \msg)\}$;
 
-            \end{itemize} 
-            }
-            \end{minipage}
-             \medbreak
-            \begin{minipage}{\linewidth} 
-            \parbox{\linewidth}{ \underline{ Experiment for Existential Unforgeability Under Tag Based
-            Aggregation}
+          \item return $\signature \gets \ATSsign(\sk_i, \Tag, \msg)$.
+
+          \end{itemize} } \end{minipage} \medbreak \begin{minipage}{\linewidth}
+          \parbox{\linewidth}{ \underline{ Experiment for Existential
+            Unforgeability Under Tag Based Aggregation}
 
             \begin{itemize}
 
@@ -149,12 +159,8 @@ parameter $\secparam$.
 
             \end{itemize}
 
-        $\adv$ wins the experiment if and only if $b = 1  \ \ \land \ \exists \
-    i \in \ISSUERS : \pk_i \notin \Cor \ \ \land \ \  (\pk_i, \Tag, \msg_i)
-\notin \Query.$ } 
-\end{minipage} 
-\end{framed} 
-\caption{Definition of the
-  oracles available to the adversary and the experiment for Existential
-Unforgeability Under Tag Based Aggregation.}
- \label{fig:exp} \end{figure}
+        $\adv$ wins the experiment if $b = 1  \ \ \land \ \exists \ i \in
+    \ISSUERS : \pk_i \notin \Cor \ \ \land \ \  (\pk_i, \Tag, \msg_i) \notin
+\Query.$ } \end{minipage} \end{framed} \caption{Definition of the oracles
+  available to the adversary and the experiment for Existential Unforgeability
+Under Tag Based Aggregation.} \label{fig:exp} \end{figure}

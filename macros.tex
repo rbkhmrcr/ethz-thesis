@@ -1,4 +1,3 @@
-
 \newcommand{\rebekah}[1]{\textcolor{orange}{{Rebekah}:#1}}
 
 % new environments
@@ -15,11 +14,9 @@
 \frefformat{plain}{\fancyrefthmlabelprefix}{{\frefthmname}\fancyrefdefaultspacing#1}
 \Frefformat{plain}{\fancyrefthmlabelprefix}{{\Frefthmname}\fancyrefdefaultspacing#1}
 
-
 \newcommand{\algo}[1]{\mathsf{#1}}
 \newcommand{\sample}{\overset{\$}{\leftarrow}}
 \newcommand{\secparam}{\kappa}
-
 
 % commitments
 \newcommand{\Com}{\algo{Com}}
@@ -131,12 +128,14 @@
 \newcommand{\atv}[1]{\algo{atv_{#1}}}
 \newcommand{\cred}{\algo{cred}}
 \newcommand{\creds}{\algo{creds}}
-\newcommand{\aggcreds}{\algo{ac}}
+\newcommand{\aggcreds}{\algo{aggcreds}}
+\newcommand{\aggcred}{\algo{ac}}
+\newcommand{\regcred}{\algo{rc}}
 \newcommand{\proven}{\algo{proven}}
 
 % agg creds
 \newcommand{\AAC}{\algo{AAC}}
-\newcommand{\AACsetup}{\AAC\algo{.Setup}}
+\newcommand{\AACgen}{\AAC\algo{.Gen}}
 \newcommand{\AACregister}{\AAC\algo{.Register}}
 \newcommand{\AACissue}{\AAC\algo{.Issue}}
 \newcommand{\AACaggregate}{\AAC\algo{.Aggregate}}
@@ -189,8 +188,8 @@
 \newcommand{\Max}{\algo{max}}
 
 %% sig parts
-\newcommand{\signatureone}{\signature_1}
-\newcommand{\signaturetwo}{\signature_2}
+\newcommand{\signatureone}{{\signature_1}}
+\newcommand{\signaturetwo}{{\signature_2}}
 
 %% issuer keys
 \newcommand{\ipk}[1]{\algo{pk_{I,#1}}}

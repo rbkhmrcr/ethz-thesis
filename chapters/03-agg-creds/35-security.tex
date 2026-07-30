@@ -748,3 +748,106 @@ of Type 2 forgeries is given as follows:
   %
 \end{equation*}
 %
+
+\subsection{Proof instantiation security}
+
+\paragraph{Extractability.} Recall that $\proof = (\eta, \bar{\gen}, \bar{V},
+\widehat{R}', \widehat{S}', \bar{T}, \signatureone', \bar{\signaturetwo},
+\bar{\Gamma}, \pk', \{\atv{i}, H_i\}_{i\in \mathbb{I}})$.
+
+Note that given the extractability property of signatures of knowledge, if a
+user is able to produce a valid signature $\eta$ for relation $\rel$, then it
+is possible to extract the corresponding witness $(\delta, \sk)$ that verifies
+$\bar{\gen} = \gen^{\delta} \  ; \ \bar{V} = V^{\delta} \ ; \ H_i =
+\hashone(\atv{i})^{\delta}\  ; \ \pk' = \bar{\gen}^{\sk}$.  Now given that
+$\bar{\gen} \neq 1$, then $\delta \neq 0$ and we can write $\gen =
+\bar{\gen}^{1/\delta}$, $V = \bar{V}^{1/\delta}$ and $\pk'^{1/\delta} =
+\bar{\gen}^{\sk/\delta} = \gen^{\sk}$.  Furthermore, given the equalities in
+equation~\ref{eq:app-proof-rel-2}, we can deduce that: \begin{gather*}
+  e(\bar{V}^{1/\delta}, \widehat{R}) = e(V, \widehat{R}) =
+  e(\bar{\gen}^{1/\delta}, \widehat{S}) = e(\gen, \widehat{S}) \ ; \\
+  e(\bar{T}^{1/\delta}, \widehat{R}) \cdot e( \pk'^{1/\delta}, \widehat{U}_1)
+  \cdot e(\bar{\Gamma}^{1/\delta},  \widehat{U}_2) = e(\bar{\gen}^{1/\delta},
+  \ggen)= e(\gen, \ggen) \ ; \\ e(\bar{\signaturetwo}^{1/\delta}, \ggen) =
+  e(\bar{\Gamma}^{1/\delta},
+  \signatureone)\cdot\prod_{i\in\mathbb{I}}e(H_i^{1/\delta}, {\gen^x}_i).
+\end{gather*} That is, $(\signatureone, \bar{\signaturetwo}^{1/\delta})$ is a
+valid tag-based aggregate signature on the pre-image of
+$\bar{\Gamma}^{1/\delta}$ and attributes $\atv{i}$, and that $(\widehat{R},
+\widehat{S}, \bar{T}^{1/\delta})$ is a valid AGHO signature on pair
+$\pk'^{1/\delta}, \bar{\Gamma}^{1/\delta}$.
+
+To extract the pre image of $\bar{\Gamma}^{1/\delta}$, we use the following:
+
+\begin{enumerate}
+
+  \item Random oracle $\hashtwo$, which is initialised with two maps $L_1$ and
+    $L_2$, and which for each query $\Tag$, checks if $L_1[\Tag]$ is empty. If
+    so, it  selects a random group element $\Gamma \in \group{1}$, and sets
+    $L_1[\Tag] \leftarrow \Gamma$ and $L_2[\Gamma] \leftarrow \Tag$.  Finally,
+    returns $L_1[\Tag]$.
+
+  \item The fact that the registration authority only signs well-formed pairs
+    defined as $(\pk, \hashtwo(\Tag))$.
+
+\end{enumerate}
+
+Notice that if $(\widehat{R}, \widehat{S}, \bar{T}^{1/\delta})$ is a valid AGHO
+signature on pair $(\pk'^{1/\delta}, \bar{\Gamma}^{1/\delta})$, then under the
+existential unforgeability of AGHO signatures, this signature corresponDS to
+either a signature or a randomisation of a signature computed by the
+registration authority on the same pair.  Since the registration authority is
+trusted to sign only well-formed pairs, then this entails that
+$\bar{\Gamma}^{1/\delta}$ was computed by calling $\hashtwo$ on some input
+$\Tag \in \{0,1\}^*$, and that $\Tag$ corresponDS to
+$L_2[\bar{\Gamma}^{1/\delta}]$.
+
+Hence the extractability property of signatures of knowledge guarantees that if
+user the user is able to produce a valid proof $\eta$, then we can extract a
+valid witness  $(\delta, \sk)$, and that $(\signatureone,
+\bar{\signaturetwo}^{1/\delta})$ is a valid tag-based aggregate signature on
+the pre-image of $\bar{\Gamma}^{1/\delta}$ and attributes $\atv{i}$, and that
+$(\widehat{R}, \widehat{S}, \bar{T}^{1/\delta})$ is a valid AGHO signature on
+pair $\pk'^{1/\delta}, \bar{\Gamma}^{1/\delta}$.
+
+\paragraph{Simulatability.}
+
+We now show that if DDH holds in $\group{1}$, we can simulate a valid
+presentation $\proof$ without access to a valid witness.
+
+\begin{itemize}
+
+  \item Randomly select $\alpha, \beta, \gamma, \delta, \nu, \{\eta_i\}_{i\in
+    \mathbb{I}},  \theta \in \Zp^*$;
+
+  \item Compute $\bar{\gen} = \gen^{\alpha}$, $\bar{V} = \gen^{\beta}$,
+    $\bar{T} = \gen^{\gamma}$, $\bar{\signaturetwo} = \gen^{\delta}$,
+    $\bar{\Gamma} = \gen^{\nu}$, $H_i = \gen^{\eta_i}$, and $\pk' =
+    \gen^{\theta}$ (note that if the DDH assumption holds in $\group{1}$, then
+    it is computationally infeasible to tell whether tuple $(\bar{\gen},
+    \bar{V}, \bar{T}, \bar{\signaturetwo}, \bar{\Gamma})$ was generated
+    following the description in Section~\ref{sec:proof-inst} or as random group
+    elements);
+
+  \item Compute $\widehat{R}' =
+    (\ggen^{\alpha}\widehat{U}_1^{-\theta}\widehat{U}_2^{-\nu})^{1/\gamma}$,
+    $\widehat{S}' = \widehat{R}'^{\beta/\alpha}$, and $\signatureone' =
+    (\ggen\prod_{i \in \mathbb{I}}\ipk{i}^{-\eta_i})^{\delta/\nu}$ (by
+    construction, tuple $(\bar{\gen}, \bar{V}, \widehat{R}', \widehat{S}',
+    \bar{T}, \signatureone', \bar{\signaturetwo}, \bar{\Gamma}, \pk',
+    \{\atv{i}, H_i\}_{i\in \mathbb{I}})$ verifies equations
+    \ref{eq:app-proof-rel-2});
+
+  \item Pick $\pi_1$, $\pi_2$ and $c$ randomly in $\Zp$;
+
+  \item Compute $A = \gen^{\pi_1}\cdot\bar{\gen}^{-c} \ ; \ B =
+    V^{\pi_1}\cdot\bar{V}^{-c} \ ; \ C_i = \hashone(\atv{i})^{\pi_1}\cdot
+    H_i^{-c} \ ; \ D = \bar{\gen}^{\pi_2}\cdot\pk'^{-c}$;
+
+  \item Using random oracle $\hash$, define the hash $\hash(A, B, \{C_i\}_{i
+    \in \mathbb{I}}, D, \msg)$ as value $c$;
+
+  \item Finally, set $\eta$ to tuple $(A, B, \{C_i\}_{i \in \mathbb{I}}, D,
+    \pi_1, \pi_2)$.
+
+\end{itemize}
