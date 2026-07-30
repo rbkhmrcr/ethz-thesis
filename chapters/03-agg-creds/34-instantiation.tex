@@ -1,6 +1,7 @@
 \section{Instantiation}
 
-\subsection{Our tag based aggregate signature scheme ($\ATS$)} \label{sec:tag-scheme}
+\subsection{Our tag based aggregate signature scheme ($\ATS$)}
+\label{sec:tag-scheme}
 
 Our tag based aggregate signature scheme is an enhanced aggregate BLS signature
 scheme that signs pairs of messages and tags~\cite{JC:BonLynSha04,EC:BGLS03}.
@@ -9,14 +10,15 @@ signatures.  Our scheme is comprised of the following algorithms:
 
 \begin{description}
 
-  \item $(\sk, \pk) \sample \ATSgen(\secparam)$: On input the security 
-  parameter, the generation algorithm outputs a key pair constructed as follows:
+  \item $(\sk, \pk) \sample \ATSgen(\secparam)$: On input the security
+    parameter, the generation algorithm outputs a key pair constructed as
+    follows:
       %
-    \begin{equation*}
+    \begin{align*}
     %
-  \sk \sample \Zp, \  \pk = \ggen^x.
+  & \text{Sample } \sk \sample \Zp, \\  & \text{Return } (\sk, \pk = \ggen^x).
           %
-    \end{equation*}
+    \end{align*}
     %
 
   \item $\signature \sample \ATSsign(\sk, \Tag, \msg)$: On input secret key
@@ -24,70 +26,70 @@ signatures.  Our scheme is comprised of the following algorithms:
     \{0,1\}^*\times\{0,1\}^*$, the signing algorithm outputs a signature
     defined as follows:
         %
-    \begin{gather*}
+    \begin{align*}
     %
-    s \sample \Zp, \\
-    \signature = (\ggen^{s}, \hashone(m)^{\sk} \cdot \hashtwo(\Tag)^s).
+    & \text{Sample } s \sample \Zp, \\ & \text{Return } \signature =
+    (\ggen^{s}, \hashone(m)^{\sk} \cdot \hashtwo(\Tag)^s).
             %
-    \end{gather*}
+    \end{align*}
     %
 
 
   \item $\signature' \sample \ATSrandomise(\Tag, \signature) $: On input tag
-    $\Tag$, signature $\signature$, the randomisation
-    algorithm outputs a signature formed as follows:
+    $\Tag$, signature $\signature$, the randomisation algorithm outputs a
+    signature formed as follows:
         %
-    \begin{gather*}
+    \begin{align*}
     %
-            \text{Parse } \signature = (\signatureone, \signaturetwo), \\
-        s' \sample \Zp, \\
-      \signature' = ( \signatureone \cdot  \ggen^{s'}, \signaturetwo \cdot \hashtwo(\Tag)^{s'}).
+            & \text{Parse } \signature = (\signatureone, \signaturetwo), \\ &
+      \text{Sample } s' \sample \Zp, \\ & \text{Return } \signature' = (
+      \signatureone \cdot  \ggen^{s'}, \signaturetwo \cdot
+      \hashtwo(\Tag)^{s'}).
             %
-    \end{gather*}
+    \end{align*}
     %
 
   \item $ \{0,1\} \leftarrow \ATSverify(\pk, \Tag, \msg, \signature) $: On
     input public key $\pk$, tag $\Tag \in \{0,1\}^*$, message $\msg \in
-    \{0,1\}^*$, and signature $\signature$ the verification algorithm
-    outputs $1$ if the following is satisfied:
+    \{0,1\}^*$, and signature $\signature$ the verification algorithm outputs
+    the result of the following check:
         %
-    \begin{gather*}
+    \begin{align*}
     %
-        \text{Parse } \signature = (\signatureone, \signaturetwo), \\
-e(\signaturetwo,\ggen) = e(\hashone(\msg), \pk) \cdot e(\hashtwo(\Tag), \signatureone).
+        & \text{Parse } \signature = (\signatureone, \signaturetwo), \\ &
+        \text{Return } e(\signaturetwo,\ggen) \checkcheck e(\hashone(\msg),
+        \pk) \cdot e(\hashtwo(\Tag), \signatureone).
         %
-    \end{gather*}
+    \end{align*}
     %
-    And otherwise outputs $0$.
 
   \item $\signature \leftarrow \ATSaggregate(\{ \signature_i \}_{i \in [1,
-    n]})$: On input signatures $\signature_i$, the aggregation algorithm 
+    n]})$: On input signatures $\signature_i$, the aggregation algorithm
     outputs the following:
         %
-    \begin{gather*}
+    \begin{align*}
     %
-            \text{Parse } \signature_i = (\signatureone_i, \signaturetwo_i), \\
-      \signature = (\prod_{i=1}^n {\signatureone}_i, \ \prod_{i=1}^n
-      {\signaturetwo}_i).
+            & \text{Parse } \signature_i = (\signatureone_i, \signaturetwo_i),
+         \\ & \text{Return } \signature = (\prod_{i=1}^n {\signatureone}_i, \
+         \prod_{i=1}^n {\signaturetwo}_i).
         %
-    \end{gather*}
+    \end{align*}
     %
 
   \item $\{0,1\} \leftarrow \ATSverifyagg(\{\pk_i\}_{i\in [1, n]},
     \Tag,\{\msg_i\}_{i\in [1, n]},\signature) $: On input public keys
     $\{\pk_i\}_{i\in [1, n]}$, tag $\Tag$, messages $\{\msg_i\}_{i\in [1, n]}$,
-    and aggregate signature $\signature$, the aggregate verification 
-    algorithm outputs $1$ if the following holds:
+    and aggregate signature $\signature$, the aggregate verification algorithm
+    outputs the result of the following check:
         %
-    \begin{gather*}
+    \begin{align*}
     %
-  \text{Parse } \signature = (\signatureone, \signaturetwo), \\
-      e(\signaturetwo, \ggen) = e (\hashtwo(\Tag), \signatureone) \cdot
-      \prod_{i=1}^n e(\hashone(\msg_i), \pk_i).
+  & \text{Parse } \signature = (\signatureone, \signaturetwo), \\ &
+  \text{Return } e(\signaturetwo, \ggen) \checkcheck e (\hashtwo(\Tag),
+  \signatureone) \cdot \prod_{i=1}^n e(\hashone(\msg_i), \pk_i).
         %
-    \end{gather*}
+    \end{align*}
     %
-    And otherwise it outputs $0$.
 
 \end{description}
 
@@ -184,17 +186,17 @@ attacks under the $q$-Strong Diffie-Hellman ($q$-SDH) assumption~\cite{}.
 
 \begin{description}
 
-  \item[$(\crs,\state) \sample \AACgen(\secparam)$ :] 
+  \item[$(\crs,\state) \sample \AACgen(\secparam)$ :]
 
-  \item[$(\sk,\regcred) \sample \AACregister(\crs,\state)$ :] 
+  \item[$(\sk,\regcred) \sample \AACregister(\crs,\state)$ :]
 
-  \item[$\cred \sample \AACissue(\crs,\isk{},\regcred,\att{})$ :] 
+  \item[$\cred \sample \AACissue(\crs,\isk{},\regcred,\att{})$ :]
 
-  \item[$\aggcred \leftarrow \AACaggregate(\crs,\cred,\ldots,\cred)$ :] 
+  \item[$\aggcred \leftarrow \AACaggregate(\crs,\cred,\ldots,\cred)$ :]
 
-  \item[$\proof \sample \AACpresent(\crs,\aggcred,\msg)$ :] 
+  \item[$\proof \sample \AACpresent(\crs,\aggcred,\msg)$ :]
 
-  \item[$\{0,1\} \leftarrow \AACverify(\crs,\msg,\proof)$ :] 
+  \item[$\{0,1\} \leftarrow \AACverify(\crs,\msg,\proof)$ :]
 
 \end{description}
 
@@ -246,8 +248,8 @@ $\rel$ defined as $\rel( \inst, \witness) = 1$, if and only if, the following
 equalities hold: \begin{equation} \label{eq:proof-original} \begin{aligned}
   e(V, \widehat{R}) = e(\gen, \widehat{S}) & \quad ;  \quad e(T, \widehat{R})
   \cdot e(\gen^{\sk}, \widehat{U}_1)\cdot e(\Gamma,  \widehat{U}_2) = e(\gen,
-  \ggen) \ ; \\ \quad \pk = \gen^{\sk} & \quad ;  \quad e(\signaturetwo, \ggen)
-= e(\Gamma, \signatureone)\cdot\prod_{i\in\mathbb{I}}e(\hashone(\atv{i}),
+\ggen) \ ; \\ \quad \pk = \gen^{\sk} & \quad ;  \quad e(\signaturetwo, \ggen) =
+e(\Gamma, \signatureone)\cdot\prod_{i\in\mathbb{I}}e(\hashone(\atv{i}),
 {\gen^x}_{i}).  \end{aligned} \end{equation} Since we assume that the
 registration authority only issues signatures on well-formed messages, pairs
 $(\pk, \hashtwo(\Tag))$ for $\Tag \in \Zp$, we do not require the user to prove
@@ -316,11 +318,11 @@ following equalities hold:
 \end{gather*}
 %
 
-Next we describe how $\eta$ is computed.  This is followed by showing
-that if the user is able to produce a valid $\eta$, then we can extract a valid
-witness for the relation defined in~\fref{eq:proof-original}.
-We prove that under the DDH assumption in $\group{1}$, $\proof$ is simulatable,
-it does not leak any information whatsoever about the witness.
+Next we describe how $\eta$ is computed.  This is followed by showing that if
+the user is able to produce a valid $\eta$, then we can extract a valid witness
+for the relation defined in~\fref{eq:proof-original}.  We prove that under the
+DDH assumption in $\group{1}$, $\proof$ is simulatable, it does not leak any
+information whatsoever about the witness.
 
 \paragraph{$\eta$ Computation.} We first describe the interactive
 zero-knowledge proof  underlying the computation of $\eta$, and then show how
@@ -361,8 +363,8 @@ computing tuple $(A, B, \{C_i\}_{i \in \mathbb{I}}, D)$, followed by $c =
 \hash(A, B, \{C_i\}_{i \in \mathbb{I}}, D, \msg)$, and outputting $\eta = (A,
 B, \{C_i\}_{i \in \mathbb{I}}, D, \pi_1, \pi_2)$.
 
-\subsubsection*{Extensions.} The construction supports also several straightforward
-extensions.
+\subsubsection*{Extensions.} The construction supports also several
+straightforward extensions.
 
 New issuers can join the system without impacting the construction.  In fact,
 the aggregation of credentials and their presentation is agnostic to the number

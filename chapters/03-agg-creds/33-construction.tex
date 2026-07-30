@@ -75,9 +75,7 @@ They then construct a proof of knowledge with the following parameters:
 %
 \begin{gather}
 %
-  \inst = (\rapk, \ISSUERS, \{\ipk{i}, \atv{i}\}_{i \in \ISSUERS}) \\
-%
-  \witness = (\tau, \sk, \pk, \psi, \sigma) \\
+  \inst = (\rapk, \ISSUERS, \{\ipk{i}, \atv{i}\}_{i \in \ISSUERS}), \witness = (\tau, \sk, \pk, \psi, \sigma) \\
 %
   \rel = \{ (\sk, \pk) \leftarrow \DSgen(\secparam) \quad \wedge \quad
     \DSverify(\pk, \pk \|  \tau, \psi) = 1 \\
