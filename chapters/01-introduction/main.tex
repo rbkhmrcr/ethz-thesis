@@ -8,11 +8,12 @@ way by cryptography.
 Encryption allows people to communicate by exchanging messages that are, to
 eavesdroppers, indistinguishable from random. This allows parties with a shared
 key to communicate privately, regardless of their personal power, wealth,
-affiliations, or any other characteristics. The ability to conceal written information 
-has been considered for at least
-four thousand years, evidenced by the obfuscated hieroglyphs in the
-tomb of Khnumhotep II. Modern cryptography has refined this further - even
-truly powerful entities cannot read today's encrypted communication.
+affiliations, or any other characteristics.
+% A shifting sandbank in eternity,
+The desire to conceal written information has been considered for at least the
+last four thousand years, reaching back to the obfuscated hieroglyphs in the
+tomb of Khnumhotep II.  Modern cryptography has enabled encrypted
+communications that even truly powerful entities cannot read.
 
 The communicating parties themselves are not assumed to be as powerful as the
 entities trying to break the system.  Encryption demands relatively little
@@ -25,15 +26,16 @@ Cryptography today deals in more varied technologies than private
 communication.  Information flows, and the question shifts to reflect that.
 Once the contents of a communication are protected, for example, a resourceful
 adversary may instead attempt to determine the identities of the communicating
-parties, their relationships, or patterns in their behaviour. Protecting that then 
-brings into focus the next piece of information that could be observed and used.
+parties, their relationships, or patterns in their behaviour. Protecting that
+then brings into focus the next piece of information that could be observed and
+used. Every answer reveals another question.
 
 Over the last fifty years, privacy enhancing technologies have been designed to
 answer exactly these broader privacy problems. The surface of information being
-protected has expanded, so has the number of entities capable of observing some
-part of the system.  Service providers, issuers, validators, network operators
-and public authorities may all learn sensitive information while performing
-otherwise legitimate functions.
+protected has expanded, and so has the number of entities capable of observing
+some part of the system.  Service providers, issuers, validators, network
+operators and public authorities may all learn sensitive information while
+performing otherwise legitimate functions.
 
 These powerful entities are consequently often modelled as adversaries.
 Protocol designers have then, understandably, been active in designing systems
@@ -56,7 +58,7 @@ the system. An institution may be relied upon to provide availability, maintain
 state or execute a prescribed computation without being trusted with users'
 private information.
 
-Privacy preserving systems are often discussed as if the choice is between
+Privacy-preserving systems are often discussed as if the choice is between
 decentralised privacy and centralised surveillance. This thesis challenges that
 binary. Powerful institutions can perform useful protocol functions while
 cryptography limits both the information available to them and the capabilities
@@ -67,10 +69,11 @@ users.
 Modern privacy-preserving systems already involve service providers, issuers,
 auditors, validators and other accountable entities with operational
 responsibilities. Privacy Pass, anonymous credential systems and privacy
-services such as Private Relay and Hide My Email use institutional
-infrastructure while limiting the information available to the institutions
-involved~\cite{}. This thesis explores how modelling such roles explicitly can
-enable practical and efficient privacy preserving systems.
+services such as Apple's Private Relay use institutional infrastructure while
+limiting the information available to the institutions
+involved~\cite{PoPETS:DGSTV18,privaterelay2021}. This thesis explores how
+modelling such roles explicitly can enable practical and efficient
+privacy-preserving systems.
 
 \paragraph{Financial privacy.} Cryptographic protocols are applied in vastly
 different spaces. You can make every argument that governments should not be
@@ -82,44 +85,34 @@ intended recipient learns the contents of a message.
 But in a financial system, there is something slightly different involved.
 Real financial systems have legitimate accountability requirements.
 
-They must establish the validity of transactions, preserve consistent shared
-states, control issuance, prevent or detect any possible double spending, and,
-in many settings, support some form of accountability.  Whether an entity with
-the ability to audit financial transactions should exist is not, in the setting
-of this thesis, a question. The question is how they should be implemented.
-What information can they obtain? Under which circumstances can they obtain it?
+They must establish the validity of transactions, maintain a consistent shared
+state, control issuance, prevent or detect double spending, and, in many
+settings, support some form of accountability.  This thesis takes the existence
+of financial auditing requirements as a system constraint and asks how narrowly
+the corresponding capabilities can be defined.  What information should an
+auditor be able to obtain? Under which circumstances can they obtain it?
 Should access be limited to a transaction, a user, a certain period of time, a
 single prescribed purpose, or be ongoing?
 
-There is often objection to constructing protocols with accountability at all,
-as it seems analogous to a backdoor in the system. And there is the argument
-that once a capability exists, it will be used everywhere possible. This is
-important to consider.  Financial systems are inherently responsible for
-movement of money.  This instantly distinguishes the system from communication
-alone.  Refusing to design auditing protocols does not remove the
+There are often objections to constructing protocols with accountability at
+all, as it seems analogous to a backdoor in the system. And there is the
+argument that once a capability exists, it will be used everywhere possible.
+This is important to consider.  Financial systems are inherently responsible
+for movement of money.  This instantly distinguishes the system from
+communication alone.  Refusing to design auditing protocols does not remove the
 accountability requirements already present in financial systems. It may
 instead result in the auditing goals being met by systems offering much weaker
 privacy to all users.
 
-This thesis starts from the presence of these operational roles and asks how
-cryptography can constrain them. The organisations involved are not entrusted
-with users' privacy. They are modelled as honest but curious: they execute
-their prescribed protocols while attempting to learn everything possible.
-
-An actively malicious adversary is formally able to behave arbitrarily, but it
-is not always the most informative model of an institution's role especially
-when privacy is the greatest concern. In many deployed systems, organisations
-are legally, operationally and publicly accountable for correct provision of
-services. The principal threat is rarely how much damage they can do through
-arbitrary deviation from the protocol, as that is constrained by their desires
-for a smooth running country, or profits. The more persistent threat to users
-then is the observation, retention and combination of all information revealed
-during legitimate protocol execution.
-
-In this way, the protocol design is able to distinguish between trust in an
-organisation's operational role and trust in its handling of private
-information. An institution may be relied upon for availability, validation or
-prescribed computation while cryptography limits what it can learn.
+This thesis starts with the presence of these operational roles and asks how
+cryptography can work with them. An institution need not be modelled in the
+same way for every property of a system. For availability and correct
+operation, we assume that it performs its prescribed role. For privacy, the
+same institution may deviate arbitrarily from the protocol, retain and combine
+the information available to it, and attempt to learn anything it can. Privacy
+is assessed against the strongest information it can derive in this setting.
+The institution may therefore be relied upon to perform an operational function
+without being trusted with users' private information.
 
 \paragraph{The thesis.} This thesis argues that practical privacy is achieved
 not by assuming away existing infrastructure, but by modelling its participants
@@ -136,27 +129,36 @@ later need to demonstrate statements concerning those attributes without
 revealing either the attributes themselves or unnecessary information about the
 issuers. We construct an efficient multi-issuer aggregate anonymous credential
 scheme in which independently issued credentials can be combined and presented
-through a single proof. We use the existence of a system registration authority
-- already implicitly present in anonymous credential constructions - to
-eliminate heavy computational requirements.
+through a single proof. Anonymous credential systems already implicitly include
+a registration authority. We use this existing role to bind credentials issued
+to the same user, preventing credentials belonging to different users from
+being aggregated without requiring expensive proofs during presentation.
 
-We next consider accountability in privacy preserving transaction systems.
+We next consider accountability in privacy-preserving transaction systems.
 Financial systems may require both the ability to investigate a particular
 transaction and the ability, under prescribed circumstances, to identify the
 transactions associated with a particular user. These capabilities are related
 but distinct, and granting one need not grant the other. We develop a
-transaction identification mechanism.
+transaction identification mechanism that supports concurrent transaction
+creation without requiring the auditor to maintain persistent per-user state.
+Tracing authority can be restricted to a specified epoch, limiting both the
+scope and duration of the information disclosed to an auditor.
 
-Third, we study privacy preserving offline payments. Offline operation improves
+Third, we study privacy-preserving offline payments. Offline operation improves
 availability and accessibility, but changes how double spending must be
-handled. We develop a scheme that supports offline transactions.
+handled. We develop a privacy-preserving offline payment scheme that divides
+computation between a mobile device and a secure element. Payments made by
+honest users remain unlinkable, while information identifying a payer can be
+recovered following double spending.
 
 Finally, we consider transaction authorisation in permissioned distributed
 systems. In these systems, transactions are approved by known endorsing parties
-rather than anonymous participants. We develop a mechanism through which the
-required endorsers can authorise transactions.  This again treats the existing
-institutional structure as a resource to be modelled rather than an obstacle to
-be removed.
+rather than anonymous participants. We construct threshold structure-preserving
+signature schemes that allow the required endorsers to jointly authorise
+transactions without relying on a single signing authority.  The schemes
+require no interaction during the online signing phase, making them suitable
+for efficient transaction authorisation. This treats the existing institutional
+structure as a resource to be modelled rather than an obstacle to be removed.
 
 Together, these contributions support three claims:
 
@@ -176,3 +178,13 @@ Together, these contributions support three claims:
     to each participant.
 
 \end{enumerate}
+
+The remainder of this thesis is organised as follows.
+\Fref{chap:preliminaries} introduces the notation, security definitions and
+cryptographic building blocks used throughout. \Fref{chap:agg-creds} considers
+privacy-preserving identity systems and presents our aggregate anonymous
+credential construction. \Fref{chap:txid} presents our transaction
+identification mechanism.  \Fref{chap:tsps} presents our threshold
+structure-preserving signature protocol, and \Fref{chap:offline-payments}
+presents our offline payment mechanism.  Finally, \Fref{chap:conclusion}
+summarises the work, the resulting trade-offs, and discusses open questions.

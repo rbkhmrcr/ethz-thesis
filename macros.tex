@@ -1,3 +1,11 @@
+\usepackage{amssymb}
+\usepackage{mathtools}
+\usepackage{framed}
+\usepackage{xcolor}
+\usepackage{multicol}
+\usepackage{enumitem}
+\usepackage{url}
+
 \newcommand{\rebekah}[1]{\textcolor{orange}{{Rebekah}:#1}}
 
 % new environments
@@ -13,6 +21,7 @@
 \Frefformat{vario}{\fancyrefthmlabelprefix}{{\Frefthmname}\fancyrefdefaultspacing#1 on page #2}
 \frefformat{plain}{\fancyrefthmlabelprefix}{{\frefthmname}\fancyrefdefaultspacing#1}
 \Frefformat{plain}{\fancyrefthmlabelprefix}{{\Frefthmname}\fancyrefdefaultspacing#1}
+
 
 \newcommand{\algo}[1]{\mathsf{#1}}
 \newcommand{\sample}{\overset{\$}{\leftarrow}}
@@ -86,6 +95,9 @@
 \newcommand{\inst}{\algo{inst}}
 \newcommand{\witness}{\algo{wit}}
 
+% prf
+\newcommand{\PRF}{\algo{F}}
+
 % soks
 \newcommand{\SOK}{\algo{SoK}}
 \newcommand{\sokgen}{\SOK\algo{.Gen}}
@@ -102,6 +114,7 @@
 % txid
 \newcommand{\ID}{\algo{ID}}
 \newcommand{\IDregister}{\ID\algo{.Register}}
+\newcommand{\IDgrant}{\ID\algo{.Grant}}
 \newcommand{\IDsubmit}{\ID\algo{.Submit}}
 \newcommand{\IDexecute}{\ID\algo{.Execute}}
 \newcommand{\IDidkeygen}{\ID\algo{.IDKeyGen}}
@@ -118,6 +131,14 @@
 \newcommand{\ek}{\algo{ek}}
 \newcommand{\utk}{\algo{tk}}
 \newcommand{\payload}{\algo{payload}}
+
+% txid sec
+\newcommand{\reg}{\algo{reg}}
+\newcommand{\perm}{\algo{perm}}
+\newcommand{\txns}{\algo{txns}}
+\newcommand{\regsimu}{\texttt{reg}}
+\newcommand{\permsimu}{\texttt{perm}}
+\newcommand{\txnssimu}{\texttt{txns}}
 
 % anon creds
 \newcommand{\AC}{\algo{AC}}
@@ -168,6 +189,7 @@
 
 \newcommand{\gen}{g}
 \newcommand{\ggen}{\tilde{g}}
+\newcommand{\gggen}[1]{\tilde{#1}}
 
 \newcommand{\group}[1]{\mathbb{G}_{#1}}
 \newcommand{\Zp}{\mathbb{Z}_p}
@@ -186,7 +208,9 @@
 %% txid things
 \newcommand{\PSK}{\mathcal{S}}
 \newcommand{\PTK}{\mathcal{T}}
+\newcommand{\tx}{\algo{tn}}
 \newcommand{\Max}{\algo{max}}
+\newcommand{\auditor}{\algo{aud}}
 
 %% sig parts
 \newcommand{\signatureone}{{\signature_1}}
