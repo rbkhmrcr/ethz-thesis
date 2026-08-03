@@ -1,64 +1,178 @@
 \chapter{Introduction}
-% This thesis argues that practical privacy is achieved not by assuming away
-% existing infrastructure, but by modelling it accurately and using cryptography
-% to constrain the information available to each participant according to their
-% operational role.to start making the point that, though researchers interested
-% in privacy usually use decentralisation to a very ... admirable? pov, a lot of
-% the time in practice, solutions have a variety of parties and are not
-% explicitly p2p, for example. and a way to successfully get privacy in practice
-% is to embrace this.  think of privacy pass, apple private relay, ... apple hide
-% my email, (finance stuff?) (physical cash itself?!) ... then looks at design
-% docs for self sovereign identity, for ... digital assets? ??? and we see that
-% to empower users is often through systems which allow them to achieve what they
-% want in a frictionless, fast, secure, way, and this means that more powerful
-% parties can be taken advantage of ...?  Privacy-enhancing technologies are
-% increasingly deployed in systems that serve millions of users. These systems
-% rarely consist of mutually distrustful peers. Instead, they involve service
-% providers, issuers, auditors, validators, or other accountable entities that
-% already have operational responsibilities.  Then examples.  Privacy Pass.
-% Apple Private Relay.  Hide My Email.  Anonymous credential deployments.  CBDC
-% proposals.  Enterprise blockchains.
-%
-% we dont (usually) trust them with privacy. they're honest but curious. they're
-% trusted for availability, and to follow the protocol. and we can use this to
-% build more lightweight systems.
-%
-% Real financial systems have legitimate accountability requirements.
-%
-% Modern privacy-preserving systems are rarely deployed in environments
-% consisting solely of mutually distrusting peers. Instead, they are deployed
-% within infrastructures that already contain organisations responsible for
-% service provision, policy enforcement, auditing, or transaction validation.
-% These organisations are not entrusted with users' privacy. Rather, they are
-% assumed to execute prescribed protocols while cryptography limits the
-% information available to them. This thesis explores how acknowledging these
-% existing operational roles enables practical and efficient privacy-preserving
-% systems.
-%
-% then the thesis,
-%
-% the aggregate credentials paper says, the credential systems we have at the
-% moment don't reflect reality, so we make a nice neat construction that better
-% reflects what is desired. and it's fast.
-%
-% the tracing paper, again, if we want financial privacy with digital money, we
-% may need ability to both people at a transaction, and identify the user, and to
-% point at a user, and identify all transactions associated with that user. this
-% is what this paper enables. it uses epochs so that transactions aren't strictly
-% sequential. i know tracing is a bad word for a lot of people. but maybe adding
-% these features will allow us to have more privacy in digital money. (cite some
-% stuff idk)
-%
-% offline payments. accessibility. develop the scheme, prove it secure, again
-% there is an auditor. again talk about the power given to this person, contrast
-% with solving for double spenders only, the efficiency / impossibility of that
-%
-% tsps. this is for a specific problem in hyperledger fabric style systems. there
-% are known endorsers rather than untrusted anonymous miners, and so we want them
-% to sign each transaction to confirm that it is legitimate. here is how you do
-% that.
-%
-% This thesis argues that in practice, privacy is achieved not by assuming away
-% existing infrastructure, but by modelling it accurately and using cryptography
-% to constrain the information available to each participant according to their
-% operational role.
+
+\paragraph{Privacy and power.} Resources are not equally distributed throughout
+the world. There are infinitely many consequences of this. All of them
+influence our actions in some way, but not all of them can be influenced in any
+way by cryptography.
+
+Encryption allows people to communicate by exchanging messages that are, to
+eavesdroppers, indistinguishable from random. This allows parties with a shared
+key to communicate privately, regardless of their personal power, wealth,
+affiliations, or any other characteristics. The ability to conceal written information 
+has been considered for at least
+four thousand years, evidenced by the obfuscated hieroglyphs in the
+tomb of Khnumhotep II. Modern cryptography has refined this further - even
+truly powerful entities cannot read today's encrypted communication.
+
+The communicating parties themselves are not assumed to be as powerful as the
+entities trying to break the system.  Encryption demands relatively little
+computational power of the users while keeping the adversary's computational
+task infeasible.  This asymmetry of necessary computational power between users
+and attacking entities is well noted, and lies at the foundation of modern
+cryptography itself.
+
+Cryptography today deals in more varied technologies than private
+communication.  Information flows, and the question shifts to reflect that.
+Once the contents of a communication are protected, for example, a resourceful
+adversary may instead attempt to determine the identities of the communicating
+parties, their relationships, or patterns in their behaviour. Protecting that then 
+brings into focus the next piece of information that could be observed and used.
+
+Over the last fifty years, privacy enhancing technologies have been designed to
+answer exactly these broader privacy problems. The surface of information being
+protected has expanded, so has the number of entities capable of observing some
+part of the system.  Service providers, issuers, validators, network operators
+and public authorities may all learn sensitive information while performing
+otherwise legitimate functions.
+
+These powerful entities are consequently often modelled as adversaries.
+Protocol designers have then, understandably, been active in designing systems
+that take power away from powerful, centralised entities. Anything that such an
+entity learns is a step away from the perfect world. The ideal world.
+
+\paragraph{Centralisation, responsibility and trust.} In attempting to remove
+trust from centralised institutions, protocols may instead transfer
+computation, storage and operational responsibility to individual users. This
+can improve some properties of a system, but centralisation is not a single
+property and decentralisation is not a complete description of a protocol's
+design.
+
+Computation, state, authority and information may be distributed differently.
+A system may centralise computation while distributing authority between
+several institutions, or centralise storage while using cryptography to prevent
+the storage provider from learning the stored information. The distribution of
+these responsibilities does not by itself determine the trust assumptions of
+the system. An institution may be relied upon to provide availability, maintain
+state or execute a prescribed computation without being trusted with users'
+private information.
+
+Privacy preserving systems are often discussed as if the choice is between
+decentralised privacy and centralised surveillance. This thesis challenges that
+binary. Powerful institutions can perform useful protocol functions while
+cryptography limits both the information available to them and the capabilities
+they receive. Allowing institutions to perform this work may reduce the
+computation, storage, time and specialist knowledge required of individual
+users.
+
+Modern privacy-preserving systems already involve service providers, issuers,
+auditors, validators and other accountable entities with operational
+responsibilities. Privacy Pass, anonymous credential systems and privacy
+services such as Private Relay and Hide My Email use institutional
+infrastructure while limiting the information available to the institutions
+involved~\cite{}. This thesis explores how modelling such roles explicitly can
+enable practical and efficient privacy preserving systems.
+
+\paragraph{Financial privacy.} Cryptographic protocols are applied in vastly
+different spaces. You can make every argument that governments should not be
+able to read the communications of their citizens under any circumstances, that
+companies should not have the ability to read the messages of their customers.
+A private communication system can aim to ensure that no party other than the
+intended recipient learns the contents of a message.
+
+But in a financial system, there is something slightly different involved.
+Real financial systems have legitimate accountability requirements.
+
+They must establish the validity of transactions, preserve consistent shared
+states, control issuance, prevent or detect any possible double spending, and,
+in many settings, support some form of accountability.  Whether an entity with
+the ability to audit financial transactions should exist is not, in the setting
+of this thesis, a question. The question is how they should be implemented.
+What information can they obtain? Under which circumstances can they obtain it?
+Should access be limited to a transaction, a user, a certain period of time, a
+single prescribed purpose, or be ongoing?
+
+There is often objection to constructing protocols with accountability at all,
+as it seems analogous to a backdoor in the system. And there is the argument
+that once a capability exists, it will be used everywhere possible. This is
+important to consider.  Financial systems are inherently responsible for
+movement of money.  This instantly distinguishes the system from communication
+alone.  Refusing to design auditing protocols does not remove the
+accountability requirements already present in financial systems. It may
+instead result in the auditing goals being met by systems offering much weaker
+privacy to all users.
+
+This thesis starts from the presence of these operational roles and asks how
+cryptography can constrain them. The organisations involved are not entrusted
+with users' privacy. They are modelled as honest but curious: they execute
+their prescribed protocols while attempting to learn everything possible.
+
+An actively malicious adversary is formally able to behave arbitrarily, but it
+is not always the most informative model of an institution's role especially
+when privacy is the greatest concern. In many deployed systems, organisations
+are legally, operationally and publicly accountable for correct provision of
+services. The principal threat is rarely how much damage they can do through
+arbitrary deviation from the protocol, as that is constrained by their desires
+for a smooth running country, or profits. The more persistent threat to users
+then is the observation, retention and combination of all information revealed
+during legitimate protocol execution.
+
+In this way, the protocol design is able to distinguish between trust in an
+organisation's operational role and trust in its handling of private
+information. An institution may be relied upon for availability, validation or
+prescribed computation while cryptography limits what it can learn.
+
+\paragraph{The thesis.} This thesis argues that practical privacy is achieved
+not by assuming away existing infrastructure, but by modelling its participants
+and responsibilities accurately, and cryptographically constraining what each
+participant can learn and do. In particular, an institution may perform
+computation, maintain state, issue credentials, validate transactions or
+provide availability without being trusted with users' private information. We
+examine this principle through several systems.
+
+First, we consider aggregate anonymous credentials. Existing credential models
+do not always reflect the way that authority is divided between institutions in
+practice. A user may receive attributes from several independent issuers and
+later need to demonstrate statements concerning those attributes without
+revealing either the attributes themselves or unnecessary information about the
+issuers. We construct an efficient multi-issuer aggregate anonymous credential
+scheme in which independently issued credentials can be combined and presented
+through a single proof. We use the existence of a system registration authority
+- already implicitly present in anonymous credential constructions - to
+eliminate heavy computational requirements.
+
+We next consider accountability in privacy preserving transaction systems.
+Financial systems may require both the ability to investigate a particular
+transaction and the ability, under prescribed circumstances, to identify the
+transactions associated with a particular user. These capabilities are related
+but distinct, and granting one need not grant the other. We develop a
+transaction identification mechanism.
+
+Third, we study privacy preserving offline payments. Offline operation improves
+availability and accessibility, but changes how double spending must be
+handled. We develop a scheme that supports offline transactions.
+
+Finally, we consider transaction authorisation in permissioned distributed
+systems. In these systems, transactions are approved by known endorsing parties
+rather than anonymous participants. We develop a mechanism through which the
+required endorsers can authorise transactions.  This again treats the existing
+institutional structure as a resource to be modelled rather than an obstacle to
+be removed.
+
+Together, these contributions support three claims:
+
+\begin{enumerate}
+
+  \item Centralisation is multidimensional. Computation, state, authority, and
+    knowledge can each be centralised or decentralised independently, with
+    substantially different consequences for the resulting system.
+
+  \item Protocol models should reflect the roles that exist in practice.
+    Issuers, auditors, validators and service providers can be represented
+    explicitly rather than removed in pursuit of decentralisation.
+
+  \item Privacy does not automatically follow from decentralisation, nor does
+    it automatically disappear when corporations or public institutions
+    participate in a protocol. What matters is the information made available
+    to each participant.
+
+\end{enumerate}
