@@ -1,1 +1,46 @@
 \section{Definitions}
+
+\subsection{Transaction identification}
+
+\begin{description}
+
+  \item[$(\crs,\state) \sample \IDgen(\secparam)$ :] The setup algorithm, on
+    input security parameter $\secparam$, generates the public ledger
+    parameters $\crs$ together with the initial ledger state $\state$.
+
+  \item[$(\sk,\rc) \sample \IDregister(\crs,\state)$ :] The registration
+    algorithm, run interactively between a user and the registration authority
+    on input public parameters $\crs$ and state $\state$, outputs user secret
+    key $\sk$ and registration credential $\rc$ to the user.
+
+  \item[$\ek \sample \IDgrant(\crs,\sk,\rc,\epoch)$ :] The authorisation
+    algorithm, run interactively between a user and an auditor on input public
+    parameters $\crs$, user secret key $\sk$, registration credential $\rc$,
+    and epoch $\epoch$, outputs epoch tracing key $\ek$ to the auditor.
+
+  \item[$\tx \sample \IDsubmit(\crs,\sk,\rc,\epoch,\payload)$ :] The submission
+    algorithm, on input public parameters $\crs$, user secret key $\sk$,
+    registration credential $\rc$, epoch $\epoch$, and transaction payload
+    $\payload$, outputs transaction $\tx$, and appends it to the ledger if
+    valid.
+
+  \item[$\{\payload\} \leftarrow \IDidentify(\crs,\ek,\epoch)$ :] The
+    identification algorithm, on input public parameters $\crs$, epoch tracing
+    key $\ek$, and epoch $\epoch$, returns the set of payloads of the
+    transactions submitted under $\ek$ during $\epoch$.
+
+\end{description}
+
+We define security of transaction identification through an ideal functionality
+$\F{txid}$ that represents a trusted third party which executes the operations
+of the ledger on behalf of system participants in a way that perfectly meets
+the system requirements.
+
+The ideal functionality captures the properties of transaction identification:
+unlinkability, soundness, and epoch-scoped tracing.  Unlinkability is enforced
+by ensuring that an honest user's transactions reveal nothing to any auditor
+the user has not authorised for the corresponding epoch. Soundness is achieved
+by ensuring that an authorised auditor recovers exactly the transactions the
+user submitted during the authorised epoch, no more and no fewer. Epoch-scoping
+is enforced by ensuring that an epoch tracing key granted for one epoch
+discloses nothing about a user's transactions in any other epoch.

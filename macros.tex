@@ -14,6 +14,38 @@
 \frefformat{plain}{\fancyrefthmlabelprefix}{{\frefthmname}\fancyrefdefaultspacing#1}
 \Frefformat{plain}{\fancyrefthmlabelprefix}{{\Frefthmname}\fancyrefdefaultspacing#1}
 
+% define box for protocols
+
+\definecolor{boxpurple}{RGB}{82, 55, 175}
+\definecolor{boxblue}{RGB}{70, 110, 180}
+
+\newtcbtheorem[
+  auto counter,
+  number within=chapter
+]{protocolbox}{Protocol}{
+  colback=boxpurple!9,
+  colframe=boxpurple!55,
+  coltitle=black,
+  fonttitle=\normalfont,
+  fontupper=\small,
+  boxrule=0.6pt,
+  arc=1mm
+}{prot}
+
+% define box for primitives
+
+\newtcbtheorem[
+  auto counter,
+  number within=chapter
+]{primitivebox}{Primitive}{
+  colback=boxblue!7,
+  colframe=boxblue!40,
+  coltitle=black,
+  fonttitle=\normalfont,
+  fontupper=\small,
+  boxrule=0.5pt,
+  arc=1mm
+}{prim}
 
 \newcommand{\algo}[1]{\mathsf{#1}}
 \newcommand{\sample}{\overset{\$}{\leftarrow}}
@@ -109,7 +141,7 @@
 \newcommand{\IDgrant}{\ID\algo{.Grant}}
 \newcommand{\IDsubmit}{\ID\algo{.Submit}}
 \newcommand{\IDexecute}{\ID\algo{.Execute}}
-\newcommand{\IDidkeygen}{\ID\algo{.IDKeyGen}}
+\newcommand{\IDgen}{\ID\algo{.IDGen}}
 \newcommand{\IDidentify}{\ID\algo{.Identify}}
 
 % tagging scheme
@@ -119,6 +151,7 @@
 \newcommand{\TAGverify}{\TAG\algo{.Verify}}
 \newcommand{\epoch}{\algo{epoch}}
 \newcommand{\ledger}{\algo{ledger}}
+\newcommand{\tid}{\algo{tid}}
 \newcommand{\Tag}{\algo{tag}}
 \newcommand{\ek}{\algo{ek}}
 \newcommand{\utk}{\algo{tk}}
@@ -180,8 +213,11 @@
 %%% maths, fields, groups, etc %%%
 
 \newcommand{\gen}{g}
+\newcommand{\hgen}{h}
 \newcommand{\ggen}{\tilde{g}}
 \newcommand{\gggen}[1]{\tilde{#1}}
+
+\newcommand{\rc}{\mathit{rc}}
 
 \newcommand{\group}[1]{\mathbb{G}_{#1}}
 \newcommand{\Zp}{\mathbb{Z}_p}
