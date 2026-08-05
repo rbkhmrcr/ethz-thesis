@@ -36,35 +36,33 @@ the following holds:
 \end{equation*}
 
 \paragraph{Hiding.} Hiding requires that a commitment reveal no information
-about its message before it is opened. We define the following experiment
-between a challenger and an adversary $\adv$.
+about its message before it is opened.
 
-\begin{enumerate}
+\begin{experimentbox}{Hiding}{hiding}
 
-  \item The challenger generates $\ck \sample \ComGen(\secparam)$ and sends
-    $\ck$ to $\adv$.
+  \begin{enumerate}
 
-  \item The adversary outputs two messages $(\msg_0, \msg_1)$.
+    \item The challenger generates $\ck \sample \ComGen(\secparam)$ and sends
+      $\ck$ to $\adv$.
 
-  \item The challenger samples $b \sample \{0,1\}$, and computes the challenge
-    commitment as follows:
-    %
-    \begin{equation*}
-    %
-      \com^\star \leftarrow \ComCommit(\ck, \msg_b, \openinfo).
-     %
-    \end{equation*}
-     %
-    They then send $\com^\star$ to $\adv$.
+    \item The adversary outputs two messages $(\msg_0, \msg_1)$.
 
-  \item The adversary outputs a bit $b'$.
+    \item The challenger samples $b \sample \{0,1\}$, computes the challenge
+      commitment $\com^\star \leftarrow \ComCommit(\ck, \msg_b, \openinfo)$,
+      and sends $\com^\star$ to $\adv$.
 
-\end{enumerate}
+    \item The adversary outputs a bit $b'$.
 
-The hiding advantage of $\adv$ is then defined as follows:
-      %
+  \end{enumerate}
+
+  $\adv$ wins the experiment if $b' = b$.
+
+\end{experimentbox}
+
+The hiding advantage of $\adv$ is defined as follows:
+%
 \begin{equation*}
-    %
+%
   \Adv_{\Com,\adv}^{\mathsf{hiding}}(\secparam) = \left| \Pr[b'=b]-\frac{1}{2}
   \right|.
 %
@@ -75,33 +73,36 @@ every admissible adversary $\adv$.
 
 \paragraph{Binding.} We also require commitment schemes to satisfy the binding
 property, which prevents an adversary from opening the same commitment to two
-different messages. We define the following security experiment between a
-challenger and an adversary $\adv$:
+different messages.
 
-\begin{enumerate}
+\begin{experimentbox}{Binding}{binding}
 
-  \item The challenger generates $\ck \sample \ComGen(\secparam)$ and sends
-    $\ck$ to $\adv$.
+  \begin{enumerate}
 
-  \item The adversary outputs $ (\com, \msg, \msg', \openinfo, \openinfo') $
-    where $\msg \neq \msg'$.
+    \item The challenger generates $\ck \sample \ComGen(\secparam)$ and sends
+      $\ck$ to $\adv$.
 
-\end{enumerate}
+    \item The adversary outputs $(\com, \msg, \msg', \openinfo, \openinfo')$
+      where $\msg \neq \msg'$.
 
-The adversary wins if the following hold:
-      %
-\begin{equation*}
-    %
-  \ComOpen(\ck, \com, \openinfo)=\msg  \quad\text{and}\quad \ComOpen(\ck, \com,
-  \openinfo')=\msg'.
-    %
-\end{equation*}
+  \end{enumerate}
+
+  $\adv$ wins the experiment if the following hold:
+  %
+  \begin{equation*}
+  %
+    \ComOpen(\ck, \com, \openinfo) = \msg \quad\text{and}\quad \ComOpen(\ck,
+    \com, \openinfo') = \msg'.
+  %
+  \end{equation*}
+
+\end{experimentbox}
+
+The binding advantage of $\adv$ is defined as follows:
 %
-The binding advantage of $\adv$ is then defined as follows:
-      %
 \begin{equation*}
-    %
-  \Adv^{\mathsf{binding}}_{\Com,\adv}(\secparam)  = \Pr[\adv\text{ wins}].
+%
+  \Adv^{\mathsf{binding}}_{\Com,\adv}(\secparam) = \Pr[\adv\text{ wins}].
 %
 \end{equation*}
 %

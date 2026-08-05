@@ -36,31 +36,36 @@ the following holds:
 %
 
 \paragraph{Unforgeability.} We define existential unforgeability under chosen
-message attack (EUF-CMA) using the following security experiment:
+message attack (EUF-CMA) using the following security experiment.
 
-\begin{enumerate}
+\begin{experimentbox}{Existential unforgeability under chosen message
+  attack}{euf-cma}
 
-  \item The challenger generates $(\pk,\sk)\sample\DSgen(\secparam)$ and sends
-    $\pk$ to $\adv$.
+  \begin{enumerate}
 
-  \item The adversary is given oracle access to $\DSsigno$, which on input a
-    message $\msg$ returns $\signature = \DSsign(\sk, \msg)$, and stores
-    message $\msg$ in set $\mssg$.
+    \item The challenger generates $(\pk,\sk) \sample \DSgen(\secparam)$ and
+      sends $\pk$ to $\adv$.
 
-  \item The adversary outputs $(\msg^\star, \signature^\star)$.
+    \item The adversary is given oracle access to $\DSsigno$, which on input a
+      message $\msg$ returns $\signature = \DSsign(\sk, \msg)$ and stores
+      $\msg$ in the set $\mssg$.
 
-\end{enumerate}
-%
-We say that the adversary wins if the following hold:
-%
-\begin{equation*}
-%
-  \DSverify(\pk,\msg^\star,\signature^\star)=1  \quad\text{and}\quad \msg^\star
-  \notin \mssg.
-    %
-\end{equation*}
-%
-The adversary's advantage is then defined as follows:
+    \item The adversary outputs $(\msg^\star, \signature^\star)$.
+
+  \end{enumerate}
+
+  $\adv$ wins the experiment if the following hold:
+  %
+  \begin{equation*}
+  %
+    \DSverify(\pk,\msg^\star,\signature^\star) = 1 \quad\text{and}\quad
+    \msg^\star \notin \mssg.
+  %
+  \end{equation*}
+
+\end{experimentbox}
+
+The advantage of $\adv$ is defined as follows:
 %
 \begin{equation*}
 %
