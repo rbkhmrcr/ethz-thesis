@@ -1,0 +1,62 @@
+\section{Pseudorandom functions}\label{sec:prelims-prfs}
+
+Pseudorandom functions enable a party holding a secret key to evaluate a
+function whose outputs are indistinguishable from those of a truly random
+function to anyone without the key.
+
+\paragraph{Syntax.} A pseudorandom function family consists of algorithms
+defined as follows:
+%
+\begin{description}
+
+  \item[$\key \sample \PRFgen(\secparam)$ :] The key generation algorithm
+    takes the security parameter as input, and outputs a key $\key$.
+
+  \item[$y \leftarrow \PRFeval(\key, x)$ :] The evaluation algorithm takes key
+    $\key$ and input $x$ in the domain, and outputs $y$ in the range.
+
+\end{description}
+%
+We say $\PRF = (\PRFgen, \PRFeval)$ is a pseudorandom function family with
+domain $\domain$ and range $\range$ if $\PRFeval(\key, \cdot)$ is efficiently
+computable for every $\key$ output by $\PRFgen(\secparam)$, and if it
+satisfies pseudorandomness, which we define below. We use the standard syntax
+and security notions for pseudorandom functions~\cite{KatLin14}.
+
+\paragraph{Pseudorandomness.} Pseudorandomness requires that no efficient
+adversary, given oracle access to the function, can distinguish it from a
+function sampled uniformly at random from all functions $\domain \to
+\range$.
+
+\begin{experimentbox}{Pseudorandomness}{prf}
+
+  \begin{enumerate}
+
+    \item The challenger samples $b \sample \{0,1\}$. If $b = 0$, it generates
+      $\key \sample \PRFgen(\secparam)$. If $b = 1$, it samples a function $R$
+      uniformly at random from all functions $\domain \to \range$.
+
+    \item The adversary is given oracle access to $\mathcal{O}_{\PRF}$, which on
+      input $x \in \domain$ returns $\PRFeval(\key, x)$ if $b = 0$, and $R(x)$
+      if $b = 1$.
+
+    \item The adversary outputs a bit $b'$.
+
+  \end{enumerate}
+
+  $\adv$ wins the experiment if $b' = b$.
+
+\end{experimentbox}
+
+The pseudorandomness advantage of $\adv$ is defined as follows:
+%
+\begin{equation*}
+%
+  \Adv_{\PRF,\adv}^{\mathsf{prf}}(\secparam) = \left| \Pr[b'=b]-\frac{1}{2}
+  \right|.
+%
+\end{equation*}
+%
+We say $\PRF$ is a secure pseudorandom function if this advantage is small
+for every admissible adversary $\adv$ making a polynomial number of queries
+to $\mathcal{O}_{\PRF}$.
