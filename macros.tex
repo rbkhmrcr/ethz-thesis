@@ -18,6 +18,8 @@
 
 \definecolor{boxpurple}{RGB}{82, 55, 175}
 \definecolor{boxblue}{RGB}{70, 110, 180}
+\definecolor{boxteal}{RGB}{40, 125, 120}
+\definecolor{boxberry}{RGB}{155, 40, 110}
 
 \newtcbtheorem[
   auto counter,
@@ -46,6 +48,51 @@
   boxrule=0.5pt,
   arc=1mm
 }{prim}
+
+% box for assumptions
+
+\newtcbtheorem[
+  auto counter,
+  number within=chapter
+]{assumptionbox}{Assumption}{
+  colback=boxteal!5,
+  colframe=boxteal!35,
+  coltitle=black,
+  fonttitle=\normalfont,
+  fontupper=\small,
+  boxrule=0.4pt,
+  arc=1mm
+}{asm}
+
+% box for security experiments
+
+\newtcbtheorem[
+  auto counter,
+  number within=chapter
+]{experimentbox}{Experiment}{
+  colback=boxberry!5,
+  colframe=boxberry!38,
+  coltitle=black,
+  fonttitle=\normalfont,
+  fontupper=\small,
+  boxrule=0.5pt,
+  arc=1mm
+}{exp}
+
+% box for ideal functionalities
+
+\newtcbtheorem[
+  auto counter,
+  number within=chapter
+]{functionalitybox}{Functionality}{
+  colback=boxberry!5,
+  colframe=boxberry!42,
+  coltitle=black,
+  fonttitle=\normalfont,
+  fontupper=\small,
+  boxrule=0.6pt,
+  arc=1mm
+}{func}
 
 \newcommand{\algo}[1]{\mathsf{#1}}
 \newcommand{\sample}{\overset{\$}{\leftarrow}}
@@ -110,7 +157,8 @@
 % nizk sec 
 \newcommand{\NIZKsimgen}{\NIZK\algo{.SimGen}}
 \newcommand{\NIZKsimprove}{\NIZK\algo{.SimProve}}
-\newcommand{\NIZKext}{\NIZK\algo{.Extract}}
+\newcommand{\NIZKextract}{\NIZK\algo{.Extract}}
+\newcommand{\simoracle}{\mathcal{O}_{\NIZKsimprove}}
 \newcommand{\lang}{\algo{lang}}
 \newcommand{\rel}{\algo{rel}}
 \newcommand{\crs}{\algo{crs}}
@@ -118,6 +166,8 @@
 \newcommand{\state}{\algo{state}}
 \newcommand{\inst}{\algo{inst}}
 \newcommand{\witness}{\algo{wit}}
+\newcommand{\lbl}{\mathsf{lbl}}
+\newcommand{\td}{\mathsf{td}}
 
 % prf
 \newcommand{\PRF}{\algo{F}}

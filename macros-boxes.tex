@@ -1,0 +1,79 @@
+% define box for protocols
+
+\definecolor{boxpurple}{RGB}{82, 55, 175}
+\definecolor{boxblue}{RGB}{70, 110, 180}
+\definecolor{boxteal}{RGB}{40, 125, 120}
+\definecolor{boxberry}{RGB}{155, 40, 110}
+
+\newtcbtheorem[
+  auto counter,
+  number within=chapter
+]{protocolbox}{Protocol}{
+  colback=boxpurple!9,
+  colframe=boxpurple!55,
+  coltitle=black,
+  fonttitle=\normalfont,
+  fontupper=\small,
+  boxrule=0.6pt,
+  arc=1mm
+}{prot}
+
+% define box for primitives
+
+\newtcbtheorem[
+  auto counter,
+  number within=chapter
+]{primitivebox}{Primitive}{
+  colback=boxblue!7,
+  colframe=boxblue!40,
+  coltitle=black,
+  fonttitle=\normalfont,
+  fontupper=\small,
+  boxrule=0.5pt,
+  arc=1mm
+}{prim}
+
+% box for assumptions
+
+\newtcbtheorem[
+  auto counter,
+  number within=chapter
+]{assumptionbox}{Assumption}{
+  colback=boxteal!5,
+  colframe=boxteal!35,
+  coltitle=black,
+  fonttitle=\normalfont,
+  fontupper=\small,
+  boxrule=0.4pt,
+  arc=1mm
+}{asm}
+
+% box for security experiments
+
+\newtcbtheorem[
+  auto counter,
+  number within=chapter
+]{experimentbox}{Experiment}{
+  colback=boxberry!5,
+  colframe=boxberry!38,
+  coltitle=black,
+  fonttitle=\normalfont,
+  fontupper=\small,
+  boxrule=0.5pt,
+  arc=1mm
+}{exp}
+
+% box for ideal functionalities
+
+\newtcbtheorem[
+  auto counter,
+  number within=chapter
+]{functionalitybox}{Functionality}{
+  colback=boxberry!5,
+  colframe=boxberry!42,
+  coltitle=black,
+  fonttitle=\normalfont,
+  fontupper=\small,
+  boxrule=0.6pt,
+  arc=1mm
+}{func}

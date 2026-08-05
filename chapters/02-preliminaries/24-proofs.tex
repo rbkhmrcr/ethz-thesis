@@ -39,3 +39,135 @@ different security notions for non interactive zero knowledge proof systems,
 including zero knowledge, simulation soundness, and simulation extractability.
 Since these notions are construction dependent, we defer their formal
 definitions to the chapters in which they are required.
+
+\paragraph{Labelled proofs.} Certain construction require proofs
+that are bound to a message to prevent proof replaying.  
+We can attach a \emph{label} to each
+proof to prevent this.  A label is an arbitrary string that is fixed at proving time, supplied
+again at verification, and is not otherwise interpreted by the proof system.
+A labelled NIZK extends the syntax of~\Fref{sec:prelims-nizks} as follows:
+
+\begin{description}
+
+  \item[$\proof \leftarrow \NIZKprove(\crs, \inst, \witness, \lbl)$ :] The
+    proving algorithm additionally takes a label $\lbl \in \{0,1\}^*$.
+
+  \item[$\{0, 1\} \leftarrow \NIZKverify(\crs, \inst, \proof, \lbl)$ :] The
+    verification algorithm additionally takes the label $\lbl$, and accepts
+    only proofs produced under that label.
+
+\end{description}
+
+Correctness is as before, quantified additionally over all labels.  Labelled
+proofs subsume signatures of knowledge~\cite{C:ChaLys06}: taking the label to
+be the message being signed gives exactly a signature of knowledge, and we
+therefore do not treat the two as separate primitives.
+
+\paragraph{Simulation and extraction.} To state the security notions we
+require, we introduce the following additional algorithms.
+
+\begin{description}
+
+  \item[$(\crs, \td) \sample \NIZKsimgen(\secparam)$ :] The simulated setup
+    algorithm outputs a common reference string $\crs$ together with a
+    trapdoor $\td$.  The distribution of $\crs$ is computationally
+    indistinguishable from that produced by $\NIZKgen(\secparam)$.
+
+  \item[$\proof \leftarrow \NIZKsimprove(\crs, \td, \inst, \lbl)$ :] The simulator
+    takes the trapdoor, a statement $\inst$, and a label $\lbl$, and outputs a
+    proof, without access to a witness.
+
+  \item[$\witness \leftarrow \NIZKextract(\crs, \td, \inst, \proof, \lbl)$ :]
+    The extractor takes the trapdoor, a statement, a proof, and a label, and
+    outputs a candidate witness.
+
+\end{description}
+
+\paragraph{Zero knowledge.} A labelled NIZK is zero knowledge if simulated
+proofs are indistinguishable from honestly generated ones.  We define the
+following experiment between a challenger and an adversary $\adv$.
+
+\begin{experimentbox}{Zero knowledge}{zk}
+
+  \begin{itemize}
+
+    \item The challenger samples $b \sample \{0,1\}$.  If $b = 0$ it generates
+      $\crs \sample \NIZKgen(\secparam)$; if $b = 1$ it generates $(\crs, \td)
+      \sample \NIZKsimgen(\secparam)$.  It sends $\crs$ to $\adv$.
+
+    \item $\adv$ is given oracle access to $\simoracle$, which on input
+      $(\inst, \witness, \lbl)$ with $\rel(\inst, \witness) = 1$ returns
+      $\NIZKprove(\crs, \inst, \witness, \lbl)$ if $b = 0$, and
+      $\NIZKsimprove(\crs, \td, \inst, \lbl)$ if $b = 1$.
+
+    \item $\adv$ outputs a bit $b'$.
+
+  \end{itemize}
+
+  $\adv$ wins the experiment if $b' = b$.
+
+\end{experimentbox}
+
+The advantage of $\adv$ is defined as follows:
+%
+\begin{equation*}
+%
+  \mathsf{Adv}^{\mathsf{zk}}_{\mathsf{NIZK}, \adv}(\secparam) =
+  \left| \Pr[b' = b] - \frac{1}{2} \right|.
+%
+\end{equation*}
+%
+We say the proof system is zero knowledge if this advantage is small for every
+admissible adversary $\adv$.  Since anything a verifier learns from a proof
+could have been produced by the simulator, which has no witness, a proof
+reveals nothing about the witness beyond the truth of the statement.
+
+\paragraph{Simulation extractability.} We require more than soundness: our
+security arguments need not only that accepting proofs are for true
+statements, but that a witness can be recovered from them, and that this
+remains so after the adversary has observed simulated proofs.  Simulation
+extractability captures both.
+
+\begin{experimentbox}{Simulation extractability}{simext}
+
+  \begin{itemize}
+
+    \item The challenger generates $(\crs, \td) \sample
+      \NIZKsimgen(\secparam)$ and sends $\crs$ to $\adv$.
+
+    \item $\adv$ is given oracle access to $\simoracle$, which on input
+      $(\inst, \lbl)$ returns $\proof \leftarrow \NIZKsimprove(\crs, \td, \inst,
+      \lbl)$ and stores $(\inst, \lbl)$ in the set $\Query$.
+
+    \item $\adv$ outputs $(\inst^*, \proof^*, \lbl^*)$.
+
+    \item The challenger computes $\witness^* \leftarrow \NIZKextract(\crs,
+      \td, \inst^*, \proof^*, \lbl^*)$.
+
+  \end{itemize}
+
+  $\adv$ wins the experiment if $\NIZKverify(\crs, \inst^*, \proof^*, \lbl^*)
+  = 1$, $(\inst^*, \lbl^*) \notin \Query$, and $\rel(\inst^*, \witness^*) \neq
+  1$.
+
+\end{experimentbox}
+
+A labelled NIZK is simulation extractable if the probability that any
+admissible adversary wins this experiment is small.
+
+Simulation extractability implies the notions we would otherwise have to state
+separately.  Soundness follows, since a witness cannot be extracted for a false
+statement.  Knowledge soundness follows, and is the property we in fact rely
+on: our simulator does not merely need the statement to be true, but needs the
+witness in hand in order to look up its own records.  Finally, the simulation
+prefix gives simulation soundness, that is, extraction continues to hold even
+once the adversary has seen proofs the simulator produced without a witness.
+This is the situation our security argument places the simulator in, as it
+simulates presentations for honest users and only then extracts from a proof
+produced by a corrupt one.
+
+The condition $(\inst^*, \lbl^*) \notin \Query$ makes proofs non-malleable
+across labels: an adversary that has seen proofs for a statement under other
+labels gains no advantage in producing one under a fresh label.  This is what
+allows a proof to be bound to a message, and is the property that a signature
+of knowledge would otherwise have supplied.

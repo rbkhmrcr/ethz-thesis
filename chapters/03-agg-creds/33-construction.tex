@@ -8,9 +8,17 @@ corresponding to the attributes they wish to disclose into a single aggregate
 signature. Finally, the user proves knowledge of the aggregate credential and
 their registered identity using a signature of knowledge.
 
-Throughout this construction, we refer simply to proofs. These are instantiated
-using signatures of knowledge, allowing the resulting proofs to be bound to
-protocol messages where required.
+The construction assumes that the registration authority ensures each user's
+public key is unique, and that the user holds the corresponding secret key.
+This prevents users from registering others' public keys and pooling
+credentials across identities.  The registration authority assigns each user
+exactly one tag, and signs only messages of the prescribed form: public keys
+and tags. A malicious registration authority could violate these, for instance
+by assigning duplicate tags or registering users under adversarially chosen
+identities; addressing this is orthogonal to our contribution.  We assume that
+verifiers accept credentials only from the set of issuers with published public
+keys. This prevents a malicious user from being able to impersonate an issuer
+to an honest verifier.
 
 \paragraph{Setup.} During setup, the registration authority generates a key
 pair for the digital signature scheme and public parameters for the proofs used
@@ -75,7 +83,8 @@ They then construct a proof of knowledge with the following parameters:
 %
 \begin{gather}
 %
-  \inst = (\rapk, \ISSUERS, \{\ipk{i}, \atv{i}\}_{i \in \ISSUERS}), \witness = (\tau, \sk, \pk, \psi, \sigma) \\
+  \inst = (\rapk, \ISSUERS, \{\ipk{i}, \atv{i}\}_{i \in \ISSUERS}), \witness =
+  (\tau, \sk, \pk, \psi, \sigma) \\
 %
   \rel = \{ (\sk, \pk) \leftarrow \DSgen(\secparam) \quad \wedge \quad
     \DSverify(\pk, \pk \|  \tau, \psi) = 1 \\

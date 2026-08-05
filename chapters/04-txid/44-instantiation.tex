@@ -407,6 +407,14 @@ of equalities hold: \begin{align*} A\cdot\com^c =
 \quad D\cdot(\gen_0\cdot\com)^{ c} = V^{\phi_5}\cdot
 \gen_1^{\phi_6}\cdot\gen_3^{\phi_7}.  \end{align*}
 
+\begin{assumptionbox}{Decisional Diffie-Hellman (DDH)}{ddh}
+
+  The DDH assumption holds in $\group{1}$ if no PPT adversary can distinguish
+  $(\gen^x, \gen^y, \gen^{xy})$ from $(\gen^x, \gen^y, \gen^z)$ for uniformly
+  random $x, y, z \sample \Zp$.
+
+\end{assumptionbox}
+
 \paragraph{Security.} \begin{theorem}\label{thm:inst} The instantiation,
   presented in Section \ref{sec:algebraic}, securely realises $\F{txid}$, in
   the random oracle model, under the Decisional Diffie Hellman assumption in
