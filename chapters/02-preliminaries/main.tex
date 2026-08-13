@@ -1,4 +1,57 @@
 \chapter{Preliminaries}\label{chap:preliminaries}
+
+The contributions of this thesis include both constructions of protocols and
+constructions of their underlying primitives. We take different approaches to
+defining and proving the security of each of these.
+
+Primitives (for example commitments, signature schemes, and PRFs) are handled
+through defining experiments, and then showing that the adversary cannot win
+with greater probability than some predefined amount. For larger protocols with
+many parties and interfaces, we capture all security goals at once inside an
+ideal functionality. We then construct a simulator to show that the view of an
+adversary in the real world, interacting with our protocol, is
+indistinguishable from the view when interacting with the ideal functionality
+itself. As the ideal functionality achieves all security properties by design,
+this then shows that the protocol achieves them too.
+
+The definitions of the security goals that we wish to achieve are not complete
+without also defining the capabilities the adversary and the probability of
+success that we class as too large. There are two main ways of doing this: the
+concrete approach and the asymptotic approach. The concrete approach assigns
+numbers to the amount of operations that the adversary is able to execute and a
+fixed bound to the probability of success. The asymptotic approach instead
+treats security as a function parameterised by a security parameter. Then as
+this parameter grows, the resources needed to break a scheme grow faster than
+any fixed polynomial, and the probability of success of the adversary becomes
+vanishingly small.
+
+We have chosen to follow the asymptotic approach. This deserves some
+consideration, as we are explicitly aiming for concrete efficiency in the
+design of our protocols and primitives. We wish for the schemes to be used in
+practice. The primitives and protocols we design have elements chosen in their
+instantiations specifically for the efficiency benefits. However, we wish to
+separate the instantiation choices from the design and security proofs of the
+abstract constructions that we present.
+
+For asymptotic security definitions, there are a few more details we must give.
+An adversary is considered efficient if it runs in probabilistic polynomial
+time (PPT) in the security parameter . We denote this parameter with
+$\secparam$, and so the adversary's running time is bounded by $p(\secparam)$
+for some fixed polynomial $p$. It may use randomness in its computation. Honest
+parties must also satisfy this definition of efficiency.
+
+We define 'small' for the success probability of the adversary through a
+negligible function. A function $f$ from the natural numbers to non-negative
+real numbers is negligible if it is below every inverse polynomial at every
+point after reaching some value. Concretely, for every polynomial $p$, there
+exists $N$ such that $f(\secparam) < 1/p(\secparam)$ for all $\secparam > N$.
+Negligible functions have a property of closure which carries well to their use
+in security definitions in cryptography. This is that a polynomial number of
+events each occurring with negligible probability, still occurs with negligible
+probability in total. This means an adversary repeating an attack with
+negligible success probability polynomially many times will still have a
+negligible probability of success.
+
 \input{chapters/02-preliminaries/21-commitments}
 \input{chapters/02-preliminaries/22-prfs}
 \input{chapters/02-preliminaries/23-signatures}

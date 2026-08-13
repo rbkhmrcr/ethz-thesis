@@ -3,24 +3,27 @@
 \paragraph{Privacy and power.} Resources are not equally distributed throughout
 the world. There are infinitely many consequences of this. All of them
 influence our actions in some way, but not all of them can be influenced in any
-way by cryptography.
+way by cryptography. One that can is the ability to keep information private
+from those with more power to observe or act on it.
 
+The desire to conceal written information has been considered for at least the
+last four thousand years, reaching back to the obfuscated hieroglyphs in the
+tomb of Khnumhotep II. 
 Encryption allows people to communicate by exchanging messages that are, to
 eavesdroppers, indistinguishable from random. This allows parties with a shared
 key to communicate privately, regardless of their personal power, wealth,
 affiliations, or any other characteristics.
-% A shifting sandbank in eternity,
-The desire to conceal written information has been considered for at least the
-last four thousand years, reaching back to the obfuscated hieroglyphs in the
-tomb of Khnumhotep II.  Modern cryptography has enabled encrypted
-communications that even truly powerful entities cannot read.
+Modern cryptography has enabled encrypted
+communications that even truly powerful entities cannot read. This
+protection rests on an asymmetry of effort, not a change in who holds power.
 
 The communicating parties themselves are not assumed to be as powerful as the
 entities trying to break the system.  Encryption demands relatively little
 computational power of the users while keeping the adversary's computational
 task infeasible.  This asymmetry of necessary computational power between users
 and attacking entities is well noted, and lies at the foundation of modern
-cryptography itself.
+cryptography itself. But protecting the content of a message says nothing
+about who is exchanging it, when, or how often.
 
 Cryptography today deals in more varied technologies than private
 communication.  Information flows, and the question shifts to reflect that.
@@ -28,19 +31,22 @@ Once the contents of a communication are protected, for example, a resourceful
 adversary may instead attempt to determine the identities of the communicating
 parties, their relationships, or patterns in their behaviour. Protecting that
 then brings into focus the next piece of information that could be observed and
-used. Every answer reveals another question.
+used. Every answer reveals another question. Answering each new question has
+driven successive waves of privacy research.
 
 Over the last fifty years, privacy enhancing technologies have been designed to
 answer exactly these broader privacy problems. The surface of information being
 protected has expanded, and so has the number of entities capable of observing
 some part of the system.  Service providers, issuers, validators, network
 operators and public authorities may all learn sensitive information while
-performing otherwise legitimate functions.
+performing otherwise legitimate functions. This growing list of legitimate
+but powerful observers raises an uncomfortable question: how should a
+protocol treat them?
 
 These powerful entities are consequently often modelled as adversaries.
 Protocol designers have then, understandably, been active in designing systems
 that take power away from powerful, centralised entities. Anything that such an
-entity learns is a step away from the perfect world. The ideal world.
+entity learns is a step away from the ideal world.
 
 \paragraph{Centralisation, responsibility and trust.} In attempting to remove
 trust from centralised institutions, protocols may instead transfer
@@ -82,6 +88,19 @@ messages of their customers.  A private communication system can aim to ensure
 that no party other than the intended recipient learns the contents of a
 message.
 
+This thesis takes payments as its proving ground, but the underlying
+question is broader: what must a system's participants be able to learn and
+do, and what can be withheld from them regardless? Financial systems make
+that question concrete, and unusually demanding. Beyond confidentiality,
+they must resist double spending, since digital tokens, unlike physical
+cash, are trivial to duplicate; remain efficient as the number of
+participants grows, ideally without cost per participant growing linearly
+with the size of the system; and continue to function for a user with no
+network connection at all, which matters for anyone without continuous
+access to power or connectivity. These are not properties a private
+communication channel needs to have, and they are why a system that gets
+privacy right for messaging does not automatically get it right for money.
+
 But in a financial system, there is something slightly different involved.
 Real financial systems have legitimate accountability requirements.
 
@@ -120,7 +139,8 @@ and responsibilities accurately, and cryptographically constraining what each
 participant can learn and do. In particular, an institution may perform
 computation, maintain state, issue credentials, validate transactions or
 provide availability without being trusted with users' private information. We
-examine this principle through several systems.
+examine this principle through several systems, each closing a specific gap
+left by treating decentralisation as sufficient for privacy on its own.
 
 First, we consider aggregate anonymous credentials. Existing credential models
 do not always reflect the way that authority is divided between institutions in

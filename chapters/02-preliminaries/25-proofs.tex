@@ -171,3 +171,11 @@ across labels: an adversary that has seen proofs for a statement under other
 labels gains no advantage in producing one under a fresh label.  This is what
 allows a proof to be bound to a message, and is the property that a signature
 of knowledge would otherwise have supplied.
+
+Zero knowledge and simulation extractability are independent properties: the
+former concerns whether simulated proofs are indistinguishable from honestly
+generated ones, while the latter concerns whether a witness can be extracted
+even after the adversary has observed simulated proofs, and neither implies
+the other in general. Since every proof system constructed in this thesis
+satisfies both, we refer to them simply as \emph{(secure) proofs} throughout,
+and establish each property separately in the relevant security section.

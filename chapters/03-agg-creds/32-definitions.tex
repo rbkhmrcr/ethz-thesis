@@ -1,4 +1,4 @@
-\section{Definitions}
+\section{Definitions}\label{sec:agg-creds-definitions}
 
 \subsection{Aggregate anonymous credentials}
 
@@ -22,13 +22,13 @@ place.
 
 \begin{description}
 
-  \item[$(\crs,\state) \sample \AACgen(\secparam)$ :] The setup algorithm, on
-    input security parameter $\secparam$, generates the system public
-    parameters $\crs$ together with the initial state $\state$.
+  \item[$\crs \sample \AACgen(\secparam)$ :] The setup algorithm, on input
+    security parameter $\secparam$, generates the system public parameters
+    $\crs$.
 
-  \item[$(\sk,\regcred) \sample \AACregister(\crs,\state)$ :] The registration
-    algorithm, on input public parameters $\crs$ and state $\state$, outputs
-    user secret key $\sk$ and registration credential $\regcred$.
+  \item[$(\sk,\regcred) \sample \AACregister(\crs)$ :] The registration
+    algorithm, on input public parameters $\crs$, outputs user secret key $\sk$
+    and registration credential $\regcred$.
 
   \item[$\cred \sample \AACissue(\crs,\isk{},\regcred,\att{})$ :] The issuance
     algorithm, on input public parameters $\crs$, issuer secret key $\isk{}$,
@@ -84,16 +84,16 @@ aggregate tag-based signature scheme is defined by the following algorithms:
     verification algorithm, on input public key $\pk$, tag $\Tag$, message
     $\msg$, and signature $\signature$, returns 0 or 1.
 
-  \item[$\signature \leftarrow \ATSaggregate(\signature_1, \ldots,
-    \signature_n)$ :] The aggregation algorithm, for general $n$, on input
-    signatures $\signature_1,\ldots,\signature_n$, all under the same tag
+  \item[$\signature \leftarrow \ATSaggregate((\signature_i)_{i \in \ISSUERS})$
+    :] The aggregation algorithm, for set $\ISSUERS \subseteq [1, n]$, on input
+    signatures $(\signature_i)_{i \in \ISSUERS}$, all under the same tag
     $\Tag$, outputs aggregate signature $\signature$.
 
-  \item[$\{0,1\} \leftarrow \ATSverifyagg((\pk_i)_{i\in [1 , n]}, \Tag,
-    (\msg_i)_{i\in [1 , n]}, \signature)$ :] The aggregate verification
-    algorithm, on input public keys $(\pk_i)_{i\in [1 , n]}$, tag $\Tag$,
-    messages $(\msg_i)_{i\in [1 , n]}$, and aggregate signature $\signature$,
-    returns 0 or 1.
+  \item[$\{0,1\} \leftarrow \ATSverifyagg((\pk_i)_{i\in \ISSUERS}, \Tag,
+    (\msg_i)_{i\in \ISSUERS}, \signature)$ :] The aggregate verification
+    algorithm, for set $\ISSUERS \subseteq [1, n]$, on input public keys
+    $(\pk_i)_{i\in \ISSUERS}$, tag $\Tag$, messages $(\msg_i)_{i\in \ISSUERS}$,
+    and aggregate signature $\signature$, returns 0 or 1.
 
 \end{description}
 
@@ -152,60 +152,299 @@ Randomisation also preserves validity, meaning that the following holds:
 ATS scheme is existentially unforgeable under tag based aggregation if for any
 probabilistic polynomial time adversary $\adv$, with access to corruption
 oracle $\corrupto$ and signing oracle $\signo$, the probability that $\adv$
-wins the experiment depicted in~\Fref{fig:exp-ats-euf} is negligible in security
-parameter $\secparam$.
+wins the experiment depicted in Experiment~\ref{exp:ats-euf} is negligible in
+security parameter $\secparam$.
 
 \begin{experimentbox}{Existential unforgeability under tag based
-  aggregation}{fig:exp-ats-euf}
+  aggregation}{ats-euf}
 
-  \begin{minipage}[t]{0.36\linewidth}
+  \begin{enumerate}
 
-    \underline{$\corrupto(\pk_i)$}
+    \item The challenger generates $(\sk_i, \pk_i) \gets \ATSgen(\secparam)$
+      for each $i \in [1,n]$, and sends $\pk = (\pk_1, \ldots, \pk_n)$ to
+      $\adv$.
 
-    If $\pk_i \in \pk$, then:
+    \item The adversary is given oracle access to $\corrupto$, which on input
+      $\pk_i$, if $\pk_i \in \pk$, adds $\pk_i$ to $\Cor$ and returns
+      $\sk_i$.
 
-    \begin{itemize}
+    \item The adversary is given oracle access to $\signo$, which on input
+      $(\pk_i, \Tag, \msg)$, if $\pk_i \in \pk$, adds $(\pk_i, \Tag, \msg)$ to
+      $\Query$ and returns $\signature \gets \ATSsign(\sk_i, \Tag, \msg)$.
 
-      \item $\Cor \gets \Cor \cup \{\pk_i\}$;
+    \item The adversary outputs $(\ISSUERS \subseteq [1, n], (\pk_i)_{i \in
+      \ISSUERS}, \Tag, (\msg_i)_{i \in \ISSUERS}, \signature)$.
 
-      \item return $\sk_i$.
+    \item The challenger computes $b \gets \ATSverifyagg\bigl((\pk_i)_{i \in
+      \ISSUERS}, \Tag, (\msg_i)_{i \in \ISSUERS}, \signature\bigr)$.
 
-    \end{itemize}
-
-  \end{minipage}
-  \hfill
-  \begin{minipage}[t]{0.60\linewidth}
-
-    \underline{$\signo(\pk_i, \Tag, \msg)$}
-
-    If $\pk_i \in \pk$, then:
-
-    \begin{itemize}
-
-      \item $\Query \gets \Query \cup \{(\pk_i, \Tag, \msg)\}$;
-
-      \item return $\signature \gets \ATSsign(\sk_i, \Tag, \msg)$.
-
-    \end{itemize}
-
-  \end{minipage}
-
-  \medbreak
-
-  \underline{Experiment}
-
-  \begin{itemize}
-
-    \item $(\ISSUERS \subseteq [1, n], (\pk_i)_{i \in \ISSUERS}, \Tag,
-      (\msg_i)_{i \in \ISSUERS}, \signature) \gets
-      \adv^{\signo,\corrupto}(\pk)$;
-
-    \item $b \gets \ATSverifyagg\bigl((\pk_i)_{i \in \ISSUERS}, \Tag,
-      (\msg_i)_{i \in \ISSUERS}, \signature\bigr)$.
-
-  \end{itemize}
+  \end{enumerate}
 
   $\adv$ wins the experiment if $b = 1$ and $\exists \ i \in \ISSUERS : \pk_i
   \notin \Cor \wedge (\pk_i, \Tag, \msg_i) \notin \Query$.
 
 \end{experimentbox}
+
+
+\subsection{Ideal Functionality $\F{\AAC}$.}
+
+We define security for the aggregate anonymous credentials protocol through an
+ideal functionality as follows. We have the outputs of the honest parties
+and~$\adv$ during an execution of~$\Pi$ in the real world captured in
+$\textsc{Exec}_{\Pi,\adv}(\secparam)$, and we have the outputs of the honest
+parties and~$\simu$ interacting with~$\F{\AAC}$ in the ideal world captured by
+$\textsc{Exec}_{\F{\AAC},\simu}(\secparam)$.
+
+We then say that the protocol~$\Pi$ securely realises the ideal
+functionality~$\F{\AAC}$ if for every PPT adversary~$\adv$, there exists a PPT
+simulator~$\simu$ where $\textsc{Exec}_{\Pi,\adv}(\secparam)$ is computational
+indistinguishable from $\textsc{Exec}_{\F{\AAC},\simu}(\secparam)$.
+
+$\F{\AAC}$ receives inputs from system participants and $\simu$, computes the
+corresponding outputs, and delivers them to the authorised parties. It exposes
+five interfaces --- register, issue, aggregate, present, verify --- through
+which $\simu$ and honest participants submit inputs. The formal description is
+given in~\Fref{fig:faac}; we summarise each interface below.
+
+\paragraph{Register.} A user calls this to join the system. If the registration
+authority accepts and the user was never registered before, registration
+succeeds.
+
+\paragraph{Issue.} A user calls this to obtain a credential certifying value
+$\atv{}$ of attribute $\att{}$. If the authorised issuer accepts, the user
+receives a credential usable in later presentations. $\simu$ learns the user's
+identity on every call, and additionally the attribute value on issue calls.
+
+\paragraph{Aggregate.} A user calls this to combine their credentials for
+attribute values $\vec{\atv{}}$ into a form usable for later presentation.
+Aggregation is local, so $\simu$ learns nothing. Success yields a random string
+$\signature$ representing the aggregate credential.
+
+\paragraph{Present.} A user queries this to produce a presentation of
+$\vec{\atv{}}$, submitting $(\vec{\atv{}}, \signature, \msg)$, where
+$\signature$ aggregates the credentials for $\vec{\atv{}}$ and $\msg$ is a
+fresh message supplied by the verifier that the resulting presentation is bound
+to. $\F{\AAC}$ accepts if the user previously called aggregate on
+$\vec{\atv{}}$, or otherwise if the user actually holds $\vec{\atv{}}$. This
+means a corrupt user who skips aggregate can still succeed if they hold the
+credentials. On acceptance, $\F{\AAC}$ generates a random string $\proof$,
+whose randomness ensures $(\vec{\atv{}}, \msg, \proof)$ reveals nothing about
+the user beyond $\vec{\atv{}}$.
+
+\paragraph{Verify.} A verifier calls this to check a presentation
+$(\vec{\atv{}}, \msg, \proof)$. If it was already produced by a valid present
+call, $\F{\AAC}$ returns true; if already flagged invalid, it returns false.
+Otherwise, $\F{\AAC}$ checks whether the presentation could have been forged by
+corrupt parties: whether corrupt users hold all disclosed values, or failing
+that, whether corrupt issuers could produce valid credentials for the remaining
+values. If either check succeeds, $\F{\AAC}$ defers to $\simu$ and returns its
+answer; otherwise it records the presentation as invalid and returns false.
+
+\begin{figure} \centering \hspace*{-0.05\textwidth}
+  \begin{minipage}{1.1\textwidth}
+
+    \begin{framed} \scriptsize
+
+      \setlist[enumerate]{ topsep=2pt, partopsep=0pt, parsep=0pt, itemsep=1pt }
+
+      \begin{multicols}{2}
+
+        \paragraph{$\AACregister$.} On input register from the user, send
+        $(register, user)$ to the registration authority and wait for its
+        confirmation.  Upon receiving the confirmation, do the following:
+
+        \begin{enumerate}
+
+          \item If $\creds[\user] \not\rightarrow \bot$, then abort; else
+            continue.  (a user can be registered only once)
+
+          \item Send $(\AACregister, \user)$ to $\simu$ and wait for the
+            go-ahead; on receiving the go-ahead continue.
+
+          \item Set $\creds[\user] \leftarrow [\varnothing, \ldots,
+            \varnothing]$ ($\creds[\user]$ is an array of length $N$, and
+            $\creds[\user][i]$ is the $i^{th}$ element).
+
+          \item Return $\AACregister end$ to the user .
+
+        \end{enumerate}
+
+        \paragraph{$\AACissue$.} On input $(\AACissue, \att{i},\atv{i})$ from
+        the user, with $\atv{i}$ being value of attribute $\att{i}$, send
+        $(\AACissue, \user, \atv{i})$ to issuer $\issuer{i}$ associated with
+        $\att{i}$ and wait for its confirmation.  Upon confirmation, do:
+
+        \begin{enumerate}
+
+          \item If issuer $\issuer{i}$ is honest, then:
+
+            \begin{enumerate}
+
+              \item If $\creds[\user] \rightarrow \bot$, then abort; else
+                continue. (An honest issuer will only issue credentials to a
+                registered user.)
+
+              \item If $\creds[\user][i] \neq \varnothing$, then abort; else
+                continue.  (An honest issuer will issue at most one valid
+                credential per user.)
+
+              \item Send $(\AACissue, \user, \att{i}, \atv{i})$ to $\simu$ and
+                wait for the go-ahead; on receiving the go ahead, continue.
+
+            \end{enumerate}
+
+          \item Else:
+
+            \begin{enumerate}
+
+              \item Send $(\AACissue, \user, \att{i}, \atv{i})$ to $\simu$, and
+                waits for its response.
+
+              \item If $\simu$ sends accept, then continue; else abort.
+
+            \end{enumerate}
+
+          \item Set $\creds[\user][i] \leftarrow \creds[\user][i] \cup
+            \{\atv{i}\}$.
+
+          \item Return $(\AACissue end, \att{i}, \atv{i})$ to the user and
+            $(\AACissue end, \user, \atv{i})$ to $\issuer{i}$.
+
+        \end{enumerate}
+
+        \paragraph{$\AACaggregate$.} On input $(\AACaggregate, \vec{\atv{}})$
+        from the user , where $\vec{\atv{}} = (\atv{1}, ..., \atv{n})$ and
+        $\atv{i} \in \{\varnothing\} \cup \{0, 1\}^*$, do:
+
+        \begin{enumerate}
+
+          \item If $\creds[\user] = \bot$, then abort; else continue.
+            (Unregistered users cannot successfully aggregate credentials.)
+
+          \item If $\forall i \in [1 , n]: \atv{i} = \varnothing \vee \atv{i}
+            \in \creds[\user][i]$, then:
+
+            \begin{enumerate}
+
+              \item Randomly generate  $\signature$.
+
+              \item Set $\aggcreds[\signature] \leftarrow \langle \user,
+                \vec{\atv{}}\rangle$.
+
+              \item Return $(\AACaggregate end, \signature)$ to the user.
+                (Users who hold non-empty attribute values successfully
+                aggregate the corresponding credentials.)
+
+            \end{enumerate}
+
+          \item Else abort.
+
+        \end{enumerate}
+
+        \paragraph{$\AACpresent$.} On input $(\AACpresent, \vec{\atv{}},
+        \signature, \msg)$ from the user , where $\vec{\atv{}} = (\atv{1}, ...,
+        \atv{n})$ s.t. $\atv{i} = \varnothing$ if $\atv{i}$ is not disclosed,
+        do:
+
+        \begin{enumerate}
+
+          \item If $\aggcreds[\signature] \rightarrow \langle \user,
+            \vec{\atv{}}\rangle$, then:
+
+            \begin{enumerate}
+
+              \item Randomly generate $\proof$.  \item Set
+                $\proven[\vec{\atv{}}, \msg, \proof] \leftarrow 1$.
+
+              \item Return $(\AACpresent end, \proof)$ to the user and
+                $(\AACpresent end, \vec{\atv{}}, \msg, \proof)$ to $\simu$.
+                (Users who successfully aggregated their credentials
+                successfully sign messages.)
+
+            \end{enumerate}
+
+          \item Else if $\creds[\user] = \bot$, then abort; else continue.
+            (Unregistered users cannot successfully sign messages.)
+
+          \item If $\forall i \in [1, n]: \atv{i} = \varnothing \vee \atv{i}
+            \in \creds[\user][i]$, then: \begin{enumerate}
+
+              \item Randomly generate $\proof$.
+
+              \item Set $\proven[\vec{\atv{}}, \msg, \proof] \leftarrow 1$.
+
+              \item Return $(\AACpresent end,  \proof)$ to the user and
+                $(\AACpresent end, \vec{\atv{}}, \msg, \proof)$ to $\simu$.
+                (Users with disclosed attribute values successfully sign
+                messages even if they did not call aggregate before.)
+
+            \end{enumerate}
+
+          \item Else abort.
+
+        \end{enumerate}
+
+        \paragraph{$\AACverify$.} Upon receiving message $(\AACverify,
+        \vec{\atv{}}, \msg, \proof)$ from a verifier, do:
+
+        \begin{enumerate}
+
+          \item If $\proven[\vec{\atv{}}, \msg, \proof] \rightarrow 0$, then
+            abort.
+
+          \item Else if $\proven[\vec{\atv{}}, \msg, \proof] \rightarrow 1$,
+            then:
+
+            \begin{enumerate}
+
+              \item Return $(\AACverify end, 1)$ to the verifier.
+                (Completeness.)
+
+              \item Send $(\AACverify end, \algo{V}, \vec{\atv{}}, \msg,
+                \proof, \allowbreak 1)$ to $\simu$.
+
+            \end{enumerate}
+
+          \item Else if $\proven[\vec{\atv{}}, \msg, \proof] \rightarrow \bot$,
+            then:
+
+            \begin{enumerate}
+
+              \item If there exists a dishonest user $\user'$ with attribute
+                values $\vec{\atv'{}} = (\atv'{1}, \ldots, \atv'{N})$ s.t.
+                $\forall \atv{i} \neq \varnothing$, we either have $\atv{i} =
+                \atv'{i}$, or have $\atv{i} \neq \atv'{i}$ but issuer
+                $\issuer{i}$ is dishonest, then query $\simu$ with
+                $(\AACverify, \vec{\atv{}}, \msg,\proof)$. On receiving the
+                response $(\AACverify end, b)$, do:
+
+                \begin{enumerate}
+
+                  \item Set $\proven[\vec{\atv{}}, \msg, \proof] \leftarrow b$.
+
+                  \item Return $(\AACverify end, b)$ to $\algo{V}$.
+
+                \end{enumerate}
+
+              \item Else:
+
+                \begin{enumerate}
+
+                  \item Set $\proven[\vec{\atv{}}, \msg, \proof] \leftarrow 0$.
+
+                  \item Return $(\AACverify end, 0)$ to $\algo{V}$.
+                    (Unforgeability.)
+
+                  \item Send $(\AACverify end, \algo{V}, \vec{\atv{}}, \msg,
+                    \proof,\allowbreak 0)$ to $\simu$.
+
+                \end{enumerate}
+
+            \end{enumerate}
+
+        \end{enumerate}
+
+      \end{multicols} \end{framed}
+
+    \caption{Ideal functionality for aggregate anonymous credentials.}
+  \label{fig:faac} \end{minipage} \end{figure}

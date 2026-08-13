@@ -1,4 +1,4 @@
-\section{Construction}\label{sec:agg creds construction}
+\section{Construction}\label{sec:agg-creds-construction}
 
 The protocol involves a registration authority and a collection of issuers.
 Each user first establishes a pseudonymous identity with the registration
@@ -35,15 +35,20 @@ scheme~$\ATS$ and publishes~$\ipk{i}$.
 \paragraph{Registration.} During registration, the user establishes a long term
 pseudonymous identity with the registration authority. The user proves
 knowledge of the secret key corresponding to their public key, after which the
-registration authority binds that public key to a unique user tag.
+registration authority binds that public key to a unique user tag. This tag is
+what later links the credentials a user obtains from different issuers to one
+another and to the user's registration: it is embedded in every credential
+issued to the user, and at presentation the user proves that the same tag
+underlies both their registration signature and their aggregated credentials,
+without revealing which tag it is.
 
 The user samples $(\sk, \pk) \leftarrow \DSgen(\secparam)$, and sends $\pk$ to
 the RA together with a proof on a fresh $\msg$ from the RA that proves the user
 knows the corresponding secret key $\sk$.  If the proof verifies, then the RA
-assigns the user a unique tag~$\tau$ and issues $\psi \leftarrow \DSsign(\rask,
-\pk \| \tau)$.
+assigns the user a unique tag~$\Tag$ and issues $\psi \leftarrow \DSsign(\rask,
+(\pk, \Tag))$.
 
-The user initialises their credential state as $(\tau, \sk, \pk, \psi, \cred_1,
+The user initialises their credential state as $(\Tag, \sk, \pk, \psi, \cred_1,
 \ldots, \cred_N)$, with $\cred_i = \varnothing$ for all $i \in [N]$.
 
 \paragraph{Issuance.} To obtain an attribute credential, the user authenticates
@@ -51,31 +56,35 @@ their registered identity to an issuer. If the issuer is satisfied that the
 user possesses the requested attribute value, it issues an aggregate tag-based
 signature on that attribute.
 
-On input $(\tau, \pk, \psi, \atv{i})$ from the user, issuer sets $\msg = (\pk,
-\tau)$, and checks that $\DSverify(\rapk, \msg, \psi) = 1$.  If not, it
+On input $(\Tag, \pk, \psi, \atv{i})$ from the user, the issuer checks that 
+$\DSverify(\rapk, (\pk, \Tag), \psi) = 1$.  If not, it
 rejects.  Otherwise, the user next proves knowledge of $\sk$.  If this check
 succeeds and the user holds attribute value $\atv{i}$, the issuer sends back
-$\sigma_i \leftarrow \ATSsign(\isk{i}, \tau, \atv{i})$. The user sets $\cred_i
-= (\atv{i}, \sigma_i)$.
+$\signature_i \leftarrow \ATSsign(\isk{i}, \Tag, \atv{i})$. The user sets $\cred_i
+= (\atv{i}, \signature_i)$.
 
 \paragraph{Aggregation.} Before presenting credentials, the user aggregates the
 signatures corresponding to the attributes they wish to disclose into a single
-aggregate signature.
+aggregate signature. Aggregating under a common tag lets credentials issued by
+different issuers be compressed into one short signature, so that presentation
+requires a single proof of possession rather than one per issuer.
 
 \paragraph{Presentation.} To prove possession of a collection of attributes,
 the user aggregates the corresponding credentials and produces a proof.  This
 simultaneously demonstrates possession of a valid registration credential and
 that the aggregate signature verifies under the disclosed issuer public keys
-and attribute values.
+and attribute values, without linking the presentation to the user's identity,
+to their registration, or to any other presentation of the same underlying
+credentials.
 
-The user has $(\tau, \sk, \pk, \psi, \cred_1, \ldots, \cred_N)$, where $\cred_i
-= (\atv{i}, \sigma_i)$.  To prove possession of attribute values $(\atv{i})_{i
+The user has $(\Tag, \sk, \pk, \psi, \cred_1, \ldots, \cred_N)$, where $\cred_i
+= (\atv{i}, \signature_i)$.  To prove possession of attribute values $(\atv{i})_{i
 \in \ISSUERS}$ to a verifier providing a fresh message $\msg$, the user first
 constructs the aggregate signature as follows:
 %
 \begin{equation*}
 %
-  \sigma \leftarrow \ATSaggregate(\{\sigma_i\}_{i \in \ISSUERS}).
+  \signature \leftarrow \ATSaggregate(\{\signature_i\}_{i \in \ISSUERS}).
  %
 \end{equation*}
 %
@@ -84,13 +93,13 @@ They then construct a proof of knowledge with the following parameters:
 \begin{gather}
 %
   \inst = (\rapk, \ISSUERS, \{\ipk{i}, \atv{i}\}_{i \in \ISSUERS}), \witness =
-  (\tau, \sk, \pk, \psi, \sigma) \\
+  (\Tag, \sk, \pk, \psi, \signature) \\
 %
   \rel = \{ (\sk, \pk) \leftarrow \DSgen(\secparam) \quad \wedge \quad
-    \DSverify(\pk, \pk \|  \tau, \psi) = 1 \\
+    \DSverify(\rapk, (\pk, \Tag), \psi) = 1 \\
 %
-  \wedge \quad \ATSverifyagg(\{\ipk{i}\}_{i \in \ISSUERS}, \tau, \{\atv{i}\}_{i
-\in \ISSUERS}, \sigma) = 1.  \}
+  \wedge \quad \ATSverifyagg(\{\ipk{i}\}_{i \in \ISSUERS}, \Tag, \{\atv{i}\}_{i
+\in \ISSUERS}, \signature) = 1.  \}
 %
 \end{gather}
 %
@@ -102,8 +111,8 @@ and only if the verification succeeds.
 On input $(\{\atv{i}\}_{i \in \ISSUERS}, \msg, \proof)$, the verifier returns
 the output of the proof verification algorithm.
 
-\begin{theorem}\label{thm:bbsecurity} If $\DS$ is an existentially unforgeable
+\begin{theorem}\label{thm:agg-creds-construction-security} If $\DS$ is an existentially unforgeable
   digital signature scheme, $\ATS$ an existentially unforgeable aggregate tag
   based signature scheme under tag based aggregation, and the proof system is
   secure, then the above protocol securely realises ideal
-functionality~$\F{\ATS}$ in the standalone model.  \end{theorem}
+functionality~$\F{\AAC}$ in the standalone model.  \end{theorem}
