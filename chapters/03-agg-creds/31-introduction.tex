@@ -8,12 +8,13 @@ unforgeability, so only credentials that the user actually possesses will
 verify~\cite{EC:CamLys01}.
 
 Early anonymous credential schemes assume a single issuer certifying all
-attributes, creating one powerful entity. Later schemes distribute issuance
+attributes, creating a single entity responsible for all issuance, and able to
+learn all attribute values of every user. Later schemes distribute issuance
 across multiple authorities or delegated it to sub issuers, but the issuer,
-though now decentralised, remains conceptually responsible for all
-attributes. This reduces trust in
-any one party, but does not reflect real world scenarios, where distinct
-entities independently certify one or a small subset of attributes.
+though now decentralised, remains conceptually responsible for all attributes.
+This reduces trust in any one party, but does not reflect real world scenarios,
+where distinct entities independently certify one or a small subset of
+attributes.
 
 In decentralised identity systems, different authorities each typically certify
 a small number of attributes: age, residency, citizenship, possession of a
@@ -38,28 +39,26 @@ aggregate alone, without contacting any issuer again.
 
 \paragraph{Single issuer anonymous credential systems.} An early anonymous
 credential system issues signatures on committed values, with security under
-the strong-RSA
-assumption~\cite{EC:CamLys01,SCN:CamLys02}. A later
+the strong-RSA assumption~\cite{EC:CamLys01,SCN:CamLys02}. A later
 pairing-based construction works under the LRSW assumption, though signature
 size and verification complexity grow linearly with the number of attribute
-values signed~\cite{C:CamLys04}.  An extension supports a constrained form
-of aggregation, but only in settings where all values are known ahead of
+values signed~\cite{C:CamLys04}.  An extension supports a constrained form of
+aggregation, but only in settings where all values are known ahead of
 time~\cite{FC:LeeLeeYun13}.
 
 BBS+ credentials support selective disclosure in a single-issuer setting, with
 verification linear in the number of revealed attributes, and form the basis of
-the ongoing IETF standardisation effort~\cite{EC:BonBoy04a}.
+the ongoing IETF standardisation effort~\cite{EC:BonBoy04a,SCN:AuSusMu06}.
 
 Further improvements targeted efficiency. The Pointcheval-Sanders signature
 scheme introduces randomisable signatures with sequential aggregation, and
-proves unforgeability in the generic bilinear group
-model~\cite{RSA:PoiSan16}. These systems operate in a centralised,
-single-issuer setting where one authority certifies all attributes. More
-recently, structure-preserving signatures on equivalence classes enable very
-efficient privacy-preserving proofs, with security proven in the generic group
-model~\cite{JC:FucHanSla19}. Unlinkable proofs of knowledge over a
-subset of signed messages, building on the Pointcheval-Sanders signature
-scheme, achieve the same generic-group-model
+proves unforgeability in the generic bilinear group model~\cite{RSA:PoiSan16}.
+These systems operate in a centralised, single-issuer setting where one
+authority certifies all attributes. More recently, structure-preserving
+signatures on equivalence classes enable very efficient privacy-preserving
+proofs, with security proven in the generic group model~\cite{JC:FucHanSla19}.
+Unlinkable proofs of knowledge over a subset of signed messages, building on
+the Pointcheval-Sanders signature scheme, achieve the same generic-group-model
 security~\cite{PKC:Sanders20}.
 
 \paragraph{Multi-issuer anonymous credential systems.} Other work decentralises
@@ -72,9 +71,9 @@ real-world scenarios where different authorities independently certify distinct
 attributes.
 
 A UC-secure, composable multi-issuer credential system supports selective
-disclosure and pseudonyms~\cite{AC:CDHK15}. Its construction is
-built from several distinct building blocks, each analysed under its own
-assumptions, including $n$-BSDH and $n$-RootDH.
+disclosure and pseudonyms~\cite{AC:CDHK15}. Its construction is built from
+several distinct building blocks, each analysed under its own assumptions,
+including $n$-BSDH and $n$-RootDH.
 
 \paragraph{Aggregate anonymous credentials.} Aggregate credentials aim to
 combine independently issued credentials into a single compact credential,
@@ -83,54 +82,48 @@ signatures support anonymous credentials this way, with unforgeability under
 the $q$-Asymmetric Double Hidden Strong Diffie-Hellman assumption, and
 anonymity under DDH in the random oracle model~\cite{canard2011anonymous}.
 
-Closest to our work, a traceable aggregate signature scheme called ART-Sign
-uses randomisable tags as pseudonyms~\cite{SCN:HebPoi22}.  It achieves a
-showing cost essentially independent of both the number of attributes and the
-number of issuers and supports traceability by a designated authority. The
-construction requires issuers to be stateful, tracking which index they use per
-tag. A variant removes this at the cost that the issuer key that grows with a
-fixed attribute limit.
+ART-Sign is a traceable aggregate signature scheme using randomisable tags as
+pseudonyms~\cite{SCN:HebPoi22}.  It achieves a showing cost essentially
+independent of both the number of attributes and the number of issuers and
+supports traceability by a designated authority. The construction requires
+issuers to be stateful, tracking which index they use per tag. A variant
+removes this at the cost that the issuer key that grows with a fixed attribute
+limit.
 
-Table~\ref{tab:related-comparison} compares our scheme with representative
-single-issuer and multi-issuer credential constructions, reporting asymptotic
-complexities at a high level and omitting constant factors.
+Table~\ref{tab:related-comparison} compares our scheme with several single- and
+multi-issuer credential systems, reporting asymptotic complexities.
 
 \begin{table}[t] \centering \small
  %
-  \begin{tabular}{l|c|c|c|c|c}
+  \begin{tabular}{l|c|c|c|c}
  %
-    Scheme & Assumptions & Multi-issuer & $|$cred$|$ & Prover cost &
-    Selective/Relational \\
+    Scheme & Assumptions & Multi-issuer & $|$cred$|$ & Prover cost \\
   %
-    \hline \cite{SCN:CamLys02} & sRSA & No & $O(1)$ & $O(n)$ &
-    Relational \\
+    \hline \cite{SCN:CamLys02} & sRSA & No & $O(1)$ & $O(n)$ \\
   %
-    \cite{C:CamLys04} & LRSW & No & $O(n)$ & $O(n)$ & Relational \\
+    \cite{C:CamLys04} & LRSW & No & $O(n)$ & $O(n)$ \\
   %
-    BBS+~\cite{EC:BonBoy04a} & $q$-SDH & No & $O(1)$ & $O(n)$ & Relational
-    \\
+    \cite{EC:BonBoy04a,SCN:AuSusMu06} & $q$-SDH & No & $O(1)$ & $O(n)$ \\
   %
-    \cite{canard2011anonymous} & $q$-ADHSDH & Partial\footnotemark[1] & $O(n)$
-                               & $O(k)$ & Selective \\
+    \cite{canard2011anonymous} & $q$-ADHSDH & Partial & $O(n)$ & $O(k)$ \\
   %
-    \cite{AC:CDHK15} & $n$-BSDH, $n$-RootDH & No & $O(1)$ &
-    $O(k)$ & Selective \\
+    \cite{AC:CDHK15} & \shortstack{$n$-BSDH,\\$n$-RootDH} & No & $O(1)$ &
+    $O(k)$ \\
   %
-    \cite{SCN:HebPoi22} & GGM & Yes & $O(1)$ & $O(k{-}1)$ & Selective \\
+    \cite{SCN:HebPoi22} & GGM & Yes & $O(1)$ & $O(k{-}1)$ \\
   %
-    \textbf{Our scheme} & m-BCDH, $q$-SDH & \textbf{Yes} & $O(1)$ &
-    $O(k)$ & Selective \\
+    \textbf{Our scheme} & \shortstack{m-BCDH,\\$q$-SDH} & \textbf{Yes} & $O(1)$
+                        & $O(k)$ \\
   %
   \end{tabular}
   %
   \caption{Comparison with existing single and multi-issuer anonymous
-  credential schemes. $n$ is the total number of attributes a scheme supports,
-$k$ the number of attributes disclosed in a presentation, and $|$cred$|$ is the
-size of a full aggregated credential.} \label{tab:related-comparison}
-\end{table}
-%
-\footnotetext[1]{Aggregate signatures under a shared index, but do not consider
-independent issuers in the sense we require.}
+    credential schemes. $n$ is the total number of attributes a scheme
+    supports, $k$ the number of attributes disclosed in a presentation,
+    $|$cred$|$ is the size of a full aggregated credential.
+    \cite{canard2011anonymous} provides aggregate signatures under a shared
+index, but does not consider independent issuers in the sense we require.}
+\label{tab:related-comparison} \end{table}
 
 \paragraph{Our Contribution.} In contrast to classical anonymous credential
 schemes, we explicitly consider a decentralised setting in which each attribute

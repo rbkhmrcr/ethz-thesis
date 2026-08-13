@@ -42,11 +42,9 @@ $\simu$ receives a unique tag $\Tag$ and a signature $\psi \leftarrow
 \DSsign(\rask, (\pk, \Tag))$ and stores entry $\langle \user, \Tag, \pk,
 \psi\rangle $.
 
-Since the registration authority  is honest, they will register users only once
-and reject duplicate requests, same as $\F{\AAC}'$.  In other words, when
-$\F{\AAC}'$ accepts a registration request, so will the registration authority
-in the real world, and vice versa.  Hence, this game is indistinguishable from
-Game 2.
+Since the registration authority and $\F{\AAC}'$ both register each user
+exactly once and reject duplicates, they accept or reject the same requests,
+so this game is indistinguishable from Game 2.
 
 \paragraph{Game 4.} In this game, $\F{\AAC}'$ also handles credential issuance
 calls from honest users following the description of ideal functionality
@@ -74,21 +72,13 @@ $\issuer{i}$.  There are two cases to consider.
 
 \end{enumerate}
 
-We recall that, in the real world, an honest issuer rejects a credential
-issuance request from a registered user if a preceding request from the same
-user has already been processed.  Otherwise, the honest issuer accepts and
-issues the credential.  It is easy to see that, in this case, the output of the
-issuer matches that of $\F{\AAC}'$ if the latter processes the credential
-request instead.  We also recall that when $\F{\AAC}'$ receives a  credential
-issuance request involving a dishonest issuer, $\F{\AAC}'$ follows $\simu$
-instructions.  That is, if $\simu$ sends accept, then $\F{\AAC}'$ accepts the
-request and updates the credential map accordingly; otherwise, $\F{\AAC}'$ just
-rejects.  Since $\simu$ sends accept only if the dishonest issuer outputs a
-valid aggregate signature, then the output of the dishonest issuer in the real
-world is equivalent to the output of $\F{\AAC}'$.  Therefore, this game is
-indistinguishable from Game 4 as long as $\simu$ does not abort.  Since $\user$
-is honest, she will always register first before requesting credentials from
-the issuers, and hence, the abort event will never occur.
+In both cases, $\F{\AAC}'$ tracks $\simu$: an honest issuer accepts a request
+exactly once per user, matching the first branch, and for a dishonest issuer,
+$\F{\AAC}'$ accepts only when $\simu$ does, i.e.\ only when the issuer
+produced a genuinely valid aggregate signature.  So $\F{\AAC}'$'s output
+matches $\Pi$'s in both cases, and this game is indistinguishable from Game 3
+as long as $\simu$ does not abort.  Since $\user$ is honest, she always
+registers before requesting credentials, so the abort event never occurs.
 
 \paragraph{Game 5.} During this game, $\F{\AAC}'$ executes aggregate requests
 from honest users following the description of $\F{\AAC}$.  This game is
@@ -103,11 +93,11 @@ thanks to the simulatability of $\proof$.  Namely, given message $(\AACpresent
 end, \vec{\atv{}}, \msg, \proof)$ from $\F{\AAC}'$ for $\vec{\atv{}} =
 (\atv{1}, \ldots, \atv{N})$, $\simu$ defines  $\inst = (\pk, (\ipk{i},
 \atv{i})_{i \in \ISSUERS})$ such that $\forall i \in \ISSUERS: \atv{i} \neq
-\varnothing$, and outputs $\proof^{\star} \leftarrow \soksimsign(\Tag, \inst,
+\varnothing$, and outputs $\proof^{\star} \leftarrow \NIZKsimprove(\Tag, \inst,
 \msg, \crs)$, which gives $\NIZKverify(\crs, \inst, \proof^{\star}, \msg) = 1$.
 
 \paragraph{Game 7.} In this game, $\F{\AAC}'$ processes verification requests
-from honest verifiers following the description of $\F{\AAC}$, whereas $\simu$
+from honest verifiers following the description of $\F{\AAC}$, and $\simu$
 simulates the honest verifiers in the real world.  Namely, upon receiving a
 signature in the real world, $\simu$ translates the signature into calls to
 $\F{\AAC}'$, and instead of returning the output of $\NIZKverify$, it returns
@@ -125,24 +115,18 @@ describe $\simu$'s simulation.
     transmits the corresponding registration request $register$ to $\F{\AAC}'$
     which processes it in a similar fashion to $\F{\AAC}$.
 
-    As per the specifications of $\Pi$, the simulated the registration
-    authority  in the real world will not accept a registration request that
-    will be rejected by $\F{\AAC}'$, and vice versa.  Therefore the output of
-    $\Pi$ and the output of $\F{\AAC}'$ when processing registration requests
-    is indistinguishable.
+    The simulated registration authority and $\F{\AAC}'$ accept or reject
+    the same requests by construction, so their outputs are indistinguishable.
 
   \item[Issue.] For each issuance request $(\Tag, \pk, \psi, \atv{i})$ that a
     corrupt user $\user$ sends, in the real world, to an honest issuer
     $\issuer{i}$ (simulated by $\simu$), $\simu$ (acting as $\user$) sends
-    $(\AACissue, \att{i}, \atv{i})$ to $\F{\AAC}'$.  We recall that if $\user$
-    is not registered or if this is not the first time that $\user$ requests a
-    credential, $\F{\AAC}'$ rejects.  Otherwise, $\F{\AAC}'$ issues the
-    credential.  Similarly, in the real world, the simulated $\issuer{i}$
-    returns $\signature_i \leftarrow \AACissue(\isk{i}, \Tag, \atv{i})$ if the
-    same conditions are met.  Hence, the output of $\Pi$ and the output of
-    $\F{\AAC}'$ when processing credential issuance is indistinguishable.
-    After each successful credential issuance, $\simu$ stores entry $\langle
-    \user, \Tag, \att{i}, \atv{i}, \signature_i\rangle$.
+    $(\AACissue, \att{i}, \atv{i})$ to $\F{\AAC}'$, and stores entry $\langle
+    \user, \Tag, \att{i}, \atv{i}, \signature_i\rangle$ on success.
+    $\F{\AAC}'$ issues the credential exactly when $\user$ is registered and
+    this is her first request for $\att{i}$, and the simulated $\issuer{i}$
+    returns $\signature_i \leftarrow \AACissue(\isk{i}, \Tag, \atv{i})$ under
+    the same conditions, so their outputs are indistinguishable.
 
   \item[Verify.] For each signature $(\vec{\atv{}} = (\atv{1}, ..., \atv{N}),
     \msg, \proof)$ that a user $\user$ presents, in the real world, to an
@@ -314,6 +298,15 @@ happens to be consistent with the adversary's queries (which happens with
 noticeable probability, made precise below), the forged aggregate signature
 algebraically yields the target group element.
 
+\paragraph{Simulating $\corrupto$ (shared by both reductions).} Without loss
+of generality, we assume that $\adv$ corrupts all public keys except for one.
+$\advB$ randomly selects $j \in [1, n]$ and sets $\pk_j = \widetilde{x}$, and
+for all $k \neq j$ randomly selects $\xi_k \in \Zp^*$ and has $\sk_k = \xi_k$
+and $\pk_k = \widetilde{x}_k = \ggen^{\xi_k}$. If $\adv$ sends a corruption
+request for $\pk_i \neq \pk_j$, then $\advB$ returns $\sk_i = \xi_i$, and
+otherwise aborts. This does not depend on which hash function carries the
+embedded challenge, so it is used unchanged in both Type 1 and Type 2.
+
 \paragraph{Type 1 Forgery.} Let $\advB$ be an adversary whose goal is to break
 BCDH.  $\advB$ is given a challenge tuple as follows:
 %
@@ -355,20 +348,12 @@ $L_2$, and then computes $\hashone$ and $\hashtwo$ as follows:
 
 \end{itemize}
 
-\paragraph{Simulating $\corrupto$.} Without loss of generality, we assume that
-$\adv$ corrupts all public keys except for one.  $\advB$ randomly selects $j
-\in [1, n]$ and sets $\pk_j = \widetilde{x}$, and for all $k \neq j$ randomly
-selects $\xi_k \in \Zp^*$ and has $\sk_k = \xi_k$ and $\pk_k = \widetilde{x}_k =
-\ggen^{\xi_k}$.  If $\adv$ sends a corruption request for $\pk_i \neq \pk_j$,
-then $\advB$ returns $\sk_i = \xi_i$; otherwise, $\advB$ aborts the experiment.
-
-\paragraph{Simulating $\signo$ .} On receiving a signature request $(\pk_i,
-\Tag, \msg)$, $\advB$ proceeds as follows.  If $i \neq j$, then $\advB$ outputs
-$\signature \leftarrow \ATSsign(\sk, \Tag, \msg)$.
-
-If $i = j$, then $\advB$ checks if $\hashone(\msg) = y$. If so, then $\advB$
-aborts. Otherwise, $\advB$ retrieves entry $\langle \msg, \rho, \hashone(\msg)
-= \gen^{\rho}\rangle$ and computes the signature as follows:
+\paragraph{Simulating $\signo$.} On a signature request $(\pk_i, \Tag, \msg)$
+with $i \neq j$, $\advB$ outputs $\signature \sample \ATSsign(\sk_i, \Tag,
+\msg)$, since it knows $\sk_i$. For $i = j$, $\advB$ checks if $\hashone(\msg)
+= y$, and aborts if so. Otherwise, $\advB$ retrieves entry $\langle \msg,
+\rho, \hashone(\msg) = \gen^{\rho}\rangle$ and computes the signature as
+follows:
 %
 \begin{equation*}
 %
@@ -446,7 +431,7 @@ To summarise, $\advB$ aborts in the following cases:
   \item If, for the forged message under the uncorrupted key $\pk_j$, we have
     the case that $\hashone(\msg^*_j) \neq y$, then $\advB$ cannot extract
     $e(\gen,\ggen)^{\gamma\varepsilon\chi}$ as required. This occurs with probability
-    $p_{\hashone}$.  Hence, the probability that $\advB$ \emph{succeeds} here
+    $p_{\hashone}$, so the probability that $\advB$ \emph{succeeds} here
     is $1 - p_{\hashone}$.
 
   \item If any signing query $(\pk_j,\Tag,\msg)$ to the signing oracle is for a
@@ -500,8 +485,31 @@ $L_2$, and then computes $\hashone$ and $\hashtwo$ as described below:
 
 \end{itemize}
 
-\paragraph{Simulating $\corrupto$ and $\signo$.} These are identical to in type
-1 forgeries.
+\paragraph{Simulating $\signo$.} $\corrupto$ is simulated exactly as above.
+For $\signo$, on a signature request $(\pk_i, \Tag, \msg)$ with $i \neq j$,
+$\advB$ outputs $\signature \sample \ATSsign(\sk_i, \Tag, \msg)$, as before.
+The case $i = j$ is different from Type 1: the Type 1 trick embeds the
+challenge in $\hashone$ and relies on $\advB$ knowing $x = \gen^\gamma$, but
+here the challenge is embedded in $\hashtwo$ instead, and $\advB$ is never
+given $\gen^\gamma$, only $\ggen^\gamma$. So for $i = j$, $\advB$ instead
+retrieves entries $\langle \msg, \rho, \hashone(\msg) =
+\gen^{\rho}\rangle$ and $\langle \Tag, \eta, \hashtwo(\Tag)\rangle$ from $L_1$
+and $L_2$, and aborts if $\hashtwo(\Tag) \neq \gen^{\eta}$ or $\eta = 0$.
+Otherwise, it samples $\upsilon \sample \Zp$ and, rather than computing
+$\signatureone$ and $\signaturetwo$ directly, sets $\signaturetwo$ freely and
+solves the verification equation for $\signatureone$, as follows:
+%
+\begin{equation*}
+%
+  (\signatureone, \signaturetwo) = \left(\left(\ggen^{\upsilon} /
+  \widetilde{x}^{\rho}\right)^{1/\eta}, \ \gen^{\upsilon}\right).
+%
+\end{equation*}
+%
+This is a valid signature on pair $(\Tag, \msg)$ relative to public key
+$\pk_j = \widetilde{x} = \ggen^\gamma$: by construction, $e(\signaturetwo,
+\ggen) = e(\hashone(\msg), \widetilde{x}) \cdot e(\hashtwo(\Tag),
+\signatureone)$, exactly the check performed by $\ATSverify$.
 
 \paragraph{Forgery.} After receiving $\adv$'s forgery $(\ISSUERS,
 (\pk_i)_{i\in\ISSUERS}, \Tag^*,  (\msg^*_i)_{i \in \ISSUERS}, \signature^*)$,
@@ -567,14 +575,16 @@ In the case of Type 2 forgeries, $\advB$ aborts in the following cases:
 
   \item If, for the forged tag $\Tag^*$, we have that $\hashtwo(\Tag^*)
     \neq y^{\eta^*}$, then $\advB$ cannot extract $e(\gen,\ggen)^{\gamma\varepsilon}$ as
-    required.  This occurs with probability $1-p_{\hashtwo}$.  Hence, the
+    required.  This occurs with probability $1-p_{\hashtwo}$, so the
     probability that $\advB$ \emph{succeeds} here is $p_{\hashtwo}$.
 
   \item If any signing query $(\pk_j,\Tag,\msg)$ to the signing oracle is
-    for a tag such that $\hashtwo(\Tag) \neq y^{\eta}$, then $\advB$ cannot
-    produce a signature and must abort. The probability that all signing
-    queries avoid this is $p_{\hashtwo}^{q}$, where $q$ is the number of
-    signing queries made with $\pk_j$.
+    for a tag such that $\hashtwo(\Tag) = y^{\eta}$, then $\advB$ cannot
+    produce a signature (\Fref{sec:tag-scheme}'s $\signo$ simulation needs the
+    un-embedded branch $\hashtwo(\Tag) = \gen^\eta$) and must abort. The
+    probability that all signing queries avoid this is
+    $(1-p_{\hashtwo})^{q}$, where $q$ is the number of signing queries made
+    with $\pk_j$.
 
 \end{itemize}
 
@@ -583,8 +593,8 @@ the case of Type 2 forgeries is as follows:
 %
 \begin{equation*}
 %
-  \Pr[\text{Type 2 abort}] = 1 - \left( \frac{1}{n}\cdot p_{\hashtwo}^{q+1}
-  \right).
+  \Pr[\text{Type 2 abort}] = 1 - \left( \frac{1}{n}\cdot p_{\hashtwo}\cdot
+  (1-p_{\hashtwo})^{q} \right).
 %
 \end{equation*}
 %
@@ -597,7 +607,7 @@ an instance of the generic black-box construction of
 Section~\ref{sec:agg-creds-construction}, obtained by setting $\DS$ to the
 AGHO structure-preserving signature scheme, $\ATS$ to our tag based aggregate
 signature scheme of Protocol~\ref{prot:ats}, and the generic proof system to
-the sigma-protocol-based signature of knowledge of
+the sigma-protocol-based NIZK of
 Section~\ref{sec:proof-inst}. By~\Fref{thm:agg-creds-construction-security},
 it therefore suffices to show that each of these three primitives meets the
 abstract requirement that theorem places on it.

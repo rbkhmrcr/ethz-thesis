@@ -57,9 +57,8 @@ that perfectly meets the system requirements.
 The ideal functionality captures the properties of aggregate anonymous
 credentials: unforgeability, unlinkability, and aggregatability.
 Unforgeability is enforced by ensuring that only validly issued attributes can
-be successfully presented or verified. Unlinkability is achieved as randomness
-is returned in each query to present, which prevents presentations from being
-correlated.
+be successfully presented or verified. Unlinkability is achieved as the response
+to each query to the presentation interface is simply randomness.
 
 \subsection{Aggregate tag based signatures}
 
@@ -202,7 +201,7 @@ indistinguishable from $\textsc{Exec}_{\F{\AAC},\simu}(\secparam)$.
 
 $\F{\AAC}$ receives inputs from system participants and $\simu$, computes the
 corresponding outputs, and delivers them to the authorised parties. It exposes
-five interfaces --- register, issue, aggregate, present, verify --- through
+interfaces through
 which $\simu$ and honest participants submit inputs. The formal description is
 given in~\Fref{fig:faac}; we summarise each interface below.
 
@@ -217,7 +216,7 @@ identity on every call, and additionally the attribute value on issue calls.
 
 \paragraph{Aggregate.} A user calls this to combine their credentials for
 attribute values $\vec{\atv{}}$ into a form usable for later presentation.
-Aggregation is local, so $\simu$ learns nothing. Success yields a random string
+Aggregation is local, so $\simu$ learns nothing. Success results in a random string
 $\signature$ representing the aggregate credential.
 
 \paragraph{Present.} A user queries this to produce a presentation of
@@ -249,7 +248,7 @@ answer; otherwise it records the presentation as invalid and returns false.
 
       \begin{multicols}{2}
 
-        \paragraph{$\AACregister$.} On input register from the user, send
+        {$\AACregister$.} On input register from the user, send
         $(register, user)$ to the registration authority and wait for its
         confirmation.  Upon receiving the confirmation, do the following:
 
@@ -269,7 +268,7 @@ answer; otherwise it records the presentation as invalid and returns false.
 
         \end{enumerate}
 
-        \paragraph{$\AACissue$.} On input $(\AACissue, \att{i},\atv{i})$ from
+        {$\AACissue$.} On input $(\AACissue, \att{i},\atv{i})$ from
         the user, with $\atv{i}$ being value of attribute $\att{i}$, send
         $(\AACissue, \user, \atv{i})$ to issuer $\issuer{i}$ associated with
         $\att{i}$ and wait for its confirmation.  Upon confirmation, do:
@@ -307,12 +306,12 @@ answer; otherwise it records the presentation as invalid and returns false.
           \item Set $\creds[\user][i] \leftarrow \creds[\user][i] \cup
             \{\atv{i}\}$.
 
-          \item Return $(\AACissue end, \att{i}, \atv{i})$ to the user and
-            $(\AACissue end, \user, \atv{i})$ to $\issuer{i}$.
+          \item Return $(\AACissue$end$, \att{i}, \atv{i})$ to the user and
+            $(\AACissue$end$, \user, \atv{i})$ to $\issuer{i}$.
 
         \end{enumerate}
 
-        \paragraph{$\AACaggregate$.} On input $(\AACaggregate, \vec{\atv{}})$
+        {$\AACaggregate$.} On input $(\AACaggregate, \vec{\atv{}})$
         from the user , where $\vec{\atv{}} = (\atv{1}, ..., \atv{n})$ and
         $\atv{i} \in \{\varnothing\} \cup \{0, 1\}^*$, do:
 
@@ -331,7 +330,7 @@ answer; otherwise it records the presentation as invalid and returns false.
               \item Set $\aggcreds[\signature] \leftarrow \langle \user,
                 \vec{\atv{}}\rangle$.
 
-              \item Return $(\AACaggregate end, \signature)$ to the user.
+              \item Return $(\AACaggregate$end$, \signature)$ to the user.
                 (Users who hold non-empty attribute values successfully
                 aggregate the corresponding credentials.)
 
@@ -341,7 +340,7 @@ answer; otherwise it records the presentation as invalid and returns false.
 
         \end{enumerate}
 
-        \paragraph{$\AACpresent$.} On input $(\AACpresent, \vec{\atv{}},
+        {$\AACpresent$.} On input $(\AACpresent, \vec{\atv{}},
         \signature, \msg)$ from the user , where $\vec{\atv{}} = (\atv{1}, ...,
         \atv{n})$ s.t. $\atv{i} = \varnothing$ if $\atv{i}$ is not disclosed,
         do:
@@ -356,8 +355,8 @@ answer; otherwise it records the presentation as invalid and returns false.
               \item Randomly generate $\proof$.  \item Set
                 $\proven[\vec{\atv{}}, \msg, \proof] \leftarrow 1$.
 
-              \item Return $(\AACpresent end, \proof)$ to the user and
-                $(\AACpresent end, \vec{\atv{}}, \msg, \proof)$ to $\simu$.
+              \item Return $(\AACpresent$end$, \proof)$ to the user and
+                $(\AACpresent$end$, \vec{\atv{}}, \msg, \allowbreak \proof)$ to $\simu$.
                 (Users who successfully aggregated their credentials
                 successfully sign messages.)
 
@@ -373,8 +372,8 @@ answer; otherwise it records the presentation as invalid and returns false.
 
               \item Set $\proven[\vec{\atv{}}, \msg, \proof] \leftarrow 1$.
 
-              \item Return $(\AACpresent end,  \proof)$ to the user and
-                $(\AACpresent end, \vec{\atv{}}, \msg, \proof)$ to $\simu$.
+              \item Return $(\AACpresent$end$,  \proof)$ to the user and
+                $(\AACpresent$end$, \vec{\atv{}}, \msg, \allowbreak \proof)$ to $\simu$.
                 (Users with disclosed attribute values successfully sign
                 messages even if they did not call aggregate before.)
 
@@ -384,8 +383,8 @@ answer; otherwise it records the presentation as invalid and returns false.
 
         \end{enumerate}
 
-        \paragraph{$\AACverify$.} Upon receiving message $(\AACverify,
-        \vec{\atv{}}, \msg, \proof)$ from a verifier, do:
+        {$\AACverify$.} Upon receiving message $(\AACverify,
+        \vec{\atv{}}, \allowbreak \msg, \proof)$ from a verifier, do:
 
         \begin{enumerate}
 
@@ -397,10 +396,10 @@ answer; otherwise it records the presentation as invalid and returns false.
 
             \begin{enumerate}
 
-              \item Return $(\AACverify end, 1)$ to the verifier.
+              \item Return $(\AACverify$end$, 1)$ to the verifier.
                 (Completeness.)
 
-              \item Send $(\AACverify end, \algo{V}, \vec{\atv{}}, \msg,
+              \item Send $(\AACverify$end$, \algo{V}, \vec{\atv{}}, \msg,
                 \proof, \allowbreak 1)$ to $\simu$.
 
             \end{enumerate}
@@ -416,13 +415,13 @@ answer; otherwise it records the presentation as invalid and returns false.
                 \atv'{i}$, or have $\atv{i} \neq \atv'{i}$ but issuer
                 $\issuer{i}$ is dishonest, then query $\simu$ with
                 $(\AACverify, \vec{\atv{}}, \msg,\proof)$. On receiving the
-                response $(\AACverify end, b)$, do:
+                response $(\AACverify$end$, b)$, do:
 
                 \begin{enumerate}
 
                   \item Set $\proven[\vec{\atv{}}, \msg, \proof] \leftarrow b$.
 
-                  \item Return $(\AACverify end, b)$ to $\algo{V}$.
+                  \item Return $(\AACverify$end$, b)$ to $\algo{V}$.
 
                 \end{enumerate}
 
@@ -432,11 +431,11 @@ answer; otherwise it records the presentation as invalid and returns false.
 
                   \item Set $\proven[\vec{\atv{}}, \msg, \proof] \leftarrow 0$.
 
-                  \item Return $(\AACverify end, 0)$ to $\algo{V}$.
+                  \item Return $(\AACverify$end$, 0)$ to $\algo{V}$.
                     (Unforgeability.)
 
-                  \item Send $(\AACverify end, \algo{V}, \vec{\atv{}}, \msg,
-                    \proof,\allowbreak 0)$ to $\simu$.
+                  \item Send $(\AACverify$end$, \algo{V}, \vec{\atv{}}, \msg, \allowbreak
+                    \proof, \allowbreak 0)$ to $\simu$.
 
                 \end{enumerate}
 

@@ -1,12 +1,12 @@
 \section{Construction}\label{sec:agg-creds-construction}
 
-The protocol involves a registration authority and a collection of issuers.
+In brief, the protocol proceeds as follows.
 Each user first establishes a pseudonymous identity with the registration
 authority. Issuers then issue credentials to that identity for the attributes
 they certify. Before presentation, the user aggregates the credentials
 corresponding to the attributes they wish to disclose into a single aggregate
 signature. Finally, the user proves knowledge of the aggregate credential and
-their registered identity using a signature of knowledge.
+their registered identity using a NIZK.
 
 The construction assumes that the registration authority ensures each user's
 public key is unique, and that the user holds the corresponding secret key.
@@ -18,7 +18,7 @@ by assigning duplicate tags or registering users under adversarially chosen
 identities; addressing this is orthogonal to our contribution.  We assume that
 verifiers accept credentials only from the set of issuers with published public
 keys. This prevents a malicious user from being able to impersonate an issuer
-to an honest verifier.
+to an honest verifier. We now present the construction in full.
 
 \paragraph{Setup.} During setup, the registration authority generates a key
 pair for the digital signature scheme and public parameters for the proofs used
@@ -90,18 +90,24 @@ constructs the aggregate signature as follows:
 %
 They then construct a proof of knowledge with the following parameters:
 %
-\begin{gather}
+\begin{equation}
 %
-  \inst = (\rapk, \ISSUERS, \{\ipk{i}, \atv{i}\}_{i \in \ISSUERS}), \witness =
-  (\Tag, \sk, \pk, \psi, \signature) \\
+  \inst = (\rapk, \ISSUERS, \{\ipk{i}, \atv{i}\}_{i \in \ISSUERS}), \qquad
+  \witness = (\Tag, \sk, \pk, \psi, \signature),
 %
-  \rel = \{ (\sk, \pk) \leftarrow \DSgen(\secparam) \quad \wedge \quad
+\end{equation}
+%
+\begin{equation}
+\begin{gathered}
+%
+  \rel = \{\ (\sk, \pk) \leftarrow \DSgen(\secparam) \ \wedge \
     \DSverify(\rapk, (\pk, \Tag), \psi) = 1 \\
 %
-  \wedge \quad \ATSverifyagg(\{\ipk{i}\}_{i \in \ISSUERS}, \Tag, \{\atv{i}\}_{i
-\in \ISSUERS}, \signature) = 1.  \}
+  \wedge\ \ATSverifyagg(\{\ipk{i}\}_{i \in \ISSUERS}, \Tag, \{\atv{i}\}_{i
+    \in \ISSUERS}, \signature) = 1\ \}.
 %
-\end{gather}
+\end{gathered}
+\end{equation}
 %
 
 \paragraph{Verification.} The verifier checks the proof with respect to the

@@ -4,8 +4,10 @@ The contributions of this thesis include both constructions of protocols and
 constructions of their underlying primitives. We take different approaches to
 defining and proving the security of each of these.
 
-Primitives (for example commitments, signature schemes, and PRFs) are handled
-through defining experiments, and then showing that the adversary cannot win
+By primitives, we refer to building blocks such as commitments, signature schemes, and PRFs. 
+Security in this case is handled
+through defining experiments, a limited number of oracles which an adversary has access to, 
+and then showing that the adversary cannot win
 with greater probability than some predefined amount. For larger protocols with
 many parties and interfaces, we capture all security goals at once inside an
 ideal functionality. We then construct a simulator to show that the view of an
