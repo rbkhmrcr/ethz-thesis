@@ -1,0 +1,97 @@
+\section{Hash functions}\label{sec:prelims-hash}
+
+Hash functions compress inputs of arbitrary length into a short digest.
+
+\paragraph{Syntax.} A hash function family consists of algorithms defined as
+follows:
+%
+\begin{description}
+
+  \item[$\key \sample \hashgen(\secparam)$ :] The key generation algorithm
+    takes the security parameter as input, and outputs a key $\key$.
+
+  \item[$y \leftarrow \hasheval(\key, x)$ :] The evaluation algorithm takes key
+    $\key$ and input $x \in \{0,1\}^*$, and outputs digest $y$ in the range
+    $\range$.
+
+\end{description}
+%
+We say $\Hash = (\hashgen, \hash)$ is a hash function family with range
+$\range$ if $\hasheval(\key, \cdot)$ is efficiently computable for every $\key$
+output by $\hashgen(\secparam)$. We use the standard syntax and security
+notions for hash functions~\cite{KatLin14}. When the key $\key$ is fixed and
+public, as is the case throughout this thesis, we write $\hash(x)$ for
+$\hasheval(\key, x)$.
+
+\paragraph{Collision resistance.} Collision resistance requires that no
+efficient adversary can find two distinct inputs hashing to the same digest.
+
+\begin{experimentbox}{Collision resistance}{hash-cr}
+
+  \begin{enumerate}
+
+    \item The challenger generates $\key \sample \hashgen(\secparam)$ and sends
+      $\key$ to $\adv$.
+
+    \item The adversary outputs $(x, x')$.
+
+  \end{enumerate}
+
+  $\adv$ wins the experiment if $x \neq x'$ and $\hasheval(\key, x) =
+  \hasheval(\key, x')$.
+
+\end{experimentbox}
+
+The collision resistance advantage of $\adv$ is defined as follows:
+%
+\begin{equation*}
+%
+  \Adv^{\mathsf{cr}}_{\Hash, \adv}(\secparam) = \Pr[\adv \text{ wins}].
+%
+\end{equation*}
+%
+We say $\Hash$ is collision resistant if this advantage is small for every
+admissible adversary $\adv$.
+
+\paragraph{Preimage resistance.} Preimage resistance requires that no efficient
+adversary can recover an input hashing to a given digest, even one of their own
+choosing.
+
+\begin{experimentbox}{Preimage resistance}{hash-preimage}
+
+  \begin{enumerate}
+
+    \item The challenger generates $\key \sample \hashgen(\secparam)$, samples
+      $x \sample \{0,1\}^{\secparam}$, computes $y \leftarrow \hasheval(\key,
+      x)$, and sends $(\key, y)$ to $\adv$.
+
+    \item The adversary outputs $x'$.
+
+  \end{enumerate}
+
+  $\adv$ wins the experiment if $\hasheval(\key, x') = y$.
+
+\end{experimentbox}
+
+The preimage resistance advantage of $\adv$ is defined as follows:
+%
+\begin{equation*}
+%
+  \Adv^{\mathsf{preimage}}_{\Hash, \adv}(\secparam) = \Pr[\adv \text{ wins}].
+%
+\end{equation*}
+%
+We say $\Hash$ is preimage resistant if this advantage is small for every
+admissible adversary $\adv$. A related property is second preimage resistance,
+which requires that no efficient adversary given $x$, can find a distinct $x'$
+with $\hasheval(\key, x) = \hasheval(\key, x')$. Collision resistance implies
+second preimage resistance, so we do not use it separately.
+
+\paragraph{The random oracle model.} Our security proofs generally model a hash
+function as a random oracle: a function sampled uniformly at random from all
+functions with the given domain and range, to which every party, including the
+adversary, has oracle access. The random oracle answers each fresh query with
+an output of its choosing. It has internal state and records the message and
+output for each query it has answered, which allows answering consistently for
+repeated queries. We refer to the ability to choose the answer to oracle
+queries as programming the random oracle.

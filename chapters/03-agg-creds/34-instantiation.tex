@@ -2,9 +2,9 @@
 
 \paragraph{Notation.} We use cyclic groups $\group{1}$, $\group{2}$, and
 $\group{T}$ of prime order $p$.  The groups are equipped with an efficiently
-computable pairing written as $e \colon \group{1} \times \group{2} \rightarrow \group{T}$.
-For all $a \in \group{1}$, $\widetilde{b} \in \group{2}$, and $x,y \in \Zp$,
-bilinearity means that the following holds:
+computable pairing written as $e \colon \group{1} \times \group{2} \rightarrow
+\group{T}$.  For all $a \in \group{1}$, $\widetilde{b} \in \group{2}$, and $x,y
+\in \Zp$, bilinearity means that the following holds:
     %
 \begin{equation*}
      %
@@ -23,17 +23,15 @@ $\group{2}$ are distinguished using a tilde, while elements of $\Zp$ are
 written using lower case Greek letters or otherwise specified explicitly.  We
 use generators $g \in \group{1}$ and $\widetilde{g} \in \group{2}$.
 
-We use hash functions 
- $ \hashone \colon \{0,1\}^* \rightarrow \group{1}$ and $\hashtwo
-  \colon \{0,1\}^* \rightarrow \group{1}$.
+We use hash functions $ \hashone \colon \{0,1\}^* \rightarrow \group{1}$ and
+$\hashtwo \colon \{0,1\}^* \rightarrow \group{1}$.
 
 Bilinearity allows relations between exponents in the source groups to be
-checked through equalities in $\group{T}$.  The equality
-  $e(a,\widetilde{g}) = e(g,\widetilde{b})$
-shows that $a$ and $\widetilde{b}$ contain the same exponent relative to their
-respective generators, without requiring that exponent to be recovered.  Our
-constructions use such pairing equations to verify signatures and other
-algebraic relations across $\group{1}$ and $\group{2}$.
+checked through equalities in $\group{T}$.  The equality $e(a,\widetilde{g}) =
+e(g,\widetilde{b})$ shows that $a$ and $\widetilde{b}$ contain the same
+exponent relative to their generators, without requiring that exponent to be
+recovered.  Our constructions use such pairing equations to verify signatures
+and other algebraic relations across $\group{1}$ and $\group{2}$.
 
 \subsection{Our tag based aggregate signature scheme ($\ATS$)}
 \label{sec:tag-scheme}
@@ -66,8 +64,8 @@ signatures.  Our scheme is comprised of the following algorithms:
 
         \item Sample $\upsilon \sample \Zp$.
 
-        \item Return $\signature = (\ggen^{\upsilon}, \hashone(\msg)^{\sk} \cdot
-          \hashtwo(\Tag)^\upsilon)$.
+        \item Return $\signature = (\ggen^{\upsilon}, \hashone(\msg)^{\sk}
+          \cdot \hashtwo(\Tag)^\upsilon)$.
 
       \end{enumerate}
 
@@ -123,7 +121,8 @@ signatures.  Our scheme is comprised of the following algorithms:
         \item Parse $\signature = (\signatureone, \signaturetwo)$.
 
         \item Return $e(\signaturetwo, \ggen) \checkcheck e (\hashtwo(\Tag),
-          \signatureone) \cdot \prod_{i\in\ISSUERS} e(\hashone(\msg_i), \pk_i)$.
+          \signatureone) \cdot \prod_{i\in\ISSUERS} e(\hashone(\msg_i),
+          \pk_i)$.
 
       \end{enumerate}
 
@@ -131,9 +130,10 @@ signatures.  Our scheme is comprised of the following algorithms:
 
   \begin{assumptionbox}{Bilinear Computational Diffie-Hellman (BCDH)}{bcdh}
 
-    The BCDH assumption holds if, given $(\gen, \gen^\gamma, \gen^\varepsilon, \gen^\chi, \ggen,
-    \ggen^\gamma, \ggen^\varepsilon, \ggen^\chi)$ for uniformly random $\gamma, \varepsilon, \chi \sample \Zp$, no
-    PPT adversary can output $e(\gen, \ggen)^{\gamma\varepsilon\chi}$ with non-negligible
+    The BCDH assumption holds if, given $(\gen, \gen^\gamma, \gen^\varepsilon,
+    \gen^\chi, \ggen, \ggen^\gamma, \ggen^\varepsilon, \ggen^\chi)$ for
+    uniformly random $\gamma, \varepsilon, \chi \sample \Zp$, no PPT adversary
+    can output $e(\gen, \ggen)^{\gamma\varepsilon\chi}$ with non-negligible
     probability.
 
   \end{assumptionbox}
@@ -141,9 +141,10 @@ signatures.  Our scheme is comprised of the following algorithms:
   \begin{assumptionbox}{Modified Bilinear Computational Diffie-Hellman
     (m-BCDH)}{mbcdh}
 
-    The m-BCDH assumption holds if, given $(\gen, \gen^{1/\varepsilon}, \ggen, \ggen^\gamma,
-    \ggen^\varepsilon)$ for uniformly random $\gamma, \varepsilon \sample \Zp$, no PPT adversary can
-    output $e(\gen, \ggen)^{\gamma\varepsilon}$ with non-negligible probability.
+    The m-BCDH assumption holds if, given $(\gen, \gen^{1/\varepsilon}, \ggen,
+    \ggen^\gamma, \ggen^\varepsilon)$ for uniformly random $\gamma, \varepsilon
+    \sample \Zp$, no PPT adversary can output $e(\gen,
+    \ggen)^{\gamma\varepsilon}$ with non-negligible probability.
 
   \end{assumptionbox}
 
@@ -151,30 +152,30 @@ signatures.  Our scheme is comprised of the following algorithms:
   the random oracle model under the Bilinear Computational Diffie-Hellman
   (BCDH) assumption and a modified variant of the same assumption.
 
-  \begin{theorem}\label{thm:agg-creds-thm-1} If the BCDH and m-BCDH
-  assumptions hold, then our tag based aggregate signature scheme is
-  existentially unforgeable under tag based aggregation in the random oracle
-  model.  \end{theorem}
+  \begin{theorem}\label{thm:agg-creds-thm-1} If the BCDH and m-BCDH assumptions
+  hold, then our tag based aggregate signature scheme is existentially
+unforgeable under tag based aggregation in the random oracle model.
+\end{theorem}
 
 \subsection{Our aggregate anonymous credentials scheme ($\AAC$)}
 
 \paragraph{Overview.} In this instantiation, each user has a pair of secret and
 public keys $(\sk, \pk = \gen^\sk)$.  The digital signature $\DS$ uses the AGHO
 structure preserving signature scheme~\cite{C:AGHO11}. Every user is assigned a
-unique tag $\Tag \in \Zp$. Since structure-preserving signatures signs vectors 
-of group elements rather
-than scalars, we take $\tid = \hashtwo(\Tag)$ and it is the pair $(\pk, \tid)$
-that the registration authority signs, with $\pk$ the user's public key.
-Every other computation in the protocol uses $\Tag$ directly. The aggregate
-tag-based signature $\ATS$ is instantiated with our construction.
+unique tag $\Tag \in \Zp$. Since structure-preserving signatures signs vectors
+of group elements rather than scalars, we take $\tid = \hashtwo(\Tag)$ and it
+is the pair $(\pk, \tid)$ that the registration authority signs, with $\pk$ the
+user's public key.  Every other computation in the protocol uses $\Tag$
+directly. The aggregate tag-based signature $\ATS$ is instantiated with our
+construction.
 
 \paragraph{The AGHO structure preserving signature scheme.} The AGHO scheme
 supports signing vectors of elements in $\group{1}$, $\group{2}$, or both.  In
 the following, we only describe signing elements of $\group{1}$. We use a
-structure preserving signature scheme specifically because it has public
-keys, messages, and signatures consisting of elements of the same group.
-This allows us to build a more efficient protocol; we explain how in more
-detail once the registration algorithm has been described.
+structure preserving signature scheme specifically because it has public keys,
+messages, and signatures consisting of elements of the same group.  This allows
+us to build a more efficient protocol. We explain how in more detail once the
+registration algorithm has been described.
 
 \begin{primitivebox} {AGHO structure-preserving signatures} {agho}
 
@@ -186,63 +187,59 @@ detail once the registration algorithm has been described.
          %
       \begin{gather*}
      %
-        (\mu_1, \dots, \mu_\ell,  \tau) \sample \Zp^{\ell+1}; \quad \sk = (\mu_1, \dots,
-        \mu_\ell, \tau); \\
+        (\mu_1, \dots, \mu_\ell,  \tau) \sample \Zp^{\ell+1}; \quad \sk =
+        (\mu_1, \dots, \mu_\ell, \tau); \\
       %
-        \pk = (\widetilde{u}_1, \dots, \widetilde{u}_\ell, v) \quad\text{with}\quad
-        \widetilde{u}_i = \ggen^{\mu_i} \in \group{2}, v = \gen^\tau \in \group{1}.
+        \pk = (\widetilde{u}_1, \dots, \widetilde{u}_\ell, v)
+        \quad\text{with}\quad \widetilde{u}_i = \ggen^{\mu_i} \in \group{2},
+        v = \gen^\tau \in \group{1}.
         %
       \end{gather*}
      %
-
     \item[$\SPSsig \sample \SPSsign(\sk, \vec{m})$ :] On input the secret key
-      $\sk = (\mu_1, \dots, \mu_\ell, \tau)$ and message $\vec{m} = (m_1, \dots,
-      m_\ell) \in \group{1}^\ell$, the signing algorithm randomly samples $\omega
-      \sample \Zp$ and outputs the signature constructed as follows:
-    %
-      \begin{equation*}
-     %
-        \signature =  (\widetilde{r}, \widetilde{s}, t) = (\ggen^\omega, \widetilde{r}^\tau,
-        (\gen \cdot \prod_{i=1}^\ell m_i^{-\mu_i})^{1/\omega}).
-    %
-      \end{equation*}
-     %
-
-    \item[$\SPSsig' \sample \SPSrandomise(\SPSsig)$ :] On input signature
-      $\SPSsig = (\widetilde{r}, \widetilde{s}, t)$, the randomisation algorithm
-      randomly samples $\omega' \sample \Zp$ and outputs the signature formed as
+      $\sk = (\mu_1, \dots, \mu_\ell, \tau)$ and message $\vec{m} = (m_1,
+      \dots, m_\ell) \in \group{1}^\ell$, the signing algorithm randomly
+      samples $\omega \sample \Zp$ and outputs the signature constructed as
       follows:
     %
       \begin{equation*}
-        %
-        \SPSsig' = (\widetilde{r}', \widetilde{s}', t') = ( \widetilde{r}^{\omega'},
-        \widetilde{s}^{\omega'}, t^{\frac{1}{\omega'}}).
+     %
+        \signature =  (\widetilde{r}, \widetilde{s}, t) = (\ggen^\omega,
+        \widetilde{r}^\tau, (\gen \cdot \prod_{i=1}^\ell
+        m_i^{-\mu_i})^{1/\omega}).
     %
       \end{equation*}
      %
-
+    \item[$\SPSsig' \sample \SPSrandomise(\SPSsig)$ :] On input signature
+      $\SPSsig = (\widetilde{r}, \widetilde{s}, t)$, the randomisation
+      algorithm randomly samples $\omega' \sample \Zp$ and outputs the
+      signature formed as follows:
+    %
+      \begin{equation*}
+        %
+        \SPSsig' = (\widetilde{r}', \widetilde{s}', t') = (
+        \widetilde{r}^{\omega'}, \widetilde{s}^{\omega'}, t^{1/\omega'}).
+    %
+      \end{equation*}
+     %
     \item[$ \{0,1\} \leftarrow \SPSverify(\pk, \vec{m}, \SPSsig)$ :] On input a
       public key $\pk$, message $\vec{m} = (m_1, \dots, m_\ell) \in
-      \group{1}^\ell$, and signature $\SPSsig = (\widetilde{r}, \widetilde{s}, t)$,
-      the verification algorithm outputs $1$ if both of the following pairing
-      equations hold:
+      \group{1}^\ell$, and signature $\SPSsig = (\widetilde{r}, \widetilde{s},
+      t)$, output the result of the following check:
     %
       \begin{equation*}
     %
-        e(v, \widetilde{r}) = e(\gen, \widetilde{s}) \quad \wedge \quad e(t,
-        \widetilde{r}) \cdot \prod_{i=1}^\ell e(m_i, \widetilde{u}_i) = e(\gen,
-        \ggen).
+        e(v, \widetilde{r}) \checkcheck e(\gen, \widetilde{s}) \ \wedge\ e(t,
+        \widetilde{r}) \cdot \prod_{i=1}^\ell e(m_i, \widetilde{u}_i)
+        \checkcheck e(\gen, \ggen).
   %
       \end{equation*}
-  %
-      And otherwise outputs $0$.
-
   \end{description}
-
 \end{primitivebox}
 
 The AGHO signature scheme is existentially unforgeable under chosen message
-attacks under the $q$-Strong Diffie-Hellman ($q$-SDH) assumption~\cite{C:AGHO11}.
+attacks under the $q$-Strong Diffie-Hellman ($q$-SDH)
+assumption~\cite{C:AGHO11}.
 
 \begin{assumptionbox}{$q$-Strong Diffie-Hellman ($q$-SDH)}{qsdh}
 
@@ -258,97 +255,98 @@ they possess a valid registration signature, an aggregate credential under a
 single tag, and the secret key corresponding to the registered public key for
 that tag, without revealing either the tag or the public key.
 
-We have the public keys defined as follows:
+We have the public keys of the registration authority, issuer $i$, and the user
+defined as follows:
 %
 \begin{equation*}
 %
-  \rapk = (\widetilde{u}_1, \widetilde{u}_2, v), \qquad \ipk{i} =
-  \ggen^{\xi_i}, \qquad \pk = \gen^{\sk},
+  \rapk = (\widetilde{u}_1, \widetilde{u}_2, v), \quad \ipk{i} =
+  \ggen^{\xi_i}, \quad \pk = \gen^{\sk}.
 %
 \end{equation*}
 %
-for the registration authority, issuer $i$, and the user, respectively. We
-have the tag identifier and signatures defined as follows:
+And we have the following tag identifier and signatures:
 %
 \begin{equation*}
 %
-  \tid = \hashtwo(\Tag), \qquad \signature = (\signatureone, \signaturetwo),
-  \qquad \SPSsig = (\widetilde{r}, \widetilde{s}, t).
+  \tid = \hashtwo(\Tag), \quad \signature = (\signatureone, \signaturetwo),
+  \quad \SPSsig = (\widetilde{r}, \widetilde{s}, t).
 %
 \end{equation*}
 %
-With $\crs = (\gen, \ggen)$, we instantiate the generic relation of
+With $\crs = (\gen, \ggen)$, we instantiate the relation of
 Section~\ref{sec:agg-creds-construction}, with $\DS$ set to $\SPS$ and $\ATS$
-set to our tag based scheme, giving instance and witness as follows:
+set to our tag based scheme, giving witness, instance, and relation defined as follows:
 %
 \begin{equation}
 %
-  \inst = (\rapk, \{\atv{i}, \ipk{i}\}_{i \in \ISSUERS}), \qquad
-  \witness = (\sk, \pk, \tid, \signature, \SPSsig).
+  \inst_2 = (\rapk, \{\atv{i}, \ipk{i}\}_{i \in \ISSUERS}), \quad \witness_2 =
+  (\sk, \pk, \tid, \signature, \SPSsig).
 %
 \end{equation}
 %
-This gives relation $\rel$ as follows:
 %
-\begin{equation}\label{eq:proof-original}
-\begin{gathered}
+\begin{equation}\label{eq:proof-original} \begin{gathered}
 %
-  \rel = \{\ e(v, \widetilde{r}) = e(\gen, \widetilde{s}) \ \wedge\
-    e(t, \widetilde{r}) \cdot e(\gen^{\sk}, \widetilde{u}_1)\cdot
-    e(\tid, \widetilde{u}_2) = e(\gen, \ggen) \\
+  \rel_2 = \{\ e(v, \widetilde{r}) = e(\gen, \widetilde{s}) \ \wedge\ e(t,
+    \widetilde{r}) \cdot e(\gen^{\sk}, \widetilde{u}_1)\cdot e(\tid,
+    \widetilde{u}_2) = e(\gen, \ggen) \\
   %
   \wedge\ \pk = \gen^{\sk} \ \wedge\ e(\signaturetwo, \ggen) = e(\tid,
-    \signatureone)\cdot\prod_{i\in\ISSUERS}e(\hashone(\atv{i}), \ipk{i})\ \}.
+\signatureone)\cdot\prod_{i\in\ISSUERS}e(\hashone(\atv{i}), \ipk{i})\ \}.
   %
-\end{gathered}
-\end{equation}
+\end{gathered} \end{equation}
 %
 Since the registration authority only issues signatures on well-formed
 messages, pairs $(\pk, \hashtwo(\Tag))$ for $\Tag \in \Zp$, the user does not
-need to prove knowledge of the pre image such that $\tid = \hashtwo(\Tag)$,
-which already saves a proof of a hash pre image.
+need to prove knowledge of the preimage such that $\tid = \hashtwo(\Tag)$,
+which already saves a proof of a hash preimage.
 
 To avoid a general purpose zero knowledge proof over these pairing equations,
-$\AACpresent$ first randomises $\signature' \sample
-\ATSrandomise(\signature)$ and $\SPSsig' \sample \SPSrandomise(\SPSsig)$, then
-blinds every element of the witness by a common factor $\delta \sample
-\Zp^*$:
+$\AACpresent$ proceeds as follows.
+
+\begin{enumerate}
+
+  \item Randomise $\signature' \sample \ATSrandomise(\signature)$ and
+    $\SPSsig' \sample \SPSrandomise(\SPSsig)$.
+
+  \item Sample $\delta \sample \Zp^*$ and compute the following:
+    %
+    \begin{equation*}\begin{gathered}
+    %
+      \bar{\gen} = \gen^{\delta}, \quad \bar{t} = {t'}^{\delta}, \quad
+      \bar{\signaturetwo} = {\signaturetwo'}^{\delta}, \quad \bar{\tid} =
+      \tid^{\delta}, \\
+      %
+      \bar{v} = v^{\delta}, \quad \pk' = \pk^{\delta}, \quad \forall i \in \ISSUERS: \ H_i = \hashone(\atv{i})^{\delta}.
+    %
+    \end{gathered} \end{equation*}
 %
-\begin{equation*}
+\end{enumerate}
 %
-  \forall i \in \ISSUERS: \ H_i = \hashone(\atv{i})^{\delta}, \quad \bar{\gen}
-  = \gen^{\delta}, \quad \bar{t} = {t'}^{\delta}, \quad \bar{\signaturetwo} =
-  {\signaturetwo'}^{\delta}, \quad \bar{\tid} = \tid^{\delta}, \quad \bar{v} =
-  v^{\delta}, \quad \pk' = \pk^{\delta}.
-%
-\end{equation*}
-%
-This is exactly the redefined $\crs = \gen$ that $\AACpresent$
-(Protocol~\ref{prot:paac}, below) passes to $\NIZKprove$, with instance and
-witness as follows:
+This allows of to form the proof we use in practice, with the following instance and
+witness, and relation:
 %
 \begin{equation}
 %
-  \inst = (\pk', \{\atv{i}, H_i\}_{i \in \ISSUERS}, \bar{\gen}), \qquad
-  \witness = (\delta, \sk).
+  \inst_3 = (\pk', \{\atv{i}, H_i\}_{i \in \ISSUERS}, \bar{\gen}), \quad
+  \witness_3 = (\delta, \sk).
 %
 \end{equation}
 %
-This turns~\eqref{eq:proof-original} into the blinded relation as follows:
 %
 \begin{equation} \label{eq:proof-rel}
 %
-  \rel = \{\ \bar{\gen} = \gen^{\delta} \ \wedge\ \bar{v} = v^{\delta} \ \wedge\
-    H_i = \hashone(\atv{i})^{\delta}\ \ \forall i \in \ISSUERS \ \wedge\
-    \pk' = \bar{\gen}^{\sk}\ \}.
+  \rel_3 = \{\ \bar{\gen} = \gen^{\delta} \ \wedge\ \bar{v} = v^{\delta} \
+  \wedge\ H_i = \hashone(\atv{i})^{\delta}\ \ \forall i \in \ISSUERS \ \wedge\
+\pk' = \bar{\gen}^{\sk}\ \}.
 %
 \end{equation}
 %
-This relation only concerns equality of discrete logarithms of elements in
-$\group{1}$, so $\NIZKprove$ and $\NIZKverify$ can be instantiated cheaply, and
-without any zero knowledge proof over pairing equations in $\group{T}$. This
-is the relation used by $\AACpresent$ below, and proved directly by
-Protocol~\ref{prot:paac-2} further on.
+This relation only involves equality of discrete logarithms of elements in
+$\group{1}$, which allows us to build a concretely efficient proof rather than
+requiring zero knowledge proofs over pairing equations and elements of 
+$\group{T}$.
 
 %%%% anon creds protocol
 
@@ -356,8 +354,8 @@ Protocol~\ref{prot:paac-2} further on.
 
   \begin{description}
 
-    \item[$\crs \sample \AACgen(\secparam)$ :] On input security
-      parameter $\secparam$, do the following:
+    \item[$\crs \sample \AACgen(\secparam)$ :] On input security parameter
+      $\secparam$, do the following:
 
       \begin{enumerate}
 
@@ -371,19 +369,19 @@ Protocol~\ref{prot:paac-2} further on.
 
       \end{enumerate}
 
-    \item[$(\sk,\regcred) \sample \AACregister(\crs)$ :] On input
-      $\crs$ from the user, do:
+    \item[$(\sk,\regcred) \sample \AACregister(\crs)$ :] On input $\crs$ from
+      the user, do:
 
       \begin{enumerate}
 
         \item The user samples $\sk \sample \Zp$ and sets $\pk \leftarrow
           \gen^\sk$.
 
-        \item The RA samples a fresh nonce $\nonce \sample \Zp$ and sends it
-          to the user, who sends back $\pk$ together with a proof of knowledge
-          of $\sk$ on $\nonce$.
+        \item The RA samples a fresh nonce $\nonce \sample \Zp$ and sends it to
+          the user, who sends back $\pk$ together with a proof of knowledge of
+          $\sk$ on $\nonce$.
 
-        \item If the proof does not verify, the RA aborts.
+        \item If the proof does not verify, the RA exits.
 
         \item Otherwise, the RA samples $\Tag \sample \Zp$ uniformly at random,
           makes sure it is unique, sets $\tid \leftarrow \hashtwo(\Tag)$, and
@@ -403,20 +401,20 @@ Protocol~\ref{prot:paac-2} further on.
         \item Parse $\regcred = (\Tag,\pk,\psi)$ and compute $\tid \leftarrow
           \hashtwo(\Tag)$.
 
-        \item If $\SPSverify(\rapk,(\pk,\tid),\psi) \neq 1$, abort.
-          (This instantiates the generic $\DSverify$.)
+        \item If $\SPSverify(\rapk,(\pk,\tid),\psi) \neq 1$, exit.
 
         \item Otherwise, the user proves knowledge of $\sk$ underlying $\pk$ to
-          issuer $i$; if this fails, abort.
+          issuer $i$. If this fails, exit.
 
-        \item Otherwise, compute $\signature_i \sample \ATSsign(\isk{i},\Tag,\atv{i})$.
+        \item Otherwise, compute $\signature_i \sample
+          \ATSsign(\isk{i},\Tag,\atv{i})$.
 
         \item Return $\cred \leftarrow (\atv{i},\signature_i)$ to the user.
 
       \end{enumerate}
 
-    \item[$\aggcred \leftarrow \AACaggregate(\crs,\cred_1,\ldots,\cred_n)$ :] On
-      input credentials $\cred_1,\ldots,\cred_n$ from the user, all issued
+    \item[$\aggcred \leftarrow \AACaggregate(\crs,\cred_1,\ldots,\cred_n)$ :]
+      On input credentials $\cred_1,\ldots,\cred_n$ from the user, all issued
       under the same tag $\Tag$, do:
 
       \begin{enumerate}
@@ -442,104 +440,87 @@ Protocol~\ref{prot:paac-2} further on.
         \item Randomise $\signature' \sample \ATSrandomise(\Tag,\signature)$
           and $\psi' \sample \SPSrandomise(\psi)$.
 
-        \item Sample $\delta \sample \Zp^*$ and compute the $\delta$-blinded
-          values $\bar{\gen}, \bar{v}, \bar{t}, \bar{\signaturetwo},
+        \item Sample $\delta \sample \Zp^*$ and compute $\bar{\gen}, \bar{v}, \bar{t}, \bar{\signaturetwo},
           \bar{\tid}, \pk', \{H_i\}_{i\in\ISSUERS}$.
 
-        \item Set instance and witness as follows:
+        \item Set witness, instance, and relation as follows:
           %
-          \begin{equation*}
+          \begin{equation*}\begin{gathered}
           %
-            \inst = (\pk', \{\atv{i}, H_i\}_{i\in\ISSUERS}, \bar{\gen}),
-            \qquad \witness = (\delta, \sk).
+            \inst_3 = (\pk', \{\atv{i}, H_i\}_{i\in\ISSUERS}, \bar{\gen}),
+            \quad \witness_3 = (\delta, \sk), \\
           %
-          \end{equation*}
-          %
-          Then compute $\eta \sample \NIZKprove(\crs, \inst, \witness, \msg)$,
-          which proves $\rel(\inst, \witness) = 1$ for the relation defined
-          as follows:
-          %
-          \begin{equation*}
-          %
-            \rel = \{\ \bar{\gen} = \gen^{\delta} \ \wedge\ \bar{v} =
+            \rel_3 = \{\ \bar{\gen} = \gen^{\delta} \ \wedge\ \bar{v} =
             v^{\delta} \ \wedge\ H_i = \hashone(\atv{i})^{\delta}\ \ \forall i
-            \in \ISSUERS \ \wedge\ \pk' = \bar{\gen}^{\sk}\ \}.
+          \in \ISSUERS \ \wedge\ \pk' = \bar{\gen}^{\sk}\ \}.
           %
-          \end{equation*}
-
-        \item Return $\proof = (\eta, \bar{\gen}, \bar{v}, \widetilde{r}',
-          \widetilde{s}', \bar{t}, \signatureone', \bar{\signaturetwo},
-          \bar{\tid}, \pk', \{\atv{i}, H_i\}_{i\in \ISSUERS})$.
-
-      \end{enumerate}
-
-    \item[$\{0,1\} \leftarrow \AACverify(\crs,\msg,\proof)$ :] On input
-      $(\msg,\proof)$ from a verifier, parse $\proof = (\eta, \bar{\gen},
-      \bar{v}, \widetilde{r}', \widetilde{s}', \bar{t}, \signatureone',
-      \bar{\signaturetwo}, \bar{\tid}, \pk', \{\atv{i}, H_i\}_{i\in\ISSUERS})$
-      and do:
-
-      \begin{enumerate}
-
-        \item If $\bar{\gen} = 1$, return $0$.
-
-        \item Set $\inst = (\pk', \{\atv{i}, H_i\}_{i\in\ISSUERS}, \bar{\gen})$.
-          If $\NIZKverify(\crs, \inst, \eta, \msg) = 0$, return $0$.
-
-        \item Otherwise, if any of the following three pairing checks fails,
-          return $0$. The first is the blinded aggregate-verification
-          equation of $\ATSverifyagg$, checking the aggregate credential
-          $(\signatureone', \bar{\signaturetwo})$ against $\bar{\tid}$ and the
-          disclosed attributes; the second and third are the blinded
-          verification equations of $\SPSverify$, checking the registration
-          signature $(\widetilde{r}', \widetilde{s}', \bar{t})$ against
-          $\pk'$ and $\bar{\tid}$, as follows:
+        \end{gathered}\end{equation*}
           %
-          \begin{gather*}
-          %
-            e(\bar{\signaturetwo}, \ggen) = \prod_{i\in \ISSUERS}e(H_{i},
-            \ipk{i})\cdot e(\bar{\tid}, \signatureone') \ ; \\
-            %
-            e(\bar{\gen}, \ggen) = e(\bar{t}, \widetilde{r}')\cdot e(\pk',
-            \widetilde{u}_1)\cdot e(\bar{\tid}, \widetilde{u}_2) \ ; \\
-            %
-            e(\bar{v}, \widetilde{r}')= e(\bar{\gen}, \widetilde{s}').
-          %
-          \end{gather*}
-          %
+      \item Compute $\eta \sample \NIZKprove(\crs, \inst_3, \witness_3, \msg)$.
 
-        \item Otherwise, return $1$.
+      \item Return $\proof = (\eta, \bar{\gen}, \bar{v}, \widetilde{r}',
+        \widetilde{s}', \bar{t}, \signatureone', \bar{\signaturetwo},
+        \bar{\tid}, \pk', \{\atv{i}, H_i\}_{i\in \ISSUERS})$.
 
-      \end{enumerate}
+    \end{enumerate}
 
-  \end{description}
+  \item[$\{0,1\} \leftarrow \AACverify(\crs,\msg,\proof)$ :] On input
+    $(\msg,\proof)$ from a verifier, parse $\proof = (\eta, \bar{\gen},
+    \bar{v}, \widetilde{r}', \widetilde{s}', \bar{t}, \signatureone',
+    \bar{\signaturetwo}, \bar{\tid}, \pk', \{\atv{i}, H_i\}_{i\in\ISSUERS})$
+    and do:
+
+    \begin{enumerate}
+
+      \item If $\bar{\gen} = 1$, return $0$.
+
+      \item Set $\inst_3 = (\pk', \{\atv{i}, H_i\}_{i\in\ISSUERS},
+        \bar{\gen})$, and return the output of the following checks:
+       %
+		\begin{gather*}
+		%
+		\NIZKverify(\crs, \inst_3, \eta, \msg) \checkcheck 1, \\
+		%
+		e(\bar{v}, \widetilde{r}')\checkcheck e(\bar{\gen}, \widetilde{s}'), \\
+		%
+          	e(\bar{\signaturetwo}, \ggen) \checkcheck \prod_{i\in
+          	\ISSUERS}e(H_{i}, \ipk{i})\cdot e(\bar{\tid}, \signatureone'), \\
+          	%
+          	e(\bar{\gen}, \ggen) \checkcheck e(\bar{t}, \widetilde{r}')\cdot
+          	e(\pk', \widetilde{u}_1)\cdot e(\bar{\tid}, \widetilde{u}_2).
+	%
+        \end{gather*}
+        %
+    \end{enumerate}
+
+\end{description}
 
 \end{protocolbox}
 
-The protocol instantiation is described in full in Protocol~\ref{prot:paac}. There are
-design choices made in $\AACgen$ and $\AACregister$, and the remaining
-algorithms follow the previous description entirely.
- 
-The registration authority's key pair is for the structure-preserving
-signature scheme, since messages and signatures consist of elements of
-the same group as everything else in the protocol. This lets users prove
-knowledge of a valid registration signature with an efficient sigma protocol
-over discrete logarithms, rather than requiring a general purpose zero knowledge proof.
- 
+The protocol instantiation is described in full in Protocol~\ref{prot:paac}.
+There are design choices made in $\AACgen$ and $\AACregister$, and the
+remaining algorithms follow the previous description entirely.
+
+The registration authority's key pair is for the structure-preserving signature
+scheme, since messages and signatures consist of elements of the same group as
+everything else in the protocol. This lets users prove knowledge of a valid
+registration signature with an efficient sigma protocol over discrete
+logarithms, rather than requiring a general purpose zero knowledge proof.
+
 During registration, the registration authority signs the user's public key
 together with the group element $\tid = \hashtwo(\Tag)$, rather than $\Tag$
-itself. This serves the same purpose as above, and lets us extract $\Tag$ from $\tid$ by
-programming the random oracle. All other computations in the protocol, 
-including the tag-based aggregate signature scheme, use the tag directly.
+itself. This serves the same purpose as above, and lets us extract $\Tag$ from
+$\tid$ by programming the random oracle. All other computations in the
+protocol, including the tag-based aggregate signature scheme, use the tag
+directly.
 
 \begin{theorem}\label{thm:agg-creds-thm-2}
 
   If the $q$-SDH assumption holds for the AGHO signature scheme, the BCDH and
   m-BCDH assumptions hold for the tag based aggregate signature scheme
   of~\Fref{sec:tag-scheme}, and the DDH assumption holds in $\group{1}$, then
-  the aggregate anonymous credentials protocol
-  of Protocol~\ref{prot:paac}~and~Protocol~\ref{prot:paac-2} securely realises ideal
-  functionality $\F{\AAC}$ in the random oracle model.
+  the aggregate anonymous credentials protocol in Protocol~\ref{prot:paac}
+  securely realises ideal functionality $\F{\AAC}$ in the random oracle model.
 
 \end{theorem}
 
@@ -552,19 +533,15 @@ including the tag-based aggregate signature scheme, use the tag directly.
 
 \end{assumptionbox}
 
+Protocol~\ref{prot:paac-2} gives the resulting instantiation in full.
 
-Protocol~\ref{prot:paac-2} gives the resulting instantiation in full, as a
-Fiat-Shamir transformed Schnorr proof over the blinded relation of the
-Proving Knowledge derivation in Section~\ref{sec:agg-creds-instantiation}
-(page~\pageref{sec:proof-inst}).
-
-\begin{protocolbox}{Presentation proof of knowledge ($\Sigma_{\AAC}$)} {paac-2}
+\begin{protocolbox}{Presentation proof of knowledge} {paac-2}
 
   \begin{description}
 
-    \item[$\eta \sample \NIZKprove(\crs, \inst, \witness, \msg)$ :] On input
-      $\crs = \gen$, instance $\inst = (\pk', \{\atv{i}, H_i\}_{i \in
-      \ISSUERS}, \bar{\gen})$, witness $\witness = (\delta, \sk)$, and
+    \item[$\eta \sample \NIZKprove(\crs, \inst_3, \witness_3, \msg)$ :] On
+      input $\crs = \gen$, instance $\inst_3 = (\pk', \{\atv{i}, H_i\}_{i \in
+      \ISSUERS}, \bar{\gen})$, witness $\witness_3 = (\delta, \sk)$, and
       message $\msg$, do:
 
       \begin{enumerate}
@@ -587,8 +564,8 @@ Proving Knowledge derivation in Section~\ref{sec:agg-creds-instantiation}
 
       \end{enumerate}
 
-    \item[$\{0,1\} \leftarrow \NIZKverify(\crs, \inst, \eta, \msg)$ :] On
-      input $\crs = \gen$, instance $\inst$, proof $\eta = (f, h, \{k_i\}_{i
+    \item[$\{0,1\} \leftarrow \NIZKverify(\crs, \inst_3, \eta, \msg)$ :] On
+      input $\crs = \gen$, instance $\inst_3$, proof $\eta = (f, h, \{k_i\}_{i
       \in \ISSUERS}, w, \pi_1, \pi_2)$, and message $\msg$, do:
 
       \begin{enumerate}
@@ -596,14 +573,14 @@ Proving Knowledge derivation in Section~\ref{sec:agg-creds-instantiation}
         \item Compute $c \leftarrow \hash(f, h, \{k_i\}_{i \in \ISSUERS}, w,
           \msg)$.
 
-        \item Return $1$ if and only if all of the following hold, and $0$
-          otherwise:
+        \item Output the result of the following checks:
           %
           \begin{equation*}
           %
-            \gen^{\pi_1} = f\cdot\bar{\gen}^c, \qquad v^{\pi_1} =
-            h\cdot\bar{v}^c, \qquad \hashone(\atv{i})^{\pi_1} = k_i\cdot
-            H_i^c, \qquad \bar{\gen}^{\pi_2} = w\cdot\pk'^c.
+            \gen^{\pi_1} \checkcheck f\cdot\bar{\gen}^c, \quad v^{\pi_1}
+            \checkcheck h\cdot\bar{v}^c, \quad \hashone(\atv{i})^{\pi_1}
+            \checkcheck k_i\cdot H_i^c, \quad \bar{\gen}^{\pi_2} \checkcheck
+            w\cdot\pk'^c.
           %
           \end{equation*}
           %
@@ -614,10 +591,10 @@ Proving Knowledge derivation in Section~\ref{sec:agg-creds-instantiation}
 
 \end{protocolbox}
 
-If a user is able to produce a valid $\eta$, we can extract a witness for
-relation~\eqref{eq:proof-original}, and under the DDH assumption in
-$\group{1}$, the resulting presentation is simulatable: it leaks no
-information about the witness beyond the disclosed attribute values.
+If a user is able to produce a valid $\eta$, we can extract a witness for the
+original relation. Under the DDH assumption in $\group{1}$, the resulting
+presentation is simulatable: it leaks no information about the witness beyond
+the disclosed attribute values.
 
 \begin{lemma}\label{lem:agg-creds-extract}
 
@@ -633,32 +610,11 @@ information about the witness beyond the disclosed attribute values.
 
 \end{lemma}
 
-\paragraph{Extensions.} The construction supports also several
-straightforward extensions.
-
-New issuers can join the system without impacting the construction.  In fact,
-the aggregation of credentials and their presentation is agnostic to the number
-of issuers.
-
-The current construction assumes that each issuer produces a credential for a
-single attribute type.  The current construction captures settings where
-issuers generate credentials for multiple attribute types by having each issuer
-hold different public key for each attribute type.  Alternatively, if it is
-desirable to have the issuer hold a single public key regardless of the number
-of attribute types it is responsible for, then we modify the way the issuer
-signs. Instead of signing pair $(\Tag, \atv{})$, the issuer signs $(\Tag,
-\att{} \| \atv{})$, with $\att{}$ the attribute type and $\atv{}$ the attribute
-value.
-
-The construction can be extended to support epoch-based revocation, in the
-following way.  Instead of signing pair $(\pk, \tid)$, the registration
-authority signs triple $(\pk, \tid, \gen^{\epoch})$, where $\epoch$ identifies
-the current epoch.  Issuers, on
-their end, sign pair $(\Tag, \epoch \| \att{} \| \atv{})$, instead of pair
-$(\Tag, \att{} \| \atv{})$; this ties the attribute credential to epoch
-$\epoch$.  During credential presentation, users prove that they hold a valid
-signature from the registration authority and valid aggregate tag-based
-signatures from the relevant issuers, for the current epoch.
-
-We leave the study of accumulator-based revocation and the revocation of
-individual attribute credentials to future work.
+Lemmas~\ref{lem:agg-creds-extract} and~\ref{lem:agg-creds-simulate} give
+extractability and simulatability separately. \Fref{thm:agg-creds-thm-2} needs
+simulation-extractability, which additionally allows extraction after the
+adversary has observed simulated proofs of its own choosing. Our simulator does
+both within the same experiment, so this is the property we rely on.
+Protocol~\ref{prot:paac-2} is a sigma protocol with the Fiat-Shamir heuristic
+applied~\cite{C:FiaSha86}. This combination satisfies simulation-extractability
+in the random oracle model~\cite{INDOCRYPT:FKMV12} .

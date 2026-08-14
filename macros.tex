@@ -16,10 +16,10 @@
 
 % define box for protocols
 
-\definecolor{boxpurple}{RGB}{82, 55, 175}
-\definecolor{boxblue}{RGB}{70, 110, 180}
-\definecolor{boxteal}{RGB}{40, 125, 120}
-\definecolor{boxberry}{RGB}{155, 40, 110}
+\definecolor{boxgreen}{RGB}{11, 110, 79}
+\definecolor{boxblue}{RGB}{20, 95, 175}
+\definecolor{boxberry}{RGB}{160, 30, 85} 
+\definecolor{boxpurple}{RGB}{95, 45, 120} 
 
 \newtcbtheorem[
   auto counter,
@@ -31,7 +31,8 @@
   fonttitle=\normalfont,
   fontupper=\small,
   boxrule=0.6pt,
-  arc=1mm
+  arc=1mm,
+  breakable
 }{prot}
 
 % define box for primitives
@@ -40,8 +41,8 @@
   auto counter,
   number within=chapter
 ]{primitivebox}{Primitive}{
-  colback=boxblue!7,
-  colframe=boxblue!40,
+  colback=boxblue!5,
+  colframe=boxblue!35,
   coltitle=black,
   fonttitle=\normalfont,
   fontupper=\small,
@@ -55,8 +56,8 @@
   auto counter,
   number within=chapter
 ]{assumptionbox}{Assumption}{
-  colback=boxteal!5,
-  colframe=boxteal!35,
+  colback=boxberry!5,
+  colframe=boxberry!35,
   coltitle=black,
   fonttitle=\normalfont,
   fontupper=\small,
@@ -64,35 +65,22 @@
   arc=1mm
 }{asm}
 
-% box for security experiments
+% box for experiments
 
 \newtcbtheorem[
   auto counter,
   number within=chapter
 ]{experimentbox}{Experiment}{
-  colback=boxberry!5,
-  colframe=boxberry!38,
+  colback=boxgreen!5,
+  colframe=boxgreen!35,
   coltitle=black,
   fonttitle=\normalfont,
   fontupper=\small,
-  boxrule=0.5pt,
+  boxrule=0.4pt,
   arc=1mm
 }{exp}
 
-% box for ideal functionalities
 
-\newtcbtheorem[
-  auto counter,
-  number within=chapter
-]{functionalitybox}{Functionality}{
-  colback=boxberry!5,
-  colframe=boxberry!42,
-  coltitle=black,
-  fonttitle=\normalfont,
-  fontupper=\small,
-  boxrule=0.6pt,
-  arc=1mm
-}{func}
 \newcommand{\algo}[1]{\mathsf{#1}}
 \newcommand{\sample}{\overset{\$}{\leftarrow}}
 \newcommand{\secparam}{\kappa}
@@ -175,6 +163,12 @@
 \newcommand{\domain}{\algo{dom}}
 \newcommand{\range}{\algo{range}}
 
+% hashes
+\newcommand{\Hash}{\algo{Hash}}
+\newcommand{\hashgen}{\Hash\algo{.Gen}}
+\newcommand{\hasheval}{\Hash\algo{.Eval}}
+\newcommand{\hash}{H}
+
 % soks
 \newcommand{\SOK}{\algo{SoK}}
 \newcommand{\sokgen}{\SOK\algo{.Gen}}
@@ -244,6 +238,14 @@
 \newcommand{\AACverify}{\AAC\algo{.Verify}}
 \newcommand{\AACverifyagg}{\AAC\algo{.VerifyAgg}}
 
+\newcommand{\msgend}[1]{#1\algo{End}}
+
+\newcommand{\AACregisterend}{\msgend{\AACregister}}
+\newcommand{\AACissueend}{\msgend{\AACissue}}
+\newcommand{\AACaggregateend}{\msgend{\AACaggregate}}
+\newcommand{\AACpresentend}{\msgend{\AACpresent}}
+\newcommand{\AACverifyend}{\msgend{\AACverify}}
+
 %% func
 \newcommand{\user}{\algo{U}}
 \newcommand{\issuer}{\algo{I}}
@@ -278,7 +280,6 @@
 \newcommand{\F}[1]{\mathcal{F}_{#1}}
 
 %% hashes, owfs, prfs
-\newcommand{\hash}{H}
 \newcommand{\hashone}{{H_1}}
 \newcommand{\hashtwo}{{H_2}}
 \newcommand{\G}{\mathcal{G}}
@@ -295,11 +296,11 @@
 \newcommand{\auditor}{\algo{aud}}
 
 %% sig parts
-\newcommand{\signatureone}{\widetilde{\signature_1}}
+\newcommand{\signatureone}{\tilde{\signature_1}}
 \newcommand{\signaturetwo}{{\signature_2}}
 
 %% issuer keys
-\newcommand{\ipk}[1]{\algo{pk_{I,#1}}}
+\newcommand{\ipk}[1]{\tilde{\algo{pk_{I,#1}}}}
 \newcommand{\isk}[1]{\algo{sk_{I,#1}}}
 \newcommand{\ISSUERS}{\mathcal{I}}
 

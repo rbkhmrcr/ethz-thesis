@@ -15,7 +15,7 @@ credentials across identities.  The registration authority assigns each user
 exactly one tag, and signs only messages of the prescribed form: public keys
 and tags. A malicious registration authority could violate these, for instance
 by assigning duplicate tags or registering users under adversarially chosen
-identities; addressing this is orthogonal to our contribution.  We assume that
+identities. Addressing this is orthogonal to our contribution.  We assume that
 verifiers accept credentials only from the set of issuers with published public
 keys. This prevents a malicious user from being able to impersonate an issuer
 to an honest verifier. We now present the construction in full.
@@ -92,15 +92,15 @@ They then construct a proof of knowledge with the following parameters:
 %
 \begin{equation}
 %
-  \inst = (\rapk, \ISSUERS, \{\ipk{i}, \atv{i}\}_{i \in \ISSUERS}), \qquad
-  \witness = (\Tag, \sk, \pk, \psi, \signature),
+  \inst_1 = (\rapk, \ISSUERS, \{\ipk{i}, \atv{i}\}_{i \in \ISSUERS}), \qquad
+  \witness_1 = (\Tag, \sk, \pk, \psi, \signature),
 %
 \end{equation}
 %
-\begin{equation}
+\begin{equation}\label{eq:proof-abstract}
 \begin{gathered}
 %
-  \rel = \{\ (\sk, \pk) \leftarrow \DSgen(\secparam) \ \wedge \
+  \rel_1 = \{\ (\sk, \pk) \leftarrow \DSgen(\secparam) \ \wedge \
     \DSverify(\rapk, (\pk, \Tag), \psi) = 1 \\
 %
   \wedge\ \ATSverifyagg(\{\ipk{i}\}_{i \in \ISSUERS}, \Tag, \{\atv{i}\}_{i
@@ -122,3 +122,27 @@ the output of the proof verification algorithm.
   based signature scheme under tag based aggregation, and the proof system is
   secure, then the above protocol securely realises ideal
 functionality~$\F{\AAC}$ in the standalone model.  \end{theorem}
+
+\paragraph{Extensions.} The construction supports several straightforward
+extensions.
+
+New issuers can join the system without impacting the construction. The
+aggregation of credentials and their presentation is agnostic to the number
+of issuers.
+
+The construction as described assumes each issuer certifies a single
+attribute type. To support an issuer certifying multiple attribute types
+under one key, the issuer instead signs $(\Tag, \att{} \| \atv{})$ rather
+than $(\Tag, \atv{})$, with $\att{}$ the attribute type and $\atv{}$ the
+attribute value.
+
+The construction extends to epoch-based revocation. The registration
+authority signs triple $(\pk, \Tag, \epoch)$ rather than pair $(\pk, \Tag)$,
+where $\epoch$ identifies the current epoch, and issuers sign $(\Tag, \epoch
+\| \atv{})$ rather than $(\Tag, \atv{})$, tying each attribute credential to
+that epoch. At presentation, users additionally prove that their
+registration signature and aggregate signatures all correspond to the
+current epoch.
+
+We leave the study of accumulator-based revocation and the revocation of
+individual attribute credentials to future work.

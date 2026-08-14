@@ -1,14 +1,32 @@
 \section{Summary}\label{sec:agg-creds-summary}
 
-% TODO: write the chapter conclusion. Suggested shape, to mirror the
-% introduction's contributions list:
-%   - Recap: ideal-functionality definition, black-box construction, ATS
-%     primitive + instantiation, implementation and evaluation.
-%   - What the evaluation showed in one or two sentences (near-constant
-%     showing/verification cost in the number of disclosed attributes).
-%   - Limitations honestly stated (selective disclosure only; no
-%     accumulator-based revocation; RA is honest-but-curious, not malicious).
-%   - Future work pointers already flagged elsewhere in the thesis:
-%     accumulator-based revocation and revocation of individual attribute
-%     credentials (see Extensions, end of the Instantiation chapter),
-%     predicate proofs via zk-SNARKs (see Related Work / Our Contribution).
+This chapter addresses a gap in existing anonymous credential systems.  While
+later systems decentralise issuance, the issuers as a whole remain responsible
+for all attributes. We instead target the setting of distinct issuers without
+requiring any coordination between issuers, or indeed between the registration
+authority, issuers, and verifiers at any time. The user simply interacts with
+each as needed.
+
+We achieve this through constructing an aggregate anonymous credentials system,
+in which credentials issued independently by different authorities can be
+combined by the user into a single compact credential and presented through one
+proof. Issuers do not need to maintain state across users. We took the
+certified key assumption implicit in similar constructions and made it
+explicit, introducing the registration authority as its own role, and using
+this role to achieve efficient multi-issuer anonymous credentials.
+
+We present an instantiation based on structure-preserving signatures, and build
+a special purpose proof for efficiency. Even with 64 attributes disclosed, both
+proving and verification complete in under 10ms, with cost scaling in the
+number of attributes disclosed. A concrete security analysis of the scheme
+would be valuable for determining its real world security guarantees.
+
+We briefly outline epoch-based revocation, which would address attributes with
+natural expiry dates.  However, a more thorough consideration of revocation is
+needed before the scheme would be able to support different attribute
+revocation policies.
+
+The anonymous credential scheme as it stands uses the issuer public keys in the
+clear. As the identity of the issuers can reveal information about the user,
+recent work has focused on issuer hiding. Adding the property of issuer hiding
+to this protocol would be interesting future work.

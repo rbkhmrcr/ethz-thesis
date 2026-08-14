@@ -40,7 +40,7 @@ Since these notions are construction dependent, we defer their formal
 definitions to the chapters in which they are required.
 
 \paragraph{Labelled proofs.} Certain construction require proofs that are bound
-to a message to prevent proof replaying.  We can attach a \emph{label} to each
+to a message to prevent proof replaying.  We can attach a label to each
 proof to prevent this.  A label is an arbitrary string that is fixed at proving
 time, supplied again at verification, and is not otherwise interpreted by the
 proof system.  A labelled NIZK extends the syntax as follows:
@@ -85,10 +85,10 @@ following experiment between a challenger and an adversary $\adv$.
 
 \begin{experimentbox}{Zero knowledge}{zk}
 
-  \begin{itemize}
+  \begin{enumerate}
 
     \item The challenger samples $b \sample \{0,1\}$.  If $b = 0$ it generates
-      $\crs \sample \NIZKgen(\secparam)$; if $b = 1$ it generates $(\crs, \td)
+      $\crs \sample \NIZKgen(\secparam)$. If $b = 1$ it generates $(\crs, \td)
       \sample \NIZKsimgen(\secparam)$.  It sends $\crs$ to $\adv$.
 
     \item $\adv$ is given oracle access to $\simoracle$, which on input
@@ -98,7 +98,7 @@ following experiment between a challenger and an adversary $\adv$.
 
     \item $\adv$ outputs a bit $b'$.
 
-  \end{itemize}
+  \end{enumerate}
 
   $\adv$ wins the experiment if $b' = b$.
 
@@ -108,7 +108,7 @@ The advantage of $\adv$ is defined as follows:
 %
 \begin{equation*}
 %
-  \mathsf{Adv}^{\mathsf{zk}}_{\mathsf{NIZK}, \adv}(\secparam) = \left| \Pr[b' =
+  \Adv^{\mathsf{zk}}_{\mathsf{NIZK}, \adv}(\secparam) = \left| \Pr[b' =
   b] - \frac{1}{2} \right|.
 %
 \end{equation*}
@@ -124,7 +124,7 @@ captures both of these properties.
 
 \begin{experimentbox}{Simulation extractability}{simext}
 
-  \begin{itemize}
+  \begin{enumerate}
 
     \item The challenger generates $(\crs, \td) \sample \NIZKsimgen(\secparam)$
       and sends $\crs$ to $\adv$.
@@ -138,7 +138,7 @@ captures both of these properties.
     \item The challenger computes $\witness^* \leftarrow \NIZKextract(\crs,
       \td, \inst^*, \proof^*, \lbl^*)$.
 
-  \end{itemize}
+  \end{enumerate}
 
   $\adv$ wins the experiment if $\NIZKverify(\crs, \inst^*, \proof^*, \lbl^*) =
   1$, $(\inst^*, \lbl^*) \notin \Query$, and $\rel(\inst^*, \witness^*) \neq
@@ -146,8 +146,17 @@ captures both of these properties.
 
 \end{experimentbox}
 
-A labelled NIZK is simulation extractable if the probability that any
-admissible adversary wins this experiment is small.
+The simulation extractability advantage of $\adv$ is defined as follows:
+%
+\begin{equation*}
+%
+  \Adv^{\mathsf{simext}}_{\mathsf{NIZK}, \adv}(\secparam) = \Pr[\adv\text{
+  wins}].
+%
+\end{equation*}
+%
+A labelled NIZK is simulation extractable if this advantage is small for
+every admissible adversary $\adv$.
 
 The condition $(\inst^*, \lbl^*) \notin \Query$ makes proofs non-malleable
 across labels.

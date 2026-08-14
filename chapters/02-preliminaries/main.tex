@@ -4,17 +4,17 @@ The contributions of this thesis include both constructions of protocols and
 constructions of their underlying primitives. We take different approaches to
 defining and proving the security of each of these.
 
-By primitives, we refer to building blocks such as commitments, signature schemes, and PRFs. 
-Security in this case is handled
-through defining experiments, a limited number of oracles which an adversary has access to, 
-and then showing that the adversary cannot win
-with greater probability than some predefined amount. For larger protocols with
-many parties and interfaces, we capture all security goals at once inside an
-ideal functionality. We then construct a simulator to show that the view of an
-adversary in the real world, interacting with our protocol, is
-indistinguishable from the view when interacting with the ideal functionality
-itself. As the ideal functionality achieves all security properties by design,
-this then shows that the protocol achieves them too.
+By primitives, we refer to building blocks such as commitments, signature
+schemes, and PRFs.  Security in this case is handled through defining
+experiments, a limited number of oracles which an adversary has access to, and
+then showing that the adversary cannot win with greater probability than some
+predefined amount. For larger protocols with many parties and interfaces, we
+capture all security goals at once inside an ideal functionality. We then
+construct a simulator to show that the view of an adversary in the real world,
+interacting with our protocol, is indistinguishable from the view when
+interacting with the ideal functionality itself. As the ideal functionality
+achieves all security properties by design, this then shows that the protocol
+achieves them too.
 
 The definitions of the security goals that we wish to achieve are not complete
 without also defining the capabilities the adversary and the probability of
@@ -37,25 +37,41 @@ abstract constructions that we present.
 
 For asymptotic security definitions, there are a few more details we must give.
 An adversary is considered efficient if it runs in probabilistic polynomial
-time (PPT) in the security parameter . We denote this parameter with
-$\secparam$, and so the adversary's running time is bounded by $p(\secparam)$
-for some fixed polynomial $p$. It may use randomness in its computation. Honest
-parties must also satisfy this definition of efficiency.
+time (PPT) in the security parameter. We call this parameter $\secparam$, and
+so the adversary's running time is bounded by $p(\secparam)$ for some fixed
+polynomial $p$. It may use randomness in its computation. Honest parties must
+also satisfy this definition of efficiency.
 
-We define 'small' for the success probability of the adversary through a
-negligible function. A function $f$ from the natural numbers to non-negative
-real numbers is negligible if it is below every inverse polynomial at every
-point after reaching some value. Concretely, for every polynomial $p$, there
-exists $N$ such that $f(\secparam) < 1/p(\secparam)$ for all $\secparam > N$.
-Negligible functions have a property of closure which carries well to their use
-in security definitions in cryptography. This is that a polynomial number of
+For the success probability of the adversary, we define small with a negligible
+function. A function $f$ from the natural numbers to non-negative real numbers
+is negligible if it is below every inverse polynomial at every point after
+reaching some value. Concretely, for every polynomial $p$, there exists $N$
+such that $f(\secparam) < 1/p(\secparam)$ for all $\secparam > N$.  Negligible
+functions have a property of closure which carries well to their use in
+security definitions in cryptography. This is that a polynomial number of
 events each occurring with negligible probability, still occurs with negligible
 probability in total. This means an adversary repeating an attack with
 negligible success probability polynomially many times will still have a
 negligible probability of success.
 
+\paragraph{A note on readability.} The thesis contains numerous
+primitives, protocols, security definitions, instantiations, and assumptions to
+keep track of. To ease the understanding of our contributions, and clearly
+separate them from prior work from which we build, a number of different
+coloured boxed environments are used.
+
+Abstract primitives are given directly in prose. Security experiments are boxed
+in green, to set the formal games apart from the prose around them.
+Assumptions are given in pink boxes, and ideal functionalities are displayed as
+plain figures. Instantiations of primitives are displayed in blue boxes, and the
+protocols that are contributions of this work are given in purple boxes. Once
+experiments, assumptions, primitives and protocols have been introduced, later
+chapters will refer back to them when needed. Protocols, explanations, and
+security analyses throughout aim to be as self contained as possible.
+
 \input{chapters/02-preliminaries/21-commitments}
 \input{chapters/02-preliminaries/22-prfs}
-\input{chapters/02-preliminaries/23-signatures}
-\input{chapters/02-preliminaries/24-encryption}
-\input{chapters/02-preliminaries/25-proofs}
+\input{chapters/02-preliminaries/23-hash}
+\input{chapters/02-preliminaries/24-signatures}
+\input{chapters/02-preliminaries/25-encryption}
+\input{chapters/02-preliminaries/26-proofs}
