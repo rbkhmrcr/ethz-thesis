@@ -521,9 +521,9 @@ directly.
 
   If the $q$-SDH assumption holds for the AGHO signature scheme, the BCDH and
   m-BCDH assumptions hold for the tag based aggregate signature scheme
-  of~\Fref{sec:tag-scheme}, and the DDH assumption holds in $\group{1}$, then
+  of~\Cref{sec:tag-scheme}, and the DDH assumption holds in $\group{1}$, then
   the aggregate anonymous credentials protocol in Protocol~\ref{prot:paac}
-  securely realises ideal functionality $\F{\AAC}$ in the random oracle model.
+  securely realises ideal functionality $\idfu{\AAC}$ in the random oracle model.
 
 \end{theorem}
 
@@ -605,7 +605,7 @@ the disclosed attribute values.
 \end{lemma}
 
 Lemmas~\ref{lem:agg-creds-extract} and~\ref{lem:agg-creds-simulate} give
-extractability and simulatability separately. \Fref{thm:agg-creds-thm-2} needs
+extractability and simulatability separately. \Cref{thm:agg-creds-thm-2} needs
 simulation-extractability, which additionally allows extraction after the
 adversary has observed simulated proofs of its own choosing. Our simulator does
 both within the same experiment, so this is the property we rely on.

@@ -184,24 +184,24 @@ security parameter $\secparam$.
 \end{experimentbox}
 
 
-\subsection{Ideal functionality $\F{\AAC}$.}
+\subsection{Ideal functionality $\idfu{\AAC}$.}
 
 We define security for the aggregate anonymous credentials protocol through an
 ideal functionality as follows. We have the outputs of the honest parties
 and~$\adv$ during an execution of~$\Pi$ in the real world captured in
 $\textsc{Exec}_{\Pi,\adv}(\secparam)$, and we have the outputs of the honest
-parties and~$\simu$ interacting with~$\F{\AAC}$ in the ideal world captured by
-$\textsc{Exec}_{\F{\AAC},\simu}(\secparam)$.
+parties and~$\simu$ interacting with~$\idfu{\AAC}$ in the ideal world captured by
+$\textsc{Exec}_{\idfu{\AAC},\simu}(\secparam)$.
 
 We then say that the protocol~$\Pi$ securely realises the ideal
-functionality~$\F{\AAC}$ if for every PPT adversary~$\adv$, there exists a PPT
+functionality~$\idfu{\AAC}$ if for every PPT adversary~$\adv$, there exists a PPT
 simulator~$\simu$ where $\textsc{Exec}_{\Pi,\adv}(\secparam)$ is computational
-indistinguishable from $\textsc{Exec}_{\F{\AAC},\simu}(\secparam)$.
+indistinguishable from $\textsc{Exec}_{\idfu{\AAC},\simu}(\secparam)$.
 
-$\F{\AAC}$ receives inputs from system participants and $\simu$, computes the
+$\idfu{\AAC}$ receives inputs from system participants and $\simu$, computes the
 corresponding outputs, and delivers them to the authorised parties. It exposes
 interfaces through which $\simu$ and honest participants submit inputs. The
-formal description is given in~\Fref{fig:faac}. We summarise each interface
+formal description is given in~\Cref{fig:faac}. We summarise each interface
 below.
 
 \paragraph{Register.} A user calls this to join the system. If the registration
@@ -222,20 +222,20 @@ string $\signature$ representing the aggregate credential.
 $\vec{\atv{}}$, submitting $(\vec{\atv{}}, \signature, \msg)$, where
 $\signature$ aggregates the credentials for $\vec{\atv{}}$ and $\msg$ is a
 fresh message supplied by the verifier that the resulting presentation is bound
-to. $\F{\AAC}$ accepts if the user previously called aggregate on
+to. $\idfu{\AAC}$ accepts if the user previously called aggregate on
 $\vec{\atv{}}$, or otherwise if the user actually holds $\vec{\atv{}}$. This
 means a corrupt user who skips aggregate can still succeed if they hold the
-credentials. On acceptance, $\F{\AAC}$ generates a random string $\proof$,
+credentials. On acceptance, $\idfu{\AAC}$ generates a random string $\proof$,
 whose randomness ensures $(\vec{\atv{}}, \msg, \proof)$ reveals nothing about
 the user beyond $\vec{\atv{}}$.
 
 \paragraph{Verify.} A verifier calls this to check a presentation
 $(\vec{\atv{}}, \msg, \proof)$. If it was already produced by a valid present
-call, $\F{\AAC}$ returns true. If already flagged invalid, it returns false.
-Otherwise, $\F{\AAC}$ checks whether the presentation could have been forged by
+call, $\idfu{\AAC}$ returns true. If already flagged invalid, it returns false.
+Otherwise, $\idfu{\AAC}$ checks whether the presentation could have been forged by
 corrupt parties: whether corrupt users hold all disclosed values, or failing
 that, whether corrupt issuers could produce valid credentials for the remaining
-values. If either check succeeds, $\F{\AAC}$ defers to $\simu$ and returns its
+values. If either check succeeds, $\idfu{\AAC}$ defers to $\simu$ and returns its
 answer. Otherwise, it records the presentation as invalid and returns false.
 
 \begin{figure} \centering \hspace*{-0.05\textwidth}

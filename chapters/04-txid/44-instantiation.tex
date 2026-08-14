@@ -200,11 +200,11 @@ than requiring general purpose zero knowledge proofs.
           \ComCommit(\ck,\utk,\openinfo)$.
 
         \item Compute $\pi_1 \sample \NIZKprove(\crs_3,\inst_3,\witness_3)$,
-          proving relation $\rel_3$, following~\Fref{sec:tag-computation}.
+          proving relation $\rel_3$, following~\Cref{sec:tag-computation}.
 
         \item Compute $\psi_2 \sample \soksign(\crs_2,\inst_2,\witness_2,\msg)$
           for $\msg = \payload\|\Tag_\gamma\|\com\|\pi_1$, proving relation
-          $\rel_2$, following~\Fref{sec:tx-auth}.
+          $\rel_2$, following~\Cref{sec:tx-auth}.
 
         \item Set $\tx \leftarrow (\payload,\Tag_\gamma,\com,\pi_1,\psi_2)$ and
           submit $\tx$ to the ledger.
@@ -233,7 +233,7 @@ than requiring general purpose zero knowledge proofs.
 
 \end{protocolbox}
 
-The protocol instantiation is described in full in~\Fref{fig:txid}. The
+The protocol instantiation is described in full in~\Cref{fig:txid}. The
 protocol instantiation works as follows:
 
 \begin{description}
@@ -242,7 +242,7 @@ protocol instantiation works as follows:
     and ledger operator jointly fix the system's groups, hash function, and
     public keys: a BBS+ key pair for the registration authority, and a Pedersen
     commitment key. We use BBS+ specifically because, as described
-    in~\Fref{fig:bbs}, it can sign group elements directly, letting the
+    in~\Cref{fig:bbs}, it can sign group elements directly, letting the
     registration authority certify a user's keys without ever seeing them in
     the clear; this is essential, since the the registration authority must not
     learn a user's tracing key. Pedersen commitments are chosen because they
@@ -278,9 +278,9 @@ protocol instantiation works as follows:
     corresponding epoch tracing key, computed by evaluating a pairing based PRF
     at the user's epoch key and a fresh counter. Within a single epoch, each
     user can submit up to $\Max$ transactions. Alongside the tag, the user
-    attaches two separate proofs: one, described in~\Fref{sec:tag-computation},
+    attaches two separate proofs: one, described in~\Cref{sec:tag-computation},
     that the tag was correctly derived from a properly committed tracing key;
-    and one, described in~\Fref{sec:tx-auth}, that the committed key was signed
+    and one, described in~\Cref{sec:tx-auth}, that the committed key was signed
     by the registration authority.
 
   \item[$\{\payload\} \leftarrow \IDidentify(\crs,\ek,\epoch)$ :] Given an

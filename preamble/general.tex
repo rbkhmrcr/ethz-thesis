@@ -145,21 +145,8 @@
 
 \usepackage{amssymb}
 \usepackage{framed}
+\usepackage{cleveref}
 \usepackage{xcolor}
-\usepackage[plain]{fancyref}
-
-% preamble/general.tex, after \usepackage[plain]{fancyref}
-
-\newcommand*{\fancyrefthmlabelprefix}{thm}
-\fancyrefaddcaptions{english}{%
-  \newcommand*{\Frefthmname}{Theorem}%
-  \newcommand*{\frefthmname}{\MakeLowercase{\Frefthmname}}%
-}
-\frefformat{vario}{\fancyrefthmlabelprefix}{{\frefthmname}\fancyrefdefaultspacing#1 on page #2}
-\Frefformat{vario}{\fancyrefthmlabelprefix}{{\Frefthmname}\fancyrefdefaultspacing#1 on page #2}
-\frefformat{plain}{\fancyrefthmlabelprefix}{{\frefthmname}\fancyrefdefaultspacing#1}
-\Frefformat{plain}{\fancyrefthmlabelprefix}{{\Frefthmname}\fancyrefdefaultspacing#1}
-
 \usepackage{enumitem}
 \usepackage{url}
 \usepackage[most]{tcolorbox}

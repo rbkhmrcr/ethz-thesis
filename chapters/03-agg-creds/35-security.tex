@@ -3,12 +3,12 @@
 %%%% proof 1 - the generic black-box construction is secure (Theorem 1)
 
 \subsection{Proof
-of~\Fref{thm:agg-creds-construction-security}}\label{sec:agg-creds-proof-1}
+of~\Cref{thm:agg-creds-construction-security}}\label{sec:agg-creds-proof-1}
 
 In the following, we show that the view of a real world adversary $\adv$ during
 an execution of $\Pi$ is indistinguishable from the view of an ideal world
 simulator $\simu$ that interacts with system participants through ideal
-functionality $\F{\AAC}$.  We define a sequence of indistinguishable games that
+functionality $\idfu{\AAC}$.  We define a sequence of indistinguishable games that
 start with Game 0 representing the real world, and end with Game 8 representing
 the ideal world.
 
@@ -20,27 +20,27 @@ secrets) of the honest parties, and interacts with corrupt parties, through the
 adversary, in the real world, following $\Pi$'s specifications, and returns the
 corresponding output.  Game 1 is by construction indistinguishable from Game 0.
 
-\paragraph{Game 2.} We introduce dummy functionality $\F{\AAC}'$ that forwards
+\paragraph{Game 2.} We introduce dummy functionality $\idfu{\AAC}'$ that forwards
 the inputs from the honest parties to $\simu$ and returns the outputs.  This
 modification is syntactic.
 
-\paragraph{Game 3.} In this game, $\F{\AAC}'$ handles register calls from
-honest users following the description of ideal functionality $\F{\AAC}$.
+\paragraph{Game 3.} In this game, $\idfu{\AAC}'$ handles register calls from
+honest users following the description of ideal functionality $\idfu{\AAC}$.
 $\simu$ first assigns each honest user a key pair $(\sk, \pk)$.  Now, when an
-honest user $\user$ calls $\F{\AAC}'$ to register, $\simu$ learns the user's
+honest user $\user$ calls $\idfu{\AAC}'$ to register, $\simu$ learns the user's
 identity.  Given this information, $\simu$ retrieves the corresponding key pair
 $(\sk,\pk)$ and contacts the registration authority to register $\user$.
 $\simu$ receives a unique tag $\Tag$ and a signature $\psi \leftarrow
 \DSsign(\rask, (\pk, \Tag))$ and stores entry $\langle \user, \Tag, \pk,
 \psi\rangle $.
 
-Since the registration authority and $\F{\AAC}'$ both register each user
+Since the registration authority and $\idfu{\AAC}'$ both register each user
 exactly once and reject duplicates, they accept or reject the same requests, so
 this game is indistinguishable from Game 2.
 
-\paragraph{Game 4.} In this game, $\F{\AAC}'$ also handles credential issuance
+\paragraph{Game 4.} In this game, $\idfu{\AAC}'$ also handles credential issuance
 calls from honest users following the description of ideal functionality
-$\F{\AAC}$.  When  $\F{\AAC}'$ receives issuance request $(\AACissue, \att{i},
+$\idfu{\AAC}$.  When  $\idfu{\AAC}'$ receives issuance request $(\AACissue, \att{i},
 \atv{i})$ from honest user $\user$, $\simu$ learns the triple $(\user, \att{i},
 \atv{i})$.  To simulate the corresponding credential issuance for $\user$ in
 the real world, $\simu$ retrieves $(\sk, \pk)$ and $(\Tag, \psi)$.  If the pair
@@ -64,24 +64,24 @@ with issuer $\issuer{i}$.  There are two cases to consider.
 
 \end{description}
 
-In both cases, $\F{\AAC}'$ follows $\simu$: an honest issuer accepts a request
+In both cases, $\idfu{\AAC}'$ follows $\simu$: an honest issuer accepts a request
 exactly once per user, matching the first branch, and for a dishonest issuer,
-$\F{\AAC}'$ accepts only when $\simu$ does, when the issuer produced a
-genuinely valid aggregate signature.  So $\F{\AAC}'$'s output matches $\Pi$'s
+$\idfu{\AAC}'$ accepts only when $\simu$ does, when the issuer produced a
+genuinely valid aggregate signature.  So $\idfu{\AAC}'$'s output matches $\Pi$'s
 in both cases, and this game is indistinguishable from Game 3 as long as
 $\simu$ does not abort.  Since $\user$ is honest, she always registers before
 requesting credentials, so the abort event never occurs.
 
-\paragraph{Game 5.} During this game, $\F{\AAC}'$ executes aggregate requests
-from honest users following the description of $\F{\AAC}$.  This game is
+\paragraph{Game 5.} During this game, $\idfu{\AAC}'$ executes aggregate requests
+from honest users following the description of $\idfu{\AAC}$.  This game is
 indistinguishable from Game 4, as credential aggregation is a local operation
 where adversary $\adv$ observes nothing, so $\simu$ need not do anything.
 
-\paragraph{Game 6.} In this game, $\F{\AAC}'$ takes charge of signature
-requests from honest users, following the specifications of $\F{\AAC}$, and
+\paragraph{Game 6.} In this game, $\idfu{\AAC}'$ takes charge of signature
+requests from honest users, following the specifications of $\idfu{\AAC}$, and
 $\simu$ successfully simulates their executions of $\Pi$ in the real world
 thanks to the simulatability of $\proof$.  Namely, given message $(\AACpresent
-end, \vec{\atv{}}, \msg, \proof)$ from $\F{\AAC}'$ for $\vec{\atv{}} =
+end, \vec{\atv{}}, \msg, \proof)$ from $\idfu{\AAC}'$ for $\vec{\atv{}} =
 (\atv{1}, \ldots, \atv{N})$, $\simu$ defines  $\inst_1 = (\pk, (\ipk{i},
 \atv{i})_{i \in \ISSUERS})$ such that $\forall i \in \ISSUERS: \atv{i} \neq
 \varnothing$, and, using its ability to program the random oracle as the
@@ -89,12 +89,12 @@ simulation trapdoor $\td$, outputs $\proof^{\star} \leftarrow
 \NIZKsimprove(\crs, \td, \inst_1, \msg)$, which gives $\NIZKverify(\crs,
 \inst_1, \proof^{\star}, \msg) = 1$.
 
-\paragraph{Game 7.} In this game, $\F{\AAC}'$ processes verification requests
-from honest verifiers following the description of $\F{\AAC}$, and $\simu$
+\paragraph{Game 7.} In this game, $\idfu{\AAC}'$ processes verification requests
+from honest verifiers following the description of $\idfu{\AAC}$, and $\simu$
 simulates the honest verifiers in the real world.  On receiving a signature in
-the real world, $\simu$ translates the signature into calls to $\F{\AAC}'$, and
+the real world, $\simu$ translates the signature into calls to $\idfu{\AAC}'$, and
 instead of returning the output of $\NIZKverify$, it returns the verification
-result received from $\F{\AAC}'$.  In the following, we describe $\simu$'s
+result received from $\idfu{\AAC}'$.  In the following, we describe $\simu$'s
 simulation.
 
 \begin{description}
@@ -105,18 +105,18 @@ simulation.
     secret key $\sk$ underlying $\pk$.  If not, then $\simu$ stops.  Otherwise,
     it executes the rest of the registration protocol, records entry
     $\langle\user, \Tag, \pk, \psi \rangle$, and then (acting as a user)
-    transmits the corresponding registration request $register$ to $\F{\AAC}'$
-    which processes it in a similar fashion to $\F{\AAC}$.
+    transmits the corresponding registration request $register$ to $\idfu{\AAC}'$
+    which processes it in a similar fashion to $\idfu{\AAC}$.
 
-    The simulated registration authority and $\F{\AAC}'$ accept or reject the
+    The simulated registration authority and $\idfu{\AAC}'$ accept or reject the
     same requests by construction, so their outputs are indistinguishable.
 
   \item[Issue.] For each issuance request $(\Tag, \pk, \psi, \atv{i})$ that a
     corrupt user $\user$ sends, in the real world, to an honest issuer
     $\issuer{i}$ (simulated by $\simu$), $\simu$ (acting as $\user$) sends
-    $(\AACissue, \att{i}, \atv{i})$ to $\F{\AAC}'$, and stores entry $\langle
+    $(\AACissue, \att{i}, \atv{i})$ to $\idfu{\AAC}'$, and stores entry $\langle
     \user, \Tag, \att{i}, \atv{i}, \signature_i\rangle$ on success.
-    $\F{\AAC}'$ issues the credential exactly when $\user$ is registered and
+    $\idfu{\AAC}'$ issues the credential exactly when $\user$ is registered and
     this is her first request for $\att{i}$, and the simulated $\issuer{i}$
     returns $\signature_i \leftarrow \AACissue(\isk{i}, \Tag, \atv{i})$ under
     the same conditions, so their outputs are indistinguishable.
@@ -128,7 +128,7 @@ simulation.
     \varnothing$ if the attribute value is not disclosed.
 
     If $b  = 0$,  $\simu$ sends $(\msg, \vec{\atv{}} = (\atv{1}, ..., \atv{N}),
-    \proof)$ to $\F{\AAC}'$, which returns $(\AACverifyend, b^\star)$.  Two
+    \proof)$ to $\idfu{\AAC}'$, which returns $(\AACverifyend, b^\star)$.  Two
     scenarios present themselves. Either there exists a dishonest user with
     attribute values $\vec{\atv'{}} = (\atv'{1}, ..., \atv'{N})$, $\forall
     \atv{i} \neq \varnothing$, we either have $\atv{i} = \atv'{i}$, or have
@@ -136,12 +136,12 @@ simulation.
     i: \atv{i} \neq \varnothing$, issuers $\issuer{i}$ and users holding
     attribute values $\atv{i}$ are honest.
 
-    In case of scenario one, the output of $\F{\AAC}'$ is defined by $\simu$,
-    which instructs $\F{\AAC}'$ to return $(\AACverifyend, 0)$.  In case of
-    scenario two, $\F{\AAC}'$ outputs $(\AACverifyend, 1)$.  However, thanks to
+    In case of scenario one, the output of $\idfu{\AAC}'$ is defined by $\simu$,
+    which instructs $\idfu{\AAC}'$ to return $(\AACverifyend, 0)$.  In case of
+    scenario two, $\idfu{\AAC}'$ outputs $(\AACverifyend, 1)$.  However, thanks to
     the correctness of protocol $\Pi$ this scenario never occurs.  Given a
     proof that was computed honestly,  $\NIZKverify$ will never output $0$, so
-    the output of $\F{\AAC}'$ matches that of $\Pi$.
+    the output of $\idfu{\AAC}'$ matches that of $\Pi$.
 
     If $b = 1$, then thanks to the extractability property of the proof,
     $\simu$ can extract the witness $\witness_1 = (\Tag, \sk, \pk, \psi,
@@ -157,13 +157,13 @@ simulation.
         there is no recorded entry $\langle \star, \Tag, \atv{i}, \star
         \rangle$, then $\simu$ aborts (call this event $a_2$).
 
-      \item[Otherwise.] $\simu$ sends to $\F{\AAC}'$ signature request
+      \item[Otherwise.] $\simu$ sends to $\idfu{\AAC}'$ signature request
         $(\AACissue, \vec{\atv{}}, \signature, \msg)$.
 
-        Either $\F{\AAC}'$ aborts, and $\simu$ sends request $(\AACverify,
-        V,\vec{\atv{}}, \proof)$ to $\F{\AAC}'$, or $\F{\AAC}'$ returns
+        Either $\idfu{\AAC}'$ aborts, and $\simu$ sends request $(\AACverify,
+        V,\vec{\atv{}}, \proof)$ to $\idfu{\AAC}'$, or $\idfu{\AAC}'$ returns
         $(\AACpresentend, \proof^{\star})$, and $\simu$ sends request
-        $(\AACverify, V, \vec{\atv{}}, \proof^{\star})$ to $\F{\AAC}'$.
+        $(\AACverify, V, \vec{\atv{}}, \proof^{\star})$ to $\idfu{\AAC}'$.
 
     \end{description}
 
@@ -175,7 +175,7 @@ In what follows, we show that if $\simu$ does not abort, then $b = 1$.
 
 If $a_1$ does not occur, then the registration request for $\user$ was
 successfully processed by $\simu$, and $\user$ was successfully registered by
-$\F{\AAC}$.  If $a_2$ does not occur then this implies one of two things:
+$\idfu{\AAC}$.  If $a_2$ does not occur then this implies one of two things:
 
 \begin{description}
 
@@ -189,17 +189,17 @@ $\F{\AAC}$.  If $a_2$ does not occur then this implies one of two things:
 \end{description}
 
 Case one implies that $\simu$ issued credentials for $\user$ for the relevant
-attributes, and so did $\F{\AAC}'$.  During the $\AACpresent$ call, $\F{\AAC}'$
+attributes, and so did $\idfu{\AAC}'$.  During the $\AACpresent$ call, $\idfu{\AAC}'$
 will not abort and will return $(\AACpresentend, \proof^{\star})$, and the
 subsequent call $(\AACverify, V, \vec{\atv{}}, \proof^{\star})$ will result in
-$\F{\AAC}'$ returning $(\AACverifyend, 1)$.  This matches the output of the
+$\idfu{\AAC}'$ returning $(\AACverifyend, 1)$.  This matches the output of the
 verification in the real world.
 
 Case two implies that $\user$ is in possession of a credential that was issued
-by a dishonest issuer and never recorded by either $\simu$ or $\F{\AAC}'$.  In
-this case,  $\F{\AAC}'$ aborts during $\AACpresent$, and when $\simu$ calls
-$\F{\AAC}'$ with  $(\AACverify, V, \vec{\atv{}}, \proof)$, the output of
-$\F{\AAC}'$ is dictated by $\simu$.  $\simu$ sets this output to $1$ to match
+by a dishonest issuer and never recorded by either $\simu$ or $\idfu{\AAC}'$.  In
+this case,  $\idfu{\AAC}'$ aborts during $\AACpresent$, and when $\simu$ calls
+$\idfu{\AAC}'$ with  $(\AACverify, V, \vec{\atv{}}, \proof)$, the output of
+$\idfu{\AAC}'$ is dictated by $\simu$.  $\simu$ sets this output to $1$ to match
 the output of the verification in the real world.
 
 This game is indistinguishable from Game 6 as long as $a_1$ and $a_2$ do not
@@ -232,13 +232,13 @@ occur. We now show that the probability of these events occuring is negligible.
 \end{description}
 
 \paragraph{Game 8.} This is the ideal world.  This game is indistinguishable
-from Game 7 as functionality $\F{\AAC}'$ is identical to ideal functionality
-$\F{\AAC}$.  This concludes the proof
-of~\Fref{thm:agg-creds-construction-security}.
+from Game 7 as functionality $\idfu{\AAC}'$ is identical to ideal functionality
+$\idfu{\AAC}$.  This concludes the proof
+of~\Cref{thm:agg-creds-construction-security}.
 
 %%%% proof 2 - tag based agg sigs are secure (Theorem 2)
 
-\subsection{Proof of~\Fref{thm:agg-creds-thm-1}}\label{sec:agg-creds-proof-2}
+\subsection{Proof of~\Cref{thm:agg-creds-thm-1}}\label{sec:agg-creds-proof-2}
 
 Let $\pk = \{\pk_1, ..., \pk_n\}$ be the set of challenge public keys from the
 existential unforgeability under tag-based aggregation experiment.  Assume
@@ -540,7 +540,7 @@ for the BCDH or m-BCDH challenge.
 
 %%%% proof of Theorem 3 - the concrete instantiation, corollary of Theorem 1
 
-\subsection{Proof of~\Fref{thm:agg-creds-thm-2}}\label{sec:agg-creds-proof-3}
+\subsection{Proof of~\Cref{thm:agg-creds-thm-2}}\label{sec:agg-creds-proof-3}
 
 The instantiation is an instance of the abstract construction that sets $\DS$
 to the AGHO structure-preserving signature scheme, $\ATS$ to our tag based
@@ -554,12 +554,12 @@ zero knowledge proofs of Section~\ref{sec:proof-inst}.
     assumption~\cite{C:AGHO11}.
 
   \item[$\ATS$ is existentially unforgeable under tag based aggregation.] This
-    is~\Fref{thm:agg-creds-thm-1}, proven in~\Fref{sec:agg-creds-proof-2} under
+    is~\Cref{thm:agg-creds-thm-1}, proven in~\Cref{sec:agg-creds-proof-2} under
     the BCDH and m-BCDH assumptions.
 
   \item[The proof system is simulation-extractable.]
     Lemma~\ref{lem:agg-creds-extract} and Lemma~\ref{lem:agg-creds-simulate},
-    proved in~\Fref{sec:agg-creds-proof-lemmas} under the DDH assumption in
+    proved in~\Cref{sec:agg-creds-proof-lemmas} under the DDH assumption in
     $\group{1}$, establish extractability and simulatability separately.
     Combined with the discussion following Lemma~\ref{lem:agg-creds-simulate},
     they give the simulation-extractability of $\Sigma_{\AAC}$ that this proof
@@ -567,7 +567,7 @@ zero knowledge proofs of Section~\ref{sec:proof-inst}.
 
 \end{description}
 
-The instantiated protocol securely realises ideal functionality $\F{\AAC}$ in
+The instantiated protocol securely realises ideal functionality $\idfu{\AAC}$ in
 the random oracle model.
 
 %%% proof 4 - extractability and simulatability of the sigma-protocol proof
@@ -683,7 +683,7 @@ presentation $\proof$ without access to a valid witness.
     If the DDH assumption holds in $\group{1}$, it is computationally
     infeasible to tell whether the tuple $(\bar{\gen}, \bar{v}, \bar{t},
     \bar{\signaturetwo}, \bar{\tid})$ was generated this way or following the
-    description in~\Fref{sec:proof-inst}.
+    description in~\Cref{sec:proof-inst}.
 
   \item Set the following:
 %
