@@ -431,7 +431,7 @@ and $\advB$ no longer learns $\gamma$ directly, only $\omega$. We describe only
 the resulting differences.
 
 \paragraph{Random oracle programming.} $\hashone$ is now programmed without
-embedding, exactly as $\hashtwo$ was in the Type 1 case. For each new query
+embedding, exactly as $\hashtwo$ is in the Type 1 case. For each new query
 $\msg$, $\advB$ generates $\rho \sample \Zp$, sets $\hashone(\msg) =
 \gen^{\rho}$, and stores $\langle \msg, \rho, \hashone(\msg)\rangle$ in $L_1$.
 The embedding moves to $\hashtwo$ instead. For each new query $\Tag$, $\advB$

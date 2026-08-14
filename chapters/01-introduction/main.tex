@@ -31,13 +31,14 @@ parties, their relationships, or patterns in their behaviour. Protecting that
 then brings into focus the next piece of information that could be observed and
 used. Every answer reveals another question.
 
-Over the last fifty years, privacy enhancing technologies have been designed to
+Over the last fifty years, privacy-enhancing technologies have been designed to
 answer exactly these broader privacy problems. The surface of information being
 protected has expanded, and so has the number of entities capable of observing
 some part of the system.  Service providers, issuers, validators, network
 operators and public authorities may all learn sensitive information while
-performing otherwise legitimate functions. These new participants of the
-systems then raise the question of how the protocols should treat them.
+performing otherwise legitimate functions. This raises the question of how
+these participants should be incorporated into the system model, and what
+information they should be permitted to learn.
 
 These powerful entities are consequently often modelled as adversaries.
 Protocol designers have understandably been active in designing systems that
@@ -64,13 +65,13 @@ anonymous credential schemes, and multi-party computation.
 
 Anonymous credential schemes operate by having issuers give credentials to
 users, attesting that the user holds certain attribute values. The user then
-presents the credential in a privacy-preserving way, proving they hold given
-attributes without revealing who they are or anything about their undisclosed
-attribute values. Early anonymous credential schemes assume a single issuer
-certifying all attributes, creating one powerful entity. Later schemes
-decentralise issuance, but the issuers as a whole entity remain responsible for
-all attributes. This means that in decentralising the protocol, all issuers can
-now learn all attribute values of each user.
+presents the credential, proving they hold given attributes without revealing
+who they are or anything about their undisclosed attribute values. Early
+anonymous credential schemes assume a single issuer certifying all attributes,
+creating one powerful entity. Later schemes decentralise issuance, but the
+issuers as a whole entity remain responsible for all attributes. This means
+that in decentralising the protocol, all issuers can now learn all attribute
+values of each user.
 
 Multi-party computation allows a function to be computed by multiple mutually
 distrusting parties, each with a private input. The function is computed on all
@@ -78,29 +79,29 @@ inputs while revealing nothing but the output. This seems to be an instance
 where decentralisation of the protocol does lead to a straightforward privacy
 gain for users. It can even be applied to anonymous credential issuance to
 sidestep the issue just stated above. The new problem it introduces, however,
-is in practicality. Mutli-party computation generally involves interaction from
+is in practicality. Multi-party computation generally involves interaction from
 all participants, which becomes infeasible when, for example, your driving
-license, birth certificate, and passport are each issued by countries with no
-diplomatic relations with one another. have no incentive to participate in an
-expensive protocol to allow individuals to privately prove statements about
-themselves. And so we aim also for efficiency in all of our protocols.
+licence, birth certificate, and passport are each issued by countries with no
+diplomatic relations with one another. These issuers have no incentive to
+participate in an expensive protocol to allow individuals to privately prove
+statements about themselves. And so practicality is also an aim in all of our
+constructions. By this, we mean minimising the interaction, coordination,
+communication and computational costs required by the protocols.
 
-Privacy preserving systems are often discussed as if the choice is between
-decentralised privacy and centralised surveillance. This thesis challenges that
-binary. Powerful institutions can perform useful protocol functions while
-cryptography limits both the information available to them and the capabilities
-they receive. Allowing institutions to perform this work may reduce the
-computation, storage, time and specialist knowledge required of individual
-users.
+Privacy-focused systems are often discussed as if the choice is between decentralised
+privacy and centralised surveillance. This thesis challenges that binary.
+Powerful institutions can perform useful protocol functions while cryptography
+limits both the information available to them and the capabilities they
+receive. Allowing institutions to perform this work may reduce the computation,
+storage, time and specialist knowledge required of individual users.
 
-Modern privacy-preserving systems already involve service providers, issuers,
-auditors, validators and other accountable entities with operational
-responsibilities. Privacy Pass, anonymous credential systems, and privacy
-services such as Apple's Private Relay use institutional infrastructure while
-limiting the information available to the institutions
+Systems deployed today to protect user privacy already involve service
+providers, issuers, auditors, validators and other accountable entities with
+operational responsibilities. Privacy Pass, anonymous credential systems, and
+privacy services such as Apple's Private Relay use institutional infrastructure
+while limiting the information available to the institutions
 involved~\cite{PoPETS:DGSTV18,privaterelay2021}. This thesis explores how
-modelling such roles explicitly can enable practical and efficient
-privacy-preserving systems.
+modelling such roles explicitly can enable practical and efficient systems.
 
 \paragraph{Financial privacy.} Cryptographic protocols are applied in vastly
 different spaces. There are extremely strong arguments against governments
@@ -126,8 +127,8 @@ can they obtain it?  Should access be limited to a transaction, a user, a
 certain period of time, a single prescribed purpose, or be ongoing?
 
 Constructing digital financial systems with auditability may seem analogous to
-building a backdoors in messaging systems. And there is the argument that once
-a capability exists, it will be used everywhere possible.  This is important to
+building backdoors in messaging systems. And there is the argument that once a
+capability exists, it will be used everywhere possible.  This is important to
 consider.  Financial systems are inherently responsible for movement of money.
 This instantly distinguishes the system from communication alone.  Refusing to
 design auditing protocols does not remove the accountability requirements
@@ -166,12 +167,12 @@ authority. We use this existing role to bind credentials issued to the same
 user, preventing credentials belonging to different users from being aggregated
 without requiring expensive proofs during presentation.
 
-We next consider accountability in privacy-preserving transaction systems.
-Financial systems may require both the ability to investigate a particular
-transaction and the ability, under prescribed circumstances, to identify the
-transactions associated with a particular user. These capabilities are related
-but distinct, and granting one need not grant the other. We develop a
-transaction identification mechanism that supports concurrent transaction
+We next consider accountability in transaction systems that protect user
+privacy.  Financial systems may require both the ability to investigate a
+particular transaction and the ability, under prescribed circumstances, to
+identify the transactions associated with a particular user. These capabilities
+are related but distinct, and granting one need not grant the other. We develop
+a transaction identification mechanism that supports concurrent transaction
 creation without requiring the auditor to maintain persistent per-user state.
 Tracing authority can be restricted to a specified epoch, limiting both the
 scope and duration of the information disclosed to an auditor.
@@ -185,12 +186,12 @@ require no interaction during the online signing phase, making them suitable
 for efficient transaction authorisation. The existing institutional structure
 then becomes a resource rather than an obstacle to be removed.
 
-Finally, we study privacy-preserving offline payments. Offline operation
-improves availability and accessibility, but changes how double spending must
-be handled. We develop a privacy-preserving offline payment scheme that divides
-computation between a mobile device and a secure element. Payments made by
-honest users remain unlinkable, while information identifying the double
-spender can be recovered following double spending.
+Finally, we study privacy in offline payments. Offline operation improves
+availability and accessibility, but changes how double spending must be
+handled. We develop an offline payment scheme that divides computation between
+a mobile device and a secure element. Payments made by honest users remain
+unlinkable, while information identifying the double spender can be recovered
+following double spending.
 
 To reiterate, centralisation is multidimensional. Computation, state,
 authority, and knowledge can each be centralised or decentralised
@@ -206,9 +207,10 @@ than removed in pursuit of decentralisation.
 
 The remainder of this thesis is organised as follows.  Preliminary information
 is found in \Fref{chap:preliminaries}.  \Fref{chap:agg-creds} presents our
-aggregate anonymous credential construction. \Fref{chap:txid} presents the
-transaction identification mechanism,  \Fref{chap:tsps} presents the threshold
-signing protocol for transaction authorisation, and
-\Fref{chap:offline-payments} presents the offline payment mechanism.
-\Fref{chap:conclusion} summarises the contributions and discusses open
-questions.
+aggregate anonymous credential construction. 
+%\Fref{chap:txid} presents the
+%transaction identification mechanism,  \Fref{chap:tsps} presents the threshold
+%signing protocol for transaction authorisation, and
+%\Fref{chap:offline-payments} presents the offline payment mechanism.
+%\Fref{chap:conclusion} summarises the contributions and discusses open
+%questions.

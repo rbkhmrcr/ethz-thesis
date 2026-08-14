@@ -4,7 +4,7 @@
 
 An aggregate anonymous credentials scheme involves four types of participants.
 The registration authority is responsible for registering users. Issuers
-certifies attributes. For simplicity we assume that each issuer is responsible
+certify attributes. For simplicity we assume that each issuer is responsible
 for a single attribute type, and is the only issuer for that attribute. Users
 each register with the registration authority, obtain credentials from the
 relevant i issuers for the attribute values they hold, and then use these
@@ -350,8 +350,8 @@ answer. Otherwise, it records the presentation as invalid and returns false.
 
               \item Return $(\AACpresentend, \proof)$ to the user and
                 $(\AACpresentend, \vec{\atv{}}, \msg, \allowbreak \proof)$ to
-                $\simu$.  (Users who successfully aggregated their credentials
-                successfully sign messages.)
+                $\simu$.  (Users who have successfully aggregated their
+                credentials successfully sign messages.)
 
             \end{enumerate}
 
@@ -370,7 +370,7 @@ answer. Otherwise, it records the presentation as invalid and returns false.
               \item Return $(\AACpresentend,  \proof)$ to the user and
                 $(\AACpresentend, \vec{\atv{}}, \msg, \allowbreak \proof)$ to
                 $\simu$.  (Users with disclosed attribute values successfully
-                sign messages even if they did not call aggregate before.)
+                sign messages even if they have not called aggregate before.)
 
             \end{enumerate}
 

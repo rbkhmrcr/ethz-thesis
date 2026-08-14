@@ -324,16 +324,8 @@ $\AACpresent$ proceeds as follows.
 %
 \end{enumerate}
 %
-This allows of to form the proof we use in practice, with the following instance and
-witness, and relation:
-%
-\begin{equation}
-%
-  \inst_3 = (\pk', \{\atv{i}, H_i\}_{i \in \ISSUERS}, \bar{\gen}), \quad
-  \witness_3 = (\delta, \sk).
-%
-\end{equation}
-%
+This turns the discrete logarithm consistency checks of the relation
+above into the following:
 %
 \begin{equation} \label{eq:proof-rel}
 %
@@ -343,9 +335,20 @@ witness, and relation:
 %
 \end{equation}
 %
-This relation only involves equality of discrete logarithms of elements in
-$\group{1}$, which allows us to build a concretely efficient proof rather than
-requiring zero knowledge proofs over pairing equations and elements of 
+$\rel_3$ does not include the signature verification equations of the
+original relation, $1 = \SPSverify(\rapk, (\pk,\tid), \psi)$ and $1 =
+\ATSverifyagg((\ipk{i})_{i\in\ISSUERS}, \Tag, (\atv{i})_{i\in\ISSUERS},
+\signature)$. 
+
+$\AACpresent$ randomises $\signature'$ and $\SPSsig'$, so these values 
+can be sent in the clear within $\proof$, as they reveal nothing about which
+original signature they came from. This means $\AACverify$ can check 
+these two equations directly in addition to verifying $\eta$
+for $\rel_3$. $\proof$ then captures the full original relation, with
+signature verification performed directly instead of proven. This means
+$\rel_3$ only concerns equality of discrete logarithms of elements in
+$\group{1}$, which allows us to build a concretely efficient proof rather
+than requiring zero knowledge proofs over pairing equations and elements of
 $\group{T}$.
 
 %%%% anon creds protocol
@@ -523,15 +526,6 @@ directly.
   securely realises ideal functionality $\F{\AAC}$ in the random oracle model.
 
 \end{theorem}
-
-\begin{assumptionbox}{Bilinear Decisional Diffie-Hellman (BDDH)}{bddh}
-
-  The BDDH assumption holds if no PPT adversary can distinguish $(\gen, \gen^x,
-  \gen^y, \ggen, \ggen^z, e(\gen, \ggen)^{xyz})$ from $(\gen, \gen^x, \gen^y,
-  \ggen, \ggen^z, \Delta)$ for uniformly random $x, y, z \sample \Zp$ and
-  $\Delta \sample \group{T}$.
-
-\end{assumptionbox}
 
 Protocol~\ref{prot:paac-2} gives the resulting instantiation in full.
 
