@@ -307,8 +307,15 @@ $\AACpresent$ proceeds as follows.
 
 \begin{enumerate}
 
-  \item Randomise $\signature' \sample \ATSrandomise(\signature)$ and
-    $\SPSsig' \sample \SPSrandomise(\SPSsig)$.
+  \item Randomise the signatures as follows:
+      %
+    \begin{equation*}\begin{gathered}
+    %
+  \signature' \sample \ATSrandomise(\signature), \\
+   \SPSsig' \sample \SPSrandomise(\SPSsig).
+        %
+    \end{gathered} \end{equation*}
+%
 
   \item Sample $\delta \sample \Zp^*$ and compute the following:
     %
@@ -336,20 +343,53 @@ above into the following:
 \end{equation}
 %
 $\rel_3$ does not include the signature verification equations of the
-original relation, $1 = \SPSverify(\rapk, (\pk,\tid), \psi)$ and $1 =
+original relation:
+%
+\begin{equation}
+%
+\SPSverify(\rapk, (\pk,\tid), \psi) = 1 \ \wedge \
 \ATSverifyagg((\ipk{i})_{i\in\ISSUERS}, \Tag, (\atv{i})_{i\in\ISSUERS},
-\signature)$. 
-
-$\AACpresent$ randomises $\signature'$ and $\SPSsig'$, so these values 
+\signature) = 1. 
+%
+\end{equation}
+%
+This is because in the concrete instantiation, the user instead randomises $\signature'$ and $\SPSsig'$.
+This means that these values 
 can be sent in the clear within $\proof$, as they reveal nothing about which
-original signature they came from. This means $\AACverify$ can check 
-these two equations directly in addition to verifying $\eta$
-for $\rel_3$. $\proof$ then captures the full original relation, with
-signature verification performed directly instead of proven. This means
-$\rel_3$ only concerns equality of discrete logarithms of elements in
-$\group{1}$, which allows us to build a concretely efficient proof rather
+original signature they came from. This means that the signature verification equations 
+can be used directly. $\proof$ then captures the full original relation, with
+signature verification performed directly instead of proven, and the discrete log equalities
+enforcing consistency through $\eta$. This allows us to build a concretely efficient proof rather
 than requiring zero knowledge proofs over pairing equations and elements of
 $\group{T}$.
+
+If a user is able to produce a valid $\eta$, we can extract a witness for the
+original relation. Under the DDH assumption in $\group{1}$, the resulting
+presentation is simulatable: it leaks no information about the witness beyond
+the disclosed attribute values.
+
+\begin{lemma}\label{lem:agg-creds-extract}
+
+  If a user produces a presentation that verifies, a witness for
+  relation~\eqref{eq:proof-original} can be extracted.
+
+\end{lemma}
+
+\begin{lemma}\label{lem:agg-creds-simulate}
+
+  If the DDH assumption holds in $\group{1}$, a valid presentation can be
+  simulated without access to a witness.
+
+\end{lemma}
+
+Lemmas~\ref{lem:agg-creds-extract} and~\ref{lem:agg-creds-simulate} give
+extractability and simulatability separately. \Cref{thm:agg-creds-thm-2} needs
+simulation-extractability, which additionally allows extraction after the
+adversary has observed simulated proofs of its own choosing. Our simulator does
+both within the same experiment, so this is the property we rely on.
+Protocol~\ref{prot:paac-2} is a sigma protocol with the Fiat-Shamir heuristic
+applied~\cite{C:FiaSha86}. This combination satisfies simulation-extractability
+in the random oracle model~\cite{INDOCRYPT:FKMV12}.
 
 %%%% anon creds protocol
 
@@ -584,31 +624,3 @@ Protocol~\ref{prot:paac-2} gives the resulting instantiation in full.
   \end{description}
 
 \end{protocolbox}
-
-If a user is able to produce a valid $\eta$, we can extract a witness for the
-original relation. Under the DDH assumption in $\group{1}$, the resulting
-presentation is simulatable: it leaks no information about the witness beyond
-the disclosed attribute values.
-
-\begin{lemma}\label{lem:agg-creds-extract}
-
-  If a user produces a presentation that verifies, a witness for
-  relation~\eqref{eq:proof-original} can be extracted.
-
-\end{lemma}
-
-\begin{lemma}\label{lem:agg-creds-simulate}
-
-  If the DDH assumption holds in $\group{1}$, a valid presentation can be
-  simulated without access to a witness.
-
-\end{lemma}
-
-Lemmas~\ref{lem:agg-creds-extract} and~\ref{lem:agg-creds-simulate} give
-extractability and simulatability separately. \Cref{thm:agg-creds-thm-2} needs
-simulation-extractability, which additionally allows extraction after the
-adversary has observed simulated proofs of its own choosing. Our simulator does
-both within the same experiment, so this is the property we rely on.
-Protocol~\ref{prot:paac-2} is a sigma protocol with the Fiat-Shamir heuristic
-applied~\cite{C:FiaSha86}. This combination satisfies simulation-extractability
-in the random oracle model~\cite{INDOCRYPT:FKMV12} .

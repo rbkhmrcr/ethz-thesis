@@ -57,8 +57,7 @@ user possesses the requested attribute value, it issues an aggregate tag-based
 signature on that attribute.
 
 On input $(\Tag, \pk, \psi, \atv{i})$ from the user, the issuer checks that 
-$\DSverify(\rapk, (\pk, \Tag), \psi) = 1$.  If not, it
-rejects.  Otherwise, the user next proves knowledge of $\sk$.  If this check
+$\psi$ verifies, and rejects if it does not.  Otherwise, the user next proves knowledge of $\sk$.  If this
 succeeds and the user holds attribute value $\atv{i}$, the issuer sends back
 $\signature_i \leftarrow \ATSsign(\isk{i}, \Tag, \atv{i})$. The user sets $\cred_i
 = (\atv{i}, \signature_i)$.
