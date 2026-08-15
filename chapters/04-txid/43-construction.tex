@@ -1,29 +1,27 @@
 \section{Construction}\label{sec:txidconstruction}
 
-We have a ledger that processes user transactions.  We also have two one way
-functions, which we call $\G$ and $\G'$, and two PRFs, $\FE$ and $\FT$.  There
-is an upper bound of the number of transactions a user can submit during any
-given epoch, which we call $\Max$.
+In brief, the protocol proceeds as follows. A ledger processes user
+transactions. Each user is provisioned with a long term signing key and a long
+term tracing key, cryptographically bound together via a credential issued by
+the registration authority. For each epoch, the user derives an epoch tracing
+key from their tracing key and the epoch identifier. Transactions submitted
+during that epoch are tagged using PRF $\FT$, evaluated on the epoch tracing
+key and an index in the range $[0,\Max)$, where $\Max$ bounds the number of
+transactions a user can submit per epoch. Each transaction carries a proof
+that its tag was correctly generated.
 
-The protocol operates as follows. Each user is provisioned with a long term
-signing key and a long term tracing key. These two keys are cryptographically
-bound together via a credential issued by the registration authority.  For each
-epoch, the user derives an epoch tracing key as a function of their tracing key
-and the epoch identifier. All transactions submitted by the user during that
-epoch are tagged with a PRF evaluated with the user's epoch tracing key and an
-index in the range $[0,\Max)$.  Each transaction is accompanied by a proof of
-the correctness of the tag generation.
+For transaction identification, the user discloses their epoch tracing key to
+the relevant auditor, who locally computes every valid transaction tag for
+that user and epoch.
 
-For transaction identification, the user's epoch tracing key is disclosed to
-the auditor in question.  The auditor can then locally compute all valid
-transaction tags corresponding to that user and epoch.
+When the system moves to a new epoch, users derive a fresh epoch tracing key,
+and tracing capabilities granted for prior epochs expire automatically.
 
-When the system transitions to a new epoch, users derive a fresh epoch tracing
-key. Tracing capabilities granted for prior epochs automatically expire.
-
-The protocol uses signatures of knowledge where a proof is also used to
-authenticate a message. For proofs used only to certify correctness, we use non
-interactive zero knowledge proofs.
+The protocol combines signatures of knowledge, where a proof also
+authenticates a message, with non interactive zero knowledge proofs for
+statements that only need to certify correctness. Long term keys are bound
+using one way functions $\G$ and $\G'$, and epoch and tag derivation use PRF
+$\FE$ for epoch keys and PRF $\FT$ for tags.
 
 \paragraph{Setup.} During setup, the registration authority generates a key
 pair for a digital signature scheme. Their public key is communicated to the
@@ -40,41 +38,37 @@ same commitment.
 
 The registration authority generates $(\rask, \rapk) \leftarrow
 \DSgen(\secparam)$ and communicates $\pk$ to the ledger operator.  The ledger
-operator calls $ \ck \leftarrow \ComGen(\secparam)$ and produces four sets of
-public parameters:
+operator calls $\ck \leftarrow \ComGen(\secparam)$ and produces four sets of
+public parameters, one for each relation.
 
-\begin{itemize}
-
-  \item First, we have $ \inst_0 = (\G, \G', \PSK, \PTK)$, and $\witness_0 =
-    (\sk, \utk)$ for the relation defined as follows:
-   %
-    \begin{equation}  \label{eq:rel0} \PSK = \G(\sk) \quad \wedge \quad \PTK =
-    \G'(\utk).  \end{equation}
-
-  \item Next, we have $\inst_1 = (\FE, \G', \PTK, \epoch,  \ek)$, and
-    $\witness_1 =  \utk$, for the following relation:
-    %
-    \begin{equation} \label{eq:rel1} \PTK = \G'(\utk) \quad \wedge \quad \ek =
-    \FE(\utk, \epoch).  \end{equation}
-
-  \item The third are defined $\inst_2 = (\G, \G', \rapk, \ck, \com)$, and
-    $\witness_2 = (\signature, \sk, \utk, \openinfo)$, for relation given as
-    follows:
-  %
-    \begin{equation} \label{eq:rel2} \DSverify(\rapk, \G(\sk) \| \G'(\utk),
-    \signature) = 1 \ \wedge  \ \ComOpen(\ck, \openinfo, \com) = \utk.
-  \end{equation}
-
-\item  And finally, we have $\inst_3 = (\FE, \FT, \ck, \com, \epoch, \Max,
-  \Tag)$, and $\witness_3 =  (\utk, \openinfo, \ek, \gamma)$, for proving that
-  the following are satisfied:
+For $\rel_0$, the instance and witness are $\inst_0 = (\G, \G', \PSK, \PTK)$
+and $\witness_0 = (\sk, \utk)$, for the relation defined as follows:
 %
-  \begin{gather} \label{eq:rel3} \ComOpen(\ck, \openinfo, \com) = \utk \quad
-  \wedge \quad \ek = \FE(\utk, \epoch) \\ \wedge \quad \Tag = \FT(\ek, \gamma)
+\begin{equation}  \label{eq:rel0} \PSK = \G(\sk) \quad \wedge \quad \PTK =
+\G'(\utk).  \end{equation}
+%
+For $\rel_1$, the instance and witness are $\inst_1 = (\FE, \G', \PTK, \epoch,
+\ek)$ and $\witness_1 = \utk$, for the following relation:
+%
+\begin{equation} \label{eq:rel1} \PTK = \G'(\utk) \quad \wedge \quad \ek =
+\FE(\utk, \epoch).  \end{equation}
+%
+For $\rel_2$, the instance and witness are $\inst_2 = (\G, \G', \rapk, \ck,
+\com)$ and $\witness_2 = (\signature, \sk, \utk, \openinfo)$, for the relation
+given as follows:
+%
+\begin{equation} \label{eq:rel2} \DSverify(\rapk, \G(\sk) \| \G'(\utk),
+\signature) = 1 \ \wedge  \ \ComOpen(\ck, \openinfo, \com) = \utk.
+\end{equation}
+%
+For $\rel_3$, the instance and witness are $\inst_3 = (\FE, \FT, \ck, \com,
+\epoch, \Max, \Tag)$ and $\witness_3 = (\utk, \openinfo, \ek, \gamma)$, proving
+that the following are satisfied:
+%
+\begin{gather} \label{eq:rel3} \ComOpen(\ck, \openinfo, \com) = \utk \quad
+\wedge \quad \ek = \FE(\utk, \epoch) \\ \wedge \quad \Tag = \FT(\ek, \gamma)
 \quad  \wedge  \quad 0 \leq \gamma < \Max.  \end{gather}
-
-\end{itemize}
-
+%
 The ledger operator then publishes the following:
 %
 \begin{equation*} \ledger[\crs] \leftarrow (\G, \G', \FE, \FT, \rapk, \ck,
@@ -118,8 +112,8 @@ tracing key $\ek$.
 proves that the transaction tag was correctly generated from their tracing key
 while also authenticating the transaction itself.
 
-The user first prepares confidential payload of their transaction denoted
-$\payload$, selects a fresh counter $0 \leq \gamma < \Max$, and computes $\Tag=
+The user first prepares confidential transaction payload $\payload$, selects a
+fresh counter $0 \leq \gamma < \Max$, and computes $\Tag=
 \FT(\ek, \gamma)$.  Next, the user computes commitment $\com \leftarrow
 \ComCommit(\ck, \utk, \openinfo)$ and generates $\proof \leftarrow
 \NIZKprove(\crs_3, \inst_3, \witness_3)$, for $(\inst_3, \witness_3)$ as
@@ -138,14 +132,14 @@ If these checks succeed, the transaction validators mark the transaction as
 valid by adding entry $\ledger[\Tag] \leftarrow \payload$.
 
 \paragraph{Transaction identification.} Given key $\ek$ for epoch $\epoch$, the
-auditor traces the transactions that the user submitted during that epoch as
-follows.  $\forall \ 0 \leq \gamma < \Max:$  the auditor computes $\Tag=
-\FT(\ek, \gamma)$ and retrieves entry $\ledger[\Tag]$ if not empty.
+auditor traces the transactions the user submitted during that epoch by
+computing $\Tag = \FT(\ek, \gamma)$ for each counter value $\gamma \in
+[0,\Max)$ and retrieving entry $\ledger[\Tag]$ where present.
 
 \paragraph{Increment Epoch.} The system participants move to epoch $\epoch +
 1$.
 
 \begin{theorem}\label{thm:bb} Assuming that $\DS$ satisfies existential
-unforgeability, $\FE$ and $\FT$ are psuedorandom, $\G$ and $\G'$ are one way,
-and $\SOK$ and the proof system are secure, the protocol described above securely realises
-$\F{txid}$.  \end{theorem}
+unforgeability, $\FE$ and $\FT$ are pseudorandom, $\G$ and $\G'$ are one way,
+and $\SOK$ and the proof system are secure, the protocol described above
+securely realises $\idfu{txid}$.  \end{theorem}

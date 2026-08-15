@@ -365,6 +365,14 @@ enforcing consistency through $\eta$. This allows us to build a concretely effic
 than requiring zero knowledge proofs over pairing equations and elements of
 $\group{T}$.
 
+\begin{assumptionbox}{Decisional Diffie-Hellman (DDH)}{ddh}
+
+  The DDH assumption holds in $\group{1}$ if no PPT adversary can distinguish
+  $(\gen^x, \gen^y, \gen^{xy})$ from $(\gen^x, \gen^y, \gen^z)$ for uniformly
+  random $x, y, z \sample \Zp$.
+
+\end{assumptionbox}
+
 If a user is able to produce a valid $\eta$, we can extract a witness for the
 original relation. Under the DDH assumption in $\group{1}$, the resulting
 presentation is simulatable: it leaks no information about the witness beyond

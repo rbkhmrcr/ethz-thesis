@@ -139,7 +139,7 @@ than requiring general purpose zero knowledge proofs.
           the registration authority.
 
         \item If $\soksig$ does not verify, or the user has registered before,
-          the registration authority aborts.
+          the registration authority exits.
 
         \item Else, the registration authority computes $\signature \sample
           \BBSsign(\sk_{RA},(S,T))$ and records $(S,T)$ as registered.
@@ -148,14 +148,6 @@ than requiring general purpose zero knowledge proofs.
           (S,T,\signature)$ as their registration credential.
 
       \end{enumerate}
-
-  \end{description}
-
-\end{protocolbox}
-
-\begin{protocolbox}{Transaction identification protocol continued}{fig:txid-2}
-
-  \begin{description}
 
     \item[$\ek \sample \IDgrant(\crs,\sk,\utk,\rc,\epoch)$ :] Interactively
       between the user and an auditor, on a fresh nonce $\rand$ from the
@@ -234,64 +226,34 @@ than requiring general purpose zero knowledge proofs.
 \end{protocolbox}
 
 The protocol instantiation is described in full in~\Cref{fig:txid}. The
-protocol instantiation works as follows:
+remaining algorithms follow~\Cref{sec:txidconstruction} directly; we highlight
+below only the design choices specific to this instantiation.
 
-\begin{description}
+The registration authority's key pair is for BBS+, chosen because it signs
+group elements directly (\Cref{fig:bbs}), letting the registration authority
+certify a user's keys without ever seeing them in the clear. This is essential
+since the registration authority must not learn a user's tracing key. During
+registration, the user accordingly sends only the group elements $S =
+\gen_1^{\sk}$ and $T = \gen_2^{\utk}$, together with a proof of knowledge of
+the underlying secrets, rather than the secrets themselves.
 
-  \item[$(\crs,\state) \sample \IDgen(\secparam)$ :] The registration authority
-    and ledger operator jointly fix the system's groups, hash function, and
-    public keys: a BBS+ key pair for the registration authority, and a Pedersen
-    commitment key. We use BBS+ specifically because, as described
-    in~\Cref{fig:bbs}, it can sign group elements directly, letting the
-    registration authority certify a user's keys without ever seeing them in
-    the clear; this is essential, since the the registration authority must not
-    learn a user's tracing key. Pedersen commitments are chosen because they
-    are perfectly hiding, and because their algebraic structure lets a user
-    later prove statements about a commitments with sigma protocols. The
-    commitment key reuses the same pair of generators $(\gen_2,\gen_3)$ that
-    appear in the registration authority's public key; this is purely a reuse
-    of public parameters for compactness, and does not tie together the
-    randomness used at signing time and at commitment time, which remain
-    independently sampled at each use.
+The commitment scheme is Pedersen, chosen because it is perfectly hiding, and
+because its algebraic structure lets a user prove statements about a
+commitment using cheap sigma protocols rather than general purpose zero
+knowledge proofs. The commitment key reuses the pair of generators
+$(\gen_2,\gen_3)$ that appear in the registration authority's public key,
+purely for compactness; randomness used at signing time and at commitment time
+remains independently sampled at each use.
 
-  \item[$(\sk,\rc) \sample \IDregister(\crs,\state)$ :] The user samples their
-    signing key $\sk$ and tracing key $\utk$, but rather than sending either to
-    the registration authority directly, sends only the group elements $S =
-    \gen_1^{\sk}$ and $T = \gen_2^{\utk}$, together with a proof that they know
-    the corresponding secrets. Because BBS+ signs group elements directly, the
-    registration authority can issue a valid signature over $S$ and $T$ without
-    ever learning $\sk$ or $\utk$.
-
-  \item[$\ek \sample \IDgrant(\crs,\sk,\rc,\epoch)$ :] To authorise a specific
-    auditor for one epoch, the user derives an epoch tracing key
-    deterministically from their long term tracing key and the epoch
-    identifier, and proves that this derivation was done correctly, without
-    revealing the long term tracing key itself. Deriving $\ek$ this way is what
-    confines an auditor's tracing power to a single epoch: a key derived for
-    one epoch is useless for any other. The proof is bound to a fresh nonce
-    from the auditor and re authenticated against the user's registration
-    signature, so that only the user who registered with $(S,T)$ can grant
-    tracing rights over it.
-
-  \item[$\tx \sample \IDsubmit(\crs,\sk,\rc,\epoch,\payload)$ :] Each
-    transaction is tagged with a value that looks random unless you hold the
-    corresponding epoch tracing key, computed by evaluating a pairing based PRF
-    at the user's epoch key and a fresh counter. Within a single epoch, each
-    user can submit up to $\Max$ transactions. Alongside the tag, the user
-    attaches two separate proofs: one, described in~\Cref{sec:tag-computation},
-    that the tag was correctly derived from a properly committed tracing key;
-    and one, described in~\Cref{sec:tx-auth}, that the committed key was signed
-    by the registration authority.
-
-  \item[$\{\payload\} \leftarrow \IDidentify(\crs,\ek,\epoch)$ :] Given an
-    epoch tracing key, the auditor simply recomputes every possible tag for
-    that user and epoch, up to the $\Max$ transactions permitted, and checks
-    the ledger for a match. This works because the tag PRF is deterministic in
-    $\ek$ and the counter. As tracing keys are scoped to a single epoch, an
-    auditor holding $\ek$ for one epoch learns nothing about tags computed
-    under a different epoch's key.
-
-\end{description}
+Deriving the epoch tracing key deterministically from the long term tracing
+key and the epoch identifier is what confines an auditor's tracing power to a
+single epoch, since a key derived for one epoch is useless for any other. Each
+transaction tag is computed by evaluating a pairing based PRF at the user's
+epoch key and a fresh counter, so it looks random to anyone without that key.
+The tag carries two separate proofs, that it was correctly derived from a
+properly committed tracing key (\Cref{sec:tag-computation}), and that the
+committed key was signed by the registration authority
+(\Cref{sec:tx-auth}).
 
 \subsubsection*{Verifiable tag computation.}\label{sec:tag-computation} The
 user first computes Pedersen commitment $\com =
@@ -326,33 +288,59 @@ and $\widehat{\crs}_3 = \crs_3$, that together verify: \begin{gather*} \com =
   \quad V = U^{\utk} \quad \wedge \quad e(V, \Gamma) = \Tag^s \cdot e(V,
 \ggen)^r.  \end{gather*}
 
-We prove this in two parts. The first is a sigma protocol proving the following
-equalities for witness $\widehat{\witness}_3$: \begin{gather*} \com =
-  \gen_2^{\utk}\cdot\gen_3^{\openinfo} \quad \wedge \quad \Gamma =
-  \ggen^{r}\prod_{i=1}^{\ell} \ggen_i^{\gamma_i} \quad \wedge \quad  U =
-\HE(\epoch)^{s} \\ \wedge \quad  V = U^{\utk} \quad \wedge \quad e(V, \Gamma) =
-\Tag^s \cdot e(V, \ggen)^r.  \end{gather*} The user samples $\alpha, \beta,
-\eta, \nu \sample \Zp$ and $\delta_i \sample \Zp$ for $i \in [1,\ell]$,
-computes and sends the following:
+We prove this in two parts: a sigma protocol for the equalities of
+$\widehat{\rel}_3$ involving $\widehat{\witness}_3$, and a separate range
+argument that $(\gamma_1,\ldots,\gamma_\ell)$ are bits.
 
-\begin{gather*} A = \gen_2^{\alpha}\cdot\gen_3^{\beta}, \quad \Delta =
-\ggen^{\eta}\prod_{i=1}^{\ell} \ggen_i^{\delta_i}, \quad B = \HE(\epoch)^{\nu},
-\\ D = U^{\alpha}, \quad F =  \Tag^{\nu} \cdot e(V, \ggen)^{\eta}.
-\end{gather*} With challenge $c = \hash(\widehat{\inst}_3, A, \Delta, B, D,
-F)$, the user computes and sends the following values: \begin{equation*} \theta
-  = \alpha + c\cdot\utk, \quad  \omega = \beta + c\cdot\openinfo, \quad
-  \upsilon = \eta + c\cdot r, \quad \forall i \in [1,\ell]: \xi_i = \delta_i +
-  c\cdot\gamma_i, \quad \chi = \nu + c\cdot s.  \end{equation*} The verifier
-  computes challenge $c$ and accepts if and only if the following hold:
-  \begin{gather*} \gen_2^{\theta}\cdot\gen_3^{\omega} = A \cdot \com^c, \quad
-    \ggen^{\upsilon}\prod_{i=1}^{\ell} \ggen_i^{\xi_i} = \Delta \cdot \Gamma^c,
-    \quad \HE(\epoch)^{\chi} = B \cdot U^c, \\ U^{\chi} = D \cdot V^c, \quad
-    \Tag^\chi \cdot e(V, \ggen)^\upsilon = F \cdot e(V,\Gamma)^c.
-  \end{gather*}
+\begin{protocolbox}{Tag correctness sigma protocol}{txid-tag-sigma}
 
-  The second step is proving that $(\gamma_1,\ldots,\gamma_\ell)$ are bits. For
-  each $i\in[\ell]$, bit validity is established using an inner product
-  argument~\cite{SP:BBBPWM18}.
+  \begin{description}
+
+    \item[$\pi \sample \NIZKprove(\crs_3, \widehat{\inst}_3,
+      \widehat{\witness}_3)$ :] On input $\widehat{\inst}_3 = (\com, \Gamma, U,
+      V, \Tag)$ and $\widehat{\witness}_3 = (\utk, \openinfo, r, s)$, do:
+
+      \begin{enumerate}
+
+        \item Sample $\alpha, \beta, \eta, \nu \sample \Zp$ and $\delta_i
+          \sample \Zp$ for each $i \in [1,\ell]$.
+
+        \item Compute $A = \gen_2^{\alpha}\cdot\gen_3^{\beta}$, $\Delta =
+          \ggen^{\eta}\prod_{i=1}^{\ell} \ggen_i^{\delta_i}$, $B =
+          \HE(\epoch)^{\nu}$, $D = U^{\alpha}$, and $F = \Tag^{\nu} \cdot e(V,
+          \ggen)^{\eta}$.
+
+        \item Compute challenge $c \leftarrow \hash(\widehat{\inst}_3, A,
+          \Delta, B, D, F)$.
+
+        \item Compute $\theta = \alpha + c\cdot\utk$, $\omega = \beta +
+          c\cdot\openinfo$, $\upsilon = \eta + c\cdot r$, $\xi_i = \delta_i +
+          c\cdot\gamma_i$ for each $i \in [1,\ell]$, and $\chi = \nu +
+          c\cdot s$.
+
+        \item Return $\pi = (A, \Delta, B, D, F, \theta, \omega, \{\xi_i\},
+          \upsilon, \chi)$.
+
+      \end{enumerate}
+
+    \item[$\{0,1\} \leftarrow \NIZKverify(\crs_3, \widehat{\inst}_3, \pi)$ :]
+      On input $\widehat{\inst}_3$ and proof $\pi$, compute challenge $c
+      \leftarrow \hash(\widehat{\inst}_3, A, \Delta, B, D, F)$ and return the
+      result of the following checks:
+      %
+      \begin{gather*} \gen_2^{\theta}\cdot\gen_3^{\omega} \checkcheck A \cdot
+        \com^c, \quad \ggen^{\upsilon}\prod_{i=1}^{\ell} \ggen_i^{\xi_i}
+        \checkcheck \Delta \cdot \Gamma^c, \quad \HE(\epoch)^{\chi} \checkcheck
+        B \cdot U^c, \\ U^{\chi} \checkcheck D \cdot V^c, \quad \Tag^\chi \cdot
+        e(V, \ggen)^\upsilon \checkcheck F \cdot e(V,\Gamma)^c.
+      \end{gather*}
+
+  \end{description}
+
+\end{protocolbox}
+
+For each $i\in[\ell]$, bit validity of $\gamma_i$ is established using an inner
+product argument~\cite{SP:BBBPWM18}.
 
   \subsubsection*{Transaction authorisation.}\label{sec:tx-auth} Each
   transaction carries a signature of knowledge that attests it has originated
@@ -383,31 +371,65 @@ defined for  $\widehat{\inst}_2 = (\pk, \com, U, V, W)$ defined as follows:
 (\gen_0\cdot\com)^{ 1} = V^{\eta}\cdot \gen_1^{\sk}\cdot\gen_3^{r'}.
 \end{equation*}
 
-$\widehat{\rel}_2$ can be proven using sigma protocols and the Fiat Shamir
-heuristic is used to transform the resulting proofs into a signature of
-knowledge.
+$\widehat{\rel}_2$ can be proven using sigma protocols, and the Fiat Shamir
+heuristic transforms the resulting proof into a signature of knowledge.
 
-More specifically, the user samples $\alpha, \beta, \delta, \upsilon, \chi,
-\xi, \theta \in \Zp$ computes the following: \begin{equation*} A =
-  \gen_2^{\alpha}\cdot\gen_3^{\beta}; \quad B = U^{\delta}\cdot{V^{\upsilon}};
-  \quad D = V^{\chi}\cdot\gen_1^{\xi}\cdot \gen_3^{\theta}; \quad c =
-  \hash(\widehat{\inst}_2, A, B, D, \msg), \end{equation*} followed by tuple
-  $\vec{\phi} = (\phi_1, \phi_2, \phi_3, \phi_4, \phi_5, \phi_6, \phi_7)$
-  defined as follows: \begin{align*} \phi_1 = \alpha + c\cdot &\utk; \quad
-  \phi_2 = \beta + c\cdot \rho; \quad \phi_3 = \delta + c\cdot e; \quad \phi_4
-= \upsilon + c\cdot\zeta; \\ \phi_5 &= \chi + c\cdot \eta ; \quad \phi_6 = \xi
-+ c\cdot\sk; \quad  \phi_7 = \theta + c\cdot{r'}, \end{align*} and outputs SoK
-$\soksig = (U, V, W, A, B, D, \vec{\phi}).$
+\begin{protocolbox}{Transaction authorisation signature of knowledge}{txid-tx-sok}
 
-On input commitment $\com$, message $\msg$, and SoK $\soksig$, a verifier
-checks first whether $e(U, \ggen_Z)e(W, \ggen) = 1$, then computes $c =
-\hash(\widehat{\inst}_2, A, B, D, \msg)$, and only accepts if the following set
-of equalities hold: \begin{align*} A\cdot\com^c =
-\gen_2^{\phi_1}\cdot\gen_3^{\phi_2}; \quad B\cdot{W}^c = U^{\phi_3}V^{\phi_4} ;
-\quad D\cdot(\gen_0\cdot\com)^{ c} = V^{\phi_5}\cdot
-\gen_1^{\phi_6}\cdot\gen_3^{\phi_7}.  \end{align*}
+  \begin{description}
 
-\begin{assumptionbox}{Decisional Diffie-Hellman (DDH)}{ddh}
+    \item[$\soksig \sample \soksign(\crs_2, \widehat{\inst}_2,
+      \widehat{\witness}_2, \msg)$ :] On input $\widehat{\inst}_2 = (\pk,
+      \com, U, V, W)$, $\widehat{\witness}_2 = (\sk, \utk, \rho, e, r',
+      \zeta, \eta)$, and message $\msg$, do:
+
+      \begin{enumerate}
+
+        \item Sample $\alpha, \beta, \delta, \upsilon, \chi, \xi, \theta
+          \sample \Zp$.
+
+        \item Compute $A = \gen_2^{\alpha}\cdot\gen_3^{\beta}$, $B =
+          U^{\delta}\cdot V^{\upsilon}$, and $D =
+          V^{\chi}\cdot\gen_1^{\xi}\cdot \gen_3^{\theta}$.
+
+        \item Compute challenge $c \leftarrow \hash(\widehat{\inst}_2, A, B,
+          D, \msg)$.
+
+        \item Compute $\phi_1 = \alpha + c\cdot\utk$, $\phi_2 = \beta +
+          c\cdot\rho$, $\phi_3 = \delta + c\cdot e$, $\phi_4 = \upsilon +
+          c\cdot\zeta$, $\phi_5 = \chi + c\cdot\eta$, $\phi_6 = \xi +
+          c\cdot\sk$, and $\phi_7 = \theta + c\cdot r'$.
+
+        \item Return $\soksig = (U, V, W, A, B, D, \vec{\phi})$, for
+          $\vec{\phi} = (\phi_1,\ldots,\phi_7)$.
+
+      \end{enumerate}
+
+    \item[$\{0,1\} \leftarrow \sokverify(\crs_2, \com, \msg, \soksig)$ :] On
+      input commitment $\com$, message $\msg$, and SoK $\soksig$, do:
+
+      \begin{enumerate}
+
+        \item If $e(U, \ggen_Z)\cdot e(W, \ggen) \neq 1$, return $0$.
+
+        \item Compute challenge $c \leftarrow \hash(\widehat{\inst}_2, A, B,
+          D, \msg)$.
+
+        \item Return the result of the following checks:
+          %
+          \begin{gather*} A\cdot\com^c \checkcheck
+            \gen_2^{\phi_1}\cdot\gen_3^{\phi_2}, \quad B\cdot W^c \checkcheck
+            U^{\phi_3}V^{\phi_4}, \\ D\cdot(\gen_0\cdot\com)^c \checkcheck
+            V^{\phi_5}\cdot \gen_1^{\phi_6}\cdot\gen_3^{\phi_7}.
+          \end{gather*}
+
+      \end{enumerate}
+
+  \end{description}
+
+\end{protocolbox}
+
+\begin{assumptionbox}{Decisional Diffie-Hellman (DDH)}{ddh-txid}
 
   The DDH assumption holds in $\group{1}$ if no PPT adversary can distinguish
   $(\gen^x, \gen^y, \gen^{xy})$ from $(\gen^x, \gen^y, \gen^z)$ for uniformly
@@ -415,8 +437,25 @@ of equalities hold: \begin{align*} A\cdot\com^c =
 
 \end{assumptionbox}
 
-\paragraph{Security.} \begin{theorem}\label{thm:inst} The instantiation,
-  presented in Section \ref{sec:algebraic}, securely realises $\F{txid}$, in
-  the random oracle model, under the Decisional Diffie Hellman assumption in
-  $\group{1}$; the Bilinear Decisional Diffie Hellman assumption, and the q
-Strong Diffie Hellman assumption.  \end{theorem}
+\begin{assumptionbox}{Bilinear Decisional Diffie-Hellman (BDDH)}{bddh}
+
+  The BDDH assumption holds if, given $(\gen, \gen^a, \gen^b, \ggen, \ggen^c)$
+  for uniformly random $a, b, c \sample \Zp$, no PPT adversary can distinguish
+  $e(\gen,\ggen)^{abc}$ from a uniformly random element of $\group{T}$.
+
+\end{assumptionbox}
+
+\begin{assumptionbox}{$q$-Strong Diffie-Hellman ($q$-SDH)}{qsdh-txid}
+
+  The $q$-SDH assumption holds if, given $(\gen, \gen^{x}, \gen^{x^2}, \dots,
+  \gen^{x^q}, \ggen, \ggen^{x})$ for uniformly random $x \sample \Zp$, no PPT
+  adversary can output a pair $(c, \gen^{1/(x+c)})$ for any $c \in \Zp
+  \setminus \{-x\}$ with non-negligible probability.
+
+\end{assumptionbox}
+
+\begin{theorem}\label{thm:inst} The instantiation presented
+in~\Cref{sec:algebraic} securely realises $\idfu{txid}$ in the random oracle
+model, under the Decisional Diffie Hellman assumption in $\group{1}$, the
+Bilinear Decisional Diffie Hellman assumption, and the $q$-Strong Diffie
+Hellman assumption.  \end{theorem}
