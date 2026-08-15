@@ -156,11 +156,10 @@ Each of the protocols comes from considering the specific responsibilities of
 participants in each existing system.
 
 We first consider aggregate anonymous credentials. Existing credential models
-do not always reflect the way that authority is divided between institutions in
+do not always reflect the way that authority is divided in
 practice. A user may receive attributes from several independent issuers and
-later need to demonstrate statements concerning those attributes without
-revealing either the attributes themselves or unnecessary information about the
-issuers. We focus on decentralisation of issuance. We construct an efficient
+later need to demonstrate statements about subsets of attributes. 
+We focus on decentralisation of issuance. We construct an efficient
 multi-issuer aggregate anonymous credential scheme in which independently
 issued credentials can be combined and presented through a single proof.
 Anonymous credential systems already implicitly include a registration
@@ -175,7 +174,7 @@ identify the transactions associated with a particular user. These capabilities
 are related but distinct, and granting one need not grant the other. We develop
 a transaction identification mechanism that supports concurrent transaction
 creation without requiring the auditor to maintain persistent per-user state.
-Tracing authority can be restricted to a specified epoch, limiting both the
+Auditing is restricted to a specified epoch, limiting both the
 scope and duration of the information disclosed to an auditor.
 
 We then consider transaction authorisation in permissioned distributed systems.
@@ -184,8 +183,8 @@ than anonymous participants. We construct threshold structure-preserving
 signature schemes that allow the required endorsers to jointly authorise
 transactions without relying on a single signing authority.  The schemes
 require no interaction during the online signing phase, making them suitable
-for efficient transaction authorisation. The existing institutional structure
-then becomes a resource rather than an obstacle to be removed.
+for efficient transaction authorisation. The existing structure
+becomes a resource rather than an obstacle to be removed.
 
 Finally, we study privacy in offline payments. Offline operation improves
 availability and accessibility, but changes how double spending must be
@@ -197,11 +196,9 @@ following double spending.
 To reiterate, centralisation is multidimensional. Computation, state,
 authority, and knowledge can each be centralised or decentralised
 independently.
-
 Privacy does not automatically follow from decentralisation, nor does it
 automatically disappear when corporations or public institutions participate in
 a protocol. What matters is the information made available to each participant.
-
 Protocol models should reflect the roles that exist in practice.  Issuers,
 auditors, validators and service providers can be represented explicitly rather
 than removed in pursuit of decentralisation.
