@@ -220,9 +220,16 @@ occur. We now show that the probability of these events occuring is negligible.
     $\langle \star, \Tag, \atv{j}, \star \rangle$.  Again, due to extraction
     of the correctly verifying proof $\proof$, we can extract a valid
     witness $\witness_1 = (\Tag, \sk, \pk, \psi, \signature)$.  This means
-    that $\signature$ satisfies
-    $\ATSverifyagg((\ipk{i})_{i\in \ISSUERS},\Tag,(\atv{i})_{i\in\ISSUERS},
-    \signature)$, where $\ISSUERS$ identifies the indices with $\atv{i} \neq
+    that $\signature$ satisfies the following:
+    %
+    \begin{equation*}
+    %
+    \ATSverifyagg((\ipk{i})_{i\in \ISSUERS},\Tag,(\atv{i})_{i\in\ISSUERS},
+    \signature).
+    %
+    \end{equation*}
+    %
+     $\ISSUERS$ here identifies the indices with $\atv{i} \neq
     \varnothing$ and $j \in \ISSUERS$.  Given that there is no recorded
     entry $\langle \star, \Tag, \atv{j}, \star \rangle$, this implies that
     the honest issuer $\issuer{j}$ never issued a signature $\signature_j$
@@ -306,7 +313,7 @@ it is used unchanged in both Type 1 and Type 2.
 \paragraph{Extraction quantity $d$ (shared by both reductions).} In both
 reductions, on receiving $\adv$'s forgery $(\ISSUERS, (\pk_i)_{i\in\ISSUERS},
 \Tag^*, (\msg^*_i)_{i \in \ISSUERS}, \signature^* = (\signatureone^*,
-\signaturetwo^*))$, $\advB$ strips out the honestly known corrupted-key
+\signaturetwo^*))$, $\advB$ removes the corrupted key
 contributions from $\signaturetwo^*$ by computing $d$ as follows:
 %
 \begin{equation*}
@@ -425,10 +432,10 @@ m-BCDH. $\advB$ is given a challenge tuple as follows:
 \end{equation*}
 %
 It must compute $e(\gen, \ggen)^{\gamma\omega}$. The Type 2 reduction is
-structurally identical to the Type 1 reduction above, with the roles of
-$\hashone$ and $\hashtwo$ swapped. The challenge is now embedded in $\hashtwo$,
-and $\advB$ no longer learns $\gamma$ directly, only $\omega$. We describe only
-the resulting differences.
+follows the same structure as the Type 1 reduction but with the roles of
+$\hashone$ and $\hashtwo$ reversed. The challenge is embedded in $\hashtwo$,
+and $\advB$ no longer learns $\gamma$ directly, only $\omega$. We describe
+the differences.
 
 \paragraph{Random oracle programming.} $\hashone$ is now programmed without
 embedding, exactly as $\hashtwo$ is in the Type 1 case. For each new query
@@ -538,6 +545,11 @@ this because $\pk_j$ gets corrupted, the forgery misses the embedded branch, or
 a signing query lands on it, $\advB$ simply stops and outputs a random guess
 for the BCDH or m-BCDH challenge.
 
+So any successful Type 1 or Type 2 forgery allows construction of an 
+adversary that breaks either the BCDH or m-BCDH assumption with 
+non-negligible probability. This means the ATS scheme satisfies existential 
+unforgeability under tag-based aggregation.
+
 %%%% proof of Theorem 3 - the concrete instantiation, corollary of Theorem 1
 
 \subsection{Proof of~\Cref{thm:agg-creds-thm-2}}\label{sec:agg-creds-proof-3}
@@ -562,8 +574,7 @@ zero knowledge proofs of Section~\ref{sec:proof-inst}.
     proved in~\Cref{sec:agg-creds-proof-lemmas} under the DDH assumption in
     $\group{1}$, establish extractability and simulatability separately.
     Combined with the discussion following Lemma~\ref{lem:agg-creds-simulate},
-    they give the simulation-extractability of $\Sigma_{\AAC}$ that this proof
-    requires.
+    this gives simulation-extractability as required.
 
 \end{description}
 
@@ -586,8 +597,8 @@ following:
 %
 \begin{equation*}
 %
-  \bar{\gen} = \gen^{\delta}, \qquad \bar{v} = v^{\delta}, \qquad H_i =
-  \hashone(\atv{i})^{\delta}, \qquad \pk' = \bar{\gen}^{\sk}.
+  \bar{\gen} = \gen^{\delta}, \quad \bar{v} = v^{\delta}, \quad H_i =
+  \hashone(\atv{i})^{\delta}, \quad \pk' = \bar{\gen}^{\sk}.
 %
 \end{equation*}
 %
@@ -658,7 +669,7 @@ AGHO signature $\SPSsig = (\widetilde{r}, \widetilde{s}, \bar{t}^{1/\delta})$
 on $(\pk, \tid)$, and the tag-based aggregate signature $\signature =
 (\signatureone, \bar{\signaturetwo}^{1/\delta})$ on $\tid$ and the attributes
 $\atv{i}$: exactly a witness $\witness_2 = (\sk, \pk, \tid, \signature,
-\SPSsig)$ for relation~\eqref{eq:proof-original}, which proves
+\SPSsig)$ for relation $\rel_2$ as defined in~\eqref{eq:proof-original}, proving
 Lemma~\ref{lem:agg-creds-extract}.
 
 \paragraph{Simulatability.}
@@ -673,41 +684,43 @@ presentation $\proof$ without access to a valid witness.
 %
     \begin{equation*}
 %
-      \bar{\gen} = \gen^{\alpha}, \qquad \bar{v} = \gen^{\beta}, \qquad \bar{t}
-      = \gen^{\kappa}, \qquad \bar{\signaturetwo} = \gen^{\delta}, \qquad
-      \bar{\tid} = \gen^{\nu}, \qquad H_i = \gen^{\eta_i}, \qquad \pk' =
+      \bar{\gen} = \gen^{\alpha}, \quad \bar{v} = \gen^{\beta}, \quad \bar{t}
+      = \gen^{\kappa}, \quad \bar{\signaturetwo} = \gen^{\delta}, \quad
+      \bar{\tid} = \gen^{\nu}, \quad H_i = \gen^{\eta_i}, \quad \pk' =
       \gen^{\iota}.
 %
     \end{equation*}
 %
     If the DDH assumption holds in $\group{1}$, it is computationally
-    infeasible to tell whether the tuple $(\bar{\gen}, \bar{v}, \bar{t},
-    \bar{\signaturetwo}, \bar{\tid})$ was generated this way or following the
-    description in~\Cref{sec:proof-inst}.
+    infeasible to distinguish between $(\bar{\gen}, \bar{v}, \bar{t},
+    \bar{\signaturetwo}, \bar{\tid})$ as above and those generated following the
+    protocol description.
 
-  \item Set the following:
+  \item We define the randomised signature elements as follows:
 %
     \begin{equation*}
 %
       \widetilde{r}' =
       (\ggen^{\alpha}\widetilde{u}_1^{-\iota}\widetilde{u}_2^{-\nu})^{1/\kappa},
-      \qquad \widetilde{s}' = \widetilde{r}'^{\beta/\alpha}, \qquad
+      \quad \widetilde{s}' = \widetilde{r}'^{\beta/\alpha}, \quad
       \signatureone' = (\ggen\textstyle\prod_{i \in
       \ISSUERS}\ipk{i}^{-\eta_i})^{\delta/\nu}.
 %
     \end{equation*}
 %
-    by construction, the tuple $(\bar{\gen}, \bar{v}, \widetilde{r}',
+    Now we have by construction that $(\bar{\gen}, \bar{v}, \widetilde{r}',
     \widetilde{s}', \bar{t}, \signatureone', \bar{\signaturetwo}, \bar{\tid},
     \pk', \{\atv{i}, H_i\}_{i\in \ISSUERS})$ satisfies the following:
     %
     \begin{gather*}
     %
       e(\bar{\signaturetwo}, \ggen) = \prod_{i\in\ISSUERS}e(H_i,\ipk{i}) \cdot
-      e(\bar{\tid},\signatureone') \ \wedge \\ e(\bar{\gen},\ggen) =
-      e(\bar{t},\widetilde{r}')\cdot e(\pk',\widetilde{u}_1) \cdot
-      e(\bar{\tid},\widetilde{u}_2) \ \wedge \\ e(\bar{v},\widetilde{r}') =
-      e(\bar{\gen},\widetilde{s}').
+      e(\bar{\tid},\signatureone'), \\
+      %
+      e(\bar{\gen},\ggen) = e(\bar{t},\widetilde{r}')\cdot e(\pk',\widetilde{u}_1) \cdot
+      e(\bar{\tid},\widetilde{u}_2), \\
+      %
+      e(\bar{v},\widetilde{r}') = e(\bar{\gen},\widetilde{s}').
     %
     \end{gather*}
     %
@@ -716,9 +729,9 @@ presentation $\proof$ without access to a valid witness.
 %
     \begin{equation*}
 %
-      f = \gen^{\pi_1}\cdot\bar{\gen}^{-c}, \qquad h =
-      v^{\pi_1}\cdot\bar{v}^{-c}, \qquad k_i = \hashone(\atv{i})^{\pi_1}\cdot
-      H_i^{-c}, \qquad w = \bar{\gen}^{\pi_2}\cdot\pk'^{-c}.
+      f = \gen^{\pi_1}\cdot\bar{\gen}^{-c}, \quad h =
+      v^{\pi_1}\cdot\bar{v}^{-c}, \quad k_i = \hashone(\atv{i})^{\pi_1}\cdot
+      H_i^{-c}, \quad w = \bar{\gen}^{\pi_2}\cdot\pk'^{-c}.
 %
     \end{equation*}
 
@@ -729,3 +742,7 @@ presentation $\proof$ without access to a valid witness.
     \pi_1, \pi_2)$.
 
 \end{enumerate}
+
+So under the DDH assumption in \(\mathbb{G}_1\), the simulated presentation 
+is computationally indistinguishable from an honestly generated one, proving 
+Lemma~\ref{lem:agg-creds-simulate}.

@@ -20,8 +20,11 @@ $\group{1}$ and $\group{2}$.
 
 Elements of $\group{1}$ are written using lower case letters.  Elements of
 $\group{2}$ are distinguished using a tilde, while elements of $\Zp$ are
-written using lower case Greek letters or otherwise specified explicitly.  We
-use generators $g \in \group{1}$ and $\widetilde{g} \in \group{2}$.
+written using lower case Greek letters or otherwise specified explicitly. The 
+exceptions to this are $c$, which is a scalar challenge element, and $\signature$ 
+and $\SPSsig$, which are both used to mean signatures that consist of multiple 
+elements. We still use a tilde on the elements of the signatures to signal which 
+groups they belong to. We use generators $\gen \in \group{1}$ and $\ggen \in \group{2}$.
 
 We use hash functions $ \hashone \colon \{0,1\}^* \rightarrow \group{1}$ and
 $\hashtwo \colon \{0,1\}^* \rightarrow \group{1}$.
@@ -204,7 +207,7 @@ registration algorithm has been described.
     %
       \begin{equation*}
      %
-        \signature =  (\widetilde{r}, \widetilde{s}, t) = (\ggen^\omega,
+        \SPSsig =  (\widetilde{r}, \widetilde{s}, t) = (\ggen^\omega,
         \widetilde{r}^\tau, (\gen \cdot \prod_{i=1}^\ell
         m_i^{-\mu_i})^{1/\omega}).
     %
@@ -345,13 +348,12 @@ above into the following:
 $\rel_3$ does not include the signature verification equations of the
 original relation:
 %
-\begin{equation}
+\begin{equation*}\begin{gathered}
 %
-\SPSverify(\rapk, (\pk,\tid), \psi) = 1 \ \wedge \
-\ATSverifyagg((\ipk{i})_{i\in\ISSUERS}, \Tag, (\atv{i})_{i\in\ISSUERS},
-\signature) = 1. 
+\SPSverify(\rapk, (\pk,\tid), \SPSsig) = 1, \\
+\ATSverifyagg((\ipk{i})_{i\in\ISSUERS}, \Tag, (\atv{i})_{i\in\ISSUERS}, \signature) = 1. 
 %
-\end{equation}
+\end{gathered}\end{equation*}
 %
 This is because in the concrete instantiation, the user instead randomises $\signature'$ and $\SPSsig'$.
 This means that these values 
@@ -491,10 +493,10 @@ protocol.
 
         \item Otherwise, the RA samples $\Tag \sample \Zp$ uniformly at random,
           makes sure it is unique, sets $\tid \leftarrow \hashtwo(\Tag)$, and
-          computes $\psi \sample \SPSsign(\rask,(\pk,\tid))$.
+          computes $\SPSsig \sample \SPSsign(\rask,(\pk,\tid))$.
 
         \item Return $\sk$ to the user, and $\regcred \leftarrow
-          (\Tag,\pk,\psi)$ to the user.
+          (\Tag,\pk,\SPSsig)$ to the user.
 
       \end{enumerate}
 
@@ -504,10 +506,10 @@ protocol.
 
       \begin{enumerate}
 
-        \item Parse $\regcred = (\Tag,\pk,\psi)$ and compute $\tid \leftarrow
+        \item Parse $\regcred = (\Tag,\pk,\SPSsig)$ and compute $\tid \leftarrow
           \hashtwo(\Tag)$.
 
-        \item If $\SPSverify(\rapk,(\pk,\tid),\psi) \neq 1$, exit.
+        \item If $\SPSverify(\rapk,(\pk,\tid),\SPSsig) \neq 1$, exit.
 
         \item Otherwise, the user proves knowledge of $\sk$ underlying $\pk$ to
           issuer $i$. If this fails, exit.
@@ -541,11 +543,17 @@ protocol.
       \begin{enumerate}
 
         \item Parse $\aggcred = (\Tag,\{\atv{j}\}_j,\signature)$, and retrieve
-          the user's stored $(\sk,\pk,\psi)$.
+          the user's stored $(\sk,\pk,\SPSsig)$.
 
-        \item Randomise $\signature' \sample \ATSrandomise(\Tag,\signature)$
-          and $\psi' \sample \SPSrandomise(\psi)$.
-
+        \item Randomise the signatures as follows:
+                  %
+          \begin{equation*}\begin{gathered}
+          %
+        		\signature' \sample \ATSrandomise(\Tag,\signature), \\
+         	\SPSsig' \sample \SPSrandomise(\SPSsig).
+          %
+        \end{gathered}\end{equation*}
+          %
         \item Sample $\delta \sample \Zp^*$ and compute $\bar{\gen}, \bar{v}, \bar{t}, \bar{\signaturetwo},
           \bar{\tid}, \pk', \{H_i\}_{i\in\ISSUERS}$.
 
