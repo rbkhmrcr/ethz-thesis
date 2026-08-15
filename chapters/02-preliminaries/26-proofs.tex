@@ -36,10 +36,10 @@ witness pair $(\inst, \ \witness) \in \lang$, the following holds:
 \paragraph{Security.} The constructions presented in this thesis require
 different security notions for non interactive zero knowledge proof systems,
 including zero knowledge, simulation soundness, and simulation extractability.
-Since these notions are construction dependent, we defer their formal
-definitions to the chapters in which they are required.
+We define below the notions used throughout the thesis, and introduce any
+construction-specific requirements in the following chapters as needed.
 
-\paragraph{Labelled proofs.} Certain construction require proofs that are bound
+\paragraph{Labelled proofs.} Certain constructions require proofs that are bound
 to a message to prevent proof replaying.  We can attach a label to each
 proof to prevent this.  A label is an arbitrary string that is fixed at proving
 time, supplied again at verification, and is not otherwise interpreted by the
@@ -161,7 +161,7 @@ every admissible adversary $\adv$.
 The condition $(\inst^*, \lbl^*) \notin \Query$ makes proofs non-malleable
 across labels.
 
-Zero knowledge and simulation extractability are independent of one another.
+Zero knowledge and simulation extractability are independent properties.
 Zero knowledge ensures that simulated proofs are indistinguishable from
 honestly generated ones. Simulation extractability ensures that a witness can
 be extracted from any verifying proof, even after the adversary has observed

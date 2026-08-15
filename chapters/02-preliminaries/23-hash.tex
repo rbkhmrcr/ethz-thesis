@@ -90,8 +90,8 @@ second preimage resistance, so we do not use it separately.
 \paragraph{The random oracle model.} Our security proofs generally model a hash
 function as a random oracle: a function sampled uniformly at random from all
 functions with the given domain and range, to which every party, including the
-adversary, has oracle access. The random oracle answers each fresh query with
-an output of its choosing. It has internal state and records the message and
-output for each query it has answered, which allows answering consistently for
-repeated queries. We refer to the ability to choose the answer to oracle
-queries as programming the random oracle.
+adversary, has oracle access. The random oracle answers each fresh query 
+with an independently and uniformly sampled output from the function's range, 
+records the resulting input and output pair, and returns the same output on
+repeated queries. In security proofs, a simulator may instead choose the output
+assigned to particular queries. We refer to this as programming the random oracle.

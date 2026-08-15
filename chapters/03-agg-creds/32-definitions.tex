@@ -7,7 +7,7 @@ The registration authority is responsible for registering users. Issuers
 certify attributes. For simplicity we assume that each issuer is responsible
 for a single attribute type, and is the only issuer for that attribute. Users
 each register with the registration authority, obtain credentials from the
-relevant i issuers for the attribute values they hold, and then use these
+relevant issuers for the attribute values they hold, and then use these
 credentials to make presentations. A presentation is a user provably disclosing
 the values of a subset of their attributes. Verifiers check users' claims.
 
@@ -97,7 +97,7 @@ aggregate tag-based signature scheme is defined by the following algorithms:
 \end{description}
 
 An aggregate tag based signature scheme should satisfy correctness and
-existentially unforgeability, as defined below.
+existential unforgeability, as defined below.
 
 \paragraph{Correctness.} We say that an ATS scheme satisfies correctness if for
 all security parameters $\secparam$, all $n \geq 1$, all tags $\Tag \in
@@ -351,12 +351,12 @@ answer. Otherwise, it records the presentation as invalid and returns false.
               \item Return $(\AACpresentend, \proof)$ to the user and
                 $(\AACpresentend, \vec{\atv{}}, \msg, \allowbreak \proof)$ to
                 $\simu$.  (Users who have successfully aggregated their
-                credentials successfully sign messages.)
+                credentials successfully produce a presentation.)
 
             \end{enumerate}
 
           \item Otherwise, if $\creds[\user] = \bot$, then exit.  (Unregistered
-            users cannot successfully sign messages.)
+            users cannot successfully produce a presentation.)
 
           \item If $\exists i \in [1, n]: \atv{i} \neq \varnothing \land \atv{i}
             \notin \creds[\user][i]$, then exit. Otherwise:
@@ -370,7 +370,7 @@ answer. Otherwise, it records the presentation as invalid and returns false.
               \item Return $(\AACpresentend,  \proof)$ to the user and
                 $(\AACpresentend, \vec{\atv{}}, \msg, \allowbreak \proof)$ to
                 $\simu$.  (Users with disclosed attribute values successfully
-                sign messages even if they have not called aggregate before.)
+                produce a presentation even if they have not called aggregate before.)
 
             \end{enumerate}
 

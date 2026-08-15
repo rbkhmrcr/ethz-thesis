@@ -139,8 +139,9 @@ We start with the presence of these operational roles and ask how the protocols
 can work with them. An institution need not be modelled in the same way for the
 analysis of each property of a system. For availability and correct operation,
 we assume that they perform their prescribed roles. For privacy, the same
-institution may deviate arbitrarily from the protocol, retain and combine the
-information available to it, and attempt to learn anything it can. Privacy is
+institution need not be trusted to keep information available to it confidential. 
+It may retain and combine this information, share it with other participants, 
+and attempt to learn anything it can. Privacy is
 assessed against the strongest information it can derive in this setting.  The
 institution may therefore be relied upon to perform an operational function
 without being trusted with users' private information.
@@ -208,6 +209,13 @@ than removed in pursuit of decentralisation.
 The remainder of this thesis is organised as follows.  Preliminary information
 is found in \Cref{chap:preliminaries}.  \Cref{chap:agg-creds} presents our
 aggregate anonymous credential construction. 
+Chapter 4 presents the
+transaction identification mechanism,  Chapter 5 presents the threshold
+signing protocol for transaction authorisation, and
+Chapter 6 presents the offline payment mechanism.
+Chapter 7 summarises the contributions and discusses open
+questions.
+
 %\Cref{chap:txid} presents the
 %transaction identification mechanism,  \Cref{chap:tsps} presents the threshold
 %signing protocol for transaction authorisation, and

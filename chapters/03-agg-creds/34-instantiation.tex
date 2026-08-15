@@ -30,8 +30,8 @@ Bilinearity allows relations between exponents in the source groups to be
 checked through equalities in $\group{T}$.  The equality $e(a,\widetilde{g}) =
 e(g,\widetilde{b})$ shows that $a$ and $\widetilde{b}$ contain the same
 exponent relative to their generators, without requiring that exponent to be
-recovered.  Our constructions use such pairing equations to verify signatures
-and other algebraic relations across $\group{1}$ and $\group{2}$.
+recovered.  Our constructions use pairing equations to verify signatures
+and algebraic relations across $\group{1}$ and $\group{2}$.
 
 \subsection{Our tag based aggregate signature scheme ($\ATS$)}
 \label{sec:tag-scheme}
@@ -391,6 +391,69 @@ Protocol~\ref{prot:paac-2} is a sigma protocol with the Fiat-Shamir heuristic
 applied~\cite{C:FiaSha86}. This combination satisfies simulation-extractability
 in the random oracle model~\cite{INDOCRYPT:FKMV12}.
 
+We give the resulting protocol in full below, before presenting the
+complete instantiation.
+
+\begin{protocolbox}{Presentation proof of knowledge} {paac-2}
+
+  \begin{description}
+
+    \item[$\eta \sample \NIZKprove(\crs, \inst_3, \witness_3, \msg)$ :] On
+      input $\crs = \gen$, instance $\inst_3 = (\pk', \{\atv{i}, H_i\}_{i \in
+      \ISSUERS}, \bar{\gen})$, witness $\witness_3 = (\delta, \sk)$, and
+      message $\msg$, do:
+
+      \begin{enumerate}
+
+        \item Sample $\alpha, \beta \sample \Zp$.
+
+        \item Compute $(f, h, \{k_i\}_{i \in \ISSUERS}, w) = (\gen^{\alpha},
+          v^{\alpha}, \{\hashone(\atv{i})^{\alpha}\}_{i \in \ISSUERS},
+          \bar{\gen}^{\beta})$.
+
+        \item Compute challenge $c \leftarrow \hash(f, h, \{k_i\}_{i \in
+          \ISSUERS}, w, \msg)$, for cryptographic hash function $\hash \colon
+          \{0,1\}^* \rightarrow \Zp$.
+
+        \item Compute $\pi_1 = \alpha + c\cdot\delta$ and $\pi_2 = \beta +
+          c\cdot\sk$.
+
+        \item Return $\eta = (f, h, \{k_i\}_{i \in \ISSUERS}, w, \pi_1,
+          \pi_2)$.
+
+      \end{enumerate}
+
+    \item[$\{0,1\} \leftarrow \NIZKverify(\crs, \inst_3, \eta, \msg)$ :] On
+      input $\crs = \gen$, instance $\inst_3$, proof $\eta = (f, h, \{k_i\}_{i
+      \in \ISSUERS}, w, \pi_1, \pi_2)$, and message $\msg$, do:
+
+      \begin{enumerate}
+
+        \item Compute $c \leftarrow \hash(f, h, \{k_i\}_{i \in \ISSUERS}, w,
+          \msg)$.
+
+        \item Output the result of the following checks:
+          %
+          \begin{equation*}
+          %
+            \gen^{\pi_1} \checkcheck f\cdot\bar{\gen}^c, \quad v^{\pi_1}
+            \checkcheck h\cdot\bar{v}^c, \quad \hashone(\atv{i})^{\pi_1}
+            \checkcheck k_i\cdot H_i^c, \quad \bar{\gen}^{\pi_2} \checkcheck
+            w\cdot\pk'^c.
+          %
+          \end{equation*}
+          %
+
+      \end{enumerate}
+
+  \end{description}
+
+\end{protocolbox}
+
+With the presentation proof of knowledge fully specified, we can now
+present the full instantiation of the aggregate anonymous credentials
+protocol.
+
 %%%% anon creds protocol
 
 \begin{protocolbox} {Aggregate anonymous credentials protocol} {paac}
@@ -566,61 +629,3 @@ directly.
   securely realises ideal functionality $\idfu{\AAC}$ in the random oracle model.
 
 \end{theorem}
-
-Protocol~\ref{prot:paac-2} gives the resulting instantiation in full.
-
-\begin{protocolbox}{Presentation proof of knowledge} {paac-2}
-
-  \begin{description}
-
-    \item[$\eta \sample \NIZKprove(\crs, \inst_3, \witness_3, \msg)$ :] On
-      input $\crs = \gen$, instance $\inst_3 = (\pk', \{\atv{i}, H_i\}_{i \in
-      \ISSUERS}, \bar{\gen})$, witness $\witness_3 = (\delta, \sk)$, and
-      message $\msg$, do:
-
-      \begin{enumerate}
-
-        \item Sample $\alpha, \beta \sample \Zp$.
-
-        \item Compute $(f, h, \{k_i\}_{i \in \ISSUERS}, w) = (\gen^{\alpha},
-          v^{\alpha}, \{\hashone(\atv{i})^{\alpha}\}_{i \in \ISSUERS},
-          \bar{\gen}^{\beta})$.
-
-        \item Compute challenge $c \leftarrow \hash(f, h, \{k_i\}_{i \in
-          \ISSUERS}, w, \msg)$, for cryptographic hash function $\hash \colon
-          \{0,1\}^* \rightarrow \Zp$.
-
-        \item Compute $\pi_1 = \alpha + c\cdot\delta$ and $\pi_2 = \beta +
-          c\cdot\sk$.
-
-        \item Return $\eta = (f, h, \{k_i\}_{i \in \ISSUERS}, w, \pi_1,
-          \pi_2)$.
-
-      \end{enumerate}
-
-    \item[$\{0,1\} \leftarrow \NIZKverify(\crs, \inst_3, \eta, \msg)$ :] On
-      input $\crs = \gen$, instance $\inst_3$, proof $\eta = (f, h, \{k_i\}_{i
-      \in \ISSUERS}, w, \pi_1, \pi_2)$, and message $\msg$, do:
-
-      \begin{enumerate}
-
-        \item Compute $c \leftarrow \hash(f, h, \{k_i\}_{i \in \ISSUERS}, w,
-          \msg)$.
-
-        \item Output the result of the following checks:
-          %
-          \begin{equation*}
-          %
-            \gen^{\pi_1} \checkcheck f\cdot\bar{\gen}^c, \quad v^{\pi_1}
-            \checkcheck h\cdot\bar{v}^c, \quad \hashone(\atv{i})^{\pi_1}
-            \checkcheck k_i\cdot H_i^c, \quad \bar{\gen}^{\pi_2} \checkcheck
-            w\cdot\pk'^c.
-          %
-          \end{equation*}
-          %
-
-      \end{enumerate}
-
-  \end{description}
-
-\end{protocolbox}
