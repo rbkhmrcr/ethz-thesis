@@ -1,5 +1,104 @@
 \section{Introduction}
-% What problem is this chapter solving?
-% Why is that problem interesting?
-% What is the key idea of the construction?
-% How is the rest of the chapter organised?
+
+\begin{itemize}
+
+  \item Privacy-preserving ledgers still need to support auditing: regulators,
+    central banks, and companies all need to recover specific transactions on
+    demand.
+
+  \item Existing approaches sit at two extremes: fully transparent ledgers give
+    up all privacy, while a long-term view key gives an auditor unconditional,
+    permanent visibility and becomes a single point of failure.
+
+  \item Real audits are narrower: they target one user during one period, so
+    authorisation to trace should not outlive that period, and should not
+    require the user's continued involvement.
+
+  \item We want a middle ground: per-epoch, self-service tracing authority that
+    expires automatically.
+
+  \item Each user holds a long-term tracing key, certified once, from which
+    they derive a fresh epoch tracing key every epoch.
+
+  \item Transactions are tagged with a PRF over the epoch key; disclosing that
+    key lets an auditor trace exactly the transactions from one epoch, and
+    nothing else.
+
+  \item Granting tracing authority is a one-time key disclosure to the chosen
+    auditor; no further interaction with the registration authority, ledger
+    operator, or user is needed, and authorisation lapses automatically when
+    the epoch ends.
+
+  \item We call this mechanism tracing rather than collection: the auditor only
+    ever learns one epoch's transactions, never a user's full history. This
+    matches existing terminology, where tracing means recovering every
+    transaction linked to a user, as distinct from the narrower anonymity
+    revocation, which recovers only the identity behind a single transaction.
+
+\end{itemize}
+
+\subsection{Related work}\label{sec:txid-related}
+
+Prior work on regulatory oversight in privacy-preserving payment systems
+typically supports either anonymity revocation or tracing.  Anonymity
+revocation lets an auditor identify the user responsible for a specific
+transaction; tracing, by contrast, lets the auditor recover all transactions
+associated with a given user. Tracing can be emulated by applying anonymity
+revocation to every transaction in turn, but this costs time linear in the
+number of transactions and exposes information about non-targeted users.
+
+\paragraph{Anonymity revocation.} Many protocols attach a verifiable encryption
+or other hidden user identifier to each transaction, so that an auditor holding
+the corresponding secret key can selectively recover the sender's
+identity~\cite{SCN:CamHohLys06,CANS:BDET21,INDOCRYPT:CDLP22}.  Tracing a user's
+activity this way requires scanning and decrypting every transaction on the
+ledger, incurring overhead linear in the ledger size and exposing unrelated
+users' activity to the auditor. These protocols enable identity recovery, but
+not efficient targeted tracing.
+
+\paragraph{Tracing via sequential tags.} Other protocols derive per-transaction
+tags from a user's tracing secret combined with a monotonically increasing
+counter, and use zero-knowledge proofs to show the tags are correctly formed
+and bound to the transaction's origin~\cite{CCS:KiaKohSar22,CANS:SarKiaKoh24}.
+Given the tracing secret of a target user, an auditor identifies the
+corresponding transactions by recomputing the tags and matching them against
+the ledger, and the counter binding also stops a user later repudiating their
+own transactions. Similar tag-based techniques trace asset lineage rather than
+user activity~\cite{FC:GarGreMie16}. All of these share the same limitation: a
+user's transactions must be generated sequentially, which prevents concurrent
+transaction creation and degrades performance in high-throughput settings.
+
+\paragraph{Auditable privacy systems.} Other protocols provide auditability
+through interactive protocols or global consistency checks. ZKLedger lets
+auditors verify transaction correctness, but requires interaction and incurs
+overhead linear in the number of participants~\cite{EPRINT:NarVasVir18}.
+Privacy-focused cryptocurrencies such as Monero, Zcash, and Quisquis achieve
+strong anonymity guarantees but do not directly support efficient
+tracing~\cite{EPRINT:Noether15,SP:BCGGMT14,AC:FMMO19,FC:BAZB20}.  Retrofitting
+tracing into such systems typically requires additional interaction, user
+cooperation, or linear-time analysis~\cite{ACNS:PBGP25}. Platypus and ZKAT
+incorporate regulatory policy enforcement, for instance balance limits, but
+neither provides a mechanism for efficient per-user tracing across arbitrary
+transactions~\cite{CCS:WKDC22,EPRINT:ACDDET19}.
+
+\paragraph{Our contribution.} We introduce a tracing mechanism that eliminates
+the need for encrypted user identifiers and sequential counters, supporting
+efficient tracing while letting users generate and submit multiple transactions
+in parallel without restriction. The design gives users fine-grained control
+through epoch-bound tracing permissions: these let an auditor identify every
+transaction linked to a specific user within a predefined time window, and
+automatically become invalid once that epoch expires, requiring a fresh
+permission to be issued for any subsequent one. We formalise tracing as an
+ideal functionality capturing anonymity, non-repudiation, and permission
+expiration, give a black-box construction from signatures, commitments,
+pseudorandom functions, and zero-knowledge proofs, and instantiate it
+concretely in pairing-based groups with a transparent setup, using the BBS+
+signature scheme to let the registration authority certify a user's keys
+without ever learning their tracing key.
+
+\paragraph{Layout.} Section~\ref{sec:txid-definitions} formalises the problem
+as an ideal functionality. Section~\ref{sec:txid-construction} gives a
+construction from generic building blocks.
+Section~\ref{sec:txid-instantiation} gives a concrete instantiation in
+pairing-based groups, proved secure in Section~\ref{sec:txid-security}.
+Section~\ref{sec:txid-evaluation} evaluates the concrete instantiation.

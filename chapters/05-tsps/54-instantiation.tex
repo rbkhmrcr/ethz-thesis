@@ -1,1 +1,266 @@
-\section{Instantiation}
+\section{Threshold Structure-Preserving Signatures}\label{sec:schemes}
+
+This section gives threshold variants of the structure-preserving signatures
+of~\cite{Abe2011} and~\cite{Kiltz2015} described in Section~\ref{sec:SPS},
+built from the MPC ideal functionalities of Section~\ref{sec:MPC}.
+
+\subsection{Threshold structure-preserving signatures from~\cite{Abe2011}}\label{sec:tsps-abe}
+
+We formally describe a threshold structure-preserving signature scheme based
+on the structure-preserving scheme of Abe, Groth, Haralambiev, and
+Ohkubo~\cite{Abe2011}, built from the MPC ideal functionalities of
+Section~\ref{sec:MPC}.
+
+\begin{protocolbox}{Threshold structure-preserving signature based
+  on~\cite{Abe2011}}{tsps-abe}
+
+  \begin{description}
+
+    \item[$(\pk, \llbracket \sk \rrbracket) \sample \keygen(\secparam, l, t,
+      n)$ :] The honest signers issue $l+1$ parallel calls to $\F{\randshare}$
+      to compute $t$-additive shares $(\llbracket u_1 \rrbracket, \ldots,
+      \llbracket u_l\rrbracket, \llbracket v\rrbracket)$. They then call
+      $\F{\expgengrp_1}$ with generator $\genOne$ and shares $\llbracket
+      v\rrbracket$ to obtain $t$-additive shares $\llbracket \VOne \rrbracket
+      = {\llbracket v \rrbracket}\genOne$, and $\F{\expgengrp_2}$ with
+      $\genTwo$ and shares $\llbracket u_i\rrbracket$ to obtain $t$-additive
+      shares $\llbracket \UTwo_i\rrbracket = {\llbracket u_i\rrbracket}\genTwo$
+      for $i \in [l]$. Finally, they query $\F{\combinegrp_1}$ with the
+      shares $\llbracket \VOne \rrbracket$, and $\F{\combinegrp_2}$ with the
+      shares $(\llbracket \UTwo_1\rrbracket, \ldots, \llbracket
+      \UTwo_l\rrbracket)$. If no $\abort$ occurs, these calls result in a
+      public key $\pk = (\vec{\UTwo}, \VOne)$ with $\vec{\UTwo} = (\UTwo_1,
+      \ldots, \UTwo_l)$, and a set of corresponding secret shares $\llbracket
+      \sk \rrbracket = (\llbracket u_1 \rrbracket, \ldots, \llbracket
+      u_l\rrbracket, \llbracket v \rrbracket)$ distributed to the signers.
+
+    \item[$\llbracket \sigma \rrbracket_{\offsign} \sample \offsign(\llbracket
+      \sk \rrbracket)$ :] The honest signers invoke $\F{\randshare}$ to get
+      $t$-additive shares $\llbracket r \rrbracket$. If no $\abort$ occurs,
+      they follow with a call to $\F{\inv}$ to compute $t$-additive shares
+      $\llbracket 1/r\rrbracket$. Next, potentially in parallel, they issue
+      $l+1$ calls to $\F{\mul}$ to compute the $t$-additive shares
+      $(\llbracket ru_1\rrbracket, \ldots,\llbracket ru_l\rrbracket,
+      \llbracket v/r\rrbracket)$. If the calls to $\F{\inv}$ and $\F{\mul}$
+      all succeed, the signers hold shares $(\llbracket 1/r\rrbracket,
+      \llbracket v/r\rrbracket, \llbracket ru_1\rrbracket, \ldots, \llbracket
+      ru_l\rrbracket)$. The signers next invoke $\F{\expgengrp_1}$ with
+      generator $\genOne$ and shares $\llbracket r\rrbracket$ to compute
+      $\llbracket r\genOne\rrbracket$, and $\F{\expgengrp_2}$ with generator
+      $\genTwo$ and shares $\llbracket 1/r\rrbracket$ and $\llbracket
+      v/r\rrbracket$ to compute $\llbracket \RTwo \rrbracket = \llbracket
+      \tfrac{1}{r}\genTwo\rrbracket$ and $\llbracket \STwo\rrbracket =
+      \llbracket \tfrac{v}{r}\genTwo \rrbracket$. The offline phase concludes
+      with the signers storing $(\llbracket ru_1\rrbracket, \ldots,
+      \llbracket ru_l\rrbracket, \llbracket r\genOne\rrbracket, \llbracket
+      \RTwo\rrbracket, \llbracket \STwo\rrbracket)$.
+
+    \item[$\llbracket \sigma \rrbracket_{\onsign} \sample
+      \onsign(\vec{\MOne})$ :] For each $\MOne_i \neq 0$, the honest signers
+      issue a call to $\F{\expgengrp_1}$ with shares $\llbracket u_ir\rrbracket$
+      and generator $-\MOne_i$ to obtain $t$-additive shares $\llbracket
+      -u_ir\MOne_i \rrbracket$. They then issue consecutive calls to
+      $\F{\mulgrp_1}$ to compute the shares $\llbracket \TOne\rrbracket =
+      \llbracket r\genOne + \sum_{i=1, \MOne_i \neq 0}^l {-u_ir\MOne_i}
+      \rrbracket$, noting that this sum is equivalent to $r\genOne -
+      \sum_{i=1}^l u_ir\MOne_i$.
+
+    \item[$\sigma \leftarrow \combine(\llbracket \sigma \rrbracket)$ :] The
+      honest signers call $\F{\combinegrp_2}$ with $\llbracket \RTwo\rrbracket$
+      and $\llbracket \STwo\rrbracket$ to obtain $\RTwo = \tfrac{1}{r}\genTwo$
+      and $\STwo = \tfrac{v}{r}\genTwo$, and $\F{\combinegrp_1}$ with shares
+      $\llbracket \TOne\rrbracket$ to compute $\TOne = r(\genOne -
+      \sum_{i=1}^l u_i\MOne_i)$. If no $\abort$ occurs, the signers obtain a
+      valid signature $\sigma = (\RTwo, \STwo, \TOne)$ on the vector
+      $(\MOne_1, \ldots,\MOne_l) \in \GroupOne^l$.
+
+    \item[$\{0,1\} \leftarrow \verify(\pk, \vec{\MOne}, \sigma)$ :] On input
+      signature $\sigma = (\RTwo, \STwo, \TOne)$, vector $(\MOne_1,
+      \ldots,\MOne_l) \in \GroupOne^l$, and public key $\pk = (\vec{\UTwo},
+      \VOne)$, check whether Equation~\ref{eq:abe-ver} holds, returning 1 if
+      so and 0 otherwise.
+
+  \end{description}
+
+\end{protocolbox}
+
+\subsection{Threshold structure-preserving signatures from~\cite{Kiltz2015}}\label{sec:tsps-kiltz}
+
+We now formally describe a threshold structure-preserving signature scheme
+based on the structure-preserving scheme of Kiltz, Pan, and
+Wee~\cite{Kiltz2015}, again built from the MPC ideal functionalities of
+Section~\ref{sec:MPC}.
+
+\begin{protocolbox}{Threshold structure-preserving signature based
+  on~\cite{Kiltz2015}}{tsps-kiltz}
+
+  \begin{description}
+
+    \item[$(\pk, \llbracket \sk \rrbracket) \sample \keygen(\secparam, l, t,
+      n)$ :] The distributed key generation proceeds as follows.
+
+      \begin{enumerate}
+
+        \item \emph{$\vec{a} = (1, a)^{\tr} \in \Zp^2$ and $\vec{b} = (1,
+          b)^{\tr} \in \Zp^2$.} The honest signers issue two calls to
+          $\F{\randshare}$ to compute $t$-additive secret shares $(\llbracket a
+          \rrbracket, \llbracket b\rrbracket)$.
+
+        \item \emph{$\mat{k} \in \Zp^{(l+1)\times 2}$.} They issue $2(l+1)$
+          calls to $\F{\randshare}$ to get $t$-additive secret shares
+          $\llbracket \mat{k} \rrbracket = (\llbracket k_{1,1} \rrbracket,
+          \ldots, \llbracket k_{l+1,2}\rrbracket)$.
+
+        \item \emph{$\mat{c}, \mat{d} \in \Zp^{2\times 2}$.} The honest
+          signers invoke $\F{\randshare}$ to obtain $t$-additive secret
+          shares $(\llbracket c_{1,1} \rrbracket,\ldots, \llbracket c_{2,2}
+          \rrbracket, \llbracket d_{1,1}\rrbracket,\ldots, \llbracket
+          d_{2,2}\rrbracket)$. If no $\abort$ occurs during randomness
+          generation, the honest signers continue.
+
+        \item \emph{$\vec{u} = \mat{k}\vec{a}$.} The honest signers invoke
+          $\F{\mul}$ with shares $\llbracket a \rrbracket$ and $\llbracket
+          k_{i, 2}\rrbracket$, for $i \in [l+1]$, to compute $t$-additive
+          secret shares $(\llbracket k_{1, 2}a \rrbracket,\ldots, \llbracket
+          k_{l+1,2}a \rrbracket)$. If no $\abort$ occurs, they call $\F{\add}$
+          with shares $\llbracket k_{i, 1}\rrbracket$ and $\llbracket k_{i,
+          2}a \rrbracket$ to obtain $t$-additive secret shares $(\llbracket
+          u_1 \rrbracket,\ldots, \llbracket u_{l+1} \rrbracket)$ with $u_i =
+          k_{i, 1}+ k_{i, 2}a$ for all $i \in [l+1]$.
+
+        \item \emph{$\vec{v} = \mat{c}\vec{a}$.} The honest signers invoke
+          $\F{\mul}$ with shares $\llbracket a \rrbracket$ and $\llbracket
+          c_{1, 2}\rrbracket$, and with $\llbracket a \rrbracket$ and
+          $\llbracket c_{2, 2}\rrbracket$, to compute $t$-additive secret
+          shares $(\llbracket c_{1, 2}a \rrbracket,\llbracket c_{2,2}a
+          \rrbracket)$. If no $\abort$ occurs, they call $\F{\add}$ with
+          shares $\llbracket c_{1, 1}\rrbracket$ and $\llbracket c_{1, 2}a
+          \rrbracket$, and with $\llbracket c_{2, 1}\rrbracket$ and
+          $\llbracket c_{2, 2}a \rrbracket$, to obtain $t$-additive secret
+          shares $(\llbracket v_1 \rrbracket, \llbracket v_2 \rrbracket)$ with
+          $v_1 = c_{1, 1}+ c_{1, 2}a$ and $v_2 = c_{2, 1}+ c_{2, 2}a$.
+
+        \item \emph{$\vec{w} = \mat{d}\vec{a}$.} The honest signers follow the
+          same steps as for $\vec{v}$, with $\mat{c}$ replaced by $\mat{d}$
+          and $\vec{v}$ replaced by $\vec{w}$.
+
+        \item \emph{$\vec{x} = \vec{b}^{\tr}\mat{c}$.} The honest signers
+          invoke $\F{\mul}$ with shares $\llbracket b \rrbracket$ and
+          $\llbracket c_{2, 1}\rrbracket$, and with $\llbracket b \rrbracket$
+          and $\llbracket c_{2, 2}\rrbracket$, to get $t$-additive secret
+          shares $(\llbracket bc_{2, 1} \rrbracket,\llbracket bc_{2,2}
+          \rrbracket)$. If no $\abort$ occurs, they call $\F{\add}$ with
+          shares $\llbracket c_{1, 1}\rrbracket$ and $\llbracket bc_{2, 1}
+          \rrbracket$, and with $\llbracket c_{1, 2}\rrbracket$ and
+          $\llbracket bc_{2, 2} \rrbracket$, to obtain $t$-additive secret
+          shares $(\llbracket x_1 \rrbracket, \llbracket x_2 \rrbracket)$
+          with $x_1 = c_{1, 1}+ bc_{2, 1}$ and $x_2 = c_{1, 2}+ bc_{2, 2}$.
+
+        \item \emph{$\vec{y} = \vec{b}^{\tr}\mat{d}$.} The honest signers
+          follow the same steps as for $\vec{x}$, with $\mat{c}$ replaced by
+          $\mat{d}$ and $\vec{x}$ replaced by $\vec{y}$.
+
+        \item \emph{$(k_{1, 1}\genOne, k_{1,2}\genOne)$, $\vec{\BOne} =
+          (\genOne, b\genOne)$, $\vec{\XOne} = (\XOne_1, \XOne_2) =
+          (x_1\genOne, x_2\genOne)$, $\vec{\YOne} = (\YOne_1, \YOne_2) =
+          (y_1\genOne, y_2\genOne)$.} The honest signers invoke
+          $\F{\expgengrp_1}$ with generator $\genOne$ and shares $\llbracket
+          k_{1, 1}\rrbracket$, $\llbracket k_{1, 2} \rrbracket$, $\llbracket b
+          \rrbracket$, $\llbracket x_1\rrbracket$, $\llbracket
+          x_2\rrbracket$, $\llbracket y_1\rrbracket$, and $\llbracket
+          y_2\rrbracket$, to compute the corresponding $t$-additive shares.
+
+        \item \emph{$\vec{\ATwo} = (\genTwo, a\genTwo)$, $\vec{\UTwo} =
+          (u_1\genTwo, \ldots, u_{l+1}\genTwo)$, $\vec{\VTwo} = (v_1\genTwo,
+          v_2\genTwo)$, $\vec{\WTwo} = (w_1\genTwo, w_2\genTwo)$.} The honest
+          signers invoke $\F{\expgengrp_2}$ with generator $\genTwo$ and
+          shares $\llbracket a \rrbracket$, $\llbracket u_1\rrbracket \ldots
+          \llbracket u_{l+1}\rrbracket$, $\llbracket v_1\rrbracket$,
+          $\llbracket v_2\rrbracket$, $\llbracket w_1\rrbracket$, and
+          $\llbracket w_2\rrbracket$, to compute the corresponding
+          $t$-additive shares.
+
+        \item The honest signers call $\F{\combinegrp_2}$ to compute and
+          publish public key $\pk =(\vec{\ATwo}, \vec{\UTwo},
+          \vec{\VTwo},\vec{\WTwo})$. If no $\abort$ occurs, they proceed to
+          the next step.
+
+        \item The honest signers conclude key generation by storing their
+          shares $\llbracket \sk \rrbracket = (\llbracket \mat{k}\rrbracket,
+          \llbracket \BOne\rrbracket, \llbracket \vec{\XOne} \rrbracket,
+          \llbracket \vec{\YOne} \rrbracket)$, together with the pair
+          $\langle \llbracket k_{1, 1}\genOne \rrbracket,\llbracket k_{1,
+          2}\genOne \rrbracket \rangle$.
+
+      \end{enumerate}
+
+    \item[$\llbracket \sigma \rrbracket_{\offsign} \sample \offsign(\llbracket
+      \sk \rrbracket)$ :] The honest signers invoke $\F{\randshare}$ to get
+      $t$-additive shares $\llbracket r \rrbracket$ and $\llbracket s
+      \rrbracket$. If no $\abort$ occurs, they call $\F{\mul}$ with shares
+      $\llbracket r \rrbracket$ and $\llbracket s \rrbracket$ to compute
+      $t$-additive shares $\llbracket rs \rrbracket$. If this succeeds, they
+      invoke $\F{\expgrp_1}$ to compute $t$-additive shares $\llbracket
+      r\BOne\rrbracket$, $\llbracket rs\BOne\rrbracket$, $\llbracket
+      r\vec{\XOne}\rrbracket$, and $\llbracket rs\vec{\YOne}\rrbracket$. If
+      $\F{\expgrp_1}$ does not abort, they invoke $\F{\expgengrp_1}$ to
+      obtain $t$-additive shares $\llbracket r\genOne\rrbracket$ and
+      $\llbracket rs\genOne\rrbracket$, and $\F{\expgengrp_2}$ to get
+      $t$-additive shares $\llbracket s\genTwo\rrbracket$. If no $\abort$
+      occurs, they call $\F{\mulgrp_1}$ to receive $t$-additive shares
+      $\llbracket \vec{\TOne}^{\star} \rrbracket = \llbracket r\vec{\XOne} +
+      rs\vec{\YOne}\rrbracket= \llbracket r\vec{\XOne}\rrbracket +\llbracket
+      rs\vec{\YOne}\rrbracket$, and conclude the offline phase by storing
+      $(\llbracket s\genTwo\rrbracket, \llbracket r\genOne\rrbracket,
+      \llbracket rs\genOne\rrbracket, \llbracket r\BOne\rrbracket, \llbracket
+      rs\BOne\rrbracket, \llbracket \vec{\TOne}^{\star}\rrbracket)$.
+
+    \item[$\llbracket \sigma \rrbracket_{\onsign} \sample
+      \onsign(\vec{\MOne})$ :] For each $\MOne_i \neq 0$, the honest signers
+      issue a call to $\F{\expgengrp_1}$ with shares $\llbracket k_{i,
+      1}\rrbracket$ and $\llbracket k_{i, 2} \rrbracket$ to obtain
+      $t$-additive shares $\llbracket k_{i, 1} \MOne_i\rrbracket = \llbracket
+      k_{i, 1}\rrbracket \MOne_i$ and $\llbracket k_{i+1, 2}
+      \MOne_i\rrbracket = \llbracket k_{i+1, 2}\rrbracket\MOne_i$. This is
+      followed by consecutive calls to $\F{\mulgrp_1}$ to compute the
+      $t$-additive shares $\llbracket(\genOne, \vec{M})\mat{k}\rrbracket$,
+      comprising:
+      %
+      \begin{equation*}
+      %
+        \left(\llbracket k_{1, 1}\genOne \rrbracket + \sum_{i=1, \MOne_i \neq
+        0}^{l+1} \llbracket k_{i+1, 1}\MOne_i\rrbracket , \llbracket k_{1,
+        2}\genOne\rrbracket + \sum_{i=1, \MOne_i \neq 0}^{l+1} \llbracket
+        k_{i+1, 2}\MOne_i\rrbracket\right).
+      %
+      \end{equation*}
+      %
+      The honest signers then issue one final call to $\F{\mulgrp_1}$ to
+      compute the shares $\llbracket \vec{\TOne}\rrbracket = \llbracket
+      (\genOne, \vec{M})\mat{k} + \vec{\TOne}^{\star}\rrbracket = \llbracket
+      (\genOne, \vec{M})\mat{k} \rrbracket + \llbracket
+      \vec{\TOne}^{\star}\rrbracket$.
+
+    \item[$\sigma \leftarrow \combine(\llbracket \sigma \rrbracket)$ :] The
+      honest signers query $\F{\combinegrp_1}$ to compute group elements
+      $\vec{\ROne} = (r\genOne, r\BOne)$ and $\vec{\SOne} = (rs\genOne,
+      rs\BOne)$, and $\F{\combinegrp_2}$ to compute $\QTwo = s\genTwo$. They
+      invoke $\F{\combinegrp_1}$ to compute $\vec{\TOne}= (\genOne,
+      \vec{\MOne})\mat{k} + \vec{\TOne^{\star}}$. If no $\abort$ occurs, the
+      signers obtain a valid signature $\sigma = (\QTwo, \vec{\ROne},
+      \vec{\SOne}, \vec{\TOne})$ on vector $\vec{\MOne} = (\MOne_1, \ldots,
+      \MOne_l)$.
+
+    \item[$\{0,1\} \leftarrow \verify(\pk, \vec{\MOne}, \sigma)$ :] On input
+      signature $\sigma = (\QTwo, \vec{\ROne}, \vec{\SOne}, \vec{\TOne})$,
+      vector $(\MOne_1, \ldots,\MOne_l) \in \GroupOne^l$, and public key $\pk
+      =(\vec{\ATwo}, \vec{\UTwo}, \vec{\VTwo},\vec{\WTwo})$, check whether
+      Equation~\ref{eq:kiltz-ver} holds, returning 1 if so and 0 otherwise.
+
+  \end{description}
+
+\end{protocolbox}
+
+Section~\ref{sec:tsps-security} formalises the security notion for threshold
+structure-preserving signatures, adp-TS-UF-1, and proves that both
+constructions above satisfy it.

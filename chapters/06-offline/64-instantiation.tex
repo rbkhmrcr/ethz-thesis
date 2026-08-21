@@ -1,1 +1,310 @@
-\section{Instantiation}
+\section{Instantiation}\label{sec:offline-instantiation}
+
+\paragraph{Notation.} Let $[n]$ denote the integer interval $[0..n-1]$. Let
+$\group{1}$, $\group{2}$, and $\group{t}$ be three cyclic groups of large
+prime order $p$ that admit a non-degenerate bilinear pairing $e \colon
+\group{1} \times \group{2} \rightarrow \group{t}$. Let $\hash_p \colon
+\{0,1\}^* \rightarrow \Zp$ and $\hash_{\group{1}} \colon \{0,1\}^*
+\rightarrow \group{1}$ be two cryptographic hash functions. Let $\gen$ and
+$\tildeP$ denote generators of $\group{1}$ and $\group{2}$ respectively. We
+denote elements of $\group{1}$ by upper-case letters, elements of
+$\group{2}$ by upper-case letters with a tilde, and elements of $\Zp$ by
+lower-case letters.
+
+For a vector $\avec{x} = (x_0, \ldots, x_{n-1}) \in \Zp^n$ and $y \in \Zp$,
+and $m < n - 1$, we write $\avec{x}[{:}m]$ for the sub-vector $(x_0, \ldots,
+x_{m-1})$ and $\avec{x} \| y$ for $(x_0, \ldots, x_{n-1}, y)$, with the
+analogous notation for vectors in $\group{1}$ and $\group{2}$. For
+$\avec{x}, \avec{y} \in \Zp^n$, we write $\avec{x} \cdot \avec{y}$ for the
+inner product $\sum_{i=0}^{n-1} x_i y_i$. For $\avec{\gen} = (\gen_0,
+\ldots, \gen_{n-1}) \in \group{1}^n$, $\avec{\tildeP} = (\tildeP_0, \ldots,
+\tildeP_{n-1}) \in \group{2}^n$, and $\avec{x} = (x_0, \ldots, x_{n-1}) \in
+\Zp^n$, we write $\avec{\gen}^{\avec{x}} = \prod_{i=0}^{n-1} \gen_i^{x_i}$
+and $\avec{\tildeP}^{\avec{x}} = \prod_{i=0}^{n-1} \tildeP_i^{x_i}$.
+
+We write $\Pi \leftarrow \pok[\instance, \wit : \rel(\instance, \wit) = 1]$
+for a non-interactive zero-knowledge proof of knowledge that public input
+$\instance$ and witness $\wit$ satisfy binary relation $\rel$, and $\sigma
+\leftarrow \sok[m, (\instance, \wit) : \rel(\instance, \wit) = 1]$ for a
+signature of knowledge on message $m$ showing the same. Appendix
+\ref{sec:zkp} gives an overview of zero-knowledge proofs and signatures of
+knowledge.
+
+\subsection{BBS+ signatures}\label{sec:BBS}
+
+A BBS+ signature~\cite{Boneh2004,Au2006,Camenisch2016} is a signature scheme
+that lets a signer sign multiple messages at once, using the following
+algorithms.
+
+\begin{itemize}
+
+  \item $\BBSkeygen(1^\kappa, n)$: on input security parameter $\kappa$ and
+    integer $n$, randomly select $t \in \Zp$ and a vector of $n+2$
+    generators $(\Q_0, \ldots, \Q_n, \genH) \in \group{1}^{n+2}$, writing
+    $\avec{\Q} = (\Q_0, \ldots, \Q_n)$. Compute $\tildeT = \tildeP^t$ and
+    output secret key $\SK = t$ and public key $\PK = (\tildeT, \tildeP,
+    \avec{\Q}, \genH)$.
+
+  \item $\BBSsign(\SK, \avec{m})$: on input secret key $\SK$ and a vector
+    $\avec{m}$ of $n$ messages, randomly select $(e, s) \in \Zp$ such that $e
+    + t \neq 0$, compute $C = \genH \avec{\Q}^{\avec{m}\|s}$, and output
+    $\phi = (e, s, E = C^{1/(t+e)})$.
+
+  \item $\BBSverify(\PK, \avec{m}, \phi)$: on input public key $\PK$, vector
+    of messages $\avec{m}$, and signature $\phi$, compute $C =
+    \avec{Q}^{\avec{m}\|s}\genH$ and check that
+    \begin{equation*}
+      e(E, \tildeP^e \tildeT) = e(C, \tildeP).
+    \end{equation*}
+
+\end{itemize}
+
+BBS+ signatures are existentially unforgeable under the $q$-strong
+Diffie-Hellman ($q$-SDH) assumption.
+
+\paragraph{Proof of knowledge of a BBS+ signature.}\label{sec:joint-proof}
+Let $\phi = (e, s, E) \gets \BBSsign(\SK, \avec{m})$. By construction $E =
+(\genH \avec{Q}^{\avec{m}\|s})^{1/(t+e)}$ for $\SK = t$; setting $\instance =
+\PK = (\tildeP, \tildeT, \avec{Q}, \genH)$ and $\wit = (\avec{m}, \phi)$, a
+proof of knowledge of a BBS+ signature shows that $(\instance, \wit)$
+satisfies
+\begin{equation*}
+  e(E, \tildeP^e \tildeT) = e(\genH \avec{\Q}^{\avec{m}\|s}, \tildeP).
+\end{equation*}
+As shown in~\cite{Tessaro2023}, a prover can instead compute $\U =
+E^{-x/y}$, $\genV = (\genH \avec{\Q}^{\avec{m}\|s})^{-1/y}$, and $\W =
+\U^e \genV^x$, for randomly selected $x, y$, and prove that for $\instance =
+(\PK, \U, \genV, \W)$ and $\wit = (e, s, x, y, \avec{m})$ the relation
+\begin{align}
+  e(\U, \tildeT) e(\W, \tildeP) = 1 \ \wedge \ \W = \U^e \genV^x \ \wedge \
+  \genH^{-1} = \genV^y \avec{\Q}^{\avec{m}\|s}
+  \label{eq:BBSrel}
+\end{align}
+holds. A prover $\Prv$ for this relation follows a sigma protocol made
+non-interactive via the Fiat-Shamir heuristic; we refer to proofs of this
+form as \emph{Schnorr proofs}. Concretely, $\Prv$ selects $\alpha, \beta,
+\delta, \gamma_0, \ldots, \gamma_{n-1}, \gamma \in \Zp$ and computes
+\begin{align*}
+  \A &= \U^\alpha \genV^\beta \ ; \ \B = \genV^\delta \Q_n^\gamma
+  \prod_{i=0}^{n-1} \Q_i^{\gamma_i} \ ; \ \chal = \hash_p(\instance, \A, \B)
+  \\
+  \eta &= \alpha + \chal e \ ; \ \nu = \beta + \chal x \ ; \ \xi = \delta +
+  \chal y \ ; \\
+  \pi_i &= \gamma_i + \chal m_i, \ \forall i \in [n] \ ; \ \pi = \gamma +
+  \chal s
+\end{align*}
+and outputs $\Pi = (\A, \B, \eta, \nu, \xi, \pi_0, \ldots, \pi_{n-1}, \pi)$.
+A verifier $\V$ first checks that $e(\U, \tildeT) e(\W, \tildeP) = 1$,
+computes $\chal = \hash_p(\instance, \A, \B)$, and accepts if and only if
+\begin{align*}
+  \A \W^\chal &= \U^\eta \genV^\nu \ ; \ \B \genH^{-\chal} = \genV^\xi
+  \Q_n^\pi \prod_{i=0}^{n-1} \Q_i^{\pi_i}.
+\end{align*}
+
+\paragraph{Joint proof of knowledge of a BBS+ signature.}\label{sec:joint-proof-details}
+We now show how two provers $\Prv_0$ and $\Prv_1$ jointly produce $\Pi$,
+where $\Prv_0$ is a lightweight device that knows $m_{n-1}$ and $\Prv_1$ is
+computationally more powerful and knows $(e, s, m_0, \ldots, m_{n-2})$,
+following the approach introduced in~\cite{Hesse2023}. Rather than proving
+Equation~\eqref{eq:BBSrel}, $\Prv_0$ and $\Prv_1$ prove
+\begin{align*}
+  \comm &= \Q_{n-1}^{m_{n-1}} \Q_n^\rho \ \wedge \ e(\U, \tildeT) e(\W,
+  \tildeP) = 1 \ \wedge \\
+  \W &= \U^e \genV^x \ \wedge \ (\comm \genH)^{-1} = \genV^y \Q_n^{s'}
+  \prod_{i=0}^{n-2} \Q_i^{m_i}
+\end{align*}
+for $\instance = (\PK, \U, \genV, \W, \comm)$ and $\wit = (e, s', x, y,
+\avec{m}, \rho)$. $\Prv_0$ first computes $\comm = \Q_{n-1}^{m_{n-1}}
+\Q_n^\rho$ and produces a proof $\Pi_0$ that $\instance_0 = (\Q_{n-1},
+\Q_n, \comm)$ and $\wit_0 = (m_{n-1}, \rho)$ satisfy $\comm = \Q_{n-1}^{
+m_{n-1}} \Q_n^\rho$: it selects random $(\gamma_{n-1}, \upsilon)$, computes
+$\C = \Q_{n-1}^{\gamma_{n-1}} \Q_n^\upsilon$, $\chal_0 = \hash_p(\instance_0,
+\C)$, $\pi_{n-1} = \gamma_{n-1} + \chal_0 m_{n-1}$, and $\zeta = \upsilon +
+\chal_0 \rho$, and sends $\Prv_1$ the tuple $(\comm, \rho, \Pi_0)$ with
+$\Pi_0 = (\C, \pi_{n-1}, \zeta)$.
+
+$\Prv_1$ computes a proof $\Pi_1$ that, for $\instance_1 = (\PK, \U, \genV,
+\W, \comm)$ and $\wit_1 = (e, s', x, y, \avec{m}[{:}n-1])$ with $s' = s -
+\rho$,
+\begin{equation}
+  \label{eq:reljointproof}
+  \W = \U^e \genV^x \ \wedge \ (\comm \genH)^{-1} = \genV^y
+  \prod_{i=0}^{n-2} \Q_i^{m_i} \Q_n^{s'}
+\end{equation}
+holds: it selects random $(\alpha, \beta)$ and $(\delta, \gamma_0, \ldots,
+\gamma_{n-2}, \gamma)$, computes $\A = \U^\alpha \genV^\beta$ and $\B =
+\genV^\delta \Q_n^\gamma \prod_{i=0}^{n-2} \Q_i^{\gamma_i}$, and derives
+\begin{align*}
+  \chal_1 &= \hash_p(\instance_1, \A, \B) \ ; \ \eta = \alpha + \chal_1 e \ ;
+  \ \nu = \delta + \chal_1 x \ ; \ \xi = \delta + \chal_1 y \ ; \\
+  \pi_i &= \gamma_i + \chal_1 m_i, \ \forall i \in [n-1] \ ; \ \pi = \gamma
+  + \chal_1 s'
+\end{align*}
+before outputting $\Pi = (\comm, \A, \B, \C, \eta, \nu, \xi, \pi_0, \ldots,
+\pi_{n-1}, \pi, \zeta)$.
+
+\paragraph{Mapping to our solution.}\label{sec:sok-sol} In our protocol, the
+secure element $\se$ and mobile device $\dev$ jointly produce $\sigma
+\leftarrow \sok[\instance, \wit : \rel(\instance, \wit) = 1]$, where
+$\instance = (\gen_0, \gen_1, \BBSpk, \U, \genV, \W, c)$ with $\BBSpk =
+(\tildeP, \tildeT, \Q_0, \Q_1, \Q_2, \genH)$, $\wit = (e, x, y, s, \uid,
+\sk, r)$, and $\rel(\instance, \wit) = 1$ is equivalent to
+\begin{align*}
+  &e(\U, \tildeT) e(\W, \tildeP) = 1 \ \wedge \ \W = \U^e \genV^x \\
+  &\wedge \ \genH^{-1} = \genV^y \Q_0^{\uid} \Q_1^{\sk} Q_2^s \ \wedge \ C =
+  \gen_0^{\uid} \gen_1^r,
+\end{align*}
+that is, an instantiation of Equation~\eqref{eq:BBSrel} with $\vec{m} =
+(\uid, \sk)$ and $C = \gen_0^{\uid} \gen_1^r$. In this instantiation, $\se$
+executes $\Prv_0$, outputting $\comm = \Q_1^{\sk} \Q_2^\rho$, $\rho$, and
+proof $\Pi_0$ computed as above except that the challenge $\chal_0$ also
+hashes the message to be signed. $\dev$ computes a proof $\Pi_1 \leftarrow
+\pok[\instance_1, \wit_1 : \rel(\instance_1, \wit_1) = 1]$, for $\instance_1
+= (\gen_0, \gen_1, \BBSpk, \U, \genV, \W, \comm, C)$, $\wit_1 = (e, x, y,
+\uid, s', r)$, and
+\begin{equation*}
+  \W = \U^e \genV^x \ \wedge \ (\comm \genH)^{-1} = \genV^y \Q_0^{\uid}
+  \Q_2^{s'} \ \wedge \ C = \gen_0^{\uid} \gen_1^r,
+\end{equation*}
+computed via sigma protocols, following the same approach as $\Pi_1$ above.
+
+\subsection{Pointcheval-Sanders signatures}\label{sec:ps-sign}
+
+The Pointcheval-Sanders signature
+scheme~\cite{Pointcheval2016,Pointcheval2018}, like BBS+, signs vectors of
+messages rather than single messages, using the following algorithms.
+
+\begin{itemize}
+
+  \item $\PSkeygen(1^\kappa, n)$: on input security parameter $\kappa$ and
+    integer $n$, randomly select $(x, y_0, \ldots, y_{n-1}, z) \in
+    \Zp^{n+2}$, compute $\tildeX = \tildeP^x$, $\tildeY_i = \tildeP^{y_i}$
+    for all $i \in [n]$, and $\tildeZ = \tildeP^z$, and output $\SK = (x,
+    \avec{y}, z)$ and $\PK = (\tildeX, \avec{\tildeY}, \tildeZ)$, where
+    $\avec{y} = (y_0, \ldots, y_{n-1})$ and $\avec{\tildeY} = (\tildeY_0,
+    \ldots, \tildeY_{n-1})$.
+
+  \item $\PSsign(\SK, \avec{m})$: on input secret key $\SK$ and a vector of
+    $n$ messages $\avec{m}$, randomly select $R \in \group{1}$ and $u \in
+    \Zp$, compute $S = R^{x + \avec{y} \cdot \avec{m} + zu}$, and output
+    $\psi = (u, R, S)$.
+
+  \item $\PSverify(\PK, \avec{m}, \psi)$: on input public key $\PK$, vector
+    of messages $\avec{m}$, and signature $\psi$, check that
+    $e(R, \tildeX \avec{\tildeY}^{\avec{m}} \tildeZ^u) = e(S, \tildeP)$.
+
+\end{itemize}
+
+The resulting signatures are existentially unforgeable under the
+$q$-modified strong Diffie-Hellman ($q$-MSDH) assumption~\cite{Pointcheval2018}.
+Pointcheval-Sanders signatures can also be extended to support
+\textbf{blind signing}: a signer can sign a committed vector without
+learning any information about it, cf.~\cite{Sonnino2019}.
+
+\paragraph{Blind signing over committed inputs.}\label{sec:blindsig} Let
+$\vec{\gen} = (\gen_0, \ldots, \gen_n) \in \group{1}^{n+1}$ be a vector of
+$n+1$ random generators and $\avec{m} = (m_0, \ldots, m_{n-1}) \in \Zp^n$ a
+vector of $n$ messages. Signatures over committed
+inputs~\cite{Camenisch2003,Libert2016} are produced via an interactive
+protocol between a signer and a recipient, in which the signer signs a
+vector of \emph{committed} messages such that only the recipient learns
+their content.
+
+The recipient selects an ElGamal secret key $b \in \Zp$ with public key
+$(\gen, \B = \gen^b)$, computes $\comm = \avec{\gen}^{\avec{m}\|r}$, $R =
+\hash_{\group{1}}(\comm)$, and $n$ ciphertexts $\cipher_i = (\gen^{\rho_i},
+R^{m_i} \B^{\rho_i})$ for $i \in [n]$, together with a proof $\Pi \leftarrow
+\pok[\instance, \wit : \rel(\instance, \wit) = 1]$ for $\instance =
+(\avec{\gen}, \gen, \B, \comm, R, (\cipher_i)_{i \in [n]})$, $\wit = ((m_i,
+\rho_i)_{i \in [n]}, r)$, and relation
+\begin{align*}
+  1 = \avec{\gen}^{\avec{m}\|r} \ \wedge \ \cipher_i = (\gen^{\rho_i},
+  R^{m_i}\B^{\rho_i}), \ \forall i \in [n],
+\end{align*}
+and sends the signer $(\comm, \cipher_0, \ldots, \cipher_{n-1}, \gen, \B,
+\Pi)$. The signer recomputes $R = \hash_{\group{1}}(\comm)$, verifies $\Pi$
+against $\comm$, $R$, and $(\gen, \B)$, and rejects if it does not hold.
+Otherwise, it parses each $\cipher_i$ as $(E_{i,1}, E_{i,2})$, randomly
+selects $u \in \Zp$, computes
+\begin{align*}
+  \cipher &= (E_1, E_2) = \Bigl(\prod_{i=0}^{n-1} E_{i,1}^{y_i}, \ R^x
+  \prod_{i=1}^n E_{i,2}^{y_i} R^{uz}\Bigr),
+\end{align*}
+and sends $(u, \cipher)$ to the recipient, who decrypts $\cipher = (E_1,
+E_2)$ by computing $S = E_2 / E_1^b$ and outputs $\psi = (u, R, S)$ if it is
+a valid Pointcheval-Sanders signature on $\avec{m}$; if the signer followed
+the protocol honestly, $S = R^x \bigl(\prod_{i=0}^{n-1} R^{y_i m_i}\bigr)
+R^{uz}$.
+
+This protocol adapts readily to partially opened vectors: for $\Disc
+\subseteq [n]$ with $(m_i)_{i \in \Disc}$ revealed to the signer, the
+recipient computes $\comm = \prod_{i \in [n]\setminus\Disc} \gen_i^{m_i}$
+and a proof for $\instance = (\Disc, \avec{\gen}, \gen, \B, \comm, R,
+(\cipher_i)_{i \in [n]\setminus\Disc})$, $\wit = ((m_i, \rho_i)_{i \in
+[n]\setminus\Disc}, r)$, and relation
+\begin{align*}
+  \comm &= \gen_n^r \prod_{i \in [n]\setminus\Disc} \gen_i^{m_i} \ \wedge \
+  \cipher_i = (\gen^{\rho_i}, R^{m_i} \B^{\rho_i}), \ \forall i \in
+  [n]\setminus\Disc,
+\end{align*}
+sending $m_i$ for $i \in \Disc$ in the clear, and the signer computes
+\begin{align*}
+  \cipher &= (E_1, E_2) = \Bigl(\prod_{i \in [n]\setminus\Disc}
+  E_{i,1}^{y_i}, \ R^x \prod_{i \in \Disc} R^{m_i y_i} \prod_{i \in
+  [n]\setminus\Disc} E_{i,2}^{y_i} R^{uz}\Bigr).
+\end{align*}
+This protocol adapts directly to the withdrawal protocol of
+Section~\ref{sec:withdrawal}: we execute it on the vector of messages
+$(\uid_0, v, s_0)$ with randomness $r = 0$.
+
+\paragraph{Proof of withdrawal $\Sigma$.}\label{sec:ps-proof} Let $\tau =
+(v, C = \gen_0^{\uid} \gen_1^s)$ be a token, and let $\PSpk = (\tildeX,
+\tildeY_0, \tildeY_1, \tildeY_2, \tildeZ)$ be the public key of the central
+bank $\cb$. Let $\psi = (u, R, S)$ be a Pointcheval-Sanders signature that
+verifies $1 \gets \PSverify(\PSpk, (\uid, v, s), \psi)$, so $e(R,
+\tildeX \tildeY_0^{\uid} \tildeY_1^v \tildeY_2^s \tildeZ^u) = e(S,
+\tildeP)$. To prove that $\tau$ was issued by $\cb$, the token's owner uses
+her mobile device $\dev$ to:
+
+\begin{inparaenum}[(1)]
+
+  \item select random $r \in \Zp$ and compute $(R^*, S^*) = (R^r, S^r)$;
+
+  \item generate $\Delta \leftarrow \pok[\instance, \wit : \rel(\instance,
+    \wit) = 1]$, with $\instance = (\gen_0, \gen_1, \tildeX, \tildeY_0,
+    \tildeY_1, \tildeY_2, \tildeZ, v, C, R^*, S^*)$, $\wit = (u, \uid, s)$,
+    and
+    \begin{align*}
+      e(S^*, \tildeP) &= e(R^*, \tildeX \tildeY_0^{\uid} \tildeY_1^v
+      \tildeY_2^s \tildeZ^u) \ \wedge \ C = \gen_0^{\uid} \gen_1^s;
+    \end{align*}
+
+  \item return $\Sigma = (R^*, S^*, \Delta)$.
+
+\end{inparaenum}
+
+Since $s_0$ is random and not known, $(R^*, S^*)$ leaks no information about
+$\uid_0$. To compute $\Delta$, $\dev$ first computes $\tildeC =
+\tildeY_0^{\uid} \tildeY_2^s \tildeZ^u$, randomly selects $\alpha, \beta,
+\delta \in \Zp$, computes $\A = \gen_0^\alpha \gen_1^\beta$, $\tildeA =
+\tildeY_0^\alpha \tildeY_2^\beta \tildeZ^\delta$, and challenge $\gamma =
+\hash_p(\instance, \tildeC, \A, \tildeA)$, then computes $\pi_{\uid} =
+\alpha + \gamma \uid$, $\pi_s = \beta + \gamma s$, and $\pi_u = \delta +
+\gamma u$, and sets $\Delta = (\tildeC, \A, \tildeA, \pi_{\uid}, \pi_s,
+\pi_u)$. These are standard Schnorr proofs for $\instance' = (\gen_0,
+\gen_1, \tildeY_0, \tildeY_2, \tildeZ, C, \tildeC)$, $\wit' = (u, \uid,
+s)$, and $\rel(\instance', \wit') = 1$ equivalent to $C = \gen_0^{\uid}
+\gen_1^s \wedge \tildeC = \tildeY_0^{\uid} \tildeY_2^s \tildeZ^u$.
+
+If $(u, R^*, S^*)$ is a valid Pointcheval-Sanders signature on $(\uid, v,
+s)$ under $\PSpk$, then $e(S^*, \tildeP) = e(R^*, \tildeX \tildeC
+\tildeY_1^v)$, so a verifier, given $\Sigma = (R^*, S^*, \Delta)$ and token
+$\tau = (v, C)$, checks that $\tau$ was issued by $\cb$ by parsing $\Delta =
+(\tildeC, \A, \tildeA, \pi_{\uid}, \pi_s, \pi_u)$, computing $\gamma =
+\hash_p(\instance', \A, \tildeA)$, and verifying
+\begin{align*}
+  e(S^*, \tildeP) &= e(R^*, \tildeX \tildeC \tildeY_1^v) \ \wedge \
+  C^\gamma \A = \gen_0^{\pi_{\uid}} \gen_1^{\pi_s} \ \wedge \
+  \tildeC^\gamma \tildeA = \tildeY_0^{\pi_{\uid}} \tildeY_2^{\pi_s}
+  \tildeZ^{\pi_u}.
+\end{align*}

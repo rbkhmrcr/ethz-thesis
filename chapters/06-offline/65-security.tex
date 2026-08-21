@@ -1,1 +1,333 @@
-\section{Security arguments}
+\section{Security}\label{sec:offline:proof}
+
+\subsection{Security analysis}
+
+Let $\prot$ denote the protocol from Section~\ref{sec:construction}. We prove
+that there exists a simulator $\simu$ such that, for every adversary $\adv$,
+the joint execution of $\prot$ with $\adv$ is computationally
+indistinguishable from the interaction of $\adv$ with ideal functionality
+$\F$ via $\simu$. We proceed via a sequence of hybrid games, each
+computationally indistinguishable from the last. Throughout, we call a user
+\emph{corrupt} if both their device and secure element are compromised; the
+more general split-corruption setting follows analogously. We also simplify
+exposition by treating the randomness $\rho$ produced by $\F$ during
+$\fwithdraw$ and $\fpay$ as the output of $\com(\ck, \cdot; \cdot)$.
+
+We rely on the following security properties of the underlying primitives:
+
+\begin{enumerate}
+
+  \item[(P1)] The commitment scheme is binding: no PPT adversary can find
+    two openings of the same commitment to distinct messages.
+
+  \item[(P2)] The encryption scheme is IND-CPA secure: ciphertexts are
+    computationally indistinguishable from random ones for any PPT
+    adversary.
+
+  \item[(P3)] The blind signature scheme used by $\cb$ is EUF-CMA secure: no
+    PPT adversary can produce a valid signature without querying the
+    signer.
+
+  \item[(P4)] The credential signature scheme used by $\reg$ is EUF-CMA
+    secure.
+
+  \item[(P5)] The zero-knowledge proofs and signatures of knowledge are
+    simulation-extractable in the random oracle model: a valid witness can
+    be extracted from any accepted proof, and simulated proofs are
+    indistinguishable from real ones.
+
+\end{enumerate}
+
+\paragraph{Game 0.} The real-world execution of $\prot$.
+
+\paragraph{Game 1.} $\simu$ runs $\prot$ internally on behalf of all honest
+parties, forwarding inputs and distributing outputs. This is identically
+distributed to Game 0.
+
+\paragraph{Game 2.} $\simu$ introduces a dummy $\F$ as a communication relay
+between honest parties, who now communicate via $\F$ rather than directly.
+This is identically distributed to Game 1.
+
+\paragraph{Game 3.} $\F$ handles $\fcreate$ queries from honest users. When
+an honest user $\usr$ initialises an account of value $v$ with intermediary
+$\Int$, $\simu$ calls $\F$ with $(\fcreate, \usr, v)$ in place of running
+$\prot$. The two are identical: $\prot$ always accepts when the user has no
+prior account, and $\F$ performs the same check.
+
+\paragraph{Game 4.} As Game 3, extended to corrupt users initiating account
+creation. $\simu$ calls $\F$ and mirrors any abort to $\Int$. $\F$ aborts
+exactly when $\prot$ does, on attempts to register duplicate accounts, so no
+new distinguishing event arises.
+
+\paragraph{Game 5.} $\F$ handles $\fregister$ queries. $\simu$ calls
+$(\fregister, \usr, \se, \dev)$ whenever $\reg$ receives a valid
+registration request. $\F$ rejects only duplicate registrations, matching
+$\prot$.
+
+\paragraph{Game 6.} $\F$ handles $\fwithdraw$ queries from honest users.
+When an honest $\usr$ withdraws value $v$, $\simu$ calls $(\fwithdraw,
+\Int, v)$ and learns $(\usr, v)$. $\simu$ produces a simulated withdrawal
+transcript in which $\comm$ is a uniformly random commitment, $\cipher_0
+\leftarrow \enc(\audpk, \uid; \rho_0)$ is a well-formed encryption of
+$\uid$, $\cipher_2$ is a random ciphertext, and $\Pi$ is a simulated proof.
+By (P1), (P2), and (P5), this transcript is computationally
+indistinguishable from one produced by $\prot$.
+
+\paragraph{Game 7.} $\F$ handles $\fwithdraw$ queries from corrupt users.
+When $\usr$ submits a withdrawal, $\simu$ extracts the randomness $s$ from
+the attached proof using (P5), computes $\rho \leftarrow \com(\ck, (\uid,
+v); s)$, and calls $(\fwithdraw, \Int, v)$ with $\rho$. Both $\F$ and
+$\prot$ reject if and only if $\comm \leftarrow \com(\ck, (\uid, v); s)$ is
+a duplicate, which would imply a duplicate $\rho$, so the accounting checks
+agree.
+
+\paragraph{Game 8.} $\F$ handles $\fpay$ queries from honest payers. We
+first deal with the first payment after withdrawal, the case $i = 0$, then
+generalise.
+
+\emph{Case $i = 0$.} $\usr$ pays $\usr'$ by calling $(\fpay, \rho, v,
+\usr')$.
+
+\begin{itemize}
+
+  \item If $\usr'$ is honest: $\simu$ learns $(\fpay, v, \rho, \rho')$ from
+    $\F$, and produces a simulated payment $\py_0 = (v, \comm_0, \comm_1,
+    \cipher_0, \sigma_0, \Gamma_0, \Sigma)$ with random commitments
+    $\comm_b \leftarrow \com(\ck, r_b; s_b)$ for fresh $r_b, s_b$, a random
+    ciphertext $\cipher_0$, and simulated proofs $(\sigma_0, \Gamma_0,
+    \Sigma)$, possible by simulation-extractable security of the NIZK
+    system (P5).
+
+  \item If $\usr'$ is corrupt: $\simu$ additionally learns the identities
+    of both parties. It computes $\rho' \leftarrow \com(\ck, \uid'; s')$
+    from the commitment $\comm_1$ that $\usr'$ supplies in $\prot$, calls
+    $\F$, and sets $\cipher_0 \leftarrow \enc(\audpk, \uid; \rho_0)$.
+
+\end{itemize}
+
+In both cases $\simu$ records $\mathbb{R}[(\comm_0, \comm_1)] \gets (\rho,
+\rho')$ and $\mathbb{C}[(\rho, \rho')] \gets (\comm_0, \comm_1)$.
+
+\emph{Case $i > 0$.} $\simu$ recovers $(\comm_0, \ldots, \comm_i)$ from
+$\mathbb{C}[\vec{\rho}]$, produces a simulated payment $\py_i$ with
+simulated proofs and random ciphertexts (or $\cipher_i \leftarrow
+\enc(\audpk, \uid_i; \rho_i)$ if $\usr'$ is corrupt), and updates the maps
+as needed. By IND-CPA security of the encryption scheme (P2) and
+simulation-extractable security of the NIZK scheme (P5), simulated payments
+are indistinguishable from real ones.
+
+\paragraph{Game 9.} $\F$ also processes $\fpay$ queries from corrupt
+payers. We show that if $\F$ rejects a payment, an honest $\usr'$ in
+$\prot$ also rejects it, again showing the case $i = 0$ before generalising.
+
+Let $\py_0 = (v, \comm_1, \comm_0, \cipher_0, \sigma_0, \Gamma_0, \hist_0)$
+be the payment produced by corrupt $\usr$. $\simu$ computes $\rho \leftarrow
+\com(\ck, (\uid, v); s)$ from $\comm_0$ and calls $(\fpay, \rho, v,
+\usr')$.
+
+\emph{$\usr'$ honest.} If $\usr'$ accepts $\py_0$ but $\F$ rejects, exactly
+one of the following holds:
+
+\begin{enumerate}[label=\alph*)]
+
+  \item $\tokens[\rho] = \bot$: no prior $\fwithdraw$ matches $\rho$. By
+    (P5), $\simu$ extracts a blind signature $\psi$ and message triple
+    $(\uid, v, s)$ from $\Sigma$. Since $\cb$ never issued $\psi$, no
+    corresponding withdrawal exists, so outputting $(\psi, \uid, v, s)$
+    breaks EUF-CMA of the blind signature scheme (P3).
+
+  \item $\tokens[\rho] = \langle \usr, v^* \rangle$ with $v^* \neq v$: we
+    can extract $(\ck, \uid', s', \comm_0)$ from $\Sigma$ such that
+    $\opn(\ck, \uid'; s', \comm_0) = 1$, giving $\rho \leftarrow \com(\ck,
+    \uid'; s')$ with value $v$. Combined with $\rho \leftarrow \com(\ck,
+    \uid^*; s^*)$ with value $v^*$ from the prior withdrawal, $v \neq v^*$
+    yields two distinct openings of $\rho$, contradicting binding of the
+    commitment scheme (P1).
+
+  \item $\tokens[\rho] = \langle \usr^*, v \rangle$ with $\usr^* \neq
+    \usr$: if $\usr^*$ is corrupt, the same two representations of $\rho$
+    as in (b) give $\uid \neq \uid^*$, again contradicting (P1). If
+    $\usr^*$ is honest, $\comm_0 \leftarrow \com(\ck, \uid^*; s^*)$ was
+    chosen by $\simu$, so $\usr$ cannot have guessed it except with
+    negligible probability; if $\usr'$ accepts $\py_0$, then $\sigma_0$ is
+    a valid signature of knowledge proving possession of a credential on
+    $(\uid, \sk)$, and by (P5) $\simu$ extracts credential $\varphi$ and
+    pair $(\uid, \sk)$. Since $\uid$ was assigned randomly by $\simu$ and
+    was not registered, this gives a forgery of the credential scheme
+    (P4).
+
+  \item $\usr$ is not registered: if $\usr'$ accepts, $\sigma_0$ verifies,
+    and by (P5) $\simu$ extracts a credential forgery $(\varphi, (\uid,
+    \sk))$, contradicting (P4).
+
+\end{enumerate}
+
+\emph{$\usr'$ corrupt.} $\simu$ sends $\accept$ to $\F$ on $\usr'$'s
+behalf, provides $\rho' \leftarrow \com(\ck, (\uid', v); s')$ from
+$\comm_1$, and extends the maps.
+
+\emph{$i > 0$.} If $\mathbb{R}[(\comm_0, \ldots, \comm_i)]$ is not yet
+recorded, $\simu$ fills in the missing intermediate payments by extracting
+participant identifiers from the proof $\Gamma_j$ at the first unrecorded
+index $j$ using (P5), calling $\fpay$ for each, and extending the maps until
+$j = i - 1$. The cases above still apply, replacing $\py_0$ with $\py_i$ and
+$\rho$ with $(\rho_0, \ldots, \rho_i)$. Since the probability that an honest
+$\usr'$ accepts a payment that $\F$ rejects is negligible under (P1)-(P5),
+this game is indistinguishable from Game 8.
+
+\paragraph{Game 10.} $\F$ handles $\fdeposit$ queries from honest users.
+$\simu$ recovers $(\comm_0, \ldots, \comm_n)$ from $\mathbb{C}[\vec{\rho}]$
+and produces a simulated deposit $(\tau_n, \sigma_n, \hist_n)$ with
+simulated proofs and random ciphertexts. Since $\F$ rejects a deposit only
+when the token does not belong to $\usr$ or has been previously deposited,
+and an honest user never deposits a token they do not own, the only case
+requiring argument is double-spend detection.
+
+Each $\rho_i$ is determined by $\comm_i$ via $\rho_i \leftarrow \com(\ck,
+(\uid_i, v); s_i)$, so the mapping $\rho_i \leftrightarrow \comm_i$ is
+one-to-one by binding of the commitment scheme (P1). $\rho_0$ is fixed by
+$\comm_0$, which is fixed by the blind signature issued by $\cb$, which
+binds $(\uid_0, v, s_0)$. A corrupt user cannot alter $\comm_0$, so any two
+deposits sharing $\vec{\rho}[0]$ are double spends and will be detected by
+$\F$.
+
+\paragraph{Game 11.} $\F$ now also handles $\fdeposit$ queries from
+corrupt users. When $\tokens[\vec{\rho}] \neq \langle \usr, v \rangle$,
+exactly one of the following holds, each handled by the same argument as in
+Game 9 with the payment in question replaced by the deposit in question.
+
+\begin{enumerate}[label=\alph*)]
+
+  \item $\tokens[\vec{\rho}] = \bot$: extracting $\Sigma$ via
+    simulation-extractability of the NIZK scheme (P5) gives a blind
+    signature forgery, contradicting unforgeability of the signature
+    scheme.
+
+  \item $\tokens[\vec{\rho}] = \langle \usr^*, v^* \rangle$ with $v^* \neq
+    v$: two valid openings of $\rho_0$ under $\opn$ with distinct values
+    violate binding of the commitment scheme (P1).
+
+  \item $\tokens[\vec{\rho}] = \langle \usr^*, v \rangle$ with $\usr^*
+    \neq \usr$: either binding of the commitment scheme (P1) is violated,
+    or extracting $\sigma_0$ via (P5) yields a credential forgery,
+    contradicting EUF-CMA of the credential signature scheme (P4).
+
+  \item $\usr$ unregistered: $\sigma_0$ verifying implies a credential
+    forgery, contradicting unforgeability of the credential signature
+    scheme.
+
+\end{enumerate}
+
+If the token has been transferred multiple times before deposit, $\simu$
+fills in unrecorded payments using $\Gamma_j$ as in Game 9, and the same
+cases apply inductively. If another deposit chain sharing
+$\vec{\rho}[0]$ has already been recorded, the same argument as in Game 10
+shows the initial commitment cannot be altered.
+
+\paragraph{Game 12.} $\F$ handles $\faudit$ queries. The auditor calls
+$(\faudit, \rho)$ and expects the set of double spenders $\cDS$. We show
+that the outputs of $\F$ and $\prot$ agree except with negligible
+probability.
+
+In $\prot$, the double spender at index $j$ is identified by decrypting
+$\cipher_j$. The commitment $\comm_j$ is fixed by Game 11's argument
+(binding of the commitment scheme and EUF-CMA of the blind signature
+scheme) through the chain via simulation-extractability of $\sigma_{j-1}$.
+The ciphertext $\cipher_j \leftarrow \enc(\audpk, \uid_j; \rho_j)$ encrypts
+the same value as is committed in $\comm_j$, as certified by proof
+$\Gamma_j$; were this false, it would either yield two valid openings of
+$\comm_j$ under $\opn$, contradicting binding (P1), or a proof $\Gamma_j$
+with no valid witness, contradicting simulation-extractability (P5). An
+honest recipient cannot be framed, as $\comm_j$ is chosen by the recipient
+before being signed by the payer in $\sigma_{j-1}$; hence $\comm_j =
+\comm_j'$ if and only if the owner of $\comm_j$ is the double spender.
+
+If $\cipher_j$ decrypts to an unregistered user, then $\sigma_j$ is a valid
+signature of knowledge over a credential for that identifier, contradicting
+EUF-CMA of the credential scheme (P4) via simulation-extractability of the
+NIZK (P5). All distinguishing events occur with negligible probability, so
+Game 12 is indistinguishable from Game 11. This completes the proof.
+
+\subsection{Discussion}\label{sec:securityDiscussion}
+
+The above proves security in the cryptographic sense, under the standard
+assumption that a real-world deployment realises each ideal primitive it
+relies on. We close by discussing, informally, some further considerations
+that arise when deploying the system in practice.
+
+\paragraph{Revocation.} A practical deployment requires the ability to
+revoke users. This is complicated by two factors: first, a user's privacy
+should not be violated by revocation itself, meaning that no new
+information about their past transactions should become available once they
+are revoked; second, and more fundamentally, revocation interacts poorly
+with the offline setting's inherent lack of up-to-date information. Consider
+a payee who goes offline just before a payer is revoked: the payee's
+revocation metadata will not reflect the payer's revocation, so the payee
+will accept the revoked payer's token, discover the problem only later, and
+may unwittingly propagate it further by spending the token onward.
+
+One effective mitigation is a time-to-live (TTL) for offline tokens,
+enforced either by capping the number of spending hops a token may
+undergo or by bounding the time elapsed since the original withdrawal.
+A malicious spender cannot be trusted to enforce such a policy, but payees
+are well placed to do so themselves, by refusing payments whose TTL does not
+meet policy; the policy can be tuned to the value of the transaction, with
+higher-value transactions given a shorter TTL. Capping the value of
+individual offline transactions is a complementary mitigation, and combined
+with a TTL can make double spending financially unattractive even before
+any detection takes place. We leave a fuller treatment of revocation and
+its interaction with TTL policies to future work.
+
+\paragraph{Custody of the secret key.} Perhaps the most important
+requirement for a real-world deployment is that the user not be in direct
+possession of secret key $\usk$. If a user does hold $\usk$ directly, they
+can generate an arbitrary number of seemingly valid payments spending the
+same token, each of which will pass every check available to its offline
+recipient; the impossibility of detecting double spending before
+reconciliation is inherent to the offline setting, not a flaw in a
+particular recipient's checks. Payments remain auditable, since each
+carries a ciphertext that provably encrypts the payer's identity, and this
+holds even under \emph{cascade} double spending, where a payee further
+spends an already double-spent token: every perpetrator in the chain is
+still identified. This threat of identification is a meaningful deterrent
+only if detection can be attributed to malice rather than to key
+compromise, since a user whose device is hacked and a user who
+deliberately double spends leave the same digital trail; in this scenario,
+cryptography can support double-spending resistance but cannot enforce it,
+and the remaining gap must be closed at the governance level, for instance
+through insurance or liability for compromised devices, with TTL
+enforcement again limiting the exposure.
+
+Mediating access to the secret key through a trusted element that only ever
+produces a single payment per token closes off this class of attack, at the
+cost of introducing others: an adversary who can clone or roll back the
+secure element can still double spend, though now at a real hardware cost
+rather than none, and with the same reporting incentives making
+undetected repeat use harder to sustain. A properly implemented system also
+needs a recovery mechanism for lost or destroyed devices, which itself
+creates an avenue for abuse if a user falsely claims their device is lost in
+order to retain and later use it. Introducing a waiting period before a
+replacement device is issued, timed so that it exceeds the TTL of the
+locked tokens, together with policies that flag frequent recoveries, limits
+this risk without giving up the usability benefits of recovery.
+
+\paragraph{Instantiating the secure element.} Modern mobile platforms
+provide trusted execution environments that protect app secrets from a
+malicious device owner, but app developers cannot directly access
+TrustZone~\cite{trustzone} or Secure Enclave~\cite{secureenclave}: these
+hardware features are exposed only through higher-level key-management
+APIs. While the secret key itself remains hidden even from a malicious app,
+an attacker who achieves arbitrary code execution, whether by exploiting the
+app or by rooting the device, can still query the key manager to spend a
+token repeatedly, since the confidentiality of the key does not guarantee
+the integrity of the surrounding application logic. Smart cards offer a
+stronger guarantee: platforms such as Javacard~\cite{javacard} or
+MIFARE~\cite{mifare} provide tamper-resistant storage together with a
+dedicated, isolated execution environment, so that both the secret key and
+the logic that uses it are protected. No hardware security is unconditional,
+and an attacker willing to invest sufficient resources may eventually
+extract a card's embedded secret, reverting to the threat model discussed
+above; deploying the system is therefore ultimately a question of
+governance, weighing the cost of rolling out smart cards, the total offline
+value permitted under system-wide restrictions such as TTL, and the
+expected cost and payoff of attacking a card.

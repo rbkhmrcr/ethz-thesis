@@ -46,9 +46,10 @@ values signed~\cite{C:CamLys04}.  An extension supports a constrained form of
 aggregation, but only in settings where all values are known ahead of
 time~\cite{FC:LeeLeeYun13}.
 
-BBS+ credentials support selective disclosure in a single-issuer setting, with
-verification linear in the number of revealed attributes, and form the basis of
-the ongoing IETF standardisation effort~\cite{EC:BonBoy04a,SCN:AuSusMu06}.
+Credentials built on the BBS+ signature scheme support selective disclosure in
+a single-issuer setting, with verification linear in the number of revealed
+attributes, and form the basis of the ongoing IETF standardisation
+effort~\cite{EC:BonBoy04a,SCN:AuSusMu06}.
 
 Further improvements targeted efficiency. The Pointcheval-Sanders signature
 scheme introduces randomisable signatures with sequential aggregation, and
@@ -66,8 +67,8 @@ the issuer, delegating issuance to sub issuers or distributing issuance
 responsibilities amongst several
 issuers~\cite{TCC:BCKL08,CCS:CamDriDub17,NDSS:SABMD19}. In these cases, the now
 decentralised issuer is still responsible for all attributes. While this
-reduces the trust placed in a central authority, it does not fully reflect
-real world scenarios where different authorities independently certify distinct
+reduces the trust placed in a central authority, it does not fully reflect real
+world scenarios where different authorities independently certify distinct
 attributes.
 
 A UC-secure, composable multi-issuer credential system supports selective
@@ -101,7 +102,8 @@ multi-issuer credential systems, reporting asymptotic complexities.
  %
   \begin{tabular}{l|c|c|c|c}
  %
-    Scheme & Assumptions & Multi-issuer & $|$cred$|$ & Prover cost \\
+    \toprule Scheme & Assumptions & Multi-issuer & $|$cred$|$ & Prover cost \\
+    \midrule
   %
     \hline \cite{SCN:CamLys02} & sRSA & No & $O(1)$ & $O(n)$ \\
   %
@@ -111,13 +113,12 @@ multi-issuer credential systems, reporting asymptotic complexities.
   %
     \cite{canard2011anonymous} & $q$-ADHSDH & Partial & $O(n)$ & $O(k)$ \\
   %
-    \cite{AC:CDHK15} & $n$-BSDH, $n$-RootDH & Yes & $O(1)$ &
-    $O(k)$ \\
+    \cite{AC:CDHK15} & $n$-BSDH, $n$-RootDH & Yes & $O(1)$ & $O(k)$ \\
   %
     \cite{SCN:HebPoi22} & GGM & Yes & $O(1)$ & $O(k)$ \\
   %
-    \textbf{Our scheme} & BCDH, m-BCDH, $q$-SDH & Yes & $O(1)$ & $O(k)$
-    \\
+    \textbf{Our scheme} & BCDH, m-BCDH, $q$-SDH & Yes & $O(1)$ & $O(k)$ \\
+    \bottomrule
   %
   \end{tabular}
   %
@@ -143,5 +144,5 @@ generic primitives, proved secure in Section~\ref{sec:agg-creds-security}.
 Section~\ref{sec:agg-creds-instantiation} gives a concrete instantiation,
 including our tag-based aggregate signature scheme, which
 Section~\ref{sec:agg-creds-security} proves secure.
-Section~\ref{sec:agg-creds/eval} evaluates performance, and
+Section~\ref{sec:agg-creds-evaluation} evaluates performance, and
 Section~\ref{sec:agg-creds-summary} concludes.

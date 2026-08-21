@@ -71,7 +71,6 @@
   arc=1mm
 }{exp}
 
-
 \newcommand{\algo}[1]{\mathsf{#1}}
 \newcommand{\sample}{\overset{\$}{\leftarrow}}
 \newcommand{\secparam}{\kappa}
@@ -112,7 +111,7 @@
 \newcommand{\SPSsign}{\SPS\algo{.Sign}}
 \newcommand{\SPSrandomise}{\SPS\algo{.Randomise}}
 \newcommand{\SPSverify}{\SPS\algo{.Verify}}
-\newcommand{\SPSsig}{\psi}
+\newcommand{\SPSsig}{\SPS\algo{.sig}}
 \newcommand{\mssg}{M}
 
 % encryption
@@ -158,7 +157,8 @@
 \newcommand{\Hash}{\algo{Hash}}
 \newcommand{\hashgen}{\Hash\algo{.Gen}}
 \newcommand{\hasheval}{\Hash\algo{.Eval}}
-\newcommand{\hash}{H}
+\newcommand{\hash}{\algo{H}}
+\newcommand{\hashfs}{\algo{H}_{FS}}
 
 % soks
 \newcommand{\SOK}{\algo{SoK}}
@@ -167,7 +167,6 @@
 \newcommand{\sokverify}{\SOK\algo{.Verify}}
 \newcommand{\soksig}{\algo{proof}}
 \newcommand{\rand}{\algo{rand}}
-\newcommand{\nonce}{\algo{rand}}
 
 % sok sec
 \newcommand{\soksimgen}{\SOK\algo{.SimGen}}
@@ -181,7 +180,7 @@
 \newcommand{\IDsubmit}{\ID\algo{.Submit}}
 \newcommand{\IDexecute}{\ID\algo{.Execute}}
 \newcommand{\IDgen}{\ID\algo{.IDGen}}
-\newcommand{\IDidentify}{\ID\algo{.Identify}}
+\newcommand{\IDidentify}{\ID\algo{.Trace}}
 
 \newcommand{\IDregisterend}{\msgend{\IDregister}}
 \newcommand{\IDgrantend}{\msgend{\IDgrant}}
@@ -273,16 +272,17 @@
 
 \newcommand{\group}[1]{\mathbb{G}_{#1}}
 \newcommand{\Zp}{\mathbb{Z}_p}
+\newcommand{\pairing}{\algo{e}}
 \newcommand{\idfu}[1]{\mathcal{F}_{#1}}
 
 %% hashes, owfs, prfs
 \newcommand{\hashone}{{H_1}}
 \newcommand{\hashtwo}{{H_2}}
 \newcommand{\G}{\mathcal{G}}
-\newcommand{\FE}{\mathcal{F}_\epoch}
-\newcommand{\FT}{\mathcal{F}_\Tag}
-\newcommand{\HE}{\mathcal{H}_\epoch}
-\newcommand{\HT}{\mathcal{H}_\Tag}
+\newcommand{\FE}{\algo{F}_{\algo{E}}}
+\newcommand{\FT}{\algo{F}_{\algo{T}}}
+\newcommand{\HE}{\algo{H}_{\algo{E}}}
+\newcommand{\HT}{\algo{H}_{\algo{T}}}
 
 %% txid things
 \newcommand{\PSK}{\mathcal{S}}

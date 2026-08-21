@@ -1,1 +1,569 @@
-\section{Construction}
+\section{Structure-Preserving Signatures}\label{sec:SPS}
+
+\paragraph{Notation.} Let $[n]$ denote the integer interval $[1,\ldots,n]$.
+Let $\GroupOne$, $\GroupTwo$, and $\GroupT$ be three cyclic groups of large
+prime order $p$ that admit a non-degenerate bilinear pairing $e \colon
+\GroupOne \times \GroupTwo \rightarrow \GroupT$, with $\genOne$ and $\genTwo$
+generators of $\GroupOne$ and $\GroupTwo$ respectively. We denote elements in
+$\GroupOne$ and $\GroupTwo$ by upper-case letters, e.g. $G$ and $\gtwo{G}$,
+and elements of $\Zp$ by lower-case letters. For $\vec{\genTwo} = (\genTwo_1,
+\ldots, \genTwo_l)$, we write $e(\vec{\genOne}, \vec{\genTwo})$ for the
+product $\prod_{i=1}^l e(\genOne_i, \genTwo_i)$.
+
+Let $x \in \Zp$ be a secret value additively shared between $n$ parties such
+that any $t+1$ parties can reconstruct it with the help of a pre-defined
+linear combination. We denote such a sharing $\llbracket x \rrbracket$: the
+vector $(x_1, \ldots, x_n)$ where $x_i$ is the share held by the
+$i^{\mathrm{th}}$ party. For $\vec{x} = (x_1, \ldots, x_l) \in \Zp^l$, we
+write $\llbracket \vec{x} \rrbracket$ for the vector $(\llbracket x_1
+\rrbracket, \ldots, \llbracket x_l \rrbracket)$.
+
+In this section we describe two structure-preserving signatures. The first,
+by~\cite{Abe2011}, is optimal in terms of size, and existentially unforgeable
+in the generic group model (GGM). The second, by~\cite{Kiltz2015}, produces
+signatures with more group elements, but is existentially unforgeable under
+the DDH assumption. For each, we also sketch how it can be thresholdised;
+Section~\ref{sec:schemes} turns these sketches into full descriptions,
+building on the MPC functionalities formalised in Section~\ref{sec:MPC}.
+
+\subsection{Optimal re-randomisable structure-preserving signatures in the
+GGM}\label{sec:sps-ggm}
+
+Abe, Groth, Haralambiev, and Ohkubo~\cite{Abe2011} introduced the first
+optimal-size structure-preserving signature scheme for asymmetric pairings.
+
+\begin{primitivebox}{Optimal structure-preserving signatures (Abe, Groth,
+  Haralambiev, and Ohkubo)}{sps-ggm}
+
+  \begin{description}
+
+    \item[$(\pk, \sk) \sample \keygen(\secparam, l)$ :] On input security
+      parameter $\secparam$ and vector length $l$, do:
+
+      \begin{enumerate}
+
+        \item Sample $\vec{u} = (u_1, \ldots, u_l) \sample (\Zp^*)^l$ and $v
+          \sample \Zp$.
+
+        \item Compute $\vec{\UTwo} = (\UTwo_1, \ldots, \UTwo_l) = (u_1
+          \genTwo, \ldots, u_l \genTwo) \in \GroupTwo^l$ and $\VOne = v
+          \genOne \in \GroupOne$.
+
+        \item Return $\pk = (\vec{\UTwo}, \VOne)$ and $\sk = (\vec{u}, v)$.
+
+      \end{enumerate}
+
+    \item[$\sigma \sample \sign(\sk, \vec{\MOne})$ :] On input secret key
+      $\sk = (\vec{u}, v)$ and vector $\vec{\MOne} = (\MOne_1, \ldots,
+      \MOne_l) \in \GroupOne^l$, do:
+
+      \begin{enumerate}
+
+        \item Sample $r \sample \Zp^*$.
+
+        \item Return $\sigma = (\RTwo, \STwo, \TOne)$ such that:
+          %
+          \begin{equation*}
+          %
+            \RTwo = \tfrac{1}{r}\genTwo, \qquad \STwo = v\RTwo, \qquad \TOne =
+            r\left(\genOne - \vec{u}\vec{\MOne}\right).
+          %
+          \end{equation*}
+
+      \end{enumerate}
+
+    \item[$\{0,1\} \leftarrow \verify(\pk, \vec{\MOne}, \sigma)$ :] On input
+      signature $\sigma = (R, S, T) \in \GroupTwo^2 \times \GroupOne$ and
+      vector $\vec{M} \in \GroupOne^l$, return 1 if the following holds, and
+      0 otherwise:
+      %
+      \begin{equation}
+      %
+        e(\VOne, \RTwo) = e(\genOne, \STwo) \ \wedge \ e(\TOne,
+        \RTwo)\prod_{i=1}^le(\MOne_i, \UTwo_i) = e(\genOne, \genTwo).
+      %
+      \end{equation}
+      \label{eq:abe-ver}
+
+  \end{description}
+
+\end{primitivebox}
+
+This signature is existentially unforgeable in the GGM~\cite{Abe2011}.
+
+\paragraph{Thresholdising the signature.} The starting point for the
+threshold variant of~\cite{Abe2011} is \emph{$t$-additive secret sharing},
+which distributes the secret key $\sk = (u_1, \ldots, u_l, v)$ among the
+signers such that any $t+1$ signers can jointly recover it by computing a
+pre-defined linear function of their shares, where $t$ upper bounds the
+number of corrupt signers. To sign, the signers first come together to
+additively secret-share a random value $r$. Once $r$ is shared, they use MPC
+to compute additive shares of $1/r$ and of the products $u_i r$ for $i \in
+[l]$. Given a vector of messages $(\MOne_1, \ldots, \MOne_l)$, each signer
+then computes its signature share as:
+%
+\begin{equation*}
+%
+  \llbracket \RTwo \rrbracket = \llbracket \tfrac{1}{r}\rrbracket\genTwo \ ; \
+  \llbracket \STwo \rrbracket = {\llbracket \tfrac{v}{r}\rrbracket}\genTwo \ ;
+  \ \llbracket \TOne \rrbracket = \llbracket r\rrbracket \genOne -
+  \sum_{i=1}^l \llbracket ru_i\rrbracket {\MOne_i}.
+%
+\end{equation*}
+%
+A party receiving $t+1$ distinct shares combines them and checks whether the
+resulting signature is valid.
+
+In the \emph{honest majority} setting ($t < n/2$, where $n$ is the number of
+signers), the signature can always be computed from the shares of honest
+signers alone. In the \emph{dishonest majority} setting ($t > n/2$),
+robustness is no longer guaranteed, but if the underlying MPC supports
+identifiable aborts, so does the threshold signature: corrupt parties that
+contribute bogus shares are eventually caught. We stress that the sharing of
+$r$, the computation of $1/r$, and the products $v/r$ and $u_i r$ for $i \in
+[l]$ can all be performed before the messages to be signed are known, i.e.
+\emph{offline}. The remaining computation, performed once the messages are
+known (\emph{online}), is purely local, and is equivalent to the computation
+of the original signature.
+
+\subsection{Structure-preserving signatures under
+DDH}\label{sec:sps-kiltz}
+
+Kiltz, Pan, and Wee~\cite{Kiltz2015} introduced a structure-preserving
+signature scheme that is existentially unforgeable under the DDH assumption.
+
+\begin{primitivebox}{Structure-preserving signatures under DDH (Kiltz, Pan,
+  and Wee)}{sps-kiltz}
+
+  \begin{description}
+
+    \item[$(\pk, \sk) \sample \keygen(\secparam, l)$ :] On input security
+      parameter $\secparam$ and vector length $l$, do:
+
+      \begin{enumerate}
+
+        \item Sample column vectors $\vec{a} = (1, a)^{\tr}$ and $\vec{b} =
+          (1, b)^{\tr}$, for uniformly random $a, b \in \Zp$, together with
+          uniformly random matrices $\mat{k} \in \Zp^{(l+1)\times 2}$,
+          $\mat{c} \in \Zp^{2\times 2}$, and $\mat{d} \in \Zp^{2\times 2}$.
+
+        \item Compute $\vec{u} = \mat{k}\vec{a}$, $\vec{v} = \mat{c}\vec{a}$,
+          $\vec{w} = \mat{d}\vec{a}$, $\vec{x} = \vec{b}^{\tr}\mat{c}$, and
+          $\vec{y} = \vec{b}^{\tr}\mat{d}$.
+
+        \item Compute $\vec{\BOne} = \genOne(1, b)$, $\vec{\XOne} =
+          \genOne\vec{x}$, and $\vec{\YOne} = \genOne\vec{y}$.
+
+        \item Compute $\vec{\ATwo} = \genTwo(1, a)$, $\vec{\UTwo} =
+          \genTwo\vec{u}$, $\vec{\VTwo} = \genTwo\vec{v}$, and $\vec{\WTwo} =
+          \genTwo\vec{w}$.
+
+        \item Return $\sk = (\mat{k}, \vec{\BOne}, \vec{\XOne}, \vec{\YOne})$
+          and $\pk = (\vec{\ATwo}, \vec{\UTwo}, \vec{\VTwo}, \vec{\WTwo})$.
+
+      \end{enumerate}
+
+    \item[$\sigma \sample \sign(\sk, \vec{\MOne})$ :] On input secret key
+      $\sk = (\mat{k}, \vec{\BOne}, \vec{\XOne}, \vec{\YOne})$ and vector
+      $\vec{\MOne} = (\MOne_1, \ldots, \MOne_l)$, do:
+
+      \begin{enumerate}
+
+        \item Sample $r, s \sample \Zp^*$.
+
+        \item Compute:
+          %
+          \begin{align*}
+          %
+            \QTwo &= s\genTwo, \qquad \vec{\ROne} = r\vec{\BOne}, \qquad
+            \vec{\SOne} = rs\vec{\BOne}, \\ \vec{\TOne} &= (\genOne,
+            \vec{\MOne})\mat{k} + r (\vec{\XOne}+s\vec{\YOne}).
+          %
+          \end{align*}
+
+        \item Return $\sigma = (\QTwo, \vec{\ROne}, \vec{\SOne},
+          \vec{\TOne})$.
+
+      \end{enumerate}
+
+    \item[$\{0,1\} \leftarrow \verify(\pk, \vec{\MOne}, \sigma)$ :] On input
+      signature $\sigma =(\QTwo, \vec{\ROne}, \vec{\SOne}, \vec{\TOne}) \in
+      \GroupTwo\times\GroupOne^6$ and vector $\vec{M}$ of $l$ messages in
+      $\GroupOne$, return 1 if the following holds, and 0 otherwise:
+      %
+      \begin{equation}
+      %
+        e(\vec{\TOne}, \vec{\ATwo}) = e((\genOne, \vec{\MOne}),
+        \vec{\UTwo})\, e(\vec{\ROne},\vec{\VTwo})\, e(\vec{\SOne},
+        \vec{\WTwo}) \ ; \qquad e(\ROne, \QTwo) = e(\SOne, \genTwo).
+      %
+      \end{equation}
+      \label{eq:kiltz-ver}
+
+  \end{description}
+
+\end{primitivebox}
+
+\paragraph{Thresholdising the signature.} As with~\cite{Abe2011}, we start
+from a $t$-additive secret sharing of $\sk = (\mat{k}, \vec{\BOne},
+\vec{\XOne}, \vec{\YOne})$ among the signers. To sign a vector of messages
+$\vec{M}$, the signers first come together to additively secret-share random
+values $(r, s)$. Once $(r, s)$ are shared, they use MPC to compute additive
+shares $\llbracket s\genTwo\rrbracket = \llbracket s\rrbracket \genTwo$,
+$\llbracket r\vec{\BOne}\rrbracket$, $\llbracket rs\vec{\BOne} \rrbracket$,
+$\llbracket r\vec{\XOne} \rrbracket$, and $\llbracket rs\vec{\YOne}
+\rrbracket$. Given a vector of messages $(\MOne_1, \ldots, \MOne_l)$, a signer
+computes the share $\llbracket (\genOne, \vec{\MOne})\mat{k}\rrbracket =
+(\genOne, \vec{\MOne}) \llbracket \mat{k}\rrbracket$, and outputs its
+signature share as:
+%
+\begin{align*}
+%
+  \llbracket \QTwo\rrbracket &= \llbracket s\rrbracket \genTwo \ ; \
+  \llbracket\vec{\ROne}\rrbracket = \llbracket r\vec{\BOne}\rrbracket \ ; \
+  \llbracket\vec{\SOne}\rrbracket = \llbracket rs\vec{\BOne} \rrbracket \ ;
+  \\ \llbracket\vec{\TOne}\rrbracket &= (\genOne,
+  \vec{\MOne})\llbracket\mat{k}\rrbracket + \llbracket r \vec{\XOne}
+  \rrbracket+\llbracket rs\vec{\YOne}\rrbracket.
+%
+\end{align*}
+%
+As before, a party receiving $t+1$ distinct shares combines them and checks
+whether the resulting signature is valid.
+
+Most of this computation, namely $\llbracket \QTwo\rrbracket$, $\llbracket
+\vec{\ROne}\rrbracket$, $\llbracket \vec{\SOne}\rrbracket$, $\llbracket r
+\vec{\XOne} \rrbracket$, and $\llbracket rs\vec{\YOne}\rrbracket$, can again
+be performed offline, before the messages are known. Once the messages are
+known, the signers need only \emph{locally} compute $(\genOne,
+\vec{\MOne})\llbracket\mat{k}\rrbracket$, so the online phase remains cheap
+relative to the offline phase.
+\section{Secure Multiparty Computation}\label{sec:MPC}
+
+In this section, we describe the ideal functionalities we assume for secure
+MPC over a prime order field $\Zp$ and a generic prime order group $\Group$.
+Section~\ref{sec:eval} then summarises concrete instantiations of
+these ideal functionalities in the honest- and dishonest-majority settings,
+via ATLAS and MASCOT respectively.
+
+\subsection{Functionalities for secure multiparty computation in $\Zp$}
+
+\begin{figure*}
+    \small
+	\fbox{\parbox{0.98\linewidth}{
+		\begin{algorithmic}[1]
+
+            \Statex \underline{{\bf Functionality} $\F{\randshare}$}
+            \begin{enumerate}
+                \item
+                $\F{\randshare}$ receives a fresh identifier $\id_x$ from the honest parties and contacts the adversary with this identifier.
+                In response, the adversary sends the set of shares $\{x^*_i\}_{\Party_i \in \Cor}$.
+
+                \item
+                $\F{\randshare}$ samples a random $t$-additive sharing $\llbracket x \rrbracket = (x_1, ..., x_n)$ such that $x^*_i = x_i, \forall i : \Party_i \in \Cor$.
+                If such a sharing does not exist, $\F{\randshare}$ sends $\abort$ to all honest parties and stops.
+
+                \item
+                Else $\F{\randshare}$
+                \begin{itemize}
+                    \item distributes to each honest party its share $\langle \id_x, x_i\rangle$;
+                    \item and stores entries $\langle \share, \id_x, x_i \rangle$ and entry $\langle\secret, \id_x, x \rangle$.
+                \end{itemize}
+            \end{enumerate}
+        \smallskip
+         \Statex \underline{{\bf Functionality} $\F{\add}$}
+         \begin{enumerate}
+            \item
+            $\F{\add}$ receives from the honest parties  tuples $(\id_z, \langle \id_x, x_i\rangle, \langle \id_y,y_i\rangle)_{\Party_i \in \Hon}$.
+
+            \item
+            $\F{\add}$ retrieves all entries $\langle \share, \id_x, x_i\rangle$ and $\langle \share, \id_y, y_i\rangle$, followed by entries $\langle \secret, \id_x, x\rangle$ and $\langle \secret, \id_y, y\rangle$, computes $z_i = x_i+y_i$ and $z = x+y$, and stores entries $\langle \share, \id_z, z_i\rangle$ and $\langle \secret, \id_z, z \rangle$.
+
+            \item
+            $\F{\add}$ outputs to each honest party $\Party_i$ its share $z_i$.
+         \end{enumerate}
+        \smallskip
+        \Statex \underline{{\bf Functionality} $\F{\mul}$}
+        \begin{enumerate}
+            \item
+            $\F{\mul}$ receives from the honest parties  tuples $(\id_z, \langle \id_x, x_i\rangle, \langle \id_y,y_i\rangle)_{\Party_i \in \Hon}$ and from the adversary tuples $(\id_z, \langle \id_x, x_i \rangle,  \langle \id_y, y_i\rangle)_{\Party_i \in \Cor}$.
+            \item
+            $\F{\mul}$ retrieves entries $\langle \share, \id_x, x_i\rangle$ and $\langle \share, \id_y, y_i \rangle$ using the values $x_i$ and $y_i$ provided in the previous step.
+
+            \item
+            If at least $t+1$ entries are successfully retrieved for $\id_x$ and also for $\id_y$, then $\F{\mul}$
+            \begin{itemize}
+                \item
+                fetches entries $\langle \secret, \id_x,x\rangle $ and $\langle \secret, \id_y,y\rangle $;
+                \item
+                computes $z = xy$ and a $t$-additive sharing $\llbracket z \rrbracket = (z_1, ..., z_n)$ of $z$;
+                \item
+                sends to each party $\Party_i$ its share $z_i$;
+                \item
+                and finally stores entries $\langle \share, \id_z, z_i\rangle$,  $\forall i \in [n]$ and entry $\langle \secret, \id_z, z\rangle$.
+            \end{itemize}
+
+            \item
+            Else $\F{\mul}$ sends $\abort$ to the honest parties and stops.
+        \end{enumerate}
+        \smallskip
+        \Statex \underline{{\bf Functionality} $\F{\inv}$}
+        \begin{enumerate}
+            \item
+            $\F{\inv}$ receives from the honest parties their tuples $(\id_z, \langle \id_x, x_i\rangle)_{\Party_i \in \Hon}$ and from the adversary the tuples $(\id_z, \langle \id_x, x_i \rangle)_{\Party_i \in \Cor}$.
+            \item
+            $\F{\inv}$ retrieves entries $\langle \share, \id_x, x_i\rangle$ using the values $x_i$ received in the previous step.
+
+            \item
+            If at least $t+1$ entries are successfully retrieved, then $\F{\inv}$
+            \begin{itemize}
+                \item
+                gets entry $\langle \secret, \id_x, x \rangle$;
+                \item
+                computes $z = 1/x$ and a $t$-additive sharing $\llbracket z \rrbracket =(z_1, ..., z_n)$ of $z$;
+                \item
+                sends to each party $\Party_i$ its share $z_i$;
+                \item and finally stores entries $\langle \share, \id_z, z_i\rangle$, $\forall \ i \in [n]$ and entry $\langle \secret, \id_z, z\rangle$.
+            \end{itemize}
+
+            \item
+            Else $\F{\inv}$ sends $\abort$ to the honest parties and stops.
+        \end{enumerate}
+        \smallskip
+        \Statex \underline{{\bf Functionality} $\F{\combine}$}
+        \begin{enumerate}
+            \item
+            $\F{\combine}$ receives from the honest parties their shares $(\langle \id_x,x_i\rangle)_{\Party_i \in \Hon}$ and from the adversary the shares $(\langle \id_x,  x_i \rangle)_{\Party_i \in \Cor}$.
+
+            \item
+            $\F{\combine}$ retrieves entries $\langle \share, \id_x,x_i\rangle$ using the values $x_i$ received in the previous step.
+
+            \item
+            If at least $t+1$ entries are successfully retrieved, then $\F{\combine}$ gets entry $\langle \secret, \id_x, x\rangle$ and sends $x$ to the honest parties and the adversary.
+
+            \item
+            Else $\F{\combine}$ sends $\abort$ to the honest parties and stops.
+        \end{enumerate}
+        \end{algorithmic}
+    }}
+\caption{Ideal functionalities for MPC in $\Zp$.}
+\label{fig:ideal-func}
+\end{figure*}
+
+Our constructions of threshold structure-preserving signatures build upon
+existing frameworks for secure MPC over inputs in $\Zp$. Concretely, we assume
+some realisation of the ideal MPC functionality over $\Zp$ described in
+Figure~\ref{fig:ideal-func}, where $\Hon$ and $\Cor$ denote the sets of honest
+and corrupted parties respectively. Unless otherwise specified, we assume
+security against malicious corruption of parties. Recall that $\llbracket x
+\rrbracket$, for $x \in \Zp$, denotes that $x$ is secret-shared: no individual
+party has access to $x$, but each party holds some share $x_i$ of $x$ (for
+simplicity, we assume this notation incorporates the additional
+authentication components required for malicious security).
+
+\paragraph{Linearity-preservation.} Fundamentally, we require that the
+secret-shared representation $\llbracket x \rrbracket$ is
+linearity-preserving: for any $x,y,z,\alpha,\beta\in \Zp$ such that $u =
+\alpha\cdot x + \beta \cdot y + z$, given secret shares $\llbracket x
+\rrbracket$ and $\llbracket y \rrbracket$ and public values $z,\alpha,\beta$,
+the parties can compute a secret sharing of $u$ ``for free'' as
+\[\llbracket u \rrbracket = \alpha\cdot \llbracket x \rrbracket + \beta \cdot
+\llbracket y \rrbracket + z.\] Since we assume malicious security, this
+property must also be preserved for any additional authentication
+components, which we otherwise abstract out for ease of exposition.
+
+\paragraph{Functionalities for secure MPC in $\Zp$.} Figure~\ref{fig:ideal-func}
+formally describes the ideal functionalities we assume for secure MPC in
+$\Zp$. We assume a randomised functionality that generates a secret-shared
+representation $\llbracket r \rrbracket$ for a randomly sampled value $r\gets
+\Zp$, together with four deterministic functionalities, described below
+(all arithmetic is in $\Zp$):
+
+\begin{enumerate}
+
+	\item A functionality that adds secret-shared inputs: given $\llbracket x
+    \rrbracket$ and $\llbracket y \rrbracket$, produces $\llbracket z
+    \rrbracket$ such that $z = x + y$. By linearity-preservation, this comes
+    for free, as it can be performed locally by each party.
+
+	\item A functionality that multiplies secret-shared inputs: given
+    $\llbracket x \rrbracket$ and $\llbracket y \rrbracket$, produces
+    $\llbracket z \rrbracket$ such that $z = x \cdot y$.
+
+	\item A functionality that inverts a secret-shared value: given
+    $\llbracket x \rrbracket$, produces $\llbracket z \rrbracket$ such that $z
+    = x^{-1}$.
+
+	\item A functionality that combines the shares of a secret-shared value
+    $\llbracket x \rrbracket$: reconstructs and distributes $x$ to all, or a
+    subset, of the parties.
+
+\end{enumerate}
+
+\subsection{Functionalities for secure multiparty computation in $\Group$}
+
+\begin{figure*}
+    \small
+	\fbox{\parbox{0.98\linewidth}{
+		\begin{algorithmic}[1]
+        \Statex \underline{{\bf Functionality} $\F{\randsharegrp}$}
+            \begin{enumerate}
+                \item $\F{\randsharegrp}$ receives a fresh identifier $\id_{\X}$ from the honest parties and contacts the adversary with this identifier.
+                In response, the adversary sends the set of shares $\{x_i \}_{\Party_i \in \Cor}$.
+
+                \item
+                $\F{\randsharegrp}$ samples a random $t$-additive sharing $\llbracket x \rrbracket = (x_1, ..., x_n)$ such that $x_i = x^*_i, \forall i : \Party_i \in \Cor$.
+                If such a sharing does not exist, $\F{\randsharegrp}$ sends $\abort$ to all honest parties and stops.
+
+                \item
+                Else $\F{\randsharegrp}$
+                \begin{itemize}
+                    \item
+                    computes the shares $\llbracket \X \rrbracket = (\X_1, ..., \X_n)$ such that $\X_i = x_i\gen$;
+                    \item
+                    distributes to each honest party the tuple $\langle \id_{\X}, X_i, x_i\rangle$;
+                    \item
+                    and stores entries $\langle \share, \id_{\X}, \X_i \rangle$ and entry $\langle\secret, \id_{\X}, \X \rangle$.
+                \end{itemize}
+            \end{enumerate}
+            \smallskip
+
+            \Statex \underline{{\bf Functionality $\F{\mulgrp}$}}
+        \begin{enumerate}
+            \item
+            $\F{\mulgrp}$ receives from the honest parties  tuples $(\id_{\Z}, \langle \id_{\X}, \X_i\rangle, \langle \id_{\Y},\Y_i\rangle)_{\Party_i \in \Hon}$.
+
+            \item
+            $\F{\mulgrp}$ retrieves all entries $\langle \share, \id_{\X}, \X_i\rangle$ and $\langle \share, \id_{\Y}, \Y_i\rangle$, followed by entries $\langle \secret, \id_{\X}, \X\rangle$ and $\langle \secret, \id_{\Y}, \Y\rangle$, computes $\Z_i = \X_i+\Y_i$ and $\Z = \X+\Y$, and stores entries $\langle \share, \id_{\Z}, \Z_i\rangle$ and $\langle \secret, \id_{\Z}, \Z \rangle$.
+
+            \item
+            $\F{\mulgrp}$ outputs to each honest party $\Party_i$ its share $\Z_i$.
+        \end{enumerate}
+        \Statex \underline{{\bf Functionality} $\F{\expgengrp}$}
+        \begin{enumerate}
+            \item
+            $\F{\expgengrp}$ receives from the honest parties  tuples $(\id_{\Z}, \langle \id_{x}, x_i\rangle, \Y)_{\Party_i \in \Hon}$.
+
+            \item
+            $\F{\expgengrp}$ retrieves all entries $\langle \share, \id_x, x_i\rangle$ and entry $\langle \secret, \id_x, x\rangle$, computes $\Z_i = x_i\Y$ and $\Z = x\Y$, and stores entries $\langle \share, \id_{\Z}, \Z_i\rangle$ and $\langle \secret, \id_{\Z}, \Z  \rangle$.
+
+            \item
+            $\F{\expgengrp}$ outputs to each honest party $\Party_i$ its share $\Z_i$.
+        \end{enumerate}
+
+        \smallskip
+        \Statex \underline{{\bf Functionality} $\F{\expgrp}$}
+        \begin{enumerate}
+            \item
+            $\F{\expgrp}$ receives from the honest parties the tuples  $(\id_{\Z}, \langle \id_x, x_i\rangle, \langle \id_{\Y},\Y_i\rangle)_{\Party_i \in \Hon}$ and from the adversary the shares $(\id_{\Z}, \langle \id_x, x_i \rangle,  \langle \id_{\Y},  \Y_i\rangle)_{\Party_i \in \Cor}$.
+            \item
+            $\F{\expgrp}$ retrieves entries $\langle \share, \id_x, x_i\rangle$ and $\langle \share, \id_{\Y}, \Y_i \rangle$ using the values received in the previous step.
+            \item
+            If at least $t+1$ entries are successfully retrieved for $\id_x$ and also for $\id_{\Y}$, then $\F{\expgrp}$
+            \begin{itemize}
+                \item
+                retrieves entries $\langle \secret, \id_x,x\rangle $ and $\langle \secret, \id_{\Y},\Y\rangle$;
+                \item
+                computes $\Z = x\Y$, computes $t$-additive shares $(x'_1, ..., x'_n)$ of $x$, and sets $\Z_i = x'_i\Y$.
+                \item
+                sends to each party $\Party_i$ its share $\Z_i$ of $\Z$;
+                \item
+                and finally stores entries $\langle \share, \id_{\Z}, \Z_i\rangle$ and entry $\langle \secret, \id_{\Z}, \Z\rangle$.
+            \end{itemize}
+
+            \item
+            Else $\F{\expgrp}$ sends $\abort$ to the honest parties and stops.
+        \end{enumerate}
+        \smallskip
+        \Statex \underline{{\bf Functionality} $\F{\combinegrp}$}
+        \begin{enumerate}
+            \item
+            $\F{\combinegrp}$ receives from the honest parties their shares $(\langle \id_{\X}, \X_i\rangle)_{\Party_i \in \Hon}$ and from the adversary the shares $(\langle \id_{\X}, \X_i \rangle)_{\Party_i \in \Cor}$.
+            \item
+            $\F{\combinegrp}$ retrieves entries $\langle \share, \id_{\X},\X_i\rangle$ using the values $\X_i$ received in the previous step.
+            \item
+            If at least $t+1$ entries are retrieved successfully, then $\F{\combinegrp}$  fetches entry $\langle \secret, \id_{\X}, {\X}\rangle$ and sends $\X$ to the honest parties and the adversary.
+
+            \item
+            Else $\F{\combinegrp}$ sends $\abort$ to the honest parties and stops.
+        \end{enumerate}
+        \end{algorithmic}
+    }}
+\caption{Ideal functionalities for MPC in $\Group$.}
+\label{fig:ideal-func-group}
+\end{figure*}
+
+We additionally assume a framework for secure MPC over inputs in a cyclic
+group $(\Group,+)$ of prime order $p$. In practice, this framework is
+satisfied by both $\GroupOne$ and $\GroupTwo$, but we present it here in the
+abstract to avoid repetition. A group element is shared by sharing a random
+exponent $x$ and raising a public generator $\gen$ to each share of $x$; each
+resulting group element is then an additive share of $x\gen$, as captured by
+the $\F{\randsharegrp}$ interface below. Concretely, we assume some
+realisation of the ideal MPC functionality over $\Group$ described in
+Figure~\ref{fig:ideal-func-group}, where $\Hon$ and $\Cor$ again denote the
+sets of honest and corrupted parties respectively. As for MPC over $\Zp$,
+unless otherwise specified, we assume security against malicious corruption
+of parties.
+
+We use the representation $\llbracket X \rrbracket$, for $X\in \Group$, to
+denote that $X$ is secret-shared: no individual party has access to $X$, but
+each party holds some share $X_i$ of $X$ (again, we assume this notation
+incorporates the authentication components required for malicious security).
+
+\paragraph{Linearity-preservation.} We again require that the secret-shared
+representation $\llbracket X \rrbracket$ is linearity-preserving: for any
+$X,Y,Z\in \Group$ and $\alpha,\beta\in \Zp$ such that $U = \alpha X + \beta Y
++ Z$, given secret shares $\llbracket X \rrbracket$ and $\llbracket Y
+\rrbracket$, public group element $Z$, and public values $\alpha,\beta$, the
+parties can compute a secret sharing of $U$ ``for free'' as
+\[\llbracket U \rrbracket = \alpha\llbracket X \rrbracket + \beta \llbracket Y
+\rrbracket + Z.\] Again, since we assume malicious security, this property
+must also be preserved for any additional authentication components.
+
+\paragraph{Functionalities for secure MPC in $\Group$.} Figure~\ref{fig:ideal-func-group}
+describes the functionalities we assume for secure MPC in $\Group$, analogous
+to those of Figure~\ref{fig:ideal-func} for $\Zp$. We again assume a
+randomised functionality that generates a secret-shared representation
+$\llbracket R \rrbracket$ for a randomly sampled group element $R\gets
+\Group$, together with four deterministic functionalities, described below
+(all group operations below are written additively):
+
+\begin{enumerate}
+
+	\item A functionality that adds secret-shared group elements: given
+    $\llbracket X \rrbracket$ and $\llbracket Y \rrbracket$, produces
+    $\llbracket Z \rrbracket$ such that $Z = X + Y$. By linearity-preservation
+    this comes for free, as it can be performed locally by each party.
+
+	\item A functionality that multiplies a secret-shared field element with a
+    public group element: given $\llbracket x \rrbracket$ and public $Y$,
+    produces $\llbracket Z \rrbracket$ such that $Z = xY$. As with addition,
+    this comes for free, as it can be executed locally by each party.
+
+	\item A functionality that multiplies a secret-shared field element with a
+    secret-shared group element: given $\llbracket x \rrbracket$ and
+    $\llbracket Y \rrbracket$, produces $\llbracket Z \rrbracket$ such that $Z
+    = xY$.
+
+	\item A functionality that combines the shares of a secret-shared group
+    element $\llbracket X \rrbracket$: reconstructs and distributes $X$ to
+    all, or a subset, of the parties.
+
+\end{enumerate}
+
+Multiplying a secret-shared group element $\llbracket X \rrbracket$ by a
+public value $y \in \Zp$, to produce $\llbracket Z \rrbracket$ such that $Z =
+yX$, can also be performed locally, as this is essentially a repeated
+application of the local addition functionality above.
+
+In practice, $\Group$ corresponds to either $\GroupOne$ or $\GroupTwo$, most
+often represented concretely by elliptic curve groups, whose elements are
+coordinate pairs satisfying the curve equation, e.g. $(x_0, y_0)$. Sharing a
+group element is \emph{not} achieved by two independent secret sharings of
+the coordinates $x_0$ and $y_0$, i.e. $(\llbracket x_0 \rrbracket, \llbracket
+y_0 \rrbracket)$, as this would require parties to communicate in order to
+compute group operations on the shares. Instead, the group element is shared
+as a single unit, $\llbracket (x_0,y_0) \rrbracket$, so that group operations
+can be performed by each party locally, as desired.
+

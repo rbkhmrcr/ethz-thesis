@@ -1,1 +1,52 @@
-\section{Evaluation}
+\section{Evaluation}\label{sec:txid-evaluation}
+
+We evaluate the concrete instantiation of Section~\ref{sec:txid-instantiation},
+benchmarking each relation's proof and verification cost individually before
+reporting end-to-end figures for the full protocol.
+
+\subsection{Experimental evaluation}\label{sec:txid-eval-experimental}
+
+All experiments were conducted on an Apple M1 Pro with 16GB RAM using Go's
+benchmarking framework. The algebraic construction is implemented as a research
+prototype without batching, precomputation, or multi-exponentiation
+optimizations; benchmarks represent conservative performance estimates.
+
+For the proof of knowledge of a signature from the BBS+ signature scheme
+($\rel_4$ and $\rel_9$), the prover costs are 3 scalar multiplications, 2
+multi-exponentiations in $\group{1}$, and 5 scalar responses. The verifier
+costs are 2 pairing evaluations and 3 multi-exponentiations in $\group{1}$.
+For the epoch key proof, $\rel_5$, the prover costs are 2 exponentiations in
+$\group{1}$ and 1 scalar response. The verifier cost is 4 exponentiations in
+$\group{1}$.
+
+For the transaction tag proof, $\rel_8$, the prover and verifier costs for the
+commitment and epoch key correctness and tag PRF correctness are 2
+exponentiations in $\group{1}$, $\ell+1$ exponentiations in $\group{2}$, and 1
+pairing evaluation. For the range check, the prover costs are $O(\ell)$
+exponentiations plus the inner product argument of $O(\ell)$ group operations,
+and the verifier cost is $O(\ell)$ exponentiations.
+
+We note that the proof of $\rel_4$ is computed once at registration and once
+per Grant invocation, and the proof of $\rel_5$ once per epoch.  The proofs of
+$\rel_9$ and $\rel_8$ are computed per transaction.
+
+Table~\ref{tab:algebraic} reports results with $\ell = 10$.
+
+\begin{table}[t] \centering \caption{Algebraic PRF instantiation benchmarks
+  (BN254 / BLS12-381).} \label{tab:algebraic} \begin{tabular}{l r r} \toprule
+    Operation & \ \ BN254 & \ \ BLS12-381 \\ \midrule Epoch proof time (ms)
+              & 0.07 & 0.11 \\ Epoch verification time (ms) & 0.11 & 0.20 \\
+    Tag proof time (ms)          & 2.01 & 3.32 \\ Tag verification time (ms)
+                                 & 4.54 & 6.33 \\ \midrule Total proof time
+    (ms)        & 2.08 & 3.43 \\ Total verification time (ms) & 4.65 & 6.53 \\
+  \bottomrule \end{tabular} \end{table}
+
+  Proof generation completes in a few milliseconds and verification in under
+  10ms even without optimisation, demonstrating practical deployability.  For
+  context, Idemix~\cite{CCS:CamVan02}, a widely deployed anonymous credential
+  system over BLS12-381, requires approximately 4ms for signing and 3ms for
+  verification without tracing support. Our construction achieves comparable
+  verification cost while additionally supporting epoch-bound tracing. A
+  hash-based instantiation using zk-SNARKs, achieving sub-millisecond
+  verification at the cost of a trusted setup, is benchmarked in the full
+  version of this paper.

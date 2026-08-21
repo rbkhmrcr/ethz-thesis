@@ -1,17 +1,17 @@
-\section{Definitions}
+\section{Definitions}\label{sec:txid-definitions}
 
-\subsection{Transaction identification}
+\subsection{Tracing}
 
-A transaction identification scheme involves four types of participants. The
-ledger is a publicly accessible, append-only structure that stores submitted
-transactions; transaction validators decide, on input of the ledger, which
-transactions are valid. The registration authority is honest but curious: it
-authenticates users and issues the credentials required to submit transactions
-and enable selective traceability. Users are potentially malicious, and
-generate and submit confidential transactions while retaining fine-grained
-control over which auditors are authorised to trace them, and during which
-epochs. Auditors are potentially malicious, and may be granted permission to
-trace the transactions of specific users during specific epochs.
+A tracing scheme involves four types of participants. The ledger operator
+maintains a publicly accessible, append-only ledger that stores submitted
+transactions, and runs the transaction validators that decide, on input of the
+ledger, which transactions are valid. The registration authority is honest but
+curious: it authenticates users and issues the credentials required to submit
+transactions and enable selective traceability. Users are potentially
+malicious, and generate and submit confidential transactions while retaining
+fine-grained control over which auditors are authorised to trace them, and
+during which epochs. Auditors are potentially malicious, and may be granted
+permission to trace the transactions of specific users during specific epochs.
 
 We consider static corruption throughout: the simulator corrupts users and
 auditors of its choice before any call to the ideal functionality is made.
@@ -40,25 +40,25 @@ capable of independent corruption.
     $\payload$, outputs transaction $\tx$, and appends it to the ledger if
     valid.
 
-  \item[$\{\payload\} \leftarrow \IDidentify(\crs,\ek,\epoch)$ :] The
-    identification algorithm, on input public parameters $\crs$, epoch tracing
-    key $\ek$, and epoch $\epoch$, returns the set of payloads of the
-    transactions submitted under $\ek$ during $\epoch$.
+  \item[$\{\payload\} \leftarrow \IDidentify(\crs,\ek,\epoch)$ :] The tracing
+    algorithm, on input public parameters $\crs$, epoch tracing key $\ek$, and
+    epoch $\epoch$, returns the set of payloads of the transactions submitted
+    under $\ek$ during $\epoch$.
 
 \end{description}
 
-We define security of transaction identification through an ideal
-functionality $\idfu{txid}$ that represents a trusted third party which
-executes the operations of the ledger on behalf of system participants in a
-way that perfectly meets the system requirements.
+We define security of tracing through an ideal functionality
+$\idfu{\algo{trace}}$ that represents a trusted third party which executes the
+operations of the ledger on behalf of system participants in a way that
+perfectly meets the system requirements.
 
-The ideal functionality captures the properties of transaction identification:
-anonymity, non-repudiation, and permission expiration. Anonymity is enforced
-by ensuring that only an auditor holding a valid tracing permission for a
-specific user and epoch can de-anonymise that user's transactions during that
-epoch. Non-repudiation is achieved by ensuring that every transaction a user
-submitted during an epoch can be traced back to them by any auditor holding a
-valid permission for that user and epoch. Permission expiration is enforced by
+The ideal functionality captures the properties of tracing: anonymity,
+non-repudiation, and permission expiration. Anonymity is enforced by ensuring
+that only an auditor holding a valid tracing permission for a specific user and
+epoch can de-anonymise that user's transactions during that epoch.
+Non-repudiation is achieved by ensuring that every transaction a user submitted
+during an epoch can be traced back to them by any auditor holding a valid
+permission for that user and epoch. Permission expiration is enforced by
 ensuring that tracing permissions are automatically revoked at the end of the
 epoch for which they were granted, so an auditor retains no tracing capability
 beyond it.
@@ -66,40 +66,41 @@ beyond it.
 We have the outputs of the honest parties and~$\adv$ during an execution
 of~$\Pi$ in the real world captured in $\textsc{Exec}_{\Pi,\adv}(\secparam)$,
 and we have the outputs of the honest parties and~$\simu$ interacting
-with~$\idfu{txid}$ in the ideal world captured by
-$\textsc{Exec}_{\idfu{txid},\simu}(\secparam)$.
+with~$\idfu{\algo{trace}}$ in the ideal world captured by
+$\textsc{Exec}_{\idfu{\algo{trace}},\simu}(\secparam)$.
 
 We then say that the protocol~$\Pi$ securely realises the ideal
-functionality~$\idfu{txid}$ if for every PPT adversary~$\adv$, there exists a
-PPT simulator~$\simu$ where $\textsc{Exec}_{\Pi,\adv}(\secparam)$ is
-computationally indistinguishable from $\textsc{Exec}_{\idfu{txid},\simu}(\secparam)$.
+functionality~$\idfu{\algo{trace}}$ if for every PPT adversary~$\adv$, there
+exists a PPT simulator~$\simu$ where $\textsc{Exec}_{\Pi,\adv}(\secparam)$ is
+computationally indistinguishable from
+$\textsc{Exec}_{\idfu{\algo{trace}},\simu}(\secparam)$.
 
-$\idfu{txid}$ receives inputs from system participants and $\simu$, computes
-the corresponding outputs, and delivers them to the authorised parties. It
-exposes interfaces through which $\simu$ and honest participants submit
-inputs, and additionally maintains a current epoch counter that advances by
-one whenever the system moves to the next epoch. The formal description is
+$\idfu{\algo{trace}}$ receives inputs from system participants and $\simu$,
+computes the corresponding outputs, and delivers them to the authorised
+parties. It exposes interfaces through which $\simu$ and honest participants
+submit inputs, and additionally maintains a current epoch counter that advances
+by one whenever the system moves to the next epoch. The formal description is
 given in~\Cref{fig:ftxid}. We summarise each interface below.
 
-\paragraph{Register.} A user calls this to join the system. If the
-registration authority approves and the user has not previously registered,
+\paragraph{$\IDregister$.} A user calls $\IDregister$ to join the system. If
+the registration authority approves and the user has not previously registered,
 registration succeeds.
 
-\paragraph{Submit.} A registered user calls this to submit up to $\Max$
-transactions during the current epoch. Each successful call is recorded
+\paragraph{$\IDsubmit$.} A registered user calls $\IDsubmit$ to submit up to
+$\Max$ transactions during the current epoch. Each successful call is recorded
 together with the identity of the user and the current epoch; $\simu$ learns
 the transaction itself on every call, along with the user's identity if the
 user is corrupt.
 
-\paragraph{Grant.} A user calls this to authorise an auditor to trace their
-transactions for a specific epoch. $\idfu{txid}$ records that the auditor is
-authorised to trace the user's transactions for that epoch; once the epoch
-elapses, the authorisation lapses with it.
+\paragraph{$\IDgrant$.} A user calls $\IDgrant$ to authorise an auditor to
+trace their transactions for a specific epoch. $\idfu{\algo{trace}}$ records
+that the auditor is authorised to trace the user's transactions for that epoch;
+once the epoch elapses, the authorisation lapses with it.
 
-\paragraph{Identify.} An auditor who has been granted permission for a given
-user and epoch calls this to obtain the list of that user's transactions
-during the epoch. $\simu$ additionally learns the traced transactions if the
-auditor is corrupt.
+\paragraph{$\IDidentify$.} An auditor who has been granted permission for a
+given user and epoch calls $\IDidentify$ to obtain the list of that user's
+transactions during the epoch. $\simu$ additionally learns the traced
+transactions if the auditor is corrupt.
 
 \begin{figure} \centering \hspace*{-0.05\textwidth}
   \begin{minipage}{1.1\textwidth}
@@ -108,13 +109,14 @@ auditor is corrupt.
 
       \setlist[enumerate]{ topsep=2pt, partopsep=0pt, parsep=0pt, itemsep=1pt }
 
-      $\idfu{txid}$ maintains tables $\reg$, $\txns$, and $\perm$ to record
-      user activity: $\reg$ tracks registration status, $\txns$ tracks user
-      transactions, and $\perm$ tracks the tracing permissions granted to
-      auditors. It also maintains a current epoch counter $\epoch_{\mathsf{cur}}$,
-      initialised to $1$. We consider a static corruption model, where $\simu$
-      corrupts users and auditors of its choice before any call to
-      $\idfu{txid}$ is made; $\Cor$ is the set of corrupt participants.
+      $\idfu{\algo{trace}}$ maintains tables $\reg$, $\txns$, and $\perm$ to
+      record user activity: $\reg$ tracks registration status, $\txns$ tracks
+      user transactions, and $\perm$ tracks the tracing permissions granted to
+      auditors. It also maintains a current epoch counter
+      $\epoch_{\mathsf{cur}}$, initialised to $1$. We consider a static
+      corruption model, where $\simu$ corrupts users and auditors of its choice
+      before any call to $\idfu{\algo{trace}}$ is made; $\Cor$ is the set of
+      corrupt participants.
 
       \begin{multicols}{2}
 
@@ -152,8 +154,8 @@ auditor is corrupt.
             else $\mathsf{origin} \leftarrow \varnothing$.
 
           \item Send $(\IDsubmit, \tx, \epoch, \mathsf{origin})$ to $\simu$,
-            and wait for the go-ahead. (If the user is corrupt, $\simu$
-            learns the origin of the transaction.)
+            and wait for the go-ahead. (If the user is corrupt, $\simu$ learns
+            the origin of the transaction.)
 
           \item Set $\txns[(\user,\epoch_{\mathsf{cur}})] \leftarrow
             \txns[(\user,\epoch_{\mathsf{cur}})] \cup \tx$.
@@ -170,8 +172,8 @@ auditor is corrupt.
 
           \item If $\reg[\user] = \bot$, then stop.
 
-          \item Send $(\IDgrant, \auditor, \user, \epoch)$ to $\simu$ and
-            wait for the go-ahead. On receiving it, do:
+          \item Send $(\IDgrant, \auditor, \user, \epoch)$ to $\simu$ and wait
+            for the go-ahead. On receiving it, do:
 
             \begin{enumerate}
 
@@ -193,16 +195,16 @@ auditor is corrupt.
             stop. (Only authorised auditors can trace the transactions of a
             user.)
 
-          \item Otherwise, set $T \leftarrow \txns[(\user,\epoch)]$. ($\auditor$
-            traces every transaction $\user$ submitted during $\epoch$:
-            non-repudiation.)
+          \item Otherwise, set $T \leftarrow \txns[(\user,\epoch)]$.
+            ($\auditor$ traces every transaction $\user$ submitted during
+            $\epoch$: non-repudiation.)
 
           \item If $\auditor \in \Cor$, then $T^\star \leftarrow T$; else
             $T^\star \leftarrow \varnothing$.
 
           \item Return $(\IDidentifyend, T)$ to $\auditor$ and
-            $(\IDidentifyend, T^\star)$ to $\simu$. (If the auditor is
-            corrupt, $\simu$ also traces the user's transactions.)
+            $(\IDidentifyend, T^\star)$ to $\simu$. (If the auditor is corrupt,
+            $\simu$ also traces the user's transactions.)
 
         \end{enumerate}
 
@@ -218,5 +220,5 @@ auditor is corrupt.
 
       \end{multicols} \end{framed}
 
-    \caption{Ideal functionality for transaction identification.}
+    \caption{Ideal functionality for tracing, $\idfu{\algo{trace}}$.}
   \label{fig:ftxid} \end{minipage} \end{figure}

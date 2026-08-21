@@ -1,12 +1,17 @@
-\section{Instantiation}\label{sec:inst}
+\section{Instantiation}\label{sec:txid-instantiation}
 
 We describe a concrete instantiation of the black box construction in pairing
 based groups using algebraic PRFs and tailored sigma protocols, yielding a
-transparent setup.
+transparent setup. Two of the four relations above, $\rel_6$ and $\rel_7$,
+involve pairing equations that a general purpose proof system would handle
+expensively; as is standard when instantiating pairing based constructions with
+sigma protocols, we rewrite each as an equivalent, discrete log only relation
+($\rel_9$ and $\rel_8$ respectively) purely for efficiency, without changing
+what is being proved.
 
 \subsection{Building blocks}
 
-\begin{primitivebox}{BBS+ signatures}{fig:bbs}
+\begin{primitivebox}{BBS+ signature scheme}{fig:bbs}
 
   \begin{description}
 
@@ -42,8 +47,9 @@ transparent setup.
 
       \begin{enumerate}
 
-        \item Return $e(E,\ggen_Z\cdot\ggen^{e}) \checkcheck e(\gen_0 \cdot
-          \prod_{i=1}^{L} M_i \cdot \gen_{L+1}^{r}, \ggen)$.
+        \item Return $\pairing(E,\ggen_Z\cdot\ggen^{e}) \checkcheck
+          \pairing(\gen_0 \cdot \prod_{i=1}^{L} M_i \cdot \gen_{L+1}^{r},
+          \ggen)$.
 
       \end{enumerate}
 
@@ -51,14 +57,14 @@ transparent setup.
 
 \end{primitivebox}
 
-This variant of BBS+ signs the group elements $M_i = \gen_i^{m_i}$ directly,
-rather than the scalars $m_i$ themselves. Because computing $\prod_i M_i$
-requires no knowledge of the discrete logarithms $m_i$, a signer can produce a
-valid signature on committed values without ever learning them; this is exactly
-what lets the registration authority certify a user's keys below without ever
-seeing them~\cite{SCN:AuSusMu06,EC:TesZhu23b}.
+This variant of the BBS+ signature scheme signs the group elements $M_i =
+\gen_i^{m_i}$ directly, rather than the scalars $m_i$ themselves. Because
+computing $\prod_i M_i$ requires no knowledge of the discrete logarithms $m_i$,
+a signer can produce a valid signature on committed values without ever
+learning them; this is exactly what lets the registration authority certify a
+user's keys below without ever seeing them~\cite{SCN:AuSusMu06,EC:TesZhu23b}.
 
-\begin{primitivebox}{Pedersen commitments}{fig:pedersen}
+\begin{primitivebox}{Pedersen commitment scheme}{fig:pedersen}
 
   \begin{description}
 
@@ -77,15 +83,15 @@ seeing them~\cite{SCN:AuSusMu06,EC:TesZhu23b}.
 
 \end{primitivebox}
 
-Pedersen commitments are perfectly hiding, so nobody, not even the registration
-authority or an auditor, learns anything about a committed tracing key beyond
-what is explicitly disclosed.  Commitments are group elements, so users can
-prove statements using cheap sigma protocols over discrete logarithms rather
-than requiring general purpose zero knowledge proofs.
+The Pedersen commitment scheme is perfectly hiding, so nobody, not even the
+registration authority or an auditor, learns anything about a committed tracing
+key beyond what is explicitly disclosed.  Commitments are group elements, so
+users can prove statements using cheap sigma protocols over discrete logarithms
+rather than requiring general purpose zero knowledge proofs.
 
-\subsection{Our transaction identification scheme}\label{sec:algebraic}
+\subsection{Our tracing scheme}\label{sec:algebraic}
 
-\begin{protocolbox}{Transaction identification protocol}{fig:txid}
+\begin{protocolbox}{Tracing protocol}{txid}
 
   \begin{description}
 
@@ -110,7 +116,7 @@ than requiring general purpose zero knowledge proofs.
           (\gen_2,\gen_3)$, reusing the generators of Step 2.
 
         \item Set $\Max \leftarrow 2^\ell$, $\FE(\utk,\epoch) :=
-          \HE(\epoch)^{\utk}$, and $\FT(\ek,\gamma) := e(\ek,
+          \HE(\epoch)^{\utk}$, and $\FT(\ek,\gamma) := \pairing(\ek,
           \prod_{i=1}^{\ell} \ggen_i^{\gamma_i})$ over the bit decomposition
           $(\gamma_1,\ldots,\gamma_\ell)$ of $\gamma$.
 
@@ -132,13 +138,13 @@ than requiring general purpose zero knowledge proofs.
           user.
 
         \item The user samples $\sk,\utk \sample \Zp$, sets $S \leftarrow
-          \gen_1^{\sk}$, $T \leftarrow \gen_2^{\utk}$, computes $\soksig
-          \sample \soksign(\crs_0,\inst_0,\witness_0,\rand)$ for $\inst_0 =
-          (\gen_1,\gen_2,S,T)$ and $\witness_0 = (\sk,\utk)$, proving $S =
-          \gen_1^{\sk} \wedge T = \gen_2^{\utk}$, and sends $(S,T,\soksig)$ to
+          \gen_1^{\sk}$, $T \leftarrow \gen_2^{\utk}$, computes $\proof_4
+          \sample \NIZKprove(\crs_4,\inst_4,\witness_4,\rand)$ for $\inst_4 =
+          (\gen_1,\gen_2,S,T)$ and $\witness_4 = (\sk,\utk)$, proving $S =
+          \gen_1^{\sk} \wedge T = \gen_2^{\utk}$, and sends $(S,T,\proof_4)$ to
           the registration authority.
 
-        \item If $\soksig$ does not verify, or the user has registered before,
+        \item If $\proof_4$ does not verify, or the user has registered before,
           the registration authority exits.
 
         \item Else, the registration authority computes $\signature \sample
@@ -163,17 +169,17 @@ than requiring general purpose zero knowledge proofs.
         \item The user samples $\alpha \sample \Zp$, computes $(A,B) =
           (\gen_2^{\alpha},\HE(\epoch)^{\alpha})$, sets $c =
           \hash(\gen_2,\epoch,A,B)$ and $\eta_1 = \alpha + c\cdot\utk$, forming
-          $\pi \leftarrow (A,B,\eta_1)$, proving $\rel_1$: $\ek =
+          $\proof_5 \leftarrow (A,B,\eta_1)$, proving $\rel_5$: $\ek =
           \HE(\epoch)^{\utk} \wedge T = \gen_2^{\utk}$.
 
-        \item The user computes $\psi \sample
-          \soksign(\crs_0,\inst_0,\witness_0,\pi\|\rand)$, re-authenticating
-          $(S,T)$ on the fresh nonce, and sends $(S,T,\signature,\ek,\pi,\psi)$
-          to the auditor.
+        \item The user computes $\proof_4 \sample
+          \NIZKprove(\crs_4,\inst_4,\witness_4,\proof_5\|\rand)$,
+          re-authenticating $(S,T)$ on the fresh nonce, and sends
+          $(S,T,\signature,\ek,\proof_5,\proof_4)$ to the auditor.
 
-        \item The auditor accepts and outputs $\ek$ iff $\psi$ verifies,
-          $\BBSverify(\pk_{RA},(S,T),\signature) = 1$, and $\pi$ verifies for
-          $\rel_1$.
+        \item The auditor accepts and outputs $\ek$ if and only if $\proof_4$
+          verifies, $\BBSverify(\pk_{RA},(S,T),\signature) = 1$, and $\proof_5$
+          verifies for $\rel_5$.
 
       \end{enumerate}
 
@@ -191,19 +197,22 @@ than requiring general purpose zero knowledge proofs.
         \item Sample $\openinfo \sample \Zp$ and compute $\com \sample
           \ComCommit(\ck,\utk,\openinfo)$.
 
-        \item Compute $\pi_1 \sample \NIZKprove(\crs_3,\inst_3,\witness_3)$,
-          proving relation $\rel_3$, following~\Cref{sec:tag-computation}.
+        \item Compute $\proof_7 \sample \NIZKprove(\crs_7,\inst_7,\witness_7)$,
+          proving relation $\rel_7$, following~\Cref{sec:tag-computation}.
 
-        \item Compute $\psi_2 \sample \soksign(\crs_2,\inst_2,\witness_2,\msg)$
-          for $\msg = \payload\|\Tag_\gamma\|\com\|\pi_1$, proving relation
-          $\rel_2$, following~\Cref{sec:tx-auth}.
+        \item Compute $\proof_6 \sample
+          \NIZKprove(\crs_6,\inst_6,\witness_6,\msg)$ for $\msg =
+          \payload\|\Tag_\gamma\|\com\|\proof_7$, proving relation $\rel_6$,
+          following~\Cref{sec:tx-auth}.
 
-        \item Set $\tx \leftarrow (\payload,\Tag_\gamma,\com,\pi_1,\psi_2)$ and
-          submit $\tx$ to the ledger.
+        \item Set $\tx \leftarrow
+          (\payload,\Tag_\gamma,\com,\proof_7,\proof_6)$ and submit $\tx$ to
+          the ledger.
 
-        \item The ledger appends $\tx$ to $\state$ iff $\Tag_\gamma$ has not
-          appeared in a previously accepted transaction, $\pi_1$ verifies for
-          $\rel_3$, and $\psi_2$ verifies for $\rel_2$ on $\msg$.
+        \item The transaction validators append $\tx$ to $\state$ if and only
+          if $\Tag_\gamma$ has not appeared in a previously accepted
+          transaction, $\proof_7$ verifies for $\rel_7$, and $\proof_6$
+          verifies for $\rel_6$ on $\msg$.
 
         \item Return $\tx$.
 
@@ -225,115 +234,143 @@ than requiring general purpose zero knowledge proofs.
 
 \end{protocolbox}
 
-The protocol instantiation is described in full in~\Cref{fig:txid}. The
-remaining algorithms follow~\Cref{sec:txidconstruction} directly; we highlight
+The protocol instantiation is described in full in~\Cref{prot:txid}. The
+remaining algorithms follow~\Cref{sec:txid-construction} directly; we highlight
 below only the design choices specific to this instantiation.
 
-The registration authority's key pair is for BBS+, chosen because it signs
-group elements directly (\Cref{fig:bbs}), letting the registration authority
-certify a user's keys without ever seeing them in the clear. This is essential
-since the registration authority must not learn a user's tracing key. During
-registration, the user accordingly sends only the group elements $S =
-\gen_1^{\sk}$ and $T = \gen_2^{\utk}$, together with a proof of knowledge of
-the underlying secrets, rather than the secrets themselves.
+The registration authority's key pair is for the BBS+ signature scheme
+(\Cref{fig:bbs}). During registration, the user accordingly sends only the
+group elements $S = \gen_1^{\sk}$ and $T = \gen_2^{\utk}$, together with a
+proof of knowledge of the underlying secrets, rather than the secrets
+themselves.
 
-The commitment scheme is Pedersen, chosen because it is perfectly hiding, and
-because its algebraic structure lets a user prove statements about a
-commitment using cheap sigma protocols rather than general purpose zero
-knowledge proofs. The commitment key reuses the pair of generators
-$(\gen_2,\gen_3)$ that appear in the registration authority's public key,
-purely for compactness; randomness used at signing time and at commitment time
-remains independently sampled at each use.
+The commitment key reuses the pair of generators $(\gen_2,\gen_3)$ that appear
+in the registration authority's public key, purely for compactness; randomness
+used at signing time and at commitment time remains independently sampled at
+each use. Reusing these generators is safe because both primitives rely on the
+same underlying property: nobody knows the discrete logarithm of one relative
+to the other. Key generation for the BBS+ signature scheme samples
+$\gen_0,\ldots,\gen_{L+1}$ independently and uniformly at random
+(\Cref{fig:bbs}), so this relation stays unknown to everyone, including the
+registration authority, from the moment the parameters are fixed --- exactly
+the condition the Pedersen commitment scheme's binding property needs. And
+since a commitment under the Pedersen commitment scheme is a discrete-log
+statement with no pairing, while every check in the BBS+ signature scheme on
+these generators goes through a pairing, nothing a party learns from one
+primitive helps break the other.
 
-Deriving the epoch tracing key deterministically from the long term tracing
-key and the epoch identifier is what confines an auditor's tracing power to a
+Deriving the epoch tracing key deterministically from the long term tracing key
+and the epoch identifier is what confines an auditor's tracing power to a
 single epoch, since a key derived for one epoch is useless for any other. Each
 transaction tag is computed by evaluating a pairing based PRF at the user's
 epoch key and a fresh counter, so it looks random to anyone without that key.
 The tag carries two separate proofs, that it was correctly derived from a
 properly committed tracing key (\Cref{sec:tag-computation}), and that the
-committed key was signed by the registration authority
-(\Cref{sec:tx-auth}).
+committed key was signed by the registration authority (\Cref{sec:tx-auth}).
 
 \subsubsection*{Verifiable tag computation.}\label{sec:tag-computation} The
-user first computes Pedersen commitment $\com =
-\gen_2^{\utk}\cdot\gen_3^{\openinfo}$ and $\Tag = \FT(\ek, \gamma)$, where $
-\FT(\ek, \gamma)$ is defined as $e\!\left(\ek,\, \prod_{i=1}^{\ell}
+user first computes a commitment under the Pedersen commitment scheme, $\com =
+\gen_2^{\utk}\cdot\gen_3^{\openinfo}$, and $\Tag = \FT(\ek, \gamma)$, where $
+\FT(\ek, \gamma)$ is defined as $\pairing\!\left(\ek,\, \prod_{i=1}^{\ell}
 \ggen_i^{\gamma_i}\right)$.  Under the DDH assumption, and the Bilinear
 Decisional Diffie Hellman (BDDH) assumption, $\FT$ can be shown to be a PRF, in
 the random oracle model.
 
-Relation $\rel_3$ is defined for $\inst_3 = (\HE, \{\ggen_i\}_{i\in[1,\ell]},
-\gen_2, \gen_3, \com, \Max, \epoch, \Tag)$; $\witness_3 = (\utk, \openinfo,
-\ek, \{\gamma_i\}_{i\in[1,\ell]})$; and $(\varnothing, \crs_3)\leftarrow
-\NIZKgen(\rel_3)$ with $\crs_3$ describing a hash function
-$\hash:\{0,1\}^*\rightarrow \Zp$, and $\rel_3(\inst_3, \witness_3) =1$ if and
-only if the following holds: \begin{equation*} \com =
-  \gen_2^{\utk}\cdot\gen_3^{\openinfo} \ \wedge \ \ek = \HE(\epoch)^{\utk}\
-\wedge \ \Tag_{\gamma} = e(\ek,\prod_{i=1}^{\ell} \ggen_i^{\gamma_i}) \ \wedge
-\ \forall i \in[1, \ell]: \gamma_i \in \{0,1\}.  \end{equation*}
+$\rel_7$ is defined for $\crs_7 \leftarrow \NIZKgen(\rel_7)$, with $\crs_7$
+describing a hash function $\hash \colon \{0,1\}^* \rightarrow \Zp$, and
+instance, witness, and relation given as follows:
+%
+\begin{equation}
+%
+  \inst_7 = (\HE, \{\ggen_i\}_{i\in[1,\ell]}, \gen_2, \gen_3, \com, \Max,
+  \epoch, \Tag), \qquad \witness_7 = (\utk, \openinfo, \ek,
+  \{\gamma_i\}_{i\in[1,\ell]}),
+%
+\end{equation}
+%
+\begin{equation}\label{eq:rel7-concrete} \begin{gathered}
+%
+  \rel_7 = \{\ \com = \gen_2^{\utk}\cdot\gen_3^{\openinfo} \ \wedge \ \ek =
+  \HE(\epoch)^{\utk} \\ \wedge \ \Tag_{\gamma} =
+\pairing(\ek,\prod_{i=1}^{\ell} \ggen_i^{\gamma_i}) \ \wedge \ \forall i \in[1,
+\ell]: \gamma_i \in \{0,1\}\ \}.
+%
+\end{gathered} \end{equation}
+%
 
-Proving $\rel_3$ directly would require an argument that proves quadratic
+Proving $\rel_7$ directly would require an argument that proves quadratic
 equations over pairings, which would be expensive in practice.
 
-Instead, the user randomly samples $r, s \leftarrow \Zp$, and with them
-computes auxiliary values $\Gamma = \ggen^r\prod_{i=1}^{\ell}
-\ggen_i^{\gamma_i}, U = H(\epoch)^s, V = \ek^{s}$. The user then proves the
-equivalent relation $\widehat{\rel}_3$ defined for $\widehat{\inst}_3
-=(\inst_3, \ggen, \Gamma, U, V)$; $\widehat{\witness}_3 = (\witness_3, r, s)$;
-and $\widehat{\crs}_3 = \crs_3$, that together verify: \begin{gather*} \com =
-  \gen_2^{\utk}\cdot\gen_3^{\openinfo} \quad \wedge \quad \Gamma =
-  \ggen^r\prod_{i=1}^{\ell} \ggen_i^{\gamma_i} \quad \wedge \quad \forall i \in
-  [1,\ell]: \gamma_i \in \{0,1\} \\ \wedge \quad U = \HE(\epoch)^s \quad \wedge
-  \quad V = U^{\utk} \quad \wedge \quad e(V, \Gamma) = \Tag^s \cdot e(V,
-\ggen)^r.  \end{gather*}
+Instead, the user randomly samples $\tau, \upsilon \leftarrow \Zp$, and with
+them computes auxiliary values $\gggen{b} = \ggen^\tau\prod_{i=1}^{\ell}
+\ggen_i^{\gamma_i}$, $u = \HE(\epoch)^\upsilon$, $v = \ek^{\upsilon}$. The user
+then proves the equivalent relation $\rel_8$, for $\crs_8 = \crs_7$ and
+instance, witness, and relation given as follows:
+%
+\begin{equation}
+%
+  \inst_8 = (\inst_7, \ggen, \gggen{b}, u, v), \qquad \witness_8 = (\witness_7,
+  \tau, \upsilon),
+%
+\end{equation}
+%
+\begin{equation}\label{eq:rel7-hat} \begin{gathered}
+%
+  \rel_8 = \{\ \com = \gen_2^{\utk}\cdot\gen_3^{\openinfo} \ \wedge \ \gggen{b}
+    = \ggen^\tau\prod_{i=1}^{\ell} \ggen_i^{\gamma_i} \ \wedge \ \forall i \in
+    [1,\ell]: \gamma_i \in \{0,1\} \\ \wedge \ u = \HE(\epoch)^\upsilon \
+    \wedge \ v = u^{\utk} \ \wedge \ \pairing(v, \gggen{b}) = \Tag^\upsilon
+  \cdot \pairing(v, \ggen)^\tau\ \}.
+%
+\end{gathered} \end{equation}
+%
 
-We prove this in two parts: a sigma protocol for the equalities of
-$\widehat{\rel}_3$ involving $\widehat{\witness}_3$, and a separate range
-argument that $(\gamma_1,\ldots,\gamma_\ell)$ are bits.
+We prove this in two parts: a sigma protocol for the equalities of $\rel_8$
+involving $\witness_8$, and a separate range argument that
+$(\gamma_1,\ldots,\gamma_\ell)$ are bits.
 
 \begin{protocolbox}{Tag correctness sigma protocol}{txid-tag-sigma}
 
   \begin{description}
 
-    \item[$\pi \sample \NIZKprove(\crs_3, \widehat{\inst}_3,
-      \widehat{\witness}_3)$ :] On input $\widehat{\inst}_3 = (\com, \Gamma, U,
-      V, \Tag)$ and $\widehat{\witness}_3 = (\utk, \openinfo, r, s)$, do:
+    \item[$\proof_8 \sample \NIZKprove(\crs_8, \inst_8, \witness_8)$ :] On
+      input $\inst_8 = (\com, \gggen{b}, u, v, \Tag)$ and $\witness_8 = (\utk,
+      \openinfo, \tau, \{\gamma_i\}_{i \in [1,\ell]}, \upsilon)$, do:
 
       \begin{enumerate}
 
-        \item Sample $\alpha, \beta, \eta, \nu \sample \Zp$ and $\delta_i
+        \item Sample $\mu_1, \mu_2, \mu_3, \mu_5 \sample \Zp$ and $\mu_{4,i}
           \sample \Zp$ for each $i \in [1,\ell]$.
 
-        \item Compute $A = \gen_2^{\alpha}\cdot\gen_3^{\beta}$, $\Delta =
-          \ggen^{\eta}\prod_{i=1}^{\ell} \ggen_i^{\delta_i}$, $B =
-          \HE(\epoch)^{\nu}$, $D = U^{\alpha}$, and $F = \Tag^{\nu} \cdot e(V,
-          \ggen)^{\eta}$.
+        \item Compute $t_1 = \gen_2^{\mu_1}\cdot\gen_3^{\mu_2}$, $\gggen{t}_2 =
+          \ggen^{\mu_3}\prod_{i=1}^{\ell} \ggen_i^{\mu_{4,i}}$, $t_3 =
+          \HE(\epoch)^{\mu_5}$, $t_4 = u^{\mu_1}$, and $T_5 = \Tag^{\mu_5}
+          \cdot \pairing(v, \ggen)^{\mu_3}$.
 
-        \item Compute challenge $c \leftarrow \hash(\widehat{\inst}_3, A,
-          \Delta, B, D, F)$.
+        \item Compute challenge $c \leftarrow \hash(\inst_8, t_1, \gggen{t}_2,
+          t_3, t_4, T_5)$.
 
-        \item Compute $\theta = \alpha + c\cdot\utk$, $\omega = \beta +
-          c\cdot\openinfo$, $\upsilon = \eta + c\cdot r$, $\xi_i = \delta_i +
-          c\cdot\gamma_i$ for each $i \in [1,\ell]$, and $\chi = \nu +
-          c\cdot s$.
+        \item Compute $\pi_1 = \mu_1 + c\cdot\utk$, $\pi_2 = \mu_2 +
+          c\cdot\openinfo$, $\pi_3 = \mu_3 + c\cdot\tau$, $\pi_{4,i} =
+          \mu_{4,i} + c\cdot\gamma_i$ for each $i \in [1,\ell]$, and $\pi_5 =
+          \mu_5 + c\cdot\upsilon$.
 
-        \item Return $\pi = (A, \Delta, B, D, F, \theta, \omega, \{\xi_i\},
-          \upsilon, \chi)$.
+        \item Return $\proof_8 = (t_1, \gggen{t}_2, t_3, t_4, T_5, \pi_1,
+          \pi_2, \pi_3, \{\pi_{4,i}\}, \pi_5)$.
 
       \end{enumerate}
 
-    \item[$\{0,1\} \leftarrow \NIZKverify(\crs_3, \widehat{\inst}_3, \pi)$ :]
-      On input $\widehat{\inst}_3$ and proof $\pi$, compute challenge $c
-      \leftarrow \hash(\widehat{\inst}_3, A, \Delta, B, D, F)$ and return the
-      result of the following checks:
+    \item[$\{0,1\} \leftarrow \NIZKverify(\crs_8, \inst_8, \proof_8)$ :] On
+      input $\inst_8$ and proof $\proof_8$, compute challenge $c \leftarrow
+      \hash(\inst_8, t_1, \gggen{t}_2, t_3, t_4, T_5)$ and return the result of
+      the following checks:
       %
-      \begin{gather*} \gen_2^{\theta}\cdot\gen_3^{\omega} \checkcheck A \cdot
-        \com^c, \quad \ggen^{\upsilon}\prod_{i=1}^{\ell} \ggen_i^{\xi_i}
-        \checkcheck \Delta \cdot \Gamma^c, \quad \HE(\epoch)^{\chi} \checkcheck
-        B \cdot U^c, \\ U^{\chi} \checkcheck D \cdot V^c, \quad \Tag^\chi \cdot
-        e(V, \ggen)^\upsilon \checkcheck F \cdot e(V,\Gamma)^c.
-      \end{gather*}
+      \begin{gather*} \gen_2^{\pi_1}\cdot\gen_3^{\pi_2} \checkcheck t_1 \cdot
+        \com^c, \quad \ggen^{\pi_3}\prod_{i=1}^{\ell} \ggen_i^{\pi_{4,i}}
+        \checkcheck \gggen{t}_2 \cdot \gggen{b}^c, \quad \HE(\epoch)^{\pi_5}
+        \checkcheck t_3 \cdot u^c, \\ u^{\pi_1} \checkcheck t_4 \cdot v^c,
+        \quad \Tag^{\pi_5} \cdot \pairing(v, \ggen)^{\pi_3} \checkcheck T_5
+      \cdot \pairing(v,\gggen{b})^c.  \end{gather*}
 
   \end{description}
 
@@ -342,90 +379,110 @@ argument that $(\gamma_1,\ldots,\gamma_\ell)$ are bits.
 For each $i\in[\ell]$, bit validity of $\gamma_i$ is established using an inner
 product argument~\cite{SP:BBBPWM18}.
 
-  \subsubsection*{Transaction authorisation.}\label{sec:tx-auth} Each
-  transaction carries a signature of knowledge that attests it has originated
-  from a registered user, following relation $\rel_2$ defined below.
+\subsubsection*{Transaction authorisation.}\label{sec:tx-auth} Each transaction
+carries a NIZK proof that attests it has originated from a registered user,
+following relation $\rel_6$ defined below.
 
-  Since the user is registered using BBS+ signature $\signature = (e, r, E =
-  ({\gen_0}\cdot\gen_2^{\sk} \cdot \gen_1^{\utk}\cdot\gen_3^r)^{1/(z+e)})$,
-  $\rel_2$ is defined for $\inst_2 = (\pk, \com) = (\gen_0, \gen_1, \gen_2,
-  \gen_3, \ggen, \ggen_Z, \com)$, $\witness_2 = (\sk, \utk, \rho, e, r, E)$,
-  $\rel_2(\inst_2, \witness_2) = 1$ if and only if the following holds:
-  \begin{equation*} \com = \gen_2^{\utk}\cdot\gen_3^{\rho} \ \wedge \ e(E,
-    \ggen^e\cdot\ggen_Z) =
-  e({\gen_0}\cdot\gen_2^{\sk}\cdot\gen_1^{\utk}\cdot\gen_3^r, \ggen),
-\end{equation*} and $\crs_2 \leftarrow \sokgen(\rel_2)$ is set to hash function
-$\hash:\{0, 1\}^*\rightarrow \Zp$.
+Since the user is registered using a signature $\signature = (e, r, E =
+({\gen_0}\cdot\gen_2^{\sk} \cdot \gen_1^{\utk}\cdot\gen_3^r)^{1/(z+e)})$ from
+the BBS+ signature scheme, $\rel_6$ is defined for $\crs_6 \leftarrow
+\NIZKgen(\rel_6)$, with $\crs_6$ describing a hash function $\hash \colon
+\{0,1\}^* \rightarrow \Zp$, and instance, witness, and relation given as
+follows:
+%
+\begin{equation}
+%
+  \inst_6 = (\pk, \com) = (\gen_0, \gen_1, \gen_2, \gen_3, \ggen, \ggen_Z,
+  \com), \qquad \witness_6 = (\sk, \utk, \rho, e, r, E),
+%
+\end{equation}
+%
+\begin{equation}\label{eq:rel6-concrete} \begin{gathered}
+%
+  \rel_6 = \{\ \com = \gen_2^{\utk}\cdot\gen_3^{\rho} \ \wedge \\ \pairing(E,
+  \ggen^e\cdot\ggen_Z) =
+\pairing({\gen_0}\cdot\gen_2^{\sk}\cdot\gen_1^{\utk}\cdot\gen_3^r, \ggen)\ \}.
+%
+\end{gathered} \end{equation}
+%
 
-The SoK for $\rel_2$ on message $\msg$ is obtained by rewriting $\rel_2$ as an
-equivalent relation $\widehat{\rel}_2$ that avoids proofs over bilinear
-equations~\cite{EPRINT:CamDriLeh16,USENIX:HesSinSor23}.  $\widehat{\rel}_2$ is
-defined for  $\widehat{\inst}_2 = (\pk, \com, U, V, W)$ defined as follows:
-\begin{equation*} U = E^{\zeta/\eta}; \quad V=
-({\gen_0}\cdot{\gen_2}^{\sk}\cdot{\gen_1}^{\utk}\cdot{\gen_3}^r)^{ 1/\zeta};
-\quad W= U^eV^{\zeta}, \end{equation*} and $\widehat{\witness}_2 = (\sk, \utk,
-\rho, e, r', \zeta, \eta)$ such that $\widehat{\rel}_2(\widehat{\inst}_2,
-\widehat{\witness}_2) = 1$ if and only if the following holds:
-\begin{equation*} \com = \gen_2^{\utk}\cdot\gen_3^{\rho}\ \wedge \ e(U,
-\ggen_Z)\cdot{e(W, \ggen)}=1  \ \wedge \ W = U^e\cdot{V^{\zeta}} \ \wedge \
-(\gen_0\cdot\com)^{ 1} = V^{\eta}\cdot \gen_1^{\sk}\cdot\gen_3^{r'}.
-\end{equation*}
+The NIZK proof for $\rel_6$ on message $\msg$ is obtained by rewriting $\rel_6$
+as an equivalent relation $\rel_9$ that avoids proofs over bilinear
+equations~\cite{EPRINT:CamDriLeh16,USENIX:HesSinSor23}, for $\crs_9 = \crs_6$
+and instance, witness, and relation given as follows:
+%
+\begin{equation}
+%
+  \inst_9 = (\pk, \com, u, v, w), \qquad \witness_9 = (\utk, \rho, e, \zeta,
+  \eta, \sk, \xi),
+%
+\end{equation}
+%
+with $u = E^{\zeta/\eta}$, $v = ({\gen_0}\cdot{\gen_2}^{\sk}\cdot{\gen_1}^{
+\utk}\cdot{\gen_3}^r)^{1/\zeta}$, and $w = u^e v^{\zeta}$, and
+%
+\begin{equation}\label{eq:rel6-hat} \begin{gathered}
+%
+  \rel_9 = \{\ \com = \gen_2^{\utk}\cdot\gen_3^{\rho}\ \wedge \ \pairing(u,
+  \ggen_Z)\cdot \pairing(w, \ggen) = 1 \ \wedge \\ w = u^e\cdot v^{\zeta} \
+\wedge \ (\gen_0\cdot\com)^{-1} = v^{\eta}\cdot \gen_1^{\sk}\cdot\gen_3^{\xi}\
+\}.
+%
+\end{gathered} \end{equation}
+%
 
-$\widehat{\rel}_2$ can be proven using sigma protocols, and the Fiat Shamir
-heuristic transforms the resulting proof into a signature of knowledge.
+$\rel_9$ can be proven using sigma protocols, and the Fiat Shamir heuristic
+transforms the resulting proof into a message-bound NIZK proof.
 
-\begin{protocolbox}{Transaction authorisation signature of knowledge}{txid-tx-sok}
+\begin{protocolbox}{Transaction authorisation NIZK proof}{txid-tx-nizk}
 
   \begin{description}
 
-    \item[$\soksig \sample \soksign(\crs_2, \widehat{\inst}_2,
-      \widehat{\witness}_2, \msg)$ :] On input $\widehat{\inst}_2 = (\pk,
-      \com, U, V, W)$, $\widehat{\witness}_2 = (\sk, \utk, \rho, e, r',
-      \zeta, \eta)$, and message $\msg$, do:
+    \item[$\proof_9 \sample \NIZKprove(\crs_9, \inst_9, \witness_9, \msg)$ :]
+      On input $\inst_9 = (\pk, \com, u, v, w)$, $\witness_9 = (\utk, \rho, e,
+      \zeta, \eta, \sk, \xi)$, and message $\msg$, do:
 
       \begin{enumerate}
 
-        \item Sample $\alpha, \beta, \delta, \upsilon, \chi, \xi, \theta
-          \sample \Zp$.
+        \item Sample $\mu_1, \ldots, \mu_7 \sample \Zp$.
 
-        \item Compute $A = \gen_2^{\alpha}\cdot\gen_3^{\beta}$, $B =
-          U^{\delta}\cdot V^{\upsilon}$, and $D =
-          V^{\chi}\cdot\gen_1^{\xi}\cdot \gen_3^{\theta}$.
+        \item Compute $t_1 = \gen_2^{\mu_1}\cdot\gen_3^{\mu_2}$, $t_2 =
+          u^{\mu_3}\cdot v^{\mu_4}$, and $t_3 =
+          v^{\mu_5}\cdot\gen_1^{\mu_6}\cdot \gen_3^{\mu_7}$.
 
-        \item Compute challenge $c \leftarrow \hash(\widehat{\inst}_2, A, B,
-          D, \msg)$.
+        \item Compute challenge $c \leftarrow \hash(\inst_9, t_1, t_2, t_3,
+          \msg)$.
 
-        \item Compute $\phi_1 = \alpha + c\cdot\utk$, $\phi_2 = \beta +
-          c\cdot\rho$, $\phi_3 = \delta + c\cdot e$, $\phi_4 = \upsilon +
-          c\cdot\zeta$, $\phi_5 = \chi + c\cdot\eta$, $\phi_6 = \xi +
-          c\cdot\sk$, and $\phi_7 = \theta + c\cdot r'$.
+        \item Compute $\pi_i = \mu_i + c\cdot x_i$ for $i = 1,\ldots,7$, where
+          $(x_1,\ldots,x_7) = (\utk, \rho, e, \zeta, \eta, \sk, \xi)$ is the
+          witness in the order given above.
 
-        \item Return $\soksig = (U, V, W, A, B, D, \vec{\phi})$, for
-          $\vec{\phi} = (\phi_1,\ldots,\phi_7)$.
+        \item Return $\proof_9 = (u, v, w, t_1, t_2, t_3, \vec{\pi})$, for
+          $\vec{\pi} = (\pi_1,\ldots,\pi_7)$.
 
       \end{enumerate}
 
-    \item[$\{0,1\} \leftarrow \sokverify(\crs_2, \com, \msg, \soksig)$ :] On
-      input commitment $\com$, message $\msg$, and SoK $\soksig$, do:
+    \item[$\{0,1\} \leftarrow \NIZKverify(\crs_9, \inst_9, \proof_9, \msg)$ :]
+      On input instance $\inst_9$, proof $\proof_9$, and message $\msg$, do:
 
       \begin{enumerate}
 
-        \item If $e(U, \ggen_Z)\cdot e(W, \ggen) \neq 1$, return $0$.
+        \item If $\pairing(u, \ggen_Z)\cdot \pairing(w, \ggen) \neq 1$, return
+          $0$.
 
-        \item Compute challenge $c \leftarrow \hash(\widehat{\inst}_2, A, B,
-          D, \msg)$.
+        \item Compute challenge $c \leftarrow \hash(\inst_9, t_1, t_2, t_3,
+          \msg)$.
 
         \item Return the result of the following checks:
           %
-          \begin{gather*} A\cdot\com^c \checkcheck
-            \gen_2^{\phi_1}\cdot\gen_3^{\phi_2}, \quad B\cdot W^c \checkcheck
-            U^{\phi_3}V^{\phi_4}, \\ D\cdot(\gen_0\cdot\com)^c \checkcheck
-            V^{\phi_5}\cdot \gen_1^{\phi_6}\cdot\gen_3^{\phi_7}.
-          \end{gather*}
+          \begin{gather*} t_1\cdot\com^c \checkcheck
+          \gen_2^{\pi_1}\cdot\gen_3^{\pi_2}, \quad t_2\cdot w^c \checkcheck
+        u^{\pi_3}v^{\pi_4}, \\ t_3\cdot(\gen_0\cdot\com)^c \checkcheck
+      v^{\pi_5}\cdot \gen_1^{\pi_6}\cdot\gen_3^{\pi_7}.  \end{gather*}
 
-      \end{enumerate}
+  \end{enumerate}
 
-  \end{description}
+\end{description}
 
 \end{protocolbox}
 
@@ -441,7 +498,7 @@ heuristic transforms the resulting proof into a signature of knowledge.
 
   The BDDH assumption holds if, given $(\gen, \gen^a, \gen^b, \ggen, \ggen^c)$
   for uniformly random $a, b, c \sample \Zp$, no PPT adversary can distinguish
-  $e(\gen,\ggen)^{abc}$ from a uniformly random element of $\group{T}$.
+  $\pairing(\gen,\ggen)^{abc}$ from a uniformly random element of $\group{T}$.
 
 \end{assumptionbox}
 
@@ -455,7 +512,7 @@ heuristic transforms the resulting proof into a signature of knowledge.
 \end{assumptionbox}
 
 \begin{theorem}\label{thm:inst} The instantiation presented
-in~\Cref{sec:algebraic} securely realises $\idfu{txid}$ in the random oracle
-model, under the Decisional Diffie Hellman assumption in $\group{1}$, the
-Bilinear Decisional Diffie Hellman assumption, and the $q$-Strong Diffie
+  in~\Cref{sec:algebraic} securely realises $\idfu{\algo{trace}}$ in the random
+  oracle model, under the Decisional Diffie Hellman assumption in $\group{1}$,
+  the Bilinear Decisional Diffie Hellman assumption, and the $q$-Strong Diffie
 Hellman assumption.  \end{theorem}

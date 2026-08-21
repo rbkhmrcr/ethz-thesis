@@ -1,0 +1,28 @@
+\section{Summary}\label{sec:txid-summary}
+
+\begin{itemize}
+
+  \item This chapter addresses the gap between fully transparent ledgers and
+    long-term view keys: existing options offer either no privacy, or
+    unconditional and permanent auditor visibility.
+
+  \item We introduce tracing: users grant an auditor the ability to trace their
+    transactions during a single chosen epoch, with authorisation expiring
+    automatically once that epoch ends.
+
+  \item We formalise tracing as an ideal functionality capturing anonymity,
+    non-repudiation, and permission expiration, and give a black-box
+    construction from signatures, commitments, pseudorandom functions, and NIZK
+    proofs.
+
+  \item We instantiate the construction in pairing-based groups with a
+    transparent setup, using the BBS+ signature scheme so the registration
+    authority never learns a user's tracing key.
+
+  \item The concrete instantiation is practical: proof generation completes in
+    a few milliseconds, and verification in under 10ms, even without
+    optimisation.
+
+  \item Future work:
+
+\end{itemize}

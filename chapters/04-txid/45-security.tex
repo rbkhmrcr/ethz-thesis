@@ -1,27 +1,24 @@
-\section{Security arguments}
+\section{Security arguments}\label{sec:txid-security}
 
-\subsection{Security argument for Theorem~\ref{thm:bb}}\label{sec:bb-sec}
+\subsection{Security argument for
+Theorem~\ref{thm:txid-bb}}\label{sec:txid-bb-sec}
 
-We prove security of Theorem~\ref{thm:bb} via simulation.
+We prove Theorem~\ref{thm:txid-bb} by simulation: for a polynomial-time
+adversary $\adv$ interacting with protocol $\Pi$, we construct a simulator
+$\simu$ that, using only its interactions with ideal functionality
+$\idfu{\algo{trace}}$, simulates an execution of $\Pi$ to $\adv$ so that $\adv$
+cannot distinguish the two.
 
-Let $\adv$ be a polynomial-time adversary interacting with our protocol $\Pi$.
-In the following, we construct a simulator $\simu$
-which, based on its interactions with ideal functionality $\idfu{txid}$, simulates
-an execution of $\Pi$ to $\adv$, and then prove that $\adv$ cannot distinguish
-between a real execution of $\Pi$ and a simulated one.
+We define a sequence of games from a real execution of $\Pi$ to
+$\idfu{\algo{trace}}$, and show each is (computationally) indistinguishable
+from the last.
 
-More specifically, we define a sequence of games, starting from a real-world
-execution of $\Pi$ and ending with ideal functionality $\idfu{txid}$, and
-demonstrate that each game is (computationally) indistinguishable from the
-previous one.
-
-In the following, $\simu$ maintains the following tables, which are analogous
-to $\reg$, $\perm$, and $\txns$ maintained by $\idfu{txid}$:
+$\simu$ maintains three tables, analogous to $\reg$, $\perm$, and $\txns$ in
+$\idfu{\algo{trace}}$:
 
 \begin{enumerate}
 
-  \item $\regsimu[\user] = \langle \sk, \utk, \signature\rangle$, logging
-    registered users;
+  \item $\regsimu[\user] = (\sk, \utk, \signature)$, logging registered users;
 
   \item $\permsimu[(\auditor,\user,\epoch)] = \ek$, logging tracing permissions
     and epoch keys;
@@ -30,201 +27,179 @@ to $\reg$, $\perm$, and $\txns$ maintained by $\idfu{txid}$:
 
 \end{enumerate}
 
-\paragraph{Game 0.} This is the real execution of protocol $\Pi$.
+\paragraph{Game 0.} The real execution of protocol $\Pi$.
 
-\paragraph{Game 1.} This is an execution of $\Pi$ except that $\simu$ simulates
-honest participants.  Namely, $\simu$ receives the inputs and generates the
-outputs of the ledger, registration authority, honest users, and honest
-auditors by following the instructions of $\Pi$.  By construction, Game 1 is
-indistinguishable from Game 0.
+\paragraph{Game 1.} As Game 0, except $\simu$ simulates all honest participants
+(the ledger operator, registration authority, honest users, and honest
+auditors) by following $\Pi$'s instructions. Game 1 is indistinguishable from
+Game 0 by construction.
 
-\paragraph{Game 2.} This game is identical to Game~1, except that $\simu$ now,
-instead of executing $\Pi$ during user registration, simulates the output of
-the registration authority solely based on the output $\idfu{txid}$ upon
-$\IDregister$ calls.  For each $\IDregister$ request by some honest user,
-$\simu$ selects random $(\sk, \utk)$ and simulates an execution of $\Pi$, and
-stores $\regsimu[\user] = \langle\sk, \utk, \signature\rangle$.
+\paragraph{Game 2.} As Game 1, except during registration $\simu$ simulates the
+registration authority's output directly from $\idfu{\algo{trace}}$'s
+$\IDregister$ calls, rather than executing $\Pi$. For each honest user's
+$\IDregister$ request, $\simu$ selects random $(\sk, \utk)$, simulates an
+execution of $\Pi$, and stores $\regsimu[\user] = (\sk, \utk, \signature)$.
 
-Upon receiving a valid registration request from a corrupt user, $\simu$ issues
-a $\IDregister$ request to $\idfu{txid}$ on behalf of the user and returns the
-corresponding output.  If $\idfu{txid}$ successfully registers the user, then
-$\simu$ uses the extractability property of proof to extract pair $(\sk, \utk)$
-and records $\regsimu[\user] = \langle \sk, \utk, \signature\rangle$, where
-$\signature$ is computed following $\Pi$'s instructions and sent to $\user$.
+For a valid registration request from a corrupt user, $\simu$ issues
+$\IDregister$ to $\idfu{\algo{trace}}$ on the user's behalf and returns its
+output.  If $\idfu{\algo{trace}}$ registers the user, $\simu$ extracts $(\sk,
+\utk)$ using the extractability of the proof, computes $\signature$ following
+$\Pi$, sends it to $\user$, and records $\regsimu[\user] = (\sk, \utk,
+\signature)$.
 
-This game is indistinguishable from Game 1 unless $\idfu{txid}$'s output upon one
-of the $\IDregister$ calls diverges from that of an execution of the
-registration functionality of $\Pi$.  This only occurs if the registration
-authority, in the real world, accepts a registration request that $\idfu{txid}$
-rejects, or vice versa.  Due to the correctness of $\Pi$, the event that
-$\idfu{txid}$ accepts while $\Pi$ rejects will never occurs.  Similarly, the event
-that $\idfu{txid}$ rejects while $\Pi$ accepts will never occur; in fact, this
-event can only take place if a corrupt user is able to trick the registration
-authority, in the real world, to register them twice.  However, since the
-registration authority keeps track of registration requests, this will never
-succeed.
+The two games diverge only if $\idfu{\algo{trace}}$'s decision on some
+$\IDregister$ call differs from $\Pi$'s. The correctness of $\Pi$ rules out
+$\idfu{\algo{trace}}$ accepting where $\Pi$ rejects, and the registration
+authority's tracking of past requests rules out the reverse, since only a
+double registration could cause it, and that never succeeds.
 
-\paragraph{Game 3.} This is identical to Game~3, except that $\simu$ simulates
-the responses of honest users to tracing authorisation requests, based only on
-the output of $\idfu{txid}$ upon $\IDgrant$ calls.
+\paragraph{Game 3.} As Game 2, except $\simu$ simulates honest users' responses
+to tracing authorisation requests using only $\idfu{\algo{trace}}$'s output on
+$\IDgrant$ calls.
 
-Upon a $\IDgrant$ call to functionality $\idfu{txid}$, for epoch $\epoch$, honest
-user $\user$, and honest auditor $\auditor$, $\simu$ updates
-$\permsimu[(\auditor,\user,\epoch)] \sample \epsilon$ and simulates the
-transcript between $\user$ and $\auditor$ using randomly generated information.
-Given that information between $\user$ and $\auditor$ is exchanged using a
-secure channel, this is indistinguishable from an execution of $\Pi$, in the
-real world.
+For an $\IDgrant$ call between honest user $\user$ and honest auditor
+$\auditor$ in epoch $\epoch$, $\simu$ sets $\permsimu[(\auditor,\user,\epoch)]
+\sample \epsilon$ and simulates the transcript with randomly generated
+information; since $\user$ and $\auditor$ communicate over a secure channel,
+this is indistinguishable from a real execution.
 
-Upon an authorisation request, in the real world, from a corrupt auditor
-$\auditor$ intended for honest user $\user$, $\simu$ forwards the request to
-$\user$ in the ideal world.  $\user$, accordingly, calls $\IDgrant$, if
-$\idfu{txid}$ accepts, then $\simu$ retrieves triple $\langle \sk, \utk,
-\signature\rangle \sample \regsimu[\user]$, simulates $\user$'s response
-following $\Pi$'s instructions, and sets $\permsimu[(\auditor,\user,\epoch)]
-\sample \FE(\utk, \epoch)$.
+For an authorisation request from a corrupt auditor $\auditor$ to honest user
+$\user$, $\simu$ forwards it to $\user$, who calls $\IDgrant$. If
+$\idfu{\algo{trace}}$ accepts, $\simu$ retrieves $(\sk, \utk, \signature)
+\sample \regsimu[\user]$, simulates $\user$'s response following $\Pi$, and
+sets $\permsimu[(\auditor,\user,\epoch)] \sample \FE(\utk, \epoch)$.
 
-It is easy to infer that the simulated response is indistinguishable from an
-actual response generated by $\user$ during an execution of $\Pi$, so Game 3
-is indistinguishable from Game 2.
+This simulated response is indistinguishable from a real one, so Game 3 is
+indistinguishable from Game 2.
 
-\paragraph{Game 4.} This is identical to Game 4, except that upon an
-authorisation request from a corrupt auditor for some honest user $\user$ and
-epoch $\epoch$, $\simu$ randomly samples epoch key $\ek$, instead of computing
-$\FE(\utk, \epoch)$, sets $\permsimu[(\auditor,\user,\epoch)] \sample \ek$, and
-then simulates the proof for relation $\rel_1$.
+\paragraph{Game 4.} As Game 3, except for an authorisation request from a
+corrupt auditor for honest user $\user$ and epoch $\epoch$, $\simu$ samples a
+random epoch key $\ek$ instead of computing $\FE(\utk, \epoch)$, sets
+$\permsimu[(\auditor,\user,\epoch)] \sample \ek$, and simulates the proof for
+relation $\rel_5$.
 
-Furthermore, when simulating an honest user submitting a transaction to the
-ledger, $\simu$ produces the transaction following the description of $\Pi$,
-except that since now $\ek$ is sampled randomly, it simulates the ZK proof for
-relation $\rel_3$.  Now, thanks to the pseudo randomness of $\FE$, the zero
-knowledge and simulatability properties of proofs, we conclude that this game
-is indistinguishable from Game 3.
+When such a user submits a transaction, $\simu$ follows $\Pi$ but simulates the
+ZK proof for relation $\rel_7$, since $\ek$ is now random. The pseudorandomness
+of $\FE$ and the zero-knowledge and simulatability properties of proofs make
+this game indistinguishable from Game 3.
 
-\paragraph{Game 5.} This is identical to Game~4, except that $\simu$ now also
-simulates the output of transaction submission based on the output of
-$\idfu{txid}$ in response to $\IDsubmit$ requests from honest users.
+\paragraph{Game 5.} As Game 4, except $\simu$ also simulates transaction
+submission using $\idfu{\algo{trace}}$'s output on $\IDsubmit$ requests from
+honest users.
 
-For each call by an honest user to $\IDsubmit$ interface during epoch $\epoch$,
-$\simu$ checks if there is a corrupt auditor with a tracing permission that can
-trace the transaction back to its origin.  This is achieved by issuing
-$\IDidentify$ queries on behalf of corrupt auditors for all the honest users
-that granted them tracing permissions, until there is a match.  More
-specifically, $\simu$ executes the following steps:
+For each honest user's $\IDsubmit$ call in epoch $\epoch$, $\simu$ checks
+whether a corrupt auditor holds a tracing permission that can trace the
+transaction back to its origin, by issuing $\IDidentify$ queries on behalf of
+every corrupt auditor with a permission for that user until it finds a match:
 
 \begin{enumerate}
 
-  \item For each pair of honest user and corrupt auditor $\langle \user,
-    \auditor\rangle$ with $\permsimu[(\auditor,\user,\epoch)]\neq \perp$, call
-    $\IDidentify$ and receive $\txns \sample [(\user,\epoch)]$.
+  \item For each pair of honest user and corrupt auditor $(\user, \auditor)$
+    with $\permsimu[(\auditor,\user,\epoch)]\neq \perp$, call $\IDidentify$ and
+    receive $\txns \sample [(\user,\epoch)]$.
 
   \item If $\txns[(\user,\epoch)] \neq \txnssimu[(\user, \epoch)]$, let
     $\algo{TX} = \txns[(\user,\epoch)] \setminus \txnssimu[(\user, \epoch)]$,
     update  $\txnssimu[(\user, \epoch)] \sample \txnssimu[(\user, \epoch)]$,
-    and output pair $\langle \user, \algo{TX}\rangle$.
-
-\end{enumerate} Note that since steps 1 and 2 are executed every time an honest
-user calls $\IDsubmit$ with transaction $\tx$, we have, by construction, for
-any honest user $\user$ who granted a tracing permission for epoch $\epoch$ to
-a corrupt auditor $\txns[(\user,\epoch)] = \txnssimu[(\user, \epoch)]$ or
-$\txns[(\user,\epoch)] =  \txnssimu[(\user, \epoch)] \cup \tx$.  Furthermore,
-we have either $\txns[(\user,\epoch)] = \txnssimu[(\user, \epoch)]$ for all
-such users,  or there exists one user $\user^\star$ such that
-$\txns[(\user^\star,\epoch)] = \txnssimu[(\user^{\star}, \epoch)] \cup \tx$ and
-that's the user who called $\IDsubmit$.  If $\simu$ encounters the first
-scenario, then this implies that the honest user who called $\IDsubmit$ did not
-grant tracing permissions to any of the corrupt auditors.  If it encounters the
-second, then it concludes that no corrupt auditor is authorised to trace that
-honest user's transactions.  Accordingly, we consider the following two cases.
-
-\emph{Case 1. No corrupt auditor has a tracing permission for the honest user
-for the epoch.} $\simu$ sets the confidential payload to some arbitrary
-ciphertext and instead of computing the commitment as $\com = \ComCommit(\ck,
-\utk, \openinfo)$ and the tag as $\Tag_\gamma = \FT(\ek,\gamma)$, it samples
-uniformly at random commitment $\com^{\star}$ and tag $\Tag_{\gamma}^\star$ and
-simulates the corresponding proof and ZK proof.  Given that epoch keys are
-generated at random, we can safely argue that epoch keys provided for preceding
-and succeeding epochs are independent from the current epoch.  As a result, we
-can use the hiding property of the commitment scheme, the pseudo randomness
-property of $\FT$, and the simulatability and zero knowledge properties of
-proofs to conclude that this is indistinguishable from submitting transactions
-during an execution of $\Pi$.
-
-\emph{Case 2. There is a corrupt auditor with valid tracing permission for the
-honest user.} $\simu$ in this case is able to get pair $\langle \user,
-\algo{TX} \rangle$ where $\user$ identifies the honest user and $\algo{TX}$
-consists of the transaction $\tx$ that $\user$ sent with their $\IDsubmit$
-query.  Given this information, $\simu$ retrieves tuple $\langle\sk,
-\utk,\signature \rangle \sample \regsimu[\user]$ and the random epoch key $\ek
-\sample \permsimu[(\auditor,\user,\epoch)]$.  $\simu$ then, in the real world,
-sets the confidential payload $\payload$ to $\tx$, and simulates the rest of
-the transaction similarly to Game 4.  \medbreak
-
-\paragraph{Game 6.} This is identical to Game~5, except that $\simu$ now
-simulates the output of transaction submission in response to transactions from
-corrupt users, based on the output of $\idfu{txid}$'s $\IDsubmit$ interface.
-
-When a corrupt user $\user$ submits a transaction with a valid tag (i.e., a tag
-with valid ZK proof and proof and which does not appear in the ledger), $\simu$
-uses the extractability property of proofs and the knowledge soundness of ZK
-proofs to extract $\user$'s witness.  Furthermore, thanks to the existential
-unforgeability of the digital signature used during registration, $\simu$ will
-be able to identify $\user$ using table $\regsimu$.  Next, $\simu$ sends a
-$\IDsubmit$ request on behalf of $\user$ to $\idfu{txid}$ and returns the
-corresponding output.  If $\idfu{txid}$ accepts the transaction, then $\simu$
-records it in $\txns[(\user,\epoch)]$.
-
-This game is indistinguishable from Game 2 unless $\idfu{txid}$ rejects a
-transaction that $\Pi$ deems valid.  We recall that $\idfu{txid}$ rejects a
-transaction in one of two cases:
-
-\begin{enumerate}
-
-  \item \emph{$\user$ is not registered:}  this cannot be the case given that
-    each entry in $\regsimu$ corresponds to a successful $\IDregister$ call to
-    $\idfu{txid}$.
-
-  \item \emph{$\user$ already submitted $\Max$ transactions in the current
-    epoch:} Given the knowledge soundness of ZK proofs and determinism of
-    $\FT$, $\Pi$ will not accept a transaction from $\user$ in this case as the
-    tag will already appear in the ledger.
+    and output pair $(\user, \algo{TX})$.
 
 \end{enumerate}
 
-\paragraph{Game 7.} This is identical to Game~6, except that $\simu$ stops the
-game if the output of the $\IDidentify$ interface differs from the output of
-the tracing functionality of protocol $\Pi$.
+These two steps run on every $\IDsubmit$ call, so for any honest user $\user$
+who granted a tracing permission for epoch $\epoch$ to a corrupt auditor,
+either $\txns[(\user,\epoch)] = \txnssimu[(\user, \epoch)]$ for every such
+user, or there is exactly one such user $\user^\star$ — the one who just called
+$\IDsubmit$ — with $\txns[(\user^\star,\epoch)] = \txnssimu[(\user^{\star},
+\epoch)] \cup \tx$. The first case means the calling user granted no corrupt
+auditor a permission this epoch; the second means a corrupt auditor is
+authorised to trace their transactions. We consider these two cases below.
 
-$\simu$ stops if one of two events occurs: event $e_1$, where a coalition of
-corrupt auditors and users traces a transaction submitted by an honest user
-during an epoch even though the user did not grant permissions to any corrupt
-auditor for that epoch; or event $e_2$, where an honest auditor fails to trace
-a transaction of a corrupt user submitted during an epoch despite holding the
-granted authorisation. We now show that the probability of each event is
-negligible.
+\begin{description}
+
+  \item[No corrupt auditor holds a permission for this epoch.] $\simu$ sets the
+    confidential payload to an arbitrary ciphertext, and instead of computing
+    the commitment as $\com = \ComCommit(\ck, \utk, \openinfo)$ and the tag as
+    $\Tag_\gamma = \FT(\ek,\gamma)$, samples uniformly at random commitment
+    $\com^{\star}$ and tag $\Tag_{\gamma}^\star$ and simulates the
+    corresponding proof and ZK proof. Epoch keys for other epochs are
+    independent of the current one, so the hiding property of the commitment
+    scheme, the pseudorandomness of $\FT$, and the simulatability and
+    zero-knowledge properties of the proofs make this indistinguishable from
+    submitting transactions in an execution of $\Pi$.
+
+  \item[A corrupt auditor holds a valid tracing permission for the honest
+    user.] $\simu$ obtains pair $(\user, \algo{TX})$, where $\user$ identifies
+    the honest user and $\algo{TX}$ consists of the transaction $\tx$ that
+    $\user$ sent with their $\IDsubmit$ query. $\simu$ retrieves tuple $(\sk,
+    \utk,\signature) \sample \regsimu[\user]$ and the random epoch key $\ek
+    \sample \permsimu[(\auditor,\user,\epoch)]$, sets the confidential payload
+    $\payload$ to $\tx$, and simulates the rest of the transaction as in Game
+    4.
+
+\end{description}
+
+\paragraph{Game 6.} As Game 5, except $\simu$ also simulates transaction
+submission for corrupt users, using the output of $\idfu{\algo{trace}}$'s
+$\IDsubmit$ interface.
+
+When a corrupt user $\user$ submits a transaction with a valid tag (a tag with
+valid ZK proof and proof and which does not appear in the ledger), $\simu$ uses
+the extractability property of proofs and the knowledge soundness of ZK proofs
+to extract $\user$'s witness, and the existential unforgeability of the
+registration signature to identify $\user$ via $\regsimu$. $\simu$ then sends
+an $\IDsubmit$ request on $\user$'s behalf to $\idfu{\algo{trace}}$ and returns
+its output; if $\idfu{\algo{trace}}$ accepts, $\simu$ records the transaction
+in $\txns[(\user,\epoch)]$.
+
+This game is indistinguishable from Game 5 unless $\idfu{\algo{trace}}$ rejects
+a transaction that $\Pi$ deems valid, which happens only in one of two cases:
+
+\begin{description}
+
+  \item[$\user$ is not registered.] This cannot be the case given that each
+    entry in $\regsimu$ corresponds to a successful $\IDregister$ call to
+    $\idfu{\algo{trace}}$.
+
+  \item[$\user$ already submitted $\Max$ transactions in the current epoch.]
+    Given the knowledge soundness of ZK proofs and determinism of $\FT$, $\Pi$
+    will not accept a transaction from $\user$ in this case as the tag will
+    already appear in the ledger.
+
+\end{description}
+
+\paragraph{Game 7.} As Game 6, except $\simu$ stops the game if the output of
+the $\IDidentify$ interface differs from that of protocol $\Pi$'s tracing
+functionality.
+
+$\simu$ stops if one of two events occurs: $e_1$, where a coalition of corrupt
+auditors and users traces a transaction submitted by an honest user during an
+epoch even though the user did not grant permissions to any corrupt auditor for
+that epoch; or $e_2$, where an honest auditor fails to trace a transaction of a
+corrupt user submitted during an epoch despite holding the granted
+authorisation. We show each event is negligible.
 
 Event $e_1$ does not occur, since the transactions of honest users during an
 epoch for which they did not grant tracing permissions to any corrupt auditor
 are generated at random.
 
-Event $e_2$ occurs only with negligible probability. A transaction $\tx$ from
-a corrupt user is recorded in $\txnssimu$ and forwarded to $\idfu{txid}$ only
-if it carries a valid tag $\Tag_{\gamma}$, meaning the proof for relation
-$\rel_2$ and the ZK proof for relation $\rel_3$ are both valid. Given the
-extractability property of proofs and knowledge soundness of ZK proofs, we
-conclude that $\Tag_{\gamma} = \FT(\ek, \gamma) \ \wedge \ \ek = \FE(\utk,
-\epoch)$ with $\utk$ verifying Equations \ref{eq:rel2} and \ref{eq:rel3}. An
-honest auditor with the right permission then fails to trace $\tx$ only if
-they accepted a bogus epoch key $\ek^\star$, which, given the extractability
-property of the proof for $\rel_1$ and the existential unforgeability of
-digital signatures, occurs only with negligible probability.
+Event $e_2$ occurs only with negligible probability. A transaction $\tx$ from a
+corrupt user is recorded in $\txnssimu$ and forwarded to $\idfu{\algo{trace}}$
+only if it carries a valid tag $\Tag_{\gamma}$, meaning the proof for relation
+$\rel_6$ and the ZK proof for relation $\rel_7$ are both valid. The
+extractability of proofs and knowledge soundness of ZK proofs then give
+$\Tag_{\gamma} = \FT(\ek, \gamma) \ \wedge \ \ek = \FE(\utk, \epoch)$ with
+$\utk$ verifying Equations \ref{eq:rel6} and \ref{eq:rel7}. An honest auditor
+with the right permission then fails to trace $\tx$ only if they accepted a
+bogus epoch key $\ek^\star$, which, given the extractability of the proof for
+$\rel_5$ and the existential unforgeability of digital signatures, occurs only
+with negligible probability.
 
 \subsection{PRF security arguments}
 
-\subsubsection*{PRF Security of $\FE$}\label{sec:fe-prf-proof}
+\subsubsection*{PRF Security of $\FE$}\label{sec:txid-fe-prf-proof}
 
-\begin{lemma}\label{lem:fe-prf} Under the DDH assumption in $\group{1}$ and
-modeling $\HE$ as a random oracle, the function $\FE(\utk, \epoch) =
+\begin{lemma}\label{lem:txid-fe-prf} Under the DDH assumption in $\group{1}$
+and modeling $\HE$ as a random oracle, the function $\FE(\utk, \epoch) =
 \HE(\epoch)^{\utk}$ is a secure pseudorandom function.  \end{lemma}
 
 We show that no polynomial-time adversary can distinguish $\FE(\cdot, \cdot)$
@@ -273,21 +248,21 @@ We then have the following advantage:
 \end{equation*}
 %
 
-\subsubsection*{PRF Security of $\FT$}\label{sec:ft-prf-proof}
+\subsubsection*{PRF Security of $\FT$}\label{sec:txid-ft-prf-proof}
 
-\begin{lemma}\label{lem:ft-prf} Under the BDDH assumption in bilinear groups,
-  the function defined as follows:
+\begin{lemma}\label{lem:txid-ft-prf} Under the BDDH assumption in bilinear
+  groups, the function defined as follows:
 %
   \begin{equation*}
 %
-    \FT(\ek, \gamma) = e(\ek, \prod_{i=0}^\ell G_i^{x_i}),
+    \FT(\ek, \gamma) = \pairing(\ek, \prod_{i=0}^\ell G_i^{x_i}),
 %
   \end{equation*}
 %
 is a secure pseudorandom function for well-formed inputs $\gamma$.  \end{lemma}
 
 Given BDDH challenge $(\gen, \gen^a, \gen^b, \ggen, \ggen^c, Z)$ where $Z =
-e(\gen, \ggen)^{abc}$ (BDDH tuple) or $Z \sample \group{T}$ (random), an
+\pairing(\gen, \ggen)^{abc}$ (BDDH tuple) or $Z \sample \group{T}$ (random), an
 adversary whose goal is to break BDDH, proceeds as follows.
 
 \begin{enumerate}
@@ -308,26 +283,27 @@ adversary whose goal is to break BDDH, proceeds as follows.
   \item For each query $\FT(\ek, \gamma)$ with bit decomposition $(\gamma_0,
     \ldots, \gamma_\ell)$, compute $\signature = \sum_{i=0}^\ell \alpha_i
     \gamma_i$ and $\tau = \sum_{i=0}^\ell \beta_i \gamma_i$, and return
-    $Z^{\signature} \cdot e(\gen^a, \ggen)^{\tau}$.
+    $Z^{\signature} \cdot \pairing(\gen^a, \ggen)^{\tau}$.
 
 \end{enumerate}
 
-If $Z = e(\gen, \ggen)^{abc}$, then for each query $\gamma$, the following
-holds:
+If $Z = \pairing(\gen, \ggen)^{abc}$, then for each query $\gamma$, the
+following holds:
 %
 \begin{equation*}
 %
   \prod_{i=0}^\ell G_i^{x_i} = \ggen^{c\signature_j + \tau_j} \ \ ; \ \
-  e(\gen^a, \prod_{i=0}^\ell G_i^{x_i}) = e(\gen^a, \ggen)^{c\signature_j +
-  \tau_j} = Z^{\signature_j} \cdot e(\gen^a, \ggen)^{\tau_j}.
+  \pairing(\gen^a, \prod_{i=0}^\ell G_i^{x_i}) = \pairing(\gen^a,
+  \ggen)^{c\signature_j + \tau_j} = Z^{\signature_j} \cdot \pairing(\gen^a,
+  \ggen)^{\tau_j}.
 %
 \end{equation*}
 %
-The responses of the adversary are then correctly distributed as the output
-of $\FT$. If the distinguisher against $\FT$ signals that $\FT$ is a PRF, we
-can conclude that the BDDH challenge was indeed a BDDH tuple.
+The responses of the adversary are then correctly distributed as the output of
+$\FT$. If the distinguisher against $\FT$ signals that $\FT$ is a PRF, we can
+conclude that the BDDH challenge was indeed a BDDH tuple.
 
-If $Z \sample \group{T}$, each response $Z^{\signature} \cdot e(\gen^a,
+If $Z \sample \group{T}$, each response $Z^{\signature} \cdot \pairing(\gen^a,
 \ggen)^{\tau}$ uniformly random in $\group{T}$, since $Z$, $\alpha_i$,
 $\beta_i$ are uniformly random and independent of $\ek$ and other chosen
 values.  If the distinguisher returns that $\FT$ is not a PRF, we can then
@@ -342,133 +318,142 @@ We then have the following advantage:
 \end{equation*}
 %
 
-\subsubsection*{$\rel_3$ and $\widehat{\rel}_3$ equivalence proofs}
+\subsubsection*{$\rel_7$ and $\rel_8$ equivalence proofs}
 
-We have that $\rel_3(\inst_3, \witness_3)$ has $\inst_3 = (\HE,
-\{\gggen{G}_i\}_{i\in[1,\ell]}, \gen_2, Q, \com, \Max, \epoch, \Tag_\gamma)$,
-and $\witness_3 = (\utk, \openinfo, \ek, \{\gamma_i\}_{i\in[1,\ell]})$. We then
-have that $\rel_3(\inst_3, \witness_3) = 1$ if and only if the following hold:
+Recall from Section~\ref{sec:tag-computation} that $\rel_7$ is defined for
+instance $\inst_7 = (\HE, \{\ggen_i\}_{i\in[1,\ell]}, \gen_2, \gen_3, \com,
+\Max, \epoch, \Tag_\gamma)$ and witness $\witness_7 = (\utk, \openinfo, \ek,
+\{\gamma_i\}_{i\in[1,\ell]})$, as
 %
-\begin{equation*}
+\begin{equation}\label{eq:rel7-concrete-recall} \begin{gathered}
 %
-  \com = \gen_2^{\utk}\cdot Q^{\openinfo} \ \wedge \ \ek = \HE(\epoch)^{\utk}\
-  \wedge \ \Tag_{\gamma} = e\Big(\ek,\prod_{i=1}^{\ell}
-  \gggen{G}_i^{\gamma_i}\Big) \ \wedge \ \forall i \in[1, \ell]: \gamma_i \in
-  \{0,1\},
+  \rel_7 = \{\ \com = \gen_2^{\utk}\cdot \gen_3^{\openinfo} \ \wedge \ \ek =
+  \HE(\epoch)^{\utk} \\ \wedge \ \Tag_{\gamma} = e\Big(\ek,\prod_{i=1}^{\ell}
+\ggen_i^{\gamma_i} \Big) \ \wedge \ \forall i \in[1, \ell]: \gamma_i \in
+\{0,1\}\ \}
+%
+\end{gathered} \end{equation}
+%
+(cf.~Equation~\eqref{eq:rel7-concrete}), and $\rel_8$ is defined for instance
+$\inst_8 = (\inst_7, \ggen, \gggen{b}, u, v)$ and witness $\witness_8 =
+(\witness_7, \tau, \upsilon)$, as
+%
+\begin{equation}\label{eq:rel7-hat-recall} \begin{gathered}
+%
+  \rel_8 = \{\ \com = \gen_2^{\utk}\cdot \gen_3^{\openinfo} \ \wedge \
+    \gggen{b} = \ggen^\tau\prod_{i=1}^{\ell} \ggen_i^{\gamma_i} \ \wedge \
+    \forall i \in [1,\ell]: \gamma_i \in \{0,1\} \\ \wedge \ u =
+    \HE(\epoch)^\upsilon \ \wedge \ v = u^{\utk} \ \wedge \ \pairing(v,
+    \gggen{b}) = \Tag_\gamma^\upsilon \cdot \pairing(v, \ggen)^\tau\ \}
+%
+  \end{gathered} \end{equation}
+%
+  (cf.~Equation~\eqref{eq:rel7-hat}).
+
+  \paragraph{Correctness and soundness.} With a witness satisfying $\rel_7$,
+  sample $\upsilon, \tau \gets \Zp$ and set $\gggen{b} =
+  \ggen^\tau\prod_{i=1}^{\ell}\ggen_i^{\gamma_i}$, $u = \HE(\epoch)^\upsilon$,
+  $v = u^{\utk}$. All six statements of $\rel_8$ hold; this can be shown
+  through substitution.
+
+  With a witness satisfying $\rel_8$, we show that it satisfies $\rel_7$ too.
+  Since $v = u^{\utk} = \HE(\epoch)^{\upsilon\cdot\utk} = \ek^\upsilon$ (using
+  $\ek = \HE(\epoch)^{\utk}$), the pairing equation $\pairing(v, \gggen{b}) =
+  \Tag_\gamma^\upsilon \cdot \pairing(v, \ggen)^\tau$ becomes the following:
+%
+  \begin{equation*}
+%
+    \pairing(\ek, \gggen{b})^\upsilon = \Tag_\gamma^\upsilon \cdot
+    \pairing(\ek, \ggen)^{\tau\upsilon}.
   %
-\end{equation*}
+  \end{equation*}
 %
-
-We define $\widehat{\rel}_3(\widehat{\inst}_3, \widehat{\witness}_3)$ with
-$\widehat{\inst}_3 = (\inst_3, \gggen{H}, \Gamma, U, V)$ and
-$\widehat{\witness}_3 = (\witness_3, r, s)$. Then we have
-$\widehat{\rel}_3(\widehat{\inst}_3, \widehat{\witness}_3) = 1$ if and only if
-the following statements hold:
+  Then, if we substitute $\gggen{b} = \ggen^\tau \prod_i \ggen_i^{\gamma_i}$,
+  the left-hand side becomes $\pairing(\ek, \ggen)^{\tau\upsilon} \cdot
+  \pairing(\ek, \prod_i \ggen_i^{\gamma_i})^\upsilon$. Dividing both sides by
+  $\pairing(\ek,\ggen)^{\tau\upsilon}$ leaves the following:
 %
-\begin{gather*}
+  \begin{equation*}
 %
-  \com = \gen_2^{\utk}\cdot Q^{\openinfo} \quad \wedge \quad \Gamma =
-  \gggen{H}^r\prod_{i=1}^{\ell} \gggen{G}_i^{\gamma_i} \quad \wedge \quad
-  \forall i \in [1,\ell]: \gamma_i \in \{0,1\} \\
+    e\Big(\ek, \prod_{i=1}^\ell \ggen_i^{\gamma_i}\Big)^\upsilon =
+    \Tag_\gamma^\upsilon.
   %
-  \wedge \quad U = \HE(\epoch)^s \quad \wedge \quad V = U^{\utk} \quad \wedge
-  \quad e(V, \Gamma) = \Tag_\gamma^s \cdot e(V, \gggen{H})^r.
+  \end{equation*}
+%
+  Then we use the fact that $\upsilon \neq 0$ (except with negligible
+  probability), giving $\pairing(\ek, \prod_i \ggen_i^{\gamma_i}) =
+  \Tag_\gamma$, recovering the statement of $\rel_7$.
+
+  \paragraph{Zero knowledge.} We construct a simulator $\simu$ that, given only
+  $\inst_7$ (no knowledge of $\witness_7 = (\utk, \openinfo, \ek,
+  \{\gamma_i\})$), produces a transcript $(\gggen{b}, u, v, \proof_8)$
+  computationally indistinguishable from one produced by an honest prover.
+
+  \begin{description}
+
+    \item[Simulating $(\gggen{b}, u, v)$.] $\simu$ samples $u, v \sample
+      \group{1}$ uniformly at random (rather than deriving them as
+      $\HE(\epoch)^\upsilon$ and $\ek^\upsilon$, since $\simu$ does not know
+      $\ek$). It fixes an arbitrary bit string
+      $\widehat{\gamma}_1,\ldots,\widehat{\gamma}_\ell \in \{0,1\}$ and samples
+      $\tau \sample \Zp$, setting $\gggen{b} = \ggen^\tau \prod_{i=1}^\ell
+      \ggen_i^{\widehat{\gamma}_i}$. Choosing $\gggen{b}$ this way lets us use
+      the bit-range proof's simulator as a black box in the second part of the
+      argument.
+
+      By assuming hardness of DDH, we have indistinguishability of $(\gen,
+      \gen^s, \ek, \ek^s)$ from $(\gen, \gen^s, \ek, \ek^t)$ for random $s,t$.
+      This means that a uniformly random pair $(u,v)$ is computationally
+      indistinguishable from an honestly generated one, so the substitution is
+      undetectable to any distinguisher.
+
+    \item[Simulating the Sigma protocol.] With $(\gggen{b}, u, v)$ fixed,
+      $\simu$ simulates the algebraic clauses of the proof using the standard
+      honest-verifier zero-knowledge simulator for Sigma protocols.
+
+      Specifically, it samples the challenge $c$ and the responses $\pi_1,
+      \pi_2, \pi_3, \{\pi_{4,i}\}, \pi_5 \sample \Zp$ uniformly at random, and
+      then derives the commitments by solving the verification equations
+      backwards. Concretely, they are defined as follows:
   %
-\end{gather*}
-
-\paragraph{Correctness and soundness.} With a witness satisfying $\rel_3$,
-sample $s, r \gets \Zp$ and set $\Gamma =
-\gggen{H}^r\prod_{i=1}^{\ell}\gggen{G}_i^{\gamma_i}$, $U = \HE(\epoch)^s$, $V =
-U^{\utk}$. All six statements of $\widehat{\rel}_3$ hold; this can be shown
-through substitution.
-
-With a witness satisfying $\widehat{\rel}_3$, we show that it satisfies
-$\rel_3$ too. Since $V = U^{\utk} = \HE(\epoch)^{s\cdot\utk} = \ek^s$ (using
-$\ek = \HE(\epoch)^{\utk}$), the pairing equation $e(V, \Gamma) = \Tag_\gamma^s
-\cdot e(V, \gggen{H})^r$ becomes the following:
-%
-\begin{equation*}
-%
-  e(\ek, \Gamma)^s = \Tag_\gamma^s \cdot e(\ek, \gggen{H})^{rs}.
+      \begin{gather*}
   %
-\end{equation*}
-%
-Then, if we substitute $\Gamma = \gggen{H}^r \prod_i \gggen{G}_i^{\gamma_i}$,
-the left-hand side becomes $e(\ek, \gggen{H})^{rs} \cdot e(\ek, \prod_i
-\gggen{G}_i^{\gamma_i})^s$. Dividing both sides by $e(\ek,\gggen{H})^{rs}$
-leaves the following:
-%
-\begin{equation*}
-%
-  e\Big(\ek, \prod_{i=1}^\ell \gggen{G}_i^{\gamma_i}\Big)^s = \Tag_\gamma^s.
+        t_1 = \gen_2^{\pi_1}\cdot \gen_3^{\pi_2}\cdot\com^{-c}, \qquad
+        \gggen{t}_2 = \ggen^{\pi_3}\prod_{i=1}^{\ell}
+        \ggen_i^{\pi_{4,i}}\cdot\gggen{b}^{-c}, \qquad t_3 =
+        \HE(\epoch)^{\pi_5}\cdot u^{-c}, \\
+    %
+        t_4 = u^{\pi_1}\cdot v^{-c}, \qquad T_5 = \Tag_\gamma^{\pi_5} \cdot
+        \pairing(v, \ggen)^{\pi_3}\cdot \pairing(v,\gggen{b})^{-c}.
+    %
+      \end{gather*}
   %
-\end{equation*}
-%
-Then we use the fact that $s \neq 0$ (except with negligible probability),
-giving $e(\ek, \prod_i \gggen{G}_i^{\gamma_i}) = \Tag_\gamma$, recovering the
-statement of $\rel_3$.
+      By construction,
+      $(t_1,\gggen{t}_2,t_3,t_4,T_5,c,\pi_1,\pi_2,\pi_3,\{\pi_{4,i}\},\pi_5)$
+      satisfies every verification equation, and since $c$ and the responses
+      are uniform and independent, the simulated transcript is distributed
+      identically to a real one, given $(\gggen{b}, u, v)$.
 
-\paragraph{Zero knowledge.} We construct a simulator $\simu$ that, given only
-$\inst_3$ (no knowledge of $\witness_3 = (\utk, \openinfo, \ek,
-\{\gamma_i\})$), produces a transcript $(\Gamma, U, V, \pi)$ computationally
-indistinguishable from one produced by an honest prover.
+      Bit validity of $\{\gamma_i\}$ is shown by $\simu$ invoking the simulator
+      of the underlying inner-product/range argument on $\gggen{b}$ directly,
+      which is why $\gggen{b}$ was constructed from an explicit bit string
+      rather than sampled uniformly at random.
 
-\emph{Simulating $(\Gamma, U, V)$.} $\simu$ samples $U, V \sample \group{1}$
-uniformly at random (rather than deriving them as $\HE(\epoch)^s$ and $\ek^s$,
-since $\simu$ does not know $\ek$). It fixes an arbitrary bit string
-$\widehat{\gamma}_1,\ldots,\widehat{\gamma}_\ell \in \{0,1\}$ and samples $r
-\sample \Zp$, setting $\Gamma = \gggen{H}^r \prod_{i=1}^\ell
-\gggen{G}_i^{\widehat{\gamma}_i}$. Choosing $\Gamma$ this way lets us use the
-bit-range proof's simulator as a black box in the second part of the argument.
+      For the interactive protocol, this establishes honest-verifier zero
+      knowledge: $\simu$ fixes the challenge before the commitments, requiring
+      either that the verifier's challenge be known in advance, or that $\simu$
+      rewind a general verifier until it reuses an already-programmed
+      challenge. In the non-interactive setting, this rewinding is replaced by
+      programming the random oracle: $\simu$ samples $c$ and the responses
+      first as above, computes $t_1,\gggen{t}_2,t_3,t_4,T_5$, and then programs
+      $\hash(\inst_8, t_1,\gggen{t}_2,t_3,t_4,T_5) = c$. Since $\hash$ is
+      modelled as a random oracle, this is possible and indistinguishable from
+      normal use of the hash function, so the non-interactive version is
+      simulatable without rewinding.
 
-By assuming hardness of DDH, we have indistinguishability of $(\gen, \gen^s,
-\ek, \ek^s)$ from $(\gen, \gen^s, \ek, \ek^t)$ for random $s,t$. This means
-that a uniformly random pair $(U,V)$ is computationally indistinguishable from
-an honestly generated one, so the substitution is undetectable to any
-distinguisher.
+  \end{description}
 
-\emph{Simulating the Sigma protocol.} With $(\Gamma, U, V)$ fixed, $\simu$
-simulates the algebraic clauses of the proof using the standard honest-verifier
-zero-knowledge simulator for Sigma protocols.
-
-Specifically, it samples the challenge $c$ and the responses $\theta, \omega,
-\upsilon, \{\xi_i\}, \chi \sample \Zp$ uniformly at random, and then derives
-the commitments by solving the verification equations backwards. Concretely,
-they are defined as follows:
-%
-\begin{gather*}
-%
-  A = \gen_2^{\theta}\cdot Q^{\omega}\cdot\com^{-c}, \qquad \Delta =
-  \gggen{H}^{\upsilon}\prod_{i=1}^{\ell} \gggen{G}_i^{\xi_i}\cdot\Gamma^{-c},
-  \qquad B = \HE(\epoch)^{\chi}\cdot U^{-c}, \\
-  %
-  D = U^{\chi}\cdot V^{-c}, \qquad F = \Tag_\gamma^{\chi} \cdot e(V,
-  \gggen{H})^{\upsilon}\cdot e(V,\Gamma)^{-c}.
-  %
-\end{gather*}
-%
-By construction, $(A,\Delta,B,D,F,c,\theta,\omega,\upsilon,\{\xi_i\},\chi)$
-satisfies every verification equation, and since $c$ and the responses are
-uniform and independent, the simulated transcript is distributed identically to
-a real one, given $(\Gamma, U, V)$.
-
-Bit validity of $\{\gamma_i\}$ is shown by $\simu$ invoking the simulator of
-the underlying inner-product/range argument on $\Gamma$ directly, which is why
-$\Gamma$ was constructed from an explicit bit string rather than sampled
-uniformly at random.
-
-For the interactive protocol, this establishes honest-verifier zero knowledge:
-$\simu$ fixes the challenge before the commitments, requiring either that the
-verifier's challenge be known in advance, or that $\simu$ rewind a general
-verifier until it reuses an already-programmed challenge. In the
-non-interactive setting, this rewinding is replaced by programming the random
-oracle: $\simu$ samples $c$ and the responses first as above, computes
-$A,\Delta,B,D,F$, and then programs $\hash(\widehat{\inst}_3, A,\Delta,B,D,F) =
-c$. Since $\hash$ is modelled as a random oracle, this is possible and
-indistinguishable from normal use of the hash function, so the non-interactive
-version is simulatable without rewinding.
-
-So $(\Gamma, U, V, \pi)$ produced by $\simu$ is computationally
-indistinguishable from that of an honest execution, under the DDH assumption
-and in the random oracle model, establishing zero knowledge of
-$\widehat{\rel}_3$ and hence, by the equivalence above, of $\rel_3$.
+  So $(\gggen{b}, u, v, \proof_8)$ produced by $\simu$ is computationally
+  indistinguishable from that of an honest execution, under the DDH assumption
+  and in the random oracle model, establishing zero knowledge of $\rel_8$ and
+  hence, by the equivalence above, of $\rel_7$.

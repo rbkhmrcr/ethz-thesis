@@ -1,1 +1,269 @@
-\section{Evaluation}
+\section{Evaluation}\label{sec:eval}
+
+To assess the concrete performance of our protocols, we implement and
+benchmark the schemes of Section~\ref{sec:tsps-abe}
+and~\ref{sec:tsps-kiltz}. We also describe two applications of efficient
+threshold structure-preserving signatures: transparency logs, and digital
+assets on a permissioned ledger.
+
+\paragraph{Transparency logs.} Certificate transparency (CT) and key
+transparency (KT) are the main examples of transparency logs.\footnote{A
+citation for CT and KT is still to be added.} In both cases, a transparency
+log is an append-only, publicly verifiable record, of either certificates or
+keys. Each entry is sent to a log provider, signed, and appended to the log;
+in CT systems, the log server returns a Signed Certificate Timestamp (SCT) to
+the certificate provider, and in KT systems, the mapping from user identity to
+public key is what the log server signs. Transparency logs let users and
+auditors verify that the certificates or keys they interact with carry
+legitimacy beyond the app serving them, moving trust onto the log providers
+instead. Threshold signatures could remove this single point of trust,
+distributing it across several servers: a threshold structure-preserving
+signature given to the key or certificate owner would let the
+structure-preserving property of the signature be used to prove, in
+zero-knowledge, that a key is recorded in the log, for instance for
+privacy-preserving identity verification. Since the structure-preserving
+property lets the public key itself be signed directly, without first
+hashing it, the resulting zero-knowledge proofs are more efficient than they
+would otherwise be.
+
+\paragraph{Permissioned ledgers.} A permissioned ledger is a distributed
+ledger where token issuance, transaction verification, and participation are
+controlled by one or a small number of authorities. Permissioned ledgers are
+of particular interest for platforms such as Central Bank Digital Currencies
+(CBDCs), as they offer a transparent system enabling regulatory oversight
+while still supporting transaction privacy and compliance with the monetary
+policy of the central bank in question.\footnote{A citation for CBDC
+permissioned ledger designs is still to be added.} One way to build such a
+system has every transaction executed and, if valid, signed by an endorser
+before being added to the ledger,\footnote{A citation for endorser-based
+ledger designs is still to be added.} where the signed state committed to the
+ledger is a commitment to the value and type of asset. Threshold
+structure-preserving signatures would let trust be distributed between
+multiple endorsers via the threshold property, while the structure-preserving
+property lets users perform efficient proofs of statements about their
+assets on the ledger, for example for compliance purposes.
+
+\paragraph{Realising the ideal MPC functionalities.} Section~\ref{sec:MPC}
+describes the ideal functionalities that our constructions assume for secure
+MPC over $\Zp$ and over a generic group $\Group$. We benchmark two concrete
+frameworks that realise these functionalities: ATLAS, in the honest-majority
+setting, and MASCOT, in the dishonest-majority setting.
+
+\subsection*{ATLAS}\label{sec:ATLAS}
+
+ATLAS is a secret-sharing based MPC scheme designed for the honest-majority
+setting~\cite{Goyal2021}. Because it operates with an honest majority of
+participants, ATLAS achieves unconditional security against both
+honest-but-curious and malicious adversaries.
+
+ATLAS builds on the protocol of~\cite{damgaard2007scalable}, improving its
+round complexity by a factor of two. Since it operates in the honest-majority
+setting, no public key operations are needed, and this setting additionally
+lets the protocol achieve fairness and guaranteed output delivery against a
+semi-honest adversary.
+
+The starting point for multiplication is as follows. For shares $[a], [b]$,
+parties locally multiply their shares, giving a degree-$2t$ sharing of the
+result. $2t$ honest parties then reshare this as a degree-$t$ sharing, for use
+in the next round of computation. In this way, the degree of the shares does
+not grow exponentially with each layer of computation, and remains below the
+total number of parties $n$ throughout.
+
+In the following, subscripts on shares denote the degree of the sharing. To
+evaluate a multiplication gate, parties prepare a pair of random sharings
+$([r]_t, [r]_{2t})$ of a random shared value $r$, where the first sharing has
+degree $t$ and the second degree $2t$. To compute $[c]_t = [a \cdot b]_t$
+from $[a]_t$ and $[b]_t$, a pair $([r]_t, [r]_{2t})$ is consumed as follows. A
+party $\PKing$ is chosen, and all parties locally compute $[e]_{2t} = [a]_t
+\cdot [b]_t + [r]_{2t}$ and send these values to $\PKing$, who reconstructs
+$e$ and distributes it back to all parties. Every party then locally computes
+$[c]_t = e - [r]_t$.
+
+ATLAS relies on the observation that when $\PKing$ is honest, and the sharing
+of $e$ that $\PKing$ distributes is degree $t$ rather than degree $2t$, the
+corrupted parties receive $t$ shares of a random degree-$t$ sharing $[e]_t$
+from $\PKing$, which are uniformly random and independent of the secret. So
+for an honest $\PKing$, the protocol for computing and consuming $([r]_t,
+[r]_{2t})$ can be optimised, and the responsibilities of $\PKing$ are
+themselves distributed across all parties. ATLAS reduces the number of rounds
+by half by combining ideas from Beaver triples with the techniques
+of~\cite{damgaard2007scalable}, letting parties use one round of
+communication to cover two rounds' worth of multiplication gates. For the
+second of these two layers, a Beaver triple $[x], [y], [x \cdot y]$ is
+consumed rather than a pair $([r]_t, [r]_{2t})$; the triple is produced in the
+pre-processing stage, and consumed in the online phase as follows. To
+multiply $[a]$ and $[b]$, all parties combine $[a + x]$ to learn $a + x$, and
+$[b + y]$ to learn $b + y$, and then compute $[a \cdot b] = (a + x)[a] - (b +
+y)[b] + [x \cdot y]$. This lets two secret-shared values be multiplied in the
+online phase, using random shared values prepared in the pre-processing
+phase.
+
+In terms of the functionalities of Section~\ref{sec:MPC}, since ATLAS is built
+from a linear secret sharing scheme, addition can be performed by parties
+simply adding their local shares. Multiplication is implemented as described
+above, each instance consuming a pair $([r]_t, [r]_{2t})$, or a triple $[x],
+[y], [x \cdot y]$, prepared during pre-processing. To combine shares, all
+parties broadcast them to one another.
+
+\subsection*{MASCOT}\label{sec:MASCOT}
+
+MASCOT~\cite{keller2016mascot} performs authenticated secure multiplication
+of shared field elements in the maliciously secure dishonest-majority
+setting. Secret-sharing based MPC relies on generating multiplication
+triples $[a], [b], [c] = [a \cdot b]$; the original SPDZ protocol, for the
+dishonest-majority, malicious setting, generated these using somewhat
+homomorphic encryption and zero-knowledge proofs.
+
+MASCOT's contribution is to generate multiplication triples using oblivious
+transfer (OT) instead, extended to the arithmetic setting. OT, at a high
+level, involves a sender who inputs $s_0, s_1$ and a receiver who inputs a bit
+$b$; the sender receives no output, and the receiver receives $s_b$, learning
+nothing about $s_{1-b}$. MASCOT uses OT together with MACs, standard sacrifice
+techniques, and privacy amplification, so that the protocol either correctly
+outputs the product of the shared elements, or else aborts once malicious
+behaviour is detected.
+
+Multiplication of secret-shared elements proceeds as follows. To generate
+multiplication triple $[a], [b], [a \cdot b]$, one of the two elements to be
+multiplied, say $[b]$, is split into its component bits. For elements of
+bit-length $k$, $k$ OTs are then run in parallel: the sender inputs a random
+value $r$ and its own value to be multiplied, $[a]$; the receiver inputs the
+bit decomposition of its input, $(b_1, \ldots, b_k)$, and receives either
+$r_i$ or $r_i + a$ depending on the corresponding input bit. The values
+received satisfy $q_i = r_i + b_i \cdot a$, which, mapped back to a field
+element, gives an additive sharing $q + r = a \cdot b$.
+
+Extending this two-party construction to $n$ parties is done by having each
+pair of parties run the protocol between themselves, and then summing the
+resulting partial shares. In the malicious setting, share values are
+accompanied by MACs, under a global MAC key that is itself secret-shared
+across all parties; the MAC values are checked with every multiplication, and
+a malicious party supplying inconsistent inputs causes the MAC check, and so
+the protocol, to abort.
+
+In terms of the functionalities of Section~\ref{sec:MPC}, since MASCOT is
+built over a linear secret sharing scheme, addition of secret-shared values
+happens locally, by parties adding the shares of the values along with their
+corresponding MACs. Multiplication is as described above. Inversion of a
+secret-shared value can also be performed locally, by each party inverting
+its own share. Combining shared values is performed by broadcasting shares,
+which are reconstructed through addition, with the MACs checked to ensure
+the reconstruction is correct.
+
+\paragraph{Implementation.} Our implementation builds on
+MP-SPDZ~\cite{keller2020mp}, a framework for implementing MPC with
+pre-processing. MP-SPDZ is built for the paradigm of sharing elements of
+$\Zp$, with all operations defined between elements of $\Zp$. For the
+protocols of this chapter, we additionally need operations between elements
+of $\GroupOne$ and $\GroupTwo$. Extending MP-SPDZ with group operations,
+concretely elliptic curve group operations, has been considered and
+implemented in prior work~\cite{dalskov2020securing,Ghosh2023}.
+
+We need the groups used to be pairing-friendly. Although we do not distribute
+any pairing operations, since these occur only in verification, we still need
+all operations to take place over pairing-friendly curves. This was also
+considered by Ghosh et al.~\cite{Ghosh2023}, who integrate the RELIC
+toolkit~\cite{relictoolkit} into MP-SPDZ for operations over pairing-friendly
+curves, and extend MP-SPDZ with shared computation over elements of the
+resulting elliptic curve groups.
+
+MP-SPDZ operates with a pre-processing (offline) phase and an online phase.
+In our setting, $\offsign$ corresponds to the pre-processing phase, and
+$\onsign$ and $\combine$ run in the online phase.
+
+We benchmark both the honest-majority and dishonest-majority settings, using
+ATLAS and MASCOT respectively to realise multiplication of shared secrets
+~\cite{keller2016mascot,Goyal2021}. ATLAS is designed to work in both the
+semi-honest and malicious settings, but the implementation available in
+MP-SPDZ captures only the semi-honest case~\cite{keller2020mp}. ATLAS and
+MASCOT both implement the ideal functionality of Section~\ref{sec:formalization}:
+MASCOT via the arithmetic black box functionality, which defines
+\texttt{init}, \texttt{input}, \texttt{add}, \texttt{multiply}, and
+\texttt{output}, and ATLAS via its own ideal functionality, which defines
+similar operations. In both cases, $\F{\inv}$ is built from $\F{\mul}$, with
+$\F{\randshare}$ taking the role of \texttt{input} and $\F{\combine}$ taking
+the role of \texttt{output}.
+
+We run benchmarks on a 16-core machine running RHEL 9.0-64 with 32GB of RAM,
+inside Docker containers based on Ubuntu 22.
+
+\begin{table*}[!ht]
+  \centering
+  \begin{tabular}{ c || c | c | c || c | c | c }
+   \toprule
+    & Assumption & Message space & $|\sk|$ & $|\pk|$ & $|\sigma|$ & Verification cost \\
+   \midrule
+    ~\cite{crites2023threshold} & PS + ROM & $(\genOne^{\vec{m}}, \genTwo^{\vec{m}}) \in \GroupOne^l \times \GroupTwo^l$ &
+    $ (l+1) | \Zp | $ & $ l | \GroupOne | + (l+1) | \GroupTwo | $ & $ 2 | \GroupOne | $ & $3l+2$ \\
+    ~\cite{Mitrokotsa2024} & SXDH & $ \vec{M} \in \GroupOne^l$ &
+    $ 2(l+1) | \Zp | $ & $ (l+1) | \GroupTwo | $ & $ 6 | \GroupOne | + | \GroupTwo | $ & $l+11$ \\
+    Section~\ref{sec:tsps-abe} & q-type & $ \vec{M} \in \GroupOne^l$ &
+    $ (l+1) | \Zp | $ & $ | \GroupOne | + l| \GroupTwo | $ & $ | \GroupOne | + 2 | \GroupTwo | $ & $l+4$ \\
+    Section~\ref{sec:tsps-kiltz} & SXDH & $ \vec{M} \in \GroupOne^l$ &
+    $ l |\Zp | + 6 | \GroupOne | $ & $ (l+6)| \GroupTwo | $ & $ 6 | \GroupOne | + | \GroupTwo |$ & $2l+10$ \\
+   \bottomrule
+  \end{tabular}
+  \caption{Comparison of threshold structure-preserving signature schemes.
+  Verification cost lists the number of pairing evaluations needed during
+  verification.}
+  \label{table:comp}
+\end{table*}
+
+\begin{table*}[!ht]
+  \centering
+  \begin{tabular}{ c || c | c | c }
+   \toprule
+    & $\offsign$ & $\onsign$ & $\combine$ \\
+   \midrule
+    ~\cite{crites2023threshold} & 0 & 0 & $ 2 | \GroupOne |$ \\
+    ~\cite{Mitrokotsa2024} & 0 & 0 & $ 6 | \GroupOne | + | \GroupTwo |$ \\
+    Section~\ref{sec:tsps-abe} & $ n(l+4)|\Zp|$ & 0 & $| \GroupOne | + 2 | \GroupTwo |$ \\
+    Section~\ref{sec:tsps-kiltz} & $ n(12|\Zp| + 6|\GroupOne|) $ & 0 & $6 | \GroupOne | + | \GroupTwo | $ \\
+   \bottomrule
+  \end{tabular}
+  \caption{Per-party communication complexity for the signing and combining
+  phases of the threshold signing schemes.}
+  \label{table:comms}
+\end{table*}
+
+\begin{table*}[!ht]
+  \centering
+  \begin{tabular}{ c || c || c | c || c | c }
+   \toprule
+    & Centralised & \multicolumn{2}{c||}{ATLAS~\cite{Goyal2021}} & \multicolumn{2}{c}{MASCOT~\cite{keller2016mascot}} \\
+    & & $\offsign$ & $\onsign$ & $\offsign$ & $\onsign$ \\
+   \midrule
+    Section~\ref{sec:tsps-abe} & 10ms & 46ms & 56ms & 92ms & 84ms \\
+    Section~\ref{sec:tsps-kiltz} & 40ms & 88ms & 61ms & 352ms & 94ms \\
+   \bottomrule
+  \end{tabular}
+  \caption{Timings of the sub-protocols of our threshold structure-preserving
+  signatures, averaged over 1000 runs, for $n = 5$.}
+  \label{table:benchmarks}
+\end{table*}
+
+Table~\ref{table:comp} compares our two schemes against~\cite{crites2023threshold}
+and~\cite{Mitrokotsa2024} in terms of assumptions, message space, key and
+signature size, and verification cost, while Table~\ref{table:comms} compares
+per-party communication complexity across the offline, online, and combining
+phases. Table~\ref{table:benchmarks} reports concrete timings for both of our
+schemes, using ATLAS and MASCOT to realise the underlying MPC
+functionalities, and against a centralised (non-threshold) baseline, for $n =
+5$ parties.
+
+\paragraph{Comparing across total number of parties.} We next examine how
+execution time varies with the total number of parties, fixing the threshold
+of participating parties and the message length at two group elements. In
+each case, ATLAS is around twice as fast as MASCOT, which is expected, since
+MASCOT relies on public key cryptography to handle dishonest majorities.
+Figures~\ref{eval-keygen} and~\ref{eval-offline} further show that ATLAS
+scales better than MASCOT as the number of parties increases. Since our
+benchmarks build on MP-SPDZ, they reflect the standard MPC offline and online
+phases, where the output is constructed within the online phase; this means
+the online and combining phases are benchmarked together, so their timings
+grow with the number of parties. In practice, when using threshold
+signatures, parties may instead perform only the constant-time $\onsign$
+locally, and submit their signature shares to a single party to perform
+$\combine$, rather than all parties communicating shares and each
+constructing a copy of the signature locally. The signature generation phase
+shown in Figure~\ref{eval-online} combines $\onsign$ and $\combine$.
