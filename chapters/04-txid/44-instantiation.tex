@@ -138,13 +138,13 @@ rather than requiring general purpose zero knowledge proofs.
           user.
 
         \item The user samples $\sk,\utk \sample \Zp$, sets $S \leftarrow
-          \gen_1^{\sk}$, $T \leftarrow \gen_2^{\utk}$, computes $\proof_4
+          \gen_1^{\sk}$, $T \leftarrow \gen_2^{\utk}$, computes $\algoproof_4
           \sample \NIZKprove(\crs_4,\inst_4,\witness_4,\rand)$ for $\inst_4 =
           (\gen_1,\gen_2,S,T)$ and $\witness_4 = (\sk,\utk)$, proving $S =
-          \gen_1^{\sk} \wedge T = \gen_2^{\utk}$, and sends $(S,T,\proof_4)$ to
+          \gen_1^{\sk} \wedge T = \gen_2^{\utk}$, and sends $(S,T,\algoproof_4)$ to
           the registration authority.
 
-        \item If $\proof_4$ does not verify, or the user has registered before,
+        \item If $\algoproof_4$ does not verify, or the user has registered before,
           the registration authority exits.
 
         \item Else, the registration authority computes $\signature \sample
@@ -169,16 +169,16 @@ rather than requiring general purpose zero knowledge proofs.
         \item The user samples $\alpha \sample \Zp$, computes $(A,B) =
           (\gen_2^{\alpha},\HE(\epoch)^{\alpha})$, sets $c =
           \hash(\gen_2,\epoch,A,B)$ and $\eta_1 = \alpha + c\cdot\utk$, forming
-          $\proof_5 \leftarrow (A,B,\eta_1)$, proving $\rel_5$: $\ek =
+          $\algoproof_5 \leftarrow (A,B,\eta_1)$, proving $\rel_5$: $\ek =
           \HE(\epoch)^{\utk} \wedge T = \gen_2^{\utk}$.
 
-        \item The user computes $\proof_4 \sample
-          \NIZKprove(\crs_4,\inst_4,\witness_4,\proof_5\|\rand)$,
+        \item The user computes $\algoproof_4 \sample
+          \NIZKprove(\crs_4,\inst_4,\witness_4,\algoproof_5\|\rand)$,
           re-authenticating $(S,T)$ on the fresh nonce, and sends
-          $(S,T,\signature,\ek,\proof_5,\proof_4)$ to the auditor.
+          $(S,T,\signature,\ek,\algoproof_5,\algoproof_4)$ to the auditor.
 
-        \item The auditor accepts and outputs $\ek$ if and only if $\proof_4$
-          verifies, $\BBSverify(\pk_{RA},(S,T),\signature) = 1$, and $\proof_5$
+        \item The auditor accepts and outputs $\ek$ if and only if $\algoproof_4$
+          verifies, $\BBSverify(\pk_{RA},(S,T),\signature) = 1$, and $\algoproof_5$
           verifies for $\rel_5$.
 
       \end{enumerate}
@@ -197,21 +197,21 @@ rather than requiring general purpose zero knowledge proofs.
         \item Sample $\openinfo \sample \Zp$ and compute $\com \sample
           \ComCommit(\ck,\utk,\openinfo)$.
 
-        \item Compute $\proof_7 \sample \NIZKprove(\crs_7,\inst_7,\witness_7)$,
+        \item Compute $\algoproof_7 \sample \NIZKprove(\crs_7,\inst_7,\witness_7)$,
           proving relation $\rel_7$, following~\Cref{sec:tag-computation}.
 
-        \item Compute $\proof_6 \sample
+        \item Compute $\algoproof_6 \sample
           \NIZKprove(\crs_6,\inst_6,\witness_6,\msg)$ for $\msg =
-          \payload\|\Tag_\gamma\|\com\|\proof_7$, proving relation $\rel_6$,
+          \payload\|\Tag_\gamma\|\com\|\algoproof_7$, proving relation $\rel_6$,
           following~\Cref{sec:tx-auth}.
 
         \item Set $\tx \leftarrow
-          (\payload,\Tag_\gamma,\com,\proof_7,\proof_6)$ and submit $\tx$ to
+          (\payload,\Tag_\gamma,\com,\algoproof_7,\algoproof_6)$ and submit $\tx$ to
           the ledger.
 
         \item The transaction validators append $\tx$ to $\state$ if and only
           if $\Tag_\gamma$ has not appeared in a previously accepted
-          transaction, $\proof_7$ verifies for $\rel_7$, and $\proof_6$
+          transaction, $\algoproof_7$ verifies for $\rel_7$, and $\algoproof_6$
           verifies for $\rel_6$ on $\msg$.
 
         \item Return $\tx$.
@@ -333,7 +333,7 @@ $(\gamma_1,\ldots,\gamma_\ell)$ are bits.
 
   \begin{description}
 
-    \item[$\proof_8 \sample \NIZKprove(\crs_8, \inst_8, \witness_8)$ :] On
+    \item[$\algoproof_8 \sample \NIZKprove(\crs_8, \inst_8, \witness_8)$ :] On
       input $\inst_8 = (\com, \gggen{b}, u, v, \Tag)$ and $\witness_8 = (\utk,
       \openinfo, \tau, \{\gamma_i\}_{i \in [1,\ell]}, \upsilon)$, do:
 
@@ -355,13 +355,13 @@ $(\gamma_1,\ldots,\gamma_\ell)$ are bits.
           \mu_{4,i} + c\cdot\gamma_i$ for each $i \in [1,\ell]$, and $\pi_5 =
           \mu_5 + c\cdot\upsilon$.
 
-        \item Return $\proof_8 = (t_1, \gggen{t}_2, t_3, t_4, T_5, \pi_1,
+        \item Return $\algoproof_8 = (t_1, \gggen{t}_2, t_3, t_4, T_5, \pi_1,
           \pi_2, \pi_3, \{\pi_{4,i}\}, \pi_5)$.
 
       \end{enumerate}
 
-    \item[$\{0,1\} \leftarrow \NIZKverify(\crs_8, \inst_8, \proof_8)$ :] On
-      input $\inst_8$ and proof $\proof_8$, compute challenge $c \leftarrow
+    \item[$\{0,1\} \leftarrow \NIZKverify(\crs_8, \inst_8, \algoproof_8)$ :] On
+      input $\inst_8$ and proof $\algoproof_8$, compute challenge $c \leftarrow
       \hash(\inst_8, t_1, \gggen{t}_2, t_3, t_4, T_5)$ and return the result of
       the following checks:
       %
@@ -438,7 +438,7 @@ transforms the resulting proof into a message-bound NIZK proof.
 
   \begin{description}
 
-    \item[$\proof_9 \sample \NIZKprove(\crs_9, \inst_9, \witness_9, \msg)$ :]
+    \item[$\algoproof_9 \sample \NIZKprove(\crs_9, \inst_9, \witness_9, \msg)$ :]
       On input $\inst_9 = (\pk, \com, u, v, w)$, $\witness_9 = (\utk, \rho, e,
       \zeta, \eta, \sk, \xi)$, and message $\msg$, do:
 
@@ -457,13 +457,13 @@ transforms the resulting proof into a message-bound NIZK proof.
           $(x_1,\ldots,x_7) = (\utk, \rho, e, \zeta, \eta, \sk, \xi)$ is the
           witness in the order given above.
 
-        \item Return $\proof_9 = (u, v, w, t_1, t_2, t_3, \vec{\pi})$, for
+        \item Return $\algoproof_9 = (u, v, w, t_1, t_2, t_3, \vec{\pi})$, for
           $\vec{\pi} = (\pi_1,\ldots,\pi_7)$.
 
       \end{enumerate}
 
-    \item[$\{0,1\} \leftarrow \NIZKverify(\crs_9, \inst_9, \proof_9, \msg)$ :]
-      On input instance $\inst_9$, proof $\proof_9$, and message $\msg$, do:
+    \item[$\{0,1\} \leftarrow \NIZKverify(\crs_9, \inst_9, \algoproof_9, \msg)$ :]
+      On input instance $\inst_9$, proof $\algoproof_9$, and message $\msg$, do:
 
       \begin{enumerate}
 

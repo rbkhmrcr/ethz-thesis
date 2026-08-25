@@ -12,13 +12,13 @@ consists of the following algorithms:
   \item[$\crs \sample \NIZKgen(\secparam)$ :] The setup algorithm outputs a
     common reference string $\crs$.
 
-  \item[$\proof \leftarrow \NIZKprove(\crs, \inst, \witness)$ :] The proving
+  \item[$\algoproof \leftarrow \NIZKprove(\crs, \inst, \witness)$ :] The proving
     algorithm takes as input a common reference string $\crs$, statement
-    $\inst$, and witness $\witness$, and outputs a proof $\proof$.
+    $\inst$, and witness $\witness$, and outputs a proof $\algoproof$.
 
-  \item[$\{0, 1\} \leftarrow \NIZKverify(\crs, \inst, \proof)$ :] The
+  \item[$\{0, 1\} \leftarrow \NIZKverify(\crs, \inst, \algoproof)$ :] The
     verification algorithm takes as input a common reference string $\crs$,
-    statement $\inst$, and proof $\proof$, and outputs $0$ or $1$.
+    statement $\inst$, and proof $\algoproof$, and outputs $0$ or $1$.
 
 \end{description}
 
@@ -47,10 +47,10 @@ proof system.  A labelled NIZK extends the syntax as follows:
 
 \begin{description}
 
-  \item[$\proof \leftarrow \NIZKprove(\crs, \inst, \witness, \lbl)$ :] The
+  \item[$\algoproof \leftarrow \NIZKprove(\crs, \inst, \witness, \lbl)$ :] The
     proving algorithm additionally takes a label $\lbl \in \{0,1\}^*$.
 
-  \item[$\{0, 1\} \leftarrow \NIZKverify(\crs, \inst, \proof, \lbl)$ :] The
+  \item[$\{0, 1\} \leftarrow \NIZKverify(\crs, \inst, \algoproof, \lbl)$ :] The
     verification algorithm additionally takes the label $\lbl$, and accepts
     only proofs produced under that label.
 
@@ -69,11 +69,11 @@ require, we introduce the following additional algorithms.
     $\td$.  The distribution of $\crs$ is computationally indistinguishable
     from that produced by $\NIZKgen(\secparam)$.
 
-  \item[$\proof \leftarrow \NIZKsimprove(\crs, \td, \inst, \lbl)$ :] The
+  \item[$\algoproof \leftarrow \NIZKsimprove(\crs, \td, \inst, \lbl)$ :] The
     simulator takes the trapdoor, a statement $\inst$, and a label $\lbl$, and
     outputs a proof, without access to a witness.
 
-  \item[$\witness \leftarrow \NIZKextract(\crs, \td, \inst, \proof, \lbl)$ :]
+  \item[$\witness \leftarrow \NIZKextract(\crs, \td, \inst, \algoproof, \lbl)$ :]
     The extractor takes the trapdoor, a statement, a proof, and a label, and
     outputs a candidate witness.
 
@@ -130,17 +130,17 @@ captures both of these properties.
       and sends $\crs$ to $\adv$.
 
     \item $\adv$ is given oracle access to $\simoracle$, which on input
-      $(\inst, \lbl)$ returns $\proof \leftarrow \NIZKsimprove(\crs, \td,
+      $(\inst, \lbl)$ returns $\algoproof \leftarrow \NIZKsimprove(\crs, \td,
       \inst, \lbl)$ and stores $(\inst, \lbl)$ in the set $\Query$.
 
-    \item $\adv$ outputs $(\inst^*, \proof^*, \lbl^*)$.
+    \item $\adv$ outputs $(\inst^*, \algoproof^*, \lbl^*)$.
 
     \item Challenger extracts $\witness^* \leftarrow \NIZKextract(\crs,
-      \td, \inst^*, \proof^*, \lbl^*)$.
+      \td, \inst^*, \algoproof^*, \lbl^*)$.
 
   \end{enumerate}
 
-  $\adv$ wins the experiment if $\NIZKverify(\crs, \inst^*, \proof^*, \lbl^*) =
+  $\adv$ wins the experiment if $\NIZKverify(\crs, \inst^*, \algoproof^*, \lbl^*) =
   1$, $(\inst^*, \lbl^*) \notin \Query$, and $\rel(\inst^*, \witness^*) \neq
   1$.
 

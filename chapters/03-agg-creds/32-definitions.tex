@@ -39,13 +39,13 @@ place.
     aggregation algorithm, on input public parameters $\crs$ and credentials
     $\cred,\ldots,\cred$, outputs aggregate credential $\aggcred$.
 
-  \item[$\proof \sample \AACpresent(\crs,\aggcred,\msg)$ :] The presentation
+  \item[$\algoproof \sample \AACpresent(\crs,\aggcred,\msg)$ :] The presentation
     algorithm, on input public parameters $\crs$, aggregate credential
-    $\aggcred$, and message $\msg$, outputs presentation $\proof$.
+    $\aggcred$, and message $\msg$, outputs presentation $\algoproof$.
 
-  \item[$\{0,1\} \leftarrow \AACverify(\crs,\msg,\proof)$ :] The verification
+  \item[$\{0,1\} \leftarrow \AACverify(\crs,\msg,\algoproof)$ :] The verification
     algorithm, on input public parameters $\crs$, message $\msg$, and
-    presentation proof $\proof$, returns 0 or 1.
+    presentation proof $\algoproof$, returns 0 or 1.
 
 \end{description}
 
@@ -225,12 +225,12 @@ fresh message supplied by the verifier that the resulting presentation is bound
 to. $\idfu{\AAC}$ accepts if the user previously called aggregate on
 $\vec{\atv{}}$, or otherwise if the user actually holds $\vec{\atv{}}$. This
 means a corrupt user who skips aggregate can still succeed if they hold the
-credentials. On acceptance, $\idfu{\AAC}$ generates a random string $\proof$,
-whose randomness ensures $(\vec{\atv{}}, \msg, \proof)$ reveals nothing about
+credentials. On acceptance, $\idfu{\AAC}$ generates a random string $\algoproof$,
+whose randomness ensures $(\vec{\atv{}}, \msg, \algoproof)$ reveals nothing about
 the user beyond $\vec{\atv{}}$.
 
 \paragraph{Verify.} A verifier calls this to check a presentation
-$(\vec{\atv{}}, \msg, \proof)$. If it was already produced by a valid present
+$(\vec{\atv{}}, \msg, \algoproof)$. If it was already produced by a valid present
 call, $\idfu{\AAC}$ returns true. If already flagged invalid, it returns false.
 Otherwise, $\idfu{\AAC}$ checks whether the presentation could have been forged by
 corrupt parties: whether corrupt users hold all disclosed values, or failing
@@ -345,11 +345,11 @@ answer. Otherwise, it records the presentation as invalid and returns false.
 
             \begin{enumerate}
 
-              \item Randomly generate $\proof$.  \item Set
-                $\proven[\vec{\atv{}}, \msg, \proof] \leftarrow 1$.
+              \item Randomly generate $\algoproof$.  \item Set
+                $\proven[\vec{\atv{}}, \msg, \algoproof] \leftarrow 1$.
 
-              \item Return $(\AACpresentend, \proof)$ to the user and
-                $(\AACpresentend, \vec{\atv{}}, \msg, \allowbreak \proof)$ to
+              \item Return $(\AACpresentend, \algoproof)$ to the user and
+                $(\AACpresentend, \vec{\atv{}}, \msg, \allowbreak \algoproof)$ to
                 $\simu$.  (Users who have successfully aggregated their
                 credentials successfully produce a presentation.)
 
@@ -363,12 +363,12 @@ answer. Otherwise, it records the presentation as invalid and returns false.
 
             \begin{enumerate}
 
-              \item Randomly generate $\proof$.
+              \item Randomly generate $\algoproof$.
 
-              \item Set $\proven[\vec{\atv{}}, \msg, \proof] \leftarrow 1$.
+              \item Set $\proven[\vec{\atv{}}, \msg, \algoproof] \leftarrow 1$.
 
-              \item Return $(\AACpresentend,  \proof)$ to the user and
-                $(\AACpresentend, \vec{\atv{}}, \msg, \allowbreak \proof)$ to
+              \item Return $(\AACpresentend,  \algoproof)$ to the user and
+                $(\AACpresentend, \vec{\atv{}}, \msg, \allowbreak \algoproof)$ to
                 $\simu$.  (Users with disclosed attribute values successfully
                 produce a presentation even if they have not called aggregate before.)
 
@@ -377,14 +377,14 @@ answer. Otherwise, it records the presentation as invalid and returns false.
         \end{enumerate}
 
         {$\AACverify$.} On receiving message $(\AACverify, \vec{\atv{}},
-        \allowbreak \msg, \proof)$ from a verifier, do:
+        \allowbreak \msg, \algoproof)$ from a verifier, do:
 
         \begin{enumerate}
 
-          \item If $\proven[\vec{\atv{}}, \msg, \proof] \rightarrow 0$, then
+          \item If $\proven[\vec{\atv{}}, \msg, \algoproof] \rightarrow 0$, then
             exit.
 
-          \item Otherwise, if $\proven[\vec{\atv{}}, \msg, \proof] \rightarrow
+          \item Otherwise, if $\proven[\vec{\atv{}}, \msg, \algoproof] \rightarrow
             1$, then:
 
             \begin{enumerate}
@@ -392,12 +392,12 @@ answer. Otherwise, it records the presentation as invalid and returns false.
               \item Return $(\AACverifyend, 1)$ to the verifier.
                 (Completeness.)
 
-              \item Send $(\AACverifyend, \algo{V}, \vec{\atv{}}, \msg, \proof,
+              \item Send $(\AACverifyend, \algo{V}, \vec{\atv{}}, \msg, \algoproof,
                 \allowbreak 1)$ to $\simu$.
 
             \end{enumerate}
 
-          \item Otherwise, if $\proven[\vec{\atv{}}, \msg, \proof] \rightarrow
+          \item Otherwise, if $\proven[\vec{\atv{}}, \msg, \algoproof] \rightarrow
             \bot$, then:
 
             \begin{enumerate}
@@ -407,12 +407,12 @@ answer. Otherwise, it records the presentation as invalid and returns false.
                 $\forall \atv{i} \neq \varnothing$, we either have $\atv{i} =
                 \atv'{i}$, or have $\atv{i} \neq \atv'{i}$ but issuer
                 $\issuer{i}$ is dishonest, then query $\simu$ with
-                $(\AACverify, \vec{\atv{}}, \msg,\proof)$. On receiving the
+                $(\AACverify, \vec{\atv{}}, \msg,\algoproof)$. On receiving the
                 response $(\AACverifyend, b)$, do:
 
                 \begin{enumerate}
 
-                  \item Set $\proven[\vec{\atv{}}, \msg, \proof] \leftarrow b$.
+                  \item Set $\proven[\vec{\atv{}}, \msg, \algoproof] \leftarrow b$.
 
                   \item Return $(\AACverifyend, b)$ to $\algo{V}$.
 
@@ -422,13 +422,13 @@ answer. Otherwise, it records the presentation as invalid and returns false.
 
                 \begin{enumerate}
 
-                  \item Set $\proven[\vec{\atv{}}, \msg, \proof] \leftarrow 0$.
+                  \item Set $\proven[\vec{\atv{}}, \msg, \algoproof] \leftarrow 0$.
 
                   \item Return $(\AACverifyend, 0)$ to $\algo{V}$.
                     (Unforgeability.)
 
                   \item Send $(\AACverifyend, \algo{V}, \vec{\atv{}}, \msg,
-                    \allowbreak \proof, \allowbreak 0)$ to $\simu$.
+                    \allowbreak \algoproof, \allowbreak 0)$ to $\simu$.
 
                 \end{enumerate}
 

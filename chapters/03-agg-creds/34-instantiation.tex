@@ -365,9 +365,9 @@ relation:
 %
 This is because in the concrete instantiation, the user instead randomises
 $\signature'$ and $\SPSsig'$.  This means that these values can be sent in the
-clear within $\proof$, as they reveal nothing about which original signature
+clear within $\algoproof$, as they reveal nothing about which original signature
 they came from. This means that the signature verification equations can be
-used directly. $\proof$ then captures the full original relation, with
+used directly. $\algoproof$ then captures the full original relation, with
 signature verification performed directly instead of proven, and the discrete
 log equalities enforcing consistency through $\eta$. This allows us to build a
 concretely efficient proof rather than requiring zero knowledge proofs over
@@ -544,7 +544,7 @@ the full instantiation of the aggregate anonymous credentials protocol.
 
       \end{enumerate}
 
-    \item[$\proof \sample \AACpresent(\crs,\aggcred,\msg)$ :] On input
+    \item[$\algoproof \sample \AACpresent(\crs,\aggcred,\msg)$ :] On input
       $\aggcred$ and message $\msg$ from the verifier, do:
 
       \begin{enumerate}
@@ -580,14 +580,14 @@ the full instantiation of the aggregate anonymous credentials protocol.
           %
       \item Compute $\eta \sample \NIZKprove(\crs, \inst_3, \witness_3, \msg)$.
 
-      \item Return $\proof = (\eta, \bar{\gen}, \bar{v}, \widetilde{r}',
+      \item Return $\algoproof = (\eta, \bar{\gen}, \bar{v}, \widetilde{r}',
         \widetilde{s}', \bar{t}, \signatureone', \bar{\signaturetwo},
         \bar{\tid}, \pk', \{\atv{i}, H_i\}_{i\in \ISSUERS})$.
 
     \end{enumerate}
 
-  \item[$\{0,1\} \leftarrow \AACverify(\crs,\msg,\proof)$ :] On input
-    $(\msg,\proof)$ from a verifier, parse $\proof = (\eta, \bar{\gen},
+  \item[$\{0,1\} \leftarrow \AACverify(\crs,\msg,\algoproof)$ :] On input
+    $(\msg,\algoproof)$ from a verifier, parse $\algoproof = (\eta, \bar{\gen},
     \bar{v}, \widetilde{r}', \widetilde{s}', \bar{t}, \signatureone',
     \bar{\signaturetwo}, \bar{\tid}, \pk', \{\atv{i}, H_i\}_{i\in\ISSUERS})$
     and do:

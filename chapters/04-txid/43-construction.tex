@@ -1,6 +1,6 @@
 \section{Construction}\label{sec:txid-construction}
 
-In brief, the protocol proceeds as follows. The ledger operator processes user
+The protocol proceeds as follows. The ledger operator processes user
 transactions. Each user is provisioned with a long term signing key and a long
 term tracing key, cryptographically bound together via a credential issued by
 the registration authority. For each epoch, the user derives an epoch tracing
@@ -18,17 +18,14 @@ When the system moves to a new epoch, users derive a fresh epoch tracing key,
 and tracing capabilities granted for prior epochs expire automatically.
 
 The protocol is built from four cryptographic primitives, each used as a black
-box. A digital signature scheme $\DS$~\cite{SICOMP:GolMicRiv88} lets the
-registration authority certify a user's keys. A commitment scheme
-$\Com$~\cite{JC:Naor91} lets a user bind their tracing key across several
-proofs without revealing it. Two pseudorandom
-functions~\cite{JACM:GolGolMic86}, $\FE$ for epoch keys and $\FT$ for tags,
-deterministically derive epoch tracing keys and transaction tags from a user's
-long term tracing key; long term keys are additionally bound using one way
-functions $\G$ and $\G'$. A non-interactive zero knowledge proof
-system~\cite{STOC:BluFelMic88} lets a user prove that these values were derived
+box. The registration authority certifies users' keys with a digital signature scheme $\DS$.
+Users bind their tracing keys across several
+proofs using a commitment scheme $\Com$. Two pseudorandom
+functions, $\FE$ for epoch keys and $\FT$ for tags, derive epoch tracing keys and transaction tags from users'
+long term tracing keys. These keys are also bound using one way
+functions $\G$ and $\G'$. The user proves that these values were derived
 correctly, and, where the proof must also authenticate a message, that the
-message originated from the same user.
+message originated from the same user, using zero knowledge proofs of knowledge.
 
 The number of relations below reflects the roles the ledger imposes, rather
 than an accumulation of unrelated design choices. Unlike a credential system

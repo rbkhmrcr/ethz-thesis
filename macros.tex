@@ -5,6 +5,12 @@
 \newtheorem{lemma}{Lemma}
 \newtheorem{definition}{Definition}
 
+\newenvironment{proof}{%
+  \par\noindent\textbf{Proof.}\ \small
+}{%
+  \unskip\nobreak\hfill$\square$\par\medskip
+}
+
 % define box for protocols
 
 \definecolor{boxgreen}{RGB}{11, 110, 79}
@@ -139,7 +145,7 @@
 \newcommand{\lang}{\algo{lang}}
 \newcommand{\rel}{\algo{rel}}
 \newcommand{\crs}{\algo{crs}}
-\newcommand{\proof}{\algo{proof}}
+\newcommand{\algoproof}{\algo{proof}}
 \newcommand{\state}{\algo{state}}
 \newcommand{\inst}{\algo{inst}}
 \newcommand{\witness}{\algo{wit}}

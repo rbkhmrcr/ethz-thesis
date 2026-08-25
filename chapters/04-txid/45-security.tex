@@ -386,7 +386,7 @@ $\inst_8 = (\inst_7, \ggen, \gggen{b}, u, v)$ and witness $\witness_8 =
 
   \paragraph{Zero knowledge.} We construct a simulator $\simu$ that, given only
   $\inst_7$ (no knowledge of $\witness_7 = (\utk, \openinfo, \ek,
-  \{\gamma_i\})$), produces a transcript $(\gggen{b}, u, v, \proof_8)$
+  \{\gamma_i\})$), produces a transcript $(\gggen{b}, u, v, \algoproof_8)$
   computationally indistinguishable from one produced by an honest prover.
 
   \begin{description}
@@ -453,7 +453,7 @@ $\inst_8 = (\inst_7, \ggen, \gggen{b}, u, v)$ and witness $\witness_8 =
 
   \end{description}
 
-  So $(\gggen{b}, u, v, \proof_8)$ produced by $\simu$ is computationally
+  So $(\gggen{b}, u, v, \algoproof_8)$ produced by $\simu$ is computationally
   indistinguishable from that of an honest execution, under the DDH assumption
   and in the random oracle model, establishing zero knowledge of $\rel_8$ and
   hence, by the equivalence above, of $\rel_7$.
