@@ -90,7 +90,7 @@ payment in under $400\,\mathrm{ms}$.
 
 \subsection{Related work}\label{sec:offline-related}
 
-\paragraph{Original e-cash.} E-cash has been studied for several decades,
+\paragraph{Original ecash.} Ecash has been studied for several decades,
 beginning with Chaum's solutions, which focus on the
 privacy of users and on double spending detection~\cite{C:Chaum82,C:ChaFiaNao88}. Privacy is achieved through
 RSA blind signatures, which break the link between withdrawals and deposits,
@@ -98,7 +98,7 @@ while double spending detection is realised using unique serial numbers.
 Although efficient, these solutions guarantee neither transferability nor
 theft prevention.
 
-\paragraph{Divisible e-cash.} Divisible e-cash allows a user to withdraw a
+\paragraph{Divisible ecash.} Divisible ecash allows a user to withdraw a
 token and split it among different recipients across multiple independent
 transactions~\cite{C:OkaOht91,C:Okamoto95}. This comes at the cost of higher
 complexity for withdrawals, payments, and deposits, which scale with the token
@@ -108,17 +108,17 @@ still carry large communication and computational
 costs~\cite{PKC:CPST15,ACNS:CPST15}. While divisibility is a useful feature, we leave it as
 future work and focus instead on transferability.
 
-\paragraph{Transferable e-cash.} Some schemes present e-cash that is both
+\paragraph{Transferable ecash.} Some schemes present ecash that is both
 transferable and divisible, at the cost of high computational complexity; we
 instead focus on efficiency and scalability~\cite{C:OkaOht91,EC:ChaPed92}.
-Fuchsbauer et al.\ maintain a constant token size regardless of
+Another system maintains a constant token size regardless of
 the number of transfers, but require user interaction to identify double
 spenders, and when double spending is detected all previous owners of the
-token also become identifiable~\cite{CANS:FucPoiVer09}. Baldimtsi et al.\
-propose a scheme where token size grows linearly with the number of
+token also become identifiable~\cite{CANS:FucPoiVer09}. 
+There is also a scheme where token size grows linearly with the number of
 transfers, but which reveals only the double spender's
 identity~\cite{PKC:BCFK15}. Owing to the cost of this approach, we instead
-rely on a trusted auditor, which can be distributed, to de-anonymise payments
+rely on a trusted auditor, which can be distributed, to deanonymise payments
 as needed.
 
 Some schemes introduce coin transparency, which ensures a payee
@@ -137,13 +137,13 @@ identifiable~\cite{SCN:CamHohLys06}.
 We instead let the conditions under which anonymity is revoked be defined
 outside of the protocol itself.
 
-\paragraph{Off-chain settlement.} Payment channels such as the Lightning
-network and Teechain provide off-chain payments rather than offline
+\paragraph{Offchain settlement.} Payment channels such as the Lightning
+network and Teechain provide offchain payments rather than offline
 payments~\cite{poon2016bitcoin,lind2019teechain}. The Lightning network was
 the first payment channel network designed for
 Bitcoin: to improve latency and scalability, users
 commit funds to an account controlled by signatures from both payer and
-payee, then exchange small transactions off-chain, with only the final
+payee, then exchange small transactions offchain, with only the final
 batched transaction committed to the ledger~\cite{poon2016bitcoin}. A network of such channels lets
 users route transactions through counterparties with whom they do not share
 an account directly. Onion routing offers some notion of privacy, though it
@@ -180,20 +180,20 @@ in which transaction values are hidden, though user anonymity and
 transaction unlinkability do not appear to be implemented, and offline
 payments are not specifically addressed. The Bank of Ghana's design document
 for the digital Cedi (eCedi) highlights offline payments as a key focus
-area\footnote{\url{https://www.bog.gov.gh/news/design-paper-of-the-digital-cedi-ecedi/}.}
+area\footnote{Reported at \url{https://www.bog.gov.gh/news/design-paper-of-the-digital-cedi-ecedi/}.}
 while emphasising privacy alongside regulatory compliance. The US Federal
 Reserve Board's report on offline payments
 distinguishes hybrid payment systems, where the payee must come online to
 settle, from fully offline systems, where this is not required, and finds no
 production examples of the latter; it highlights the digital Rupee from the
 National Payments Corporation of
-India\footnote{\url{https://rbi.org.in/scripts/FAQView.aspx?Id=169}.}, which
+India\footnote{Reported at \url{https://rbi.org.in/scripts/FAQView.aspx?Id=169}.}, which
 allows offline transactions from a smartphone app with settlement once the
 app reconnects, and Pix in Brazil, which allows the payer to be offline when
 creating a transaction but requires the payee's point-of-sale terminal to be
 online to authorise it~\cite{aboulaiz2024offline,lobo2021pix}.
 
-\paragraph{Decentralised privacy-preserving payments.}
+\paragraph{Decentralised payments.}
 Peredi, Platypus, and
 UTT give privacy-preserving token schemes that
 distribute trust via threshold cryptography while providing accountability
@@ -205,7 +205,7 @@ practice~\cite{park2017opera}. Rial and Piotrowska distribute the role of the ba
 issuance and consider divisible offline payments, while we
 focus on efficient transferability~\cite{PoPETS:RiaPio23}. PayOff offers a
 transferable offline CBDC solution using more complex cryptography than ours,
-and assigns the central bank responsibility for covering double-spent values,
+and assigns the central bank responsibility for covering double spent values,
 potentially inflating the total value in the system; we instead prioritise
 equipping users with a secure element to prevent double spending rather than
 only detect it~\cite{Beer2024}.
@@ -225,9 +225,9 @@ it meets the latency expected of everyday payments.
 \paragraph{Layout.} Section~\ref{sec:offline-definitions} describes the
 system's participants and trust assumptions and formalises the security goals
 of an offline payment system as an ideal functionality.
-Section~\ref{sec:construction} gives the construction, first at the level of
+Section~\ref{sec:offline-construction} gives the construction, first at the level of
 intuition and then in full detail. Section~\ref{sec:offline-instantiation}
 instantiates the building blocks the construction relies on.
-Section~\ref{sec:offline:proof} proves the construction secure and discusses
-its security in practical deployments. Section~\ref{sec:eval} evaluates our
+Section~\ref{sec:offline-security} proves the construction secure and discusses
+its security in practical deployments. Section~\ref{sec:offline-evaluation} evaluates our
 implementation, and Section~\ref{sec:offline-summary} concludes.

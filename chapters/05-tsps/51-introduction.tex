@@ -27,7 +27,7 @@ certifier can sign tokens as they appear on the ledger and simply publish the
 resulting signatures.
 
 A similar idea applies where the ledger stores commitments to user accounts,
-pairs $\langle \text{owner}, \ \text{holdings} \rangle$, rather than committed
+pairs (owner, holdings), rather than committed
 tokens. Such accounts form the basis for periodic reporting on user holdings,
 for instance proving that holdings do not exceed some threshold when filing
 taxes. Since tax authorities typically lack direct access to the shared
@@ -141,14 +141,12 @@ concrete efficiency. Our scheme built from the signature of Abe, Groth,
 Haralambiev, and Ohkubo yields optimally small threshold signatures,
 consisting of just three group elements~\cite{C:AGHO11}.
 
-\paragraph{Layout.} Section~\ref{sec:formalisation} formalises the security
-properties of threshold structure-preserving signatures.
-Section~\ref{sec:SPS} describes the structure-preserving signatures of Abe,
-Groth, Haralambiev, and Ohkubo and of Kiltz, Pan, and
-Wee~\cite{C:AGHO11,C:KilPanWee15}. Section~\ref{sec:MPC} introduces the ideal
+\paragraph{Layout.} Section~\ref{sec:tsps-definitions} formalises the security
+properties of threshold structure-preserving signatures, and introduces the ideal
 functionalities for MPC that our constructions build on.
-Section~\ref{sec:schemes} shows how these functionalities threshold sign with
-both signature schemes, proven secure in Section~\ref{sec:tsps-security}.
-Section~\ref{sec:eval} evaluates our approach, realising the MPC
-functionalities concretely via ATLAS and MASCOT, and
+Section~\ref{sec:tsps-construction} describes the structure-preserving signatures of Abe,
+Groth, Haralambiev, and Ohkubo and of Kiltz, Pan, and
+Wee~\cite{C:AGHO11,C:KilPanWee15}. Section~\ref{sec:tsps-instantiation}
+shows the instantiations of the threshold signature schemes, which are proven secure in Section~\ref{sec:tsps-security}.
+Section~\ref{sec:tsps-evaluation} evaluates our approach, and
 Section~\ref{sec:tsps-summary} concludes.
