@@ -13,6 +13,8 @@ We define a sequence of games from a real execution of $\Pi$ to
 $\idfu{\algo{trace}}$, and show each is (computationally) indistinguishable
 from the last.
 
+\begin{proof}
+
 $\simu$ maintains three tables, analogous to $\reg$, $\perm$, and $\txns$ in
 $\idfu{\algo{trace}}$:
 
@@ -194,6 +196,8 @@ bogus epoch key $\ek^\star$, which, given the extractability of the proof for
 $\rel_5$ and the existential unforgeability of digital signatures, occurs only
 with negligible probability.
 
+\end{proof}
+
 \subsection{PRF security arguments}
 
 \subsubsection*{PRF Security of $\FE$}\label{sec:txid-fe-prf-proof}
@@ -204,6 +208,8 @@ and modeling $\HE$ as a random oracle, the function $\FE(\utk, \epoch) =
 
 We show that no polynomial-time adversary can distinguish $\FE(\cdot, \cdot)$
 from a random function with non-negligible advantage.
+
+\begin{proof}
 
 Let $\adv$ be an adversary with oracle access to either $\FE(\utk, \cdot)$ or a
 random function $R: \{0,1\}^* \to \group{1}$. Let $\adv$ distinguish $\FE(\utk,
@@ -247,6 +253,7 @@ We then have the following advantage:
 %
 \end{equation*}
 %
+\end{proof}
 
 \subsubsection*{PRF Security of $\FT$}\label{sec:txid-ft-prf-proof}
 
@@ -260,6 +267,8 @@ We then have the following advantage:
   \end{equation*}
 %
 is a secure pseudorandom function for well-formed inputs $\gamma$.  \end{lemma}
+
+\begin{proof}
 
 Given BDDH challenge $(\gen, \gen^a, \gen^b, \ggen, \ggen^c, Z)$ where $Z =
 \pairing(\gen, \ggen)^{abc}$ (BDDH tuple) or $Z \sample \group{T}$ (random), an
@@ -317,26 +326,27 @@ We then have the following advantage:
 %
 \end{equation*}
 %
+\end{proof}
 
 \subsubsection*{$\rel_7$ and $\rel_8$ equivalence proofs}
 
 Recall from Section~\ref{sec:tag-computation} that $\rel_7$ is defined for
 instance $\inst_7 = (\HE, \{\ggen_i\}_{i\in[1,\ell]}, \gen_2, \gen_3, \com,
 \Max, \epoch, \Tag_\gamma)$ and witness $\witness_7 = (\utk, \openinfo, \ek,
-\{\gamma_i\}_{i\in[1,\ell]})$, as
+\{\gamma_i\}_{i\in[1,\ell]})$, as follows:
 %
 \begin{equation}\label{eq:rel7-concrete-recall} \begin{gathered}
 %
   \rel_7 = \{\ \com = \gen_2^{\utk}\cdot \gen_3^{\openinfo} \ \wedge \ \ek =
   \HE(\epoch)^{\utk} \\ \wedge \ \Tag_{\gamma} = e\Big(\ek,\prod_{i=1}^{\ell}
 \ggen_i^{\gamma_i} \Big) \ \wedge \ \forall i \in[1, \ell]: \gamma_i \in
-\{0,1\}\ \}
+\{0,1\}\ \}.
 %
 \end{gathered} \end{equation}
 %
-(cf.~Equation~\eqref{eq:rel7-concrete}), and $\rel_8$ is defined for instance
+$\rel_8$ is defined for instance
 $\inst_8 = (\inst_7, \ggen, \gggen{b}, u, v)$ and witness $\witness_8 =
-(\witness_7, \tau, \upsilon)$, as
+(\witness_7, \tau, \upsilon)$, as follows:
 %
 \begin{equation}\label{eq:rel7-hat-recall} \begin{gathered}
 %
@@ -344,11 +354,12 @@ $\inst_8 = (\inst_7, \ggen, \gggen{b}, u, v)$ and witness $\witness_8 =
     \gggen{b} = \ggen^\tau\prod_{i=1}^{\ell} \ggen_i^{\gamma_i} \ \wedge \
     \forall i \in [1,\ell]: \gamma_i \in \{0,1\} \\ \wedge \ u =
     \HE(\epoch)^\upsilon \ \wedge \ v = u^{\utk} \ \wedge \ \pairing(v,
-    \gggen{b}) = \Tag_\gamma^\upsilon \cdot \pairing(v, \ggen)^\tau\ \}
+    \gggen{b}) = \Tag_\gamma^\upsilon \cdot \pairing(v, \ggen)^\tau\ \}.
 %
   \end{gathered} \end{equation}
 %
-  (cf.~Equation~\eqref{eq:rel7-hat}).
+
+\begin{proof}
 
   \paragraph{Correctness and soundness.} With a witness satisfying $\rel_7$,
   sample $\upsilon, \tau \gets \Zp$ and set $\gggen{b} =
@@ -456,4 +467,6 @@ $\inst_8 = (\inst_7, \ggen, \gggen{b}, u, v)$ and witness $\witness_8 =
   So $(\gggen{b}, u, v, \algoproof_8)$ produced by $\simu$ is computationally
   indistinguishable from that of an honest execution, under the DDH assumption
   and in the random oracle model, establishing zero knowledge of $\rel_8$ and
-  hence, by the equivalence above, of $\rel_7$.
+  by the equivalence above, of $\rel_7$.
+  
+  \end{proof}

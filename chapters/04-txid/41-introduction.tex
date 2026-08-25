@@ -4,7 +4,7 @@ The contributions of the next three sections are heavily motivated by
 transaction systems. Though each construction could be presented compactly and
 in isolation, the contributions are clearer when explained in context.
 
-\paragraph{Transaction systems.} We use the term transaction system to broadly
+We use the term transaction system to broadly
 capture all systems that involve moving value. We describe the systems as if
 they handle just one type of currency, but extensions to labelled assets are
 generally simple. Transaction systems in these chapters must satisfy three
@@ -25,7 +25,7 @@ We acknowledge that confidentiality of wealth at rest is a trivial problem when
 it comes to cryptography. It can be solved by simply encrypting the value. The
 open problems are instead concerned with privacy of money in motion.
 
-\paragraph{Fiat.} We must first distinguish between fiat and non-fiat
+We must first distinguish between fiat and non-fiat
 transaction systems\footnote{Fiat is Latin for `let it be done'.}. Fiat money
 is issued by an entity such as a central bank. The backing of the state gives
 the currency its value and so its issuance is centralised by design. Fiat money
@@ -84,7 +84,7 @@ associated with a given user. Tracing can be emulated by applying anonymity
 revocation to every transaction in turn, but this costs time linear in the
 number of transactions and exposes information about non-targeted users.
 
-\paragraph{Anonymity revocation.} Many protocols attach a verifiable encryption
+Anonymity revocation is achieved through attaching a verifiable encryption
 or other hidden user identifier to each transaction, so that an auditor holding
 the corresponding secret key can selectively recover the sender's
 identity~\cite{SCN:CamHohLys06,CANS:BDET21,INDOCRYPT:CDLP22}.  Tracing a user's
@@ -93,8 +93,7 @@ ledger, incurring overhead linear in the ledger size and exposing unrelated
 users' activity to the auditor. These protocols enable identity recovery, but
 not efficient targeted tracing.
 
-\paragraph{Tracing via sequential tags.} Other protocols derive per-transaction
-tags from a user's tracing secret combined with a monotonically increasing
+Per-transaction tags can be derived from users' tracing keys combined with a monotonically increasing
 counter, and use zero-knowledge proofs to show the tags are correctly formed
 and bound to the transaction's origin~\cite{CCS:KiaKohSar22,CANS:SarKiaKoh24}.
 Given the tracing secret of a target user, an auditor identifies the
@@ -105,7 +104,7 @@ of these share the same limitation: a user's transactions must be generated
 sequentially, which prevents concurrent transaction creation and degrades
 performance in high-throughput settings.
 
-\paragraph{Auditing in cryptocurrencies.} Other protocols provide auditability
+Cryptocurrencies generally provide auditability
 through interactive protocols or global consistency checks. ZKLedger lets
 auditors verify transaction correctness, but requires interaction and incurs
 overhead linear in the number of participants~\cite{EPRINT:NarVasVir18}.
@@ -115,15 +114,15 @@ tracing~\cite{EPRINT:Noether15,SP:BCGGMT14,AC:FMMO19,FC:BAZB20}.  Retrofitting
 tracing into such systems typically requires additional interaction, user
 cooperation, or linear-time analysis~\cite{ACNS:PBGP25}.
 
-\paragraph{Auditing of fiat money.} Platypus and ZKAT incorporate regulatory
-policy enforcement, for instance balance limits, but neither provides a
-mechanism for efficient per-user tracing across arbitrary
+Platypus and ZKAT incorporate regulatory
+policy enforcement, including enforcement of balance limits, but neither provides a
+mechanism for efficient per user tracing across arbitrary
 transactions~\cite{CCS:WKDC22,EPRINT:ACDDET19}.
 
 \paragraph{Our contribution.} We introduce a tracing mechanism that eliminates
 the need for encrypted user identifiers and sequential counters, supporting
 efficient tracing while letting users generate and submit multiple transactions
-in parallel without restriction. The design gives users fine-grained control
+in parallel without restriction. The design gives users fine grained control
 through epoch-bound tracing permissions: these let an auditor identify every
 transaction linked to a specific user within a predefined time window, and
 automatically become invalid once that epoch expires, requiring a fresh
@@ -132,7 +131,7 @@ ideal functionality capturing anonymity, non-repudiation, and permission
 expiration, give a black-box construction from signatures, commitments,
 pseudorandom functions, and zero-knowledge proofs, and instantiate it
 concretely in pairing-based groups with a transparent setup, using the BBS+
-signature scheme to let the registration authority certify a user's keys
+signature scheme to let the registration authority certify a users' keys
 without ever learning their tracing key.
 
 \paragraph{Layout.} Section~\ref{sec:txid-definitions} formalises the problem

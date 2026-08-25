@@ -155,14 +155,14 @@ $\Zp$, with all operations defined between elements of $\Zp$. For the
 protocols of this chapter, we additionally need operations between elements
 of $\group{1}$ and $\group{2}$. Extending MP-SPDZ with group operations,
 concretely elliptic curve group operations, has been considered and
-implemented in prior work~\cite{ESORICS:DOKSS20,Ghosh2023}.
+implemented in prior work~\cite{ESORICS:DOKSS20,NDSS:GPVRNC23}.
 
 We need the groups used to be pairing-friendly. Although we do not distribute
 any pairing operations, since these occur only in verification, we still need
-all operations to take place over pairing-friendly curves. This was also considered by Ghosh et al., who integrate the RELIC toolkit
-into MP-SPDZ for operations over pairing-friendly curves, and extend MP-SPDZ
-with shared computation over elements of the resulting elliptic curve
-groups~\cite{Ghosh2023,relictoolkit}.
+all operations to take place over pairing-friendly curves. The RELIC toolkit
+has been integrated into MP-SPDZ for operations over pairing-friendly curves
+and shared computation over elements of the resulting elliptic curve
+groups~\cite{NDSS:GPVRNC23,relictoolkit}.
 
 MP-SPDZ operates with a pre-processing (offline) phase and an online phase.
 In our setting, $\algo{OffSign}$ corresponds to the pre-processing phase, and

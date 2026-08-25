@@ -12,6 +12,8 @@ functionality $\idfu{\AAC}$.  We define a sequence of indistinguishable games
 that start with Game 0 representing the real world, and end with Game 8
 representing the ideal world.
 
+\begin{proof}
+
 \paragraph{Game 0.} This is the execution of protocol $\Pi$.
 
 \paragraph{Game 1.} The simulator $\simu$ executes protocol $\Pi$ on behalf of
@@ -245,6 +247,8 @@ from Game 7 as functionality $\idfu{\AAC}'$ is identical to ideal functionality
 $\idfu{\AAC}$.  This concludes the proof
 of~\Cref{thm:agg-creds-construction-security}.
 
+\end{proof}
+
 %%%% proof 2 - tag based agg sigs are secure (Theorem 2)
 
 \subsection{Proof of~\Cref{thm:agg-creds-thm-1}}\label{sec:agg-creds-proof-2}
@@ -279,7 +283,9 @@ signature has not been issued by the signature oracle on triple $(\pk_j,
 
 \end{description}
 
-\paragraph{Proof overview.} Both reductions share the same $\corrupto$
+\begin{proof}
+
+Both reductions share the same $\corrupto$
 simulation and follow the same template. $\advB$ embeds a Diffie-Hellman
 challenge into the uncorrupted key $\pk_j$. It programs $\hashone$ and
 $\hashtwo$ so that most queries are answered correctly, but one of the two hash
@@ -554,6 +560,8 @@ that breaks either the BCDH or m-BCDH assumption with non-negligible
 probability. This means the ATS scheme satisfies existential unforgeability
 under tag-based aggregation.
 
+\end{proof}
+
 %%%% proof of Theorem 3 - the concrete instantiation, corollary of Theorem 1
 
 \subsection{Proof of~\Cref{thm:agg-creds-thm-2}}\label{sec:agg-creds-proof-3}
@@ -562,6 +570,8 @@ The instantiation is an instance of the abstract construction that sets $\DS$
 to the AGHO structure-preserving signature scheme, $\ATS$ to our tag based
 aggregate signature scheme (defined in Protocol~\ref{prot:ats}), and using the
 zero knowledge proofs of Section~\ref{sec:proof-inst}.
+
+\begin{proof}
 
 \begin{description}
 
@@ -585,12 +595,16 @@ zero knowledge proofs of Section~\ref{sec:proof-inst}.
 The instantiated protocol securely realises ideal functionality $\idfu{\AAC}$
 in the random oracle model.
 
+\end{proof}
+
 %%% proof 4 - extractability and simulatability of the sigma-protocol proof
 
 \subsection{Proof of Lemma~\ref{lem:agg-creds-extract} and
 Lemma~\ref{lem:agg-creds-simulate}}\label{sec:agg-creds-proof-lemmas}
 
-\paragraph{Extractability.} Recall that $\algoproof = (\eta, \bar{\gen}, \bar{v},
+\begin{proof}
+
+Recall that $\algoproof = (\eta, \bar{\gen}, \bar{v},
 \widetilde{r}', \widetilde{s}', \bar{t}, \signatureone', \bar{\signaturetwo},
 \bar{\tid}, \pk', \{\atv{i}, H_i\}_{i\in \ISSUERS})$.
 
@@ -679,7 +693,9 @@ $\atv{i}$: exactly a witness $\witness_2 = (\sk, \pk, \tid, \signature,
 \SPSsig)$ for relation $\rel_2$ as defined in~\eqref{eq:proof-original},
 proving Lemma~\ref{lem:agg-creds-extract}.
 
-\paragraph{Simulatability.}
+\end{proof}
+
+\begin{proof}
 
 We now show that if DDH holds in $\group{1}$, we can simulate a valid
 presentation $\algoproof$ without access to a valid witness.
@@ -755,3 +771,5 @@ presentation $\algoproof$ without access to a valid witness.
 So under the DDH assumption in \(\mathbb{G}_1\), the simulated presentation is
 computationally indistinguishable from an honestly generated one, proving
 Lemma~\ref{lem:agg-creds-simulate}.
+
+\end{proof}
