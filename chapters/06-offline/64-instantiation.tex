@@ -32,9 +32,9 @@ knowledge.
 
 \subsection{BBS+ signatures}\label{sec:BBS}
 
-A BBS+ signature~\cite{C:BonBoySha04,SCN:AuSusMu06,EPRINT:CamDriLeh16} is a signature scheme
+A BBS+ signature is a signature scheme
 that lets a signer sign multiple messages at once, using the following
-algorithms.
+algorithms~\cite{C:BonBoySha04,SCN:AuSusMu06,EPRINT:CamDriLeh16}.
 
 \begin{primitivebox}{BBS+ signatures}{bbs}
 
@@ -86,7 +86,7 @@ satisfies
 \begin{equation*}
   e(E, \tilde{P}^e \tilde{T}) = e(\hgen \vec{Q}^{\vec{m}\|s}, \tilde{P}).
 \end{equation*}
-As shown in~\cite{EC:TesZhu23b}, a prover can instead compute $U =
+A prover can instead compute $U =
 E^{-x/y}$, $V = (\hgen \vec{Q}^{\vec{m}\|s})^{-1/y}$, and $W =
 U^e V^x$, for randomly selected $x, y$, and prove that for $\inst =
 (\pk_{\BBS}, U, V, W)$ and $\witness = (e, s, x, y, \vec{m})$ the relation
@@ -95,7 +95,7 @@ U^e V^x$, for randomly selected $x, y$, and prove that for $\inst =
   \hgen^{-1} = V^y \vec{Q}^{\vec{m}\|s}
   \label{eq:BBSrel}
 \end{align}
-holds. A prover $\algo{Prv}$ for this relation follows a sigma protocol made
+holds~\cite{EC:TesZhu23b}. A prover $\algo{Prv}$ for this relation follows a sigma protocol made
 non-interactive via the Fiat-Shamir heuristic; we refer to proofs of this
 form as Schnorr proofs. Concretely, $\algo{Prv}$ selects $\alpha, \beta,
 \delta, \gamma_0, \ldots, \gamma_{n-1}, \gamma \in \Zp$ and computes
@@ -207,8 +207,9 @@ computed via sigma protocols, following the same approach as $\Pi_1$ above.
 \subsection{Pointcheval-Sanders signatures}\label{sec:ps-sign}
 
 The Pointcheval-Sanders signature
-scheme~\cite{RSA:PoiSan16,RSA:PoiSan18}, like BBS+, signs vectors of
-messages rather than single messages, using the following algorithms.
+scheme, like BBS+, signs vectors of
+messages rather than single messages, using the following
+algorithms~\cite{RSA:PoiSan16,RSA:PoiSan18}.
 
 \begin{primitivebox}{Pointcheval-Sanders signatures}{ps}
 
@@ -259,10 +260,10 @@ learning any information about it, cf.~\cite{NDSS:SABMD19}.
 $\vec{\gen} = (\gen_0, \ldots, \gen_n) \in \group{1}^{n+1}$ be a vector of
 $n+1$ random generators and $\vec{m} = (m_0, \ldots, m_{n-1}) \in \Zp^n$ a
 vector of $n$ messages. Signatures over committed
-inputs~\cite{SCN:CamLys02,ASIACCS:LMPY16} are produced via an interactive
+inputs are produced via an interactive
 protocol between a signer and a recipient, in which the signer signs a
 vector of committed messages such that only the recipient learns
-their content.
+their content~\cite{SCN:CamLys02,ASIACCS:LMPY16}.
 
 The recipient selects an ElGamal secret key $b \in \Zp$ with public key
 $(\gen, B = \gen^b)$, computes $\com = \vec{\gen}^{\vec{m}\|r}$, $R =

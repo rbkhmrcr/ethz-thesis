@@ -1,30 +1,30 @@
 \section{Introduction}\label{sec:tsps-introduction}
 
-Structure-preserving
-signatures~\cite{C:AFGHO10,C:AGHO11,TCC:AGOT14,C:KilPanWee15,AC:Groth15,RSA:Ghadafi16}
-are digital signatures in which the messages, public keys, and signatures are
-all group elements, and verification consists solely of checking pairing
-product equations. Coupled with non-interactive zero-knowledge proofs,
-structure-preserving signatures have proved useful across a range of
-privacy-preserving applications: blind signatures~\cite{AFRICACRYPT:FucVer10},
-delegatable anonymous credentials~\cite{CCS:CamDriDub17,RSA:CriLys19,PoPETS:MSBM23}, and
-group signatures~\cite{AC:Groth06,AC:Groth07,C:LibPetYun15}, to name a few.
+Structure-preserving signatures are digital signatures in which the messages,
+public keys, and signatures are all group elements, and verification
+consists solely of checking pairing product
+equations~\cite{C:AFGHO10,C:AGHO11,TCC:AGOT14,C:KilPanWee15,AC:Groth15,RSA:Ghadafi16}.
+Coupled with non-interactive zero-knowledge proofs, structure-preserving
+signatures have proved useful across a range of privacy-preserving
+applications, including blind signatures, delegatable anonymous credentials,
+and group signatures, to name a
+few~\cite{AFRICACRYPT:FucVer10,CCS:CamDriDub17,RSA:CriLys19,PoPETS:MSBM23,AC:Groth06,AC:Groth07,C:LibPetYun15}.
 
 Structure-preserving signatures also find use in blockchain-based
-privacy-preserving payment systems. In~\cite{EPRINT:ACDDET19,EPRINT:TBAAGP22,CCS:KiaKohSar22},
-currency is represented by a token encoding the triple $\langle
-\text{owner}, \ \text{value}, \ \text{serial\_number} \rangle$. For privacy,
-the shared ledger records a hiding commitment to the token, generally a
-Pedersen commitment~\cite{C:Pedersen91}, rather than the token itself. To
-transfer ownership privately, the owner interacts with a certifier to obtain a
-blind Pointcheval-Sanders
-signature~\cite{RSA:PoiSan16,RSA:PoiSan18,NDSS:SABMD19} on the
-commitment's opening, which is later used to prove that the token being spent
-is recorded on the ledger, and, via its serial number, that it has not been
-spent before. Structure-preserving signatures remove the need for this
-interaction: since signing acts directly on the group elements that make up
-the commitment, the certifier can sign tokens as they appear on the ledger and
-simply publish the resulting signatures.
+privacy-preserving payment systems. Currency is represented by a token
+encoding the triple $\langle \text{owner}, \ \text{value}, \
+\text{serial\_number} \rangle$~\cite{EPRINT:ACDDET19,EPRINT:TBAAGP22,CCS:KiaKohSar22}.
+For privacy, the shared ledger records a hiding commitment to the token,
+generally a Pedersen commitment, rather than the token
+itself~\cite{C:Pedersen91}. To transfer ownership privately, the owner
+interacts with a certifier to obtain a blind Pointcheval-Sanders signature on
+the commitment's opening, which is later used to prove that the token being
+spent is recorded on the ledger, and, via its serial number, that it has not
+been spent before~\cite{RSA:PoiSan16,RSA:PoiSan18,NDSS:SABMD19}.
+Structure-preserving signatures remove the need for this interaction: since
+signing acts directly on the group elements that make up the commitment, the
+certifier can sign tokens as they appear on the ledger and simply publish the
+resulting signatures.
 
 A similar idea applies where the ledger stores commitments to user accounts,
 pairs $\langle \text{owner}, \ \text{holdings} \rangle$, rather than committed
@@ -42,19 +42,19 @@ In both applications, relying on a centralised certifier or administrator sits
 uneasily with the decentralised nature of blockchain systems, so
 structure-preserving signatures are only fit for this purpose once they admit
 an efficient threshold counterpart. We give two threshold
-structure-preserving signature schemes, building on the signatures
-of~\cite{C:AGHO11} and~\cite{C:KilPanWee15}, together with the secure multiparty
-computation (MPC) techniques
-of~\cite{C:DPSZ12,CCS:KelOrsSch16,C:GLOPS21}. We select
-\cite{C:AGHO11} for its optimal signature size, and \cite{C:KilPanWee15} for its
-reliance on standard assumptions alone. Both underlying signatures let the
-threshold signers perform the bulk of their computation offline, in a
+structure-preserving signature schemes, building on two existing
+structure-preserving signatures together with secure multiparty computation
+(MPC) techniques~\cite{C:AGHO11,C:KilPanWee15,C:DPSZ12,CCS:KelOrsSch16,C:GLOPS21}.
+We select the scheme of Abe, Groth, Haralambiev, and Ohkubo for its optimal
+signature size, and that of Kiltz, Pan, and Wee for its reliance on standard
+assumptions alone~\cite{C:AGHO11,C:KilPanWee15}. Both underlying signatures
+let the threshold signers perform the bulk of their computation offline, in a
 pre-processing phase before the message to be signed is known, which suits
 high-throughput applications, such as payments, that experience interspersed
 periods of low and high traffic. Since our threshold signatures require
 distributed computation over group elements rather than only field elements,
-we build on the techniques of~\cite{Ghosh2023}, which extend MPC protocols
-over field elements to protocols over group elements. Our schemes inherit the
+we build on techniques that extend MPC protocols over field elements to
+protocols over group elements~\cite{Ghosh2023}. Our schemes inherit the
 security properties of the underlying structure-preserving signatures, and
 the cost of the online phase of threshold signing is comparable to that of
 ordinary signing.
@@ -63,49 +63,53 @@ ordinary signing.
 
 \paragraph{Structure-preserving signatures.} Structure-preserving signatures
 have messages, signatures, and verification keys that are all group elements.
-They were first introduced in~\cite{C:AFGHO10} and have since been
-studied extensively, with matching impossibility results known for signature
-size in the generic group model (GGM), from $q$-type assumptions, and from
-non-$q$-type assumptions~\cite{C:AGHO11,AC:AbeGroOhk11}.
+They were first introduced, and have since been studied extensively, with
+matching impossibility results known for signature size in the generic group
+model (GGM), from $q$-type assumptions, and from non-$q$-type
+assumptions~\cite{C:AFGHO10,C:AGHO11,AC:AbeGroOhk11}.
 
-The scheme of~\cite{C:AFGHO10} signs messages of arbitrary length with
-signatures of seven group elements, and is secure in the standard model under
-a non-interactive assumption. \cite{C:AGHO11} then established a lower bound of
-three group elements for signature size in type III pairing groups, those
-without an efficiently computable isomorphism between $\group{1}$ and
-$\group{2}$, and gave a matching construction secure in the GGM. These
+The original structure-preserving signature scheme signs messages of
+arbitrary length with signatures of seven group elements, and is secure in
+the standard model under a non-interactive assumption~\cite{C:AFGHO10}. Abe,
+Groth, Haralambiev, and Ohkubo then established a lower bound of three group
+elements for signature size in type III pairing groups, those without an
+efficiently computable isomorphism between $\group{1}$ and $\group{2}$, and
+gave a matching construction secure in the GGM~\cite{C:AGHO11}. These
 signatures achieve strong unforgeability, and remain three group elements
-regardless of message length. \cite{C:LPJY13} gives a linearly
-homomorphic structure-preserving signature, also of just three group elements,
-enabling further applications.
+regardless of message length. A linearly homomorphic structure-preserving
+signature, also of just three group elements, enables further
+applications~\cite{C:LPJY13}.
 
 Fully structure-preserving signatures additionally have secret keys that are
 group elements~\cite{JC:AGKOT19}. Since structure-preserving signatures
-integrate well with Groth-Sahai proofs of knowledge~\cite{EC:GroSah08},
-a group-element secret key lets a user also prove statements about their own
-key; the cost is that signature length grows with the square root of the
-message length.
+integrate well with Groth-Sahai proofs of knowledge, a group-element secret
+key lets a user also prove statements about their own key; the cost is that
+signature length grows with the square root of the message
+length~\cite{EC:GroSah08}.
 
 \paragraph{Threshold structure-preserving signatures.} Threshold
-structure-preserving signatures have only recently been considered.
-\cite{AC:CKPSS23} gives a non-interactive construction, but one
-restricted to signing indexed Diffie-Hellman tuples of the form $(\gen^m,
-\ggen^m)$. This restricts the scheme to messages whose discrete logarithm
-relative to $\gen$ or $\ggen$ is known, and rules out signing an existing
-public key or commitment directly: either the threshold signers would learn
-someone else's secret key, or the element simply could not be signed under the
-scheme. \cite{PKC:MMSST24} instead gives a non-interactive threshold
-structure-preserving signature capable of signing arbitrary group elements,
-secure under the SXDH assumption. It builds on the structure-preserving
-signature of Kiltz, Pan, and Wee~\cite{C:KilPanWee15}, and its signatures consist
-of seven group elements.
+structure-preserving signatures have only recently been considered. One
+non-interactive construction is restricted to signing indexed
+Diffie-Hellman tuples of the form $(\gen^m, \ggen^m)$~\cite{AC:CKPSS23}. This
+restricts the scheme to messages whose discrete logarithm relative to $\gen$
+or $\ggen$ is known, and rules out signing an existing public key or
+commitment directly: either the threshold signers would learn someone else's
+secret key, or the element simply could not be signed under the scheme.
+Another non-interactive threshold structure-preserving signature instead is
+capable of signing arbitrary group elements, and is secure under the SXDH
+assumption~\cite{PKC:MMSST24}. It builds on the structure-preserving
+signature of Kiltz, Pan, and Wee, and its signatures consist of seven group
+elements~\cite{C:KilPanWee15}.
 
 We give two threshold structure-preserving signature schemes for arbitrary
-group elements, built respectively from~\cite{C:AGHO11} and~\cite{C:KilPanWee15},
-that minimise the computation and communication required of parties in the
-online phase. Table~\ref{table:comp} in Section~\ref{sec:eval} compares the
-resulting schemes with~\cite{AC:CKPSS23} and~\cite{PKC:MMSST24} in
-terms of assumptions, key and signature size, and verification cost.
+group elements, built respectively from the schemes of Abe, Groth,
+Haralambiev, and Ohkubo and of Kiltz, Pan, and Wee, that minimise the
+computation and communication required of parties in the online
+phase~\cite{C:AGHO11,C:KilPanWee15}. Table~\ref{table:comp} in
+Section~\ref{sec:eval} compares the resulting schemes with two prior
+threshold structure-preserving signature schemes in terms of assumptions,
+key and signature size, and verification
+cost~\cite{AC:CKPSS23,PKC:MMSST24}.
 
 \paragraph{Our contribution.} The contributions of this chapter are threefold.
 
@@ -121,10 +125,10 @@ terms of assumptions, key and signature size, and verification cost.
 
   \item We benchmark the threshold signatures using two MPC frameworks that
     realise these ideal functionalities: ATLAS, which assumes an honest
-    majority~\cite{C:GLOPS21}, and MASCOT, which assumes a dishonest
-    majority~\cite{CCS:KelOrsSch16}. The former suits settings where
-    robustness and high availability are desirable, the latter settings
-    where resilience to key compromise takes precedence.
+    majority, and MASCOT, which assumes a dishonest
+    majority~\cite{C:GLOPS21,CCS:KelOrsSch16}. The former suits settings
+    where robustness and high availability are desirable, the latter
+    settings where resilience to key compromise takes precedence.
 
 \end{itemize}
 
@@ -133,14 +137,15 @@ online phase, and, to the best of our knowledge, give the first multiparty
 secret sharing of group elements, building on prior work extending secret
 sharing to group elements~\cite{Ghosh2023}. We also implement previously
 suggested threshold structure-preserving signature schemes, so as to compare
-concrete efficiency. Our scheme built from~\cite{C:AGHO11} yields optimally
-small threshold signatures, consisting of just three group elements.
+concrete efficiency. Our scheme built from the signature of Abe, Groth,
+Haralambiev, and Ohkubo yields optimally small threshold signatures,
+consisting of just three group elements~\cite{C:AGHO11}.
 
 \paragraph{Layout.} Section~\ref{sec:formalization} formalises the security
 properties of threshold structure-preserving signatures.
 Section~\ref{sec:SPS} describes the structure-preserving signatures of Abe,
-Groth, Haralambiev, and Ohkubo~\cite{C:AGHO11} and of Kiltz, Pan, and
-Wee~\cite{C:KilPanWee15}. Section~\ref{sec:MPC} introduces the ideal
+Groth, Haralambiev, and Ohkubo and of Kiltz, Pan, and
+Wee~\cite{C:AGHO11,C:KilPanWee15}. Section~\ref{sec:MPC} introduces the ideal
 functionalities for MPC that our constructions build on.
 Section~\ref{sec:schemes} shows how these functionalities threshold sign with
 both signature schemes, proven secure in Section~\ref{sec:tsps-security}.

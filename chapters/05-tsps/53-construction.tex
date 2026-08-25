@@ -18,19 +18,20 @@ $i^{\mathrm{th}}$ party. For $\vec{x} = (x_1, \ldots, x_l) \in \Zp^l$, we
 write $\llbracket \vec{x} \rrbracket$ for the vector $(\llbracket x_1
 \rrbracket, \ldots, \llbracket x_l \rrbracket)$.
 
-In this section we describe two structure-preserving signatures. The first,
-by~\cite{C:AGHO11}, is optimal in terms of size, and existentially unforgeable
-in the generic group model (GGM). The second, by~\cite{C:KilPanWee15}, produces
-signatures with more group elements, but is existentially unforgeable under
-the DDH assumption. For each, we also sketch how it can be thresholdised;
+In this section we describe two structure-preserving signatures. The first is
+optimal in terms of size, and existentially unforgeable in the generic group
+model (GGM)~\cite{C:AGHO11}. The second produces signatures with more group
+elements, but is existentially unforgeable under the DDH
+assumption~\cite{C:KilPanWee15}. For each, we also sketch how it can be thresholdised;
 Section~\ref{sec:schemes} turns these sketches into full descriptions,
 building on the MPC functionalities formalised in Section~\ref{sec:MPC}.
 
 \subsection{Optimal re-randomisable structure-preserving signatures in the
 GGM}\label{sec:sps-ggm}
 
-Abe, Groth, Haralambiev, and Ohkubo~\cite{C:AGHO11} introduced the first
-optimal-size structure-preserving signature scheme for asymmetric pairings.
+Abe, Groth, Haralambiev, and Ohkubo introduced the first optimal-size
+structure-preserving signature scheme for asymmetric
+pairings~\cite{C:AGHO11}.
 
 \begin{primitivebox}{Optimal structure-preserving signatures (Abe, Groth,
   Haralambiev, and Ohkubo)}{sps-ggm}
@@ -92,11 +93,11 @@ optimal-size structure-preserving signature scheme for asymmetric pairings.
 This signature is existentially unforgeable in the GGM~\cite{C:AGHO11}.
 
 \paragraph{Thresholdising the signature.} The starting point for the
-threshold variant of~\cite{C:AGHO11} is \emph{$t$-additive secret sharing},
+threshold variant of this signature is \emph{$t$-additive secret sharing},
 which distributes the secret key $\sk = (u_1, \ldots, u_l, v)$ among the
 signers such that any $t+1$ signers can jointly recover it by computing a
 pre-defined linear function of their shares, where $t$ upper bounds the
-number of corrupt signers. To sign, the signers first come together to
+number of corrupt signers~\cite{C:AGHO11}. To sign, the signers first come together to
 additively secret-share a random value $r$. Once $r$ is shared, they use MPC
 to compute additive shares of $1/r$ and of the products $u_i r$ for $i \in
 [l]$. Given a vector of messages $({M}_1, \ldots, {M}_l)$, each signer
@@ -129,8 +130,8 @@ of the original signature.
 \subsection{Structure-preserving signatures under
 DDH}\label{sec:sps-kiltz}
 
-Kiltz, Pan, and Wee~\cite{C:KilPanWee15} introduced a structure-preserving
-signature scheme that is existentially unforgeable under the DDH assumption.
+Kiltz, Pan, and Wee introduced a structure-preserving signature scheme that
+is existentially unforgeable under the DDH assumption~\cite{C:KilPanWee15}.
 
 \begin{primitivebox}{Structure-preserving signatures under DDH (Kiltz, Pan,
   and Wee)}{sps-kiltz}
@@ -204,9 +205,10 @@ signature scheme that is existentially unforgeable under the DDH assumption.
 
 \end{primitivebox}
 
-\paragraph{Thresholdising the signature.} As with~\cite{C:AGHO11}, we start
-from a $t$-additive secret sharing of $\sk = (\mathbf{k}, \vec{{B}},
-\vec{{X}}, \vec{{Y}})$ among the signers. To sign a vector of messages
+\paragraph{Thresholdising the signature.} As with the scheme of Abe, Groth,
+Haralambiev, and Ohkubo, we start from a $t$-additive secret sharing of $\sk
+= (\mathbf{k}, \vec{{B}}, \vec{{X}}, \vec{{Y}})$ among the
+signers~\cite{C:AGHO11}. To sign a vector of messages
 $\vec{M}$, the signers first come together to additively secret-share random
 values $(r, s)$. Once $(r, s)$ are shared, they use MPC to compute additive
 shares $\llbracket s\ggen\rrbracket = \llbracket s\rrbracket \ggen$,

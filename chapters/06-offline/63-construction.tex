@@ -107,9 +107,9 @@ identify themselves to their intermediaries at both withdrawal and deposit:
 if a token is transferred only once before being deposited, and the payer's
 and payee's intermediaries collude, they can de-anonymise the payment. We
 avoid this using Pointcheval-Sanders blind
-signatures~\cite{RSA:PoiSan18,NDSS:SABMD19}, which let the central bank
+signatures, which let the central bank
 sign the token $\tau_0 = (v, C_0)$ without learning $C_0$ or the resulting
-signature $\psi_0$. We note that the withdrawal and deposit of a token can
+signature $\psi_0$~\cite{RSA:PoiSan18,NDSS:SABMD19}. We note that the withdrawal and deposit of a token can
 still be linked through its value; this can be avoided by using a single
 denomination, or mitigated by using fixed denominations together with
 aggregated deposits, which let a depositor disclose only the aggregate value

@@ -11,9 +11,9 @@ failure and limit the damage of key compromise, but efficient threshold
 structure-preserving signatures had, until now, remained an elusive goal.
 
 We gave two threshold structure-preserving signature schemes, built from the
-structure-preserving signatures of Abe, Groth, Haralambiev, and
-Ohkubo~\cite{C:AGHO11} and of Kiltz, Pan, and Wee~\cite{C:KilPanWee15}, together
-with generic MPC functionalities over both field and group elements. Both
+structure-preserving signatures of Abe, Groth, Haralambiev, and Ohkubo and of
+Kiltz, Pan, and Wee, together with generic MPC functionalities over both
+field and group elements~\cite{C:AGHO11,C:KilPanWee15}. Both
 constructions push the bulk of their computation into an offline
 pre-processing phase, ahead of the message to be signed becoming known, so
 that their online phase remains non-interactive and comparable in cost to
@@ -25,10 +25,11 @@ on are securely realised.
 We evaluated both schemes using two realisations of these functionalities,
 ATLAS in the honest-majority setting and MASCOT in the dishonest-majority
 setting, and compared them against existing threshold structure-preserving
-signatures. Our scheme built from~\cite{C:AGHO11} achieves optimally small
-threshold signatures of three group elements, matching the size of its
-non-threshold counterpart, while our scheme built from~\cite{C:KilPanWee15}
-relies only on the standard SXDH assumption. In both cases, the offline phase
+signatures. Our scheme built from the signature of Abe, Groth, Haralambiev, and Ohkubo
+achieves optimally small threshold signatures of three group elements,
+matching the size of its non-threshold counterpart, while our scheme built
+from that of Kiltz, Pan, and Wee relies only on the standard SXDH
+assumption~\cite{C:AGHO11,C:KilPanWee15}. In both cases, the offline phase
 scales with the number of parties, while the online phase remains
 constant-time and non-interactive, making the schemes practical for
 high-throughput applications such as payments and transparency logs that
@@ -36,9 +37,9 @@ experience bursty traffic.
 
 Beyond the constructions themselves, we gave the first multiparty secret
 sharing of group elements, building on prior work extending secret sharing to
-group elements~\cite{Ghosh2023}, and implemented previously proposed
-threshold structure-preserving signature schemes to allow for a concrete
-efficiency comparison. Extending our approach to other structure-preserving
+group elements, and implemented previously proposed threshold
+structure-preserving signature schemes to allow for a concrete efficiency
+comparison~\cite{Ghosh2023}. Extending our approach to other structure-preserving
 signatures, and to applications such as transparency logs and permissioned
 ledgers discussed in Section~\ref{sec:eval}, would be valuable directions for
 future work.

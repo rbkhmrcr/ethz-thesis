@@ -1,28 +1,23 @@
 \section{Summary}\label{sec:txid-summary}
 
-\begin{itemize}
-
-  \item This chapter addresses the gap between fully transparent ledgers and
-    long-term view keys: existing options offer either no privacy, or
-    unconditional and permanent auditor visibility.
-
-  \item We introduce tracing: users grant an auditor the ability to trace their
-    transactions during a single chosen epoch, with authorisation expiring
-    automatically once that epoch ends.
-
-  \item We formalise tracing as an ideal functionality capturing anonymity,
-    non-repudiation, and permission expiration, and give a black-box
-    construction from signatures, commitments, pseudorandom functions, and NIZK
-    proofs.
-
-  \item We instantiate the construction in pairing-based groups with a
-    transparent setup, using the BBS+ signature scheme so the registration
-    authority never learns a user's tracing key.
-
-  \item The concrete instantiation is practical: proof generation completes in
-    a few milliseconds, and verification in under 10ms, even without
-    optimisation.
-
-  \item Future work:
-
-\end{itemize}
+This chapter addresses regulatory oversight in privacy preserving transaction
+systems. Prior work typically supports either anonymity revocation, which
+lets an auditor identify the user responsible for a single transaction, or
+tracing, which lets an auditor recover every transaction associated with a
+given user. Existing tracing mechanisms achieve this by deriving
+tags from a sequential counter, meaning that users'
+transactions cannot be created in parallel. This degrades performance in
+high throughput settings.
+ 
+We introduce a tracing mechanism that supports both anonymity revocation and
+efficient tracing without requiring encrypted user identifiers or sequential
+counters, letting users generate and submit multiple transactions
+concurrently. Auditors are granted epoch bound
+permission. We formalise this as through an ideal functionality
+capturing anonymity, non repudiation, and permission expiration, and give a
+abstract construction from signatures, commitments, pseudorandom functions,
+and zero knowledge proofs.
+ 
+We instantiate the construction concretely in pairing-based groups with a
+transparent setup, using the BBS+ signature scheme so that the registration
+authority can certify users' keys without ever learning their tracing key.

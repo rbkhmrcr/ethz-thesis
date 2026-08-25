@@ -314,17 +314,17 @@ this risk without giving up the usability benefits of recovery.
 \paragraph{Instantiating the secure element.} Modern mobile platforms
 provide trusted execution environments that protect app secrets from a
 malicious device owner, but app developers cannot directly access
-TrustZone~\cite{trustzone} or Secure Enclave~\cite{secureenclave}: these
+TrustZone or Secure Enclave: these
 hardware features are exposed only through higher-level key-management
-APIs. While the secret key itself remains hidden even from a malicious app,
+APIs~\cite{trustzone,secureenclave}. While the secret key itself remains hidden even from a malicious app,
 an attacker who achieves arbitrary code execution, whether by exploiting the
 app or by rooting the device, can still query the key manager to spend a
 token repeatedly, since the confidentiality of the key does not guarantee
 the integrity of the surrounding application logic. Smart cards offer a
-stronger guarantee: platforms such as Javacard~\cite{javacard} or
-MIFARE~\cite{mifare} provide tamper-resistant storage together with a
+stronger guarantee: platforms such as Javacard or
+MIFARE provide tamper-resistant storage together with a
 dedicated, isolated execution environment, so that both the secret key and
-the logic that uses it are protected. No hardware security is unconditional,
+the logic that uses it are protected~\cite{javacard,mifare}. No hardware security is unconditional,
 and an attacker willing to invest sufficient resources may eventually
 extract a card's embedded secret, reverting to the threat model discussed
 above; deploying the system is therefore ultimately a question of

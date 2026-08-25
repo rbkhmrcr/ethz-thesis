@@ -56,8 +56,8 @@ setting~\cite{C:GLOPS21}. Because it operates with an honest majority of
 participants, ATLAS achieves unconditional security against both
 honest-but-curious and malicious adversaries.
 
-ATLAS builds on the protocol of~\cite{C:DamNie07}, improving its
-round complexity by a factor of two. Since it operates in the honest-majority
+ATLAS builds on an existing protocol, improving its round complexity by a
+factor of two~\cite{C:DamNie07}. Since it operates in the honest-majority
 setting, no public key operations are needed, and this setting additionally
 lets the protocol achieve fairness and guaranteed output delivery against a
 semi-honest adversary.
@@ -85,10 +85,10 @@ corrupted parties receive $t$ shares of a random degree-$t$ sharing $[e]_t$
 from ${P_{\mathrm{king}}}$, which are uniformly random and independent of the secret. So
 for an honest ${P_{\mathrm{king}}}$, the protocol for computing and consuming $([r]_t,
 [r]_{2t})$ can be optimised, and the responsibilities of ${P_{\mathrm{king}}}$ are
-themselves distributed across all parties. ATLAS reduces the number of rounds
-by half by combining ideas from Beaver triples with the techniques
-of~\cite{C:DamNie07}, letting parties use one round of
-communication to cover two rounds' worth of multiplication gates. For the
+themselves distributed across all parties. ATLAS reduces the number of rounds by half by combining ideas from Beaver
+triples with existing techniques, letting parties use one round of
+communication to cover two rounds' worth of multiplication
+gates~\cite{C:DamNie07}. For the
 second of these two layers, a Beaver triple $[x], [y], [x \cdot y]$ is
 consumed rather than a pair $([r]_t, [r]_{2t})$; the triple is produced in the
 pre-processing stage, and consumed in the online phase as follows. To
@@ -107,9 +107,8 @@ parties broadcast them to one another.
 
 \subsection*{MASCOT}\label{sec:MASCOT}
 
-MASCOT~\cite{CCS:KelOrsSch16} performs authenticated secure multiplication
-of shared field elements in the maliciously secure dishonest-majority
-setting. Secret-sharing based MPC relies on generating multiplication
+MASCOT performs authenticated secure multiplication of shared field elements
+in the maliciously secure dishonest-majority setting~\cite{CCS:KelOrsSch16}. Secret-sharing based MPC relies on generating multiplication
 triples $[a], [b], [c] = [a \cdot b]$; the original SPDZ protocol, for the
 dishonest-majority, malicious setting, generated these using somewhat
 homomorphic encryption and zero-knowledge proofs.
@@ -150,9 +149,8 @@ its own share. Combining shared values is performed by broadcasting shares,
 which are reconstructed through addition, with the MACs checked to ensure
 the reconstruction is correct.
 
-\paragraph{Implementation.} Our implementation builds on
-MP-SPDZ~\cite{CCS:Keller20}, a framework for implementing MPC with
-pre-processing. MP-SPDZ is built for the paradigm of sharing elements of
+\paragraph{Implementation.} Our implementation builds on MP-SPDZ, a framework
+for implementing MPC with pre-processing~\cite{CCS:Keller20}. MP-SPDZ is built for the paradigm of sharing elements of
 $\Zp$, with all operations defined between elements of $\Zp$. For the
 protocols of this chapter, we additionally need operations between elements
 of $\group{1}$ and $\group{2}$. Extending MP-SPDZ with group operations,
@@ -161,11 +159,10 @@ implemented in prior work~\cite{ESORICS:DOKSS20,Ghosh2023}.
 
 We need the groups used to be pairing-friendly. Although we do not distribute
 any pairing operations, since these occur only in verification, we still need
-all operations to take place over pairing-friendly curves. This was also
-considered by Ghosh et al.~\cite{Ghosh2023}, who integrate the RELIC
-toolkit~\cite{relictoolkit} into MP-SPDZ for operations over pairing-friendly
-curves, and extend MP-SPDZ with shared computation over elements of the
-resulting elliptic curve groups.
+all operations to take place over pairing-friendly curves. This was also considered by Ghosh et al., who integrate the RELIC toolkit
+into MP-SPDZ for operations over pairing-friendly curves, and extend MP-SPDZ
+with shared computation over elements of the resulting elliptic curve
+groups~\cite{Ghosh2023,relictoolkit}.
 
 MP-SPDZ operates with a pre-processing (offline) phase and an online phase.
 In our setting, $\algo{OffSign}$ corresponds to the pre-processing phase, and
@@ -242,9 +239,10 @@ inside Docker containers based on Ubuntu 22.
   \label{table:benchmarks}
 \end{table*}
 
-Table~\ref{table:comp} compares our two schemes against~\cite{AC:CKPSS23}
-and~\cite{PKC:MMSST24} in terms of assumptions, message space, key and
-signature size, and verification cost, while Table~\ref{table:comms} compares
+Table~\ref{table:comp} compares our two schemes against two prior threshold
+structure-preserving signature schemes in terms of assumptions, message
+space, key and signature size, and verification
+cost~\cite{AC:CKPSS23,PKC:MMSST24}, while Table~\ref{table:comms} compares
 per-party communication complexity across the offline, online, and combining
 phases. Table~\ref{table:benchmarks} reports concrete timings for both of our
 schemes, using ATLAS and MASCOT to realise the underlying MPC

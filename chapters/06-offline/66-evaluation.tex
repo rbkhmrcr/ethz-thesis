@@ -33,10 +33,10 @@ element, implemented on smart cards.
 A smart card is a physical card embedded with an integrated circuit that can
 process and securely store data, including a dedicated security component
 that protects sensitive data and cryptographic operations. We use
-Javacard~\cite{javacard}, a Java-based framework for smart cards, in which
+Javacard, a Java-based framework for smart cards, in which
 the protocol running on the secure element is implemented as an
 applet, a small application supported by a subset of the Java
-runtime. Javacard applets communicate through Application Protocol Data
+runtime~\cite{javacard}. Javacard applets communicate through Application Protocol Data
 Units (APDUs), which identify the applet function that should process a
 given request; the Javacard framework supports elliptic curve operations.
 
