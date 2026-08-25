@@ -2,8 +2,8 @@
 
 Central-bank digital currency (CBDC) is a form of central bank money, on par
 with cash and central-bank reserves. In CBDC, central bank money is digitally
-represented as \emph{tokens}, with each token encoding an \emph{owner} and a
-\emph{value}. CBDCs are either \emph{wholesale} or \emph{retail}: the former is
+represented as tokens, with each token encoding an owner and a
+value. CBDCs are either wholesale or retail: the former is
 a payment instrument accessible only to financial institutions to settle their
 transactions, whereas the latter is available to the general public to conduct
 retail payments.
@@ -19,7 +19,7 @@ fees, ignite innovation in digital payments, and foster financial inclusion.
 
 Retail CBDC is the most challenging to realise given the stringent
 requirements around resilience, scalability, privacy, and support for
-\emph{offline payments}. Offline payments are a pre-requisite to digital
+offline payments. Offline payments are a pre-requisite to digital
 financial inclusion, whose goal is to empower individuals to conduct digital
 payments irrespective of their location or the quality of their network
 coverage, and they are necessary for resilient and robust digital payments
@@ -29,10 +29,10 @@ withdraw or deposit their CBDCs.
 
 To facilitate adoption against cash or other offline payment instruments, CBDC
 offline payments must mimic some of the properties of physical cash. More
-specifically, offline payments must be \textbf{(1) fast:} an offline payment
-should take only a few seconds to complete; \textbf{(2) transferable:} CBDCs
+specifically, offline payments must be (1) fast: an offline payment
+should take only a few seconds to complete; (2) transferable: CBDCs
 received offline can be used in subsequent offline payments without
-restriction; and \textbf{(3) privacy-preserving:} the central bank and the
+restriction; and (3) privacy-preserving: the central bank and the
 commercial banks (the intermediaries) should not learn any information about
 an offline payment beyond what is necessarily leaked at the withdrawal and
 deposit of the CBDCs involved, such as the value of and identities of the
@@ -43,11 +43,11 @@ offline payments stems from the inability of the payee to verify in real time
 whether the tokens they receive have already been spent. Without this
 verification, double spending is trivial: a malicious payer can spend the same
 token, offline, over and over again without restriction. Curtailing this
-ability can be pursued through \emph{preventive} or \emph{deterrent} measures,
+ability can be pursued through preventive or deterrent measures,
 or a combination of both. A preventive measure is a mobile app that forbids
 double spending by design, deleting a token as soon as it is sent; the caveat
 is that an attacker can tamper with the app and bypass such restrictions. An
-alternative is to leverage a \emph{secure element} so that these restrictions
+alternative is to leverage a secure element so that these restrictions
 cannot easily be bypassed. A deterrent measure instead identifies double
 spenders when double spending is detected at the time of deposit; combined
 with the right punitive measures, this can discourage double spending by
@@ -59,26 +59,26 @@ guarantees that double spending attacks are expensive and cannot be executed
 at scale, while the identification of double spenders ensures that, on the
 off-chance an attack succeeds, the responsible party is identified and held
 accountable. A secure element, however, has limited storage and compute. While
-it can accommodate a solution that uses ECDSA signatures to \emph{authenticate
-CBDCs} and \emph{authorise offline payments}, such a solution fails to meet the
+it can accommodate a solution that uses ECDSA signatures to authenticate
+CBDCs and authorise offline payments, such a solution fails to meet the
 privacy requirements above: ECDSA signatures leak the identities of the payer
 and the payee unless one-time public keys are used, and one-time public keys
 in turn make double spender identification difficult, if not impossible.
 
-We instead rely on \textbf{(1) anonymous credentials} to allow the payer and
+We instead rely on (1) anonymous credentials to allow the payer and
 the payee to transact anonymously, such that no one else can learn their
-identities, \textbf{(2) blind signatures}, and \textbf{(3) zero-knowledge
-proofs of knowledge of signatures} to ensure that neither the central bank nor
+identities, (2) blind signatures, and (3) zero-knowledge
+proofs of knowledge of signatures to ensure that neither the central bank nor
 the intermediaries can link a withdrawal to a deposit. Finally, to
-\emph{efficiently} identify double spenders, we use \textbf{(4) verifiable
-encryption} to encrypt the identity of the payer for an authorised auditor,
+efficiently identify double spenders, we use (4) verifiable
+encryption to encrypt the identity of the payer for an authorised auditor,
 who is tasked with decrypting ciphertexts and de-anonymising double spenders.
 
 These cryptographic primitives are too expensive for off-the-shelf secure
 elements. We address this by splitting the computation of sending and
 receiving an offline payment into two categories: one that is
-\emph{computationally heavy} but requires no secret keys, and one that is
-\emph{lightweight}, comparable to an ECDSA signature, and makes use of a
+computationally heavy but requires no secret keys, and one that is
+lightweight, comparable to an ECDSA signature, and makes use of a
 signing key. The heavy computation is outsourced to a mobile device, and the
 lightweight computation is performed on the secure element, which -- in
 addition to authorising payments with its signing key -- is also responsible
@@ -91,45 +91,45 @@ payment in under $400\,\mathrm{ms}$.
 \subsection{Related work}\label{sec:offline-related}
 
 \paragraph{Original e-cash.} E-cash has been studied for several decades,
-beginning with Chaum's solutions~\cite{Chaum1982,Chaum1988}, which focus on the
+beginning with Chaum's solutions~\cite{C:Chaum82,C:ChaFiaNao88}, which focus on the
 privacy of users and on double spending detection. Privacy is achieved through
 RSA blind signatures, which break the link between withdrawals and deposits,
 while double spending detection is realised using unique serial numbers.
 Although efficient, these solutions guarantee neither transferability nor
 theft prevention.
 
-\paragraph{Divisible e-cash.} Divisible e-cash~\cite{Okamoto1991,Okamoto1995}
+\paragraph{Divisible e-cash.} Divisible e-cash~\cite{C:OkaOht91,C:Okamoto95}
 allows a user to withdraw a token and split it among different recipients
 across multiple independent transactions. This comes at the cost of higher
 complexity for withdrawals, payments, and deposits, which scale with the token
-value. This is partially addressed in~\cite{Canard2015PKC,Canard2015ACNS},
+value. This is partially addressed in~\cite{PKC:CPST15,ACNS:CPST15},
 which achieve constant computation and communication complexity for
 withdrawal and payment, though deposits still carry large communication and
 computational costs. While divisibility is a useful feature, we leave it as
 future work and focus instead on transferability.
 
-\paragraph{Transferable e-cash.} \cite{Okamoto1991} and~\cite{Chaum1992}
+\paragraph{Transferable e-cash.} \cite{C:OkaOht91} and~\cite{EC:ChaPed92}
 present e-cash schemes that are both transferable and divisible, at the cost
 of high computational complexity; we instead focus on efficiency and
 scalability. Fuchsbauer et al.\ maintain a constant token size regardless of
 the number of transfers, but require user interaction to identify double
 spenders, and when double spending is detected all previous owners of the
-token also become identifiable~\cite{Fuchsbauer2009}. Baldimtsi et al.\
+token also become identifiable~\cite{CANS:FucPoiVer09}. Baldimtsi et al.\
 propose a scheme where token size grows linearly with the number of
 transfers, but which reveals only the double spender's
-identity~\cite{Baldimtsi2015}. Owing to the cost of this approach, we instead
+identity~\cite{PKC:BCFK15}. Owing to the cost of this approach, we instead
 rely on a trusted auditor, which can be distributed, to de-anonymise payments
 as needed.
 
-\cite{Canard2008,Bauer2021} introduce coin transparency, which ensures a payee
+\cite{ACNS:CanGou08,PKC:BauFucQia21} introduce coin transparency, which ensures a payee
 cannot tell whether they are receiving a token they previously owned.
-\cite{Blazy2011} achieves this through extensive use of zero-knowledge proofs
+\cite{AFRICACRYPT:BCFGST11} achieves this through extensive use of zero-knowledge proofs
 together with a trusted party that tracks every token in the system and can
 identify double spending attempts. While this captures the strongest level of
 privacy, we do not target coin transparency, owing to its computational
 overhead and to the fact that physical cash does not satisfy it either.
 
-The bounded-anonymity model of~\cite{camenisch2006balancing} keeps
+The bounded-anonymity model of~\cite{SCN:CamHohLys06} keeps
 transactions anonymous as long as each user interacts with a given merchant no
 more than a fixed number of times; beyond this, the user becomes identifiable.
 We instead let the conditions under which anonymity is revoked be defined
@@ -146,7 +146,7 @@ batched transaction committed to the ledger. A network of such channels lets
 users route transactions through counterparties with whom they do not share
 an account directly. Onion routing offers some notion of privacy, though it
 has been shown that ordinary use of the network can bypass these privacy
-aims~\cite{kappos2021empirical}. Teechain instead has users fund an account
+aims~\cite{FC:KYPKDM21}. Teechain instead has users fund an account
 controlled by a committee of treasurers, who use trusted hardware to store
 their share of the private key and so raise the cost of stealing funds, in
 order to use that value off-chain~\cite{lind2019teechain}. Teechain does not
@@ -192,14 +192,14 @@ creating a transaction but requires the payee's point-of-sale terminal to be
 online to authorise it~\cite{lobo2021pix}.
 
 \paragraph{Decentralised privacy-preserving payments.}
-Peredi~\cite{kiayias2022peredi}, Platypus~\cite{wust2022platypus}, and
-UTT~\cite{tomescu2022utt} give privacy-preserving token schemes that
+Peredi~\cite{CCS:KiaKohSar22}, Platypus~\cite{CCS:WKDC22}, and
+UTT~\cite{EPRINT:TBAAGP22} give privacy-preserving token schemes that
 distribute trust via threshold cryptography while providing accountability
 and compliance guarantees, but do not address the offline setting. OPERA
 enables offline payments and prevents double spending using one-time readable
 memory~\cite{park2017opera}, but this technology is not widely available in
 practice. Rial and Piotrowska distribute the role of the bank via threshold
-issuance and consider divisible offline payments~\cite{Rial2023}, whereas we
+issuance and consider divisible offline payments~\cite{PoPETS:RiaPio23}, whereas we
 focus on efficient transferability. PayOff~\cite{Beer2024} offers a
 transferable offline CBDC solution using more complex cryptography than ours,
 and assigns the central bank responsibility for covering double-spent values,

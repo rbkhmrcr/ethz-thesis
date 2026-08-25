@@ -45,18 +45,18 @@ assets on the ledger, for example for compliance purposes.
 
 \paragraph{Realising the ideal MPC functionalities.} Section~\ref{sec:MPC}
 describes the ideal functionalities that our constructions assume for secure
-MPC over $\Zp$ and over a generic group $\Group$. We benchmark two concrete
+MPC over $\Zp$ and over a generic group $\G$. We benchmark two concrete
 frameworks that realise these functionalities: ATLAS, in the honest-majority
 setting, and MASCOT, in the dishonest-majority setting.
 
 \subsection*{ATLAS}\label{sec:ATLAS}
 
 ATLAS is a secret-sharing based MPC scheme designed for the honest-majority
-setting~\cite{Goyal2021}. Because it operates with an honest majority of
+setting~\cite{C:GLOPS21}. Because it operates with an honest majority of
 participants, ATLAS achieves unconditional security against both
 honest-but-curious and malicious adversaries.
 
-ATLAS builds on the protocol of~\cite{damgaard2007scalable}, improving its
+ATLAS builds on the protocol of~\cite{C:DamNie07}, improving its
 round complexity by a factor of two. Since it operates in the honest-majority
 setting, no public key operations are needed, and this setting additionally
 lets the protocol achieve fairness and guaranteed output delivery against a
@@ -74,20 +74,20 @@ evaluate a multiplication gate, parties prepare a pair of random sharings
 $([r]_t, [r]_{2t})$ of a random shared value $r$, where the first sharing has
 degree $t$ and the second degree $2t$. To compute $[c]_t = [a \cdot b]_t$
 from $[a]_t$ and $[b]_t$, a pair $([r]_t, [r]_{2t})$ is consumed as follows. A
-party $\PKing$ is chosen, and all parties locally compute $[e]_{2t} = [a]_t
-\cdot [b]_t + [r]_{2t}$ and send these values to $\PKing$, who reconstructs
+party ${P_{\mathrm{king}}}$ is chosen, and all parties locally compute $[e]_{2t} = [a]_t
+\cdot [b]_t + [r]_{2t}$ and send these values to ${P_{\mathrm{king}}}$, who reconstructs
 $e$ and distributes it back to all parties. Every party then locally computes
 $[c]_t = e - [r]_t$.
 
-ATLAS relies on the observation that when $\PKing$ is honest, and the sharing
-of $e$ that $\PKing$ distributes is degree $t$ rather than degree $2t$, the
+ATLAS relies on the observation that when ${P_{\mathrm{king}}}$ is honest, and the sharing
+of $e$ that ${P_{\mathrm{king}}}$ distributes is degree $t$ rather than degree $2t$, the
 corrupted parties receive $t$ shares of a random degree-$t$ sharing $[e]_t$
-from $\PKing$, which are uniformly random and independent of the secret. So
-for an honest $\PKing$, the protocol for computing and consuming $([r]_t,
-[r]_{2t})$ can be optimised, and the responsibilities of $\PKing$ are
+from ${P_{\mathrm{king}}}$, which are uniformly random and independent of the secret. So
+for an honest ${P_{\mathrm{king}}}$, the protocol for computing and consuming $([r]_t,
+[r]_{2t})$ can be optimised, and the responsibilities of ${P_{\mathrm{king}}}$ are
 themselves distributed across all parties. ATLAS reduces the number of rounds
 by half by combining ideas from Beaver triples with the techniques
-of~\cite{damgaard2007scalable}, letting parties use one round of
+of~\cite{C:DamNie07}, letting parties use one round of
 communication to cover two rounds' worth of multiplication gates. For the
 second of these two layers, a Beaver triple $[x], [y], [x \cdot y]$ is
 consumed rather than a pair $([r]_t, [r]_{2t})$; the triple is produced in the
@@ -107,7 +107,7 @@ parties broadcast them to one another.
 
 \subsection*{MASCOT}\label{sec:MASCOT}
 
-MASCOT~\cite{keller2016mascot} performs authenticated secure multiplication
+MASCOT~\cite{CCS:KelOrsSch16} performs authenticated secure multiplication
 of shared field elements in the maliciously secure dishonest-majority
 setting. Secret-sharing based MPC relies on generating multiplication
 triples $[a], [b], [c] = [a \cdot b]$; the original SPDZ protocol, for the
@@ -120,8 +120,8 @@ level, involves a sender who inputs $s_0, s_1$ and a receiver who inputs a bit
 $b$; the sender receives no output, and the receiver receives $s_b$, learning
 nothing about $s_{1-b}$. MASCOT uses OT together with MACs, standard sacrifice
 techniques, and privacy amplification, so that the protocol either correctly
-outputs the product of the shared elements, or else aborts once malicious
-behaviour is detected.
+outputs the product of the shared elements, or otherwise aborts once
+malicious behaviour is detected.
 
 Multiplication of secret-shared elements proceeds as follows. To generate
 multiplication triple $[a], [b], [a \cdot b]$, one of the two elements to be
@@ -151,13 +151,13 @@ which are reconstructed through addition, with the MACs checked to ensure
 the reconstruction is correct.
 
 \paragraph{Implementation.} Our implementation builds on
-MP-SPDZ~\cite{keller2020mp}, a framework for implementing MPC with
+MP-SPDZ~\cite{CCS:Keller20}, a framework for implementing MPC with
 pre-processing. MP-SPDZ is built for the paradigm of sharing elements of
 $\Zp$, with all operations defined between elements of $\Zp$. For the
 protocols of this chapter, we additionally need operations between elements
-of $\GroupOne$ and $\GroupTwo$. Extending MP-SPDZ with group operations,
+of $\group{1}$ and $\group{2}$. Extending MP-SPDZ with group operations,
 concretely elliptic curve group operations, has been considered and
-implemented in prior work~\cite{dalskov2020securing,Ghosh2023}.
+implemented in prior work~\cite{ESORICS:DOKSS20,Ghosh2023}.
 
 We need the groups used to be pairing-friendly. Although we do not distribute
 any pairing operations, since these occur only in verification, we still need
@@ -168,20 +168,20 @@ curves, and extend MP-SPDZ with shared computation over elements of the
 resulting elliptic curve groups.
 
 MP-SPDZ operates with a pre-processing (offline) phase and an online phase.
-In our setting, $\offsign$ corresponds to the pre-processing phase, and
-$\onsign$ and $\combine$ run in the online phase.
+In our setting, $\algo{OffSign}$ corresponds to the pre-processing phase, and
+$\algo{OnSign}$ and $\algo{Combine}$ run in the online phase.
 
 We benchmark both the honest-majority and dishonest-majority settings, using
 ATLAS and MASCOT respectively to realise multiplication of shared secrets
-~\cite{keller2016mascot,Goyal2021}. ATLAS is designed to work in both the
+~\cite{CCS:KelOrsSch16,C:GLOPS21}. ATLAS is designed to work in both the
 semi-honest and malicious settings, but the implementation available in
-MP-SPDZ captures only the semi-honest case~\cite{keller2020mp}. ATLAS and
+MP-SPDZ captures only the semi-honest case~\cite{CCS:Keller20}. ATLAS and
 MASCOT both implement the ideal functionality of Section~\ref{sec:formalization}:
 MASCOT via the arithmetic black box functionality, which defines
 \texttt{init}, \texttt{input}, \texttt{add}, \texttt{multiply}, and
 \texttt{output}, and ATLAS via its own ideal functionality, which defines
-similar operations. In both cases, $\F{\inv}$ is built from $\F{\mul}$, with
-$\F{\randshare}$ taking the role of \texttt{input} and $\F{\combine}$ taking
+similar operations. In both cases, $\idfu{\algo{Inv}}$ is built from $\idfu{\algo{Mul}}$, with
+$\idfu{\algo{RandShare}}$ taking the role of \texttt{input} and $\idfu{\algo{Combine}}$ taking
 the role of \texttt{output}.
 
 We run benchmarks on a 16-core machine running RHEL 9.0-64 with 32GB of RAM,
@@ -193,14 +193,14 @@ inside Docker containers based on Ubuntu 22.
    \toprule
     & Assumption & Message space & $|\sk|$ & $|\pk|$ & $|\sigma|$ & Verification cost \\
    \midrule
-    ~\cite{crites2023threshold} & PS + ROM & $(\genOne^{\vec{m}}, \genTwo^{\vec{m}}) \in \GroupOne^l \times \GroupTwo^l$ &
-    $ (l+1) | \Zp | $ & $ l | \GroupOne | + (l+1) | \GroupTwo | $ & $ 2 | \GroupOne | $ & $3l+2$ \\
-    ~\cite{Mitrokotsa2024} & SXDH & $ \vec{M} \in \GroupOne^l$ &
-    $ 2(l+1) | \Zp | $ & $ (l+1) | \GroupTwo | $ & $ 6 | \GroupOne | + | \GroupTwo | $ & $l+11$ \\
-    Section~\ref{sec:tsps-abe} & q-type & $ \vec{M} \in \GroupOne^l$ &
-    $ (l+1) | \Zp | $ & $ | \GroupOne | + l| \GroupTwo | $ & $ | \GroupOne | + 2 | \GroupTwo | $ & $l+4$ \\
-    Section~\ref{sec:tsps-kiltz} & SXDH & $ \vec{M} \in \GroupOne^l$ &
-    $ l |\Zp | + 6 | \GroupOne | $ & $ (l+6)| \GroupTwo | $ & $ 6 | \GroupOne | + | \GroupTwo |$ & $2l+10$ \\
+    ~\cite{AC:CKPSS23} & PS + ROM & $(\gen^{\vec{m}}, \ggen^{\vec{m}}) \in \group{1}^l \times \group{2}^l$ &
+    $ (l+1) | \Zp | $ & $ l | \group{1} | + (l+1) | \group{2} | $ & $ 2 | \group{1} | $ & $3l+2$ \\
+    ~\cite{PKC:MMSST24} & SXDH & $ \vec{M} \in \group{1}^l$ &
+    $ 2(l+1) | \Zp | $ & $ (l+1) | \group{2} | $ & $ 6 | \group{1} | + | \group{2} | $ & $l+11$ \\
+    Section~\ref{sec:tsps-abe} & q-type & $ \vec{M} \in \group{1}^l$ &
+    $ (l+1) | \Zp | $ & $ | \group{1} | + l| \group{2} | $ & $ | \group{1} | + 2 | \group{2} | $ & $l+4$ \\
+    Section~\ref{sec:tsps-kiltz} & SXDH & $ \vec{M} \in \group{1}^l$ &
+    $ l |\Zp | + 6 | \group{1} | $ & $ (l+6)| \group{2} | $ & $ 6 | \group{1} | + | \group{2} |$ & $2l+10$ \\
    \bottomrule
   \end{tabular}
   \caption{Comparison of threshold structure-preserving signature schemes.
@@ -213,12 +213,12 @@ inside Docker containers based on Ubuntu 22.
   \centering
   \begin{tabular}{ c || c | c | c }
    \toprule
-    & $\offsign$ & $\onsign$ & $\combine$ \\
+    & $\algo{OffSign}$ & $\algo{OnSign}$ & $\algo{Combine}$ \\
    \midrule
-    ~\cite{crites2023threshold} & 0 & 0 & $ 2 | \GroupOne |$ \\
-    ~\cite{Mitrokotsa2024} & 0 & 0 & $ 6 | \GroupOne | + | \GroupTwo |$ \\
-    Section~\ref{sec:tsps-abe} & $ n(l+4)|\Zp|$ & 0 & $| \GroupOne | + 2 | \GroupTwo |$ \\
-    Section~\ref{sec:tsps-kiltz} & $ n(12|\Zp| + 6|\GroupOne|) $ & 0 & $6 | \GroupOne | + | \GroupTwo | $ \\
+    ~\cite{AC:CKPSS23} & 0 & 0 & $ 2 | \group{1} |$ \\
+    ~\cite{PKC:MMSST24} & 0 & 0 & $ 6 | \group{1} | + | \group{2} |$ \\
+    Section~\ref{sec:tsps-abe} & $ n(l+4)|\Zp|$ & 0 & $| \group{1} | + 2 | \group{2} |$ \\
+    Section~\ref{sec:tsps-kiltz} & $ n(12|\Zp| + 6|\group{1}|) $ & 0 & $6 | \group{1} | + | \group{2} | $ \\
    \bottomrule
   \end{tabular}
   \caption{Per-party communication complexity for the signing and combining
@@ -230,8 +230,8 @@ inside Docker containers based on Ubuntu 22.
   \centering
   \begin{tabular}{ c || c || c | c || c | c }
    \toprule
-    & Centralised & \multicolumn{2}{c||}{ATLAS~\cite{Goyal2021}} & \multicolumn{2}{c}{MASCOT~\cite{keller2016mascot}} \\
-    & & $\offsign$ & $\onsign$ & $\offsign$ & $\onsign$ \\
+    & Centralised & \multicolumn{2}{c||}{ATLAS~\cite{C:GLOPS21}} & \multicolumn{2}{c}{MASCOT~\cite{CCS:KelOrsSch16}} \\
+    & & $\algo{OffSign}$ & $\algo{OnSign}$ & $\algo{OffSign}$ & $\algo{OnSign}$ \\
    \midrule
     Section~\ref{sec:tsps-abe} & 10ms & 46ms & 56ms & 92ms & 84ms \\
     Section~\ref{sec:tsps-kiltz} & 40ms & 88ms & 61ms & 352ms & 94ms \\
@@ -242,8 +242,8 @@ inside Docker containers based on Ubuntu 22.
   \label{table:benchmarks}
 \end{table*}
 
-Table~\ref{table:comp} compares our two schemes against~\cite{crites2023threshold}
-and~\cite{Mitrokotsa2024} in terms of assumptions, message space, key and
+Table~\ref{table:comp} compares our two schemes against~\cite{AC:CKPSS23}
+and~\cite{PKC:MMSST24} in terms of assumptions, message space, key and
 signature size, and verification cost, while Table~\ref{table:comms} compares
 per-party communication complexity across the offline, online, and combining
 phases. Table~\ref{table:benchmarks} reports concrete timings for both of our
@@ -262,8 +262,8 @@ benchmarks build on MP-SPDZ, they reflect the standard MPC offline and online
 phases, where the output is constructed within the online phase; this means
 the online and combining phases are benchmarked together, so their timings
 grow with the number of parties. In practice, when using threshold
-signatures, parties may instead perform only the constant-time $\onsign$
+signatures, parties may instead perform only the constant-time $\algo{OnSign}$
 locally, and submit their signature shares to a single party to perform
-$\combine$, rather than all parties communicating shares and each
+$\algo{Combine}$, rather than all parties communicating shares and each
 constructing a copy of the signature locally. The signature generation phase
-shown in Figure~\ref{eval-online} combines $\onsign$ and $\combine$.
+shown in Figure~\ref{eval-online} combines $\algo{OnSign}$ and $\algo{Combine}$.

@@ -11,26 +11,26 @@ algorithms:
 
 \begin{description}
 
-  \item[$(\pk, \sk) \sample \keygen(\secparam, l)$ :] The key generation
+  \item[$(\pk, \sk) \sample \algo{KeyGen}(\secparam, l)$ :] The key generation
     algorithm, on input security parameter $\secparam$ and vector length $l$,
     outputs key pair $(\pk, \sk)$, with $\pk$ implicitly defining message
-    space $\mathcal{M} \subseteq \Group^l$.
+    space $\mathcal{M} \subseteq \G^l$.
 
-  \item[$\sigma \sample \sign(\sk, \vec{\MOne})$ :] The signing algorithm, on
-    input secret key $\sk$ and message $\vec{\MOne} \in \mathcal{M}$, outputs
-    signature $\sigma \in \Group^{poly(\secparam)}$.
+  \item[$\sigma \sample \algo{Sign}(\sk, \vec{{M}})$ :] The signing algorithm, on
+    input secret key $\sk$ and message $\vec{{M}} \in \mathcal{M}$, outputs
+    signature $\sigma \in \G^{poly(\secparam)}$.
 
-  \item[$\{0,1\} \leftarrow \verify(\pk, \vec{\MOne}, \sigma)$ :] The
-    verification algorithm, on input public key $\pk$, message $\vec{\MOne}$,
+  \item[$\{0,1\} \leftarrow \algo{Verify}(\pk, \vec{{M}}, \sigma)$ :] The
+    verification algorithm, on input public key $\pk$, message $\vec{{M}}$,
     and signature $\sigma$, returns 0 or 1. Verification consists only of
     pairing product equations.
 
 \end{description}
 
 A structure-preserving signature scheme satisfies correctness if for all
-security parameters $\secparam$, all $(\pk, \sk) \sample \keygen(\secparam,
-l)$, and all $\vec{\MOne} \in \mathcal{M}$, we have $\verify(\pk, \vec{\MOne},
-\sign(\sk, \vec{\MOne})) = 1$.
+security parameters $\secparam$, all $(\pk, \sk) \sample \algo{KeyGen}(\secparam,
+l)$, and all $\vec{{M}} \in \mathcal{M}$, we have $\algo{Verify}(\pk, \vec{{M}},
+\algo{Sign}(\sk, \vec{{M}})) = 1$.
 
 \paragraph{Unforgeability.} For a PPT adversary $\adv$, define advantage
 %
@@ -43,8 +43,8 @@ l)$, and all $\vec{\MOne} \in \mathcal{M}$, we have $\verify(\pk, \vec{\MOne},
 \end{equation*}
 %
 with game $\mathbf{G}_{\mathrm{SPS},\adv}^{\text{UF-CMA}}$ and signing oracle
-$\signo$ given in Figure~\ref{fig:uf-cma}. A structure-preserving signature
-scheme achieves UF-CMA security if for every PPT adversary $\adv$,
+$\signo$ given in Experiment~\ref{exp:sps-uf-cma}. A structure-preserving
+signature scheme achieves UF-CMA security if for every PPT adversary $\adv$,
 %
 \begin{equation*}
 %
@@ -53,94 +53,52 @@ scheme achieves UF-CMA security if for every PPT adversary $\adv$,
 %
 \end{equation*}
 %
-Excluding the message $\vec{\MOne^*}$ itself from the set $S$ of previously
-queried messages, as shown in Figure~\ref{fig:uf-cma}, gives \emph{weak}
-unforgeability (wUF-CMA), the notion we rely on throughout this chapter.
-Excluding instead the pair $(\vec{\MOne^*}, \sigma^*)$ gives the stronger
-notion of \emph{strong} unforgeability (sUF-CMA), which additionally rules
-out an adversary producing a fresh signature on an already-signed message.
+Excluding the message $\vec{{M}^*}$ itself from the set $S$ of previously
+queried messages, as shown in Experiment~\ref{exp:sps-uf-cma}, gives
+\emph{weak} unforgeability (wUF-CMA), the notion we rely on throughout this
+chapter. Excluding instead the pair $(\vec{{M}^*}, \sigma^*)$ gives the
+stronger notion of \emph{strong} unforgeability (sUF-CMA), which additionally
+rules out an adversary producing a fresh signature on an already-signed
+message.
 
-\begin{figure}
-\centering
-  \begin{minipage}{.45\linewidth}
+\begin{experimentbox}{Unforgeability under chosen message attack for
+  structure-preserving signatures}{sps-uf-cma}
 
-  \fbox{\parbox{\linewidth}{
+  \begin{enumerate}
 
-      \begin{algorithmic}[1]
+    \item The challenger generates $(\pk, \sk) \gets \algo{KeyGen}(\secparam,
+      l)$ and sends $\pk$ to $\adv$.
 
-        \Statex \underline{$\mathbf{G}_{\mathrm{SPS},\adv}^{\text
-        {UF-CMA}}(\secparam):$}
+    \item The adversary is given oracle access to $\signo$, which on input
+      $\vec{{M}}$, computes $\sigma \gets \algo{Sign}(\sk, \vec{{M}})$, and if
+      $\sigma \neq \perp$, adds $\vec{{M}}$ to $S$, before returning $\sigma$.
 
-        \begin{enumerate}
+    \item The adversary outputs $(\vec{{M}^*}, \sigma^*)$.
 
-          \item $ (\pk, \sk) \from \keygen(\secparam, l) $
+  \end{enumerate}
 
-          \item $ (\vec{\MOne^*},\sigma^*) \from \adv^{\signo} ( \pk ) $
+  $\adv$ wins the experiment if $\algo{Verify}(\pk, \vec{{M}^*}, \sigma^*) =
+  1$ and $\vec{{M}^*} \notin S$.
 
-          \item return $ \verify (\pk, \vec{\MOne^*}, \sigma^*) \
-            \wedge \ \vec{\MOne^*} \notin S $
-
-      \end{enumerate}
-
-      \end{algorithmic}
-
-  }
-}
-\end{minipage}
-  \hspace{.05\linewidth}
-\begin{minipage}{.45\linewidth}
-
-  \fbox{\parbox{\linewidth}{
-
-        \begin{algorithmic}[1]
-
-        \Statex \underline{ $ \signo (\vec{\MOne}): $ }
-
-        \begin{enumerate}
-
-          \item $ \sigma \from \sign (\sk, \vec{\MOne}) $
-
-          \item if $ \sigma \neq \perp $ :
-
-            \begin{enumerate}
-
-              \item $ S \from S \cup \{\vec{\MOne}\} $
-
-            \end{enumerate}
-
-          \item return $ \sigma $
-
-        \end{enumerate}
-
-      \end{algorithmic}
-    }}
-
-  \end{minipage}
-
-\caption{The UF-CMA security game for structure-preserving signature scheme
-SPS, adversary $\adv$, and message set $S$, initially empty. The condition
-$\vec{\MOne^*} \notin S$ gives wUF-CMA security; replacing it with
-$(\vec{\MOne^*}, \sigma^*) \notin S$ gives the stronger sUF-CMA security.}
-\label{fig:uf-cma}
-\end{figure}
+\end{experimentbox}
 
 \subsection{Threshold structure-preserving signatures}
 
 A threshold structure-preserving signature scheme is a structure-preserving
 signature scheme whose signing key is distributed across multiple parties. It
-is defined by algorithms $\setup$, $\keygen$, $\threshsign$, $\combine$, and
-$\verify$, as follows.
+is defined by algorithms $\algo{Setup}$, $\algo{KeyGen}$, $\algo{ThreshSign}$, $\algo{Combine}$, and
+$\algo{Verify}$, as follows.
 
 \begin{description}
 
-  \item[$\pp \sample \setup(1^\secparam)$ :] The setup algorithm generates
-    public parameters $\pp$ describing three cyclic groups $(\GroupOne,
-    \GroupTwo, \GroupT)$ of prime order $p$ that admit a non-degenerate
-    bilinear pairing $e \colon \GroupOne \times \GroupTwo \rightarrow
-    \GroupT$. Hereafter we take $\pp := (p, e, \GroupOne, \GroupTwo,
-    \GroupT)$ as an implicit input to every subsequent algorithm.
+  \item[$\algo{pp} \sample \algo{Setup}(1^\secparam)$ :] The setup algorithm generates
+    public parameters $\algo{pp}$ describing three cyclic groups $(\group{1},
+    \group{2}, \group{T})$ of prime order $p$ that admit a non-degenerate
+    bilinear pairing $e \colon \group{1} \times \group{2} \rightarrow
+    \group{T}$. Hereafter we take $\algo{pp} := (p, e, \group{1}, \group{2},
+    \group{T})$ as an implicit input to every subsequent algorithm.
 
-  \item[$(\pk, \llbracket \sk \rrbracket) \sample \keygen(l, t, n)$ :] The key
+  \item[$(\pk, \llbracket \sk \rrbracket) \sample \algo{KeyGen}(l, t, n)$ :] The key
     generation algorithm takes a triple of integers $(l, t, n > t)$, where
     $l$ is the length of the vectors to be signed, $t$ is an upper bound on
     the number of corrupted parties, and $n$ is the total number of
@@ -150,30 +108,30 @@ $\verify$, as follows.
     of elements of $\Zp$ and/or group elements. This algorithm may be
     interactive.
 
-  \item[$\llbracket \sigma \rrbracket \sample \threshsign(\llbracket \sk
-    \rrbracket, \vec{\MOne})$ :] The threshold signing algorithm takes a
+  \item[$\llbracket \sigma \rrbracket \sample \algo{ThreshSign}(\llbracket \sk
+    \rrbracket, \vec{{M}})$ :] The threshold signing algorithm takes a
     secret key share $\llbracket \sk \rrbracket$ and a vector of messages
-    $\vec{\MOne}$ with elements in $\GroupOne$ and/or $\GroupTwo$, and
+    $\vec{{M}}$ with elements in $\group{1}$ and/or $\group{2}$, and
     outputs a signature share $\llbracket \sigma \rrbracket$ with elements in
-    $\GroupOne$ and $\GroupTwo$. This algorithm may be interactive.
+    $\group{1}$ and $\group{2}$. This algorithm may be interactive.
 
-  \item[$\sigma \leftarrow \combine(\llbracket \sigma \rrbracket)$ :] The
+  \item[$\sigma \leftarrow \algo{Combine}(\llbracket \sigma \rrbracket)$ :] The
     combining algorithm is non-interactive, and takes signature shares
     $\llbracket \sigma \rrbracket$ to output signature $\sigma$.
 
-  \item[$\{0,1\} \leftarrow \verify(\pk, \vec{\MOne}, \sigma)$ :] The
+  \item[$\{0,1\} \leftarrow \algo{Verify}(\pk, \vec{{M}}, \sigma)$ :] The
     verification algorithm takes public key $\pk$, vector of messages
-    $\vec{\MOne}$, and signature $\sigma$, and returns 1 if $\sigma$ is valid
-    on $\vec{\MOne}$, and 0 otherwise. As in the non-threshold case,
-    verification checks membership of the signature's elements in $\GroupOne$
-    and $\GroupTwo$, and evaluates equations involving pairing products.
+    $\vec{{M}}$, and signature $\sigma$, and returns 1 if $\sigma$ is valid
+    on $\vec{{M}}$, and 0 otherwise. As in the non-threshold case,
+    verification checks membership of the signature's elements in $\group{1}$
+    and $\group{2}$, and evaluates equations involving pairing products.
 
 \end{description}
 
 Both threshold structure-preserving signature schemes we construct in
-Section~\ref{sec:schemes} are \emph{partially non-interactive}: $\threshsign$
+Section~\ref{sec:schemes} are \emph{partially non-interactive}: $\algo{ThreshSign}$
 requires no interaction between signers, while the message-independent
-pre-processing that precedes it, captured by $\offsign$ in
+pre-processing that precedes it, captured by $\algo{OffSign}$ in
 Section~\ref{sec:schemes}, may be interactive. We formalise security for
 threshold structure-preserving signatures, together with the corresponding
 game, in Section~\ref{sec:tsps-security}, once the MPC functionalities of

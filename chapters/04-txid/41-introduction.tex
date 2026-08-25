@@ -1,41 +1,69 @@
 \section{Introduction}
 
-\begin{itemize}
+The contributions of the next three sections are heavily motivated by
+transaction systems. Though each construction could be presented compactly and
+in isolation, the contributions are clearer when explained in context.
 
-  \item Privacy-preserving ledgers still need to support auditing: regulators,
-    central banks, and companies all need to recover specific transactions on
-    demand.
+\paragraph{Transaction systems.} We use the term transaction system to broadly
+capture all systems that involve moving value. We describe the systems as if
+they handle just one type of currency, but extensions to labelled assets are
+generally simple. Transaction systems in these chapters must satisfy three
+properties. Balance, which means that no money can be created by transactions.
+Theft prevention, which means that no user of the system can spend money
+belonging to another, and finally, privacy. We will define privacy formally in
+the definitions sections, but note here that it is an intrinsic property of the
+transaction systems we are working with.
 
-  \item Existing approaches sit at two extremes: fully transparent ledgers give
-    up all privacy, while a long-term view key gives an auditor unconditional,
-    permanent visibility and becomes a single point of failure.
+Privacy of money in motion versus wealth at rest is a question with deep
+economic and political roots. We will not attempt to address this question
+directly here, and will defer to the relevant state, political, legal, and
+economic structures to determine the answers.
+%(Domesday Book of 1086, Return of Owners of Land of 1873, and then Valuation
+%Office Survey of 1910-1915, but significant portions of that are lost due to
+%WWII bombings of the National Archives.)
+We acknowledge that confidentiality of wealth at rest is a trivial problem when
+it comes to cryptography. It can be solved by simply encrypting the value. The
+open problems are instead concerned with privacy of money in motion.
 
-  \item Real audits are narrower: they target one user during one period, so
-    authorisation to trace should not outlive that period, and should not
-    require the user's continued involvement.
+\paragraph{Fiat.} We must first distinguish between fiat and non-fiat
+transaction systems\footnote{Fiat is Latin for `let it be done'.}. Fiat money
+is issued by an entity such as a central bank. The backing of the state gives
+the currency its value and so its issuance is centralised by design. Fiat money
+exists in different forms. Those we are interested in are cash, the current
+banking system, and the banking system of the near future.
 
-  \item We want a middle ground: per-epoch, self-service tracing authority that
-    expires automatically.
+Cryptocurrencies are the main non-fiat type of transaction systems. These are
+not backed by governments, and not a form of legal tender. Their issuance is
+generally decentralised and tokens are tracked by publicly readable distributed
+ledgers. Anyone can generate a key pair and start participating in the system,
+minting and using the currencies as they desire. Cryptocurrencies cover the
+entire spectrum of privacy: from offering pseudonymity with each transaction in
+the clear, to hidden values and anonymity sets equal to the total number of
+users of the system~\cite{bitcoin,ethereum,EPRINT:Noether15,SP:BCGGMT14}.
 
-  \item Each user holds a long-term tracing key, certified once, from which
-    they derive a fresh epoch tracing key every epoch.
+Cryptocurrencies with decentralised issuance exist in contrast to stable coins.
+These are generally backed by fiat assets in an unofficial capacity, issued by
+private companies. They are cryptocurrencies with completely centralised
+issuance. By trading volume and usage, stable coins, rather than central bank
+digital currencies (CBDCs), are the largest digital assets backed by
+fiat~\cite{BIS26stablecoins}.
 
-  \item Transactions are tagged with a PRF over the epoch key; disclosing that
-    key lets an auditor trace exactly the transactions from one epoch, and
-    nothing else.
+Our protocols generally deal with fiat money and so assume the role of a
+central bank as issuer. The issuer role is easy to distribute, so the main
+technical distinction between fiat and non-fiat money is actually the treatment
+of identity.
 
-  \item Granting tracing authority is a one-time key disclosure to the chosen
-    auditor; no further interaction with the registration authority, ledger
-    operator, or user is needed, and authorisation lapses automatically when
-    the epoch ends.
-
-  \item We call this mechanism tracing rather than collection: the auditor only
-    ever learns one epoch's transactions, never a user's full history. This
-    matches existing terminology, where tracing means recovering every
-    transaction linked to a user, as distinct from the narrower anonymity
-    revocation, which recovers only the identity behind a single transaction.
-
-\end{itemize}
+Cash is anonymous and tied to no identity at all, though depositing large sums
+into the banking system often requires proof of provenance. The current digital
+fiat system gives up this anonymity. Though transactions are not seen by the
+central banks or other users, commercial banks see their clients' transactions
+in the clear and tied to their identities. States can also compel commercial
+banks to disclose this information in all its detail\footnote{United States
+Congress, Bank Secrecy Act (1970) and Uniting and Strengthening America by
+Providing Appropriate Tools Required to Intercept and Obstruct Terrorism (USA
+PATRIOT) Act (2001)}.  Future digital fiat systems aim to improve the situation
+with users proving ownership over the money being moved while the transactions
+stay private. This is generally achieved through anonymous credentials.
 
 \subsection{Related work}\label{sec:txid-related}
 
@@ -63,12 +91,12 @@ and bound to the transaction's origin~\cite{CCS:KiaKohSar22,CANS:SarKiaKoh24}.
 Given the tracing secret of a target user, an auditor identifies the
 corresponding transactions by recomputing the tags and matching them against
 the ledger, and the counter binding also stops a user later repudiating their
-own transactions. Similar tag-based techniques trace asset lineage rather than
-user activity~\cite{FC:GarGreMie16}. All of these share the same limitation: a
-user's transactions must be generated sequentially, which prevents concurrent
-transaction creation and degrades performance in high-throughput settings.
+own transactions. These systems are necessarily tied to users' identities.  All
+of these share the same limitation: a user's transactions must be generated
+sequentially, which prevents concurrent transaction creation and degrades
+performance in high-throughput settings.
 
-\paragraph{Auditable privacy systems.} Other protocols provide auditability
+\paragraph{Auditing in cryptocurrencies.} Other protocols provide auditability
 through interactive protocols or global consistency checks. ZKLedger lets
 auditors verify transaction correctness, but requires interaction and incurs
 overhead linear in the number of participants~\cite{EPRINT:NarVasVir18}.
@@ -76,9 +104,11 @@ Privacy-focused cryptocurrencies such as Monero, Zcash, and Quisquis achieve
 strong anonymity guarantees but do not directly support efficient
 tracing~\cite{EPRINT:Noether15,SP:BCGGMT14,AC:FMMO19,FC:BAZB20}.  Retrofitting
 tracing into such systems typically requires additional interaction, user
-cooperation, or linear-time analysis~\cite{ACNS:PBGP25}. Platypus and ZKAT
-incorporate regulatory policy enforcement, for instance balance limits, but
-neither provides a mechanism for efficient per-user tracing across arbitrary
+cooperation, or linear-time analysis~\cite{ACNS:PBGP25}.
+
+\paragraph{Auditing of fiat money.} Platypus and ZKAT incorporate regulatory
+policy enforcement, for instance balance limits, but neither provides a
+mechanism for efficient per-user tracing across arbitrary
 transactions~\cite{CCS:WKDC22,EPRINT:ACDDET19}.
 
 \paragraph{Our contribution.} We introduce a tracing mechanism that eliminates

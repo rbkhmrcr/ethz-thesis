@@ -1,27 +1,27 @@
 \section{Security}\label{sec:tsps-security}
 
 We take inspiration from the threshold signature security definitions
-of~\cite{bellare2022better}, which introduce a hierarchy of increasingly
+of~\cite{C:BCKMTZ22}, which introduce a hierarchy of increasingly
 strong notions of unforgeability for fully and partially non-interactive
 threshold signature schemes. A partially non-interactive scheme is one whose
-$\onsign$ protocol is non-interactive, but whose message-independent
-pre-processing round, analogous to $\offsign$, may be interactive; both of
+$\algo{OnSign}$ protocol is non-interactive, but whose message-independent
+pre-processing round, analogous to $\algo{OffSign}$, may be interactive; both of
 our constructions from Section~\ref{sec:schemes} fall into this class.
 
 With TS-UF-0 security, the adversary has access to a partial signature oracle
 $\signo$, and the unforgeability game is defined so that the adversary cannot
-win with message-signature pair $(\vec{\MOne^*}, \sigma^*)$ if the partial
-signature oracle has already been queried, even once, on $\vec{\MOne^*}$.
+win with message-signature pair $(\vec{{M}^*}, \sigma^*)$ if the partial
+signature oracle has already been queried, even once, on $\vec{{M}^*}$.
 TS-UF-1 relaxes this: the winning condition can be triggered as long as the
-adversary has queried for partial signatures on $\vec{\MOne^*}$ from no more
+adversary has queried for partial signatures on $\vec{{M}^*}$ from no more
 than $t - |\Cor| - 1$ parties, where $\Cor$ is the set of corrupted parties.
 When the adversary corrupts $t-1$ parties, TS-UF-0 and TS-UF-1 coincide. In
 the adaptive variants, adp-TS-UF-0 and adp-TS-UF-1, the adversary additionally
-has access to a corruption oracle $\sko$, alongside the partial signature
+has access to a corruption oracle $\corrupto$, alongside the partial signature
 oracle $\signo$.
 
-Let $\mathrm{TSPS} = (\setup, \keygen, \offsign, \onsign, \combine,
-\verify)$ be an $(n, t)$-TSPS scheme over message space $\mathcal{M}$. The
+Let $\mathrm{TSPS} = (\algo{Setup}, \algo{KeyGen}, \algo{OffSign}, \algo{OnSign}, \algo{Combine},
+\algo{Verify})$ be an $(n, t)$-TSPS scheme over message space $\mathcal{M}$. The
 advantage of a PPT adversary $\adv$ is defined as
 %
 \begin{equation*}
@@ -32,10 +32,11 @@ advantage of a PPT adversary $\adv$ is defined as
 %
 \end{equation*}
 %
-with game $\mathbf{G}_{\mathrm{TS}, \adv}^{\text{adp-TS-UF-1}}$ given in
-Figure~\ref{fig:ts-uf-1}, and its oracles $\signo$ and $\sko$ given in
-Figure~\ref{fig:oracles}. A threshold structure-preserving signature scheme
-achieves adaptive TS-UF-1 security if, for every PPT adversary $\adv$,
+with game $\mathbf{G}_{\mathrm{TS}, \adv}^{\text{adp-TS-UF-1}}$ and its
+oracles $\signo$ and $\corrupto$ given in
+Experiment~\ref{exp:tsps-adp-ts-uf-1}. A threshold structure-preserving
+signature scheme achieves adaptive TS-UF-1 security if, for every PPT
+adversary $\adv$,
 %
 \begin{equation*}
 %
@@ -44,111 +45,42 @@ achieves adaptive TS-UF-1 security if, for every PPT adversary $\adv$,
 %
 \end{equation*}
 
-\begin{figure}
-\centering
-  \fbox{\parbox{0.99\linewidth}{
+\begin{experimentbox}{Adaptive unforgeability under chosen message attack for
+  threshold structure-preserving signatures (adp-TS-UF-1)}{tsps-adp-ts-uf-1}
 
-      \begin{algorithmic}[1]
+  \begin{enumerate}
 
-        \Statex \underline{$\mathbf{G}_{\mathrm{TS},\adv}^{\text
-        {adp-TS-UF-1}}(\secparam):$}
+    \item The challenger generates $\algo{pp} \gets \algo{Setup}(1^\secparam)$
+      and sends it to $\adv$.
 
-        \begin{enumerate}
+    \item The adversary outputs $(n, t, \Cor)$, and the challenger sets
+      $\mathcal{H} := [1,n] \backslash \Cor$.
 
-          \item $ \pp \from \setup (1^\secparam) $
+    \item The challenger generates $(\pk, \llbracket \sk \rrbracket,
+      \llbracket \pk \rrbracket) \gets \algo{KeyGen}(l, t, n)$, and sends
+      $\pk$, $\{\sk_i\}_{i \in \Cor}$, and $\llbracket \pk \rrbracket$ to
+      $\adv$.
 
-          \item $ (n, t, \Cor) \from \adv(\pp) $
+    \item The adversary is given oracle access to $\signo$, which on input
+      $(i, \vec{{M}})$, asserts $\vec{{M}} \in \mathcal{M} \wedge i \in
+      \mathcal{H}$, computes $\sigma_i \gets \algo{ThreshSign}(\sk_i,
+      \vec{{M}})$, and if $\sigma_i \neq \perp$, adds $i$ to $S(\vec{{M}})$,
+      before returning $\sigma_i$.
 
-          \item $ \Hon := [1,n] \backslash \Cor $
+    \item The adversary is given oracle access to $\corrupto$, which on
+      input $k$, returns $\perp$ if $k \in \Cor$, and otherwise adds $k$ to
+      $\Cor$, removes $k$ from $\mathcal{H}$, and returns $\sk_k$.
 
-          \item $ (\pk, \llbracket \sk \rrbracket, \llbracket \pk \rrbracket )
-            \from \keygen(l, t, n) $
+    \item The adversary outputs $(\vec{{M}^*}, \sigma^*)$.
 
-        \item $ (\vec{\MOne^*},\sigma^*) \from \adv^{\signo, \sko} (
-            \pk, \{\sk_i\}_{i \in \Cor}, \llbracket \pk \rrbracket ) $
+  \end{enumerate}
 
-          \item return $ \verify (\pk, \vec{\MOne^*}, \sigma^*) \
-            \wedge \ |\Cor| < t
-            \wedge \ | S(\vec{\MOne^*}) | < t - | \Cor | $
+  $\adv$ wins the experiment if $\algo{Verify}(\pk, \vec{{M}^*}, \sigma^*) =
+  1$, $|\Cor| < t$, and $|S(\vec{{M}^*})| < t - |\Cor|$, where $S(\vec{{M}})$
+  records which honest signers have issued a partial signature on
+  $\vec{{M}}$.
 
-      \end{enumerate}
-
-      \end{algorithmic}
-
-  }
-}
-\caption{The adp-TS-UF-1 security game for threshold structure-preserving
-signature scheme TSPS, adversary $\adv$, and set $S(\vec{\MOne})$ recording
-which honest signers have issued a partial signature on $\vec{\MOne}$.}
-\label{fig:ts-uf-1}
-\end{figure}
-
-\begin{figure}
-  \centering
-  \begin{minipage}{.46\linewidth}
-
-    \fbox{\parbox{\linewidth}{
-
-        \begin{algorithmic}[1]
-
-        \Statex \underline{ $ \signo (i,\vec{\MOne}): $ }
-
-        \begin{enumerate}
-
-          \item Assert $(\vec{\MOne} \in \mathcal{M} \wedge i \in \Hon) $
-
-          \item $ \sigma_i \from \threshsign (\sk_i, \vec{\MOne}) $
-
-          \item if $ \sigma_i \neq \perp $ :
-
-            \begin{enumerate}
-
-              \item $ S(\vec{\MOne}) \from S(\vec{\MOne}) \cup \{i\} $
-
-            \end{enumerate}
-
-          \item return $ \sigma_i $
-
-        \end{enumerate}
-
-      \end{algorithmic}
-    }}
-
-  \end{minipage}
-  \hspace{.05\linewidth}
-  \begin{minipage}{.46\linewidth}
-    \fbox{\parbox{\linewidth}{
-
-      \begin{algorithmic}[1]
-
-        \Statex \underline{ $ \sko(k): $ }
-
-        \begin{enumerate}
-
-          \item if $ k \in \Cor $ :
-
-            \begin{enumerate}
-
-              \item return $ \perp $
-
-            \end{enumerate}
-
-          \item else : $ \Cor \leftarrow \Cor \cup \{k\} $
-
-          \item $ \Hon \from \Hon \backslash \{k\} $
-
-          \item return $ \sk_k $
-
-        \end{enumerate}
-
-      \end{algorithmic}
-
-  }}
-
-  \end{minipage}
-  \caption{The oracles available to $\adv$ in the adp-TS-UF-1 game.}
-\label{fig:oracles}
-\end{figure}
+\end{experimentbox}
 
 \begin{theorem}\label{thm:tsps-security}
 
@@ -162,57 +94,55 @@ which honest signers have issued a partial signature on $\vec{\MOne}$.}
 
 \end{theorem}
 
-\begin{proof}
+\paragraph{Proof.}
 
   We argue by contrapositive. Suppose the threshold structure-preserving
   signature scheme does not achieve adaptive TS-UF-1 security. Using the
   adversary $\adv$ of the adp-TS-UF-1 game as a subroutine, we construct an
-  adversary $\advTwo$ that either breaks the ideal functionalities of
+  adversary $\advB$ that either breaks the ideal functionalities of
   Section~\ref{sec:MPC} (case 1), or wins the wUF-CMA game of
-  Figure~\ref{fig:uf-cma} against the underlying structure-preserving
+  Experiment~\ref{exp:sps-uf-cma} against the underlying structure-preserving
   signature scheme (case 2). By design of the ideal functionalities, case 1
   does not occur for either the scheme of Section~\ref{sec:tsps-abe} or that
   of Section~\ref{sec:tsps-kiltz}, and the transformation from $\adv$ to
-  $\advTwo$ that we now describe is generic to both schemes.
+  $\advB$ that we now describe is generic to both schemes.
 
-  $\advTwo$ forwards the setup parameters it receives to $\adv$. On receiving
-  $(n, t, \Cor)$ from $\adv$, and $\pk$ from its own challenger, $\advTwo$
+  $\advB$ forwards the setup parameters it receives to $\adv$. On receiving
+  $(n, t, \Cor)$ from $\adv$, and $\pk$ from its own challenger, $\advB$
   samples random shares $\{\sk_i\}_{i \in [1, t-1]}$ and their corresponding
   public key shares, together with shares $\{\sk_i\}_{i \in \Cor}$ and their
   corresponding public key shares, consistent with the sharing $\llbracket
   \pk \rrbracket$ of $\pk$. It forwards $\pk$, $\{\sk_i\}_{i \in \Cor}$, and
   $\llbracket \pk \rrbracket$ to $\adv$.
 
-  $\advTwo$ answers $\adv$'s $\signo$ queries in one of two ways. If, for the
-  queried $\vec{\MOne}$, $|S(\vec{\MOne})| < t - |\Cor|$, then $\advTwo$ forms
+  $\advB$ answers $\adv$'s $\signo$ queries in one of two ways. If, for the
+  queried $\vec{{M}}$, $|S(\vec{{M}})| < t - |\Cor|$, then $\advB$ forms
   the requested signature share $\sigma_i$ directly from its sampled $\sk_i$;
   the information-theoretic hiding property of the linear secret sharing
   scheme means $\adv$ cannot distinguish this simulated share from a genuine
-  one. Once $|S(\vec{\MOne})|$ reaches $t - |\Cor|$, $\advTwo$ instead queries
-  its own signing oracle for $\vec{\MOne}$, and uses the information exchanged
+  one. Once $|S(\vec{{M}})|$ reaches $t - |\Cor|$, $\advB$ instead queries
+  its own signing oracle for $\vec{{M}}$, and uses the information exchanged
   during the (possibly interactive) threshold signing protocol to construct a
   signature share $\sigma_i$ that, combined with the shares it has already
-  issued, yields a signature verifying correctly under $\combine$ and
-  $\verify$. In both cases, $\advTwo$ can respond to every query of $\adv$
+  issued, yields a signature verifying correctly under $\algo{Combine}$ and
+  $\algo{Verify}$. In both cases, $\advB$ can respond to every query of $\adv$
   without ever calling its own signing oracle on a message for which it would
   later need to produce a forgery.
 
-  Since $\advTwo$ never queries its own signing oracle on $\vec{\MOne}^*$
-  itself, if $\adv$ outputs a forgery $(\vec{\MOne^*}, \sigma^*)$ satisfying
-  the winning condition of the adp-TS-UF-1 game, then $(\vec{\MOne^*},
+  Since $\advB$ never queries its own signing oracle on $\vec{{M}}^*$
+  itself, if $\adv$ outputs a forgery $(\vec{{M}^*}, \sigma^*)$ satisfying
+  the winning condition of the adp-TS-UF-1 game, then $(\vec{{M}^*},
   \sigma^*)$ also satisfies the winning condition of the wUF-CMA game for
-  $\advTwo$. Hence the advantage of $\adv$ in the adp-TS-UF-1 game is bounded
-  by the advantage of $\advTwo$ in the wUF-CMA game of the underlying
+  $\advB$. Hence the advantage of $\adv$ in the adp-TS-UF-1 game is bounded
+  by the advantage of $\advB$ in the wUF-CMA game of the underlying
   structure-preserving signature scheme, which is negligible by assumption.
 
-  It remains to handle $\adv$'s queries to $\sko$. $\advTwo$ simulates these
+  It remains to handle $\adv$'s queries to $\corrupto$. $\advB$ simulates these
   directly, returning the sampled $\sk_k$ for each newly corrupted party,
-  until $|\Cor| = t$. Beyond this point, $\advTwo$ cannot return a further
+  until $|\Cor| = t$. Beyond this point, $\advB$ cannot return a further
   share $\sk_k$ consistent with $\pk$ without being able to reconstruct the
   full secret key itself, and correspondingly the adp-TS-UF-1 game's winning
-  condition requires $|\Cor| < t$. For $|\Cor| < t$, every query to $\sko$ can
+  condition requires $|\Cor| < t$. For $|\Cor| < t$, every query to $\corrupto$ can
   be simulated as above, so the reduction goes through, and the threshold
   structure-preserving signature scheme achieves adaptive TS-UF-1 security
   with corruption bound $|\Cor| < t$.
-
-\end{proof}

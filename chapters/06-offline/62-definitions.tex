@@ -3,14 +3,14 @@
 \subsection{System entities}
 
 An offline payment system involves five types of participants: the
-\textbf{central bank}, \textbf{intermediaries}, \textbf{users}, a
-\textbf{registration authority}, and an \textbf{auditor}.
+central bank, intermediaries, users, a
+registration authority, and an auditor.
 
 The central bank issues tokens to users and manages the reserves of the
-intermediaries. Issuance is triggered by a \emph{withdrawal} request from an
+intermediaries. Issuance is triggered by a withdrawal request from an
 intermediary and, when successful, debits the issued value from that
 intermediary's reserves. The central bank also redeems tokens on a
-\emph{deposit} request from an intermediary, crediting the redeemed value to
+deposit request from an intermediary, crediting the redeemed value to
 the requesting intermediary's reserves.
 
 Users hold bank deposits at intermediaries, which they can exchange for
@@ -31,8 +31,8 @@ issues these long-term credentials, which users subsequently use to authorise
 and authenticate payments. The auditor is authorised to trace a fraudulent
 offline payment, such as one that double spends a token, to its originator.
 
-We instantiate each user's wallet with a \textbf{mobile device} and a
-\textbf{secure element}, which together let the user perform offline payments
+We instantiate each user's wallet with a mobile device and a
+secure element, which together let the user perform offline payments
 securely and accountably.
 
 We assume the registration authority, the central bank, and the
@@ -103,296 +103,293 @@ bank and the intermediaries. More specifically, it must ensure:
 
 \end{description}
 
-\subsection{Ideal functionality $\F$}\label{sec:ideal-func}
+\subsection{Ideal functionality $\idfu{}$}\label{sec:ideal-func}
 
 We define security for the offline payment protocol through an ideal
-functionality $\F$, depicted in Figure~\ref{fig:ideal-func}, which represents
+functionality $\idfu{}$, depicted in Figure~\ref{fig:ideal-func}, which represents
 an incorruptible trusted party that receives the inputs of each protocol task
 and returns the prescribed outputs. An adversary in the ideal world interacts
-with $\F$ only through the parties it corrupts, which ensures that it can
+with $\idfu{}$ only through the parties it corrupts, which ensures that it can
 only determine the inputs of corrupt parties and observe their outputs,
-rather than making $\F$ deviate from its specification. Following
-convention, we call this adversary a \emph{simulator} and denote it $\simu$.
+rather than making $\idfu{}$ deviate from its specification. Following
+convention, we call this adversary a simulator and denote it $\simu$.
 
-We say that a protocol $\prot$ securely realises $\F$ if, for every adversary
-$\adv$ that controls a subset of the parties and interacts with $\prot$,
+We say that a protocol $\algo{prot}$ securely realises $\idfu{}$ if, for every adversary
+$\adv$ that controls a subset of the parties and interacts with $\algo{prot}$,
 there exists a simulator $\simu$ that controls the same parties and interacts
-with $\F$, such that for every input of the corrupt parties, the output of
+with $\idfu{}$, such that for every input of the corrupt parties, the output of
 $\adv$ in the real world is indistinguishable from the output of $\simu$ in
-the ideal world. Formally, $\prot$ securely realises $\F$ if and only if
-$\real_{\adv, \prot} \approx \ideal_{\simu, \F}$, where $\real_{\adv, \prot}$
-is the view of $\adv$ interacting with $\prot$ in the real world, and
-$\ideal_{\simu, \F}$ is the view of $\simu$ interacting with $\F$ in the
+the ideal world. Formally, $\algo{prot}$ securely realises $\idfu{}$ if and only if
+$\algo{real}_{\adv, \algo{prot}} \approx \algo{ideal}_{\simu, \idfu{}}$, where $\algo{real}_{\adv, \algo{prot}}$
+is the view of $\adv$ interacting with $\algo{prot}$ in the real world, and
+$\algo{ideal}_{\simu, \idfu{}}$ is the view of $\simu$ interacting with $\idfu{}$ in the
 ideal world.
 
 \paragraph{Participants.} We identify the offline payment participants
-$\usrs = \{\usr_1, \ldots, \usr_n\}$, who act as both payers and payees, the
-intermediaries $\I = \{\Int_1, \ldots, \Int_m\}$, the auditor $\aud$, the
-registration authority $\reg$, and the central bank $\cb$. For simplicity we
-assume each user $\usr_i$ has one bank account and is equipped with a mobile
-device $\dev_i$ and a secure element $\se_i$, so that $\usr_i$ is defined as
-the pair $(\dev_i, \se_i)$; an individual with multiple bank accounts is
+$\algo{usrs} = \{\algo{usr}_1, \ldots, \algo{usr}_n\}$, who act as both payers and payees, the
+intermediaries $\algo{I} = \{\algo{Int}_1, \ldots, \algo{Int}_m\}$, the auditor $\auditor$, the
+registration authority $\reg$, and the central bank $\algo{cb}$. For simplicity we
+assume each user $\algo{usr}_i$ has one bank account and is equipped with a mobile
+device $\algo{dev}_i$ and a secure element $\algo{se}_i$, so that $\algo{usr}_i$ is defined as
+the pair $(\algo{dev}_i, \algo{se}_i)$; an individual with multiple bank accounts is
 accommodated by mapping them to multiple users, each with one account. We
-write $\SE = \{\se_1, \ldots, \se_n\}$ and $\Dev = \{\dev_1, \ldots, \dev_n\}$
-for the sets of secure elements and mobile devices. As above, $\cb$, $\reg$,
-and the intermediaries $\I$ are honest but curious, so the simulator $\simu$
+write $\algo{SE} = \{\algo{se}_1, \ldots, \algo{se}_n\}$ and $\algo{Dev} = \{\algo{dev}_1, \ldots, \algo{dev}_n\}$
+for the sets of secure elements and mobile devices. As above, $\algo{cb}$, $\reg$,
+and the intermediaries $\algo{I}$ are honest but curious, so the simulator $\simu$
 accesses their inputs and outputs by default, and we assume a static
 corruption model in which $\simu$ corrupts the parties of its choosing before
-they interact with $\F$.
+they interact with $\idfu{}$.
 
-\paragraph{Data stores.} $\F$ maintains several data stores. $\reserves$
-tracks each intermediary's reserves at $\cb$, with entries $\reserves[\Int] =
-v$. $\registered$ is the set of registered users. $\accounts$ tracks user
-accounts, with entries $\accounts[\usr] = \langle \Int, v \rangle$ indicating
-that $\usr$ holds an account of value $v$ with intermediary $\Int$.
-$\tokens$ tracks the history of token ownership, with entries
-$\tokens[\vec{\rho}] = \langle \usr, v \rangle$ indicating that $\usr$ owns
+\paragraph{Data stores.} $\idfu{}$ maintains several data stores. $\algo{reserves}$
+tracks each intermediary's reserves at $\algo{cb}$, with entries $\algo{reserves}[\algo{Int}] =
+v$. $\algo{registered}$ is the set of registered users. $\algo{accounts}$ tracks user
+accounts, with entries $\algo{accounts}[\algo{usr}] = \langle \algo{Int}, v \rangle$ indicating
+that $\algo{usr}$ holds an account of value $v$ with intermediary $\algo{Int}$.
+$\algo{tokens}$ tracks the history of token ownership, with entries
+$\algo{tokens}[\vec{\rho}] = \langle \algo{usr}, v \rangle$ indicating that $\algo{usr}$ owns
 the token of value $v$ whose history is identified by $\vec{\rho}$.
-$\deposited$ tracks the history of deposited tokens, with entries
-$\deposited[\rho] = \{\vec{\rho}_1, \ldots, \vec{\rho}_n\}$ such that $\rho$
+$\algo{deposited}$ tracks the history of deposited tokens, with entries
+$\algo{deposited}[\rho] = \{\vec{\rho}_1, \ldots, \vec{\rho}_n\}$ such that $\rho$
 identifies a withdrawn token and each $\vec{\rho}_i$ identifies a chain of
-payments involving that token and ending in a deposit. Finally, $\mal$ is the
-set of corrupted parties in $\Dev$ or $\SE$. All of $\registered$,
-$\accounts$, $\tokens$, $\deposited$, and $\mal$ are initially empty.
+payments involving that token and ending in a deposit. Finally, $\algo{mal}$ is the
+set of corrupted parties in $\algo{Dev}$ or $\algo{SE}$. All of $\algo{registered}$,
+$\algo{accounts}$, $\algo{tokens}$, $\algo{deposited}$, and $\algo{mal}$ are initially empty.
 
-\paragraph{Interfaces.} $\F$ provides the following interfaces to $\simu$ and
+\paragraph{Interfaces.} $\idfu{}$ provides the following interfaces to $\simu$ and
 the participants.
 
-\underline{$\corrupt$}. When $\simu$ wishes to compromise a party $P \in \Dev
-\cup \SE$, it issues $\corrupt$, adding $P$ to $\mal$. Corrupting a user's
+\underline{$\algo{corrupt}$}. When $\simu$ wishes to compromise a party $P \in \algo{Dev}
+\cup \algo{SE}$, it issues $\algo{corrupt}$, adding $P$ to $\algo{mal}$. Corrupting a user's
 device without corrupting their secure element is possible; since
 corrupting a secure element is much harder than corrupting a device, we
-assume for simplicity that if $\se$ is corrupt so is the associated $\dev$.
+assume for simplicity that if $\algo{se}$ is corrupt so is the associated $\algo{dev}$.
 
-\underline{$\fcreate$}. An intermediary $\Int$ calls $\fcreate$ to create an
-account for user $\usr \in \usrs$ with initial value $v$, adding entry
-$\accounts[\usr] \gets \langle \Int, v \rangle$ and updating $\Int$'s
-reserves; $\F$ enforces that $\usr$ has one account in the system.
+\underline{$\algo{create}$}. An intermediary $\algo{Int}$ calls $\algo{create}$ to create an
+account for user $\algo{usr} \in \algo{usrs}$ with initial value $v$, adding entry
+$\algo{accounts}[\algo{usr}] \gets \langle \algo{Int}, v \rangle$ and updating $\algo{Int}$'s
+reserves; $\idfu{}$ enforces that $\algo{usr}$ has one account in the system.
 
-\underline{$\fregister$}. The registration authority $\reg$ calls
-$\fregister$ to enrol a user, for whom an account was already created, in the
-system. Users can be registered only once, and registration adds $\usr$ to
-$\registered$.
+\underline{$\algo{register}$}. The registration authority $\reg$ calls
+$\algo{register}$ to enrol a user, for whom an account was already created, in the
+system. Users can be registered only once, and registration adds $\algo{usr}$ to
+$\algo{registered}$.
 
-\underline{$\fwithdraw$}. An intermediary $\Int$ indicates a value and
-identifies a registered user $\usr$ whose account it hosts. If successful,
-$\usr$ obtains a token identified by a unique random number $\rho$, usable
-subsequently in offline payments authorised by $\usr$'s secure element; the
-call succeeds only if $\usr$'s account and $\Int$'s reserves hold enough
+\underline{$\algo{withdraw}$}. An intermediary $\algo{Int}$ indicates a value and
+identifies a registered user $\algo{usr}$ whose account it hosts. If successful,
+$\algo{usr}$ obtains a token identified by a unique random number $\rho$, usable
+subsequently in offline payments authorised by $\algo{usr}$'s secure element; the
+call succeeds only if $\algo{usr}$'s account and $\algo{Int}$'s reserves hold enough
 value. To ensure a withdrawal is not linkable to a future deposit, the
-identifier $\rho$ must not be known to $\Int$ or $\cb$: it is selected by
-$\F$ if $\usr$'s secure element is honest, and by $\simu$ otherwise. Once
-$\rho$ is selected and confirmed unique, $\F$ adds entry $\tokens[(\rho)]
-\gets \langle \usr, v \rangle$. Since $\Int$ and $\cb$ are honest but
+identifier $\rho$ must not be known to $\algo{Int}$ or $\algo{cb}$: it is selected by
+$\idfu{}$ if $\algo{usr}$'s secure element is honest, and by $\simu$ otherwise. Once
+$\rho$ is selected and confirmed unique, $\idfu{}$ adds entry $\algo{tokens}[(\rho)]
+\gets \langle \algo{usr}, v \rangle$. Since $\algo{Int}$ and $\algo{cb}$ are honest but
 curious, $\simu$ learns the identity of the user and the value of the
 withdrawal by default; if either the secure element or the mobile device of
 the user is corrupt, $\simu$ additionally learns $\rho$.
 
-\underline{$\fpay$}. A registered user $\usr$ invokes $\fpay$ to transfer
-ownership of a token they own to some user $\usr'$, identifying the payer,
-the payee, the value of the token, and a vector $\vec{\rho}$ that lets $\F$
-locate the token in $\tokens$ and trace its history. $\F$ checks that $\usr'$
+\underline{$\algo{pay}$}. A registered user $\algo{usr}$ invokes $\algo{pay}$ to transfer
+ownership of a token they own to some user $\algo{usr}'$, identifying the payer,
+the payee, the value of the token, and a vector $\vec{\rho}$ that lets $\idfu{}$
+locate the token in $\algo{tokens}$ and trace its history. $\idfu{}$ checks that $\algo{usr}'$
 would like to accept the payment and that their mobile device and secure
-element are not corrupt; if so, $\F$ checks that the token identified by
-$\vec{\rho}$ is indeed owned by $\usr$ and has value $v$. If so, $\F$
+element are not corrupt; if so, $\idfu{}$ checks that the token identified by
+$\vec{\rho}$ is indeed owned by $\algo{usr}$ and has value $v$. If so, $\idfu{}$
 produces a fresh random identifier $\rho'$ that, together with $\vec{\rho}$,
-uniquely identifies the payment, and adds entry $\tokens[\vec{\rho} \|
-\rho'] \gets \langle \usr', v \rangle$, letting a registered $\usr'$
+uniquely identifies the payment, and adds entry $\algo{tokens}[\vec{\rho} \|
+\rho'] \gets \langle \algo{usr}', v \rangle$, letting a registered $\algo{usr}'$
 subsequently transfer the token onward. If either the mobile device or the
-secure element of $\usr'$ is corrupt, $\F$ does not condition success on the
+secure element of $\algo{usr}'$ is corrupt, $\idfu{}$ does not condition success on the
 validity of the token, reflecting that a malicious payee may choose to
 accept an invalid one; in this case $\rho'$ is selected by $\simu$ if
-$\usr'$'s secure element is corrupt, and by $\F$ otherwise, and
-$\tokens[(\vec{\rho}, \rho')]$ is updated only if the token being
-transferred is genuinely valid and $\usr'$ is registered. This ensures a
+$\algo{usr}'$'s secure element is corrupt, and by $\idfu{}$ otherwise, and
+$\algo{tokens}[(\vec{\rho}, \rho')]$ is updated only if the token being
+transferred is genuinely valid and $\algo{usr}'$ is registered. This ensures a
 malicious payee who accepts an invalid token cannot transfer it onward to
-honest users, since it will not appear in $\tokens$. If the mobile device or
-secure element of either $\usr$ or $\usr'$ is corrupt, $\simu$ learns the
+honest users, since it will not appear in $\algo{tokens}$. If the mobile device or
+secure element of either $\algo{usr}$ or $\algo{usr}'$ is corrupt, $\simu$ learns the
 identities of both; otherwise, $\simu$ learns only the value and $\vec{\rho}
 \| \rho'$. We stress that an unregistered payee can accept a payment and
 receive a token, but can never transfer its ownership onward, as it is never
-added to $\tokens$.
+added to $\algo{tokens}$.
 
-\underline{$\fdeposit$}. An intermediary $\Int$ invokes $\fdeposit$ to let a
+\underline{$\algo{deposit}$}. An intermediary $\algo{Int}$ invokes $\algo{deposit}$ to let a
 registered user exchange a token for commercial bank money, identifying the
-depositing user $\usr$, a vector $\vec{\rho}$ referring to the token and its
-history, and the deposit value. $\F$ verifies that the token being deposited
-is indeed owned by $\usr$ and has the right value, then updates
-$\deposited[\vec{\rho}[0]] \gets \deposited[\vec{\rho}[0]] \cup
-\{\vec{\rho}\}$ and checks whether $|\deposited[\vec{\rho}[0]]| > 1$; if so,
-this signals double spending and $\F$ stops. Otherwise $\F$ updates the
-holdings of $\usr$ and $\Int$. Since $\cb$ and $\Int$ are honest but
+depositing user $\algo{usr}$, a vector $\vec{\rho}$ referring to the token and its
+history, and the deposit value. $\idfu{}$ verifies that the token being deposited
+is indeed owned by $\algo{usr}$ and has the right value, then updates
+$\algo{deposited}[\vec{\rho}[0]] \gets \algo{deposited}[\vec{\rho}[0]] \cup
+\{\vec{\rho}\}$ and checks whether $|\algo{deposited}[\vec{\rho}[0]]| > 1$; if so,
+this signals double spending and $\idfu{}$ stops. Otherwise $\idfu{}$ updates the
+holdings of $\algo{usr}$ and $\algo{Int}$. Since $\algo{cb}$ and $\algo{Int}$ are honest but
 curious, $\simu$ learns the deposit information by default: the identity of
-$\usr$, the value $v$, and the vector $\vec{\rho}$.
+$\algo{usr}$, the value $v$, and the vector $\vec{\rho}$.
 
-\underline{$\faudit$}. The auditor $\aud$ calls $\faudit$ with a token
+\underline{$\algo{audit}$}. The auditor $\auditor$ calls $\algo{audit}$ with a token
 identifier $\rho$, the identifier used during the corresponding withdrawal.
-$\F$ retrieves $\deposited[\rho]$; if it contains nothing or a single
-vector, $\F$ returns nothing, signalling that there is no double spender to
-identify. Otherwise, $\F$ retrieves the set of vectors $\{\vec{\rho}_1,
-\ldots, \vec{\rho}_l\}$ stored in $\deposited[\rho]$, and for each pair
+$\idfu{}$ retrieves $\algo{deposited}[\rho]$; if it contains nothing or a single
+vector, $\idfu{}$ returns nothing, signalling that there is no double spender to
+identify. Otherwise, $\idfu{}$ retrieves the set of vectors $\{\vec{\rho}_1,
+\ldots, \vec{\rho}_l\}$ stored in $\algo{deposited}[\rho]$, and for each pair
 $\vec{\rho}_i, \vec{\rho}_j$ identifies the double spender as the user
-$\usr_{ij}$ stored in $\tokens[\vec{\rho}_{ij}]$, where $\vec{\rho}_{ij}$ is
-the common prefix of $\vec{\rho}_i$ and $\vec{\rho}_j$. $\F$ returns the set
-of such users to $\aud$ and to $\cb$.
+$\algo{usr}_{ij}$ stored in $\algo{tokens}[\vec{\rho}_{ij}]$, where $\vec{\rho}_{ij}$ is
+the common prefix of $\vec{\rho}_i$ and $\vec{\rho}_j$. $\idfu{}$ returns the set
+of such users to $\auditor$ and to $\algo{cb}$.
 
-\begin{figure*}[p]
-  \fbox{\parbox{0.98\linewidth}{
-    \centering
-    \begin{algorithmic}[1]
-      \scriptsize
+\begin{figure} \centering \hspace*{-0.05\textwidth}
+  \begin{minipage}{1.1\textwidth}
+
+    \begin{framed} \scriptsize
+
+      \setlist[enumerate]{ topsep=2pt, partopsep=0pt, parsep=0pt, itemsep=1pt }
+
       \begin{multicols}{2}
 
-      \Statex Before any call to the offline payment interfaces, $\simu$
+      Before any call to the offline payment interfaces, $\simu$
       issues corruption queries:
-      \smallskip
 
-      \Statex \underline{$\corrupt$} Upon an active corruption request
-      $(\corrupt, P)$ for $P \in \Dev \cup \SE$ from $\simu$ do: $\mal \gets
-      \mal \cup P$.
-      \smallskip
+      {$\algo{corrupt}$.} Upon an active corruption request
+      $(\algo{corrupt}, P)$ for $P \in \algo{Dev} \cup \algo{SE}$ from $\simu$ do: $\algo{mal} \gets
+      \algo{mal} \cup P$.
 
-      \Statex \underline{$\fcreate$} Upon receiving for the first time
-      $(\fcreate, \usr, v)$ from $\Int \in \I$ for $\usr \in \usrs$, send
-      $(\fcreate, \usr, \Int, v)$ to $\simu$ and wait for its go-ahead. On
+      {$\algo{create}$.} Upon receiving for the first time
+      $(\algo{create}, \algo{usr}, v)$ from $\algo{Int} \in \algo{I}$ for $\algo{usr} \in \algo{usrs}$, send
+      $(\algo{create}, \algo{usr}, \algo{Int}, v)$ to $\simu$ and wait for its go-ahead. On
       receipt of the go-ahead do:
       \begin{enumerate}
-        \item {\bf If} $\accounts[\usr] \neq \perp$ {\bf then} stop
-        \item {\bf Else}
+        \item If $\algo{accounts}[\algo{usr}] \neq \perp$, then stop
+        \item Otherwise:
         \begin{enumerate}
-          \item $\accounts[\usr] \leftarrow \langle \Int, v\rangle$
-          \item $\reserves[\Int] \leftarrow \reserves[\Int]+v$
-          \item return $\fin$ to $\Int$
+          \item $\algo{accounts}[\algo{usr}] \leftarrow \langle \algo{Int}, v\rangle$
+          \item $\algo{reserves}[\algo{Int}] \leftarrow \algo{reserves}[\algo{Int}]+v$
+          \item return $\algo{fin}$ to $\algo{Int}$
         \end{enumerate}
       \end{enumerate}
-      \smallskip
 
-      \Statex \underline{$\fregister$} Upon receiving for the first time
-      $(\fregister, \usr)$ from $\reg$ for $\usr \in \usrs$ that already has
-      an account -- send $(\fregister, \usr)$ to $\simu$ and wait for its
+      {$\algo{register}$.} Upon receiving for the first time
+      $(\algo{register}, \algo{usr})$ from $\reg$ for $\algo{usr} \in \algo{usrs}$ that already has
+      an account -- send $(\algo{register}, \algo{usr})$ to $\simu$ and wait for its
       go-ahead. On receipt of the go-ahead do:
       \begin{enumerate}
-        \item $\registered \gets \registered \cup \usr$
-        \item return $\fin$ to $\reg$
+        \item $\algo{registered} \gets \algo{registered} \cup \algo{usr}$
+        \item return $\algo{fin}$ to $\reg$
       \end{enumerate}
-      \smallskip
 
-      \Statex \underline{$\fwithdraw$} On receiving a $(\fwithdraw, \usr =
-      (\se, \dev), \Int, v)$ from registered user $\usr$ that has an account
-      with $\Int$, send $(\fwithdraw, \usr, \Int, v)$ to $\Int$ and
-      $(\fwithdraw, \Int, v)$ to $\cb$ and await their go-ahead. Then send
-      message $\fwithdraw$ to $\simu$ and await its go-ahead. On receipt of
-      the go-ahead, fetch $\accounts[\usr] \rightarrow \langle \Int,
+      {$\algo{withdraw}$.} On receiving a $(\algo{withdraw}, \algo{usr} =
+      (\algo{se}, \algo{dev}), \algo{Int}, v)$ from registered user $\algo{usr}$ that has an account
+      with $\algo{Int}$, send $(\algo{withdraw}, \algo{usr}, \algo{Int}, v)$ to $\algo{Int}$ and
+      $(\algo{withdraw}, \algo{Int}, v)$ to $\algo{cb}$ and await their go-ahead. Then send
+      message $\algo{withdraw}$ to $\simu$ and await its go-ahead. On receipt of
+      the go-ahead, fetch $\algo{accounts}[\algo{usr}] \rightarrow \langle \algo{Int},
       v^*\rangle$, and do:
       \begin{enumerate}
-        \item {\bf If} $v^* < v$ {\bf or } $\reserves[\Int] < v$ {\bf then}
+        \item If $v^* < v$ or  $\algo{reserves}[\algo{Int}] < v$, then
         stop
-        \item {\bf Else} do:
+        \item Otherwise, do:
         \begin{enumerate}
-          \item $\accounts[\usr] \leftarrow \langle \Int, v^* - v\rangle$
-          \item $\reserves[\Int] \leftarrow \reserves[\Int] - v$
-          \item {\bf If} $\se \not\in \mal$ {\bf then} randomly select $\rho$
-          \item {\bf Else} receive $\rho$ from $\simu$
-          \item {\bf If} $\tokens[(\rho)] \neq \perp$ {\bf then} stop
-          \item {\bf Else} do:
+          \item $\algo{accounts}[\algo{usr}] \leftarrow \langle \algo{Int}, v^* - v\rangle$
+          \item $\algo{reserves}[\algo{Int}] \leftarrow \algo{reserves}[\algo{Int}] - v$
+          \item If $\algo{se} \not\in \algo{mal}$, then randomly select $\rho$
+          \item Otherwise, receive $\rho$ from $\simu$
+          \item If $\algo{tokens}[(\rho)] \neq \perp$, then stop
+          \item Otherwise, do:
           \begin{enumerate}
-            \item $\tokens[(\rho)] \gets \langle \usr, v \rangle$
-            \item {\bf If} $\se \in \mal$ {\bf or} $\dev \in \mal$ {\bf then}
-            return $(\fwithdraw, \usr, \rho, v)$ to $\simu$
-            \item {\bf Else} return $(\fwithdraw, \usr, v)$ to $\simu$
-            \item return $(\fwithdraw, \rho, v, \fin)$ to $\usr$
+            \item $\algo{tokens}[(\rho)] \gets \langle \algo{usr}, v \rangle$
+            \item If $\algo{se} \in \algo{mal}$ or $\algo{dev} \in \algo{mal}$, then
+            return $(\algo{withdraw}, \algo{usr}, \rho, v)$ to $\simu$
+            \item Otherwise, return $(\algo{withdraw}, \algo{usr}, v)$ to $\simu$
+            \item return $(\algo{withdraw}, \rho, v, \algo{fin})$ to $\algo{usr}$
           \end{enumerate}
         \end{enumerate}
       \end{enumerate}
-      \smallskip
 
-      \Statex \underline{$\fpay$} On receiving $(\fpay, \vec{\rho}, v, \usr' =
-      (\se', \dev'))$ from registered user $\usr = (\se, \dev)$, send
-      $(\fpay, \vec{\rho}, v)$ to $\usr'$. On receiving the response $\accept$
-      from $\usr'$, send $(\fpay, \vec{\rho}, v)$ to $\simu$ and await the
+      {$\algo{pay}$.} On receiving $(\algo{pay}, \vec{\rho}, v, \algo{usr}' =
+      (\algo{se}', \algo{dev}'))$ from registered user $\algo{usr} = (\algo{se}, \algo{dev})$, send
+      $(\algo{pay}, \vec{\rho}, v)$ to $\algo{usr}'$. On receiving the response $\algo{accept}$
+      from $\algo{usr}'$, send $(\algo{pay}, \vec{\rho}, v)$ to $\simu$ and await the
       go-ahead. On receipt of the go-ahead do:
       \begin{enumerate}
-        \item {\bf If} $\se' \not\in \mal$ {\bf and} $\dev' \not\in \mal$
-        {\bf then} do:
+        \item If $\algo{se}' \not\in \algo{mal}$ and $\algo{dev}' \not\in \algo{mal}$, then do:
         \begin{enumerate}
-          \item {\bf If} $\tokens[\vec{\rho}] \neq \langle \usr, v \rangle$
-          {\bf then} stop
-          \item {\bf Else} do:
+          \item If $\algo{tokens}[\vec{\rho}] \neq \langle \algo{usr}, v \rangle$,
+          then stop
+          \item Otherwise, do:
           \begin{enumerate}
             \item randomly select a unique random number $\rho'$
-            \item $\tokens[\vec{\rho'}] \gets \langle\usr', v \rangle$ where
+            \item $\algo{tokens}[\vec{\rho'}] \gets \langle\algo{usr}', v \rangle$ where
             $\vec{\rho'} = (\vec{\rho}, \rho')$
-            \item {\bf If} $\se \in \mal$ {\bf or} $\dev \in \mal$ {\bf then}
-            return $(\fpay, \vec{\rho'}, v, \usr, \usr')$ to $\simu$
-            \item {\bf Else} return $(\fpay, \vec{\rho'}, v)$ to $\simu$
+            \item If $\algo{se} \in \algo{mal}$ or $\algo{dev} \in \algo{mal}$, then
+            return $(\algo{pay}, \vec{\rho'}, v, \algo{usr}, \algo{usr}')$ to $\simu$
+            \item Otherwise, return $(\algo{pay}, \vec{\rho'}, v)$ to $\simu$
           \end{enumerate}
         \end{enumerate}
-        \item {\bf Else} do:
+        \item Otherwise, do:
         \begin{enumerate}
-          \item {\bf If} $\se' \in \mal$ {\bf then} receive $\rho'$ from
+          \item If $\algo{se}' \in \algo{mal}$, then receive $\rho'$ from
           $\simu$
-          \item {\bf Else} randomly select $\rho'$
-          \item {\bf If} $\tokens[\vec{\rho}] = \langle \usr, v \rangle$
-          {\bf and} $\usr' \in \registered$ {\bf then} $\tokens[\vec{\rho'}]
-          \leftarrow \langle \usr', v \rangle$
-          \item send $(\fpay,\vec{\rho'}, v, \usr, \usr')$ to $\simu$
+          \item Otherwise, randomly select $\rho'$
+          \item If $\algo{tokens}[\vec{\rho}] = \langle \algo{usr}, v \rangle$
+          and $\algo{usr}' \in \algo{registered}$, then $\algo{tokens}[\vec{\rho'}]
+          \leftarrow \langle \algo{usr}', v \rangle$
+          \item send $(\algo{pay},\vec{\rho'}, v, \algo{usr}, \algo{usr}')$ to $\simu$
         \end{enumerate}
-        \item send $(\fpay, \vec{\rho'}, v , \fin)$ to $\usr'$
+        \item send $(\algo{pay}, \vec{\rho'}, v , \algo{fin})$ to $\algo{usr}'$
       \end{enumerate}
-      \smallskip
 
-      \Statex \underline{$\fdeposit$} On receiving $(\fdeposit, \vec{\rho}, v,
-      \Int)$ from registered user $\usr$ that has an account with $\Int$,
-      send $(\fdeposit, \vec{\rho}, v, \Int, \usr)$ to $\Int$ and
-      $(\fdeposit, v, \Int)$ to $\cb$ and await their go-ahead. Then send
-      $(\fdeposit, \vec{\rho}, v, \Int, \usr)$ to $\simu$ and await the
+      {$\algo{deposit}$.} On receiving $(\algo{deposit}, \vec{\rho}, v,
+      \algo{Int})$ from registered user $\algo{usr}$ that has an account with $\algo{Int}$,
+      send $(\algo{deposit}, \vec{\rho}, v, \algo{Int}, \algo{usr})$ to $\algo{Int}$ and
+      $(\algo{deposit}, v, \algo{Int})$ to $\algo{cb}$ and await their go-ahead. Then send
+      $(\algo{deposit}, \vec{\rho}, v, \algo{Int}, \algo{usr})$ to $\simu$ and await the
       go-ahead. On receipt of the go-ahead do:
       \begin{enumerate}
-        \item {\bf If} $\tokens[\vec{\rho}] \neq \langle \usr, v \rangle$
-        {\bf then} stop
-        \item {\bf Else} do:
+        \item If $\algo{tokens}[\vec{\rho}] \neq \langle \algo{usr}, v \rangle$,
+        then stop
+        \item Otherwise, do:
         \begin{enumerate}
-          \item $\deposited[\vec{\rho}[0]] \gets \deposited[\vec{\rho}[0]]
+          \item $\algo{deposited}[\vec{\rho}[0]] \gets \algo{deposited}[\vec{\rho}[0]]
           \cup \{\vec{\rho}\}$
-          \item {\bf If} $|\deposited[\vec{\rho}[0]]| > 1$ {\bf then} stop
-          \item {\bf Else} do:
+          \item If $|\algo{deposited}[\vec{\rho}[0]]| > 1$, then stop
+          \item Otherwise, do:
           \begin{enumerate}
-            \item $\accounts[\usr] \rightarrow \langle \Int, v^*\rangle$
-            \item $\accounts[\usr] \gets \langle \Int, v^*+v \rangle$
-            \item $\reserves[\Int] \gets \reserves[\Int] + v$
-            \item send $(\fdeposit, \fin)$ to $\usr$
+            \item $\algo{accounts}[\algo{usr}] \rightarrow \langle \algo{Int}, v^*\rangle$
+            \item $\algo{accounts}[\algo{usr}] \gets \langle \algo{Int}, v^*+v \rangle$
+            \item $\algo{reserves}[\algo{Int}] \gets \algo{reserves}[\algo{Int}] + v$
+            \item send $(\algo{deposit}, \algo{fin})$ to $\algo{usr}$
           \end{enumerate}
         \end{enumerate}
       \end{enumerate}
-      \smallskip
 
-      \Statex \underline{$\faudit$} On receiving $(\faudit, \rho)$ from
-      $\aud$, send $(\faudit, \rho)$ to $\simu$ and await the go-ahead. On
+      {$\algo{audit}$.} On receiving $(\algo{audit}, \rho)$ from
+      $\auditor$, send $(\algo{audit}, \rho)$ to $\simu$ and await the go-ahead. On
       receipt of the go-ahead do:
       \begin{enumerate}
-        \item {\bf If} $|\deposited[\vec{\rho}[0]]| \leq 1$ {\bf then} send
-        $(\faudit, \fin)$ to $\aud$
-        \item {\bf Else} do:
+        \item If $|\algo{deposited}[\vec{\rho}[0]]| \leq 1$, then send
+        $(\algo{audit}, \algo{fin})$ to $\auditor$
+        \item Otherwise, do:
         \begin{enumerate}
-          \item $\deposited[\rho] \rightarrow \{\vec{\rho}_1, ...,
+          \item $\algo{deposited}[\rho] \rightarrow \{\vec{\rho}_1, ...,
           \vec{\rho}_n\}$
-          \item $\cDS \leftarrow \emptyset$
+          \item $\algo{DS} \leftarrow \emptyset$
           \item $\forall i\neq j $ do:
           \begin{enumerate}
             \item let $\vec{\rho}_{ij}$ denote the common prefix, i.e.\
             $\vec{\rho}_{ij} = (\rho_0, ..., \rho_{k-1})$ such that
             $\vec{\rho}_i[l] = \vec{\rho}_j[l]$ for all $l < k$ and
             $\vec{\rho_i}[k] \neq \vec{\rho_j}[k]$
-            \item $\tokens[\vec{\rho}_{ij}] \rightarrow \langle v,
-            \usr_{ij}\rangle$
-            \item $\cDS \gets \cDS \cup \usr_{ij}$
+            \item $\algo{tokens}[\vec{\rho}_{ij}] \rightarrow \langle v,
+            \algo{usr}_{ij}\rangle$
+            \item $\algo{DS} \gets \algo{DS} \cup \algo{usr}_{ij}$
           \end{enumerate}
-          \item send $(\faudit, \cDS, \fin)$ to $\aud$ and $\cb$
+          \item send $(\algo{audit}, \algo{DS}, \algo{fin})$ to $\auditor$ and $\algo{cb}$
         \end{enumerate}
       \end{enumerate}
       \end{multicols}
-    \end{algorithmic}
-  }}
-  \caption{Ideal functionality $\F$ for offline payments.}
+
+    \end{framed}
+
+  \end{minipage}
+
+  \caption{Ideal functionality $\idfu{}$ for offline payments.}
   \label{fig:ideal-func}
-\end{figure*}
+\end{figure}
