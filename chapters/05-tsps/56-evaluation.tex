@@ -1,4 +1,4 @@
-\section{Evaluation}\label{sec:eval}
+\section{Evaluation}\label{sec:tsps-evaluation}
 
 To assess the concrete performance of our protocols, we implement and
 benchmark the schemes of Section~\ref{sec:tsps-abe}
@@ -188,7 +188,7 @@ inside Docker containers based on Ubuntu 22.
   \centering
   \begin{tabular}{ c || c | c | c || c | c | c }
    \toprule
-    & Assumption & Message space & $|\sk|$ & $|\pk|$ & $|\sigma|$ & Verification cost \\
+    & Assumption & Message space & $|\sk|$ & $|\pk|$ & $|\signature|$ & Verification cost \\
    \midrule
     ~\cite{AC:CKPSS23} & PS + ROM & $(\gen^{\vec{m}}, \ggen^{\vec{m}}) \in \group{1}^l \times \group{2}^l$ &
     $ (l+1) | \Zp | $ & $ l | \group{1} | + (l+1) | \group{2} | $ & $ 2 | \group{1} | $ & $3l+2$ \\

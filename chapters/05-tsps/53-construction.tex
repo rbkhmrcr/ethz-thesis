@@ -1,4 +1,4 @@
-\section{Structure-Preserving Signatures}\label{sec:SPS}
+\section{Structure-Preserving Signatures}\label{sec:tsps-construction}
 
 \paragraph{Notation.} Let $[n]$ denote the integer interval $[1,\ldots,n]$.
 Let $\group{1}$, $\group{2}$, and $\group{T}$ be three cyclic groups of large
@@ -38,7 +38,7 @@ pairings~\cite{C:AGHO11}.
 
   \begin{description}
 
-    \item[$(\pk, \sk) \sample \algo{KeyGen}(\secparam, l)$ :] On input security
+    \item[$(\pk, \sk) \sample \SPSgen(\secparam, l)$ :] On input security
       parameter $\secparam$ and vector length $l$, do:
 
       \begin{enumerate}
@@ -54,7 +54,7 @@ pairings~\cite{C:AGHO11}.
 
       \end{enumerate}
 
-    \item[$\sigma \sample \algo{Sign}(\sk, \vec{{M}})$ :] On input secret key
+    \item[$\signature \sample \SPSsign(\sk, \vec{{M}})$ :] On input secret key
       $\sk = (\vec{u}, v)$ and vector $\vec{{M}} = ({M}_1, \ldots,
       {M}_l) \in \group{1}^l$, do:
 
@@ -62,7 +62,7 @@ pairings~\cite{C:AGHO11}.
 
         \item Sample $r \sample \Zp^*$.
 
-        \item Return $\sigma = (\gggen{R}, \gggen{S}, {T})$ such that:
+        \item Return $\signature = (\gggen{R}, \gggen{S}, {T})$ such that:
           %
           \begin{equation*}
           %
@@ -73,8 +73,8 @@ pairings~\cite{C:AGHO11}.
 
       \end{enumerate}
 
-    \item[$\{0,1\} \leftarrow \algo{Verify}(\pk, \vec{{M}}, \sigma)$ :] On input
-      signature $\sigma = (R, S, T) \in \group{2}^2 \times \group{1}$ and
+    \item[$\{0,1\} \leftarrow \SPSverify(\pk, \vec{{M}}, \signature)$ :] On input
+      signature $\signature = (R, S, T) \in \group{2}^2 \times \group{1}$ and
       vector $\vec{M} \in \group{1}^l$, return 1 if the following holds, and
       0 otherwise:
       %
@@ -138,7 +138,7 @@ is existentially unforgeable under the DDH assumption~\cite{C:KilPanWee15}.
 
   \begin{description}
 
-    \item[$(\pk, \sk) \sample \algo{KeyGen}(\secparam, l)$ :] On input security
+    \item[$(\pk, \sk) \sample \SPSgen(\secparam, l)$ :] On input security
       parameter $\secparam$ and vector length $l$, do:
 
       \begin{enumerate}
@@ -164,7 +164,7 @@ is existentially unforgeable under the DDH assumption~\cite{C:KilPanWee15}.
 
       \end{enumerate}
 
-    \item[$\sigma \sample \algo{Sign}(\sk, \vec{{M}})$ :] On input secret key
+    \item[$\signature \sample \SPSsign(\sk, \vec{{M}})$ :] On input secret key
       $\sk = (\mathbf{k}, \vec{{B}}, \vec{{X}}, \vec{{Y}})$ and vector
       $\vec{{M}} = ({M}_1, \ldots, {M}_l)$, do:
 
@@ -182,13 +182,13 @@ is existentially unforgeable under the DDH assumption~\cite{C:KilPanWee15}.
           %
           \end{align*}
 
-        \item Return $\sigma = (\gggen{Q}, \vec{{R}}, \vec{{S}},
+        \item Return $\signature = (\gggen{Q}, \vec{{R}}, \vec{{S}},
           \vec{{T}})$.
 
       \end{enumerate}
 
-    \item[$\{0,1\} \leftarrow \algo{Verify}(\pk, \vec{{M}}, \sigma)$ :] On input
-      signature $\sigma =(\gggen{Q}, \vec{{R}}, \vec{{S}}, \vec{{T}}) \in
+    \item[$\{0,1\} \leftarrow \SPSverify(\pk, \vec{{M}}, \signature)$ :] On input
+      signature $\signature =(\gggen{Q}, \vec{{R}}, \vec{{S}}, \vec{{T}}) \in
       \group{2}\times\group{1}^6$ and vector $\vec{M}$ of $l$ messages in
       $\group{1}$, return 1 if the following holds, and 0 otherwise:
       %

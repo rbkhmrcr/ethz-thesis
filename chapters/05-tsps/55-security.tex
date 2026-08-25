@@ -10,7 +10,7 @@ our constructions from Section~\ref{sec:schemes} fall into this class.
 
 With TS-UF-0 security, the adversary has access to a partial signature oracle
 $\signo$, and the unforgeability game is defined so that the adversary cannot
-win with message-signature pair $(\vec{{M}^*}, \sigma^*)$ if the partial
+win with message-signature pair $(\vec{{M}^*}, \signature^*)$ if the partial
 signature oracle has already been queried, even once, on $\vec{{M}^*}$.
 TS-UF-1 relaxes this: the winning condition can be triggered as long as the
 adversary has queried for partial signatures on $\vec{{M}^*}$ from no more
@@ -21,12 +21,12 @@ has access to a corruption oracle $\corrupto$, alongside the partial signature
 oracle $\signo$.
 
 Let $\mathrm{TSPS} = (\algo{Setup}, \algo{KeyGen}, \algo{OffSign}, \algo{OnSign}, \algo{Combine},
-\algo{Verify})$ be an $(n, t)$-TSPS scheme over message space $\mathcal{M}$. The
+\SPSverify)$ be an $(n, t)$-TSPS scheme over message space $\mathcal{M}$. The
 advantage of a PPT adversary $\adv$ is defined as
 %
 \begin{equation*}
 %
-  \operatorname{Adv}_{\mathrm{TSPS}, \adv}^{\text{adp-TS-UF-1}}(\secparam) =
+  \Adv_{\mathrm{TSPS}, \adv}^{\text{adp-TS-UF-1}}(\secparam) =
   \Pr\left[\mathbf{G}_{\mathrm{TS}, \adv}^{\text{adp-TS-UF-1}}(\secparam) = 1
   \right],
 %
@@ -40,7 +40,7 @@ adversary $\adv$,
 %
 \begin{equation*}
 %
-  \operatorname{Adv}_{\mathrm{TSPS}, \adv}^{\text{adp-TS-UF-1}}(\secparam)
+  \Adv_{\mathrm{TSPS}, \adv}^{\text{adp-TS-UF-1}}(\secparam)
   \leq \operatorname{negl}(\secparam).
 %
 \end{equation*}
@@ -71,11 +71,11 @@ adversary $\adv$,
       input $k$, returns $\perp$ if $k \in \Cor$, and otherwise adds $k$ to
       $\Cor$, removes $k$ from $\mathcal{H}$, and returns $\sk_k$.
 
-    \item The adversary outputs $(\vec{{M}^*}, \sigma^*)$.
+    \item The adversary outputs $(\vec{{M}^*}, \signature^*)$.
 
   \end{enumerate}
 
-  $\adv$ wins the experiment if $\algo{Verify}(\pk, \vec{{M}^*}, \sigma^*) =
+  $\adv$ wins the experiment if $\SPSverify(\pk, \vec{{M}^*}, \signature^*) =
   1$, $|\Cor| < t$, and $|S(\vec{{M}^*})| < t - |\Cor|$, where $S(\vec{{M}})$
   records which honest signers have issued a partial signature on
   $\vec{{M}}$.
@@ -125,14 +125,14 @@ adversary $\adv$,
   during the (possibly interactive) threshold signing protocol to construct a
   signature share $\sigma_i$ that, combined with the shares it has already
   issued, yields a signature verifying correctly under $\algo{Combine}$ and
-  $\algo{Verify}$. In both cases, $\advB$ can respond to every query of $\adv$
+  $\SPSverify$. In both cases, $\advB$ can respond to every query of $\adv$
   without ever calling its own signing oracle on a message for which it would
   later need to produce a forgery.
 
   Since $\advB$ never queries its own signing oracle on $\vec{{M}}^*$
-  itself, if $\adv$ outputs a forgery $(\vec{{M}^*}, \sigma^*)$ satisfying
+  itself, if $\adv$ outputs a forgery $(\vec{{M}^*}, \signature^*)$ satisfying
   the winning condition of the adp-TS-UF-1 game, then $(\vec{{M}^*},
-  \sigma^*)$ also satisfies the winning condition of the wUF-CMA game for
+  \signature^*)$ also satisfies the winning condition of the wUF-CMA game for
   $\advB$. Hence the advantage of $\adv$ in the adp-TS-UF-1 game is bounded
   by the advantage of $\advB$ in the wUF-CMA game of the underlying
   structure-preserving signature scheme, which is negligible by assumption.

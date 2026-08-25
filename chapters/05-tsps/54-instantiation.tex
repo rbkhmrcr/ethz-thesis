@@ -1,4 +1,4 @@
-\section{Threshold Structure-Preserving Signatures}\label{sec:schemes}
+\section{Threshold Structure-Preserving Signatures}\label{sec:tsps-instantiation}
 
 This section gives threshold variants of the structure-preserving signatures
 described in Section~\ref{sec:SPS}, built from the MPC ideal functionalities
@@ -49,7 +49,7 @@ Section~\ref{sec:MPC}~\cite{C:AGHO11}.
 
       \end{enumerate}
 
-    \item[$\llbracket \sigma \rrbracket_{\algo{OffSign}} \sample \algo{OffSign}(\llbracket
+    \item[$\llbracket \signature \rrbracket_{\algo{OffSign}} \sample \algo{OffSign}(\llbracket
       \sk \rrbracket)$ :] On input the secret key shares, the honest signers
       do the following:
 
@@ -86,7 +86,7 @@ Section~\ref{sec:MPC}~\cite{C:AGHO11}.
 
       \end{enumerate}
 
-    \item[$\llbracket \sigma \rrbracket_{\algo{OnSign}} \sample
+    \item[$\llbracket \signature \rrbracket_{\algo{OnSign}} \sample
       \algo{OnSign}(\vec{{M}})$ :] On input message vector $\vec{{M}}$, the
       honest signers do the following:
 
@@ -104,7 +104,7 @@ Section~\ref{sec:MPC}~\cite{C:AGHO11}.
 
       \end{enumerate}
 
-    \item[$\sigma \leftarrow \algo{Combine}(\llbracket \sigma \rrbracket)$ :]
+    \item[$\signature \leftarrow \algo{Combine}(\llbracket \signature \rrbracket)$ :]
       On input the signature shares, the honest signers do the following:
 
       \begin{enumerate}
@@ -116,14 +116,14 @@ Section~\ref{sec:MPC}~\cite{C:AGHO11}.
           $\llbracket {T}\rrbracket$ to compute ${T} = r(\gen -
           \sum_{i=1}^l u_i{M}_i)$.
 
-        \item If no $\bot$ occurs, return the valid signature $\sigma =
+        \item If no $\bot$ occurs, return the valid signature $\signature =
           (\gggen{R}, \gggen{S}, {T})$ on the vector $({M}_1, \ldots,{M}_l)
           \in \group{1}^l$.
 
       \end{enumerate}
 
-    \item[$\{0,1\} \leftarrow \algo{Verify}(\pk, \vec{{M}}, \sigma)$ :] On
-      input signature $\sigma = (\gggen{R}, \gggen{S}, {T})$, vector
+    \item[$\{0,1\} \leftarrow \SPSverify(\pk, \vec{{M}}, \signature)$ :] On
+      input signature $\signature = (\gggen{R}, \gggen{S}, {T})$, vector
       $({M}_1, \ldots,{M}_l) \in \group{1}^l$, and public key $\pk =
       (\vec{\gggen{U}}, {V})$, do the following:
 
@@ -250,7 +250,7 @@ Section~\ref{sec:MPC}~\cite{C:KilPanWee15}.
 
       \end{enumerate}
 
-    \item[$\llbracket \sigma \rrbracket_{\algo{OffSign}} \sample \algo{OffSign}(\llbracket
+    \item[$\llbracket \signature \rrbracket_{\algo{OffSign}} \sample \algo{OffSign}(\llbracket
       \sk \rrbracket)$ :] On input the secret key shares, the honest signers
       do the following:
 
@@ -286,7 +286,7 @@ Section~\ref{sec:MPC}~\cite{C:KilPanWee15}.
 
       \end{enumerate}
 
-    \item[$\llbracket \sigma \rrbracket_{\algo{OnSign}} \sample
+    \item[$\llbracket \signature \rrbracket_{\algo{OnSign}} \sample
       \algo{OnSign}(\vec{{M}})$ :] On input message vector $\vec{{M}}$, the
       honest signers do the following:
 
@@ -320,7 +320,7 @@ Section~\ref{sec:MPC}~\cite{C:KilPanWee15}.
 
       \end{enumerate}
 
-    \item[$\sigma \leftarrow \algo{Combine}(\llbracket \sigma \rrbracket)$ :]
+    \item[$\signature \leftarrow \algo{Combine}(\llbracket \signature \rrbracket)$ :]
       On input the signature shares, the honest signers do the following:
 
       \begin{enumerate}
@@ -333,14 +333,14 @@ Section~\ref{sec:MPC}~\cite{C:KilPanWee15}.
         \item Invoke $\idfu{\algo{CombineGrp}_1}$ to compute $\vec{{T}}=
           (\gen, \vec{{M}})\mathbf{k} + \vec{{T}^{\star}}$.
 
-        \item If no $\bot$ occurs, return the valid signature $\sigma =
+        \item If no $\bot$ occurs, return the valid signature $\signature =
           (\gggen{Q}, \vec{{R}}, \vec{{S}}, \vec{{T}})$ on vector $\vec{{M}}
           = ({M}_1, \ldots, {M}_l)$.
 
       \end{enumerate}
 
-    \item[$\{0,1\} \leftarrow \algo{Verify}(\pk, \vec{{M}}, \sigma)$ :] On
-      input signature $\sigma = (\gggen{Q}, \vec{{R}}, \vec{{S}},
+    \item[$\{0,1\} \leftarrow \SPSverify(\pk, \vec{{M}}, \signature)$ :] On
+      input signature $\signature = (\gggen{Q}, \vec{{R}}, \vec{{S}},
       \vec{{T}})$, vector $({M}_1, \ldots,{M}_l) \in \group{1}^l$, and
       public key $\pk =(\vec{\gggen{A}}, \vec{\gggen{U}},
       \vec{\gggen{V}},\vec{\gggen{W}})$, do the following:

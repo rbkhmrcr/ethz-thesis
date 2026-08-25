@@ -1,4 +1,4 @@
-\section{Definitions}\label{sec:formalization}
+\section{Definitions}\label{sec:tsps-definitions}
 
 Structure-preserving signatures sign vectors of messages that lie in
 pairing-friendly groups, rather than arbitrary strings, and the corresponding
@@ -11,32 +11,32 @@ algorithms:
 
 \begin{description}
 
-  \item[$(\pk, \sk) \sample \algo{KeyGen}(\secparam, l)$ :] The key generation
+  \item[$(\pk, \sk) \sample \SPSgen(\secparam, l)$ :] The key generation
     algorithm, on input security parameter $\secparam$ and vector length $l$,
     outputs key pair $(\pk, \sk)$, with $\pk$ implicitly defining message
     space $\mathcal{M} \subseteq \G^l$.
 
-  \item[$\sigma \sample \algo{Sign}(\sk, \vec{{M}})$ :] The signing algorithm, on
+  \item[$\signature \sample \SPSsign(\sk, \vec{{M}})$ :] The signing algorithm, on
     input secret key $\sk$ and message $\vec{{M}} \in \mathcal{M}$, outputs
-    signature $\sigma \in \G^{poly(\secparam)}$.
+    signature $\signature \in \G^{poly(\secparam)}$.
 
-  \item[$\{0,1\} \leftarrow \algo{Verify}(\pk, \vec{{M}}, \sigma)$ :] The
+  \item[$\{0,1\} \leftarrow \SPSverify(\pk, \vec{{M}}, \signature)$ :] The
     verification algorithm, on input public key $\pk$, message $\vec{{M}}$,
-    and signature $\sigma$, returns 0 or 1. Verification consists only of
+    and signature $\signature$, returns 0 or 1. Verification consists only of
     pairing product equations.
 
 \end{description}
 
 A structure-preserving signature scheme satisfies correctness if for all
-security parameters $\secparam$, all $(\pk, \sk) \sample \algo{KeyGen}(\secparam,
-l)$, and all $\vec{{M}} \in \mathcal{M}$, we have $\algo{Verify}(\pk, \vec{{M}},
-\algo{Sign}(\sk, \vec{{M}})) = 1$.
+security parameters $\secparam$, all $(\pk, \sk) \sample \SPSgen(\secparam,
+l)$, and all $\vec{{M}} \in \mathcal{M}$, we have $\SPSverify(\pk, \vec{{M}},
+\SPSsign(\sk, \vec{{M}})) = 1$.
 
 \paragraph{Unforgeability.} For a PPT adversary $\adv$, define advantage
 %
 \begin{equation*}
 %
-  \operatorname{Adv}_{\mathrm{SPS}, \adv}^{\text{UF-CMA}}(\secparam) =
+  \Adv_{\mathrm{SPS}, \adv}^{\text{UF-CMA}}(\secparam) =
   \Pr\left[\mathbf{G}_{\mathrm{SPS}, \adv}^{\text{UF-CMA}}(\secparam) =
   1\right],
 %
@@ -48,7 +48,7 @@ signature scheme achieves UF-CMA security if for every PPT adversary $\adv$,
 %
 \begin{equation*}
 %
-  \operatorname{Adv}_{\mathrm{SPS}, \adv}^{\text{UF-CMA}}(\secparam) \leq
+  \Adv_{\mathrm{SPS}, \adv}^{\text{UF-CMA}}(\secparam) \leq
   \operatorname{negl}(\secparam).
 %
 \end{equation*}
@@ -56,7 +56,7 @@ signature scheme achieves UF-CMA security if for every PPT adversary $\adv$,
 Excluding the message $\vec{{M}^*}$ itself from the set $S$ of previously
 queried messages, as shown in Experiment~\ref{exp:sps-uf-cma}, gives
 \emph{weak} unforgeability (wUF-CMA), the notion we rely on throughout this
-chapter. Excluding instead the pair $(\vec{{M}^*}, \sigma^*)$ gives the
+chapter. Excluding instead the pair $(\vec{{M}^*}, \signature^*)$ gives the
 stronger notion of \emph{strong} unforgeability (sUF-CMA), which additionally
 rules out an adversary producing a fresh signature on an already-signed
 message.
@@ -66,18 +66,18 @@ message.
 
   \begin{enumerate}
 
-    \item The challenger generates $(\pk, \sk) \gets \algo{KeyGen}(\secparam,
+    \item The challenger generates $(\pk, \sk) \gets \SPSgen(\secparam,
       l)$ and sends $\pk$ to $\adv$.
 
     \item The adversary is given oracle access to $\signo$, which on input
-      $\vec{{M}}$, computes $\sigma \gets \algo{Sign}(\sk, \vec{{M}})$, and if
-      $\sigma \neq \perp$, adds $\vec{{M}}$ to $S$, before returning $\sigma$.
+      $\vec{{M}}$, computes $\signature \gets \SPSsign(\sk, \vec{{M}})$, and if
+      $\signature \neq \perp$, adds $\vec{{M}}$ to $S$, before returning $\signature$.
 
-    \item The adversary outputs $(\vec{{M}^*}, \sigma^*)$.
+    \item The adversary outputs $(\vec{{M}^*}, \signature^*)$.
 
   \end{enumerate}
 
-  $\adv$ wins the experiment if $\algo{Verify}(\pk, \vec{{M}^*}, \sigma^*) =
+  $\adv$ wins the experiment if $\SPSverify(\pk, \vec{{M}^*}, \signature^*) =
   1$ and $\vec{{M}^*} \notin S$.
 
 \end{experimentbox}
@@ -87,7 +87,7 @@ message.
 A threshold structure-preserving signature scheme is a structure-preserving
 signature scheme whose signing key is distributed across multiple parties. It
 is defined by algorithms $\algo{Setup}$, $\algo{KeyGen}$, $\algo{ThreshSign}$, $\algo{Combine}$, and
-$\algo{Verify}$, as follows.
+$\SPSverify$, as follows.
 
 \begin{description}
 
@@ -108,20 +108,20 @@ $\algo{Verify}$, as follows.
     of elements of $\Zp$ and/or group elements. This algorithm may be
     interactive.
 
-  \item[$\llbracket \sigma \rrbracket \sample \algo{ThreshSign}(\llbracket \sk
+  \item[$\llbracket \signature \rrbracket \sample \algo{ThreshSign}(\llbracket \sk
     \rrbracket, \vec{{M}})$ :] The threshold signing algorithm takes a
     secret key share $\llbracket \sk \rrbracket$ and a vector of messages
     $\vec{{M}}$ with elements in $\group{1}$ and/or $\group{2}$, and
-    outputs a signature share $\llbracket \sigma \rrbracket$ with elements in
+    outputs a signature share $\llbracket \signature \rrbracket$ with elements in
     $\group{1}$ and $\group{2}$. This algorithm may be interactive.
 
-  \item[$\sigma \leftarrow \algo{Combine}(\llbracket \sigma \rrbracket)$ :] The
+  \item[$\signature \leftarrow \algo{Combine}(\llbracket \signature \rrbracket)$ :] The
     combining algorithm is non-interactive, and takes signature shares
-    $\llbracket \sigma \rrbracket$ to output signature $\sigma$.
+    $\llbracket \signature \rrbracket$ to output signature $\signature$.
 
-  \item[$\{0,1\} \leftarrow \algo{Verify}(\pk, \vec{{M}}, \sigma)$ :] The
+  \item[$\{0,1\} \leftarrow \SPSverify(\pk, \vec{{M}}, \signature)$ :] The
     verification algorithm takes public key $\pk$, vector of messages
-    $\vec{{M}}$, and signature $\sigma$, and returns 1 if $\sigma$ is valid
+    $\vec{{M}}$, and signature $\signature$, and returns 1 if $\signature$ is valid
     on $\vec{{M}}$, and 0 otherwise. As in the non-threshold case,
     verification checks membership of the signature's elements in $\group{1}$
     and $\group{2}$, and evaluates equations involving pairing products.
