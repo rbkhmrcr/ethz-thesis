@@ -156,12 +156,12 @@ $v$, adding entry $\algo{accounts}[\algo{usr}] \gets \langle \algo{Int}, v
 \rangle$ and updating $\algo{Int}$'s reserves; $\idfu{\algo{op}}$ enforces that
 $\algo{usr}$ has one account in the system.
 
-\underline{$\algo{register}$}. The registration authority $\reg$ calls
-$\algo{register}$ to enrol a user, for whom an account was already created, in
+\underline{$\OPregister$}. The registration authority $\reg$ calls
+$\OPregister$ to enrol a user, for whom an account was already created, in
 the system. Users can be registered only once, and registration adds
 $\algo{usr}$ to $\algo{registered}$.
 
-\underline{$\algo{withdraw}$}. An intermediary $\algo{Int}$ indicates a value
+\underline{$\OPwithdraw$}. An intermediary $\algo{Int}$ indicates a value
 and identifies a registered user $\algo{usr}$ whose account it hosts. If
 successful, $\algo{usr}$ obtains a token identified by a unique random number
 $\rho$, usable subsequently in offline payments authorised by $\algo{usr}$'s
@@ -176,7 +176,7 @@ curious, $\simu$ learns the identity of the user and the value of the
 withdrawal by default; if either the secure element or the mobile device of the
 user is corrupt, $\simu$ additionally learns $\rho$.
 
-\underline{$\algo{pay}$}. A registered user $\algo{usr}$ invokes $\algo{pay}$
+\underline{$\OPexecute$}. A registered user $\algo{usr}$ invokes $\OPexecute$
 to transfer ownership of a token they own to some user $\algo{usr}'$,
 identifying the payer, the payee, the value of the token, and a vector
 $\vec{\rho}$ that lets $\idfu{\algo{op}}$ locate the token in $\algo{tokens}$ and trace
@@ -202,8 +202,8 @@ stress that an unregistered payee can accept a payment and receive a token, but
 can never transfer its ownership onward, as it is never added to
 $\algo{tokens}$.
 
-\underline{$\algo{deposit}$}. An intermediary $\algo{Int}$ invokes
-$\algo{deposit}$ to let a registered user exchange a token for commercial bank
+\underline{$\OPdeposit$}. An intermediary $\algo{Int}$ invokes
+$\OPdeposit$ to let a registered user exchange a token for commercial bank
 money, identifying the depositing user $\algo{usr}$, a vector $\vec{\rho}$
 referring to the token and its history, and the deposit value. $\idfu{\algo{op}}$
 verifies that the token being deposited is indeed owned by $\algo{usr}$ and has
@@ -215,7 +215,7 @@ and $\algo{Int}$. Since $\algo{cb}$ and $\algo{Int}$ are honest but curious,
 $\simu$ learns the deposit information by default: the identity of
 $\algo{usr}$, the value $v$, and the vector $\vec{\rho}$.
 
-\underline{$\algo{audit}$}. The auditor $\auditor$ calls $\algo{audit}$ with a
+\underline{$\OPidentify$}. The auditor $\auditor$ calls $\OPidentify$ with a
 token identifier $\rho$, the identifier used during the corresponding
 withdrawal.  $\idfu{\algo{op}}$ retrieves $\algo{deposited}[\rho]$; if it contains
 nothing or a single vector, $\idfu{\algo{op}}$ returns nothing, signalling that there is
@@ -268,9 +268,9 @@ to $\auditor$ and to $\algo{cb}$.
 
         \end{enumerate}
 
-        {$\algo{register}$.} Upon receiving for the first time
-        $(\algo{register}, \algo{usr})$ from $\reg$ for $\algo{usr} \in
-        \algo{usrs}$ that already has an account -- send $(\algo{register},
+        {$\OPregister$.} Upon receiving for the first time
+        $(\OPregister, \algo{usr})$ from $\reg$ for $\algo{usr} \in
+        \algo{usrs}$ that already has an account -- send $(\OPregister,
         \algo{usr})$ to $\simu$ and wait for its go-ahead. On receipt of the
         go-ahead do:
 
@@ -282,12 +282,12 @@ to $\auditor$ and to $\algo{cb}$.
 
         \end{enumerate}
 
-        {$\algo{withdraw}$.} On receiving a $(\algo{withdraw}, \algo{usr} =
+        {$\OPwithdraw$.} On receiving a $(\OPwithdraw, \algo{usr} =
         (\algo{se}, \algo{dev}), \algo{Int}, v)$ from registered user
         $\algo{usr}$ that has an account with $\algo{Int}$, send
-        $(\algo{withdraw}, \algo{usr}, \algo{Int}, v)$ to $\algo{Int}$ and
-        $(\algo{withdraw}, \algo{Int}, v)$ to $\algo{cb}$ and await their
-        go-ahead. Then send message $\algo{withdraw}$ to $\simu$ and await its
+        $(\OPwithdraw, \algo{usr}, \algo{Int}, v)$ to $\algo{Int}$ and
+        $(\OPwithdraw, \algo{Int}, v)$ to $\algo{cb}$ and await their
+        go-ahead. Then send message $\OPwithdraw$ to $\simu$ and await its
         go-ahead. On receipt of the go-ahead, fetch
         $\algo{accounts}[\algo{usr}] \rightarrow \langle \algo{Int},
         v^*\rangle$, and do:
@@ -321,11 +321,11 @@ to $\auditor$ and to $\algo{cb}$.
                     \rangle$
 
                   \item If $\algo{se} \in \algo{mal}$ or $\algo{dev} \in
-                    \algo{mal}$, then return $(\algo{withdraw}, \algo{usr},
+                    \algo{mal}$, then return $(\OPwithdraw, \algo{usr},
                     \rho, v)$ to $\simu$ \item Otherwise, return
-                    $(\algo{withdraw}, \algo{usr}, v)$ to $\simu$
+                    $(\OPwithdraw, \algo{usr}, v)$ to $\simu$
 
-                  \item return $(\algo{withdraw}, \rho, v, \algo{fin})$ to
+                  \item return $(\OPwithdraw, \rho, v, \algo{fin})$ to
                     $\algo{usr}$
 
                 \end{enumerate}
@@ -334,11 +334,11 @@ to $\auditor$ and to $\algo{cb}$.
 
         \end{enumerate}
 
-        {$\algo{pay}$.} On receiving $(\algo{pay}, \vec{\rho}, v, \algo{usr}' =
+        {$\OPexecute$.} On receiving $(\OPexecute, \vec{\rho}, v, \algo{usr}' =
         (\algo{se}', \algo{dev}'))$ from registered user $\algo{usr} =
-        (\algo{se}, \algo{dev})$, send $(\algo{pay}, \vec{\rho}, v)$ to
+        (\algo{se}, \algo{dev})$, send $(\OPexecute, \vec{\rho}, v)$ to
         $\algo{usr}'$. On receiving the response $\algo{accept}$ from
-        $\algo{usr}'$, send $(\algo{pay}, \vec{\rho}, v)$ to $\simu$ and await
+        $\algo{usr}'$, send $(\OPexecute, \vec{\rho}, v)$ to $\simu$ and await
         the go-ahead. On receipt of the go-ahead do:
 
         \begin{enumerate}
@@ -361,10 +361,10 @@ to $\auditor$ and to $\algo{cb}$.
                     \rangle$ where $\vec{\rho'} = (\vec{\rho}, \rho')$
 
                   \item If $\algo{se} \in \algo{mal}$ or $\algo{dev} \in
-                    \algo{mal}$, then return $(\algo{pay}, \vec{\rho'}, v,
+                    \algo{mal}$, then return $(\OPexecute, \vec{\rho'}, v,
                     \algo{usr}, \algo{usr}')$ to $\simu$
 
-                  \item Otherwise, return $(\algo{pay}, \vec{\rho'}, v)$ to
+                  \item Otherwise, return $(\OPexecute, \vec{\rho'}, v)$ to
                     $\simu$
 
                 \end{enumerate}
@@ -385,18 +385,20 @@ to $\auditor$ and to $\algo{cb}$.
                 $\algo{tokens}[\vec{\rho'}] \leftarrow \langle \algo{usr}', v
                 \rangle$
 
-            \item send $(\algo{pay},\vec{\rho'}, v, \algo{usr}, \algo{usr}')$
-          to $\simu$ \end{enumerate}
+            \item send $(\OPexecute,\vec{\rho'}, v, \algo{usr}, \algo{usr}')$
+          to $\simu$ 
+          
+          \end{enumerate}
 
-        \item send $(\algo{pay}, \vec{\rho'}, v , \algo{fin})$ to $\algo{usr}'$
+        \item send $(\OPexecute, \vec{\rho'}, v , \algo{fin})$ to $\algo{usr}'$
 
       \end{enumerate}
 
-      {$\algo{deposit}$.} On receiving $(\algo{deposit}, \vec{\rho}, v,
+      {$\OPdeposit$.} On receiving $(\OPdeposit, \vec{\rho}, v,
       \algo{Int})$ from registered user $\algo{usr}$ that has an account with
-      $\algo{Int}$, send $(\algo{deposit}, \vec{\rho}, v, \algo{Int},
-      \algo{usr})$ to $\algo{Int}$ and $(\algo{deposit}, v, \algo{Int})$ to
-      $\algo{cb}$ and await their go-ahead. Then send $(\algo{deposit},
+      $\algo{Int}$, send $(\OPdeposit, \vec{\rho}, v, \algo{Int},
+      \algo{usr})$ to $\algo{Int}$ and $(\OPdeposit, v, \algo{Int})$ to
+      $\algo{cb}$ and await their go-ahead. Then send $(\OPdeposit,
       \vec{\rho}, v, \algo{Int}, \algo{usr})$ to $\simu$ and await the
       go-ahead. On receipt of the go-ahead do:
 
@@ -428,7 +430,7 @@ to $\auditor$ and to $\algo{cb}$.
                 \item $\algo{reserves}[\algo{Int}] \gets
                   \algo{reserves}[\algo{Int}] + v$
 
-                \item send $(\algo{deposit}, \algo{fin})$ to $\algo{usr}$
+                \item send $(\OPdeposit, \algo{fin})$ to $\algo{usr}$
 
               \end{enumerate}
 
@@ -436,20 +438,20 @@ to $\auditor$ and to $\algo{cb}$.
 
       \end{enumerate}
 
-      {$\algo{audit}$.} On receiving $(\algo{audit}, \rho)$ from $\auditor$,
-      send $(\algo{audit}, \rho)$ to $\simu$ and await the go-ahead. On receipt
+      {$\OPidentify$.} On receiving $(\OPidentify, \rho)$ from $\auditor$,
+      send $(\OPidentify, \rho)$ to $\simu$ and await the go-ahead. On receipt
       of the go-ahead do:
 
       \begin{enumerate}
 
         \item If $|\algo{deposited}[\vec{\rho}[0]]| \leq 1$, then send
-          $(\algo{audit}, \algo{fin})$ to $\auditor$
+          $(\OPidentify, \algo{fin})$ to $\auditor$
 
         \item Otherwise, do:
 
           \begin{enumerate}
 
-            \item $\algo{deposited}[\rho] \rightarrow \{\vec{\rho}_1, ...,
+            \item $\algo{deposited}[\rho] \rightarrow \{\vec{\rho}_1, \cdots,
               \vec{\rho}_n\}$
 
             \item $\algo{DS} \leftarrow \emptyset$
@@ -469,7 +471,7 @@ to $\auditor$ and to $\algo{cb}$.
 
               \end{enumerate}
 
-            \item send $(\algo{audit}, \algo{DS}, \algo{fin})$ to $\auditor$
+            \item send $(\OPidentify, \algo{DS}, \algo{fin})$ to $\auditor$
               and $\algo{cb}$
 
           \end{enumerate}

@@ -11,7 +11,7 @@ computationally indistinguishable from the last. Throughout, we call a user
 corrupt if both their device and secure element are compromised; the more
 general split-corruption setting follows analogously. We also simplify
 exposition by treating the randomness $\rho$ produced by $\idfu{\algo{op}}$ during
-$\algo{withdraw}$ and $\algo{pay}$ as the output of $\com(\ck, \cdot; \cdot)$.
+$\OPwithdraw$ and $\OPexecute$ as the output of $\com(\ck, \cdot; \cdot)$.
 
 We rely on the following security properties of the underlying primitives:
 
@@ -35,6 +35,8 @@ We rely on the following security properties of the underlying primitives:
 
 \end{enumerate}
 
+\begin{proof}
+
 \paragraph{Game 0.} The real-world execution of $\algo{prot}$.
 
 \paragraph{Game 1.} $\simu$ runs $\algo{prot}$ internally on behalf of all
@@ -57,14 +59,14 @@ creation. $\simu$ calls $\idfu{\algo{op}}$ and mirrors any abort to $\algo{Int}$
 $\idfu{\algo{op}}$ aborts exactly when $\algo{prot}$ does, on attempts to register
 duplicate accounts, so no new distinguishing event arises.
 
-\paragraph{Game 5.} $\idfu{\algo{op}}$ handles $\algo{register}$ queries. $\simu$ calls
-$(\algo{register}, \algo{usr}, \algo{se}, \algo{dev})$ whenever $\reg$ receives
+\paragraph{Game 5.} $\idfu{\algo{op}}$ handles $\OPregister$ queries. $\simu$ calls
+$(\OPregister, \algo{usr}, \algo{se}, \algo{dev})$ whenever $\reg$ receives
 a valid registration request. $\idfu{\algo{op}}$ rejects only duplicate registrations,
 matching $\algo{prot}$.
 
-\paragraph{Game 6.} $\idfu{\algo{op}}$ handles $\algo{withdraw}$ queries from honest
+\paragraph{Game 6.} $\idfu{\algo{op}}$ handles $\OPwithdraw$ queries from honest
 users.  When an honest $\algo{usr}$ withdraws value $v$, $\simu$ calls
-$(\algo{withdraw}, \algo{Int}, v)$ and learns $(\algo{usr}, v)$. $\simu$
+$(\OPwithdraw, \algo{Int}, v)$ and learns $(\algo{usr}, v)$. $\simu$
 produces a simulated withdrawal transcript in which $\com$ is a uniformly
 random commitment, $\ciph_0 \leftarrow \PKEencrypt(\pk_{\auditor}, \algo{uid};
 \rho_0)$ is a well-formed encryption of $\algo{uid}$, $\ciph_2$ is a random
@@ -72,24 +74,24 @@ ciphertext, and $\Pi$ is a simulated proof.  By (P1), (P2), and (P5), this
 transcript is computationally indistinguishable from one produced by
 $\algo{prot}$.
 
-\paragraph{Game 7.} $\idfu{\algo{op}}$ handles $\algo{withdraw}$ queries from corrupt
+\paragraph{Game 7.} $\idfu{\algo{op}}$ handles $\OPwithdraw$ queries from corrupt
 users.  When $\algo{usr}$ submits a withdrawal, $\simu$ extracts the randomness
 $s$ from the attached proof using (P5), computes $\rho \leftarrow \com(\ck,
-(\algo{uid}, v); s)$, and calls $(\algo{withdraw}, \algo{Int}, v)$ with $\rho$.
+(\algo{uid}, v); s)$, and calls $(\OPwithdraw, \algo{Int}, v)$ with $\rho$.
 Both $\idfu{\algo{op}}$ and $\algo{prot}$ reject if and only if $\com \leftarrow
 \com(\ck, (\algo{uid}, v); s)$ is a duplicate, which would imply a duplicate
 $\rho$, so the accounting checks agree.
 
-\paragraph{Game 8.} $\idfu{\algo{op}}$ handles $\algo{pay}$ queries from honest payers.
+\paragraph{Game 8.} $\idfu{\algo{op}}$ handles $\OPexecute$ queries from honest payers.
 We first deal with the first payment after withdrawal, the case $i = 0$, then
 generalise.
 
-Case $i = 0$. $\algo{usr}$ pays $\algo{usr}'$ by calling $(\algo{pay}, \rho, v,
+Case $i = 0$. $\algo{usr}$ pays $\algo{usr}'$ by calling $(\OPexecute, \rho, v,
 \algo{usr}')$.
 
 \begin{itemize}
 
-  \item If $\algo{usr}'$ is honest: $\simu$ learns $(\algo{pay}, v, \rho,
+  \item If $\algo{usr}'$ is honest: $\simu$ learns $(\OPexecute, v, \rho,
     \rho')$ from $\idfu{\algo{op}}$, and produces a simulated payment $p_0 = (v, \com_0,
     \com_1, \ciph_0, \sigma_0, \Gamma_0, \Sigma)$ with random commitments
     $\com_b \leftarrow \com(\ck, r_b; s_b)$ for fresh $r_b, s_b$, a random
@@ -115,14 +117,14 @@ corrupt), and updates the maps as needed. By IND-CPA security of the encryption
 scheme (P2) and simulation-extractable security of the NIZK scheme (P5),
 simulated payments are indistinguishable from real ones.
 
-\paragraph{Game 9.} $\idfu{\algo{op}}$ also processes $\algo{pay}$ queries from corrupt
+\paragraph{Game 9.} $\idfu{\algo{op}}$ also processes $\OPexecute$ queries from corrupt
 payers. We show that if $\idfu{\algo{op}}$ rejects a payment, an honest $\algo{usr}'$ in
 $\algo{prot}$ also rejects it, again showing the case $i = 0$ before
 generalising.
 
 Let $p_0 = (v, \com_1, \com_0, \ciph_0, \sigma_0, \Gamma_0, \algo{hist}_0)$ be
 the payment produced by corrupt $\algo{usr}$. $\simu$ computes $\rho \leftarrow
-\com(\ck, (\algo{uid}, v); s)$ from $\com_0$ and calls $(\algo{pay}, \rho, v,
+\com(\ck, (\algo{uid}, v); s)$ from $\com_0$ and calls $(\OPexecute, \rho, v,
 \algo{usr}')$.
 
 $\algo{usr}'$ honest. If $\algo{usr}'$ accepts $p_0$ but $\idfu{\algo{op}}$ rejects,
@@ -130,7 +132,7 @@ exactly one of the following holds:
 
 \begin{enumerate}[label=\alph*)]
 
-  \item $\algo{tokens}[\rho] = \bot$: no prior $\algo{withdraw}$ matches
+  \item $\algo{tokens}[\rho] = \bot$: no prior $\OPwithdraw$ matches
     $\rho$. By (P5), $\simu$ extracts a blind signature $\psi$ and message
     triple $(\algo{uid}, v, s)$ from $\Sigma$. Since $\algo{cb}$ never issued
     $\psi$, no corresponding withdrawal exists, so outputting $(\psi,
@@ -169,13 +171,13 @@ s')$ from $\com_1$, and extends the maps.
 $i > 0$. If $\mathbb{R}[(\com_0, \ldots, \com_i)]$ is not yet recorded, $\simu$
 fills in the missing intermediate payments by extracting participant
 identifiers from the proof $\Gamma_j$ at the first unrecorded index $j$ using
-(P5), calling $\algo{pay}$ for each, and extending the maps until $j = i - 1$.
+(P5), calling $\OPexecute$ for each, and extending the maps until $j = i - 1$.
 The cases above still apply, replacing $p_0$ with $p_i$ and $\rho$ with
 $(\rho_0, \ldots, \rho_i)$. Since the probability that an honest $\algo{usr}'$
 accepts a payment that $\idfu{\algo{op}}$ rejects is negligible under (P1)-(P5), this
 game is indistinguishable from Game 8.
 
-\paragraph{Game 10.} $\idfu{\algo{op}}$ handles $\algo{deposit}$ queries from honest
+\paragraph{Game 10.} $\idfu{\algo{op}}$ handles $\OPdeposit$ queries from honest
 users.  $\simu$ recovers $(\com_0, \ldots, \com_n)$ from
 $\mathbb{C}[\vec{\rho}]$ and produces a simulated deposit $(\tau_n, \sigma_n,
 \algo{hist}_n)$ with simulated proofs and random ciphertexts. Since $\idfu{\algo{op}}$
@@ -191,7 +193,7 @@ binds $(\algo{uid}_0, v, s_0)$. A corrupt user cannot alter $\com_0$, so any
 two deposits sharing $\vec{\rho}[0]$ are double spends and will be detected by
 $\idfu{\algo{op}}$.
 
-\paragraph{Game 11.} $\idfu{\algo{op}}$ now also handles $\algo{deposit}$ queries from
+\paragraph{Game 11.} $\idfu{\algo{op}}$ now also handles $\OPdeposit$ queries from
 corrupt users. When $\algo{tokens}[\vec{\rho}] \neq \langle \algo{usr}, v
 \rangle$, exactly one of the following holds, each handled by the same argument
 as in Game 9 with the payment in question replaced by the deposit in question.
@@ -222,8 +224,8 @@ inductively. If another deposit chain sharing $\vec{\rho}[0]$ has already been
 recorded, the same argument as in Game 10 shows the initial commitment cannot
 be altered.
 
-\paragraph{Game 12.} $\idfu{\algo{op}}$ handles $\algo{audit}$ queries. The auditor
-calls $(\algo{audit}, \rho)$ and expects the set of double spenders
+\paragraph{Game 12.} $\idfu{\algo{op}}$ handles $\OPidentify$ queries. The auditor
+calls $(\OPidentify, \rho)$ and expects the set of double spenders
 $\algo{DS}$. We show that the outputs of $\idfu{\algo{op}}$ and $\algo{prot}$ agree
 except with negligible probability.
 
@@ -246,83 +248,4 @@ EUF-CMA of the credential scheme (P4) via simulation-extractability of the NIZK
 (P5). All distinguishing events occur with negligible probability, so Game 12
 is indistinguishable from Game 11. This completes the proof.
 
-\subsection{Discussion}\label{sec:securityDiscussion}
-
-The above proves security in the cryptographic sense, under the standard
-assumption that a real-world deployment realises each ideal primitive it relies
-on. We close by discussing, informally, some further considerations that arise
-when deploying the system in practice.
-
-\paragraph{Revocation.} A practical deployment requires the ability to revoke
-users. This is complicated by two factors: first, a user's privacy should not
-be violated by revocation itself, meaning that no new information about their
-past transactions should become available once they are revoked; second, and
-more fundamentally, revocation interacts poorly with the offline setting's
-inherent lack of up-to-date information. Consider a payee who goes offline just
-before a payer is revoked: the payee's revocation metadata will not reflect the
-payer's revocation, so the payee will accept the revoked payer's token,
-discover the problem only later, and may unwittingly propagate it further by
-spending the token onward.
-
-One effective mitigation is a time-to-live (TTL) for offline tokens, enforced
-either by capping the number of spending hops a token may undergo or by
-bounding the time elapsed since the original withdrawal.  A malicious spender
-cannot be trusted to enforce such a policy, but payees are well placed to do so
-themselves, by refusing payments whose TTL does not meet policy; the policy can
-be tuned to the value of the transaction, with higher-value transactions given
-a shorter TTL. Capping the value of individual offline transactions is a
-complementary mitigation, and combined with a TTL can make double spending
-financially unattractive even before any detection takes place. We leave a
-fuller treatment of revocation and its interaction with TTL policies to future
-work.
-
-\paragraph{Custody of the secret key.} Perhaps the most important requirement
-for a real-world deployment is that the user not be in direct possession of
-secret key $\sk_{\algo{usr}}$. If a user does hold $\sk_{\algo{usr}}$ directly,
-they can generate an arbitrary number of seemingly valid payments spending the
-same token, each of which will pass every check available to its offline
-recipient; the impossibility of detecting double spending before reconciliation
-is inherent to the offline setting, not a flaw in a particular recipient's
-checks. Payments remain auditable, since each carries a ciphertext that
-provably encrypts the payer's identity, and this holds even under cascade
-double spending, where a payee further spends an already double-spent token:
-every perpetrator in the chain is still identified. This threat of
-identification is a meaningful deterrent only if detection can be attributed to
-malice rather than to key compromise, since a user whose device is hacked and a
-user who deliberately double spends leave the same digital trail; in this
-scenario, cryptography can support double-spending resistance but cannot
-enforce it, and the remaining gap must be closed at the governance level, for
-instance through insurance or liability for compromised devices, with TTL
-enforcement again limiting the exposure.
-
-Mediating access to the secret key through a trusted element that only ever
-produces a single payment per token closes off this class of attack, at the
-cost of introducing others: an adversary who can clone or roll back the secure
-element can still double spend, though now at a real hardware cost rather than
-none, and with the same reporting incentives making undetected repeat use
-harder to sustain. A properly implemented system also needs a recovery
-mechanism for lost or destroyed devices, which itself creates an avenue for
-abuse if a user falsely claims their device is lost in order to retain and
-later use it. Introducing a waiting period before a replacement device is
-issued, timed so that it exceeds the TTL of the locked tokens, together with
-policies that flag frequent recoveries, limits this risk without giving up the
-usability benefits of recovery.
-
-\paragraph{Instantiating the secure element.} Modern mobile platforms provide
-trusted execution environments that protect app secrets from a malicious device
-owner, but app developers cannot directly access TrustZone or Secure Enclave:
-these hardware features are exposed only through higher-level key-management
-APIs~\cite{trustzone,secureenclave}. While the secret key itself remains hidden
-even from a malicious app, an attacker who achieves arbitrary code execution,
-whether by exploiting the app or by rooting the device, can still query the key
-manager to spend a token repeatedly, since the confidentiality of the key does
-not guarantee the integrity of the surrounding application logic. Smart cards
-offer a stronger guarantee: platforms such as Javacard or MIFARE provide
-tamper-resistant storage together with a dedicated, isolated execution
-environment, so that both the secret key and the logic that uses it are
-protected~\cite{javacard,mifare}. No hardware security is unconditional, and an
-attacker willing to invest sufficient resources may eventually extract a card's
-embedded secret, reverting to the threat model discussed above; deploying the
-system is therefore ultimately a question of governance, weighing the cost of
-rolling out smart cards, the total offline value permitted under system-wide
-restrictions such as TTL, and the expected cost and payoff of attacking a card.
+\end{proof}

@@ -128,24 +128,18 @@ destination from the payment transcripts; and (3) the auditor may deanonymise
 payments, and is trusted to do so only with evidence of double spending, with
 the auditor role recommended to be distributed via threshold decryption.
 
-\subsection{The protocol in full}
-
 We now describe the complete protocol formally, stated generically with respect
 to the underlying commitment scheme, digital signature scheme, blind signature
 scheme, and public key encryption scheme; \Cref{sec:offline-instantiation}
-instantiates each of them. We use the notation $\Pi \leftarrow
-\algo{PoK}[\inst, \witness : \rel(\inst, \witness) = 1]$ for a non-interactive
-zero-knowledge proof of knowledge, and $\sigma \leftarrow \SOK[m, (\inst,
-\witness) : \rel(\inst, \witness) = 1]$ for a signature of knowledge on message
-$m$.
+instantiates each of them.
 
 \begin{protocolbox}{Offline payment protocol}{offline}
 
   \begin{description}
 
     \item[$(\pk_{\algo{cb}}, \ck, \pk_{\auditor}, \rapk) \leftarrow
-      \algo{Setup}(1^\kappa)$ :]\label{sec:offline:construction:setup} On input
-      security parameter $\kappa$, do:
+      \OPgen(\secparam)$ :]\label{sec:offline:construction:setup} On input
+      security parameter $\secparam$, do:
 
       \begin{enumerate}
 
@@ -153,22 +147,22 @@ $m$.
           supporting three-message vectors, obtaining $(\sk_{\algo{cb}},
           \pk_{\algo{cb}})$.
 
-        \item The central bank runs $\ck \leftarrow \ComGen(1^\kappa)$ to
+        \item The central bank runs $\ck \leftarrow \ComGen(\secparam)$ to
           obtain a public commitment key.
 
         \item The auditor generates an asymmetric encryption key pair
-          $(\sk_{\auditor}, \pk_{\auditor}) \leftarrow \PKEgen(1^\kappa)$.
+          $(\sk_{\auditor}, \pk_{\auditor}) \leftarrow \PKEgen(\secparam)$.
 
         \item The registration authority generates keys for a multi-message
           signature scheme supporting two-message vectors, obtaining $(\rask,
-          \rapk) \leftarrow \DSgen(1^\kappa, 2)$.
+          \rapk) \leftarrow \DSgen(\secparam, 2)$.
 
         \item Publish all public keys and generators to every participant, and
           return $(\pk_{\algo{cb}}, \ck, \pk_{\auditor}, \rapk)$.
 
       \end{enumerate}
 
-    \item[$\cred \leftarrow \algo{OpenAccount}(\rask)$ :] When a user
+    \item[$\cred \leftarrow \OPregister(\rask)$ :] When a user
       $\algo{usr}$ opens an account, do:
 
       \begin{enumerate}
@@ -192,7 +186,7 @@ $m$.
 
       \end{enumerate}
 
-    \item[$T_0 \leftarrow \algo{Withdraw}(v_0)$ :]\label{sec:withdrawal} User
+    \item[$T_0 \leftarrow \OPwithdraw(v_0)$ :]\label{sec:withdrawal} User
       $\algo{usr}_0$ withdraws a token of value $v_0$, do:
 
       \begin{enumerate}
@@ -238,7 +232,7 @@ $m$.
 
       \end{enumerate}
 
-    \item[$p_i \leftarrow \algo{Pay}(v, s_i, \com_i, \algo{hist}_i)$
+    \item[$p_i \leftarrow \OPexecute(v, s_i, \com_i, \algo{hist}_i)$
       :]\label{sec:payments} User $\algo{usr}_i$ pays $\algo{usr}_{i+1}$ using
       token $(v, s_i, \com_i, \algo{hist}_i)$, do:
 
@@ -290,7 +284,7 @@ $m$.
 
     \end{enumerate}
 
-  \item[$\{0,1\} \leftarrow \algo{Deposit}(\tau_n, \algo{hist}_n)$
+  \item[$\{0,1\} \leftarrow \OPdeposit(\tau_n, \algo{hist}_n)$
     :]\label{sec:deposit} User $\algo{usr}_n$ deposits token $\tau_n = (v,
     \com_n)$, do:
 
@@ -301,7 +295,7 @@ $m$.
 
       \item $\algo{dev}_n$ and $\algo{se}_n$ jointly compute a signature of
         knowledge $\sigma_n$ over $\tau_n$, structured analogously to the
-        signature $\sigma_i$ computed during $\algo{Pay}$.
+        signature $\sigma_i$ computed during $\OPexecute$.
 
       \item $\algo{dev}_n$ sends deposit request $d_n = (\tau_n, \sigma_n,
         \algo{hist}_n)$ to $\algo{Int}_n$, which forwards it to the central
@@ -322,7 +316,7 @@ $m$.
 
     \end{enumerate}
 
-  \item[$\algo{uid}^* \leftarrow \algo{Trace}(d_n, d_m)$ :] On input two
+  \item[$\algo{uid}^* \leftarrow \OPidentify(d_n, d_m)$ :] On input two
     conflicting deposit requests $d_n$ and $d_m$ involving the same original
     token, the auditor does:
 
@@ -345,7 +339,51 @@ $m$.
 
 \end{protocolbox}
 
-The signature of knowledge $\sigma_i$ computed jointly by $\algo{se}_i$ and
-$\algo{dev}_i$ in $\algo{Pay}$, and the analogous signature $\sigma_n$ computed
-in $\algo{Deposit}$, are both instances of a sigma-protocol-based two-party
-protocol, described in full in~\Cref{sec:sok-sol}.
+
+\subsection{Extensions}
+
+The above proves security cryptographically, assuming a real-world deployment
+realises each ideal primitive it relies on. We close with informal deployment
+considerations.
+
+\paragraph{Revocation.} Revocation is complicated: it must not itself leak
+information about a user's past transactions, and it interacts poorly with the
+offline setting's lack of up-to-date information - a payee who goes offline
+just before a payer is revoked will accept, and may unwittingly propagate, the
+revoked payer's token.
+
+A useful mitigation is an expiry policy organised into epochs, capping either
+spending hops or time since withdrawal. Payees, not spenders, enforce this by
+rejecting payments outside the current window, tuned to transaction value
+(shorter for higher value). Capping individual transaction values is a
+complementary mitigation, together making double spending financially
+unattractive even before detection. A fuller treatment is left to future work.
+
+\paragraph{Custody of the secret key.} Users must never hold
+$\sk_{\algo{usr}}$ directly: with direct access, they can produce unlimited
+valid-looking payments from the same token, since detecting double spending
+before reconciliation is inherently impossible offline. Auditability still
+holds under cascade double spending, since every payment encrypts the payer's
+identity and every perpetrator is identified. But identification only deters
+deliberate double spending, not key compromise, since both leave the same
+trail; cryptography can support double-spending resistance here but not
+enforce it, leaving the gap to governance - insurance, liability, and
+expiry-based exposure limits.
+
+Mediating key access through a trusted element issuing one payment per token
+closes off this attack, at the cost of new ones: cloning or rolling back the
+element still enables double spending, now at real hardware cost, with the
+same reporting incentives discouraging undetected reuse. This requires a
+recovery mechanism for lost devices, risking abuse via false loss claims; a
+waiting period exceeding the token expiry window, plus flagging frequent
+recoveries, limits this without sacrificing usability.
+
+\paragraph{Instantiating the secure element.} Mobile TEEs protect app secrets
+from a malicious owner but expose them to developers only via key-management
+APIs~\cite{trustzone,secureenclave}; key confidentiality doesn't guarantee
+logic integrity, so arbitrary code execution (app exploit or rooting) still
+allows repeated spending via the key manager. Smart cards (Javacard, MIFARE)
+protect both key and logic via tamper-resistant, isolated
+execution~\cite{javacard,mifare}. No hardware security is unconditional, so
+deployment is ultimately a governance trade-off between rollout cost,
+system-wide value limits, and the cost of attacking a card.
