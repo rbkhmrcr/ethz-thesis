@@ -71,24 +71,22 @@ unforgeability, double spending detection, and double spender
 identification, but not privacy: the chain of payments reveals every payer's
 and payee's public key. We add anonymity by having users obtain long-term
 credentials from the registration authority that bind their unique
-identifier to their secret key, for instance using BBS+
-signatures~\cite{EPRINT:CamDriLeh16}. Rather than a public key, a token's owner is
+identifier to their secret key. Rather than a public key, a token's owner is
 now identified by a pseudonym: a hiding commitment to the owner's unique
-identifier, so a token is $\tau = (v, C)$ with $C = \gen_0^{\algo{uid}}
-\gen_1^{r}$ for random $r$. During payments and deposits, the user produces
-an anonymous signature by proving in zero knowledge that the committed
-identifier was signed by the registration authority, together with a
-signature of knowledge that they know the corresponding secret key. This
-gives a chain of payments of the form $\langle v, s_0, C_0, \ldots, s_n,
-C_n, \sigma_0, \ldots, \sigma_n, \psi_0 \rangle$, where $\psi_0$ now signs
-$\tau_0 = (C_0, v, s_0)$ rather than $(\pk_0, v, s_0)$. We can further
-shrink this chain by not revealing $s_i$ and instead using it directly as
-the randomness of $C_i = \gen_0^{\algo{uid}_i}\gen_1^{s_i}$, giving payments of the
-form $\langle v, C_0, \ldots, C_n, \sigma_0, \ldots, \sigma_n, \psi_0
-\rangle$.
+identifier, so a token is $\tau = (v, C)$ for such a commitment $C$. During
+payments and deposits, the user produces an anonymous signature by proving
+in zero knowledge that the committed identifier was signed by the
+registration authority, together with a signature of knowledge that they
+know the corresponding secret key. This gives a chain of payments of the
+form $\langle v, s_0, C_0, \ldots, s_n, C_n, \sigma_0, \ldots, \sigma_n,
+\psi_0 \rangle$, where $\psi_0$ now signs $\tau_0 = (C_0, v, s_0)$ rather
+than $(\pk_0, v, s_0)$. We can further shrink this chain by not revealing
+$s_i$ and instead using it directly as the randomness underlying the
+commitment $C_i$, giving payments of the form $\langle v, C_0, \ldots, C_n,
+\sigma_0, \ldots, \sigma_n, \psi_0 \rangle$.
 
 \paragraph{Adding auditability.} To identify double spenders at deposit
-time, each payment carries a verifiable ElGamal encryption of the
+time, each payment carries a verifiable encryption of the
 payer's unique identifier, intended for an authorised auditor. Given two
 deposit requests $\langle v, C_0, \ciph_0, \ldots, C_n, \ciph_n,
 \sigma_0, \ldots, \sigma_n, \psi_0 \rangle$ and $\langle v, C_0, \ciph'_0,
@@ -106,10 +104,9 @@ privacy concern even though payments themselves are anonymised, since users
 identify themselves to their intermediaries at both withdrawal and deposit:
 if a token is transferred only once before being deposited, and the payer's
 and payee's intermediaries collude, they can de-anonymise the payment. We
-avoid this using Pointcheval-Sanders blind
-signatures, which let the central bank
+avoid this using a blind signature scheme, which lets the central bank
 sign the token $\tau_0 = (v, C_0)$ without learning $C_0$ or the resulting
-signature $\psi_0$~\cite{RSA:PoiSan18,NDSS:SABMD19}. We note that the withdrawal and deposit of a token can
+signature $\psi_0$. We note that the withdrawal and deposit of a token can
 still be linked through its value; this can be avoided by using a single
 denomination, or mitigated by using fixed denominations together with
 aggregated deposits, which let a depositor disclose only the aggregate value
@@ -140,7 +137,11 @@ threshold decryption.
 
 \subsection{The protocol in full}
 
-We now describe the complete protocol, using the notation $\Pi \leftarrow
+We now describe the complete protocol formally, stated generically with
+respect to the underlying commitment scheme, digital signature scheme,
+blind signature scheme, and public key encryption scheme;
+\Cref{sec:offline-instantiation} instantiates each of them. We use the
+notation $\Pi \leftarrow
 \algo{PoK}[\inst, \witness : \rel(\inst, \witness) = 1]$ for a non-interactive
 zero-knowledge proof of knowledge, and $\sigma \leftarrow \SOK[m, (\inst,
 \witness) : \rel(\inst, \witness) = 1]$ for a signature of knowledge on message
@@ -191,12 +192,12 @@ $(v_0, s_0, \com_0, \psi)$; $\algo{se}_0$ stores the original token $\tau_0 =
 
 Token creation\label{sec:stepW5}: $\algo{dev}_0$ produces a proof of
 withdrawal $\Sigma$ with $\inst = (\ck, \pk_{\algo{cb}}, v_0, \com_0)$, $\witness =
-(\algo{uid}_0, s_0, \psi)$, and relation
+(\algo{uid}_0, s_0, \psi)$, and relation as follows:
 \begin{equation*}
   \DSverify(\pk_{\algo{cb}}, (\algo{uid}_0, v_0); s_0, \psi) = 1 \;\wedge\; \ComOpen(\ck,
-  \algo{uid}_0; s_0, \com_0) = 1,
+  \algo{uid}_0; s_0, \com_0) = 1.
 \end{equation*}
-and stores $T_0 = (v_0, s_0, \com_0, \algo{hist}_0 = \Sigma)$.
+It then stores $T_0 = (v_0, s_0, \com_0, \algo{hist}_0 = \Sigma)$.
 
 \paragraph{Payment.}\label{sec:payments} $\algo{usr}_i$ pays $\algo{usr}_{i+1}$ using
 token $(v, s_i, \com_i, \algo{hist}_i)$ as follows.
@@ -211,18 +212,18 @@ Transfer\label{sec:stepS2S3S4}: $\algo{dev}_i$ notifies $\algo{se}_i$ that a
 payment is under way; $\algo{se}_i$ locks token $\tau_i = (v, \com_i)$. $\algo{dev}_i$
 computes the audit ciphertext $\ciph_i \leftarrow \PKEencrypt(\pk_{\auditor}, \algo{uid}_i;
 \rho_i)$ and proof of correctness $\Gamma_i$, with $\inst = (\com_i,
-\ciph_i)$, $\witness = (\algo{uid}_i, s_i, \rho_i)$, and relation
+\ciph_i)$, $\witness = (\algo{uid}_i, s_i, \rho_i)$, and relation as follows:
 \begin{equation*}
   \ComOpen(\ck, \algo{uid}_i, s_i, \com_i) = 1 \;\wedge\; \ciph_i = \PKEencrypt(\pk_{\auditor},
   \algo{uid}_i; \rho_i).
 \end{equation*}
 $\algo{se}_i$ and $\algo{dev}_i$ then jointly compute a signature of knowledge $\sigma_i$
-for the relation
+for the relation as follows:
 \begin{equation*}
   \DSverify(\rapk, \algo{uid}_i, \sk_{\algo{usr}_i}, \varphi_i) = 1 \;\wedge\; \ComOpen(\ck,
-  \algo{uid}_i, s_i, \com_i) = 1,
+  \algo{uid}_i, s_i, \com_i) = 1.
 \end{equation*}
-where $\algo{se}_i$ contributes knowledge of $\sk_{\algo{usr}_i}$ and $\algo{dev}_i$ contributes the
+Here, $\algo{se}_i$ contributes knowledge of $\sk_{\algo{usr}_i}$ and $\algo{dev}_i$ contributes the
 remaining witness, following a sigma-protocol-based two-party protocol (see
 Section~\ref{sec:sok-sol}). $\algo{dev}_i$ sends payment $p_i = (v, \com_i,
 \com_{i+1}, \ciph_i, \sigma_i, \Gamma_i, \algo{hist}_i)$ to $\algo{dev}_{i+1}$.
@@ -230,12 +231,12 @@ Section~\ref{sec:sok-sol}). $\algo{dev}_i$ sends payment $p_i = (v, \com_i,
 Receipt\label{sec:stepS5}: $\algo{dev}_{i+1}$ verifies $\algo{hist}_i$: if $i =
 0$, it checks $\Sigma$, otherwise it verifies every $(\Sigma, \Gamma_k,
 \sigma_k)_{k \in [i]}$. If $\Gamma_i$ and $\sigma_i$ also verify,
-$\algo{dev}_{i+1}$ accepts and stores
+$\algo{dev}_{i+1}$ accepts and stores the following:
 \begin{equation*}
   T_{i+1} = (v, s_{i+1}, \com_{i+1}, \algo{hist}_{i+1} = (\com_i, \ciph_i,
-  \sigma_i, \Gamma_i) \, \| \, \algo{hist}_i),
+  \sigma_i, \Gamma_i) \, \| \, \algo{hist}_i).
 \end{equation*}
-while $\algo{se}_{i+1}$ stores $\tau_{i+1} = (v, \com_{i+1})$. Upon
+Meanwhile, $\algo{se}_{i+1}$ stores $\tau_{i+1} = (v, \com_{i+1})$. Upon
 acknowledgement, $\algo{se}_i$ deletes $\com_i$.
 
 \paragraph{Deposit and reconciliation.}\label{sec:deposit} User $\algo{usr}_n$

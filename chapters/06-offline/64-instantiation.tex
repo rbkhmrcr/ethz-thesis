@@ -1,5 +1,16 @@
 \section{Instantiation}\label{sec:offline-instantiation}
 
+We now instantiate the generic construction of
+\Cref{sec:offline-construction} with concrete cryptographic building
+blocks. We use BBS+ signatures to build the anonymous credential that binds
+a user's pseudonym to their secret key (\Cref{sec:BBS}), and
+Pointcheval-Sanders signatures, extended to support blind signing over
+committed inputs, to let the central bank sign tokens at withdrawal without
+learning their content (\Cref{sec:ps-sign}). Both are pairing based
+multi-message signature schemes, which lets us build efficient sigma
+protocols directly over their verification equations rather than relying on
+general purpose zero-knowledge proofs.
+
 \paragraph{Notation.} Let $[n]$ denote the integer interval $[0..n-1]$. Let
 $\group{1}$, $\group{2}$, and $\group{t}$ be three cyclic groups of large
 prime order $p$ that admit a non-degenerate bilinear pairing $e \colon
@@ -55,7 +66,7 @@ algorithms~\cite{C:BonBoySha04,SCN:AuSusMu06,EPRINT:CamDriLeh16}.
     \item[$\{0,1\} \leftarrow \BBSverify(\pk_{\BBS}, \vec{m}, \phi)$ :] On input
       public key $\pk_{\BBS}$, vector of messages $\vec{m}$, and signature
       $\phi$, compute $C = \vec{Q}^{\vec{m}\|s}\hgen$ and return the result of
-      the check
+      the check given as follows:
       \begin{equation*}
         e(E, \tilde{P}^e \tilde{T}) = e(C, \tilde{P}).
       \end{equation*}
@@ -82,23 +93,23 @@ Let $\phi = (e, s, E) \gets \BBSsign(\sk_{\BBS}, \vec{m})$. By construction $E =
 (\hgen \vec{Q}^{\vec{m}\|s})^{1/(t+e)}$ for $\sk_{\BBS} = t$; setting $\inst =
 \pk_{\BBS} = (\tilde{P}, \tilde{T}, \vec{Q}, \hgen)$ and $\witness = (\vec{m}, \phi)$, a
 proof of knowledge of a BBS+ signature shows that $(\inst, \witness)$
-satisfies
+satisfies the equation as follows:
 \begin{equation*}
   e(E, \tilde{P}^e \tilde{T}) = e(\hgen \vec{Q}^{\vec{m}\|s}, \tilde{P}).
 \end{equation*}
 A prover can instead compute $U =
 E^{-x/y}$, $V = (\hgen \vec{Q}^{\vec{m}\|s})^{-1/y}$, and $W =
 U^e V^x$, for randomly selected $x, y$, and prove that for $\inst =
-(\pk_{\BBS}, U, V, W)$ and $\witness = (e, s, x, y, \vec{m})$ the relation
+(\pk_{\BBS}, U, V, W)$ and $\witness = (e, s, x, y, \vec{m})$ the relation as follows:
 \begin{align}
   e(U, \tilde{T}) e(W, \tilde{P}) = 1 \ \wedge \ W = U^e V^x \ \wedge \
-  \hgen^{-1} = V^y \vec{Q}^{\vec{m}\|s}
+  \hgen^{-1} = V^y \vec{Q}^{\vec{m}\|s}.
   \label{eq:BBSrel}
 \end{align}
-holds~\cite{EC:TesZhu23b}. A prover $\algo{Prv}$ for this relation follows a sigma protocol made
+This holds~\cite{EC:TesZhu23b}. A prover $\algo{Prv}$ for this relation follows a sigma protocol made
 non-interactive via the Fiat-Shamir heuristic; we refer to proofs of this
 form as Schnorr proofs. Concretely, $\algo{Prv}$ selects $\alpha, \beta,
-\delta, \gamma_0, \ldots, \gamma_{n-1}, \gamma \in \Zp$ and computes
+\delta, \gamma_0, \ldots, \gamma_{n-1}, \gamma \in \Zp$ and computes the following:
 \begin{align*}
   A &= U^\alpha V^\beta \ ; \ B = V^\delta Q_n^\gamma
   \prod_{i=0}^{n-1} Q_i^{\gamma_i} \ ; \ \algo{chal} = \hash_p(\inst, A, B)
@@ -106,11 +117,11 @@ form as Schnorr proofs. Concretely, $\algo{Prv}$ selects $\alpha, \beta,
   \eta &= \alpha + \algo{chal} e \ ; \ \nu = \beta + \algo{chal} x \ ; \ \xi = \delta +
   \algo{chal} y \ ; \\
   \pi_i &= \gamma_i + \algo{chal} m_i, \ \forall i \in [n] \ ; \ \pi = \gamma +
-  \algo{chal} s
+  \algo{chal} s.
 \end{align*}
-and outputs $\Pi = (A, B, \eta, \nu, \xi, \pi_0, \ldots, \pi_{n-1}, \pi)$.
+It then outputs $\Pi = (A, B, \eta, \nu, \xi, \pi_0, \ldots, \pi_{n-1}, \pi)$.
 A verifier $\algo{V}$ first checks that $e(U, \tilde{T}) e(W, \tilde{P}) = 1$,
-computes $\algo{chal} = \hash_p(\inst, A, B)$, and accepts if and only if
+computes $\algo{chal} = \hash_p(\inst, A, B)$, and accepts if and only if the following holds:
 \begin{align*}
   A W^\algo{chal} &= U^\eta V^\nu \ ; \ B \hgen^{-\algo{chal}} = V^\xi
   Q_n^\pi \prod_{i=0}^{n-1} Q_i^{\pi_i}.
@@ -120,14 +131,14 @@ We now show how two provers $\algo{Prv}_0$ and $\algo{Prv}_1$ jointly produce $\
 where $\algo{Prv}_0$ is a lightweight device that knows $m_{n-1}$ and $\algo{Prv}_1$ is
 computationally more powerful and knows $(e, s, m_0, \ldots, m_{n-2})$,
 following the approach introduced in~\cite{USENIX:HesSinSor23}. Rather than proving
-Equation~\eqref{eq:BBSrel}, $\algo{Prv}_0$ and $\algo{Prv}_1$ jointly prove
+Equation~\eqref{eq:BBSrel}, $\algo{Prv}_0$ and $\algo{Prv}_1$ jointly prove the relation as follows:
 \begin{align*}
   \com &= Q_{n-1}^{m_{n-1}} Q_n^\rho \ \wedge \ e(U, \tilde{T}) e(W,
   \tilde{P}) = 1 \ \wedge \\
   W &= U^e V^x \ \wedge \ (\com \hgen)^{-1} = V^y Q_n^{s'}
-  \prod_{i=0}^{n-2} Q_i^{m_i}
+  \prod_{i=0}^{n-2} Q_i^{m_i}.
 \end{align*}
-for $\inst = (\pk_{\BBS}, U, V, W, \com)$ and $\witness = (e, s', x, y,
+Here, $\inst = (\pk_{\BBS}, U, V, W, \com)$ and $\witness = (e, s', x, y,
 \vec{m}, \rho)$.
 
 \begin{protocolbox}{Joint proof of knowledge of a BBS+ signature}{bbs-joint-proof}
@@ -152,22 +163,22 @@ for $\inst = (\pk_{\BBS}, U, V, W, \com)$ and $\witness = (e, s', x, y,
 
         \item $\algo{Prv}_1$ computes a proof $\Pi_1$ that, for $\inst_1 =
           (\pk_{\BBS}, U, V, W, \com)$ and $\witness_1 = (e, s', x, y,
-          \vec{m}[{:}n-1])$ with $s' = s - \rho$,
+          \vec{m}[{:}n-1])$ with $s' = s - \rho$, the following holds:
           \begin{equation}
             \label{eq:reljointproof}
             W = U^e V^x \ \wedge \ (\com \hgen)^{-1} = V^y
-            \prod_{i=0}^{n-2} Q_i^{m_i} Q_n^{s'}
+            \prod_{i=0}^{n-2} Q_i^{m_i} Q_n^{s'}.
           \end{equation}
-          holds: it selects random $(\alpha, \beta)$ and $(\delta,
+          To do so, it selects random $(\alpha, \beta)$ and $(\delta,
           \gamma_0, \ldots, \gamma_{n-2}, \gamma)$, computes $A = U^\alpha
           V^\beta$ and $B = V^\delta Q_n^\gamma \prod_{i=0}^{n-2}
-          Q_i^{\gamma_i}$, and derives
+          Q_i^{\gamma_i}$, and derives the following:
           \begin{align*}
             \algo{chal}_1 &= \hash_p(\inst_1, A, B) \ ; \ \eta = \alpha +
             \algo{chal}_1 e \ ; \ \nu = \delta + \algo{chal}_1 x \ ; \ \xi =
             \delta + \algo{chal}_1 y \ ; \\
             \pi_i &= \gamma_i + \algo{chal}_1 m_i, \ \forall i \in [n-1] \ ; \
-            \pi = \gamma + \algo{chal}_1 s'
+            \pi = \gamma + \algo{chal}_1 s'.
           \end{align*}
 
         \item $\algo{Prv}_1$ outputs $\Pi = (\com, A, B, C, \eta, \nu, \xi,
@@ -184,25 +195,25 @@ secure element $\algo{se}$ and mobile device $\algo{dev}$ jointly produce $\sigm
 \leftarrow \SOK[\inst, \witness : \rel(\inst, \witness) = 1]$, where
 $\inst = (\gen_0, \gen_1, \pk_{\BBS}, U, V, W, c)$ with $\pk_{\BBS} =
 (\tilde{P}, \tilde{T}, Q_0, Q_1, Q_2, \hgen)$, $\witness = (e, x, y, s, \algo{uid},
-\sk, r)$, and $\rel(\inst, \witness) = 1$ is equivalent to
+\sk, r)$, and $\rel(\inst, \witness) = 1$ is equivalent to the following:
 \begin{align*}
   &e(U, \tilde{T}) e(W, \tilde{P}) = 1 \ \wedge \ W = U^e V^x \\
   &\wedge \ \hgen^{-1} = V^y Q_0^{\algo{uid}} Q_1^{\sk} Q_2^s \ \wedge \ C =
-  \gen_0^{\algo{uid}} \gen_1^r,
+  \gen_0^{\algo{uid}} \gen_1^r.
 \end{align*}
-that is, an instantiation of Equation~\eqref{eq:BBSrel} with $\vec{m} =
+That is, this is an instantiation of Equation~\eqref{eq:BBSrel} with $\vec{m} =
 (\algo{uid}, \sk)$ and $C = \gen_0^{\algo{uid}} \gen_1^r$. In this instantiation, $\algo{se}$
 executes $\algo{Prv}_0$, outputting $\com = Q_1^{\sk} Q_2^\rho$, $\rho$, and
 proof $\Pi_0$ computed as above except that the challenge $\algo{chal}_0$ also
 hashes the message to be signed. $\algo{dev}$ computes a proof $\Pi_1 \leftarrow
 \algo{PoK}[\inst_1, \witness_1 : \rel(\inst_1, \witness_1) = 1]$, for $\inst_1
 = (\gen_0, \gen_1, \pk_{\BBS}, U, V, W, \com, C)$, $\witness_1 = (e, x, y,
-\algo{uid}, s', r)$, and
+\algo{uid}, s', r)$, and relation as follows:
 \begin{equation*}
   W = U^e V^x \ \wedge \ (\com \hgen)^{-1} = V^y Q_0^{\algo{uid}}
-  Q_2^{s'} \ \wedge \ C = \gen_0^{\algo{uid}} \gen_1^r,
+  Q_2^{s'} \ \wedge \ C = \gen_0^{\algo{uid}} \gen_1^r.
 \end{equation*}
-computed via sigma protocols, following the same approach as $\Pi_1$ above.
+This is computed via sigma protocols, following the same approach as $\Pi_1$ above.
 
 \subsection{Pointcheval-Sanders signatures}\label{sec:ps-sign}
 
@@ -271,21 +282,21 @@ $(\gen, B = \gen^b)$, computes $\com = \vec{\gen}^{\vec{m}\|r}$, $R =
 R^{m_i} B^{\rho_i})$ for $i \in [n]$, together with a proof $\Pi \leftarrow
 \algo{PoK}[\inst, \witness : \rel(\inst, \witness) = 1]$ for $\inst =
 (\vec{\gen}, \gen, B, \com, R, (\ciph_i)_{i \in [n]})$, $\witness = ((m_i,
-\rho_i)_{i \in [n]}, r)$, and relation
+\rho_i)_{i \in [n]}, r)$, and relation as follows:
 \begin{align*}
   1 = \vec{\gen}^{\vec{m}\|r} \ \wedge \ \ciph_i = (\gen^{\rho_i},
-  R^{m_i}B^{\rho_i}), \ \forall i \in [n],
+  R^{m_i}B^{\rho_i}), \ \forall i \in [n].
 \end{align*}
-and sends the signer $(\com, \ciph_0, \ldots, \ciph_{n-1}, \gen, B,
+It then sends the signer $(\com, \ciph_0, \ldots, \ciph_{n-1}, \gen, B,
 \Pi)$. The signer recomputes $R = \hash_{\group{1}}(\com)$, verifies $\Pi$
 against $\com$, $R$, and $(\gen, B)$, and rejects if it does not hold.
 Otherwise, it parses each $\ciph_i$ as $(E_{i,1}, E_{i,2})$, randomly
-selects $u \in \Zp$, computes
+selects $u \in \Zp$, and computes the following:
 \begin{align*}
   \ciph &= (E_1, E_2) = \Bigl(\prod_{i=0}^{n-1} E_{i,1}^{y_i}, \ R^x
-  \prod_{i=1}^n E_{i,2}^{y_i} R^{uz}\Bigr),
+  \prod_{i=1}^n E_{i,2}^{y_i} R^{uz}\Bigr).
 \end{align*}
-and sends $(u, \ciph)$ to the recipient, who decrypts $\ciph = (E_1,
+It then sends $(u, \ciph)$ to the recipient, who decrypts $\ciph = (E_1,
 E_2)$ by computing $S = E_2 / E_1^b$ and outputs $\psi = (u, R, S)$ if it is
 a valid Pointcheval-Sanders signature on $\vec{m}$; if the signer followed
 the protocol honestly, $S = R^x \bigl(\prod_{i=0}^{n-1} R^{y_i m_i}\bigr)
@@ -296,13 +307,13 @@ This protocol adapts readily to partially opened vectors: for $\algo{Disc}
 recipient computes $\com = \prod_{i \in [n]\setminus\algo{Disc}} \gen_i^{m_i}$
 and a proof for $\inst = (\algo{Disc}, \vec{\gen}, \gen, B, \com, R,
 (\ciph_i)_{i \in [n]\setminus\algo{Disc}})$, $\witness = ((m_i, \rho_i)_{i \in
-[n]\setminus\algo{Disc}}, r)$, and relation
+[n]\setminus\algo{Disc}}, r)$, and relation as follows:
 \begin{align*}
   \com &= \gen_n^r \prod_{i \in [n]\setminus\algo{Disc}} \gen_i^{m_i} \ \wedge \
   \ciph_i = (\gen^{\rho_i}, R^{m_i} B^{\rho_i}), \ \forall i \in
-  [n]\setminus\algo{Disc},
+  [n]\setminus\algo{Disc}.
 \end{align*}
-sending $m_i$ for $i \in \algo{Disc}$ in the clear, and the signer computes
+It sends $m_i$ for $i \in \algo{Disc}$ in the clear, and the signer computes the following:
 \begin{align*}
   \ciph &= (E_1, E_2) = \Bigl(\prod_{i \in [n]\setminus\algo{Disc}}
   E_{i,1}^{y_i}, \ R^x \prod_{i \in \algo{Disc}} R^{m_i y_i} \prod_{i \in
@@ -338,7 +349,7 @@ her mobile device $\algo{dev}$ to compute $\Sigma$ as follows.
         \item Generate $\Delta \leftarrow \algo{PoK}[\inst, \witness : \rel(\inst,
           \witness) = 1]$, with $\inst = (\gen_0, \gen_1, \tilde{X}, \tilde{Y}_0,
           \tilde{Y}_1, \tilde{Y}_2, \tilde{Z}, v, C, R^*, S^*)$, $\witness = (u, \algo{uid}, s)$,
-          and
+          and relation as follows:
           \begin{align*}
             e(S^*, \tilde{P}) &= e(R^*, \tilde{X} \tilde{Y}_0^{\algo{uid}} \tilde{Y}_1^v
             \tilde{Y}_2^s \tilde{Z}^u) \ \wedge \ C = \gen_0^{\algo{uid}} \gen_1^s.
@@ -370,7 +381,7 @@ s)$ under $\pk_{\algo{PS}}$, then $e(S^*, \tilde{P}) = e(R^*, \tilde{X} \tilde{C
 \tilde{Y}_1^v)$, so a verifier, given $\Sigma = (R^*, S^*, \Delta)$ and token
 $\tau = (v, C)$, checks that $\tau$ was issued by $\algo{cb}$ by parsing $\Delta =
 (\tilde{C}, A, \tilde{A}, \pi_{\algo{uid}}, \pi_s, \pi_u)$, computing $\gamma =
-\hash_p(\inst', A, \tilde{A})$, and verifying
+\hash_p(\inst', A, \tilde{A})$, and verifying the following:
 \begin{align*}
   e(S^*, \tilde{P}) &= e(R^*, \tilde{X} \tilde{C} \tilde{Y}_1^v) \ \wedge \
   C^\gamma A = \gen_0^{\pi_{\algo{uid}}} \gen_1^{\pi_s} \ \wedge \

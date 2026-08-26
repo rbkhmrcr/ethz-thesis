@@ -22,21 +22,21 @@ oracle $\signo$.
 
 Let $\mathrm{TSPS} = (\algo{Setup}, \algo{KeyGen}, \algo{OffSign}, \algo{OnSign}, \algo{Combine},
 \SPSverify)$ be an $(n, t)$-TSPS scheme over message space $\mathcal{M}$. The
-advantage of a PPT adversary $\adv$ is defined as
+advantage of a PPT adversary $\adv$ is defined as follows:
 %
 \begin{equation*}
 %
   \Adv_{\mathrm{TSPS}, \adv}^{\text{adp-TS-UF-1}}(\secparam) =
   \Pr\left[\mathbf{G}_{\mathrm{TS}, \adv}^{\text{adp-TS-UF-1}}(\secparam) = 1
-  \right],
+  \right].
 %
 \end{equation*}
 %
-with game $\mathbf{G}_{\mathrm{TS}, \adv}^{\text{adp-TS-UF-1}}$ and its
-oracles $\signo$ and $\corrupto$ given in
+Here, game $\mathbf{G}_{\mathrm{TS}, \adv}^{\text{adp-TS-UF-1}}$ and its
+oracles $\signo$ and $\corrupto$ are given in
 Experiment~\ref{exp:tsps-adp-ts-uf-1}. A threshold structure-preserving
 signature scheme achieves adaptive TS-UF-1 security if, for every PPT
-adversary $\adv$,
+adversary $\adv$, the following holds:
 %
 \begin{equation*}
 %

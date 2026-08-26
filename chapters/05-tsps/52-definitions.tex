@@ -32,19 +32,21 @@ security parameters $\secparam$, all $(\pk, \sk) \sample \SPSgen(\secparam,
 l)$, and all $\vec{{M}} \in \mathcal{M}$, we have $\SPSverify(\pk, \vec{{M}},
 \SPSsign(\sk, \vec{{M}})) = 1$.
 
-\paragraph{Unforgeability.} For a PPT adversary $\adv$, define advantage
+\paragraph{Unforgeability.} For a PPT adversary $\adv$, define advantage as
+follows:
 %
 \begin{equation*}
 %
   \Adv_{\mathrm{SPS}, \adv}^{\text{UF-CMA}}(\secparam) =
   \Pr\left[\mathbf{G}_{\mathrm{SPS}, \adv}^{\text{UF-CMA}}(\secparam) =
-  1\right],
+  1\right].
 %
 \end{equation*}
 %
-with game $\mathbf{G}_{\mathrm{SPS},\adv}^{\text{UF-CMA}}$ and signing oracle
-$\signo$ given in Experiment~\ref{exp:sps-uf-cma}. A structure-preserving
-signature scheme achieves UF-CMA security if for every PPT adversary $\adv$,
+Here, game $\mathbf{G}_{\mathrm{SPS},\adv}^{\text{UF-CMA}}$ and signing oracle
+$\signo$ are given in Experiment~\ref{exp:sps-uf-cma}. A structure-preserving
+signature scheme achieves UF-CMA security if, for every PPT adversary $\adv$,
+the following holds:
 %
 \begin{equation*}
 %

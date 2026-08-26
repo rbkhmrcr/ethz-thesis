@@ -62,7 +62,8 @@ pairings~\cite{C:AGHO11}.
 
         \item Sample $r \sample \Zp^*$.
 
-        \item Return $\signature = (\gggen{R}, \gggen{S}, {T})$ such that:
+        \item Return $\signature = (\gggen{R}, \gggen{S}, {T})$ such that the
+          following holds:
           %
           \begin{equation*}
           %
@@ -401,7 +402,7 @@ secret-shared representation $\llbracket x \rrbracket$ is
 linearity-preserving: for any $x,y,z,\alpha,\beta\in \Zp$ such that $u =
 \alpha\cdot x + \beta \cdot y + z$, given secret shares $\llbracket x
 \rrbracket$ and $\llbracket y \rrbracket$ and public values $z,\alpha,\beta$,
-the parties can compute a secret sharing of $u$ ``for free'' as
+the parties can compute a secret sharing of $u$ ``for free'' as follows:
 \[\llbracket u \rrbracket = \alpha\cdot \llbracket x \rrbracket + \beta \cdot
 \llbracket y \rrbracket + z.\] Since we assume malicious security, this
 property must also be preserved for any additional authentication
@@ -591,7 +592,7 @@ representation $\llbracket X \rrbracket$ is linearity-preserving: for any
 $X,Y,Z\in \G$ and $\alpha,\beta\in \Zp$ such that $U = \alpha X + \beta Y
 + Z$, given secret shares $\llbracket X \rrbracket$ and $\llbracket Y
 \rrbracket$, public group element $Z$, and public values $\alpha,\beta$, the
-parties can compute a secret sharing of $U$ ``for free'' as
+parties can compute a secret sharing of $U$ ``for free'' as follows:
 \[\llbracket U \rrbracket = \alpha\llbracket X \rrbracket + \beta \llbracket Y
 \rrbracket + Z.\] Again, since we assume malicious security, this property
 must also be preserved for any additional authentication components.
