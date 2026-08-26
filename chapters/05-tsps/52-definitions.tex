@@ -1,6 +1,6 @@
 \section{Definitions}\label{sec:tsps-definitions}
 
-Structure-preserving signatures sign vectors of messages that lie in
+Structure-preserving signatures sign messages that lie in
 pairing-friendly groups, rather than arbitrary strings, and the corresponding
 verification algorithm checks equations comprising products of pairings.
 
@@ -11,8 +11,8 @@ A structure-preserving signature scheme is defined by the following algorithms:
 \begin{description}
 
   \item[$(\pk, \sk) \sample \SPSgen(\secparam, \ell)$ :] The key generation
-    algorithm, on input security parameter $\secparam$ and vector length
-    $\ell$, outputs key pair $(\pk, \sk)$. Public keys are group elements.
+    algorithm, on input security parameter $\secparam$ and length
+    $\ell$,outputs key pair $(\pk, \sk)$. Public keys are group elements.
 
   \item[$\signature \sample \SPSsign(\sk, \mssg)$ :] The signing algorithm, on
     input secret key $\sk$ and message $\mssg$, outputs signature $\signature$.
@@ -102,7 +102,7 @@ $\TSPSverify$ as follows.
 
   \item[$\lbrack \signature\rbrack  \sample \TSPSsign(\lbrack \sk\rbrack ,
     \mssg)$ :] The threshold signing algorithm takes a secret key share
-    $\lbrack \sk\rbrack $ and a vector of messages $\mssg$ with elements in
+    $\lbrack \sk\rbrack $ and message $\mssg$ with elements in
     $\group{1}$ and/or $\group{2}$, and outputs a signature share $\lbrack
     \signature\rbrack $ with elements in $\group{1}$ and $\group{2}$.
 
@@ -111,7 +111,7 @@ $\TSPSverify$ as follows.
     \signature\rbrack $ to output signature $\signature$.
 
   \item[$\{0,1\} \leftarrow \TSPSverify(\pk, \mssg, \signature)$ :] The
-    verification algorithm takes public key $\pk$, vector of messages $\mssg$,
+    verification algorithm takes public key $\pk$, message $\mssg$,
     and signature $\signature$, and returns 0 or 1. $\TSPSverify$ is equal to
     $\SPSverify$.
 
@@ -168,10 +168,10 @@ security if, for every PPT adversary $\adv$, the following holds:
       \pk\rbrack ) \gets \TSPSgen(\secparam, \ell, t, n)$, and sends $\pk$, $\{\sk_i\}_{i \in
       \Cor}$, and $\lbrack \pk\rbrack $ to $\adv$.
 
-    \item The adversary is given oracle access to $\signo$, which on input $(i,
+    \item The adversary is given oracle access to $\TSPSsigno$, which on input $(i,
       \mssg)$, asserts $\mssg \in \mathcal{M} \wedge i \in \mathcal{H}$,
-      computes $\sigma_i \gets \TSPSsign(\sk_i, \mssg)$, and if $\sigma_i \neq
-      \perp$, adds $i$ to $S(\mssg)$, before returning $\sigma_i$.
+      computes $\signature_i \gets \TSPSsign(\sk_i, \mssg)$, and if $\signature_i \neq
+      \perp$, adds $i$ to $S(\mssg)$, before returning $\signature_i$.
 
     \item The adversary is given oracle access to $\corrupto$, which on input
       $k$, returns $\perp$ if $k \in \Cor$, and otherwise adds $k$ to $\Cor$,
