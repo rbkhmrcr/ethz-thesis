@@ -39,12 +39,12 @@ our constructions from Section~\ref{sec:tsps-instantiation} fall into this class
   $\pk$. It forwards $\pk$, $\{\sk_i\}_{i \in \Cor}$, and $\lbrack \pk\rbrack $ to $\adv$.
 
   $\advB$ answers $\adv$'s $\signo$ queries in one of two ways. If, for the
-  queried $\vec{{M}}$, $|S(\vec{{M}})| < t - |\Cor|$, then $\advB$ forms
+  queried $\vec{{m}}$, $|S(\vec{{m}})| < t - |\Cor|$, then $\advB$ forms
   the requested signature share $\sigma_i$ directly from its sampled $\sk_i$;
   the information-theoretic hiding property of the linear secret sharing
   scheme means $\adv$ cannot distinguish this simulated share from a genuine
-  one. Once $|S(\vec{{M}})|$ reaches $t - |\Cor|$, $\advB$ instead queries
-  its own signing oracle for $\vec{{M}}$, and uses the information exchanged
+  one. Once $|S(\vec{{m}})|$ reaches $t - |\Cor|$, $\advB$ instead queries
+  its own signing oracle for $\vec{{m}}$, and uses the information exchanged
   during the (possibly interactive) threshold signing protocol to construct a
   signature share $\sigma_i$ that, combined with the shares it has already
   issued, yields a signature verifying correctly under $\algo{Combine}$ and
@@ -52,9 +52,9 @@ our constructions from Section~\ref{sec:tsps-instantiation} fall into this class
   without ever calling its own signing oracle on a message for which it would
   later need to produce a forgery.
 
-  Since $\advB$ never queries its own signing oracle on $\vec{{M}}^*$
-  itself, if $\adv$ outputs a forgery $(\vec{{M}^*}, \signature^*)$ satisfying
-  the winning condition of the adp-TS-UF-1 game, then $(\vec{{M}^*},
+  Since $\advB$ never queries its own signing oracle on $\vec{{m}}^*$
+  itself, if $\adv$ outputs a forgery $(\vec{{m}^*}, \signature^*)$ satisfying
+  the winning condition of the adp-TS-UF-1 game, then $(\vec{{m}^*},
   \signature^*)$ also satisfies the winning condition of the wUF-CMA game for
   $\advB$. So the advantage of $\adv$ in the adp-TS-UF-1 game is bounded
   by the advantage of $\advB$ in the wUF-CMA game of the underlying

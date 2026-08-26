@@ -24,46 +24,46 @@ pairings~\cite{C:AGHO11}.
 
       \begin{enumerate}
 
-        \item Sample $\vec{u} = (u_1, \ldots, u_l) \sample (\Zp^*)^l$ and $v
+        \item Sample $\vec{\mu} = (\mu_1, \ldots, \mu_l) \sample (\Zp^*)^l$ and $\tau
           \sample \Zp$.
 
-        \item Compute $\vec{\gggen{U}} = (\gggen{U}_1, \ldots, \gggen{U}_l) = (u_1
-          \ggen, \ldots, u_l \ggen) \in \group{2}^l$ and ${V} = v
+        \item Compute $\vec{\widetilde{u}} = (\widetilde{u}_1, \ldots, \widetilde{u}_l) = (\mu_1
+          \ggen, \ldots, \mu_l \ggen) \in \group{2}^l$ and ${v} = \tau
           \gen \in \group{1}$.
 
-        \item Return $\pk = (\vec{\gggen{U}}, {V})$ and $\sk = (\vec{u}, v)$.
+        \item Return $\pk = (\vec{\widetilde{u}}, {v})$ and $\sk = (\vec{\mu}, \tau)$.
 
       \end{enumerate}
 
-    \item[$\signature \sample \SPSsign(\sk, \vec{{M}})$ :] On input secret key
-      $\sk = (\vec{u}, v)$ and vector $\vec{{M}} = ({M}_1, \ldots,
-      {M}_l) \in \group{1}^l$, do:
+    \item[$\signature \sample \SPSsign(\sk, \vec{{m}})$ :] On input secret key
+      $\sk = (\vec{\mu}, \tau)$ and vector $\vec{{m}} = ({m}_1, \ldots,
+      {m}_l) \in \group{1}^l$, do:
 
       \begin{enumerate}
 
-        \item Sample $r \sample \Zp^*$.
+        \item Sample $\rho \sample \Zp^*$.
 
-        \item Return $\signature = (\gggen{R}, \gggen{S}, {T})$ such that the
+        \item Return $\signature = (\widetilde{r}, \widetilde{s}, {z})$ such that the
           following holds:
           %
           \begin{equation*}
           %
-            \gggen{R} = \tfrac{1}{r}\ggen, \qquad \gggen{S} = v\gggen{R}, \qquad {T} =
-            r\left(\gen - \vec{u}\vec{{M}}\right).
+            \widetilde{r} = \tfrac{1}{\rho}\ggen, \qquad \widetilde{s} = \tau\widetilde{r}, \qquad {z} =
+            \rho\left(\gen - \vec{\mu}\vec{{m}}\right).
           %
           \end{equation*}
 
       \end{enumerate}
 
-    \item[$\{0,1\} \leftarrow \SPSverify(\pk, \vec{{M}}, \signature)$ :] On input
-      signature $\signature = (R, S, T) \in \group{2}^2 \times \group{1}$ and
-      vector $\vec{M} \in \group{1}^l$, return 1 if the following holds, and
+    \item[$\{0,1\} \leftarrow \SPSverify(\pk, \vec{{m}}, \signature)$ :] On input
+      signature $\signature = (\widetilde{r}, \widetilde{s}, {z}) \in \group{2}^2 \times \group{1}$ and
+      vector $\vec{m} \in \group{1}^l$, return 1 if the following holds, and
       0 otherwise:
       %
       \begin{equation}
       %
-        e({V}, \gggen{R}) = e(\gen, \gggen{S}) \ \wedge \ e({T},
-        \gggen{R})\prod_{i=1}^le({M}_i, \gggen{U}_i) = e(\gen, \ggen).
+        \pairing({v}, \widetilde{r}) = \pairing(\gen, \widetilde{s}) \ \wedge \ \pairing({z},
+        \widetilde{r})\prod_{i=1}^l\pairing({m}_i, \widetilde{u}_i) = \pairing(\gen, \ggen).
       %
       \end{equation}
       \label{eq:abe-ver}
@@ -90,60 +90,60 @@ is existentially unforgeable under the DDH assumption~\cite{C:KilPanWee15}.
 
       \begin{enumerate}
 
-        \item Sample column vectors $\vec{a} = (1, a)^{\mathsf{T}}$ and $\vec{b} =
-          (1, b)^{\mathsf{T}}$, for uniformly random $a, b \in \Zp$, together with
-          uniformly random matrices $\mathbf{k} \in \Zp^{(l+1)\times 2}$,
-          $\mathbf{c} \in \Zp^{2\times 2}$, and $\mathbf{d} \in \Zp^{2\times 2}$.
+        \item Sample column vectors $\vec{\alpha} = (1, \alpha)^{\mathsf{T}}$ and $\vec{\beta} =
+          (1, \beta)^{\mathsf{T}}$, for uniformly random $\alpha, \beta \in \Zp$, together with
+          uniformly random matrices $\boldsymbol{\kappa} \in \Zp^{(l+1)\times 2}$,
+          $\boldsymbol{\gamma} \in \Zp^{2\times 2}$, and $\boldsymbol{\delta} \in \Zp^{2\times 2}$.
 
-        \item Compute $\vec{u} = \mathbf{k}\vec{a}$, $\vec{v} = \mathbf{c}\vec{a}$,
-          $\vec{w} = \mathbf{d}\vec{a}$, $\vec{x} = \vec{b}^{\mathsf{T}}\mathbf{c}$, and
-          $\vec{y} = \vec{b}^{\mathsf{T}}\mathbf{d}$.
+        \item Compute $\vec{\mu} = \boldsymbol{\kappa}\vec{\alpha}$, $\vec{\nu} = \boldsymbol{\gamma}\vec{\alpha}$,
+          $\vec{\omega} = \boldsymbol{\delta}\vec{\alpha}$, $\vec{\xi} = \vec{\beta}^{\mathsf{T}}\boldsymbol{\gamma}$, and
+          $\vec{\upsilon} = \vec{\beta}^{\mathsf{T}}\boldsymbol{\delta}$.
 
-        \item Compute $\vec{{B}} = \gen(1, b)$, $\vec{{X}} =
-          \gen\vec{x}$, and $\vec{{Y}} = \gen\vec{y}$.
+        \item Compute $\vec{{b}} = \gen(1, \beta)$, $\vec{{x}} =
+          \gen\vec{\xi}$, and $\vec{{y}} = \gen\vec{\upsilon}$.
 
-        \item Compute $\vec{\gggen{A}} = \ggen(1, a)$, $\vec{\gggen{U}} =
-          \ggen\vec{u}$, $\vec{\gggen{V}} = \ggen\vec{v}$, and $\vec{\gggen{W}} =
-          \ggen\vec{w}$.
+        \item Compute $\vec{\widetilde{a}} = \ggen(1, \alpha)$, $\vec{\widetilde{u}} =
+          \ggen\vec{\mu}$, $\vec{\widetilde{v}} = \ggen\vec{\nu}$, and $\vec{\widetilde{w}} =
+          \ggen\vec{\omega}$.
 
-        \item Return $\sk = (\mathbf{k}, \vec{{B}}, \vec{{X}}, \vec{{Y}})$
-          and $\pk = (\vec{\gggen{A}}, \vec{\gggen{U}}, \vec{\gggen{V}}, \vec{\gggen{W}})$.
+        \item Return $\sk = (\boldsymbol{\kappa}, \vec{{b}}, \vec{{x}}, \vec{{y}})$
+          and $\pk = (\vec{\widetilde{a}}, \vec{\widetilde{u}}, \vec{\widetilde{v}}, \vec{\widetilde{w}})$.
 
       \end{enumerate}
 
-    \item[$\signature \sample \SPSsign(\sk, \vec{{M}})$ :] On input secret key
-      $\sk = (\mathbf{k}, \vec{{B}}, \vec{{X}}, \vec{{Y}})$ and vector
-      $\vec{{M}} = ({M}_1, \ldots, {M}_l)$, do:
+    \item[$\signature \sample \SPSsign(\sk, \vec{{m}})$ :] On input secret key
+      $\sk = (\boldsymbol{\kappa}, \vec{{b}}, \vec{{x}}, \vec{{y}})$ and vector
+      $\vec{{m}} = ({m}_1, \ldots, {m}_l)$, do:
 
       \begin{enumerate}
 
-        \item Sample $r, s \sample \Zp^*$.
+        \item Sample $\rho, \sigma \sample \Zp^*$.
 
         \item Compute:
           %
           \begin{align*}
           %
-            \gggen{Q} &= s\ggen, \qquad \vec{{R}} = r\vec{{B}}, \qquad
-            \vec{{S}} = rs\vec{{B}}, \\ \vec{{T}} &= (\gen,
-            \vec{{M}})\mathbf{k} + r (\vec{{X}}+s\vec{{Y}}).
+            \widetilde{q} &= \sigma\ggen, \qquad \vec{{r}} = \rho\vec{{b}}, \qquad
+            \vec{{s}} = \rho\sigma\vec{{b}}, \\ \vec{{z}} &= (\gen,
+            \vec{{m}})\boldsymbol{\kappa} + \rho (\vec{{x}}+\sigma\vec{{y}}).
           %
           \end{align*}
 
-        \item Return $\signature = (\gggen{Q}, \vec{{R}}, \vec{{S}},
-          \vec{{T}})$.
+        \item Return $\signature = (\widetilde{q}, \vec{{r}}, \vec{{s}},
+          \vec{{z}})$.
 
       \end{enumerate}
 
-    \item[$\{0,1\} \leftarrow \SPSverify(\pk, \vec{{M}}, \signature)$ :] On input
-      signature $\signature =(\gggen{Q}, \vec{{R}}, \vec{{S}}, \vec{{T}}) \in
-      \group{2}\times\group{1}^6$ and vector $\vec{M}$ of $l$ messages in
+    \item[$\{0,1\} \leftarrow \SPSverify(\pk, \vec{{m}}, \signature)$ :] On input
+      signature $\signature =(\widetilde{q}, \vec{{r}}, \vec{{s}}, \vec{{z}}) \in
+      \group{2}\times\group{1}^6$ and vector $\vec{m}$ of $l$ messages in
       $\group{1}$, return 1 if the following holds, and 0 otherwise:
       %
       \begin{equation}
       %
-        e(\vec{{T}}, \vec{\gggen{A}}) = e((\gen, \vec{{M}}),
-        \vec{\gggen{U}})\, e(\vec{{R}},\vec{\gggen{V}})\, e(\vec{{S}},
-        \vec{\gggen{W}}) \ ; \qquad e({R}, \gggen{Q}) = e({S}, \ggen).
+        \pairing(\vec{{z}}, \vec{\widetilde{a}}) = \pairing((\gen, \vec{{m}}),
+        \vec{\widetilde{u}})\, \pairing(\vec{{r}},\vec{\widetilde{v}})\, \pairing(\vec{{s}},
+        \vec{\widetilde{w}}) \ ; \qquad \pairing({r}, \widetilde{q}) = \pairing({s}, \ggen).
       %
       \end{equation}
       \label{eq:kiltz-ver}

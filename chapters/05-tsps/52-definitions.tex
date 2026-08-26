@@ -15,14 +15,14 @@ algorithms:
     algorithm, on input security parameter $\secparam$ and vector length $\ell$,
     outputs key pair $(\pk, \sk)$. Public keys are group elements.
 
-  \item[$\signature \sample \SPSsign(\sk, \vec{{M}})$ :] The signing algorithm, on
-    input secret key $\sk$ and message $\vec{{M}}$, outputs
+  \item[$\signature \sample \SPSsign(\sk, \vec{{m}})$ :] The signing algorithm, on
+    input secret key $\sk$ and message $\vec{{m}}$, outputs
     signature $\signature$. Messages and signatures are vectors of group elements, 
     messages from the space $\group{1}^\ell$, and signatures in 
     $\group{1}^{poly(\secparam)} \times \group{2}^{poly(\secparam)}$.
 
-  \item[$\{0,1\} \leftarrow \SPSverify(\pk, \vec{{M}}, \signature)$ :] The
-    verification algorithm, on input public key $\pk$, message $\vec{{M}}$,
+  \item[$\{0,1\} \leftarrow \SPSverify(\pk, \vec{{m}}, \signature)$ :] The
+    verification algorithm, on input public key $\pk$, message $\vec{{m}}$,
     and signature $\signature$, returns 0 or 1. Verification consists only of 
     evaluating pairing product equations.
 
@@ -30,8 +30,8 @@ algorithms:
 
 A structure-preserving signature scheme satisfies correctness if for all
 security parameters $\secparam$, all $(\pk, \sk) \sample \SPSgen(\secparam,
-l)$, and all $\vec{{M}} \in \group{1}^\ell$, we have $\SPSverify(\pk, \vec{{M}},
-\SPSsign(\sk, \vec{{M}})) = 1$.
+l)$, and all $\vec{{m}} \in \group{1}^\ell$, we have $\SPSverify(\pk, \vec{{m}},
+\SPSsign(\sk, \vec{{m}})) = 1$.
 
 \paragraph{Unforgeability.} For a PPT adversary $\adv$, define advantage as
 follows:
@@ -56,10 +56,10 @@ the following holds:
 %
 \end{equation*}
 %
-Excluding the message $\vec{{M}^*}$ from the set $S$ of
+Excluding the message $\vec{{m}^*}$ from the set $S$ of
 queried messages, as shown in Experiment~\ref{exp:sps-uf-cma}, gives
 weak unforgeability (wUF-CMA), the notion we rely on throughout this
-chapter. Excluding instead the pair $(\vec{{M}^*}, \signature^*)$ gives 
+chapter. Excluding instead the pair $(\vec{{m}^*}, \signature^*)$ gives 
 strong unforgeability (sUF-CMA), which
 rules out an adversary producing a fresh signature on an already-signed
 message.
@@ -73,15 +73,15 @@ message.
       l)$ and sends $\pk$ to $\adv$.
 
     \item The adversary is given oracle access to $\signo$, which on input
-      $\vec{{M}}$, computes $\signature \gets \SPSsign(\sk, \vec{{M}})$, and if
-      $\signature \neq \perp$, adds $\vec{{M}}$ to $S$, before returning $\signature$.
+      $\vec{{m}}$, computes $\signature \gets \SPSsign(\sk, \vec{{m}})$, and if
+      $\signature \neq \perp$, adds $\vec{{m}}$ to $S$, before returning $\signature$.
 
-    \item The adversary outputs $(\vec{{M}^*}, \signature^*)$.
+    \item The adversary outputs $(\vec{{m}^*}, \signature^*)$.
 
   \end{enumerate}
 
-  $\adv$ wins the experiment if $\SPSverify(\pk, \vec{{M}^*}, \signature^*) =
-  1$ and $\vec{{M}^*} \notin S$.
+  $\adv$ wins the experiment if $\SPSverify(\pk, \vec{{m}^*}, \signature^*) =
+  1$ and $\vec{{m}^*} \notin S$.
 
 \end{experimentbox}
 
@@ -103,9 +103,9 @@ $\TSPSverify$ as follows.
     secret key underlying $\pk$; $\pk$ consists of group elements, and $\sk$
     of elements of $\Zp$ and/or group elements.
 
-  \item[$\lbrack \signature\rbrack  \sample \TSPSsign(\lbrack \sk\rbrack , \vec{{M}})$ :] The threshold signing algorithm takes a
+  \item[$\lbrack \signature\rbrack  \sample \TSPSsign(\lbrack \sk\rbrack , \vec{{m}})$ :] The threshold signing algorithm takes a
     secret key share $\lbrack \sk\rbrack $ and a vector of messages
-    $\vec{{M}}$ with elements in $\group{1}$ and/or $\group{2}$, and
+    $\vec{{m}}$ with elements in $\group{1}$ and/or $\group{2}$, and
     outputs a signature share $\lbrack \signature\rbrack $ with elements in
     $\group{1}$ and $\group{2}$.
 
@@ -113,9 +113,9 @@ $\TSPSverify$ as follows.
     combining algorithm is non-interactive, and takes signature shares
     $\lbrack \signature\rbrack $ to output signature $\signature$.
 
-  \item[$\{0,1\} \leftarrow \TSPSverify(\pk, \vec{{M}}, \signature)$ :] The
+  \item[$\{0,1\} \leftarrow \TSPSverify(\pk, \vec{{m}}, \signature)$ :] The
     verification algorithm takes public key $\pk$, vector of messages
-    $\vec{{M}}$, and signature $\signature$, and returns 0 or 1. $\TSPSverify$ 
+    $\vec{{m}}$, and signature $\signature$, and returns 0 or 1. $\TSPSverify$ 
     is equal to $\SPSverify$.
 
 \end{description}
@@ -127,10 +127,10 @@ notions of unforgeability, distinguishing fully and partially
 non-interactive schemes~\cite{C:BCKMTZ22}. With TS-UF-0 security, the
 adversary has access to a partial signature oracle $\signo$, and the
 unforgeability game is defined so that the adversary cannot win with
-message-signature pair $(\vec{{M}^*}, \signature^*)$ if the partial
-signature oracle has already been queried, even once, on $\vec{{M}^*}$.
+message-signature pair $(\vec{{m}^*}, \signature^*)$ if the partial
+signature oracle has already been queried, even once, on $\vec{{m}^*}$.
 TS-UF-1 relaxes this: the winning condition can be triggered as long as the
-adversary has queried for partial signatures on $\vec{{M}^*}$ from no more
+adversary has queried for partial signatures on $\vec{{m}^*}$ from no more
 than $t - |\Cor| - 1$ parties, where $\Cor$ is the set of corrupted parties.
 When the adversary corrupts $t-1$ parties, TS-UF-0 and TS-UF-1 coincide. In
 the adaptive variants, adp-TS-UF-0 and adp-TS-UF-1, the adversary
@@ -179,23 +179,23 @@ adversary $\adv$, the following holds:
       $\adv$.
 
     \item The adversary is given oracle access to $\signo$, which on input
-      $(i, \vec{{M}})$, asserts $\vec{{M}} \in \mathcal{M} \wedge i \in
+      $(i, \vec{{m}})$, asserts $\vec{{m}} \in \mathcal{M} \wedge i \in
       \mathcal{H}$, computes $\sigma_i \gets \algo{ThreshSign}(\sk_i,
-      \vec{{M}})$, and if $\sigma_i \neq \perp$, adds $i$ to $S(\vec{{M}})$,
+      \vec{{m}})$, and if $\sigma_i \neq \perp$, adds $i$ to $S(\vec{{m}})$,
       before returning $\sigma_i$.
 
     \item The adversary is given oracle access to $\corrupto$, which on
       input $k$, returns $\perp$ if $k \in \Cor$, and otherwise adds $k$ to
       $\Cor$, removes $k$ from $\mathcal{H}$, and returns $\sk_k$.
 
-    \item The adversary outputs $(\vec{{M}^*}, \signature^*)$.
+    \item The adversary outputs $(\vec{{m}^*}, \signature^*)$.
 
   \end{enumerate}
 
-  $\adv$ wins the experiment if $\SPSverify(\pk, \vec{{M}^*}, \signature^*) =
-  1$, $|\Cor| < t$, and $|S(\vec{{M}^*})| < t - |\Cor|$, where $S(\vec{{M}})$
+  $\adv$ wins the experiment if $\SPSverify(\pk, \vec{{m}^*}, \signature^*) =
+  1$, $|\Cor| < t$, and $|S(\vec{{m}^*})| < t - |\Cor|$, where $S(\vec{{m}})$
   records which honest signers have issued a partial signature on
-  $\vec{{M}}$.
+  $\vec{{m}}$.
 
 \end{experimentbox}
 

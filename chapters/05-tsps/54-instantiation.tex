@@ -32,26 +32,26 @@ Section~\ref{sec:MPC}~\cite{C:AGHO11}.
       \begin{enumerate}
 
         \item Issue $l+1$ parallel calls to $\idfu{\algo{RandShare}}$ to
-          compute $t$-additive shares $(\lbrack u_1\rbrack , \ldots,
-          \lbrack u_l\rbrack , \lbrack v\rbrack )$.
+          compute $t$-additive shares $(\lbrack \mu_1\rbrack , \ldots,
+          \lbrack \mu_l\rbrack , \lbrack \tau\rbrack )$.
 
         \item Call $\idfu{\algo{ExpGenGrp}_1}$ with generator $\gen$ and
-          shares $\lbrack v\rbrack $ to obtain $t$-additive shares
-          $\lbrack {V}\rbrack  = {\lbrack v\rbrack }\gen$, and
+          shares $\lbrack \tau\rbrack $ to obtain $t$-additive shares
+          $\lbrack {v}\rbrack  = {\lbrack \tau\rbrack }\gen$, and
           $\idfu{\algo{ExpGenGrp}_2}$ with $\ggen$ and shares $\lbrack 
-          u_i\rbrack $ to obtain $t$-additive shares $\lbrack 
-          \gggen{U}_i\rbrack  = {\lbrack u_i\rbrack }\ggen$ for $i \in [l]$.
+          \mu_i\rbrack $ to obtain $t$-additive shares $\lbrack 
+          \widetilde{u}_i\rbrack  = {\lbrack \mu_i\rbrack }\ggen$ for $i \in [l]$.
 
         \item Query $\idfu{\algo{CombineGrp}_1}$ with the shares $\lbrack 
-          {V}\rbrack $, and $\idfu{\algo{CombineGrp}_2}$ with the shares
-          $(\lbrack \gggen{U}_1\rbrack , \ldots, \lbrack 
-          \gggen{U}_l\rbrack )$.
+          {v}\rbrack $, and $\idfu{\algo{CombineGrp}_2}$ with the shares
+          $(\lbrack \widetilde{u}_1\rbrack , \ldots, \lbrack 
+          \widetilde{u}_l\rbrack )$.
 
         \item If no $\bot$ occurs, return public key $\pk =
-          (\vec{\gggen{U}}, {V})$ with $\vec{\gggen{U}} = (\gggen{U}_1,
-          \ldots, \gggen{U}_l)$, with corresponding secret shares
-          $\lbrack \sk\rbrack  = (\lbrack u_1\rbrack , \ldots,
-          \lbrack u_l\rbrack , \lbrack v\rbrack )$ distributed to
+          (\vec{\widetilde{u}}, {v})$ with $\vec{\widetilde{u}} = (\widetilde{u}_1,
+          \ldots, \widetilde{u}_l)$, with corresponding secret shares
+          $\lbrack \sk\rbrack  = (\lbrack \mu_1\rbrack , \ldots,
+          \lbrack \mu_l\rbrack , \lbrack \tau\rbrack )$ distributed to
           the signers.
 
       \end{enumerate}
@@ -63,51 +63,51 @@ Section~\ref{sec:MPC}~\cite{C:AGHO11}.
       \begin{enumerate}
 
         \item Invoke $\idfu{\algo{RandShare}}$ to get $t$-additive shares
-          $\lbrack r\rbrack $.
+          $\lbrack \rho\rbrack $.
 
         \item If no $\bot$ occurs, call $\idfu{\algo{Inv}}$ to compute
-          $t$-additive shares $\lbrack 1/r\rbrack $.
+          $t$-additive shares $\lbrack 1/\rho\rbrack $.
 
         \item Issue, potentially in parallel, $l+1$ calls to
           $\idfu{\algo{Mul}}$ to compute the $t$-additive shares
-          $(\lbrack ru_1\rbrack , \ldots,\lbrack ru_l\rbrack ,
-          \lbrack v/r\rbrack )$.
+          $(\lbrack \rho\mu_1\rbrack , \ldots,\lbrack \rho\mu_l\rbrack ,
+          \lbrack \tau/\rho\rbrack )$.
 
         \item If the calls to $\idfu{\algo{Inv}}$ and $\idfu{\algo{Mul}}$
-          all succeed, the signers hold shares $(\lbrack 1/r\rbrack ,
-          \lbrack v/r\rbrack , \lbrack ru_1\rbrack , \ldots,
-          \lbrack ru_l\rbrack )$.
+          all succeed, the signers hold shares $(\lbrack 1/\rho\rbrack ,
+          \lbrack \tau/\rho\rbrack , \lbrack \rho\mu_1\rbrack , \ldots,
+          \lbrack \rho\mu_l\rbrack )$.
 
         \item Invoke $\idfu{\algo{ExpGenGrp}_1}$ with generator $\gen$ and
-          shares $\lbrack r\rbrack $ to compute $\lbrack 
-          r\gen\rbrack $, and $\idfu{\algo{ExpGenGrp}_2}$ with generator
-          $\ggen$ and shares $\lbrack 1/r\rbrack $ and $\lbrack 
-          v/r\rbrack $ to compute $\lbrack \gggen{R}\rbrack  =
-          \lbrack \tfrac{1}{r}\ggen\rbrack $ and $\lbrack 
-          \gggen{S}\rbrack  = \lbrack \tfrac{v}{r}\ggen\rbrack $.
+          shares $\lbrack \rho\rbrack $ to compute $\lbrack 
+          \rho\gen\rbrack $, and $\idfu{\algo{ExpGenGrp}_2}$ with generator
+          $\ggen$ and shares $\lbrack 1/\rho\rbrack $ and $\lbrack 
+          \tau/\rho\rbrack $ to compute $\lbrack \widetilde{r}\rbrack  =
+          \lbrack \tfrac{1}{\rho}\ggen\rbrack $ and $\lbrack 
+          \widetilde{s}\rbrack  = \lbrack \tfrac{\tau}{\rho}\ggen\rbrack $.
 
         \item Conclude the offline phase by storing $(\lbrack 
-          ru_1\rbrack , \ldots, \lbrack ru_l\rbrack , \lbrack 
-          r\gen\rbrack , \lbrack \gggen{R}\rbrack , \lbrack 
-          \gggen{S}\rbrack )$.
+          \rho\mu_1\rbrack , \ldots, \lbrack \rho\mu_l\rbrack , \lbrack 
+          \rho\gen\rbrack , \lbrack \widetilde{r}\rbrack , \lbrack 
+          \widetilde{s}\rbrack )$.
 
       \end{enumerate}
 
     \item[$\lbrack \signature\rbrack _{\algo{OnSign}} \sample
-      \algo{OnSign}(\vec{{M}})$ :] On input message vector $\vec{{M}}$, the
+      \algo{OnSign}(\vec{{m}})$ :] On input message vector $\vec{{m}}$, the
       honest signers do the following:
 
       \begin{enumerate}
 
-        \item For each ${M}_i \neq 0$, issue a call to
-          $\idfu{\algo{ExpGenGrp}_1}$ with shares $\lbrack u_ir\rbrack $
-          and generator $-{M}_i$ to obtain $t$-additive shares $\lbrack 
-          -u_ir{M}_i\rbrack $.
+        \item For each ${m}_i \neq 0$, issue a call to
+          $\idfu{\algo{ExpGenGrp}_1}$ with shares $\lbrack \mu_i\rho\rbrack $
+          and generator $-{m}_i$ to obtain $t$-additive shares $\lbrack 
+          -\mu_i\rho{m}_i\rbrack $.
 
         \item Issue consecutive calls to $\idfu{\algo{MulGrp}_1}$ to compute
-          the shares $\lbrack {T}\rbrack  = \lbrack r\gen +
-          \sum_{i=1, {M}_i \neq 0}^l {-u_ir{M}_i}\rbrack $, noting that
-          this sum is equivalent to $r\gen - \sum_{i=1}^l u_ir{M}_i$.
+          the shares $\lbrack {z}\rbrack  = \lbrack \rho\gen +
+          \sum_{i=1, {m}_i \neq 0}^l {-\mu_i\rho{m}_i}\rbrack $, noting that
+          this sum is equivalent to $\rho\gen - \sum_{i=1}^l \mu_i\rho{m}_i$.
 
       \end{enumerate}
 
@@ -117,22 +117,22 @@ Section~\ref{sec:MPC}~\cite{C:AGHO11}.
       \begin{enumerate}
 
         \item Call $\idfu{\algo{CombineGrp}_2}$ with $\lbrack 
-          \gggen{R}\rbrack $ and $\lbrack \gggen{S}\rbrack $ to
-          obtain $\gggen{R} = \tfrac{1}{r}\ggen$ and $\gggen{S} =
-          \tfrac{v}{r}\ggen$, and $\idfu{\algo{CombineGrp}_1}$ with shares
-          $\lbrack {T}\rbrack $ to compute ${T} = r(\gen -
-          \sum_{i=1}^l u_i{M}_i)$.
+          \widetilde{r}\rbrack $ and $\lbrack \widetilde{s}\rbrack $ to
+          obtain $\widetilde{r} = \tfrac{1}{\rho}\ggen$ and $\widetilde{s} =
+          \tfrac{\tau}{\rho}\ggen$, and $\idfu{\algo{CombineGrp}_1}$ with shares
+          $\lbrack {z}\rbrack $ to compute ${z} = \rho(\gen -
+          \sum_{i=1}^l \mu_i{m}_i)$.
 
         \item If no $\bot$ occurs, return the valid signature $\signature =
-          (\gggen{R}, \gggen{S}, {T})$ on the vector $({M}_1, \ldots,{M}_l)
+          (\widetilde{r}, \widetilde{s}, {z})$ on the vector $({m}_1, \ldots,{m}_l)
           \in \group{1}^l$.
 
       \end{enumerate}
 
-    \item[$\{0,1\} \leftarrow \SPSverify(\pk, \vec{{M}}, \signature)$ :] On
-      input signature $\signature = (\gggen{R}, \gggen{S}, {T})$, vector
-      $({M}_1, \ldots,{M}_l) \in \group{1}^l$, and public key $\pk =
-      (\vec{\gggen{U}}, {V})$, do the following:
+    \item[$\{0,1\} \leftarrow \SPSverify(\pk, \vec{{m}}, \signature)$ :] On
+      input signature $\signature = (\widetilde{r}, \widetilde{s}, {z})$, vector
+      $({m}_1, \ldots,{m}_l) \in \group{1}^l$, and public key $\pk =
+      (\vec{\widetilde{u}}, {v})$, do the following:
 
       \begin{enumerate}
 
@@ -164,95 +164,95 @@ Section~\ref{sec:MPC}~\cite{C:KilPanWee15}.
 
       \begin{enumerate}
 
-        \item \emph{$\vec{a} = (1, a)^{\mathsf{T}} \in \Zp^2$ and $\vec{b} = (1,
-          b)^{\mathsf{T}} \in \Zp^2$.} Issue two calls to
-          $\idfu{\algo{RandShare}}$ to compute $t$-additive secret shares $(\lbrack a
-\rbrack , \lbrack b\rbrack )$.
+        \item \emph{$\vec{\alpha} = (1, \alpha)^{\mathsf{T}} \in \Zp^2$ and $\vec{\beta} = (1,
+          \beta)^{\mathsf{T}} \in \Zp^2$.} Issue two calls to
+          $\idfu{\algo{RandShare}}$ to compute $t$-additive secret shares $(\lbrack \alpha
+\rbrack , \lbrack \beta\rbrack )$.
 
-        \item \emph{$\mathbf{k} \in \Zp^{(l+1)\times 2}$.} Issue $2(l+1)$
+        \item \emph{$\boldsymbol{\kappa} \in \Zp^{(l+1)\times 2}$.} Issue $2(l+1)$
           calls to $\idfu{\algo{RandShare}}$ to get $t$-additive secret shares
-          $\lbrack \mathbf{k}\rbrack  = (\lbrack k_{1,1}\rbrack ,
-          \ldots, \lbrack k_{l+1,2}\rbrack )$.
+          $\lbrack \boldsymbol{\kappa}\rbrack  = (\lbrack \kappa_{1,1}\rbrack ,
+          \ldots, \lbrack \kappa_{l+1,2}\rbrack )$.
 
-        \item \emph{$\mathbf{c}, \mathbf{d} \in \Zp^{2\times 2}$.} Invoke
+        \item \emph{$\boldsymbol{\gamma}, \boldsymbol{\delta} \in \Zp^{2\times 2}$.} Invoke
           $\idfu{\algo{RandShare}}$ to obtain $t$-additive secret
-          shares $(\lbrack c_{1,1}\rbrack ,\ldots, \lbrack c_{2,2}
-\rbrack , \lbrack d_{1,1}\rbrack ,\ldots, \lbrack 
-          d_{2,2}\rbrack )$. If no $\bot$ occurs during randomness
+          shares $(\lbrack \gamma_{1,1}\rbrack ,\ldots, \lbrack \gamma_{2,2}
+\rbrack , \lbrack \delta_{1,1}\rbrack ,\ldots, \lbrack 
+          \delta_{2,2}\rbrack )$. If no $\bot$ occurs during randomness
           generation, continue.
 
-        \item \emph{$\vec{u} = \mathbf{k}\vec{a}$.} Invoke
-          $\idfu{\algo{Mul}}$ with shares $\lbrack a\rbrack $ and $\lbrack 
-          k_{i, 2}\rbrack $, for $i \in [l+1]$, to compute $t$-additive
-          secret shares $(\lbrack k_{1, 2}a\rbrack ,\ldots, \lbrack 
-          k_{l+1,2}a\rbrack )$. If no $\bot$ occurs, call $\idfu{\algo{Add}}$
-          with shares $\lbrack k_{i, 1}\rbrack $ and $\lbrack k_{i,
-          2}a\rbrack $ to obtain $t$-additive secret shares $(\lbrack 
-          u_1\rbrack ,\ldots, \lbrack u_{l+1}\rbrack )$ with $u_i =
-          k_{i, 1}+ k_{i, 2}a$ for all $i \in [l+1]$.
+        \item \emph{$\vec{\mu} = \boldsymbol{\kappa}\vec{\alpha}$.} Invoke
+          $\idfu{\algo{Mul}}$ with shares $\lbrack \alpha\rbrack $ and $\lbrack 
+          \kappa_{i, 2}\rbrack $, for $i \in [l+1]$, to compute $t$-additive
+          secret shares $(\lbrack \kappa_{1, 2}\alpha\rbrack ,\ldots, \lbrack 
+          \kappa_{l+1,2}\alpha\rbrack )$. If no $\bot$ occurs, call $\idfu{\algo{Add}}$
+          with shares $\lbrack \kappa_{i, 1}\rbrack $ and $\lbrack \kappa_{i,
+          2}\alpha\rbrack $ to obtain $t$-additive secret shares $(\lbrack 
+          \mu_1\rbrack ,\ldots, \lbrack \mu_{l+1}\rbrack )$ with $\mu_i =
+          \kappa_{i, 1}+ \kappa_{i, 2}\alpha$ for all $i \in [l+1]$.
 
-        \item \emph{$\vec{v} = \mathbf{c}\vec{a}$.} Invoke
-          $\idfu{\algo{Mul}}$ with shares $\lbrack a\rbrack $ and $\lbrack 
-          c_{1, 2}\rbrack $, and with $\lbrack a\rbrack $ and
-          $\lbrack c_{2, 2}\rbrack $, to compute $t$-additive secret
-          shares $(\lbrack c_{1, 2}a\rbrack ,\lbrack c_{2,2}a
+        \item \emph{$\vec{\nu} = \boldsymbol{\gamma}\vec{\alpha}$.} Invoke
+          $\idfu{\algo{Mul}}$ with shares $\lbrack \alpha\rbrack $ and $\lbrack 
+          \gamma_{1, 2}\rbrack $, and with $\lbrack \alpha\rbrack $ and
+          $\lbrack \gamma_{2, 2}\rbrack $, to compute $t$-additive secret
+          shares $(\lbrack \gamma_{1, 2}\alpha\rbrack ,\lbrack \gamma_{2,2}\alpha
 \rbrack )$. If no $\bot$ occurs, call $\idfu{\algo{Add}}$ with
-          shares $\lbrack c_{1, 1}\rbrack $ and $\lbrack c_{1, 2}a
-\rbrack $, and with $\lbrack c_{2, 1}\rbrack $ and
-          $\lbrack c_{2, 2}a\rbrack $, to obtain $t$-additive secret
-          shares $(\lbrack v_1\rbrack , \lbrack v_2\rbrack )$ with
-          $v_1 = c_{1, 1}+ c_{1, 2}a$ and $v_2 = c_{2, 1}+ c_{2, 2}a$.
+          shares $\lbrack \gamma_{1, 1}\rbrack $ and $\lbrack \gamma_{1, 2}\alpha
+\rbrack $, and with $\lbrack \gamma_{2, 1}\rbrack $ and
+          $\lbrack \gamma_{2, 2}\alpha\rbrack $, to obtain $t$-additive secret
+          shares $(\lbrack \nu_1\rbrack , \lbrack \nu_2\rbrack )$ with
+          $\nu_1 = \gamma_{1, 1}+ \gamma_{1, 2}\alpha$ and $\nu_2 = \gamma_{2, 1}+ \gamma_{2, 2}\alpha$.
 
-        \item \emph{$\vec{w} = \mathbf{d}\vec{a}$.} Follow the
-          same steps as for $\vec{v}$, with $\mathbf{c}$ replaced by $\mathbf{d}$
-          and $\vec{v}$ replaced by $\vec{w}$.
+        \item \emph{$\vec{\omega} = \boldsymbol{\delta}\vec{\alpha}$.} Follow the
+          same steps as for $\vec{\nu}$, with $\boldsymbol{\gamma}$ replaced by $\boldsymbol{\delta}$
+          and $\vec{\nu}$ replaced by $\vec{\omega}$.
 
-        \item \emph{$\vec{x} = \vec{b}^{\mathsf{T}}\mathbf{c}$.} Invoke
-          $\idfu{\algo{Mul}}$ with shares $\lbrack b\rbrack $ and
-          $\lbrack c_{2, 1}\rbrack $, and with $\lbrack b\rbrack $
-          and $\lbrack c_{2, 2}\rbrack $, to get $t$-additive secret
-          shares $(\lbrack bc_{2, 1}\rbrack ,\lbrack bc_{2,2}
+        \item \emph{$\vec{\xi} = \vec{\beta}^{\mathsf{T}}\boldsymbol{\gamma}$.} Invoke
+          $\idfu{\algo{Mul}}$ with shares $\lbrack \beta\rbrack $ and
+          $\lbrack \gamma_{2, 1}\rbrack $, and with $\lbrack \beta\rbrack $
+          and $\lbrack \gamma_{2, 2}\rbrack $, to get $t$-additive secret
+          shares $(\lbrack \beta\gamma_{2, 1}\rbrack ,\lbrack \beta\gamma_{2,2}
 \rbrack )$. If no $\bot$ occurs, call $\idfu{\algo{Add}}$ with
-          shares $\lbrack c_{1, 1}\rbrack $ and $\lbrack bc_{2, 1}
-\rbrack $, and with $\lbrack c_{1, 2}\rbrack $ and
-          $\lbrack bc_{2, 2}\rbrack $, to obtain $t$-additive secret
-          shares $(\lbrack x_1\rbrack , \lbrack x_2\rbrack )$
-          with $x_1 = c_{1, 1}+ bc_{2, 1}$ and $x_2 = c_{1, 2}+ bc_{2, 2}$.
+          shares $\lbrack \gamma_{1, 1}\rbrack $ and $\lbrack \beta\gamma_{2, 1}
+\rbrack $, and with $\lbrack \gamma_{1, 2}\rbrack $ and
+          $\lbrack \beta\gamma_{2, 2}\rbrack $, to obtain $t$-additive secret
+          shares $(\lbrack \xi_1\rbrack , \lbrack \xi_2\rbrack )$
+          with $\xi_1 = \gamma_{1, 1}+ \beta\gamma_{2, 1}$ and $\xi_2 = \gamma_{1, 2}+ \beta\gamma_{2, 2}$.
 
-        \item \emph{$\vec{y} = \vec{b}^{\mathsf{T}}\mathbf{d}$.} Follow the
-          same steps as for $\vec{x}$, with $\mathbf{c}$ replaced by
-          $\mathbf{d}$ and $\vec{x}$ replaced by $\vec{y}$.
+        \item \emph{$\vec{\upsilon} = \vec{\beta}^{\mathsf{T}}\boldsymbol{\delta}$.} Follow the
+          same steps as for $\vec{\xi}$, with $\boldsymbol{\gamma}$ replaced by
+          $\boldsymbol{\delta}$ and $\vec{\xi}$ replaced by $\vec{\upsilon}$.
 
-        \item \emph{$(k_{1, 1}\gen, k_{1,2}\gen)$, $\vec{{B}} =
-          (\gen, b\gen)$, $\vec{{X}} = ({X}_1, {X}_2) =
-          (x_1\gen, x_2\gen)$, $\vec{{Y}} = ({Y}_1, {Y}_2) =
-          (y_1\gen, y_2\gen)$.} Invoke
+        \item \emph{$(\kappa_{1, 1}\gen, \kappa_{1,2}\gen)$, $\vec{{b}} =
+          (\gen, \beta\gen)$, $\vec{{x}} = ({x}_1, {x}_2) =
+          (\xi_1\gen, \xi_2\gen)$, $\vec{{y}} = ({y}_1, {y}_2) =
+          (\upsilon_1\gen, \upsilon_2\gen)$.} Invoke
           $\idfu{\algo{ExpGenGrp}_1}$ with generator $\gen$ and shares $\lbrack 
-          k_{1, 1}\rbrack $, $\lbrack k_{1, 2}\rbrack $, $\lbrack b
-\rbrack $, $\lbrack x_1\rbrack $, $\lbrack 
-          x_2\rbrack $, $\lbrack y_1\rbrack $, and $\lbrack 
-          y_2\rbrack $, to compute the corresponding $t$-additive shares.
+          \kappa_{1, 1}\rbrack $, $\lbrack \kappa_{1, 2}\rbrack $, $\lbrack \beta
+\rbrack $, $\lbrack \xi_1\rbrack $, $\lbrack 
+          \xi_2\rbrack $, $\lbrack \upsilon_1\rbrack $, and $\lbrack 
+          \upsilon_2\rbrack $, to compute the corresponding $t$-additive shares.
 
-        \item \emph{$\vec{\gggen{A}} = (\ggen, a\ggen)$, $\vec{\gggen{U}} =
-          (u_1\ggen, \ldots, u_{l+1}\ggen)$, $\vec{\gggen{V}} = (v_1\ggen,
-          v_2\ggen)$, $\vec{\gggen{W}} = (w_1\ggen, w_2\ggen)$.} Invoke
+        \item \emph{$\vec{\widetilde{a}} = (\ggen, \alpha\ggen)$, $\vec{\widetilde{u}} =
+          (\mu_1\ggen, \ldots, \mu_{l+1}\ggen)$, $\vec{\widetilde{v}} = (\nu_1\ggen,
+          \nu_2\ggen)$, $\vec{\widetilde{w}} = (\omega_1\ggen, \omega_2\ggen)$.} Invoke
           $\idfu{\algo{ExpGenGrp}_2}$ with generator $\ggen$ and
-          shares $\lbrack a\rbrack $, $\lbrack u_1\rbrack  \ldots
-          \lbrack u_{l+1}\rbrack $, $\lbrack v_1\rbrack $,
-          $\lbrack v_2\rbrack $, $\lbrack w_1\rbrack $, and
-          $\lbrack w_2\rbrack $, to compute the corresponding
+          shares $\lbrack \alpha\rbrack $, $\lbrack \mu_1\rbrack  \ldots
+          \lbrack \mu_{l+1}\rbrack $, $\lbrack \nu_1\rbrack $,
+          $\lbrack \nu_2\rbrack $, $\lbrack \omega_1\rbrack $, and
+          $\lbrack \omega_2\rbrack $, to compute the corresponding
           $t$-additive shares.
 
         \item Call $\idfu{\algo{CombineGrp}_2}$ to compute and
-          publish public key $\pk =(\vec{\gggen{A}}, \vec{\gggen{U}},
-          \vec{\gggen{V}},\vec{\gggen{W}})$. If no $\bot$ occurs, proceed to
+          publish public key $\pk =(\vec{\widetilde{a}}, \vec{\widetilde{u}},
+          \vec{\widetilde{v}},\vec{\widetilde{w}})$. If no $\bot$ occurs, proceed to
           the next step.
 
         \item Conclude key generation by storing the
-          shares $\lbrack \sk\rbrack  = (\lbrack \mathbf{k}\rbrack ,
-          \lbrack {B}\rbrack , \lbrack \vec{{X}}\rbrack ,
-          \lbrack \vec{{Y}}\rbrack )$, together with the pair
-          $\langle \lbrack k_{1, 1}\gen\rbrack ,\lbrack k_{1,
+          shares $\lbrack \sk\rbrack  = (\lbrack \boldsymbol{\kappa}\rbrack ,
+          \lbrack {b}\rbrack , \lbrack \vec{{x}}\rbrack ,
+          \lbrack \vec{{y}}\rbrack )$, together with the pair
+          $\langle \lbrack \kappa_{1, 1}\gen\rbrack ,\lbrack \kappa_{1,
           2}\gen\rbrack  \rangle$.
 
       \end{enumerate}
@@ -264,66 +264,66 @@ Section~\ref{sec:MPC}~\cite{C:KilPanWee15}.
       \begin{enumerate}
 
         \item Invoke $\idfu{\algo{RandShare}}$ to get $t$-additive shares
-          $\lbrack r\rbrack $ and $\lbrack s\rbrack $.
+          $\lbrack \rho\rbrack $ and $\lbrack \sigma\rbrack $.
 
         \item If no $\bot$ occurs, call $\idfu{\algo{Mul}}$ with shares
-          $\lbrack r\rbrack $ and $\lbrack s\rbrack $ to compute
-          $t$-additive shares $\lbrack rs\rbrack $.
+          $\lbrack \rho\rbrack $ and $\lbrack \sigma\rbrack $ to compute
+          $t$-additive shares $\lbrack \rho\sigma\rbrack $.
 
         \item If this succeeds, invoke $\idfu{\algo{ExpGrp}_1}$ to compute
-          $t$-additive shares $\lbrack r{B}\rbrack $, $\lbrack 
-          rs{B}\rbrack $, $\lbrack r\vec{{X}}\rbrack $, and
-          $\lbrack rs\vec{{Y}}\rbrack $.
+          $t$-additive shares $\lbrack \rho{b}\rbrack $, $\lbrack 
+          \rho\sigma{b}\rbrack $, $\lbrack \rho\vec{{x}}\rbrack $, and
+          $\lbrack \rho\sigma\vec{{y}}\rbrack $.
 
         \item If $\idfu{\algo{ExpGrp}_1}$ does not abort, invoke
           $\idfu{\algo{ExpGenGrp}_1}$ to obtain $t$-additive shares $\lbrack 
-          r\gen\rbrack $ and $\lbrack rs\gen\rbrack $, and
+          \rho\gen\rbrack $ and $\lbrack \rho\sigma\gen\rbrack $, and
           $\idfu{\algo{ExpGenGrp}_2}$ to get $t$-additive shares $\lbrack 
-          s\ggen\rbrack $.
+          \sigma\ggen\rbrack $.
 
         \item If no $\bot$ occurs, call $\idfu{\algo{MulGrp}_1}$ to receive
-          $t$-additive shares $\lbrack \vec{{T}}^{\star}\rbrack  =
-          \lbrack r\vec{{X}} + rs\vec{{Y}}\rbrack = \lbrack 
-          r\vec{{X}}\rbrack  +\lbrack rs\vec{{Y}}\rbrack $.
+          $t$-additive shares $\lbrack \vec{{z}}^{\star}\rbrack  =
+          \lbrack \rho\vec{{x}} + \rho\sigma\vec{{y}}\rbrack = \lbrack 
+          \rho\vec{{x}}\rbrack  +\lbrack \rho\sigma\vec{{y}}\rbrack $.
 
         \item Conclude the offline phase by storing $(\lbrack 
-          s\ggen\rbrack , \lbrack r\gen\rbrack , \lbrack 
-          rs\gen\rbrack , \lbrack r{B}\rbrack , \lbrack 
-          rs{B}\rbrack , \lbrack \vec{{T}}^{\star}\rbrack )$.
+          \sigma\ggen\rbrack , \lbrack \rho\gen\rbrack , \lbrack 
+          \rho\sigma\gen\rbrack , \lbrack \rho{b}\rbrack , \lbrack 
+          \rho\sigma{b}\rbrack , \lbrack \vec{{z}}^{\star}\rbrack )$.
 
       \end{enumerate}
 
     \item[$\lbrack \signature\rbrack _{\algo{OnSign}} \sample
-      \algo{OnSign}(\vec{{M}})$ :] On input message vector $\vec{{M}}$, the
+      \algo{OnSign}(\vec{{m}})$ :] On input message vector $\vec{{m}}$, the
       honest signers do the following:
 
       \begin{enumerate}
 
-        \item For each ${M}_i \neq 0$, issue a call to
-          $\idfu{\algo{ExpGenGrp}_1}$ with shares $\lbrack k_{i,
-          1}\rbrack $ and $\lbrack k_{i, 2}\rbrack $ to obtain
-          $t$-additive shares $\lbrack k_{i, 1} {M}_i\rbrack  =
-          \lbrack k_{i, 1}\rbrack  {M}_i$ and $\lbrack k_{i+1, 2}
-          {M}_i\rbrack  = \lbrack k_{i+1, 2}\rbrack {M}_i$.
+        \item For each ${m}_i \neq 0$, issue a call to
+          $\idfu{\algo{ExpGenGrp}_1}$ with shares $\lbrack \kappa_{i,
+          1}\rbrack $ and $\lbrack \kappa_{i, 2}\rbrack $ to obtain
+          $t$-additive shares $\lbrack \kappa_{i, 1} {m}_i\rbrack  =
+          \lbrack \kappa_{i, 1}\rbrack  {m}_i$ and $\lbrack \kappa_{i+1, 2}
+          {m}_i\rbrack  = \lbrack \kappa_{i+1, 2}\rbrack {m}_i$.
 
         \item Issue consecutive calls to $\idfu{\algo{MulGrp}_1}$ to compute
           the $t$-additive shares $\lbrack (\gen,
-          \vec{M})\mathbf{k}\rbrack $, comprising:
+          \vec{m})\boldsymbol{\kappa}\rbrack $, comprising:
           %
           \begin{equation*}
           %
-            \left(\lbrack k_{1, 1}\gen\rbrack  + \sum_{i=1, {M}_i \neq
-            0}^{l+1} \lbrack k_{i+1, 1}{M}_i\rbrack  , \lbrack k_{1,
-            2}\gen\rbrack  + \sum_{i=1, {M}_i \neq 0}^{l+1} \lbrack 
-            k_{i+1, 2}{M}_i\rbrack \right).
+            \left(\lbrack \kappa_{1, 1}\gen\rbrack  + \sum_{i=1, {m}_i \neq
+            0}^{l+1} \lbrack \kappa_{i+1, 1}{m}_i\rbrack  , \lbrack \kappa_{1,
+            2}\gen\rbrack  + \sum_{i=1, {m}_i \neq 0}^{l+1} \lbrack 
+            \kappa_{i+1, 2}{m}_i\rbrack \right).
           %
           \end{equation*}
 
         \item Issue one final call to $\idfu{\algo{MulGrp}_1}$ to
-          compute the shares $\lbrack \vec{{T}}\rbrack  = \lbrack 
-          (\gen, \vec{M})\mathbf{k} + \vec{{T}}^{\star}\rbrack  = \lbrack 
-          (\gen, \vec{M})\mathbf{k}\rbrack  + \lbrack 
-          \vec{{T}}^{\star}\rbrack $.
+          compute the shares $\lbrack \vec{{z}}\rbrack  = \lbrack 
+          (\gen, \vec{m})\boldsymbol{\kappa} + \vec{{z}}^{\star}\rbrack  = \lbrack 
+          (\gen, \vec{m})\boldsymbol{\kappa}\rbrack  + \lbrack 
+          \vec{{z}}^{\star}\rbrack $.
 
       \end{enumerate}
 
@@ -333,24 +333,24 @@ Section~\ref{sec:MPC}~\cite{C:KilPanWee15}.
       \begin{enumerate}
 
         \item Query $\idfu{\algo{CombineGrp}_1}$ to compute group elements
-          $\vec{{R}} = (r\gen, r{B})$ and $\vec{{S}} = (rs\gen,
-          rs{B})$, and $\idfu{\algo{CombineGrp}_2}$ to compute $\gggen{Q} =
-          s\ggen$.
+          $\vec{{r}} = (\rho\gen, \rho{b})$ and $\vec{{s}} = (\rho\sigma\gen,
+          \rho\sigma{b})$, and $\idfu{\algo{CombineGrp}_2}$ to compute $\widetilde{q} =
+          \sigma\ggen$.
 
-        \item Invoke $\idfu{\algo{CombineGrp}_1}$ to compute $\vec{{T}}=
-          (\gen, \vec{{M}})\mathbf{k} + \vec{{T}^{\star}}$.
+        \item Invoke $\idfu{\algo{CombineGrp}_1}$ to compute $\vec{{z}}=
+          (\gen, \vec{{m}})\boldsymbol{\kappa} + \vec{{z}^{\star}}$.
 
         \item If no $\bot$ occurs, return the valid signature $\signature =
-          (\gggen{Q}, \vec{{R}}, \vec{{S}}, \vec{{T}})$ on vector $\vec{{M}}
-          = ({M}_1, \ldots, {M}_l)$.
+          (\widetilde{q}, \vec{{r}}, \vec{{s}}, \vec{{z}})$ on vector $\vec{{m}}
+          = ({m}_1, \ldots, {m}_l)$.
 
       \end{enumerate}
 
-    \item[$\{0,1\} \leftarrow \SPSverify(\pk, \vec{{M}}, \signature)$ :] On
-      input signature $\signature = (\gggen{Q}, \vec{{R}}, \vec{{S}},
-      \vec{{T}})$, vector $({M}_1, \ldots,{M}_l) \in \group{1}^l$, and
-      public key $\pk =(\vec{\gggen{A}}, \vec{\gggen{U}},
-      \vec{\gggen{V}},\vec{\gggen{W}})$, do the following:
+    \item[$\{0,1\} \leftarrow \SPSverify(\pk, \vec{{m}}, \signature)$ :] On
+      input signature $\signature = (\widetilde{q}, \vec{{r}}, \vec{{s}},
+      \vec{{z}})$, vector $({m}_1, \ldots,{m}_l) \in \group{1}^l$, and
+      public key $\pk =(\vec{\widetilde{a}}, \vec{\widetilde{u}},
+      \vec{\widetilde{v}},\vec{\widetilde{w}})$, do the following:
 
       \begin{enumerate}
 
