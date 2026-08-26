@@ -246,23 +246,23 @@ to $\auditor$ and to $\algo{cb}$.
         {$\algo{create}$.} Upon receiving for the first time $(\algo{create},
         \algo{usr}, v)$ from $\algo{Int} \in \algo{I}$ for $\algo{usr} \in
         \algo{usrs}$, send $(\algo{create}, \algo{usr}, \algo{Int}, v)$ to
-        $\simu$ and wait for its go-ahead. On receipt of the go-ahead do:
+        $\simu$ and wait for the go-ahead. On receiving it, do:
 
         \begin{enumerate}
 
-          \item If $\algo{accounts}[\algo{usr}] \neq \perp$, then stop
+          \item If $\algo{accounts}[\algo{usr}] \neq \perp$, then stop.
 
           \item Otherwise:
 
             \begin{enumerate}
 
-              \item $\algo{accounts}[\algo{usr}] \leftarrow \langle \algo{Int},
-                v\rangle$
+              \item Set $\algo{accounts}[\algo{usr}] \leftarrow \langle
+                \algo{Int}, v\rangle$.
 
-              \item $\algo{reserves}[\algo{Int}] \leftarrow
-                \algo{reserves}[\algo{Int}]+v$
+              \item Set $\algo{reserves}[\algo{Int}] \leftarrow
+                \algo{reserves}[\algo{Int}]+v$.
 
-              \item return $\algo{fin}$ to $\algo{Int}$
+              \item Return $\OPcreateend$ to $\algo{Int}$.
 
             \end{enumerate}
 
@@ -271,14 +271,15 @@ to $\auditor$ and to $\algo{cb}$.
         {$\OPregister$.} Upon receiving for the first time
         $(\OPregister, \algo{usr})$ from $\reg$ for $\algo{usr} \in
         \algo{usrs}$ that already has an account -- send $(\OPregister,
-        \algo{usr})$ to $\simu$ and wait for its go-ahead. On receipt of the
-        go-ahead do:
+        \algo{usr})$ to $\simu$ and wait for the go-ahead. On receiving it,
+        do:
 
         \begin{enumerate}
 
-          \item $\algo{registered} \gets \algo{registered} \cup \algo{usr}$
+          \item Set $\algo{registered} \gets \algo{registered} \cup
+            \algo{usr}$.
 
-          \item return $\algo{fin}$ to $\reg$
+          \item Return $\OPregisterend$ to $\reg$.
 
         \end{enumerate}
 
@@ -287,46 +288,48 @@ to $\auditor$ and to $\algo{cb}$.
         $\algo{usr}$ that has an account with $\algo{Int}$, send
         $(\OPwithdraw, \algo{usr}, \algo{Int}, v)$ to $\algo{Int}$ and
         $(\OPwithdraw, \algo{Int}, v)$ to $\algo{cb}$ and await their
-        go-ahead. Then send message $\OPwithdraw$ to $\simu$ and await its
-        go-ahead. On receipt of the go-ahead, fetch
-        $\algo{accounts}[\algo{usr}] \rightarrow \langle \algo{Int},
-        v^*\rangle$, and do:
+        go-ahead. Then send message $\OPwithdraw$ to $\simu$ and wait for the
+        go-ahead. On receiving it, fetch $\algo{accounts}[\algo{usr}]
+        \rightarrow \langle \algo{Int}, v^*\rangle$, and do:
 
         \begin{enumerate}
 
-          \item If $v^* < v$ or  $\algo{reserves}[\algo{Int}] < v$, then stop
+          \item If $v^* < v$ or  $\algo{reserves}[\algo{Int}] < v$, then
+            stop.
 
           \item Otherwise, do:
 
             \begin{enumerate}
 
-              \item $\algo{accounts}[\algo{usr}] \leftarrow \langle \algo{Int},
-                v^* - v\rangle$
+              \item Set $\algo{accounts}[\algo{usr}] \leftarrow \langle
+                \algo{Int}, v^* - v\rangle$.
 
-              \item $\algo{reserves}[\algo{Int}] \leftarrow
-                \algo{reserves}[\algo{Int}] - v$
+              \item Set $\algo{reserves}[\algo{Int}] \leftarrow
+                \algo{reserves}[\algo{Int}] - v$.
 
               \item If $\algo{se} \not\in \algo{mal}$, then randomly select
-                $\rho$
+                $\rho$.
 
-              \item Otherwise, receive $\rho$ from $\simu$
+              \item Otherwise, receive $\rho$ from $\simu$.
 
-              \item If $\algo{tokens}[(\rho)] \neq \perp$, then stop
+              \item If $\algo{tokens}[(\rho)] \neq \perp$, then stop.
 
               \item Otherwise, do:
 
                 \begin{enumerate}
 
-                  \item $\algo{tokens}[(\rho)] \gets \langle \algo{usr}, v
-                    \rangle$
+                  \item Set $\algo{tokens}[(\rho)] \gets \langle \algo{usr},
+                    v \rangle$.
 
                   \item If $\algo{se} \in \algo{mal}$ or $\algo{dev} \in
                     \algo{mal}$, then return $(\OPwithdraw, \algo{usr},
-                    \rho, v)$ to $\simu$ \item Otherwise, return
-                    $(\OPwithdraw, \algo{usr}, v)$ to $\simu$
+                    \rho, v)$ to $\simu$.
 
-                  \item return $(\OPwithdraw, \rho, v, \algo{fin})$ to
-                    $\algo{usr}$
+                  \item Otherwise, return $(\OPwithdraw, \algo{usr}, v)$ to
+                    $\simu$.
+
+                  \item Return $(\OPwithdraw, \rho, v, \OPwithdrawend)$ to
+                    $\algo{usr}$.
 
                 \end{enumerate}
 
@@ -338,8 +341,8 @@ to $\auditor$ and to $\algo{cb}$.
         (\algo{se}', \algo{dev}'))$ from registered user $\algo{usr} =
         (\algo{se}, \algo{dev})$, send $(\OPexecute, \vec{\rho}, v)$ to
         $\algo{usr}'$. On receiving the response $\algo{accept}$ from
-        $\algo{usr}'$, send $(\OPexecute, \vec{\rho}, v)$ to $\simu$ and await
-        the go-ahead. On receipt of the go-ahead do:
+        $\algo{usr}'$, send $(\OPexecute, \vec{\rho}, v)$ to $\simu$ and wait
+        for the go-ahead. On receiving it, do:
 
         \begin{enumerate}
 
@@ -349,23 +352,24 @@ to $\auditor$ and to $\algo{cb}$.
             \begin{enumerate}
 
               \item If $\algo{tokens}[\vec{\rho}] \neq \langle \algo{usr}, v
-                \rangle$, then stop
+                \rangle$, then stop.
 
               \item Otherwise, do:
 
                 \begin{enumerate}
 
-                  \item randomly select a unique random number $\rho'$
+                  \item Randomly select a unique random number $\rho'$.
 
-                  \item $\algo{tokens}[\vec{\rho'}] \gets \langle\algo{usr}', v
-                    \rangle$ where $\vec{\rho'} = (\vec{\rho}, \rho')$
+                  \item Set $\algo{tokens}[\vec{\rho'}] \gets
+                    \langle\algo{usr}', v \rangle$ where $\vec{\rho'} =
+                    (\vec{\rho}, \rho')$.
 
                   \item If $\algo{se} \in \algo{mal}$ or $\algo{dev} \in
                     \algo{mal}$, then return $(\OPexecute, \vec{\rho'}, v,
-                    \algo{usr}, \algo{usr}')$ to $\simu$
+                    \algo{usr}, \algo{usr}')$ to $\simu$.
 
                   \item Otherwise, return $(\OPexecute, \vec{\rho'}, v)$ to
-                    $\simu$
+                    $\simu$.
 
                 \end{enumerate}
 
@@ -376,21 +380,22 @@ to $\auditor$ and to $\algo{cb}$.
             \begin{enumerate}
 
               \item If $\algo{se}' \in \algo{mal}$, then receive $\rho'$ from
-                $\simu$
+                $\simu$.
 
-              \item Otherwise, randomly select $\rho'$
+              \item Otherwise, randomly select $\rho'$.
 
               \item If $\algo{tokens}[\vec{\rho}] = \langle \algo{usr}, v
-                \rangle$ and $\algo{usr}' \in \algo{registered}$, then
+                \rangle$ and $\algo{usr}' \in \algo{registered}$, then set
                 $\algo{tokens}[\vec{\rho'}] \leftarrow \langle \algo{usr}', v
-                \rangle$
+                \rangle$.
 
-            \item send $(\OPexecute,\vec{\rho'}, v, \algo{usr}, \algo{usr}')$
-          to $\simu$ 
-          
-          \end{enumerate}
+              \item Send $(\OPexecute,\vec{\rho'}, v, \algo{usr}, \algo{usr}')$
+                to $\simu$.
 
-        \item send $(\OPexecute, \vec{\rho'}, v , \algo{fin})$ to $\algo{usr}'$
+            \end{enumerate}
+
+        \item Return $(\OPexecute, \vec{\rho'}, v, \OPexecuteend)$ to
+          $\algo{usr}'$.
 
       \end{enumerate}
 
@@ -399,38 +404,37 @@ to $\auditor$ and to $\algo{cb}$.
       $\algo{Int}$, send $(\OPdeposit, \vec{\rho}, v, \algo{Int},
       \algo{usr})$ to $\algo{Int}$ and $(\OPdeposit, v, \algo{Int})$ to
       $\algo{cb}$ and await their go-ahead. Then send $(\OPdeposit,
-      \vec{\rho}, v, \algo{Int}, \algo{usr})$ to $\simu$ and await the
-      go-ahead. On receipt of the go-ahead do:
+      \vec{\rho}, v, \algo{Int}, \algo{usr})$ to $\simu$ and wait for the
+      go-ahead. On receiving it, do:
 
       \begin{enumerate}
 
         \item If $\algo{tokens}[\vec{\rho}] \neq \langle \algo{usr}, v
-          \rangle$, then stop
+          \rangle$, then stop.
 
         \item Otherwise, do:
 
           \begin{enumerate}
 
-            \item $\algo{deposited}[\vec{\rho}[0]] \gets
-              \algo{deposited}[\vec{\rho}[0]] \cup \{\vec{\rho}\}$
+            \item Set $\algo{deposited}[\vec{\rho}[0]] \gets
+              \algo{deposited}[\vec{\rho}[0]] \cup \{\vec{\rho}\}$.
 
-            \item If $|\algo{deposited}[\vec{\rho}[0]]| > 1$, then stop
+            \item If $|\algo{deposited}[\vec{\rho}[0]]| > 1$, then stop.
 
             \item Otherwise, do:
 
-
               \begin{enumerate}
 
-                \item $\algo{accounts}[\algo{usr}] \rightarrow \langle
-                  \algo{Int}, v^*\rangle$
+                \item Fetch $\algo{accounts}[\algo{usr}] \rightarrow \langle
+                  \algo{Int}, v^*\rangle$.
 
-                \item $\algo{accounts}[\algo{usr}] \gets \langle \algo{Int},
-                  v^*+v \rangle$
+                \item Set $\algo{accounts}[\algo{usr}] \gets \langle
+                  \algo{Int}, v^*+v \rangle$.
 
-                \item $\algo{reserves}[\algo{Int}] \gets
-                  \algo{reserves}[\algo{Int}] + v$
+                \item Set $\algo{reserves}[\algo{Int}] \gets
+                  \algo{reserves}[\algo{Int}] + v$.
 
-                \item send $(\OPdeposit, \algo{fin})$ to $\algo{usr}$
+                \item Return $(\OPdeposit, \OPdepositend)$ to $\algo{usr}$.
 
               \end{enumerate}
 
@@ -439,40 +443,41 @@ to $\auditor$ and to $\algo{cb}$.
       \end{enumerate}
 
       {$\OPidentify$.} On receiving $(\OPidentify, \rho)$ from $\auditor$,
-      send $(\OPidentify, \rho)$ to $\simu$ and await the go-ahead. On receipt
-      of the go-ahead do:
+      send $(\OPidentify, \rho)$ to $\simu$ and wait for the go-ahead. On
+      receiving it, do:
 
       \begin{enumerate}
 
-        \item If $|\algo{deposited}[\vec{\rho}[0]]| \leq 1$, then send
-          $(\OPidentify, \algo{fin})$ to $\auditor$
+        \item If $|\algo{deposited}[\vec{\rho}[0]]| \leq 1$, then return
+          $(\OPidentify, \OPidentifyend)$ to $\auditor$.
 
         \item Otherwise, do:
 
           \begin{enumerate}
 
-            \item $\algo{deposited}[\rho] \rightarrow \{\vec{\rho}_1, \cdots,
-              \vec{\rho}_n\}$
+            \item Fetch $\algo{deposited}[\rho] \rightarrow \{\vec{\rho}_1,
+              \cdots, \vec{\rho}_n\}$.
 
-            \item $\algo{DS} \leftarrow \emptyset$
+            \item Set $\algo{DS} \leftarrow \emptyset$.
 
-            \item $\forall i\neq j $ do:
+            \item $\forall i\neq j$, do:
 
               \begin{enumerate}
 
-                \item let $\vec{\rho}_{ij}$ denote the common prefix, i.e.\
+                \item Let $\vec{\rho}_{ij}$ denote the common prefix, i.e.\
                   $\vec{\rho}_{ij} = (\rho_0, ..., \rho_{k-1})$ such that
                   $\vec{\rho}_i[l] = \vec{\rho}_j[l]$ for all $l < k$ and
-                  $\vec{\rho_i}[k] \neq \vec{\rho_j}[k]$
+                  $\vec{\rho_i}[k] \neq \vec{\rho_j}[k]$.
 
-                \item $\algo{tokens}[\vec{\rho}_{ij}] \rightarrow \langle v,
-                  \algo{usr}_{ij}\rangle$ \item $\algo{DS} \gets \algo{DS} \cup
-                  \algo{usr}_{ij}$
+                \item Fetch $\algo{tokens}[\vec{\rho}_{ij}] \rightarrow
+                  \langle v, \algo{usr}_{ij}\rangle$.
+
+                \item Set $\algo{DS} \gets \algo{DS} \cup \algo{usr}_{ij}$.
 
               \end{enumerate}
 
-            \item send $(\OPidentify, \algo{DS}, \algo{fin})$ to $\auditor$
-              and $\algo{cb}$
+            \item Return $(\OPidentify, \algo{DS}, \OPidentifyend)$ to
+              $\auditor$ and $\algo{cb}$.
 
           \end{enumerate}
 

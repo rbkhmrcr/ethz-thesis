@@ -253,7 +253,7 @@ answer. Otherwise, it records the presentation as invalid and returns false.
 
         \begin{enumerate}
 
-          \item If $\creds[\user] \not\rightarrow \bot$, then exit. (A user can
+          \item If $\creds[\user] \not\rightarrow \bot$, then stop. (A user can
             be registered only once.)
 
           \item Send $(\AACregister, \user)$ to $\simu$ and wait for the
@@ -277,10 +277,10 @@ answer. Otherwise, it records the presentation as invalid and returns false.
 
             \begin{enumerate}
 
-              \item If $\creds[\user] \rightarrow \bot$, then exit. (An honest
+              \item If $\creds[\user] \rightarrow \bot$, then stop. (An honest
                 issuer will only issue credentials to a registered user.)
 
-              \item If $\creds[\user][i] \neq \varnothing$, then exit. (An
+              \item If $\creds[\user][i] \neq \varnothing$, then stop. (An
                 honest issuer will issue at most one valid credential per
                 user.)
 
@@ -312,11 +312,11 @@ answer. Otherwise, it records the presentation as invalid and returns false.
 
         \begin{enumerate}
 
-          \item If $\creds[\user] = \bot$, then exit.  (Unregistered users
+          \item If $\creds[\user] = \bot$, then stop.  (Unregistered users
             cannot successfully aggregate credentials.)
 
           \item If $\exists i \in [1, n]: \atv{i} \neq \varnothing \land \atv{i}
-            \notin \creds[\user][i]$, then exit. Otherwise:
+            \notin \creds[\user][i]$, then stop. Otherwise:
 
             \begin{enumerate}
 
@@ -355,11 +355,11 @@ answer. Otherwise, it records the presentation as invalid and returns false.
 
             \end{enumerate}
 
-          \item Otherwise, if $\creds[\user] = \bot$, then exit.  (Unregistered
+          \item Otherwise, if $\creds[\user] = \bot$, then stop.  (Unregistered
             users cannot successfully produce a presentation.)
 
           \item If $\exists i \in [1, n]: \atv{i} \neq \varnothing \land \atv{i}
-            \notin \creds[\user][i]$, then exit. Otherwise:
+            \notin \creds[\user][i]$, then stop. Otherwise:
 
             \begin{enumerate}
 
@@ -382,7 +382,7 @@ answer. Otherwise, it records the presentation as invalid and returns false.
         \begin{enumerate}
 
           \item If $\proven[\vec{\atv{}}, \msg, \algoproof] \rightarrow 0$, then
-            exit.
+            stop.
 
           \item Otherwise, if $\proven[\vec{\atv{}}, \msg, \algoproof] \rightarrow
             1$, then:
