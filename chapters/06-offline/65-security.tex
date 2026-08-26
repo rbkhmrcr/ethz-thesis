@@ -1,13 +1,14 @@
 \section{Security}\label{sec:offline-security}
 
-\subsection{Security analysis}
+\subsection{Proof of security}
 
 Let $\algo{prot}$ denote the protocol from Section~\ref{sec:construction}. We
-prove that there exists a simulator $\simu$ such that, for every adversary
-$\adv$, the joint execution of $\algo{prot}$ with $\adv$ is computationally
-indistinguishable from the interaction of $\adv$ with ideal functionality
-$\idfu{\algo{op}}$ via $\simu$. We proceed via a sequence of hybrid games, each
-computationally indistinguishable from the last. Throughout, we call a user
+show that the view of a real world adversary $\adv$ during an execution of
+$\algo{prot}$ is indistinguishable from the view of an ideal world simulator
+$\simu$ that interacts with system participants through ideal functionality
+$\idfu{\algo{op}}$. We define a sequence of indistinguishable games that start
+with Game 0 representing the real world, and end with Game 12 representing the
+ideal world. Throughout, we call a user
 corrupt if both their device and secure element are compromised; the more
 general split-corruption setting follows analogously. We also simplify
 exposition by treating the randomness $\rho$ produced by $\idfu{\algo{op}}$ during
@@ -39,52 +40,57 @@ We rely on the following security properties of the underlying primitives:
 
 \paragraph{Game 0.} The real-world execution of $\algo{prot}$.
 
-\paragraph{Game 1.} $\simu$ runs $\algo{prot}$ internally on behalf of all
-honest parties, forwarding inputs and distributing outputs. This is identically
-distributed to Game 0.
+\paragraph{Game 1.} As Game 0, except $\simu$ runs $\algo{prot}$ internally on
+behalf of all honest parties, forwarding inputs and distributing outputs. This
+change is purely syntactic, so Game 1 is identically distributed to Game 0.
 
-\paragraph{Game 2.} $\simu$ introduces a dummy $\idfu{\algo{op}}$ as a communication
-relay between honest parties, who now communicate via $\idfu{\algo{op}}$ rather than
-directly.  This is identically distributed to Game 1.
+\paragraph{Game 2.} As Game 1, except $\simu$ introduces a dummy
+$\idfu{\algo{op}}$ as a communication relay between honest parties, who now
+communicate via $\idfu{\algo{op}}$ rather than directly. This change is again
+syntactic, so Game 2 is identically distributed to Game 1.
 
-\paragraph{Game 3.} $\idfu{\algo{op}}$ handles $\algo{create}$ queries from honest
-users. When an honest user $\algo{usr}$ initialises an account of value $v$
-with intermediary $\algo{Int}$, $\simu$ calls $\idfu{\algo{op}}$ with $(\algo{create},
-\algo{usr}, v)$ in place of running $\algo{prot}$. The two are identical:
-$\algo{prot}$ always accepts when the user has no prior account, and $\idfu{\algo{op}}$
-performs the same check.
+\paragraph{Game 3.} As Game 2, except $\idfu{\algo{op}}$ handles
+$\algo{create}$ queries from honest users. When an honest user $\algo{usr}$
+initialises an account of value $v$ with intermediary $\algo{Int}$, $\simu$
+calls $\idfu{\algo{op}}$ with $(\algo{create}, \algo{usr}, v)$ in place of
+running $\algo{prot}$. $\algo{prot}$ always accepts when the user has no prior
+account and $\idfu{\algo{op}}$ performs the same check, so the two are
+identical.
 
-\paragraph{Game 4.} As Game 3, extended to corrupt users initiating account
-creation. $\simu$ calls $\idfu{\algo{op}}$ and mirrors any abort to $\algo{Int}$.
-$\idfu{\algo{op}}$ aborts exactly when $\algo{prot}$ does, on attempts to register
-duplicate accounts, so no new distinguishing event arises.
+\paragraph{Game 4.} As Game 3, except corrupt users may also initiate account
+creation. $\simu$ calls $\idfu{\algo{op}}$ and mirrors any abort to
+$\algo{Int}$. $\idfu{\algo{op}}$ aborts exactly when $\algo{prot}$ does, on
+attempts to register duplicate accounts, so no new distinguishing event
+arises.
 
-\paragraph{Game 5.} $\idfu{\algo{op}}$ handles $\OPregister$ queries. $\simu$ calls
-$(\OPregister, \algo{usr}, \algo{se}, \algo{dev})$ whenever $\reg$ receives
-a valid registration request. $\idfu{\algo{op}}$ rejects only duplicate registrations,
-matching $\algo{prot}$.
+\paragraph{Game 5.} As Game 4, except $\idfu{\algo{op}}$ handles
+$\OPregister$ queries: $\simu$ calls $(\OPregister, \algo{usr}, \algo{se},
+\algo{dev})$ whenever $\reg$ receives a valid registration request.
+$\idfu{\algo{op}}$ rejects only duplicate registrations, matching
+$\algo{prot}$, so the games are indistinguishable.
 
-\paragraph{Game 6.} $\idfu{\algo{op}}$ handles $\OPwithdraw$ queries from honest
-users.  When an honest $\algo{usr}$ withdraws value $v$, $\simu$ calls
-$(\OPwithdraw, \algo{Int}, v)$ and learns $(\algo{usr}, v)$. $\simu$
-produces a simulated withdrawal transcript in which $\com$ is a uniformly
-random commitment, $\ciph_0 \leftarrow \PKEencrypt(\pk_{\auditor}, \algo{uid};
-\rho_0)$ is a well-formed encryption of $\algo{uid}$, $\ciph_2$ is a random
-ciphertext, and $\Pi$ is a simulated proof.  By (P1), (P2), and (P5), this
-transcript is computationally indistinguishable from one produced by
+\paragraph{Game 6.} As Game 5, except $\idfu{\algo{op}}$ handles
+$\OPwithdraw$ queries from honest users. When an honest $\algo{usr}$ withdraws
+value $v$, $\simu$ calls $(\OPwithdraw, \algo{Int}, v)$, learns $(\algo{usr},
+v)$, and produces a simulated withdrawal transcript in which $\com$ is a
+uniformly random commitment, $\ciph_0 \leftarrow \PKEencrypt(\pk_{\auditor},
+\algo{uid}; \rho_0)$ is a well-formed encryption of $\algo{uid}$, $\ciph_2$ is
+a random ciphertext, and $\Pi$ is a simulated proof. By (P1), (P2), and (P5),
+this transcript is computationally indistinguishable from one produced by
 $\algo{prot}$.
 
-\paragraph{Game 7.} $\idfu{\algo{op}}$ handles $\OPwithdraw$ queries from corrupt
-users.  When $\algo{usr}$ submits a withdrawal, $\simu$ extracts the randomness
-$s$ from the attached proof using (P5), computes $\rho \leftarrow \com(\ck,
-(\algo{uid}, v); s)$, and calls $(\OPwithdraw, \algo{Int}, v)$ with $\rho$.
-Both $\idfu{\algo{op}}$ and $\algo{prot}$ reject if and only if $\com \leftarrow
-\com(\ck, (\algo{uid}, v); s)$ is a duplicate, which would imply a duplicate
-$\rho$, so the accounting checks agree.
+\paragraph{Game 7.} As Game 6, except $\idfu{\algo{op}}$ handles
+$\OPwithdraw$ queries from corrupt users. When $\algo{usr}$ submits a
+withdrawal, $\simu$ extracts the randomness $s$ from the attached proof using
+(P5), computes $\rho \leftarrow \com(\ck, (\algo{uid}, v); s)$, and calls
+$(\OPwithdraw, \algo{Int}, v)$ with $\rho$. Both $\idfu{\algo{op}}$ and
+$\algo{prot}$ reject if and only if $\com \leftarrow \com(\ck, (\algo{uid},
+v); s)$ is a duplicate, which would imply a duplicate $\rho$, so the
+accounting checks agree and the games are indistinguishable.
 
-\paragraph{Game 8.} $\idfu{\algo{op}}$ handles $\OPexecute$ queries from honest payers.
-We first deal with the first payment after withdrawal, the case $i = 0$, then
-generalise.
+\paragraph{Game 8.} As Game 7, except $\idfu{\algo{op}}$ handles
+$\OPexecute$ queries from honest payers. We first deal with the first payment
+after withdrawal, the case $i = 0$, then generalise.
 
 Case $i = 0$. $\algo{usr}$ pays $\algo{usr}'$ by calling $(\OPexecute, \rho, v,
 \algo{usr}')$.
@@ -115,12 +121,13 @@ proofs and random ciphertexts (or $\ciph_i \leftarrow
 \PKEencrypt(\pk_{\auditor}, \algo{uid}_i; \rho_i)$ if $\algo{usr}'$ is
 corrupt), and updates the maps as needed. By IND-CPA security of the encryption
 scheme (P2) and simulation-extractable security of the NIZK scheme (P5),
-simulated payments are indistinguishable from real ones.
+simulated payments are indistinguishable from real ones, so Game 8 is
+indistinguishable from Game 7.
 
-\paragraph{Game 9.} $\idfu{\algo{op}}$ also processes $\OPexecute$ queries from corrupt
-payers. We show that if $\idfu{\algo{op}}$ rejects a payment, an honest $\algo{usr}'$ in
-$\algo{prot}$ also rejects it, again showing the case $i = 0$ before
-generalising.
+\paragraph{Game 9.} As Game 8, except $\idfu{\algo{op}}$ also processes
+$\OPexecute$ queries from corrupt payers. We show that if $\idfu{\algo{op}}$
+rejects a payment, an honest $\algo{usr}'$ in $\algo{prot}$ also rejects it,
+again showing the case $i = 0$ before generalising.
 
 Let $p_0 = (v, \com_1, \com_0, \ciph_0, \sigma_0, \Gamma_0, \algo{hist}_0)$ be
 the payment produced by corrupt $\algo{usr}$. $\simu$ computes $\rho \leftarrow
@@ -177,8 +184,8 @@ $(\rho_0, \ldots, \rho_i)$. Since the probability that an honest $\algo{usr}'$
 accepts a payment that $\idfu{\algo{op}}$ rejects is negligible under (P1)-(P5), this
 game is indistinguishable from Game 8.
 
-\paragraph{Game 10.} $\idfu{\algo{op}}$ handles $\OPdeposit$ queries from honest
-users.  $\simu$ recovers $(\com_0, \ldots, \com_n)$ from
+\paragraph{Game 10.} As Game 9, except $\idfu{\algo{op}}$ handles
+$\OPdeposit$ queries from honest users. $\simu$ recovers $(\com_0, \ldots, \com_n)$ from
 $\mathbb{C}[\vec{\rho}]$ and produces a simulated deposit $(\tau_n, \sigma_n,
 \algo{hist}_n)$ with simulated proofs and random ciphertexts. Since $\idfu{\algo{op}}$
 rejects a deposit only when the token does not belong to $\algo{usr}$ or has
@@ -191,12 +198,13 @@ one-to-one by binding of the commitment scheme (P1). $\rho_0$ is fixed by
 $\com_0$, which is fixed by the blind signature issued by $\algo{cb}$, which
 binds $(\algo{uid}_0, v, s_0)$. A corrupt user cannot alter $\com_0$, so any
 two deposits sharing $\vec{\rho}[0]$ are double spends and will be detected by
-$\idfu{\algo{op}}$.
+$\idfu{\algo{op}}$, so Game 10 is indistinguishable from Game 9.
 
-\paragraph{Game 11.} $\idfu{\algo{op}}$ now also handles $\OPdeposit$ queries from
-corrupt users. When $\algo{tokens}[\vec{\rho}] \neq \langle \algo{usr}, v
-\rangle$, exactly one of the following holds, each handled by the same argument
-as in Game 9 with the payment in question replaced by the deposit in question.
+\paragraph{Game 11.} As Game 10, except $\idfu{\algo{op}}$ also handles
+$\OPdeposit$ queries from corrupt users. When $\algo{tokens}[\vec{\rho}] \neq
+\langle \algo{usr}, v \rangle$, exactly one of the following holds, each
+handled by the same argument as in Game 9 with the payment in question
+replaced by the deposit in question.
 
 \begin{enumerate}[label=\alph*)]
 
@@ -222,12 +230,12 @@ If the token has been transferred multiple times before deposit, $\simu$ fills
 in unrecorded payments using $\Gamma_j$ as in Game 9, and the same cases apply
 inductively. If another deposit chain sharing $\vec{\rho}[0]$ has already been
 recorded, the same argument as in Game 10 shows the initial commitment cannot
-be altered.
+be altered, so Game 11 is indistinguishable from Game 10.
 
-\paragraph{Game 12.} $\idfu{\algo{op}}$ handles $\OPidentify$ queries. The auditor
-calls $(\OPidentify, \rho)$ and expects the set of double spenders
-$\algo{DS}$. We show that the outputs of $\idfu{\algo{op}}$ and $\algo{prot}$ agree
-except with negligible probability.
+\paragraph{Game 12.} As Game 11, except $\idfu{\algo{op}}$ handles
+$\OPidentify$ queries. The auditor calls $(\OPidentify, \rho)$ and expects the
+set of double spenders $\algo{DS}$. We show that the outputs of
+$\idfu{\algo{op}}$ and $\algo{prot}$ agree except with negligible probability.
 
 In $\algo{prot}$, the double spender at index $j$ is identified by decrypting
 $\ciph_j$. The commitment $\com_j$ is fixed by Game 11's argument (binding of
@@ -245,7 +253,8 @@ is the double spender.
 If $\ciph_j$ decrypts to an unregistered user, then $\sigma_j$ is a valid
 signature of knowledge over a credential for that identifier, contradicting
 EUF-CMA of the credential scheme (P4) via simulation-extractability of the NIZK
-(P5). All distinguishing events occur with negligible probability, so Game 12
-is indistinguishable from Game 11. This completes the proof.
+(P5). All distinguishing events occur with negligible probability, so Game 12,
+which is the ideal world, is indistinguishable from Game 11. This completes
+the proof.
 
 \end{proof}

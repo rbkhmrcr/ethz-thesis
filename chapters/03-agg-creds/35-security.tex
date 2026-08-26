@@ -12,35 +12,57 @@ functionality $\idfu{\AAC}$.  We define a sequence of indistinguishable games
 that start with Game 0 representing the real world, and end with Game 8
 representing the ideal world.
 
+We rely on the following security properties of the underlying primitives:
+
+\begin{enumerate}
+
+  \item[(P1)] The digital signature scheme $\DS$ used by the registration
+    authority is existentially unforgeable (EUF-CMA): no PPT adversary can
+    produce a valid signature $\psi$ on a pair $(\pk, \Tag)$ that the
+    registration authority never signed.
+
+  \item[(P2)] The tag-based aggregate signature scheme $\ATS$ is existentially
+    unforgeable under tag-based aggregation, as shown
+    in~\Cref{thm:agg-creds-thm-1}.
+
+  \item[(P3)] The non-interactive zero-knowledge proof system used to compute
+    $\algoproof$ is simulation-extractable: a valid witness can be extracted
+    from any accepted proof, and simulated proofs are indistinguishable from
+    real ones.
+
+\end{enumerate}
+
 \begin{proof}
 
 \paragraph{Game 0.} This is the execution of protocol $\Pi$.
 
-\paragraph{Game 1.} The simulator $\simu$ executes protocol $\Pi$ on behalf of
-the honest parties.  That is, $\simu$ is provided with the inputs (including
-secrets) of the honest parties, and interacts with corrupt parties, through the
-adversary, in the real world, following $\Pi$'s specifications, and returns the
-corresponding output.  Game 1 is by construction indistinguishable from Game 0.
+\paragraph{Game 1.} As Game 0, except $\simu$ executes protocol $\Pi$ on
+behalf of the honest parties: $\simu$ is provided with the inputs (including
+secrets) of the honest parties, and interacts with corrupt parties, through
+the adversary, in the real world, following $\Pi$'s specifications, and
+returns the corresponding output. This change is purely syntactic, so Game 1
+is indistinguishable from Game 0 by construction.
 
-\paragraph{Game 2.} We introduce dummy functionality $\idfu{\AAC}'$ that
-forwards the inputs from the honest parties to $\simu$ and returns the outputs.
-This modification is syntactic.
+\paragraph{Game 2.} As Game 1, except we introduce dummy functionality
+$\idfu{\AAC}'$ that forwards the inputs from the honest parties to $\simu$ and
+returns the outputs. This modification is syntactic, so Game 2 is
+indistinguishable from Game 1.
 
-\paragraph{Game 3.} In this game, $\idfu{\AAC}'$ handles register calls from
-honest users following the description of ideal functionality $\idfu{\AAC}$.
-$\simu$ first assigns each honest user a key pair $(\sk, \pk)$.  Now, when an
-honest user $\user$ calls $\idfu{\AAC}'$ to register, $\simu$ learns the user's
-identity.  Given this information, $\simu$ retrieves the corresponding key pair
-$(\sk,\pk)$ and contacts the registration authority to register $\user$.
-$\simu$ receives a unique tag $\Tag$ and a signature $\psi \leftarrow
-\DSsign(\rask, (\pk, \Tag))$ and stores entry $\langle \user, \Tag, \pk,
-\psi\rangle $.
+\paragraph{Game 3.} As Game 2, except $\idfu{\AAC}'$ handles register calls
+from honest users following the description of ideal functionality
+$\idfu{\AAC}$. $\simu$ first assigns each honest user a key pair $(\sk, \pk)$.
+Now, when an honest user $\user$ calls $\idfu{\AAC}'$ to register, $\simu$
+learns the user's identity. Given this information, $\simu$ retrieves the
+corresponding key pair $(\sk,\pk)$ and contacts the registration authority to
+register $\user$. $\simu$ receives a unique tag $\Tag$ and a signature $\psi
+\leftarrow \DSsign(\rask, (\pk, \Tag))$ and stores entry $\langle \user, \Tag,
+\pk, \psi\rangle $.
 
 Since the registration authority and $\idfu{\AAC}'$ both register each user
 exactly once and reject duplicates, they accept or reject the same requests, so
 this game is indistinguishable from Game 2.
 
-\paragraph{Game 4.} In this game, $\idfu{\AAC}'$ also handles credential
+\paragraph{Game 4.} As Game 3, except $\idfu{\AAC}'$ also handles credential
 issuance calls from honest users following the description of ideal
 functionality $\idfu{\AAC}$.  When  $\idfu{\AAC}'$ receives issuance request
 $(\AACissue, \att{i}, \atv{i})$ from honest user $\user$, $\simu$ learns the
@@ -75,25 +97,25 @@ $\Pi$'s in both cases, and this game is indistinguishable from Game 3 as long
 as $\simu$ does not abort.  Since $\user$ is honest, she always registers
 before requesting credentials, so the abort event never occurs.
 
-\paragraph{Game 5.} During this game, $\idfu{\AAC}'$ executes aggregate
-requests from honest users following the description of $\idfu{\AAC}$.  This
-game is indistinguishable from Game 4, as credential aggregation is a local
-operation where adversary $\adv$ observes nothing, so $\simu$ need not do
-anything.
+\paragraph{Game 5.} As Game 4, except $\idfu{\AAC}'$ executes aggregate
+requests from honest users following the description of $\idfu{\AAC}$. Since
+credential aggregation is a local operation where adversary $\adv$ observes
+nothing, $\simu$ need not do anything, so Game 5 is indistinguishable from
+Game 4.
 
-\paragraph{Game 6.} In this game, $\idfu{\AAC}'$ takes charge of signature
-requests from honest users, following the specifications of $\idfu{\AAC}$, and
-$\simu$ successfully simulates their executions of $\Pi$ in the real world
-thanks to the simulatability of $\algoproof$.  Namely, given message $(\AACpresent
-end, \vec{\atv{}}, \msg, \algoproof)$ from $\idfu{\AAC}'$ for $\vec{\atv{}} =
-(\atv{1}, \ldots, \atv{N})$, $\simu$ defines  $\inst_1 = (\pk, (\ipk{i},
-\atv{i})_{i \in \ISSUERS})$ such that $\forall i \in \ISSUERS: \atv{i} \neq
-\varnothing$, and, using its ability to program the random oracle as the
-simulation trapdoor $\td$, outputs $\algoproof^{\star} \leftarrow
-\NIZKsimprove(\crs, \td, \inst_1, \msg)$, which gives $\NIZKverify(\crs,
-\inst_1, \algoproof^{\star}, \msg) = 1$.
+\paragraph{Game 6.} As Game 5, except $\idfu{\AAC}'$ takes charge of signature
+requests from honest users, following the specifications of $\idfu{\AAC}$.
+Given message $(\AACpresentend, \vec{\atv{}}, \msg, \algoproof)$ from
+$\idfu{\AAC}'$ for $\vec{\atv{}} = (\atv{1}, \ldots, \atv{N})$, $\simu$ defines
+$\inst_1 = (\pk, (\ipk{i}, \atv{i})_{i \in \ISSUERS})$ such that $\forall i \in
+\ISSUERS: \atv{i} \neq \varnothing$, and, using its ability to program the
+random oracle as the simulation trapdoor $\td$, outputs $\algoproof^{\star}
+\leftarrow \NIZKsimprove(\crs, \td, \inst_1, \msg)$, which gives
+$\NIZKverify(\crs, \inst_1, \algoproof^{\star}, \msg) = 1$. By (P3), this
+simulated proof is indistinguishable from a real one, so Game 6 is
+indistinguishable from Game 5.
 
-\paragraph{Game 7.} In this game, $\idfu{\AAC}'$ processes verification
+\paragraph{Game 7.} As Game 6, except $\idfu{\AAC}'$ processes verification
 requests from honest verifiers following the description of $\idfu{\AAC}$, and
 $\simu$ simulates the honest verifiers in the real world.  On receiving a
 signature in the real world, $\simu$ translates the signature into calls to
@@ -147,9 +169,8 @@ following, we describe $\simu$'s simulation.
     occurs.  Given a proof that was computed honestly,  $\NIZKverify$ will
     never output $0$, so the output of $\idfu{\AAC}'$ matches that of $\Pi$.
 
-    If $b = 1$, then thanks to the extractability property of the proof,
-    $\simu$ can extract the witness $\witness_1 = (\Tag, \sk, \pk, \psi,
-    \signature)$. They then execute the following steps:
+    If $b = 1$, then by (P3), $\simu$ can extract the witness $\witness_1 =
+    (\Tag, \sk, \pk, \psi, \signature)$. They then execute the following steps:
 
     \begin{description}
 
@@ -212,19 +233,16 @@ occur. We now show that the probability of these events occuring is negligible.
 \begin{description}
 
   \item[$a_1$.] Occurs if there is no recorded entry $\langle \star, \Tag, \pk,
-    \star \rangle$ in the system.  Again due to extraction of the verifying
-    proof $\algoproof$, we can extract witness $\witness_1 = (\Tag, \sk, \pk, \psi,
-    \signature)$.  This means that $\user$ has knowledge of a valid $\psi$ such
-    that $1 \leftarrow \DSverify(\rapk, (\pk, \Tag), \psi)$ with no
-    corresponding entry, contradicting the existential unforgeability of the
-    digital signature scheme $\DS$.
+    \star \rangle$ in the system.  By (P3), we can extract witness $\witness_1
+    = (\Tag, \sk, \pk, \psi, \signature)$.  This means that $\user$ has
+    knowledge of a valid $\psi$ such that $1 \leftarrow \DSverify(\rapk, (\pk,
+    \Tag), \psi)$ with no corresponding entry, contradicting (P1).
 
   \item[$a_2$.] Occurs if $\exists j \in [1, n]$ such that $\atv{j} \neq
     \varnothing$ and $\issuer{j}$ is honest, and there is no recorded entry
-    $\langle \star, \Tag, \atv{j}, \star \rangle$.  Again, due to extraction of
-    the correctly verifying proof $\algoproof$, we can extract a valid witness
-    $\witness_1 = (\Tag, \sk, \pk, \psi, \signature)$.  This means that
-    $\signature$ satisfies the following:
+    $\langle \star, \Tag, \atv{j}, \star \rangle$.  By (P3), we can again
+    extract a valid witness $\witness_1 = (\Tag, \sk, \pk, \psi, \signature)$.
+    This means that $\signature$ satisfies the following:
     %
     \begin{equation*}
     %
@@ -237,14 +255,13 @@ occur. We now show that the probability of these events occuring is negligible.
     $j \in \ISSUERS$.  Given that there is no recorded entry $\langle \star,
     \Tag, \atv{j}, \star \rangle$, this implies that the honest issuer
     $\issuer{j}$ never issued a signature $\signature_j$ for pair $(\Tag,
-    \atv{j})$, contradicting existential unforgeability under tag-based
-    aggregation of $\ATS$.
+    \atv{j})$, contradicting (P2).
 
 \end{description}
 
-\paragraph{Game 8.} This is the ideal world.  This game is indistinguishable
-from Game 7 as functionality $\idfu{\AAC}'$ is identical to ideal functionality
-$\idfu{\AAC}$.  This concludes the proof
+\paragraph{Game 8.} This is the ideal world. As Game 7, except $\idfu{\AAC}'$
+is now identical to ideal functionality $\idfu{\AAC}$, so Game 8 is
+indistinguishable from Game 7. This concludes the proof
 of~\Cref{thm:agg-creds-construction-security}.
 
 \end{proof}

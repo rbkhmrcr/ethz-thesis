@@ -1,17 +1,37 @@
-\section{Security arguments}\label{sec:txid-security}
+\section{Security}\label{sec:txid-security}
 
-\subsection{Security argument for
-Theorem~\ref{thm:txid-bb}}\label{sec:txid-bb-sec}
+\subsection{Proof of~\Cref{thm:txid-bb}}\label{sec:txid-bb-sec}
 
-We prove Theorem~\ref{thm:txid-bb} by simulation: for a polynomial-time
-adversary $\adv$ interacting with protocol $\Pi$, we construct a simulator
-$\simu$ that, using only its interactions with ideal functionality
-$\idfu{\algo{trace}}$, simulates an execution of $\Pi$ to $\adv$ so that $\adv$
-cannot distinguish the two.
+We show that the view of a real world adversary $\adv$ during an execution of
+$\Pi$ is indistinguishable from the view of an ideal world simulator $\simu$
+that interacts with system participants through ideal functionality
+$\idfu{\algo{trace}}$. We define a sequence of indistinguishable games that
+start with Game 0 representing the real world, and end with Game 7
+representing the ideal world.
 
-We define a sequence of games from a real execution of $\Pi$ to
-$\idfu{\algo{trace}}$, and show each is (computationally) indistinguishable
-from the last.
+We rely on the following security properties of the underlying primitives:
+
+\begin{enumerate}
+
+  \item[(P1)] The registration/credential signature scheme is EUF-CMA secure:
+    no PPT adversary can produce a valid signature without querying the
+    registration authority.
+
+  \item[(P2)] The commitment scheme $\ComCommit$ is hiding: commitments are
+    computationally indistinguishable from random for any PPT adversary.
+
+  \item[(P3)] $\FE$ and $\FT$ are secure pseudorandom functions, as shown in
+    Lemma~\ref{lem:txid-fe-prf} and Lemma~\ref{lem:txid-ft-prf}.
+
+  \item[(P4)] The proofs and signatures of knowledge for relations $\rel_5$
+    through $\rel_8$ are simulation-extractable in the random oracle model: a
+    valid witness can be extracted from any accepted proof, and simulated
+    proofs are indistinguishable from real ones.
+
+  \item[(P5)] Honest users and honest auditors communicate over a secure
+    (confidential) channel.
+
+\end{enumerate}
 
 \begin{proof}
 
@@ -46,7 +66,7 @@ from the last.
   For a valid registration request from a corrupt user, $\simu$ issues
   $\IDregister$ to $\idfu{\algo{trace}}$ on the user's behalf and returns its
   output.  If $\idfu{\algo{trace}}$ registers the user, $\simu$ extracts $(\sk,
-  \utk)$ using the extractability of the proof, computes $\signature$ following
+  \utk)$ using the extractability of the proof (P4), computes $\signature$ following
   $\Pi$, sends it to $\user$, and records $\regsimu[\user] = (\sk, \utk,
   \signature)$.
 
@@ -54,7 +74,8 @@ from the last.
   $\IDregister$ call differs from $\Pi$'s. The correctness of $\Pi$ rules out
   $\idfu{\algo{trace}}$ accepting where $\Pi$ rejects, and the registration
   authority's tracking of past requests rules out the reverse, since only a
-  double registration could cause it, and that never succeeds.
+  double registration could cause it, and that never succeeds. So Game 2 is
+  indistinguishable from Game 1.
 
   \paragraph{Game 3.} As Game 2, except $\simu$ simulates honest users'
   responses to tracing authorisation requests using only
@@ -63,9 +84,8 @@ from the last.
   For an $\IDgrant$ call between honest user $\user$ and honest auditor
   $\auditor$ in epoch $\epoch$, $\simu$ sets
   $\permsimu[(\auditor,\user,\epoch)] \sample \epsilon$ and simulates the
-  transcript with randomly generated information; since $\user$ and $\auditor$
-  communicate over a secure channel, this is indistinguishable from a real
-  execution.
+  transcript with randomly generated information; by (P5), this is
+  indistinguishable from a real execution.
 
   For an authorisation request from a corrupt auditor $\auditor$ to honest user
   $\user$, $\simu$ forwards it to $\user$, who calls $\IDgrant$. If
@@ -83,9 +103,9 @@ from the last.
   relation $\rel_5$.
 
   When such a user submits a transaction, $\simu$ follows $\Pi$ but simulates
-  the ZK proof for relation $\rel_7$, since $\ek$ is now random. The
-  pseudorandomness of $\FE$ and the zero-knowledge and simulatability
-  properties of proofs make this game indistinguishable from Game 3.
+  the ZK proof for relation $\rel_7$, since $\ek$ is now random. By the
+  pseudorandomness of $\FE$ (P3) and (P4), this game is indistinguishable
+  from Game 3.
 
   \paragraph{Game 5.} As Game 4, except $\simu$ also simulates transaction
   submission using $\idfu{\algo{trace}}$'s output on $\IDsubmit$ requests from
@@ -127,10 +147,9 @@ from the last.
       the tag as $\Tag_\gamma = \FT(\ek,\gamma)$, samples uniformly at random
       commitment $\com^{\star}$ and tag $\Tag_{\gamma}^\star$ and simulates the
       corresponding proof and ZK proof. Epoch keys for other epochs are
-      independent of the current one, so the hiding property of the commitment
-      scheme, the pseudorandomness of $\FT$, and the simulatability and
-      zero-knowledge properties of the proofs make this indistinguishable from
-      submitting transactions in an execution of $\Pi$.
+      independent of the current one, so by (P2), the pseudorandomness of
+      $\FT$ (P3), and (P4), this is indistinguishable from submitting
+      transactions in an execution of $\Pi$.
 
     \item[A corrupt auditor holds a valid tracing permission for the honest
       user.] $\simu$ obtains pair $(\user, \algo{TX})$, where $\user$
@@ -143,15 +162,16 @@ from the last.
 
   \end{description}
 
+  Both cases are indistinguishable from a real execution, so Game 5 is
+  indistinguishable from Game 4.
+
   \paragraph{Game 6.} As Game 5, except $\simu$ also simulates transaction
   submission for corrupt users, using the output of $\idfu{\algo{trace}}$'s
   $\IDsubmit$ interface.
 
   When a corrupt user $\user$ submits a transaction with a valid tag (a tag
   with valid ZK proof and proof and which does not appear in the ledger),
-  $\simu$ uses the extractability property of proofs and the knowledge
-  soundness of ZK proofs to extract $\user$'s witness, and the existential
-  unforgeability of the registration signature to identify $\user$ via
+  $\simu$ uses (P4) to extract $\user$'s witness, and (P1) to identify $\user$ via
   $\regsimu$. $\simu$ then sends an $\IDsubmit$ request on $\user$'s behalf to
   $\idfu{\algo{trace}}$ and returns its output; if $\idfu{\algo{trace}}$
   accepts, $\simu$ records the transaction in $\txns[(\user,\epoch)]$.
@@ -167,9 +187,9 @@ from the last.
       $\idfu{\algo{trace}}$.
 
     \item[$\user$ already submitted $\Max$ transactions in the current epoch.]
-      Given the knowledge soundness of ZK proofs and determinism of $\FT$,
-      $\Pi$ will not accept a transaction from $\user$ in this case as the tag
-      will already appear in the ledger.
+      By (P4) and the determinism of $\FT$, $\Pi$ will not accept a
+      transaction from $\user$ in this case as the tag will already appear in
+      the ledger.
 
   \end{description}
 
@@ -192,17 +212,17 @@ from the last.
   a corrupt user is recorded in $\txnssimu$ and forwarded to
   $\idfu{\algo{trace}}$ only if it carries a valid tag $\Tag_{\gamma}$, meaning
   the proof for relation $\rel_6$ and the ZK proof for relation $\rel_7$ are
-  both valid. The extractability of proofs and knowledge soundness of ZK proofs
-  then give $\Tag_{\gamma} = \FT(\ek, \gamma) \ \wedge \ \ek = \FE(\utk,
-  \epoch)$ with $\utk$ verifying Equations \ref{eq:rel6} and \ref{eq:rel7}. An
-  honest auditor with the right permission then fails to trace $\tx$ only if
-  they accepted a bogus epoch key $\ek^\star$, which, given the extractability
-  of the proof for $\rel_5$ and the existential unforgeability of digital
-  signatures, occurs only with negligible probability.
+  both valid. By (P4), this gives $\Tag_{\gamma} = \FT(\ek, \gamma) \ \wedge \
+  \ek = \FE(\utk, \epoch)$ with $\utk$ verifying Equations \ref{eq:rel6} and
+  \ref{eq:rel7}. An honest auditor with the right permission then fails to
+  trace $\tx$ only if they accepted a bogus epoch key $\ek^\star$, which, by
+  (P4) and (P1), occurs only with negligible probability. So Game 7, which is
+  the ideal world, is indistinguishable from Game 6. This concludes the proof
+  of~\Cref{thm:txid-bb}.
 
 \end{proof}
 
-\subsection{PRF security arguments}
+\subsection{Auxiliary security arguments}
 
 \subsubsection*{PRF Security of $\FE$}\label{sec:txid-fe-prf-proof}
 

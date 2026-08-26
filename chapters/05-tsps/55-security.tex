@@ -19,7 +19,9 @@ Section~\ref{sec:tsps-instantiation} fall into this class.
 
 \end{theorem}
 
-\paragraph{Proof.}
+\subsection{Proof of~\Cref{thm:tsps-security}}\label{sec:tsps-security-proof}
+
+\begin{proof}
 
 We argue by contrapositive. Suppose the threshold structure-preserving
 signature scheme does not achieve adaptive TS-UF-1 security. Using the
@@ -70,4 +72,6 @@ itself, and correspondingly the adp-TS-UF-1 game's winning condition requires
 $|\Cor| < t$. For $|\Cor| < t$, every query to $\corrupto$ can be simulated as
 above, so the reduction goes through, and the threshold structure-preserving
 signature scheme achieves adaptive TS-UF-1 security with corruption bound
-$|\Cor| < t$.
+$|\Cor| < t$. This concludes the proof of~\Cref{thm:tsps-security}.
+
+\end{proof}
