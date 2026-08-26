@@ -149,115 +149,218 @@ $m$.
 
 \begin{protocolbox}{Offline payment protocol}{offline}
 
-\paragraph{Setup.}\label{sec:offline:construction:setup} The central bank
-generates keys for a blind signature scheme supporting three-message
-vectors, obtaining $(\sk_{\algo{cb}}, \pk_{\algo{cb}})$, and runs $\ck \leftarrow
-\ComGen(1^\kappa)$ to obtain a public commitment key. The auditor generates
-an asymmetric encryption key pair $(\sk_{\auditor}, \pk_{\auditor}) \leftarrow
-\PKEgen(1^\kappa)$. The registration authority generates keys for a
-multi-message signature scheme supporting two-message vectors, obtaining
-$(\rask, \rapk) \leftarrow \DSgen(1^\kappa, 2)$. All public keys and
-generators are published to every participant.
+  \begin{description}
 
-When a user $\algo{usr}$ opens an account, their secure element $\algo{se}$ is
-provisioned with a fresh secret key $\sk_{\algo{usr}}$ and a unique random identifier
-$\algo{uid}$. The registration authority verifies that $\algo{uid}$ is fresh and that
-$\algo{se}$ knows $\sk_{\algo{usr}}$ via an interactive zero-knowledge proof of knowledge,
-then issues credential $\cred = (\algo{uid}, \pk_{\algo{usr}}, \varphi)$ with $\varphi
-\leftarrow \DSsign(\rask, (\algo{uid}, \sk_{\algo{usr}}))$. $\algo{dev}$ and $\algo{se}$ are paired so
-that only $\algo{dev}$ can send instructions to $\algo{se}$.
+    \item[$(\pk_{\algo{cb}}, \ck, \pk_{\auditor}, \rapk) \leftarrow
+      \algo{Setup}(1^\kappa)$ :]\label{sec:offline:construction:setup} On
+      input security parameter $\kappa$, do:
 
-\paragraph{Withdrawal.}\label{sec:withdrawal} User $\algo{usr}_0$ withdraws a token
-of value $v_0$ as follows.
+      \begin{enumerate}
 
-Preparation\label{sec:stepW1W2}: $\algo{dev}_0$ instructs $\algo{se}_0$ to
-initiate a withdrawal of value $v_0$. $\algo{se}_0$ selects random $s_0$, computes
-$\com_0 \leftarrow \com(\ck, \algo{uid}_0; s_0)$, and returns $(s_0, \com_0)$ to
-$\algo{dev}_0$, which computes $\com \leftarrow \com(\ck, (\algo{uid}_0, v_0); s_0)$.
-$\algo{dev}_0$ prepares a blind signature request on the committed vector
-$(\algo{uid}_0, v_0, s_0)$, hiding $\algo{uid}_0$ and $s_0$ and disclosing $v_0$,
-including a zero-knowledge proof $\Pi$ that $\com$ is correctly formed and
-that the accompanying ciphertexts are correct, and sends $\algo{req} = (\algo{uid}_0,
-\com, \ciph_0, v_0, \ciph_2, \Pi, \rho_0)$ to $\algo{Int}_0$.
+        \item The central bank generates keys for a blind signature scheme
+          supporting three-message vectors, obtaining $(\sk_{\algo{cb}},
+          \pk_{\algo{cb}})$.
 
-Issuance\label{sec:stepW3}: $\algo{Int}_0$ verifies $\Pi$, locks $v_0$ in
-$\algo{usr}_0$'s account, and forwards $(\com, \ciph_0, v_0, \ciph_2, \Pi)$ to
-the central bank, which checks that $\com$ is fresh, verifies $\Pi$, debits
-$\algo{Int}_0$'s reserves, and returns a blind signature response $\algo{resp}$.
+        \item The central bank runs $\ck \leftarrow \ComGen(1^\kappa)$ to
+          obtain a public commitment key.
 
-Receipt\label{sec:stepW4}: $\algo{dev}_0$ unblinds $\algo{resp}$ to obtain a
-signature $\psi \leftarrow \DSsign(\sk_{\algo{cb}}, (\algo{uid}_0, v_0); s_0)$ and stores
-$(v_0, s_0, \com_0, \psi)$; $\algo{se}_0$ stores the original token $\tau_0 =
-(v_0, \com_0)$.
+        \item The auditor generates an asymmetric encryption key pair
+          $(\sk_{\auditor}, \pk_{\auditor}) \leftarrow \PKEgen(1^\kappa)$.
 
-Token creation\label{sec:stepW5}: $\algo{dev}_0$ produces a proof of
-withdrawal $\Sigma$ with $\inst = (\ck, \pk_{\algo{cb}}, v_0, \com_0)$, $\witness =
-(\algo{uid}_0, s_0, \psi)$, and relation as follows:
-\begin{equation*}
-  \DSverify(\pk_{\algo{cb}}, (\algo{uid}_0, v_0); s_0, \psi) = 1 \;\wedge\; \ComOpen(\ck,
-  \algo{uid}_0; s_0, \com_0) = 1.
-\end{equation*}
-It then stores $T_0 = (v_0, s_0, \com_0, \algo{hist}_0 = \Sigma)$.
+        \item The registration authority generates keys for a
+          multi-message signature scheme supporting two-message vectors,
+          obtaining $(\rask, \rapk) \leftarrow \DSgen(1^\kappa, 2)$.
 
-\paragraph{Payment.}\label{sec:payments} $\algo{usr}_i$ pays $\algo{usr}_{i+1}$ using
-token $(v, s_i, \com_i, \algo{hist}_i)$ as follows.
+        \item Publish all public keys and generators to every participant,
+          and return $(\pk_{\algo{cb}}, \ck, \pk_{\auditor}, \rapk)$.
 
-Preparation\label{sec:stepS1}: $\algo{dev}_{i+1}$ instructs $\algo{se}_{i+1}$ to
-prepare to receive a payment of value $v$. $\algo{se}_{i+1}$ selects random
-$s_{i+1}$, computes $\com_{i+1} \leftarrow \com(\ck, \algo{uid}_{i+1};
-s_{i+1})$, and returns $(s_{i+1}, \com_{i+1})$ to $\algo{dev}_{i+1}$, which
-sends $\com_{i+1}$ to $\algo{dev}_i$.
+      \end{enumerate}
 
-Transfer\label{sec:stepS2S3S4}: $\algo{dev}_i$ notifies $\algo{se}_i$ that a
-payment is under way; $\algo{se}_i$ locks token $\tau_i = (v, \com_i)$. $\algo{dev}_i$
-computes the audit ciphertext $\ciph_i \leftarrow \PKEencrypt(\pk_{\auditor}, \algo{uid}_i;
-\rho_i)$ and proof of correctness $\Gamma_i$, with $\inst = (\com_i,
-\ciph_i)$, $\witness = (\algo{uid}_i, s_i, \rho_i)$, and relation as follows:
-\begin{equation*}
-  \ComOpen(\ck, \algo{uid}_i, s_i, \com_i) = 1 \;\wedge\; \ciph_i = \PKEencrypt(\pk_{\auditor},
-  \algo{uid}_i; \rho_i).
-\end{equation*}
-$\algo{se}_i$ and $\algo{dev}_i$ then jointly compute a signature of knowledge $\sigma_i$
-for the relation as follows:
-\begin{equation*}
-  \DSverify(\rapk, \algo{uid}_i, \sk_{\algo{usr}_i}, \varphi_i) = 1 \;\wedge\; \ComOpen(\ck,
-  \algo{uid}_i, s_i, \com_i) = 1.
-\end{equation*}
-Here, $\algo{se}_i$ contributes knowledge of $\sk_{\algo{usr}_i}$ and $\algo{dev}_i$ contributes the
-remaining witness, following a sigma-protocol-based two-party protocol (see
-Section~\ref{sec:sok-sol}). $\algo{dev}_i$ sends payment $p_i = (v, \com_i,
-\com_{i+1}, \ciph_i, \sigma_i, \Gamma_i, \algo{hist}_i)$ to $\algo{dev}_{i+1}$.
+    \item[$\cred \leftarrow \algo{OpenAccount}(\rask)$ :] When a user
+      $\algo{usr}$ opens an account, do:
 
-Receipt\label{sec:stepS5}: $\algo{dev}_{i+1}$ verifies $\algo{hist}_i$: if $i =
-0$, it checks $\Sigma$, otherwise it verifies every $(\Sigma, \Gamma_k,
-\sigma_k)_{k \in [i]}$. If $\Gamma_i$ and $\sigma_i$ also verify,
-$\algo{dev}_{i+1}$ accepts and stores the following:
-\begin{equation*}
-  T_{i+1} = (v, s_{i+1}, \com_{i+1}, \algo{hist}_{i+1} = (\com_i, \ciph_i,
-  \sigma_i, \Gamma_i) \, \| \, \algo{hist}_i).
-\end{equation*}
-Meanwhile, $\algo{se}_{i+1}$ stores $\tau_{i+1} = (v, \com_{i+1})$. Upon
-acknowledgement, $\algo{se}_i$ deletes $\com_i$.
+      \begin{enumerate}
 
-\paragraph{Deposit and reconciliation.}\label{sec:deposit} User $\algo{usr}_n$
-deposits token $\tau_n = (v, \com_n)$ by instructing $\algo{dev}_n$, which informs
-$\algo{se}_n$ to lock $\tau_n$; $\algo{dev}_n$ and $\algo{se}_n$ jointly compute a signature of
-knowledge $\sigma_n$ over $\tau_n$, structured analogously to the payment
-signatures above. $\algo{dev}_n$ sends deposit request $d_n = (\tau_n, \sigma_n,
-\algo{hist}_n)$ to $\algo{Int}_n$, which forwards it to the central bank. The central
-bank verifies $\sigma_n$ and $\algo{hist}_n$; if valid, it checks whether any
-prior deposit shares the same origin $\com_0$, and if so records double
-spending and notifies the auditor, and otherwise credits $\algo{Int}_n$'s account,
-which in turn credits $\algo{usr}_n$'s account. Upon notification, $\algo{se}_n$
-deletes $\tau_n$. Appendix~\ref{sec:aggregate-deposits} extends the protocol
-to support the aggregation of deposits.
+        \item Provision the user's secure element $\algo{se}$ with a fresh
+          secret key $\sk_{\algo{usr}}$ and a unique random identifier
+          $\algo{uid}$.
 
-\paragraph{Identifying double spenders.} For two conflicting deposit
-requests $d_n$ and $d_m$ involving the same original token, let $\algo{hist}_n =
-((\com_k, \ciph_k, \sigma_k, \Gamma_k)_{k \in [n]}, \Sigma)$ and $\algo{hist}_m$
-analogously. The auditor finds the divergence index $j$ such that $\com_k =
-\com'_k$ for all $k \leq j$ but $\com_{j+1} \neq \com'_{j+1}$; the double
-spender is the owner of $\tau_j = (v, \com_j)$, identified by decrypting
-$\ciph_j$ (or $\ciph'_j$).
+        \item The registration authority verifies that $\algo{uid}$ is fresh
+          and that $\algo{se}$ knows $\sk_{\algo{usr}}$, via an interactive
+          zero-knowledge proof of knowledge.
+
+        \item The registration authority issues credential $\cred =
+          (\algo{uid}, \pk_{\algo{usr}}, \varphi)$ with $\varphi \leftarrow
+          \DSsign(\rask, (\algo{uid}, \sk_{\algo{usr}}))$.
+
+        \item Pair the user's mobile device $\algo{dev}$ with $\algo{se}$, so
+          that only $\algo{dev}$ can send instructions to $\algo{se}$.
+
+        \item Return $\cred$.
+
+      \end{enumerate}
+
+    \item[$T_0 \leftarrow \algo{Withdraw}(v_0)$ :]\label{sec:withdrawal}
+      User $\algo{usr}_0$ withdraws a token of value $v_0$, do:
+
+      \begin{enumerate}
+
+        \item $\algo{dev}_0$ instructs $\algo{se}_0$ to initiate a withdrawal of
+          value $v_0$.
+
+        \item $\algo{se}_0$ selects random $s_0$, computes $\com_0 \leftarrow
+          \com(\ck, \algo{uid}_0; s_0)$, and returns $(s_0, \com_0)$ to
+          $\algo{dev}_0$.
+
+        \item $\algo{dev}_0$ computes $\com \leftarrow \com(\ck, (\algo{uid}_0,
+          v_0); s_0)$.
+
+        \item $\algo{dev}_0$ prepares a blind signature request on the
+          committed vector $(\algo{uid}_0, v_0, s_0)$, hiding $\algo{uid}_0$ and
+          $s_0$ and disclosing $v_0$, together with a zero-knowledge proof
+          $\Pi$ that $\com$ is correctly formed and that the accompanying
+          ciphertexts are correct, and sends $\algo{req} = (\algo{uid}_0, \com,
+          \ciph_0, v_0, \ciph_2, \Pi, \rho_0)$ to $\algo{Int}_0$.
+
+        \item $\algo{Int}_0$ verifies $\Pi$, locks $v_0$ in $\algo{usr}_0$'s
+          account, and forwards $(\com, \ciph_0, v_0, \ciph_2, \Pi)$ to the
+          central bank.
+
+        \item The central bank checks that $\com$ is fresh, verifies
+          $\Pi$, debits $\algo{Int}_0$'s reserves, and returns a blind
+          signature response $\algo{resp}$.
+
+        \item $\algo{dev}_0$ unblinds $\algo{resp}$ to obtain a signature $\psi
+          \leftarrow \DSsign(\sk_{\algo{cb}}, (\algo{uid}_0, v_0); s_0)$ and
+          stores $(v_0, s_0, \com_0, \psi)$; $\algo{se}_0$ stores the original
+          token $\tau_0 = (v_0, \com_0)$.
+
+        \item $\algo{dev}_0$ produces a proof of withdrawal $\Sigma$ with
+          $\inst = (\ck, \pk_{\algo{cb}}, v_0, \com_0)$, $\witness = (\algo{uid}_0,
+          s_0, \psi)$, and relation as follows:
+          \begin{equation*}
+            \DSverify(\pk_{\algo{cb}}, (\algo{uid}_0, v_0); s_0, \psi) = 1
+            \;\wedge\; \ComOpen(\ck, \algo{uid}_0; s_0, \com_0) = 1.
+          \end{equation*}
+
+        \item Return $T_0 = (v_0, s_0, \com_0, \algo{hist}_0 = \Sigma)$.
+
+      \end{enumerate}
+
+    \item[$p_i \leftarrow \algo{Pay}(v, s_i, \com_i,
+      \algo{hist}_i)$ :]\label{sec:payments} User $\algo{usr}_i$ pays
+      $\algo{usr}_{i+1}$ using token $(v, s_i, \com_i, \algo{hist}_i)$, do:
+
+      \begin{enumerate}
+
+        \item $\algo{dev}_{i+1}$ instructs $\algo{se}_{i+1}$ to prepare to
+          receive a payment of value $v$.
+
+        \item $\algo{se}_{i+1}$ selects random $s_{i+1}$, computes
+          $\com_{i+1} \leftarrow \com(\ck, \algo{uid}_{i+1}; s_{i+1})$, and
+          returns $(s_{i+1}, \com_{i+1})$ to $\algo{dev}_{i+1}$.
+
+        \item $\algo{dev}_{i+1}$ sends $\com_{i+1}$ to $\algo{dev}_i$.
+
+        \item $\algo{dev}_i$ notifies $\algo{se}_i$ that a payment is under way;
+          $\algo{se}_i$ locks token $\tau_i = (v, \com_i)$.
+
+        \item $\algo{dev}_i$ computes the audit ciphertext $\ciph_i
+          \leftarrow \PKEencrypt(\pk_{\auditor}, \algo{uid}_i; \rho_i)$ and a
+          proof of correctness $\Gamma_i$, with $\inst = (\com_i,
+          \ciph_i)$, $\witness = (\algo{uid}_i, s_i, \rho_i)$, and relation as
+          follows:
+          \begin{equation*}
+            \ComOpen(\ck, \algo{uid}_i, s_i, \com_i) = 1 \;\wedge\; \ciph_i =
+            \PKEencrypt(\pk_{\auditor}, \algo{uid}_i; \rho_i).
+          \end{equation*}
+
+        \item $\algo{se}_i$ and $\algo{dev}_i$ jointly compute a signature of
+          knowledge $\sigma_i$ for the relation as follows:
+          \begin{equation*}
+            \DSverify(\rapk, \algo{uid}_i, \sk_{\algo{usr}_i}, \varphi_i) = 1
+            \;\wedge\; \ComOpen(\ck, \algo{uid}_i, s_i, \com_i) = 1.
+          \end{equation*}
+          Here, $\algo{se}_i$ contributes knowledge of $\sk_{\algo{usr}_i}$ and
+          $\algo{dev}_i$ contributes the remaining witness.
+
+        \item $\algo{dev}_i$ sends payment $p_i = (v, \com_i, \com_{i+1},
+          \ciph_i, \sigma_i, \Gamma_i, \algo{hist}_i)$ to $\algo{dev}_{i+1}$.
+
+        \item $\algo{dev}_{i+1}$ verifies $\algo{hist}_i$: if $i = 0$, it checks
+          $\Sigma$; otherwise it verifies every $(\Sigma, \Gamma_k,
+          \sigma_k)_{k \in [i]}$.
+
+        \item If $\Gamma_i$ and $\sigma_i$ also verify, $\algo{dev}_{i+1}$
+          accepts and stores $T_{i+1} = (v, s_{i+1}, \com_{i+1},
+          \algo{hist}_{i+1} = (\com_i, \ciph_i, \sigma_i, \Gamma_i) \, \| \,
+          \algo{hist}_i)$, and $\algo{se}_{i+1}$ stores $\tau_{i+1} = (v,
+          \com_{i+1})$.
+
+        \item Upon acknowledgement, $\algo{se}_i$ deletes $\com_i$, and
+          $\algo{dev}_i$ returns $p_i$.
+
+      \end{enumerate}
+
+    \item[$\{0,1\} \leftarrow \algo{Deposit}(\tau_n,
+      \algo{hist}_n)$ :]\label{sec:deposit} User $\algo{usr}_n$ deposits token
+      $\tau_n = (v, \com_n)$, do:
+
+      \begin{enumerate}
+
+        \item $\algo{usr}_n$ instructs $\algo{dev}_n$ to deposit $\tau_n$;
+          $\algo{dev}_n$ informs $\algo{se}_n$ to lock $\tau_n$.
+
+        \item $\algo{dev}_n$ and $\algo{se}_n$ jointly compute a signature of
+          knowledge $\sigma_n$ over $\tau_n$, structured analogously to the
+          signature $\sigma_i$ computed during $\algo{Pay}$.
+
+        \item $\algo{dev}_n$ sends deposit request $d_n = (\tau_n, \sigma_n,
+          \algo{hist}_n)$ to $\algo{Int}_n$, which forwards it to the central
+          bank.
+
+        \item The central bank verifies $\sigma_n$ and $\algo{hist}_n$; if
+          either check fails, return $0$.
+
+        \item Otherwise, the central bank checks whether any prior deposit
+          shares the same origin $\com_0$; if so, it records double
+          spending, notifies the auditor, and returns $0$.
+
+        \item Otherwise, the central bank credits $\algo{Int}_n$'s account,
+          which in turn credits $\algo{usr}_n$'s account, and $\algo{se}_n$
+          deletes $\tau_n$ upon notification.
+
+        \item Return $1$.
+
+      \end{enumerate}
+
+    \item[$\algo{uid}^* \leftarrow \algo{Trace}(d_n, d_m)$ :] On input two
+      conflicting deposit requests $d_n$ and $d_m$ involving the same
+      original token, the auditor does:
+
+      \begin{enumerate}
+
+        \item Parse $\algo{hist}_n = ((\com_k, \ciph_k, \sigma_k,
+          \Gamma_k)_{k \in [n]}, \Sigma)$ and $\algo{hist}_m$ analogously.
+
+        \item Find the divergence index $j$ such that $\com_k = \com'_k$
+          for all $k \leq j$ but $\com_{j+1} \neq \com'_{j+1}$.
+
+        \item Decrypt $\ciph_j$ (or $\ciph'_j$) using $\sk_{\auditor}$ to
+          recover $\algo{uid}^*$, the identifier of the owner of $\tau_j = (v,
+          \com_j)$.
+
+        \item Return $\algo{uid}^*$.
+
+      \end{enumerate}
+
+  \end{description}
 
 \end{protocolbox}
+
+The signature of knowledge $\sigma_i$ computed jointly by $\algo{se}_i$ and
+$\algo{dev}_i$ in $\algo{Pay}$, and the analogous signature $\sigma_n$ computed in
+$\algo{Deposit}$, are both instances of a sigma-protocol-based two-party
+protocol, described in full in Section~\ref{sec:sok-sol}.
+Appendix~\ref{sec:aggregate-deposits} extends $\algo{Deposit}$ to support the
+aggregation of multiple deposits into a single disclosed value.
