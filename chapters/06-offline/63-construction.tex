@@ -106,8 +106,7 @@ that the withdrawal and deposit of a token can still be linked through its
 value; this can be avoided by using a single denomination, or mitigated by
 using fixed denominations together with aggregated deposits, which let a
 depositor disclose only the aggregate value of several deposited tokens rather
-than the value of each. We take the latter approach (cf.\
-Appendix~\ref{sec:aggregate-deposits}).
+than the value of each.
 
 \paragraph{Using secure elements to limit double spending.} As discussed in the
 introduction, secure elements make double spending attacks impractical to
@@ -349,6 +348,4 @@ $m$.
 The signature of knowledge $\sigma_i$ computed jointly by $\algo{se}_i$ and
 $\algo{dev}_i$ in $\algo{Pay}$, and the analogous signature $\sigma_n$ computed
 in $\algo{Deposit}$, are both instances of a sigma-protocol-based two-party
-protocol, described in full in Section~\ref{sec:sok-sol}.
-Appendix~\ref{sec:aggregate-deposits} extends $\algo{Deposit}$ to support the
-aggregation of multiple deposits into a single disclosed value.
+protocol, described in full in~\Cref{sec:sok-sol}.

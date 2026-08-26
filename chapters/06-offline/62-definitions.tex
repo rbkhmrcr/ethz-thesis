@@ -99,27 +99,12 @@ the intermediaries. More specifically, it must ensure:
 
 \end{description}
 
-\subsection{Ideal functionality $\idfu{}$}\label{sec:ideal-func}
+\subsection{Ideal functionality $\idfu{\algo{op}}$}\label{sec:ideal-func}
 
 We define security for the offline payment protocol through an ideal
-functionality $\idfu{}$, depicted in Figure~\ref{fig:ideal-func}, which
+functionality $\idfu{\algo{op}}$, depicted in Figure~\ref{fig:ideal-func}, which
 represents an incorruptible trusted party that receives the inputs of each
-protocol task and returns the prescribed outputs. An adversary in the ideal
-world interacts with $\idfu{}$ only through the parties it corrupts, which
-ensures that it can only determine the inputs of corrupt parties and observe
-their outputs, rather than making $\idfu{}$ deviate from its specification.
-Following convention, we call this adversary a simulator and denote it $\simu$.
-
-We say that a protocol $\algo{prot}$ securely realises $\idfu{}$ if, for every
-adversary $\adv$ that controls a subset of the parties and interacts with
-$\algo{prot}$, there exists a simulator $\simu$ that controls the same parties
-and interacts with $\idfu{}$, such that for every input of the corrupt parties,
-the output of $\adv$ in the real world is indistinguishable from the output of
-$\simu$ in the ideal world. Formally, $\algo{prot}$ securely realises $\idfu{}$
-if and only if $\algo{real}_{\adv, \algo{prot}} \approx \algo{ideal}_{\simu,
-\idfu{}}$, where $\algo{real}_{\adv, \algo{prot}}$ is the view of $\adv$
-interacting with $\algo{prot}$ in the real world, and $\algo{ideal}_{\simu,
-\idfu{}}$ is the view of $\simu$ interacting with $\idfu{}$ in the ideal world.
+protocol task and returns the prescribed outputs.
 
 \paragraph{Participants.} We identify the offline payment participants
 $\algo{usrs} = \{\algo{usr}_1, \ldots, \algo{usr}_n\}$, who act as both payers
@@ -136,9 +121,9 @@ mobile devices. As above, $\algo{cb}$, $\reg$, and the intermediaries
 $\algo{I}$ are honest but curious, so the simulator $\simu$ accesses their
 inputs and outputs by default, and we assume a static corruption model in which
 $\simu$ corrupts the parties of its choosing before they interact with
-$\idfu{}$.
+$\idfu{\algo{op}}$.
 
-\paragraph{Data stores.} $\idfu{}$ maintains several data stores.
+\paragraph{Data stores.} $\idfu{\algo{op}}$ maintains several data stores.
 $\algo{reserves}$ tracks each intermediary's reserves at $\algo{cb}$, with
 entries $\algo{reserves}[\algo{Int}] = v$. $\algo{registered}$ is the set of
 registered users. $\algo{accounts}$ tracks user accounts, with entries
@@ -155,7 +140,7 @@ $\algo{mal}$ is the set of corrupted parties in $\algo{Dev}$ or $\algo{SE}$.
 All of $\algo{registered}$, $\algo{accounts}$, $\algo{tokens}$,
 $\algo{deposited}$, and $\algo{mal}$ are initially empty.
 
-\paragraph{Interfaces.} $\idfu{}$ provides the following interfaces to $\simu$
+\paragraph{Interfaces.} $\idfu{\algo{op}}$ provides the following interfaces to $\simu$
 and the participants.
 
 \underline{$\algo{corrupt}$}. When $\simu$ wishes to compromise a party $P \in
@@ -168,7 +153,7 @@ is the associated $\algo{dev}$.
 \underline{$\algo{create}$}. An intermediary $\algo{Int}$ calls $\algo{create}$
 to create an account for user $\algo{usr} \in \algo{usrs}$ with initial value
 $v$, adding entry $\algo{accounts}[\algo{usr}] \gets \langle \algo{Int}, v
-\rangle$ and updating $\algo{Int}$'s reserves; $\idfu{}$ enforces that
+\rangle$ and updating $\algo{Int}$'s reserves; $\idfu{\algo{op}}$ enforces that
 $\algo{usr}$ has one account in the system.
 
 \underline{$\algo{register}$}. The registration authority $\reg$ calls
@@ -183,9 +168,9 @@ $\rho$, usable subsequently in offline payments authorised by $\algo{usr}$'s
 secure element; the call succeeds only if $\algo{usr}$'s account and
 $\algo{Int}$'s reserves hold enough value. To ensure a withdrawal is not
 linkable to a future deposit, the identifier $\rho$ must not be known to
-$\algo{Int}$ or $\algo{cb}$: it is selected by $\idfu{}$ if $\algo{usr}$'s
+$\algo{Int}$ or $\algo{cb}$: it is selected by $\idfu{\algo{op}}$ if $\algo{usr}$'s
 secure element is honest, and by $\simu$ otherwise. Once $\rho$ is selected and
-confirmed unique, $\idfu{}$ adds entry $\algo{tokens}[(\rho)] \gets \langle
+confirmed unique, $\idfu{\algo{op}}$ adds entry $\algo{tokens}[(\rho)] \gets \langle
 \algo{usr}, v \rangle$. Since $\algo{Int}$ and $\algo{cb}$ are honest but
 curious, $\simu$ learns the identity of the user and the value of the
 withdrawal by default; if either the secure element or the mobile device of the
@@ -194,19 +179,19 @@ user is corrupt, $\simu$ additionally learns $\rho$.
 \underline{$\algo{pay}$}. A registered user $\algo{usr}$ invokes $\algo{pay}$
 to transfer ownership of a token they own to some user $\algo{usr}'$,
 identifying the payer, the payee, the value of the token, and a vector
-$\vec{\rho}$ that lets $\idfu{}$ locate the token in $\algo{tokens}$ and trace
-its history. $\idfu{}$ checks that $\algo{usr}'$ would like to accept the
+$\vec{\rho}$ that lets $\idfu{\algo{op}}$ locate the token in $\algo{tokens}$ and trace
+its history. $\idfu{\algo{op}}$ checks that $\algo{usr}'$ would like to accept the
 payment and that their mobile device and secure element are not corrupt; if so,
-$\idfu{}$ checks that the token identified by $\vec{\rho}$ is indeed owned by
-$\algo{usr}$ and has value $v$. If so, $\idfu{}$ produces a fresh random
+$\idfu{\algo{op}}$ checks that the token identified by $\vec{\rho}$ is indeed owned by
+$\algo{usr}$ and has value $v$. If so, $\idfu{\algo{op}}$ produces a fresh random
 identifier $\rho'$ that, together with $\vec{\rho}$, uniquely identifies the
 payment, and adds entry $\algo{tokens}[\vec{\rho} \| \rho'] \gets \langle
 \algo{usr}', v \rangle$, letting a registered $\algo{usr}'$ subsequently
 transfer the token onward. If either the mobile device or the secure element of
-$\algo{usr}'$ is corrupt, $\idfu{}$ does not condition success on the validity
+$\algo{usr}'$ is corrupt, $\idfu{\algo{op}}$ does not condition success on the validity
 of the token, reflecting that a malicious payee may choose to accept an invalid
 one; in this case $\rho'$ is selected by $\simu$ if $\algo{usr}'$'s secure
-element is corrupt, and by $\idfu{}$ otherwise, and $\algo{tokens}[(\vec{\rho},
+element is corrupt, and by $\idfu{\algo{op}}$ otherwise, and $\algo{tokens}[(\vec{\rho},
 \rho')]$ is updated only if the token being transferred is genuinely valid and
 $\algo{usr}'$ is registered. This ensures a malicious payee who accepts an
 invalid token cannot transfer it onward to honest users, since it will not
@@ -220,26 +205,26 @@ $\algo{tokens}$.
 \underline{$\algo{deposit}$}. An intermediary $\algo{Int}$ invokes
 $\algo{deposit}$ to let a registered user exchange a token for commercial bank
 money, identifying the depositing user $\algo{usr}$, a vector $\vec{\rho}$
-referring to the token and its history, and the deposit value. $\idfu{}$
+referring to the token and its history, and the deposit value. $\idfu{\algo{op}}$
 verifies that the token being deposited is indeed owned by $\algo{usr}$ and has
 the right value, then updates $\algo{deposited}[\vec{\rho}[0]] \gets
 \algo{deposited}[\vec{\rho}[0]] \cup \{\vec{\rho}\}$ and checks whether
 $|\algo{deposited}[\vec{\rho}[0]]| > 1$; if so, this signals double spending
-and $\idfu{}$ stops. Otherwise $\idfu{}$ updates the holdings of $\algo{usr}$
+and $\idfu{\algo{op}}$ stops. Otherwise $\idfu{\algo{op}}$ updates the holdings of $\algo{usr}$
 and $\algo{Int}$. Since $\algo{cb}$ and $\algo{Int}$ are honest but curious,
 $\simu$ learns the deposit information by default: the identity of
 $\algo{usr}$, the value $v$, and the vector $\vec{\rho}$.
 
 \underline{$\algo{audit}$}. The auditor $\auditor$ calls $\algo{audit}$ with a
 token identifier $\rho$, the identifier used during the corresponding
-withdrawal.  $\idfu{}$ retrieves $\algo{deposited}[\rho]$; if it contains
-nothing or a single vector, $\idfu{}$ returns nothing, signalling that there is
-no double spender to identify. Otherwise, $\idfu{}$ retrieves the set of
+withdrawal.  $\idfu{\algo{op}}$ retrieves $\algo{deposited}[\rho]$; if it contains
+nothing or a single vector, $\idfu{\algo{op}}$ returns nothing, signalling that there is
+no double spender to identify. Otherwise, $\idfu{\algo{op}}$ retrieves the set of
 vectors $\{\vec{\rho}_1, \ldots, \vec{\rho}_l\}$ stored in
 $\algo{deposited}[\rho]$, and for each pair $\vec{\rho}_i, \vec{\rho}_j$
 identifies the double spender as the user $\algo{usr}_{ij}$ stored in
 $\algo{tokens}[\vec{\rho}_{ij}]$, where $\vec{\rho}_{ij}$ is the common prefix
-of $\vec{\rho}_i$ and $\vec{\rho}_j$. $\idfu{}$ returns the set of such users
+of $\vec{\rho}_i$ and $\vec{\rho}_j$. $\idfu{\algo{op}}$ returns the set of such users
 to $\auditor$ and to $\algo{cb}$.
 
 \begin{figure} \centering \hspace*{-0.05\textwidth}
@@ -497,5 +482,5 @@ to $\auditor$ and to $\algo{cb}$.
 
 \end{minipage}
 
-\caption{Ideal functionality $\idfu{}$ for offline payments.}
+\caption{Ideal functionality $\idfu{\algo{op}}$ for offline payments.}
 \label{fig:ideal-func} \end{figure}

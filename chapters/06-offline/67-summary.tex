@@ -10,43 +10,14 @@ double spending expensive and impractical to mount at scale, while an
 efficient auditing mechanism ensures that, should an attack succeed, the
 responsible party can still be identified and held accountable.
 
-We construct this scheme from anonymous credentials, blind signatures, and
-zero-knowledge proofs of knowledge, which together hide the identities of
-payers and payees from the central bank and the intermediaries and prevent
-withdrawals from being linked to deposits, and from a verifiable encryption
-scheme that lets an authorised auditor efficiently de-anonymise double
-spenders without compromising the privacy of honest users. Since these
-primitives are too costly for off-the-shelf secure elements, we split the
-computation of a payment between a lightweight operation performed by the
-secure element and a heavier one offloaded to the user's mobile device, so
-that the secure element performs work comparable to producing an ordinary
-digital signature.
-
-We implement this split using BBS+ signatures for the anonymous credential
-issued by the registration authority, and Pointcheval-Sanders blind
-signatures for the tokens issued by the central bank, and demonstrate the
-viability of the resulting protocol on commodity smart cards and mobile
+We demonstrate the
+viability of the protocol on commodity smart cards and mobile
 phones. Withdrawal and the payer side of a payment both complete in under
 half a second, and even a payment chain of 32 hops verifies in under a
 second on the payee's side, with the smart card itself authorising a
 payment in under $400\,\mathrm{ms}$. Auditing adds no overhead for the
 payer and a modest 10-20\% overhead for the payee.
 
-Deploying the scheme in practice raises questions we have only discussed
-informally in this chapter. Revoking users without undermining their
-privacy, and without exposing payees who are offline at the moment of
-revocation, is a genuine challenge in this setting; the time-to-live and
-transaction-value restrictions we discuss go some way towards mitigating
-the resulting window of exposure, but a more thorough treatment of
-revocation, closer to the level of formality we give the rest of the
-scheme, would be valuable future work. Likewise, our security analysis
-assumes an idealised secure element; a concrete evaluation of the residual
-risk once realistic hardware constraints and attacker budgets are taken
-into account would help translate our guarantees into deployment guidance.
-
-We focus throughout on transferability rather than divisibility, following
-the same trade-off made by related e-cash schemes discussed in
-Section~\ref{sec:offline-related}; extending the scheme to support splitting
-and merging tokens, and to support aggregated deposits as more than the
-two-token case we sketch in Appendix~\ref{sec:aggregate-deposits}, are both
+We focus on transferability rather than divisibility. Extending the scheme to support splitting
+and merging tokens and to support aggregated deposits are both
 natural directions for future work.
