@@ -38,7 +38,44 @@ directly, without involving the user. The user can then use the published
 signature to prove properties of their holdings without disclosing anything
 beyond what is required.
 
-In both applications, relying on a centralised certifier or administrator sits
+\paragraph{Transparency logs.} Certificate transparency (CT) and key
+transparency (KT) are the main examples of transparency logs. In both cases,
+a transparency log is an append-only, publicly verifiable record, of either
+certificates or keys. Each entry is sent to a log provider, signed, and
+appended to the log; in CT systems, the log server returns a Signed
+Certificate Timestamp (SCT) to the certificate provider, and in KT systems,
+the mapping from user identity to public key is what the log server signs.
+Transparency logs let users and auditors verify that the certificates or
+keys they interact with carry legitimacy beyond the app serving them, moving
+trust onto the log providers instead. Threshold signatures could remove this
+single point of trust, distributing it across several servers: a threshold
+structure-preserving signature given to the key or certificate owner would
+let the structure-preserving property of the signature be used to prove, in
+zero-knowledge, that a key is recorded in the log, for instance for
+privacy-preserving identity verification. Since the structure-preserving
+property lets the public key itself be signed directly, without first
+hashing it, the resulting zero-knowledge proofs are more efficient than they
+would otherwise be.
+
+\paragraph{Permissioned ledgers.} A permissioned ledger is a distributed
+ledger where token issuance, transaction verification, and participation are
+controlled by one or a small number of authorities. Permissioned ledgers are
+of particular interest for platforms such as Central Bank Digital Currencies
+(CBDCs), as they offer a transparent system enabling regulatory oversight
+while still supporting transaction privacy and compliance with the monetary
+policy of the central bank in question.\footnote{A citation for CBDC
+permissioned ledger designs is still to be added.} One way to build such a
+system has every transaction executed and, if valid, signed by an endorser
+before being added to the ledger,\footnote{A citation for endorser-based
+ledger designs is still to be added.} where the signed state committed to the
+ledger is a commitment to the value and type of asset. Threshold
+structure-preserving signatures would let trust be distributed between
+multiple endorsers via the threshold property, while the structure-preserving
+property lets users perform efficient proofs of statements about their
+assets on the ledger, for example for compliance purposes.
+
+In each of these applications, relying on a centralised certifier or
+administrator sits
 uneasily with the decentralised nature of blockchain systems, so
 structure-preserving signatures are only fit for this purpose once they admit
 an efficient threshold counterpart. We give two threshold
@@ -87,6 +124,25 @@ key lets a user also prove statements about their own key; the cost is that
 signature length grows with the square root of the message
 length~\cite{EC:GroSah08}.
 
+\begin{table*}[!ht]
+  \centering
+  \begin{tabular}{ c || c | c | c }
+   \toprule
+    & Assumption/model & $|\signature|$ & Notable property \\
+   \midrule
+    \cite{C:AFGHO10} & standard model, non-interactive assumption & 7 group elements & signs messages of arbitrary length \\
+    \cite{C:AGHO11} & GGM & 3 group elements & strong unforgeability; size-optimal in type III groups \\
+    \cite{C:LPJY13} & -- & 3 group elements & linearly homomorphic \\
+    \cite{JC:AGKOT19} & -- & grows with $\sqrt{\cdot}$ of message length & fully structure-preserving (group-element secret key) \\
+    \cite{C:KilPanWee15} & DDH & 7 group elements & security from a standard, non-$q$-type assumption \\
+   \bottomrule
+  \end{tabular}
+  \caption{Structure-preserving signature schemes discussed above. Entries
+  marked `--' are not stated explicitly in the cited work as summarised
+  here; please verify against the original papers before submission.}
+  \label{table:related-sps}
+\end{table*}
+
 \paragraph{Threshold structure-preserving signatures.} Threshold
 structure-preserving signatures have only recently been considered. One
 non-interactive construction is restricted to signing indexed
@@ -101,23 +157,52 @@ assumption~\cite{PKC:MMSST24}. It builds on the structure-preserving
 signature of Kiltz, Pan, and Wee, and its signatures consist of seven group
 elements~\cite{C:KilPanWee15}.
 
+\begin{table*}[!ht]
+  \centering
+  \begin{tabular}{ c || c | c | c }
+   \toprule
+    & Assumption & Message space & Built from \\
+   \midrule
+    \cite{AC:CKPSS23} & PS + ROM & indexed Diffie-Hellman tuples $(\gen^m, \ggen^m)$ & -- \\
+    \cite{PKC:MMSST24} & SXDH & arbitrary $\vec{M} \in \group{1}^l$ & \cite{C:KilPanWee15} \\
+    Section~\ref{sec:tsps-abe} (ours) & q-type & arbitrary $\vec{M} \in \group{1}^l$ & \cite{C:AGHO11} \\
+    Section~\ref{sec:tsps-kiltz} (ours) & SXDH & arbitrary $\vec{M} \in \group{1}^l$ & \cite{C:KilPanWee15} \\
+   \bottomrule
+  \end{tabular}
+  \caption{Threshold structure-preserving signature schemes. Concrete key,
+  signature, and communication sizes for these schemes are compared in
+  Table~\ref{table:comp} and Table~\ref{table:comms} in
+  Section~\ref{sec:tsps-evaluation}.}
+  \label{table:related-tsps}
+\end{table*}
+
 We give two threshold structure-preserving signature schemes for arbitrary
 group elements, built respectively from the schemes of Abe, Groth,
 Haralambiev, and Ohkubo and of Kiltz, Pan, and Wee, that minimise the
 computation and communication required of parties in the online
 phase~\cite{C:AGHO11,C:KilPanWee15}. Table~\ref{table:comp} in
-Section~\ref{sec:eval} compares the resulting schemes with two prior
+Section~\ref{sec:tsps-evaluation} compares the resulting schemes with two prior
 threshold structure-preserving signature schemes in terms of assumptions,
 key and signature size, and verification
 cost~\cite{AC:CKPSS23,PKC:MMSST24}.
 
-\paragraph{Our contribution.} The contributions of this chapter are threefold.
+\paragraph{Our contribution.} The contributions of this chapter are fourfold.
 
 \begin{itemize}
 
   \item We design two threshold structure-preserving signature schemes in the
     hybrid model: the constructions assume the existence of ideal
     functionalities that model the computations of the threshold signers.
+    To support this, we broaden standard MPC functionalities over field
+    elements to secret-shared group elements, building on prior work
+    extending secret sharing to group elements, and, to the best of our
+    knowledge, give the first multiparty secret sharing of group
+    elements~\cite{NDSS:GPVRNC23}.
+
+  \item We design both schemes so that the online phase, run once the
+    messages to be signed are known, requires no interaction between
+    parties, keeping its cost comparable to that of ordinary, non-threshold
+    signing.
 
   \item We prove the security of the threshold signatures in the hybrid
     model, and show that they offer the same security guarantees as their
@@ -126,27 +211,27 @@ cost~\cite{AC:CKPSS23,PKC:MMSST24}.
   \item We benchmark the threshold signatures using two MPC frameworks that
     realise these ideal functionalities: ATLAS, which assumes an honest
     majority, and MASCOT, which assumes a dishonest
-    majority~\cite{C:GLOPS21,CCS:KelOrsSch16}. The former suits settings
-    where robustness and high availability are desirable, the latter
-    settings where resilience to key compromise takes precedence.
+    majority~\cite{C:GLOPS21,CCS:KelOrsSch16}, extending MP-SPDZ with support
+    for the group-element functionalities our schemes
+    require~\cite{CCS:Keller20}. The former suits settings where robustness
+    and high availability are desirable, the latter settings where
+    resilience to key compromise takes precedence.
 
 \end{itemize}
 
-We design our schemes to require no interaction between parties during the
-online phase, and, to the best of our knowledge, give the first multiparty
-secret sharing of group elements, building on prior work extending secret
-sharing to group elements~\cite{NDSS:GPVRNC23}. We also implement previously
-suggested threshold structure-preserving signature schemes, so as to compare
-concrete efficiency. Our scheme built from the signature of Abe, Groth,
-Haralambiev, and Ohkubo yields optimally small threshold signatures,
-consisting of just three group elements~\cite{C:AGHO11}.
+We also implement previously suggested threshold structure-preserving
+signature schemes, so as to compare concrete efficiency. Our scheme built
+from the signature of Abe, Groth, Haralambiev, and Ohkubo yields optimally
+small threshold signatures, consisting of just three group
+elements~\cite{C:AGHO11}.
 
 \paragraph{Layout.} Section~\ref{sec:tsps-definitions} formalises the security
 properties of threshold structure-preserving signatures, and introduces the ideal
 functionalities for MPC that our constructions build on.
 Section~\ref{sec:tsps-construction} describes the structure-preserving signatures of Abe,
-Groth, Haralambiev, and Ohkubo and of Kiltz, Pan, and
-Wee~\cite{C:AGHO11,C:KilPanWee15}. Section~\ref{sec:tsps-instantiation}
-shows the instantiations of the threshold signature schemes, which are proven secure in Section~\ref{sec:tsps-security}.
-Section~\ref{sec:tsps-evaluation} evaluates our approach, and
-Section~\ref{sec:tsps-summary} concludes.
+Groth, Haralambiev, and Ohkubo and of Kiltz, Pan, and Wee, and the general
+strategy we use to thresholdise them~\cite{C:AGHO11,C:KilPanWee15}.
+Section~\ref{sec:tsps-instantiation} turns this strategy into full
+instantiations of the two threshold signature schemes, which are proven
+secure in Section~\ref{sec:tsps-security}. Section~\ref{sec:tsps-evaluation}
+evaluates our approach, and Section~\ref{sec:tsps-summary} concludes.

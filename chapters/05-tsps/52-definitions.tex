@@ -11,25 +11,26 @@ algorithms:
 
 \begin{description}
 
-  \item[$(\pk, \sk) \sample \SPSgen(\secparam, l)$ :] The key generation
-    algorithm, on input security parameter $\secparam$ and vector length $l$,
-    outputs key pair $(\pk, \sk)$, with $\pk$ implicitly defining message
-    space $\mathcal{M} \subseteq \G^l$.
+  \item[$(\pk, \sk) \sample \SPSgen(\secparam, \ell)$ :] The key generation
+    algorithm, on input security parameter $\secparam$ and vector length $\ell$,
+    outputs key pair $(\pk, \sk)$. Public keys are group elements.
 
   \item[$\signature \sample \SPSsign(\sk, \vec{{M}})$ :] The signing algorithm, on
-    input secret key $\sk$ and message $\vec{{M}} \in \mathcal{M}$, outputs
-    signature $\signature \in \G^{poly(\secparam)}$.
+    input secret key $\sk$ and message $\vec{{M}}$, outputs
+    signature $\signature$. Messages and signatures are vectors of group elements, 
+    messages from the space $\group{1}^\ell$, and signatures in 
+    $\group{1}^{poly(\secparam)} \times \group{2}^{poly(\secparam)}$.
 
   \item[$\{0,1\} \leftarrow \SPSverify(\pk, \vec{{M}}, \signature)$ :] The
     verification algorithm, on input public key $\pk$, message $\vec{{M}}$,
-    and signature $\signature$, returns 0 or 1. Verification consists only of
-    pairing product equations.
+    and signature $\signature$, returns 0 or 1. Verification consists only of 
+    evaluating pairing product equations.
 
 \end{description}
 
 A structure-preserving signature scheme satisfies correctness if for all
 security parameters $\secparam$, all $(\pk, \sk) \sample \SPSgen(\secparam,
-l)$, and all $\vec{{M}} \in \mathcal{M}$, we have $\SPSverify(\pk, \vec{{M}},
+l)$, and all $\vec{{M}} \in \group{1}^\ell$, we have $\SPSverify(\pk, \vec{{M}},
 \SPSsign(\sk, \vec{{M}})) = 1$.
 
 \paragraph{Unforgeability.} For a PPT adversary $\adv$, define advantage as
@@ -38,8 +39,8 @@ follows:
 \begin{equation*}
 %
   \Adv_{\mathrm{SPS}, \adv}^{\text{UF-CMA}}(\secparam) =
-  \Pr\left[\mathbf{G}_{\mathrm{SPS}, \adv}^{\text{UF-CMA}}(\secparam) =
-  1\right].
+  \Pr\left\lbrack \mathbf{G}_{\mathrm{SPS}, \adv}^{\text{UF-CMA}}(\secparam) =
+  1\right\rbrack .
 %
 \end{equation*}
 %
@@ -55,11 +56,11 @@ the following holds:
 %
 \end{equation*}
 %
-Excluding the message $\vec{{M}^*}$ itself from the set $S$ of previously
+Excluding the message $\vec{{M}^*}$ from the set $S$ of
 queried messages, as shown in Experiment~\ref{exp:sps-uf-cma}, gives
-\emph{weak} unforgeability (wUF-CMA), the notion we rely on throughout this
-chapter. Excluding instead the pair $(\vec{{M}^*}, \signature^*)$ gives the
-stronger notion of \emph{strong} unforgeability (sUF-CMA), which additionally
+weak unforgeability (wUF-CMA), the notion we rely on throughout this
+chapter. Excluding instead the pair $(\vec{{M}^*}, \signature^*)$ gives 
+strong unforgeability (sUF-CMA), which
 rules out an adversary producing a fresh signature on an already-signed
 message.
 
@@ -88,54 +89,530 @@ message.
 
 A threshold structure-preserving signature scheme is a structure-preserving
 signature scheme whose signing key is distributed across multiple parties. It
-is defined by algorithms $\algo{Setup}$, $\algo{KeyGen}$, $\algo{ThreshSign}$, $\algo{Combine}$, and
-$\SPSverify$, as follows.
+is defined by algorithms $\TSPSgen$, $\TSPSsign$, $\TSPScombine$, and
+$\TSPSverify$ as follows.
 
 \begin{description}
 
-  \item[$\algo{pp} \sample \algo{Setup}(1^\secparam)$ :] The setup algorithm generates
-    public parameters $\algo{pp}$ describing three cyclic groups $(\group{1},
-    \group{2}, \group{T})$ of prime order $p$ that admit a non-degenerate
-    bilinear pairing $e \colon \group{1} \times \group{2} \rightarrow
-    \group{T}$. Hereafter we take $\algo{pp} := (p, e, \group{1}, \group{2},
-    \group{T})$ as an implicit input to every subsequent algorithm.
-
-  \item[$(\pk, \llbracket \sk \rrbracket) \sample \algo{KeyGen}(l, t, n)$ :] The key
+  \item[$(\pk, \lbrack \sk\rbrack ) \sample \TSPSgen(l, t, n)$ :] The key
     generation algorithm takes a triple of integers $(l, t, n > t)$, where
     $l$ is the length of the vectors to be signed, $t$ is an upper bound on
     the number of corrupted parties, and $n$ is the total number of
     threshold signers. It returns a public key $\pk$ and $n$ shares
-    $\llbracket \sk \rrbracket$ such that any $t+1$ shares reconstruct the
+    $\lbrack \sk\rbrack $ such that any $t+1$ shares reconstruct the
     secret key underlying $\pk$; $\pk$ consists of group elements, and $\sk$
-    of elements of $\Zp$ and/or group elements. This algorithm may be
-    interactive.
+    of elements of $\Zp$ and/or group elements.
 
-  \item[$\llbracket \signature \rrbracket \sample \algo{ThreshSign}(\llbracket \sk
-    \rrbracket, \vec{{M}})$ :] The threshold signing algorithm takes a
-    secret key share $\llbracket \sk \rrbracket$ and a vector of messages
+  \item[$\lbrack \signature\rbrack  \sample \TSPSsign(\lbrack \sk\rbrack , \vec{{M}})$ :] The threshold signing algorithm takes a
+    secret key share $\lbrack \sk\rbrack $ and a vector of messages
     $\vec{{M}}$ with elements in $\group{1}$ and/or $\group{2}$, and
-    outputs a signature share $\llbracket \signature \rrbracket$ with elements in
-    $\group{1}$ and $\group{2}$. This algorithm may be interactive.
+    outputs a signature share $\lbrack \signature\rbrack $ with elements in
+    $\group{1}$ and $\group{2}$.
 
-  \item[$\signature \leftarrow \algo{Combine}(\llbracket \signature \rrbracket)$ :] The
+  \item[$\signature \leftarrow \TSPScombine(\lbrack \signature\rbrack )$ :] The
     combining algorithm is non-interactive, and takes signature shares
-    $\llbracket \signature \rrbracket$ to output signature $\signature$.
+    $\lbrack \signature\rbrack $ to output signature $\signature$.
 
-  \item[$\{0,1\} \leftarrow \SPSverify(\pk, \vec{{M}}, \signature)$ :] The
+  \item[$\{0,1\} \leftarrow \TSPSverify(\pk, \vec{{M}}, \signature)$ :] The
     verification algorithm takes public key $\pk$, vector of messages
-    $\vec{{M}}$, and signature $\signature$, and returns 1 if $\signature$ is valid
-    on $\vec{{M}}$, and 0 otherwise. As in the non-threshold case,
-    verification checks membership of the signature's elements in $\group{1}$
-    and $\group{2}$, and evaluates equations involving pairing products.
+    $\vec{{M}}$, and signature $\signature$, and returns 0 or 1. $\TSPSverify$ 
+    is equal to $\SPSverify$.
 
 \end{description}
 
-Both threshold structure-preserving signature schemes we construct in
-Section~\ref{sec:schemes} are \emph{partially non-interactive}: $\algo{ThreshSign}$
-requires no interaction between signers, while the message-independent
-pre-processing that precedes it, captured by $\algo{OffSign}$ in
-Section~\ref{sec:schemes}, may be interactive. We formalise security for
-threshold structure-preserving signatures, together with the corresponding
-game, in Section~\ref{sec:tsps-security}, once the MPC functionalities of
-Section~\ref{sec:MPC} that our constructions build upon are available to draw
-on.
+\paragraph{Unforgeability.} As with structure-preserving signatures, we
+define the advantage of a PPT adversary $\adv$, though threshold
+structure-preserving signatures admit a hierarchy of increasingly strong
+notions of unforgeability, distinguishing fully and partially
+non-interactive schemes~\cite{C:BCKMTZ22}. With TS-UF-0 security, the
+adversary has access to a partial signature oracle $\signo$, and the
+unforgeability game is defined so that the adversary cannot win with
+message-signature pair $(\vec{{M}^*}, \signature^*)$ if the partial
+signature oracle has already been queried, even once, on $\vec{{M}^*}$.
+TS-UF-1 relaxes this: the winning condition can be triggered as long as the
+adversary has queried for partial signatures on $\vec{{M}^*}$ from no more
+than $t - |\Cor| - 1$ parties, where $\Cor$ is the set of corrupted parties.
+When the adversary corrupts $t-1$ parties, TS-UF-0 and TS-UF-1 coincide. In
+the adaptive variants, adp-TS-UF-0 and adp-TS-UF-1, the adversary
+additionally has access to a corruption oracle $\corrupto$, alongside the
+partial signature oracle $\signo$. We rely on adaptive TS-UF-1 security
+throughout this chapter.
+
+Let $\mathrm{TSPS} = (\algo{Setup}, \algo{KeyGen}, \algo{OffSign}, \algo{OnSign}, \algo{Combine},
+\SPSverify)$ be an $(n, t)$-TSPS scheme over message space $\mathcal{M}$. The
+advantage of a PPT adversary $\adv$ is defined as follows:
+%
+\begin{equation*}
+%
+  \Adv_{\mathrm{TSPS}, \adv}^{\text{adp-TS-UF-1}}(\secparam) =
+  \Pr\left\lbrack \mathbf{G}_{\mathrm{TSPS}, \adv}^{\text{adp-TS-UF-1}}(\secparam) = 1
+  \right\rbrack .
+%
+\end{equation*}
+%
+Here, game $\mathbf{G}_{\mathrm{TSPS}, \adv}^{\text{adp-TS-UF-1}}$ and its
+oracles $\signo$ and $\corrupto$ are given in
+Experiment~\ref{exp:tsps-adp-ts-uf-1}. A threshold structure-preserving
+signature scheme achieves adaptive TS-UF-1 security if, for every PPT
+adversary $\adv$, the following holds:
+%
+\begin{equation*}
+%
+  \Adv_{\mathrm{TSPS}, \adv}^{\text{adp-TS-UF-1}}(\secparam)
+  \leq \operatorname{negl}(\secparam).
+%
+\end{equation*}
+
+\begin{experimentbox}{Adaptive unforgeability under chosen message attack for
+  threshold structure-preserving signatures (adp-TS-UF-1)}{tsps-adp-ts-uf-1}
+
+  \begin{enumerate}
+
+    \item The challenger generates $\algo{pp} \gets \algo{Setup}(1^\secparam)$
+      and sends it to $\adv$.
+
+    \item The adversary outputs $(n, t, \Cor)$, and the challenger sets
+      $\mathcal{H} := [1,n] \backslash \Cor$.
+
+    \item The challenger generates $(\pk, \lbrack \sk\rbrack , \lbrack \pk\rbrack ) \gets \algo{KeyGen}(l, t, n)$, and sends
+      $\pk$, $\{\sk_i\}_{i \in \Cor}$, and $\lbrack \pk\rbrack $ to
+      $\adv$.
+
+    \item The adversary is given oracle access to $\signo$, which on input
+      $(i, \vec{{M}})$, asserts $\vec{{M}} \in \mathcal{M} \wedge i \in
+      \mathcal{H}$, computes $\sigma_i \gets \algo{ThreshSign}(\sk_i,
+      \vec{{M}})$, and if $\sigma_i \neq \perp$, adds $i$ to $S(\vec{{M}})$,
+      before returning $\sigma_i$.
+
+    \item The adversary is given oracle access to $\corrupto$, which on
+      input $k$, returns $\perp$ if $k \in \Cor$, and otherwise adds $k$ to
+      $\Cor$, removes $k$ from $\mathcal{H}$, and returns $\sk_k$.
+
+    \item The adversary outputs $(\vec{{M}^*}, \signature^*)$.
+
+  \end{enumerate}
+
+  $\adv$ wins the experiment if $\SPSverify(\pk, \vec{{M}^*}, \signature^*) =
+  1$, $|\Cor| < t$, and $|S(\vec{{M}^*})| < t - |\Cor|$, where $S(\vec{{M}})$
+  records which honest signers have issued a partial signature on
+  $\vec{{M}}$.
+
+\end{experimentbox}
+
+Let $x \in \Zp$ be a secret value additively shared between $n$ parties such
+that any $t+1$ parties can reconstruct it with the help of a pre-defined
+linear combination. We denote such a sharing $\lbrack x\rbrack $: the
+vector $(x_1, \ldots, x_n)$ where $x_i$ is the share held by the
+$i^{\mathrm{th}}$ party. For $\vec{x} = (x_1, \ldots, x_l) \in \Zp^l$, we
+write $\lbrack \vec{x}\rbrack $ for the vector $(\lbrack x_1\rbrack , \ldots, \lbrack x_l\rbrack )$.
+
+Our threshold signing algorithms are built from secure multiparty
+computation (MPC). We introduce the ideal functionalities for MPC that they
+rely on below.
+
+\subsection{Secure multiparty computation}\label{sec:MPC}
+
+Our threshold signatures are built in a hybrid model: rather than specifying
+how the signers jointly compute each step, we assume access to ideal
+functionalities that perform the relevant computation on their behalf, and
+describe our schemes in terms of calls to these functionalities. This
+section describes the ideal functionalities we assume for secure MPC over a
+prime order field $\Zp$ and a generic prime order group $\G$.
+Section~\ref{sec:tsps-evaluation} then summarises concrete instantiations of
+these ideal functionalities in the honest- and dishonest-majority settings,
+via ATLAS and MASCOT respectively.
+
+\subsubsection{Functionalities for secure multiparty computation in $\Zp$}
+
+\begin{figure*} \centering \hspace*{-0.05\textwidth}
+  \begin{minipage}{1.1\textwidth}
+
+    \begin{framed} \scriptsize
+
+      \setlist[enumerate]{ topsep=2pt, partopsep=0pt, parsep=0pt, itemsep=1pt }
+
+      \begin{multicols}{2}
+
+        {$\idfu{\algo{RandShare}}$.} On receiving a fresh identifier
+        $\mathit{id}_x$ from the honest parties, contact the adversary with
+        this identifier. In response, receive the set of shares
+        $\{x^*_i\}_{{P}_i \in \Cor}$, then:
+
+        \begin{enumerate}
+
+          \item Sample a random $t$-additive sharing $\lbrack x\rbrack 
+            = (x_1, ..., x_n)$ such that $x^*_i = x_i, \forall i : {P}_i \in
+            \Cor$. If no such sharing exists, send $\bot$ to all honest
+            parties and stop.
+
+          \item Otherwise, distribute to each honest party its share
+            $\langle \mathit{id}_x, x_i\rangle$, and store entries $\langle
+            \algo{share}, \mathit{id}_x, x_i \rangle$ and $\langle
+            \algo{secret}, \mathit{id}_x, x \rangle$.
+
+        \end{enumerate}
+
+        {$\idfu{\algo{Add}}$.} On receiving from the honest parties tuples
+        $(\mathit{id}_z, \langle \mathit{id}_x, x_i\rangle, \langle
+        \mathit{id}_y,y_i\rangle)_{{P}_i \in \mathcal{H}}$, do:
+
+        \begin{enumerate}
+
+          \item Retrieve all entries $\langle \algo{share}, \mathit{id}_x,
+            x_i\rangle$ and $\langle \algo{share}, \mathit{id}_y,
+            y_i\rangle$, followed by entries $\langle \algo{secret},
+            \mathit{id}_x, x\rangle$ and $\langle \algo{secret},
+            \mathit{id}_y, y\rangle$, compute $z_i = x_i+y_i$ and $z = x+y$,
+            and store entries $\langle \algo{share}, \mathit{id}_z,
+            z_i\rangle$ and $\langle \algo{secret}, \mathit{id}_z, z
+            \rangle$.
+
+          \item Output to each honest party ${P}_i$ its share $z_i$.
+
+        \end{enumerate}
+
+        {$\idfu{\algo{Mul}}$.} On receiving from the honest parties tuples
+        $(\mathit{id}_z, \langle \mathit{id}_x, x_i\rangle, \langle
+        \mathit{id}_y,y_i\rangle)_{{P}_i \in \mathcal{H}}$ and from the
+        adversary tuples $(\mathit{id}_z, \langle \mathit{id}_x, x_i
+        \rangle, \langle \mathit{id}_y, y_i\rangle)_{{P}_i \in \Cor}$, do:
+
+        \begin{enumerate}
+
+          \item Retrieve entries $\langle \algo{share}, \mathit{id}_x,
+            x_i\rangle$ and $\langle \algo{share}, \mathit{id}_y, y_i
+            \rangle$ using the values $x_i$ and $y_i$ provided in the
+            previous step.
+
+          \item If at least $t+1$ entries are successfully retrieved for
+            $\mathit{id}_x$ and also for $\mathit{id}_y$, then:
+
+            \begin{enumerate}
+              \item fetch entries $\langle \algo{secret}, \mathit{id}_x,x\rangle$
+                and $\langle \algo{secret}, \mathit{id}_y,y\rangle$;
+              \item compute $z = xy$ and a $t$-additive sharing $\lbrack z
+\rbrack  = (z_1, ..., z_n)$ of $z$;
+              \item send to each party ${P}_i$ its share $z_i$;
+              \item and store entries $\langle \algo{share}, \mathit{id}_z,
+                z_i\rangle$, $\forall i \in [n]$ and entry $\langle
+                \algo{secret}, \mathit{id}_z, z\rangle$.
+            \end{enumerate}
+
+          \item Otherwise, send $\bot$ to the honest parties and stop.
+
+        \end{enumerate}
+
+        {$\idfu{\algo{Inv}}$.} On receiving from the honest parties their
+        tuples $(\mathit{id}_z, \langle \mathit{id}_x,
+        x_i\rangle)_{{P}_i \in \mathcal{H}}$ and from the adversary the
+        tuples $(\mathit{id}_z, \langle \mathit{id}_x, x_i
+        \rangle)_{{P}_i \in \Cor}$, do:
+
+        \begin{enumerate}
+
+          \item Retrieve entries $\langle \algo{share}, \mathit{id}_x,
+            x_i\rangle$ using the values $x_i$ received in the previous
+            step.
+
+          \item If at least $t+1$ entries are successfully retrieved, then:
+
+            \begin{enumerate}
+              \item get entry $\langle \algo{secret}, \mathit{id}_x, x
+                \rangle$;
+              \item compute $z = 1/x$ and a $t$-additive sharing
+                $\lbrack z\rbrack  =(z_1, ..., z_n)$ of $z$;
+              \item send to each party ${P}_i$ its share $z_i$;
+              \item and store entries $\langle \algo{share}, \mathit{id}_z,
+                z_i\rangle$, $\forall \ i \in [n]$ and entry $\langle
+                \algo{secret}, \mathit{id}_z, z\rangle$.
+            \end{enumerate}
+
+          \item Otherwise, send $\bot$ to the honest parties and stop.
+
+        \end{enumerate}
+
+        {$\idfu{\algo{Combine}}$.} On receiving from the honest parties
+        their shares $(\langle \mathit{id}_x,x_i\rangle)_{{P}_i \in
+        \mathcal{H}}$ and from the adversary the shares $(\langle
+        \mathit{id}_x, x_i \rangle)_{{P}_i \in \Cor}$, do:
+
+        \begin{enumerate}
+
+          \item Retrieve entries $\langle \algo{share}, \mathit{id}_x,
+            x_i\rangle$ using the values $x_i$ received in the previous
+            step.
+
+          \item If at least $t+1$ entries are successfully retrieved, get
+            entry $\langle \algo{secret}, \mathit{id}_x, x\rangle$ and send
+            $x$ to the honest parties and the adversary.
+
+          \item Otherwise, send $\bot$ to the honest parties and stop.
+
+        \end{enumerate}
+
+      \end{multicols}
+
+    \end{framed}
+
+  \end{minipage}
+\caption{Ideal functionalities for MPC in $\Zp$.}
+\label{fig:ideal-func}
+\end{figure*}
+
+Our constructions of threshold structure-preserving signatures build upon
+existing frameworks for secure MPC over inputs in $\Zp$. Concretely, we assume
+some realisation of the ideal MPC functionality over $\Zp$ described in
+Figure~\ref{fig:ideal-func}, where $\mathcal{H}$ and $\Cor$ denote the sets of honest
+and corrupted parties respectively. Unless otherwise specified, we assume
+security against malicious corruption of parties. Recall that $\lbrack x
+\rbrack $, for $x \in \Zp$, denotes that $x$ is secret-shared: no individual
+party has access to $x$, but each party holds some share $x_i$ of $x$ (for
+simplicity, we assume this notation incorporates the additional
+authentication components required for malicious security).
+
+\paragraph{Linearity-preservation.} Fundamentally, we require that the
+secret-shared representation $\lbrack x\rbrack $ is
+linearity-preserving: for any $x,y,z,\alpha,\beta\in \Zp$ such that $u =
+\alpha\cdot x + \beta \cdot y + z$, given secret shares $\lbrack x\rbrack $ and $\lbrack y\rbrack $
+and public values $z,\alpha,\beta$,
+the parties can compute a secret sharing of $u$ ``for free'' as follows:
+\[\lbrack u\rbrack = \alpha\cdot \lbrack x\rbrack + \beta \cdot
+\lbrack y\rbrack + z.\] Since we assume malicious security, this
+property must also be preserved for any additional authentication
+components, which we otherwise abstract out for ease of exposition.
+
+\paragraph{Functionalities for secure MPC in $\Zp$.} Figure~\ref{fig:ideal-func}
+formally describes the ideal functionalities we assume for secure MPC in
+$\Zp$. We assume a randomised functionality that generates a secret-shared
+representation $\lbrack r\rbrack $ for a randomly sampled value $r\gets
+\Zp$, together with four deterministic functionalities, described below
+(all arithmetic is in $\Zp$):
+
+\begin{enumerate}
+
+	\item A functionality that adds secret-shared inputs: given $\lbrack x
+\rbrack $ and $\lbrack y\rbrack $, produces $\lbrack z
+\rbrack $ such that $z = x + y$. By linearity-preservation, this comes
+    for free, as it can be performed locally by each party.
+
+	\item A functionality that multiplies secret-shared inputs: given
+    $\lbrack x\rbrack $ and $\lbrack y\rbrack $, produces
+    $\lbrack z\rbrack $ such that $z = x \cdot y$.
+
+	\item A functionality that inverts a secret-shared value: given
+    $\lbrack x\rbrack $, produces $\lbrack z\rbrack $ such that $z
+    = x^{-1}$.
+
+	\item A functionality that combines the shares of a secret-shared value
+    $\lbrack x\rbrack $: reconstructs and distributes $x$ to all, or a
+    subset, of the parties.
+
+\end{enumerate}
+
+\subsubsection{Functionalities for secure multiparty computation in $\G$}
+
+\begin{figure*} \centering \hspace*{-0.05\textwidth}
+  \begin{minipage}{1.1\textwidth}
+
+    \begin{framed} \scriptsize
+
+      \setlist[enumerate]{ topsep=2pt, partopsep=0pt, parsep=0pt, itemsep=1pt }
+
+      \begin{multicols}{2}
+
+        {$\idfu{\algo{RandShareGrp}}$.} On receiving a fresh identifier
+        $\mathit{id}_{{X}}$ from the honest parties, contact the adversary
+        with this identifier. In response, receive the set of shares
+        $\{x_i \}_{{P}_i \in \Cor}$, then:
+
+        \begin{enumerate}
+
+          \item Sample a random $t$-additive sharing $\lbrack x\rbrack 
+            = (x_1, ..., x_n)$ such that $x_i = x^*_i, \forall i : {P}_i \in
+            \Cor$. If no such sharing exists, send $\bot$ to all honest
+            parties and stop.
+
+          \item Otherwise:
+
+            \begin{enumerate}
+              \item compute the shares $\lbrack {X}\rbrack  = ({X}_1,
+                ..., {X}_n)$ such that ${X}_i = x_i\gen$;
+              \item distribute to each honest party the tuple $\langle
+                \mathit{id}_{{X}}, X_i, x_i\rangle$;
+              \item and store entries $\langle \algo{share},
+                \mathit{id}_{{X}}, {X}_i \rangle$ and $\langle \algo{secret},
+                \mathit{id}_{{X}}, {X} \rangle$.
+            \end{enumerate}
+
+        \end{enumerate}
+
+        {$\idfu{\algo{MulGrp}}$.} On receiving from the honest parties
+        tuples $(\mathit{id}_{{Z}}, \langle \mathit{id}_{{X}},
+        {X}_i\rangle, \langle \mathit{id}_{{Y}},{Y}_i\rangle)_{{P}_i \in
+        \mathcal{H}}$, do:
+
+        \begin{enumerate}
+
+          \item Retrieve all entries $\langle \algo{share},
+            \mathit{id}_{{X}}, {X}_i\rangle$ and $\langle \algo{share},
+            \mathit{id}_{{Y}}, {Y}_i\rangle$, followed by entries $\langle
+            \algo{secret}, \mathit{id}_{{X}}, {X}\rangle$ and $\langle
+            \algo{secret}, \mathit{id}_{{Y}}, {Y}\rangle$, compute ${Z}_i =
+            {X}_i+{Y}_i$ and ${Z} = {X}+{Y}$, and store entries $\langle
+            \algo{share}, \mathit{id}_{{Z}}, {Z}_i\rangle$ and $\langle
+            \algo{secret}, \mathit{id}_{{Z}}, {Z} \rangle$.
+
+          \item Output to each honest party ${P}_i$ its share ${Z}_i$.
+
+        \end{enumerate}
+
+        {$\idfu{\algo{ExpGenGrp}}$.} On receiving from the honest parties
+        tuples $(\mathit{id}_{{Z}}, \langle \mathit{id}_{x},
+        x_i\rangle, {Y})_{{P}_i \in \mathcal{H}}$, do:
+
+        \begin{enumerate}
+
+          \item Retrieve all entries $\langle \algo{share}, \mathit{id}_x,
+            x_i\rangle$ and entry $\langle \algo{secret}, \mathit{id}_x,
+            x\rangle$, compute ${Z}_i = x_i{Y}$ and ${Z} = x{Y}$, and store
+            entries $\langle \algo{share}, \mathit{id}_{{Z}}, {Z}_i\rangle$
+            and $\langle \algo{secret}, \mathit{id}_{{Z}}, {Z} \rangle$.
+
+          \item Output to each honest party ${P}_i$ its share ${Z}_i$.
+
+        \end{enumerate}
+
+        {$\idfu{\algo{ExpGrp}}$.} On receiving from the honest parties the
+        tuples $(\mathit{id}_{{Z}}, \langle \mathit{id}_x, x_i\rangle,
+        \langle \mathit{id}_{{Y}},{Y}_i\rangle)_{{P}_i \in \mathcal{H}}$ and
+        from the adversary the shares $(\mathit{id}_{{Z}}, \langle
+        \mathit{id}_x, x_i \rangle, \langle \mathit{id}_{{Y}},
+        {Y}_i\rangle)_{{P}_i \in \Cor}$, do:
+
+        \begin{enumerate}
+
+          \item Retrieve entries $\langle \algo{share}, \mathit{id}_x,
+            x_i\rangle$ and $\langle \algo{share}, \mathit{id}_{{Y}}, {Y}_i
+            \rangle$ using the values received in the previous step.
+
+          \item If at least $t+1$ entries are successfully retrieved for
+            $\mathit{id}_x$ and also for $\mathit{id}_{{Y}}$, then:
+
+            \begin{enumerate}
+              \item retrieve entries $\langle \algo{secret},
+                \mathit{id}_x,x\rangle$ and $\langle \algo{secret},
+                \mathit{id}_{{Y}},{Y}\rangle$;
+              \item compute ${Z} = x{Y}$, compute $t$-additive shares
+                $(x'_1, ..., x'_n)$ of $x$, and set ${Z}_i = x'_i{Y}$;
+              \item send to each party ${P}_i$ its share ${Z}_i$ of ${Z}$;
+              \item and store entries $\langle \algo{share},
+                \mathit{id}_{{Z}}, {Z}_i\rangle$ and entry $\langle
+                \algo{secret}, \mathit{id}_{{Z}}, {Z}\rangle$.
+            \end{enumerate}
+
+          \item Otherwise, send $\bot$ to the honest parties and stop.
+
+        \end{enumerate}
+
+        {$\idfu{\algo{CombineGrp}}$.} On receiving from the honest parties
+        their shares $(\langle \mathit{id}_{{X}}, {X}_i\rangle)_{{P}_i \in
+        \mathcal{H}}$ and from the adversary the shares $(\langle
+        \mathit{id}_{{X}}, {X}_i \rangle)_{{P}_i \in \Cor}$, do:
+
+        \begin{enumerate}
+
+          \item Retrieve entries $\langle \algo{share}, \mathit{id}_{{X}},
+            {X}_i\rangle$ using the values ${X}_i$ received in the previous
+            step.
+
+          \item If at least $t+1$ entries are retrieved successfully, fetch
+            entry $\langle \algo{secret}, \mathit{id}_{{X}}, {{X}}\rangle$
+            and send ${X}$ to the honest parties and the adversary.
+
+          \item Otherwise, send $\bot$ to the honest parties and stop.
+
+        \end{enumerate}
+
+      \end{multicols}
+
+    \end{framed}
+
+  \end{minipage}
+\caption{Ideal functionalities for MPC in $\G$.}
+\label{fig:ideal-func-group}
+\end{figure*}
+
+We additionally assume a framework for secure MPC over inputs in a cyclic
+group $(\G,+)$ of prime order $p$. In practice, this framework is
+satisfied by both $\group{1}$ and $\group{2}$, but we present it here in the
+abstract to avoid repetition. A group element is shared by sharing a random
+exponent $x$ and raising a public generator $\gen$ to each share of $x$; each
+resulting group element is then an additive share of $x\gen$, as captured by
+the $\idfu{\algo{RandShareGrp}}$ interface below. Concretely, we assume some
+realisation of the ideal MPC functionality over $\G$ described in
+Figure~\ref{fig:ideal-func-group}, where $\mathcal{H}$ and $\Cor$ again denote the
+sets of honest and corrupted parties respectively. As for MPC over $\Zp$,
+unless otherwise specified, we assume security against malicious corruption
+of parties.
+
+We use the representation $\lbrack X\rbrack $, for $X\in \G$, to
+denote that $X$ is secret-shared: no individual party has access to $X$, but
+each party holds some share $X_i$ of $X$ (again, we assume this notation
+incorporates the authentication components required for malicious security).
+
+\paragraph{Linearity-preservation.} We again require that the secret-shared
+representation $\lbrack X\rbrack $ is linearity-preserving: for any
+$X,Y,Z\in \G$ and $\alpha,\beta\in \Zp$ such that $U = \alpha X + \beta Y
++ Z$, given secret shares $\lbrack X\rbrack $ and $\lbrack Y
+\rbrack $, public group element $Z$, and public values $\alpha,\beta$, the
+parties can compute a secret sharing of $U$ ``for free'' as follows:
+\[\lbrack U\rbrack = \alpha\lbrack X\rbrack + \beta \lbrack Y
+\rbrack + Z.\] Again, since we assume malicious security, this property
+must also be preserved for any additional authentication components.
+
+\paragraph{Functionalities for secure MPC in $\G$.} Figure~\ref{fig:ideal-func-group}
+describes the functionalities we assume for secure MPC in $\G$, analogous
+to those of Figure~\ref{fig:ideal-func} for $\Zp$. We again assume a
+randomised functionality that generates a secret-shared representation
+$\lbrack R\rbrack $ for a randomly sampled group element $R\gets
+\G$, together with four deterministic functionalities, described below
+(all group operations below are written additively):
+
+\begin{enumerate}
+
+	\item A functionality that adds secret-shared group elements: given
+    $\lbrack X\rbrack $ and $\lbrack Y\rbrack $, produces
+    $\lbrack Z\rbrack $ such that $Z = X + Y$. By linearity-preservation
+    this comes for free, as it can be performed locally by each party.
+
+	\item A functionality that multiplies a secret-shared field element with a
+    public group element: given $\lbrack x\rbrack $ and public $Y$,
+    produces $\lbrack Z\rbrack $ such that $Z = xY$. As with addition,
+    this comes for free, as it can be executed locally by each party.
+
+	\item A functionality that multiplies a secret-shared field element with a
+    secret-shared group element: given $\lbrack x\rbrack $ and
+    $\lbrack Y\rbrack $, produces $\lbrack Z\rbrack $ such that $Z
+    = xY$.
+
+	\item A functionality that combines the shares of a secret-shared group
+    element $\lbrack X\rbrack $: reconstructs and distributes $X$ to
+    all, or a subset, of the parties.
+
+\end{enumerate}
+
+Multiplying a secret-shared group element $\lbrack X\rbrack $ by a
+public value $y \in \Zp$, to produce $\lbrack Z\rbrack $ such that $Z =
+yX$, can also be performed locally, as this is essentially a repeated
+application of the local addition functionality above.
+
+In practice, $\G$ corresponds to either $\group{1}$ or $\group{2}$, most
+often represented concretely by elliptic curve groups, whose elements are
+coordinate pairs satisfying the curve equation, e.g. $(x_0, y_0)$. Sharing a
+group element is not achieved by two independent secret sharings of
+the coordinates $x_0$ and $y_0$, that is, $(\lbrack x_0\rbrack , \lbrack 
+y_0\rbrack )$, as this would require parties to communicate in order to
+compute group operations on the shares. Instead, the group element is shared
+as a single unit, $\lbrack (x_0,y_0)\rbrack $, so that group operations
+can be performed by each party locally, as desired.
+

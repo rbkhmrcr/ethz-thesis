@@ -1,86 +1,10 @@
 \section{Security}\label{sec:tsps-security}
 
-We take inspiration from threshold signature security definitions that
-introduce a hierarchy of increasingly strong notions of unforgeability for
-fully and partially non-interactive threshold signature
-schemes~\cite{C:BCKMTZ22}. A partially non-interactive scheme is one whose
+We adopt the notion of adaptive TS-UF-1 security defined in
+Section~\ref{sec:tsps-definitions}. A partially non-interactive scheme is one whose
 $\algo{OnSign}$ protocol is non-interactive, but whose message-independent
 pre-processing round, analogous to $\algo{OffSign}$, may be interactive; both of
-our constructions from Section~\ref{sec:schemes} fall into this class.
-
-With TS-UF-0 security, the adversary has access to a partial signature oracle
-$\signo$, and the unforgeability game is defined so that the adversary cannot
-win with message-signature pair $(\vec{{M}^*}, \signature^*)$ if the partial
-signature oracle has already been queried, even once, on $\vec{{M}^*}$.
-TS-UF-1 relaxes this: the winning condition can be triggered as long as the
-adversary has queried for partial signatures on $\vec{{M}^*}$ from no more
-than $t - |\Cor| - 1$ parties, where $\Cor$ is the set of corrupted parties.
-When the adversary corrupts $t-1$ parties, TS-UF-0 and TS-UF-1 coincide. In
-the adaptive variants, adp-TS-UF-0 and adp-TS-UF-1, the adversary additionally
-has access to a corruption oracle $\corrupto$, alongside the partial signature
-oracle $\signo$.
-
-Let $\mathrm{TSPS} = (\algo{Setup}, \algo{KeyGen}, \algo{OffSign}, \algo{OnSign}, \algo{Combine},
-\SPSverify)$ be an $(n, t)$-TSPS scheme over message space $\mathcal{M}$. The
-advantage of a PPT adversary $\adv$ is defined as follows:
-%
-\begin{equation*}
-%
-  \Adv_{\mathrm{TSPS}, \adv}^{\text{adp-TS-UF-1}}(\secparam) =
-  \Pr\left[\mathbf{G}_{\mathrm{TS}, \adv}^{\text{adp-TS-UF-1}}(\secparam) = 1
-  \right].
-%
-\end{equation*}
-%
-Here, game $\mathbf{G}_{\mathrm{TS}, \adv}^{\text{adp-TS-UF-1}}$ and its
-oracles $\signo$ and $\corrupto$ are given in
-Experiment~\ref{exp:tsps-adp-ts-uf-1}. A threshold structure-preserving
-signature scheme achieves adaptive TS-UF-1 security if, for every PPT
-adversary $\adv$, the following holds:
-%
-\begin{equation*}
-%
-  \Adv_{\mathrm{TSPS}, \adv}^{\text{adp-TS-UF-1}}(\secparam)
-  \leq \operatorname{negl}(\secparam).
-%
-\end{equation*}
-
-\begin{experimentbox}{Adaptive unforgeability under chosen message attack for
-  threshold structure-preserving signatures (adp-TS-UF-1)}{tsps-adp-ts-uf-1}
-
-  \begin{enumerate}
-
-    \item The challenger generates $\algo{pp} \gets \algo{Setup}(1^\secparam)$
-      and sends it to $\adv$.
-
-    \item The adversary outputs $(n, t, \Cor)$, and the challenger sets
-      $\mathcal{H} := [1,n] \backslash \Cor$.
-
-    \item The challenger generates $(\pk, \llbracket \sk \rrbracket,
-      \llbracket \pk \rrbracket) \gets \algo{KeyGen}(l, t, n)$, and sends
-      $\pk$, $\{\sk_i\}_{i \in \Cor}$, and $\llbracket \pk \rrbracket$ to
-      $\adv$.
-
-    \item The adversary is given oracle access to $\signo$, which on input
-      $(i, \vec{{M}})$, asserts $\vec{{M}} \in \mathcal{M} \wedge i \in
-      \mathcal{H}$, computes $\sigma_i \gets \algo{ThreshSign}(\sk_i,
-      \vec{{M}})$, and if $\sigma_i \neq \perp$, adds $i$ to $S(\vec{{M}})$,
-      before returning $\sigma_i$.
-
-    \item The adversary is given oracle access to $\corrupto$, which on
-      input $k$, returns $\perp$ if $k \in \Cor$, and otherwise adds $k$ to
-      $\Cor$, removes $k$ from $\mathcal{H}$, and returns $\sk_k$.
-
-    \item The adversary outputs $(\vec{{M}^*}, \signature^*)$.
-
-  \end{enumerate}
-
-  $\adv$ wins the experiment if $\SPSverify(\pk, \vec{{M}^*}, \signature^*) =
-  1$, $|\Cor| < t$, and $|S(\vec{{M}^*})| < t - |\Cor|$, where $S(\vec{{M}})$
-  records which honest signers have issued a partial signature on
-  $\vec{{M}}$.
-
-\end{experimentbox}
+our constructions from Section~\ref{sec:tsps-instantiation} fall into this class.
 
 \begin{theorem}\label{thm:tsps-security}
 
@@ -111,9 +35,8 @@ adversary $\adv$, the following holds:
   $(n, t, \Cor)$ from $\adv$, and $\pk$ from its own challenger, $\advB$
   samples random shares $\{\sk_i\}_{i \in [1, t-1]}$ and their corresponding
   public key shares, together with shares $\{\sk_i\}_{i \in \Cor}$ and their
-  corresponding public key shares, consistent with the sharing $\llbracket
-  \pk \rrbracket$ of $\pk$. It forwards $\pk$, $\{\sk_i\}_{i \in \Cor}$, and
-  $\llbracket \pk \rrbracket$ to $\adv$.
+  corresponding public key shares, consistent with the sharing $\lbrack \pk\rbrack $ of
+  $\pk$. It forwards $\pk$, $\{\sk_i\}_{i \in \Cor}$, and $\lbrack \pk\rbrack $ to $\adv$.
 
   $\advB$ answers $\adv$'s $\signo$ queries in one of two ways. If, for the
   queried $\vec{{M}}$, $|S(\vec{{M}})| < t - |\Cor|$, then $\advB$ forms
