@@ -11,45 +11,49 @@ what is being proved.
 
 \subsection{Building blocks}
 
-\begin{primitivebox}{BBS+ signature scheme}{fig:bbs}
+\subsubsection{The BBS+ signature scheme.} The BBS+ signature scheme enables
+signers to sign multiple messages at once, using the following
+algorithms~\cite{C:BonBoySha04,SCN:AuSusMu06,EPRINT:CamDriLeh16}.
+
+\begin{primitivebox}{The BBS+ signature scheme}{fig:bbs}
 
   \begin{description}
 
-    \item[$(\sk,\pk) \sample \BBSgen(\secparam, L)$ :] On input the security
-      parameter and vector length $L$, do the following:
+    \item[$(\sk,\pk) \sample \BBSgen(\secparam, \ell)$ :] On input the security
+      parameter and vector length $\ell$, do the following:
 
       \begin{enumerate}
 
-        \item Sample $z \sample \Zp$ and generators
-          $\gen_0,\gen_1,\ldots,\gen_{L+1} \sample \group{1}$, $\ggen \sample
-          \group{2}$.
+        \item Sample $z \sample \Zp$ and generators $\gen_0,\gen_1, \ldots,
+          \gen_{\ell+1} \sample \group{1}^\ell$, $\ggen \sample \group{2}$.
 
-        \item Return $\sk = z$, $\pk = (\gen_0,\ldots,\gen_{L+1},\ggen,\ggen_Z
-          = \ggen^z)$.
+        \item Return $\sk = z$, $\pk = (\gen_0, \ldots, \gen_{\ell+1}, \ggen,
+          \ggen_Z = \ggen^z)$.
 
       \end{enumerate}
 
-    \item[$\signature \sample \BBSsign(\sk,(M_1,\ldots,M_L))$ :] On input
-      secret key $\sk = z$ and message $(M_1,\ldots,M_L) \in \group{1}^L$, do:
+    \item[$\signature \sample \BBSsign(\sk,(\msg_1, \ldots, \msg_\ell))$ :] On
+      input secret key $\sk = z$ and message $(\msg_1, \ldots, \msg_\ell) \in
+      \group{1}^\ell$, do:
 
       \begin{enumerate}
 
         \item Sample $e,r \sample \Zp$.
 
-        \item Return $\signature = (e,r,E)$ with $E = (\gen_0 \cdot
-          \prod_{i=1}^{L} M_i \cdot \gen_{L+1}^{r})^{1/(z+e)}$.
+        \item Return $\signature = (e, r, E)$ with $E = (\gen_0 \cdot
+          \prod_{i=1}^{\ell} \msg_i \cdot \gen_{\ell+1}^{r})^{1/(z+e)}$.
 
       \end{enumerate}
 
-    \item[$\{0,1\} \leftarrow \BBSverify(\pk,(M_1,\ldots,M_L),\signature)$ :]
-      On input public key $\pk$, message $(M_1,\ldots,M_L)$, and signature
-      $\signature = (e,r,E)$, do:
+    \item[$\{0,1\} \leftarrow \BBSverify(\pk,(\msg_1, \ldots, \msg_\ell),
+      \signature)$ :] On input public key $\pk$, message $(\msg_1, \ldots,
+      \msg_\ell)$, and signature $\signature = (e,r,E)$, do:
 
       \begin{enumerate}
 
         \item Return $\pairing(E,\ggen_Z\cdot\ggen^{e}) \checkcheck
-          \pairing(\gen_0 \cdot \prod_{i=1}^{L} M_i \cdot \gen_{L+1}^{r},
-          \ggen)$.
+          \pairing(\gen_0 \cdot \prod_{i=1}^{\ell} \msg_i \cdot
+          \gen_{\ell+1}^{r}, \ggen)$.
 
       \end{enumerate}
 
@@ -63,6 +67,19 @@ computing $\prod_i M_i$ requires no knowledge of the discrete logarithms $m_i$,
 a signer can produce a valid signature on committed values without ever
 learning them; this is exactly what lets the registration authority certify a
 user's keys below without ever seeing them~\cite{SCN:AuSusMu06,EC:TesZhu23b}.
+
+BBS+ signatures are existentially unforgeable under the $q$-strong
+Diffie-Hellman ($q$-SDH) assumption.
+
+\begin{assumptionbox}{$q$-Strong Diffie-Hellman ($q$-SDH)}{qsdh-bbs}
+
+  The $q$-SDH assumption holds if, given $(\hgen, \ggen, \ggen^{\theta},
+  \gen_0, \gen_0^{\theta}, \ldots, \gen_0^{\theta^{q}})$ for uniformly random
+  $\theta \sample \Zp$, no PPT adversary can output a pair $(\varepsilon,
+  c^{1/(\theta+\varepsilon)})$ for a group element $c$ of this form and any
+  $\varepsilon \in \Zp \setminus \{-\theta\}$ with non-negligible probability.
+
+\end{assumptionbox}
 
 \begin{primitivebox}{Pedersen commitment scheme}{fig:pedersen}
 
@@ -141,11 +158,11 @@ rather than requiring general purpose zero knowledge proofs.
           \gen_1^{\sk}$, $T \leftarrow \gen_2^{\utk}$, computes $\algoproof_4
           \sample \NIZKprove(\crs_4,\inst_4,\witness_4,\rand)$ for $\inst_4 =
           (\gen_1,\gen_2,S,T)$ and $\witness_4 = (\sk,\utk)$, proving $S =
-          \gen_1^{\sk} \wedge T = \gen_2^{\utk}$, and sends $(S,T,\algoproof_4)$ to
-          the registration authority.
+          \gen_1^{\sk} \wedge T = \gen_2^{\utk}$, and sends
+          $(S,T,\algoproof_4)$ to the registration authority.
 
-        \item If $\algoproof_4$ does not verify, or the user has registered before,
-          the registration authority exits.
+        \item If $\algoproof_4$ does not verify, or the user has registered
+          before, the registration authority exits.
 
         \item Else, the registration authority computes $\signature \sample
           \BBSsign(\sk_{RA},(S,T))$ and records $(S,T)$ as registered.
@@ -177,9 +194,9 @@ rather than requiring general purpose zero knowledge proofs.
           re-authenticating $(S,T)$ on the fresh nonce, and sends
           $(S,T,\signature,\ek,\algoproof_5,\algoproof_4)$ to the auditor.
 
-        \item The auditor accepts and outputs $\ek$ if and only if $\algoproof_4$
-          verifies, $\BBSverify(\pk_{RA},(S,T),\signature) = 1$, and $\algoproof_5$
-          verifies for $\rel_5$.
+        \item The auditor accepts and outputs $\ek$ if and only if
+          $\algoproof_4$ verifies, $\BBSverify(\pk_{RA},(S,T),\signature) = 1$,
+          and $\algoproof_5$ verifies for $\rel_5$.
 
       \end{enumerate}
 
@@ -197,17 +214,18 @@ rather than requiring general purpose zero knowledge proofs.
         \item Sample $\openinfo \sample \Zp$ and compute $\com \sample
           \ComCommit(\ck,\utk,\openinfo)$.
 
-        \item Compute $\algoproof_7 \sample \NIZKprove(\crs_7,\inst_7,\witness_7)$,
-          proving relation $\rel_7$, following~\Cref{sec:tag-computation}.
+        \item Compute $\algoproof_7 \sample
+          \NIZKprove(\crs_7,\inst_7,\witness_7)$, proving relation $\rel_7$,
+          following~\Cref{sec:tag-computation}.
 
         \item Compute $\algoproof_6 \sample
           \NIZKprove(\crs_6,\inst_6,\witness_6,\msg)$ for $\msg =
-          \payload\|\Tag_\gamma\|\com\|\algoproof_7$, proving relation $\rel_6$,
-          following~\Cref{sec:tx-auth}.
+          \payload\|\Tag_\gamma\|\com\|\algoproof_7$, proving relation
+          $\rel_6$, following~\Cref{sec:tx-auth}.
 
         \item Set $\tx \leftarrow
-          (\payload,\Tag_\gamma,\com,\algoproof_7,\algoproof_6)$ and submit $\tx$ to
-          the ledger.
+          (\payload,\Tag_\gamma,\com,\algoproof_7,\algoproof_6)$ and submit
+          $\tx$ to the ledger.
 
         \item The transaction validators append $\tx$ to $\state$ if and only
           if $\Tag_\gamma$ has not appeared in a previously accepted
@@ -369,10 +387,10 @@ $(\gamma_1,\ldots,\gamma_\ell)$ are bits.
         \com^c, \quad \ggen^{\pi_3}\prod_{i=1}^{\ell} \ggen_i^{\pi_{4,i}}
         \checkcheck \gggen{t}_2 \cdot \gggen{b}^c, \quad \HE(\epoch)^{\pi_5}
         \checkcheck t_3 \cdot u^c, \\ u^{\pi_1} \checkcheck t_4 \cdot v^c,
-        \quad \Tag^{\pi_5} \cdot \pairing(v, \ggen)^{\pi_3} \checkcheck T_5
-      \cdot \pairing(v,\gggen{b})^c.  \end{gather*}
+      \quad \Tag^{\pi_5} \cdot \pairing(v, \ggen)^{\pi_3} \checkcheck T_5 \cdot
+    \pairing(v,\gggen{b})^c.  \end{gather*}
 
-  \end{description}
+\end{description}
 
 \end{protocolbox}
 
@@ -438,9 +456,9 @@ transforms the resulting proof into a message-bound NIZK proof.
 
   \begin{description}
 
-    \item[$\algoproof_9 \sample \NIZKprove(\crs_9, \inst_9, \witness_9, \msg)$ :]
-      On input $\inst_9 = (\pk, \com, u, v, w)$, $\witness_9 = (\utk, \rho, e,
-      \zeta, \eta, \sk, \xi)$, and message $\msg$, do:
+    \item[$\algoproof_9 \sample \NIZKprove(\crs_9, \inst_9, \witness_9, \msg)$
+      :] On input $\inst_9 = (\pk, \com, u, v, w)$, $\witness_9 = (\utk, \rho,
+      e, \zeta, \eta, \sk, \xi)$, and message $\msg$, do:
 
       \begin{enumerate}
 
@@ -462,8 +480,9 @@ transforms the resulting proof into a message-bound NIZK proof.
 
       \end{enumerate}
 
-    \item[$\{0,1\} \leftarrow \NIZKverify(\crs_9, \inst_9, \algoproof_9, \msg)$ :]
-      On input instance $\inst_9$, proof $\algoproof_9$, and message $\msg$, do:
+    \item[$\{0,1\} \leftarrow \NIZKverify(\crs_9, \inst_9, \algoproof_9, \msg)$
+      :] On input instance $\inst_9$, proof $\algoproof_9$, and message $\msg$,
+      do:
 
       \begin{enumerate}
 

@@ -1,180 +1,30 @@
-\section{Structure-Preserving Signatures}\label{sec:tsps-construction}
+\section{Threshold Structure-Preserving
+Signatures}\label{sec:tsps-construction}
 
-In this section we describe two structure-preserving signatures, and the
-general strategy we use to thresholdise them. The first is optimal in terms
-of size, and existentially unforgeable in the generic group model
-(GGM)~\cite{C:AGHO11}. The second produces signatures with more group
-elements, but is existentially unforgeable under the DDH
-assumption~\cite{C:KilPanWee15}.
-
-\subsection{Optimal re-randomisable structure-preserving signatures in the
-GGM}\label{sec:sps-ggm}
-
-Abe, Groth, Haralambiev, and Ohkubo introduced the first optimal-size
-structure-preserving signature scheme for asymmetric
-pairings~\cite{C:AGHO11}.
-
-\begin{primitivebox}{Optimal structure-preserving signatures (Abe, Groth,
-  Haralambiev, and Ohkubo)}{sps-ggm}
-
-  \begin{description}
-
-    \item[$(\pk, \sk) \sample \SPSgen(\secparam, l)$ :] On input security
-      parameter $\secparam$ and vector length $l$, do:
-
-      \begin{enumerate}
-
-        \item Sample $\vec{\mu} = (\mu_1, \ldots, \mu_l) \sample (\Zp^*)^l$ and $\tau
-          \sample \Zp$.
-
-        \item Compute $\vec{\widetilde{u}} = (\widetilde{u}_1, \ldots, \widetilde{u}_l) = (\mu_1
-          \ggen, \ldots, \mu_l \ggen) \in \group{2}^l$ and ${v} = \tau
-          \gen \in \group{1}$.
-
-        \item Return $\pk = (\vec{\widetilde{u}}, {v})$ and $\sk = (\vec{\mu}, \tau)$.
-
-      \end{enumerate}
-
-    \item[$\signature \sample \SPSsign(\sk, \vec{{m}})$ :] On input secret key
-      $\sk = (\vec{\mu}, \tau)$ and vector $\vec{{m}} = ({m}_1, \ldots,
-      {m}_l) \in \group{1}^l$, do:
-
-      \begin{enumerate}
-
-        \item Sample $\rho \sample \Zp^*$.
-
-        \item Return $\signature = (\widetilde{r}, \widetilde{s}, {z})$ such that the
-          following holds:
-          %
-          \begin{equation*}
-          %
-            \widetilde{r} = \tfrac{1}{\rho}\ggen, \qquad \widetilde{s} = \tau\widetilde{r}, \qquad {z} =
-            \rho\left(\gen - \vec{\mu}\vec{{m}}\right).
-          %
-          \end{equation*}
-
-      \end{enumerate}
-
-    \item[$\{0,1\} \leftarrow \SPSverify(\pk, \vec{{m}}, \signature)$ :] On input
-      signature $\signature = (\widetilde{r}, \widetilde{s}, {z}) \in \group{2}^2 \times \group{1}$ and
-      vector $\vec{m} \in \group{1}^l$, return 1 if the following holds, and
-      0 otherwise:
-      %
-      \begin{equation}
-      %
-        \pairing({v}, \widetilde{r}) = \pairing(\gen, \widetilde{s}) \ \wedge \ \pairing({z},
-        \widetilde{r})\prod_{i=1}^l\pairing({m}_i, \widetilde{u}_i) = \pairing(\gen, \ggen).
-      %
-      \end{equation}
-      \label{eq:abe-ver}
-
-  \end{description}
-
-\end{primitivebox}
-
-This signature is existentially unforgeable in the GGM~\cite{C:AGHO11}.
-
-\subsection{Structure-preserving signatures under
-DDH}\label{sec:sps-kiltz}
-
-Kiltz, Pan, and Wee introduced a structure-preserving signature scheme that
-is existentially unforgeable under the DDH assumption~\cite{C:KilPanWee15}.
-
-\begin{primitivebox}{Structure-preserving signatures under DDH (Kiltz, Pan,
-  and Wee)}{sps-kiltz}
-
-  \begin{description}
-
-    \item[$(\pk, \sk) \sample \SPSgen(\secparam, l)$ :] On input security
-      parameter $\secparam$ and vector length $l$, do:
-
-      \begin{enumerate}
-
-        \item Sample column vectors $\vec{\alpha} = (1, \alpha)^{\mathsf{T}}$ and $\vec{\beta} =
-          (1, \beta)^{\mathsf{T}}$, for uniformly random $\alpha, \beta \in \Zp$, together with
-          uniformly random matrices $\boldsymbol{\kappa} \in \Zp^{(l+1)\times 2}$,
-          $\boldsymbol{\gamma} \in \Zp^{2\times 2}$, and $\boldsymbol{\delta} \in \Zp^{2\times 2}$.
-
-        \item Compute $\vec{\mu} = \boldsymbol{\kappa}\vec{\alpha}$, $\vec{\nu} = \boldsymbol{\gamma}\vec{\alpha}$,
-          $\vec{\omega} = \boldsymbol{\delta}\vec{\alpha}$, $\vec{\xi} = \vec{\beta}^{\mathsf{T}}\boldsymbol{\gamma}$, and
-          $\vec{\upsilon} = \vec{\beta}^{\mathsf{T}}\boldsymbol{\delta}$.
-
-        \item Compute $\vec{{b}} = \gen(1, \beta)$, $\vec{{x}} =
-          \gen\vec{\xi}$, and $\vec{{y}} = \gen\vec{\upsilon}$.
-
-        \item Compute $\vec{\widetilde{a}} = \ggen(1, \alpha)$, $\vec{\widetilde{u}} =
-          \ggen\vec{\mu}$, $\vec{\widetilde{v}} = \ggen\vec{\nu}$, and $\vec{\widetilde{w}} =
-          \ggen\vec{\omega}$.
-
-        \item Return $\sk = (\boldsymbol{\kappa}, \vec{{b}}, \vec{{x}}, \vec{{y}})$
-          and $\pk = (\vec{\widetilde{a}}, \vec{\widetilde{u}}, \vec{\widetilde{v}}, \vec{\widetilde{w}})$.
-
-      \end{enumerate}
-
-    \item[$\signature \sample \SPSsign(\sk, \vec{{m}})$ :] On input secret key
-      $\sk = (\boldsymbol{\kappa}, \vec{{b}}, \vec{{x}}, \vec{{y}})$ and vector
-      $\vec{{m}} = ({m}_1, \ldots, {m}_l)$, do:
-
-      \begin{enumerate}
-
-        \item Sample $\rho, \sigma \sample \Zp^*$.
-
-        \item Compute:
-          %
-          \begin{align*}
-          %
-            \widetilde{q} &= \sigma\ggen, \qquad \vec{{r}} = \rho\vec{{b}}, \qquad
-            \vec{{s}} = \rho\sigma\vec{{b}}, \\ \vec{{z}} &= (\gen,
-            \vec{{m}})\boldsymbol{\kappa} + \rho (\vec{{x}}+\sigma\vec{{y}}).
-          %
-          \end{align*}
-
-        \item Return $\signature = (\widetilde{q}, \vec{{r}}, \vec{{s}},
-          \vec{{z}})$.
-
-      \end{enumerate}
-
-    \item[$\{0,1\} \leftarrow \SPSverify(\pk, \vec{{m}}, \signature)$ :] On input
-      signature $\signature =(\widetilde{q}, \vec{{r}}, \vec{{s}}, \vec{{z}}) \in
-      \group{2}\times\group{1}^6$ and vector $\vec{m}$ of $l$ messages in
-      $\group{1}$, return 1 if the following holds, and 0 otherwise:
-      %
-      \begin{equation}
-      %
-        \pairing(\vec{{z}}, \vec{\widetilde{a}}) = \pairing((\gen, \vec{{m}}),
-        \vec{\widetilde{u}})\, \pairing(\vec{{r}},\vec{\widetilde{v}})\, \pairing(\vec{{s}},
-        \vec{\widetilde{w}}) \ ; \qquad \pairing({r}, \widetilde{q}) = \pairing({s}, \ggen).
-      %
-      \end{equation}
-      \label{eq:kiltz-ver}
-
-  \end{description}
-
-\end{primitivebox}
+In this section we describe the general strategy we use to thresholdise the
+structure-preserving signatures.
 
 Both schemes admit a threshold variant that follows the same recipe. The
 signing key is additively secret-shared among the signers, using the
-$t$-additive sharing described in Section~\ref{sec:tsps-definitions}, so
-that any $t+1$ signers can jointly reconstruct it, but no smaller set can.
-To sign, the signers use the MPC functionalities of
-Section~\ref{sec:tsps-definitions} to jointly compute shares of the random
+$t$-additive sharing described in Section~\ref{sec:tsps-definitions}, so that
+any $t+1$ signers can jointly reconstruct it, but no smaller set can.  To sign,
+the signers use the MPC functionalities to jointly compute shares of the random
 values each scheme's signing algorithm samples, and of the further values
-derived from them, without ever reconstructing the signing key itself. A
-party that collects $t+1$ signature shares combines them locally into a
-signature that verifies exactly as an ordinary signature would.
+derived from them, without ever reconstructing the signing key itself. A party
+that collects $t+1$ signature shares combines them locally into a signature
+that verifies exactly as an ordinary signature would.
 
-In the honest-majority setting ($t < n/2$, where $n$ is the number of
-signers), the signature can always be computed from the shares of honest
-signers alone. In the dishonest-majority setting ($t > n/2$), robustness is
-no longer guaranteed, but if the underlying MPC supports identifiable
-aborts, so does the threshold signature: corrupt parties that contribute
-bogus shares are eventually caught. Crucially, for both schemes, everything
-but a single, cheap, local computation can be carried out before the
-messages to be signed are known: signers pre-process offline, using the MPC
-functionalities, and are then left with only a local computation once the
-messages are known, in an online phase that is both non-interactive and
-comparable in cost to that of ordinary signing.
-Section~\ref{sec:tsps-instantiation} turns this general strategy into full
-descriptions of both threshold schemes, extending the MPC functionalities of
-Section~\ref{sec:tsps-definitions} to secret-shared group elements along the
+In the honest-majority setting ($t < n/2$, where $n$ is the number of signers),
+the signature can always be computed from the shares of honest signers alone.
+In the dishonest-majority setting ($t > n/2$), robustness is no longer
+guaranteed, but if the underlying MPC supports identifiable aborts, so does the
+threshold signature: corrupt parties that contribute bogus shares are
+eventually caught. Crucially, for both schemes, everything but a single, cheap,
+local computation can be carried out before the messages to be signed are
+known: signers pre-process offline, using the MPC functionalities, and are then
+left with only a local computation once the messages are known, in an online
+phase that is both non-interactive and comparable in cost to that of ordinary
+signing.  Section~\ref{sec:tsps-instantiation} turns this general strategy into
+full descriptions of both threshold schemes, extending the MPC functionalities
+of Section~\ref{sec:tsps-definitions} to secret-shared group elements along the
 way.

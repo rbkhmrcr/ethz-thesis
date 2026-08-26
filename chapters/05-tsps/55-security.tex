@@ -1,71 +1,73 @@
 \section{Security}\label{sec:tsps-security}
 
 We adopt the notion of adaptive TS-UF-1 security defined in
-Section~\ref{sec:tsps-definitions}. A partially non-interactive scheme is one whose
-$\algo{OnSign}$ protocol is non-interactive, but whose message-independent
-pre-processing round, analogous to $\algo{OffSign}$, may be interactive; both of
-our constructions from Section~\ref{sec:tsps-instantiation} fall into this class.
+Section~\ref{sec:tsps-definitions}. A partially non-interactive scheme is one
+whose $\algo{OnSign}$ protocol is non-interactive, but whose
+message-independent pre-processing round, analogous to $\algo{OffSign}$, may be
+interactive; both of our constructions from
+Section~\ref{sec:tsps-instantiation} fall into this class.
 
 \begin{theorem}\label{thm:tsps-security}
 
   Let $\Sigma$ be the structure-preserving signature scheme of
   Section~\ref{sec:sps-ggm} (respectively Section~\ref{sec:sps-kiltz}),
   satisfying wUF-CMA security, and let the ideal functionalities of
-  Figure~\ref{fig:ideal-func} and Figure~\ref{fig:ideal-func-group} be
-  realised as defined. Then the threshold structure-preserving signature
-  scheme of Section~\ref{sec:tsps-abe} (respectively
-  Section~\ref{sec:tsps-kiltz}) is adaptive TS-UF-1 secure.
+  Figure~\ref{fig:ideal-func} and Figure~\ref{fig:ideal-func-group} be realised
+  as defined. Then the threshold structure-preserving signature scheme of
+  Section~\ref{sec:tsps-abe} (respectively Section~\ref{sec:tsps-kiltz}) is
+  adaptive TS-UF-1 secure.
 
 \end{theorem}
 
 \paragraph{Proof.}
 
-  We argue by contrapositive. Suppose the threshold structure-preserving
-  signature scheme does not achieve adaptive TS-UF-1 security. Using the
-  adversary $\adv$ of the adp-TS-UF-1 game as a subroutine, we construct an
-  adversary $\advB$ that either breaks the ideal functionalities of
-  Section~\ref{sec:MPC} (case 1), or wins the wUF-CMA game of
-  Experiment~\ref{exp:sps-uf-cma} against the underlying structure-preserving
-  signature scheme (case 2). By design of the ideal functionalities, case 1
-  does not occur for either the scheme of Section~\ref{sec:tsps-abe} or that
-  of Section~\ref{sec:tsps-kiltz}, and the transformation from $\adv$ to
-  $\advB$ that we now describe is generic to both schemes.
+We argue by contrapositive. Suppose the threshold structure-preserving
+signature scheme does not achieve adaptive TS-UF-1 security. Using the
+adversary $\adv$ of the adp-TS-UF-1 game as a subroutine, we construct an
+adversary $\advB$ that either breaks the ideal functionalities of
+Section~\ref{sec:MPC} (case 1), or wins the wUF-CMA game of
+Experiment~\ref{exp:sps-uf-cma} against the underlying structure-preserving
+signature scheme (case 2). By design of the ideal functionalities, case 1 does
+not occur for either the scheme of Section~\ref{sec:tsps-abe} or that of
+Section~\ref{sec:tsps-kiltz}, and the transformation from $\adv$ to $\advB$
+that we now describe is generic to both schemes.
 
-  $\advB$ forwards the setup parameters it receives to $\adv$. On receiving
-  $(n, t, \Cor)$ from $\adv$, and $\pk$ from its own challenger, $\advB$
-  samples random shares $\{\sk_i\}_{i \in [1, t-1]}$ and their corresponding
-  public key shares, together with shares $\{\sk_i\}_{i \in \Cor}$ and their
-  corresponding public key shares, consistent with the sharing $\lbrack \pk\rbrack $ of
-  $\pk$. It forwards $\pk$, $\{\sk_i\}_{i \in \Cor}$, and $\lbrack \pk\rbrack $ to $\adv$.
+$\advB$ forwards the setup parameters it receives to $\adv$. On receiving $(n,
+t, \Cor)$ from $\adv$, and $\pk$ from its own challenger, $\advB$ samples
+random shares $\{\sk_i\}_{i \in [1, t-1]}$ and their corresponding public key
+shares, together with shares $\{\sk_i\}_{i \in \Cor}$ and their corresponding
+public key shares, consistent with the sharing $\lbrack \pk\rbrack $ of $\pk$.
+It forwards $\pk$, $\{\sk_i\}_{i \in \Cor}$, and $\lbrack \pk\rbrack $ to
+$\adv$.
 
-  $\advB$ answers $\adv$'s $\signo$ queries in one of two ways. If, for the
-  queried $\vec{{m}}$, $|S(\vec{{m}})| < t - |\Cor|$, then $\advB$ forms
-  the requested signature share $\sigma_i$ directly from its sampled $\sk_i$;
-  the information-theoretic hiding property of the linear secret sharing
-  scheme means $\adv$ cannot distinguish this simulated share from a genuine
-  one. Once $|S(\vec{{m}})|$ reaches $t - |\Cor|$, $\advB$ instead queries
-  its own signing oracle for $\vec{{m}}$, and uses the information exchanged
-  during the (possibly interactive) threshold signing protocol to construct a
-  signature share $\sigma_i$ that, combined with the shares it has already
-  issued, yields a signature verifying correctly under $\algo{Combine}$ and
-  $\SPSverify$. In both cases, $\advB$ can respond to every query of $\adv$
-  without ever calling its own signing oracle on a message for which it would
-  later need to produce a forgery.
+$\advB$ answers $\adv$'s $\signo$ queries in one of two ways. If, for the
+queried $\vec{{m}}$, $|S(\vec{{m}})| < t - |\Cor|$, then $\advB$ forms the
+requested signature share $\sigma_i$ directly from its sampled $\sk_i$; the
+information-theoretic hiding property of the linear secret sharing scheme means
+$\adv$ cannot distinguish this simulated share from a genuine one. Once
+$|S(\vec{{m}})|$ reaches $t - |\Cor|$, $\advB$ instead queries its own signing
+oracle for $\vec{{m}}$, and uses the information exchanged during the (possibly
+interactive) threshold signing protocol to construct a signature share
+$\sigma_i$ that, combined with the shares it has already issued, yields a
+signature verifying correctly under $\algo{Combine}$ and $\SPSverify$. In both
+cases, $\advB$ can respond to every query of $\adv$ without ever calling its
+own signing oracle on a message for which it would later need to produce a
+forgery.
 
-  Since $\advB$ never queries its own signing oracle on $\vec{{m}}^*$
-  itself, if $\adv$ outputs a forgery $(\vec{{m}^*}, \signature^*)$ satisfying
-  the winning condition of the adp-TS-UF-1 game, then $(\vec{{m}^*},
-  \signature^*)$ also satisfies the winning condition of the wUF-CMA game for
-  $\advB$. So the advantage of $\adv$ in the adp-TS-UF-1 game is bounded
-  by the advantage of $\advB$ in the wUF-CMA game of the underlying
-  structure-preserving signature scheme, which is negligible by assumption.
+Since $\advB$ never queries its own signing oracle on $\vec{{m}}^*$ itself, if
+$\adv$ outputs a forgery $(\vec{{m}^*}, \signature^*)$ satisfying the winning
+condition of the adp-TS-UF-1 game, then $(\vec{{m}^*}, \signature^*)$ also
+satisfies the winning condition of the wUF-CMA game for $\advB$. So the
+advantage of $\adv$ in the adp-TS-UF-1 game is bounded by the advantage of
+$\advB$ in the wUF-CMA game of the underlying structure-preserving signature
+scheme, which is negligible by assumption.
 
-  It remains to handle $\adv$'s queries to $\corrupto$. $\advB$ simulates these
-  directly, returning the sampled $\sk_k$ for each newly corrupted party,
-  until $|\Cor| = t$. Beyond this point, $\advB$ cannot return a further
-  share $\sk_k$ consistent with $\pk$ without being able to reconstruct the
-  full secret key itself, and correspondingly the adp-TS-UF-1 game's winning
-  condition requires $|\Cor| < t$. For $|\Cor| < t$, every query to $\corrupto$ can
-  be simulated as above, so the reduction goes through, and the threshold
-  structure-preserving signature scheme achieves adaptive TS-UF-1 security
-  with corruption bound $|\Cor| < t$.
+It remains to handle $\adv$'s queries to $\corrupto$. $\advB$ simulates these
+directly, returning the sampled $\sk_k$ for each newly corrupted party, until
+$|\Cor| = t$. Beyond this point, $\advB$ cannot return a further share $\sk_k$
+consistent with $\pk$ without being able to reconstruct the full secret key
+itself, and correspondingly the adp-TS-UF-1 game's winning condition requires
+$|\Cor| < t$. For $|\Cor| < t$, every query to $\corrupto$ can be simulated as
+above, so the reduction goes through, and the threshold structure-preserving
+signature scheme achieves adaptive TS-UF-1 security with corruption bound
+$|\Cor| < t$.

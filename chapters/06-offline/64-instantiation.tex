@@ -1,393 +1,410 @@
 \section{Instantiation}\label{sec:offline-instantiation}
 
-We now instantiate the generic construction of
-\Cref{sec:offline-construction} with concrete cryptographic building
-blocks. We use BBS+ signatures to build the anonymous credential that binds
-a user's pseudonym to their secret key (\Cref{sec:BBS}), and
+We now instantiate the generic construction of \Cref{sec:offline-construction}
+with concrete cryptographic building blocks. We use BBS+ signatures to build
+the anonymous credential that binds a user's pseudonym to their secret key, and
 Pointcheval-Sanders signatures, extended to support blind signing over
 committed inputs, to let the central bank sign tokens at withdrawal without
-learning their content (\Cref{sec:ps-sign}). Both are pairing based
-multi-message signature schemes, which lets us build efficient sigma
-protocols directly over their verification equations rather than relying on
-general purpose zero-knowledge proofs.
+learning their content. Both are pairing based multi-message signature schemes,
+which lets us build efficient sigma protocols directly over their verification
+equations rather than relying on general purpose zero knowledge proofs.
 
-\paragraph{Notation.} Let $[n]$ denote the integer interval $[0..n-1]$. Let
-$\group{1}$, $\group{2}$, and $\group{T}$ be three cyclic groups of large
-prime order $p$ that admit a non-degenerate bilinear pairing $\pairing
-\colon \group{1} \times \group{2} \rightarrow \group{T}$. Let $\hash_p
-\colon \{0,1\}^* \rightarrow \Zp$ and $\hash_{\group{1}} \colon \{0,1\}^*
-\rightarrow \group{1}$ be two cryptographic hash functions. Let $\gen$ and
-$\ggen$ denote generators of $\group{1}$ and $\group{2}$ respectively. We
-denote elements of $\group{1}$ by lower-case letters, elements of
-$\group{2}$ by lower-case letters with a tilde, and elements of $\Zp$ by
-lower-case Greek letters.
+\subsection{Building blocks}
 
-For a vector $\vec{x} = (x_0, \ldots, x_{n-1}) \in \Zp^n$ and $y \in \Zp$,
-and $m < n - 1$, we write $\vec{x}[{:}m]$ for the sub-vector $(x_0, \ldots,
-x_{m-1})$ and $\vec{x} \| y$ for $(x_0, \ldots, x_{n-1}, y)$, with the
-analogous notation for vectors in $\group{1}$ and $\group{2}$. For
-$\vec{x}, \vec{y} \in \Zp^n$, we write $\vec{x} \cdot \vec{y}$ for the
-inner product $\sum_{i=0}^{n-1} x_i y_i$. For $\vec{\gen} = (\gen_0,
-\ldots, \gen_{n-1}) \in \group{1}^n$, $\vec{\ggen} = (\ggen_0, \ldots,
-\ggen_{n-1}) \in \group{2}^n$, and $\vec{x} = (x_0, \ldots, x_{n-1}) \in
-\Zp^n$, we write $\vec{\gen}^{\vec{x}} = \prod_{i=0}^{n-1} \gen_i^{x_i}$
-and $\vec{\ggen}^{\vec{x}} = \prod_{i=0}^{n-1} \ggen_i^{x_i}$.
-
-We write $\algoproof \leftarrow \NIZKprove(\crs, \inst, \witness)$ for a
-non-interactive zero-knowledge proof of knowledge that public input
-$\inst$ and witness $\witness$ satisfy the accompanying relation, and
-$\{0,1\} \leftarrow \NIZKverify(\crs, \inst, \algoproof)$ for its
-verification, where $\crs$ is the common reference string published by
-$\algo{Setup}$ (\Cref{sec:offline-construction}). Appendix \ref{sec:zkp}
-gives an overview of zero-knowledge proofs.
-
-\subsection{BBS+ signatures}\label{sec:BBS}
-
-A BBS+ signature is a signature scheme
-that lets a signer sign multiple messages at once, using the following
+A BBS+ signature is a signature scheme that lets a signer sign multiple
+messages at once, using the following
 algorithms~\cite{C:BonBoySha04,SCN:AuSusMu06,EPRINT:CamDriLeh16}.
 
-\begin{primitivebox}{BBS+ signatures}{bbs}
-
-  \begin{description}
-
-    \item[$(\sk_{\BBS}, \pk_{\BBS}) \leftarrow \BBSgen(1^\kappa, n)$ :] On input
-      security parameter $\kappa$ and integer $n$, randomly select $\theta
-      \in \Zp$ and a vector of $n+2$ generators $(q_0, \ldots, q_n, \hgen)
-      \in \group{1}^{n+2}$, writing $\vec{q} = (q_0, \ldots, q_n)$. Compute
-      $\tilde{t} = \ggen^\theta$ and output secret key $\sk_{\BBS} = \theta$
-      and public key $\pk_{\BBS} = (\tilde{t}, \ggen, \vec{q}, \hgen)$.
-
-    \item[$\phi \leftarrow \BBSsign(\sk_{\BBS}, \vec{m})$ :] On input secret key
-      $\sk_{\BBS}$ and a vector $\vec{m}$ of $n$ messages, randomly select
-      $(\varepsilon, s) \in \Zp$ such that $\varepsilon + \theta \neq 0$,
-      compute $c = \hgen \vec{q}^{\vec{m}\|s}$, and output $\phi =
-      (\varepsilon, s, e = c^{1/(\theta+\varepsilon)})$.
-
-    \item[$\{0,1\} \leftarrow \BBSverify(\pk_{\BBS}, \vec{m}, \phi)$ :] On input
-      public key $\pk_{\BBS}$, vector of messages $\vec{m}$, and signature
-      $\phi$, compute $c = \vec{q}^{\vec{m}\|s}\hgen$ and return the result of
-      the check given as follows:
-      \begin{equation*}
-        \pairing(e, \ggen^\varepsilon \tilde{t}) = \pairing(c, \ggen).
-      \end{equation*}
-
-  \end{description}
-
-\end{primitivebox}
-
 BBS+ signatures are existentially unforgeable under the $q$-strong
-Diffie-Hellman ($q$-SDH) assumption.
-
-\begin{assumptionbox}{$q$-Strong Diffie-Hellman ($q$-SDH)}{qsdh-bbs}
-
-  The $q$-SDH assumption holds if, given $(\hgen, \ggen, \ggen^{\theta},
-  \gen_0, \gen_0^{\theta}, \ldots, \gen_0^{\theta^{q}})$ for uniformly
-  random $\theta \sample \Zp$, no PPT adversary can output a pair
-  $(\varepsilon, c^{1/(\theta+\varepsilon)})$ for a group element $c$ of
-  this form and any $\varepsilon \in \Zp \setminus \{-\theta\}$ with
-  non-negligible probability.
-
-\end{assumptionbox}
+Diffie-Hellman ($q$-SDH) assumption, and are described
+in~\Cref{sec:txid-instantiation}.
 
 \paragraph{Proof of knowledge of a BBS+ signature.}\label{sec:joint-proof}
-Let $\phi = (\varepsilon, s, e) \gets \BBSsign(\sk_{\BBS}, \vec{m})$. By
-construction $e = (\hgen \vec{q}^{\vec{m}\|s})^{1/(\theta+\varepsilon)}$
-for $\sk_{\BBS} = \theta$; setting $\inst =
-\pk_{\BBS} = (\ggen, \tilde{t}, \vec{q}, \hgen)$ and $\witness = (\vec{m}, \phi)$, a
-proof of knowledge of a BBS+ signature shows that $(\inst, \witness)$
-satisfies the equation as follows:
+
+Let $\phi = (\varepsilon, s, e) \gets \BBSsign(\sk_{\BBS}, \msg)$. By
+construction $e = (\hgen \vec{q}^{\msg\|s})^{1/(\theta+\varepsilon)}$ for
+$\sk_{\BBS} = \theta$; setting $\inst = \pk_{\BBS} = (\ggen, \tilde{t},
+\vec{q}, \hgen)$ and $\witness = (\msg, \phi)$, a proof of knowledge of a BBS+
+signature shows that $(\inst, \witness)$ satisfies the equation as follows:
+%
 \begin{equation*}
-  \pairing(e, \ggen^\varepsilon \tilde{t}) = \pairing(\hgen \vec{q}^{\vec{m}\|s}, \ggen).
+%
+  \pairing(e, \ggen^\varepsilon \tilde{t}) = \pairing(\hgen \vec{q}^{\msg\|s},
+  \ggen).
+  %
 \end{equation*}
-A prover can instead compute $u =
-e^{-\iota/\lambda}$, $w = (\hgen \vec{q}^{\vec{m}\|s})^{-1/\lambda}$, and $x =
-u^\varepsilon w^\iota$, for randomly selected $\iota, \lambda$, and prove that for $\inst =
-(\pk_{\BBS}, u, w, x)$ and $\witness = (\varepsilon, s, \iota, \lambda, \vec{m})$ the relation as follows:
-\begin{align}
-  \pairing(u, \tilde{t}) \pairing(x, \ggen) = 1 \ \wedge \ x = u^\varepsilon w^\iota \ \wedge \
-  \hgen^{-1} = w^\lambda \vec{q}^{\vec{m}\|s}.
-  \label{eq:BBSrel}
-\end{align}
-This holds~\cite{EC:TesZhu23b}. A prover $\algo{Prv}$ for this relation follows a sigma protocol made
-non-interactive via the Fiat-Shamir heuristic; we refer to proofs of this
-form as Schnorr proofs. Concretely, $\algo{Prv}$ selects $\alpha, \beta,
-\delta, \gamma_0, \ldots, \gamma_{n-1}, \gamma \in \Zp$ and computes the following:
+%
+A prover can instead compute $u = e^{-\iota/\lambda}$, $w = (\hgen
+\vec{q}^{\msg\|s})^{-1/\lambda}$, and $x = u^\varepsilon w^\iota$, for randomly
+selected $\iota, \lambda$, and prove that for $\inst = (\pk_{\BBS}, u, w, x)$
+and $\witness = (\varepsilon, s, \iota, \lambda, \msg)$ the relation as
+follows:
+%
+\begin{align} \pairing(u, \tilde{t}) \pairing(x, \ggen) = 1 \ \wedge \ x =
+u^\varepsilon w^\iota \ \wedge \ \hgen^{-1} = w^\lambda \vec{q}^{\msg\|s}.
+\label{eq:BBSrel} \end{align}
+%
+This holds~\cite{EC:TesZhu23b}. A prover $\algo{Prv}$ for this relation follows
+a sigma protocol made non-interactive via the
+
+Concretely, $\algo{Prv}$ selects $\alpha, \beta, \delta, \gamma_0, \ldots,
+\gamma_{\ell-1}, \gamma \in \Zp$ and computes the following:
+%
 \begin{align*}
-  a &= u^\alpha w^\beta \ ; \ b = w^\delta q_n^\gamma
-  \prod_{i=0}^{n-1} q_i^{\gamma_i} \ ; \ \algo{chal} = \hash_p(\inst, a, b)
-  \\
-  \eta &= \alpha + \algo{chal} \varepsilon \ ; \ \nu = \beta + \algo{chal} \iota \ ; \ \xi = \delta +
-  \algo{chal} \lambda \ ; \\
-  \pi_i &= \gamma_i + \algo{chal} m_i, \ \forall i \in [n] \ ; \ \pi = \gamma +
-  \algo{chal} s.
+%
+  a &= u^\alpha w^\beta \ ; \ b = w^\delta q_\ell^\gamma \prod_{i=0}^{\ell-1}
+  q_i^{\gamma_i} \ ; \ \algo{chal} = \hash_p(\inst, a, b) \\
+  %
+  \eta &= \alpha + \algo{chal} \varepsilon \ ; \ \nu = \beta + \algo{chal}
+  \iota \ ; \ \xi = \delta + \algo{chal} \lambda \ ; \\
+  %
+  \pi_i &= \gamma_i + \algo{chal} \msg_i, \ \forall i \in [\ell] \ ; \ \pi =
+  \gamma + \algo{chal} s.
+  %
 \end{align*}
-It then outputs $\Pi = (a, b, \eta, \nu, \xi, \pi_0, \ldots, \pi_{n-1}, \pi)$.
-A verifier $\algo{V}$ first checks that $\pairing(u, \tilde{t}) \pairing(x, \ggen) = 1$,
-computes $\algo{chal} = \hash_p(\inst, a, b)$, and accepts if and only if the following holds:
+%
+It then outputs $\Pi = (a, b, \eta, \nu, \xi, \pi_0, \ldots, \pi_{\ell-1},
+\pi)$.  A verifier $\algo{V}$ first checks that $\pairing(u, \tilde{t})
+\pairing(x, \ggen) = 1$, computes $\algo{chal} = \hash_p(\inst, a, b)$, and
+accepts if and only if the following holds:
+%
 \begin{align*}
+%
   a x^\algo{chal} &= u^\eta w^\nu \ ; \ b \hgen^{-\algo{chal}} = w^\xi
-  q_n^\pi \prod_{i=0}^{n-1} q_i^{\pi_i}.
+  q_\ell^\pi \prod_{i=0}^{\ell-1} q_i^{\pi_i}.
+  %
 \end{align*}
 
-We now show how two provers $\algo{Prv}_0$ and $\algo{Prv}_1$ jointly produce $\Pi$,
-where $\algo{Prv}_0$ is a lightweight device that knows $m_{n-1}$ and $\algo{Prv}_1$ is
-computationally more powerful and knows $(\varepsilon, s, m_0, \ldots, m_{n-2})$,
-following the approach introduced in~\cite{USENIX:HesSinSor23}. Rather than proving
-Equation~\eqref{eq:BBSrel}, $\algo{Prv}_0$ and $\algo{Prv}_1$ jointly prove the relation as follows:
+We now show how two provers $\algo{Prv}_0$ and $\algo{Prv}_1$ jointly produce
+$\Pi$, where $\algo{Prv}_0$ is a lightweight device that knows $\msg_{\ell-1}$
+and $\algo{Prv}_1$ is computationally more powerful and knows $(\varepsilon, s,
+\msg_0, \ldots, \msg_{n-2})$, following the approach introduced
+in~\cite{USENIX:HesSinSor23}. Rather than proving Equation~\eqref{eq:BBSrel},
+$\algo{Prv}_0$ and $\algo{Prv}_1$ jointly prove the relation as follows:
+%
 \begin{align*}
-  \com &= q_{n-1}^{m_{n-1}} q_n^\rho \ \wedge \ \pairing(u, \tilde{t}) \pairing(x,
-  \ggen) = 1 \ \wedge \\
-  x &= u^\varepsilon w^\iota \ \wedge \ (\com \hgen)^{-1} = w^\lambda q_n^{s'}
-  \prod_{i=0}^{n-2} q_i^{m_i}.
+%
+  \com &= q_{\ell-1}^{\msg_{\ell-1}} q_\ell^\rho \ \wedge \ \pairing(u,
+  \tilde{t}) \pairing(x, \ggen) = 1 \ \wedge \\
+  %
+  x &= u^\varepsilon w^\iota \ \wedge \ (\com \hgen)^{-1} = w^\lambda
+  q_\ell^{s'} \prod_{i=0}^{n-2} q_i^{\msg_i}.
+  %
 \end{align*}
-Here, $\inst = (\pk_{\BBS}, u, w, x, \com)$ and $\witness = (\varepsilon, s', \iota, \lambda,
-\vec{m}, \rho)$.
+%
+Here, $\inst = (\pk_{\BBS}, u, w, x, \com)$ and $\witness = (\varepsilon, s',
+\iota, \lambda, \msg, \rho)$.
 
-\begin{protocolbox}{Joint proof of knowledge of a BBS+ signature}{bbs-joint-proof}
+\begin{primitivebox}{Joint proof of knowledge of a BBS+
+  signature}{bbs-joint-proof}
 
   \begin{description}
 
-    \item[$\Pi \leftarrow \algo{Prv}_0(\gamma_{n-1}, m_{n-1}, \rho)
-      \leftrightarrow \algo{Prv}_1(\varepsilon, s, m_0, \ldots, m_{n-2})$ :] The two
-      provers jointly compute $\Pi$ as follows.
+    \item[$\Pi \leftarrow \algo{Prv}_0(\gamma_{\ell-1}, \msg_{\ell-1}, \rho)
+      \leftrightarrow \algo{Prv}_1(\varepsilon, s, \msg_0, \ldots, \msg_{n-2})$
+      :] The two provers jointly compute $\Pi$ as follows.
 
       \begin{enumerate}
 
-        \item $\algo{Prv}_0$ computes $\com = q_{n-1}^{m_{n-1}} q_n^\rho$ and
-          produces a proof $\Pi_0$ that $\inst_0 = (q_{n-1}, q_n, \com)$ and
-          $\witness_0 = (m_{n-1}, \rho)$ satisfy $\com = q_{n-1}^{m_{n-1}}
-          q_n^\rho$: it selects random $(\gamma_{n-1}, \upsilon)$, computes
-          $c = q_{n-1}^{\gamma_{n-1}} q_n^\upsilon$, $\algo{chal}_0 =
-          \hash_p(\inst_0, c)$, $\pi_{n-1} = \gamma_{n-1} + \algo{chal}_0
-          m_{n-1}$, and $\zeta = \upsilon + \algo{chal}_0 \rho$, and sends
-          $\algo{Prv}_1$ the tuple $(\com, \rho, \Pi_0)$ with $\Pi_0 = (c,
-          \pi_{n-1}, \zeta)$.
+        \item $\algo{Prv}_0$ computes $\com = q_{\ell-1}^{\msg_{\ell-1}}
+          q_\ell^\rho$ and produces a proof $\Pi_0$ that $\inst_0 =
+          (q_{\ell-1}, q_\ell, \com)$ and $\witness_0 = (\msg_{\ell-1}, \rho)$
+          satisfy $\com = q_{\ell-1}^{\msg_{\ell-1}} q_\ell^\rho$: it selects
+          random $(\gamma_{\ell-1}, \upsilon)$, computes $c =
+          q_{\ell-1}^{\gamma_{\ell-1}} q_\ell^\upsilon$, $\algo{chal}_0 =
+          \hash_p(\inst_0, c)$, $\pi_{\ell-1} = \gamma_{\ell-1} + \algo{chal}_0
+          \msg_{\ell-1}$, and $\zeta = \upsilon + \algo{chal}_0 \rho$, and
+          sends $\algo{Prv}_1$ the tuple $(\com, \rho, \Pi_0)$ with $\Pi_0 =
+          (c, \pi_{\ell-1}, \zeta)$.
 
         \item $\algo{Prv}_1$ computes a proof $\Pi_1$ that, for $\inst_1 =
-          (\pk_{\BBS}, u, w, x, \com)$ and $\witness_1 = (\varepsilon, s', \iota, \lambda,
-          \vec{m}[{:}n-1])$ with $s' = s - \rho$, the following holds:
-          \begin{equation}
-            \label{eq:reljointproof}
+          (\pk_{\BBS}, u, w, x, \com)$ and $\witness_1 = (\varepsilon, s',
+          \iota, \lambda, \msg[{:}\ell-1])$ with $s' = s - \rho$, the following
+          holds:
+          %
+          \begin{equation} \label{eq:reljointproof}
+            %
             x = u^\varepsilon w^\iota \ \wedge \ (\com \hgen)^{-1} = w^\lambda
-            \prod_{i=0}^{n-2} q_i^{m_i} q_n^{s'}.
+            \prod_{i=0}^{n-2} q_i^{\msg_i} q_\ell^{s'}.
+            %
           \end{equation}
-          To do so, it selects random $(\alpha, \beta)$ and $(\delta,
-          \gamma_0, \ldots, \gamma_{n-2}, \gamma)$, computes $a = u^\alpha
-          w^\beta$ and $b = w^\delta q_n^\gamma \prod_{i=0}^{n-2}
-          q_i^{\gamma_i}$, and derives the following:
-          \begin{align*}
-            \algo{chal}_1 &= \hash_p(\inst_1, a, b) \ ; \ \eta = \alpha +
-            \algo{chal}_1 \varepsilon \ ; \ \nu = \delta + \algo{chal}_1 \iota \ ; \ \xi =
-            \delta + \algo{chal}_1 \lambda \ ; \\
-            \pi_i &= \gamma_i + \algo{chal}_1 m_i, \ \forall i \in [n-1] \ ; \
-            \pi = \gamma + \algo{chal}_1 s'.
+          %
+          To do so, it selects random $(\alpha, \beta)$ and $(\delta, \gamma_0,
+          \ldots, \gamma_{n-2}, \gamma)$, computes $a = u^\alpha w^\beta$ and
+          $b = w^\delta q_\ell^\gamma \prod_{i=0}^{n-2} q_i^{\gamma_i}$, and
+          derives the following:
+          %
+          \begin{align*} \algo{chal}_1 &= \hash_p(\inst_1, a, b) \ ; \ \eta =
+            \alpha + \algo{chal}_1 \varepsilon \ ; \ \nu = \delta +
+            \algo{chal}_1 \iota \ ; \ \xi = \delta + \algo{chal}_1 \lambda \ ;
+            \\
+            %
+            \pi_i &= \gamma_i + \algo{chal}_1 \msg_i, \ \forall i \in [\ell-1]
+            \ ; \ \pi = \gamma + \algo{chal}_1 s'.
+            %
           \end{align*}
 
         \item $\algo{Prv}_1$ outputs $\Pi = (\com, a, b, c, \eta, \nu, \xi,
-          \pi_0, \ldots, \pi_{n-1}, \pi, \zeta)$.
+          \pi_0, \ldots, \pi_{\ell-1}, \pi, \zeta)$.
 
-      \end{enumerate}
+        \end{enumerate}
 
-  \end{description}
+    \end{description}
 
-\end{protocolbox}
+  \end{primitivebox}
 
-\paragraph{Mapping to our solution.}\label{sec:pok-sol} In our protocol, the
-secure element $\algo{se}$ and mobile device $\algo{dev}$ jointly produce $\sigma
-\leftarrow \NIZKprove(\crs, \inst, \witness)$, where
-$\inst = (\gen_0, \gen_1, \pk_{\BBS}, u, w, x, c)$ with $\pk_{\BBS} =
-(\ggen, \tilde{t}, q_0, q_1, q_2, \hgen)$, $\witness = (\varepsilon, \iota,
-\lambda, s, \algo{uid}, \sk, r)$, and $\rel(\inst, \witness) = 1$ is equivalent to the following:
-\begin{align*}
-  &\pairing(u, \tilde{t}) \pairing(x, \ggen) = 1 \ \wedge \ x = u^\varepsilon w^\iota \\
-  &\wedge \ \hgen^{-1} = w^\lambda q_0^{\algo{uid}} q_1^{\sk} q_2^s \ \wedge \ c =
-  \gen_0^{\algo{uid}} \gen_1^r.
-\end{align*}
-That is, this is an instantiation of Equation~\eqref{eq:BBSrel} with $\vec{m} =
-(\algo{uid}, \sk)$ and $c = \gen_0^{\algo{uid}} \gen_1^r$. In this instantiation, $\algo{se}$
-executes $\algo{Prv}_0$, outputting $\com = q_1^{\sk} q_2^\rho$, $\rho$, and
-proof $\Pi_0$ computed as above except that the challenge $\algo{chal}_0$ also
-hashes the message to be signed. $\algo{dev}$ computes a proof $\Pi_1 \leftarrow
-\NIZKprove(\crs, \inst_1, \witness_1)$, for $\inst_1
-= (\gen_0, \gen_1, \pk_{\BBS}, u, w, x, \com, c)$, $\witness_1 = (\varepsilon, \iota, \lambda,
-\algo{uid}, s', r)$, and relation as follows:
+  \paragraph{Mapping to our solution.}\label{sec:pok-sol} In our protocol, the
+  secure element $\algo{se}$ and mobile device $\algo{dev}$ jointly produce
+  $\sigma \leftarrow \NIZKprove(\crs, \inst, \witness)$, where $\inst =
+  (\gen_0, \gen_1, \pk_{\BBS}, u, w, x, c)$ with $\pk_{\BBS} = (\ggen,
+  \tilde{t}, q_0, q_1, q_2, \hgen)$, $\witness = (\varepsilon, \iota, \lambda,
+  s, \algo{uid}, \sk, r)$, and $\rel(\inst, \witness) = 1$ is equivalent to the
+  following: \begin{align*} &\pairing(u, \tilde{t}) \pairing(x, \ggen) = 1 \
+  \wedge \ x = u^\varepsilon w^\iota \\ &\wedge \ \hgen^{-1} = w^\lambda
+q_0^{\algo{uid}} q_1^{\sk} q_2^s \ \wedge \ c = \gen_0^{\algo{uid}} \gen_1^r.
+\end{align*} That is, this is an instantiation of Equation~\eqref{eq:BBSrel}
+with $\msg = (\algo{uid}, \sk)$ and $c = \gen_0^{\algo{uid}} \gen_1^r$. In this
+instantiation, $\algo{se}$ executes $\algo{Prv}_0$, outputting $\com =
+q_1^{\sk} q_2^\rho$, $\rho$, and proof $\Pi_0$ computed as above except that
+the challenge $\algo{chal}_0$ also hashes the message to be signed.
+$\algo{dev}$ computes a proof $\Pi_1 \leftarrow \NIZKprove(\crs, \inst_1,
+\witness_1)$, for $\inst_1 = (\gen_0, \gen_1, \pk, u, w, x, \com, c)$,
+$\witness_1 = (\varepsilon, \iota, \lambda, \algo{uid}, s', r)$, and relation
+as follows:
+%
 \begin{equation*}
-  x = u^\varepsilon w^\iota \ \wedge \ (\com \hgen)^{-1} = w^\lambda q_0^{\algo{uid}}
-  q_2^{s'} \ \wedge \ c = \gen_0^{\algo{uid}} \gen_1^r.
+%
+  x = u^\varepsilon w^\iota \ \wedge \ (\com \hgen)^{-1} = w^\lambda
+  q_0^{\algo{uid}} q_2^{s'} \ \wedge \ c = \gen_0^{\algo{uid}} \gen_1^r.
+  %
 \end{equation*}
-This is computed via sigma protocols, following the same approach as $\Pi_1$ above.
+%
 
 \subsection{Pointcheval-Sanders signatures}\label{sec:ps-sign}
 
-The Pointcheval-Sanders signature
-scheme, like BBS+, signs vectors of
-messages rather than single messages, using the following
-algorithms~\cite{RSA:PoiSan16,RSA:PoiSan18}.
+The Pointcheval-Sanders signature scheme, like BBS+, signs vectors of messages.
+It does so through the following algorithms~\cite{RSA:PoiSan16,RSA:PoiSan18}.
 
-\begin{primitivebox}{Pointcheval-Sanders signatures}{ps}
+\begin{primitivebox}{The Pointcheval-Sanders signature scheme}{ps}
 
   \begin{description}
 
-    \item[$(\sk_{\algo{PS}}, \pk_{\algo{PS}}) \leftarrow \algo{PS}\algo{.Gen}(1^\kappa, n)$ :] On
-      input security parameter $\kappa$ and integer $n$, randomly select
-      $(\chi, \lambda_0, \ldots, \lambda_{n-1}, \iota) \in \Zp^{n+2}$, compute $\tilde{x} =
-      \ggen^\chi$, $\tilde{y}_i = \ggen^{\lambda_i}$ for all $i \in [n]$, and
-      $\tilde{z} = \ggen^\iota$, and output $\sk_{\algo{PS}} = (\chi, \vec{\lambda}, \iota)$
-      and $\pk_{\algo{PS}} = (\tilde{x}, \vec{\tilde{y}}, \tilde{z})$, where
-      $\vec{\lambda} = (\lambda_0, \ldots, \lambda_{n-1})$ and $\vec{\tilde{y}} = (\tilde{y}_0,
-      \ldots, \tilde{y}_{n-1})$.
+    \item[$(\sk, \pk) \leftarrow \PSgen(\secparam, \ell)$ :] On input security
+      parameter $\secparam$ and integer $\ell$, do the following:
 
-    \item[$\psi \leftarrow \algo{PS}\algo{.Sign}(\sk_{\algo{PS}}, \vec{m})$ :] On input
-      secret key $\sk_{\algo{PS}}$ and a vector of $n$ messages $\vec{m}$,
-      randomly select $k \in \group{1}$ and $\omega \in \Zp$, compute $l = k^{\chi
-      + \vec{\lambda} \cdot \vec{m} + \iota\omega}$, and output $\psi = (\omega, k, l)$.
+      \begin{enumerate}
 
-    \item[$\{0,1\} \leftarrow \algo{PS}\algo{.Verify}(\pk_{\algo{PS}}, \vec{m}, \psi)$ :] On
-      input public key $\pk_{\algo{PS}}$, vector of messages $\vec{m}$, and
-      signature $\psi$, return the result of the check $\pairing(k, \tilde{x}
-      \vec{\tilde{y}}^{\vec{m}} \tilde{z}^\omega) = \pairing(l, \ggen)$.
+        \item Sample $(\chi, \lambda_0, \ldots, \lambda_{\ell-1}, \iota)
+          \sample \Zp^{\ell+2}$.
+
+        \item Compute $\tilde{x} = \ggen^\chi$, $\tilde{y}_i =
+          \ggen^{\lambda_i}$ for all $i \in [\ell]$, and $\tilde{z} =
+          \ggen^\iota$.
+
+        \item Return $\sk = (\chi, \vec{\lambda}, \iota)$ and $\pk =
+          (\tilde{x}, \vec{\tilde{y}}, \tilde{z})$.
+
+      \end{enumerate}
+
+    \item[$\psi \leftarrow \PSsign(\sk, \msg)$ :] On input secret key $\sk$ and
+      a vector of $\ell$ messages $\msg$, do:
+
+      \begin{enumerate}
+
+        \item Sample $k \sample \group{1}$ and $\omega \sample \Zp$.
+
+        \item Compute $l = k^{\chi + \vec{\lambda} \cdot \msg + \iota\omega}$.
+
+        \item Return $\psi = (\omega, k, l)$.
+
+      \end{enumerate}
+
+    \item[$\{0,1\} \leftarrow \PSverify(\pk, \msg, \psi)$ :] On input public
+      key $\pk$, vector of messages $\msg$, and signature $\psi$, return the
+      result of the following:
+      %
+      \begin{equation*}
+      %
+        \pairing(k, \tilde{x} \vec{\tilde{y}}^{\msg} \tilde{z}^\omega) =
+        \pairing(l, \ggen).
+            %
+      \end{equation*}
+      %
 
   \end{description}
 
 \end{primitivebox}
 
-The resulting signatures are existentially unforgeable under the
-$q$-modified strong Diffie-Hellman ($q$-MSDH) assumption~\cite{RSA:PoiSan18}.
+The resulting signatures are existentially unforgeable under the $q$-modified
+strong Diffie-Hellman ($q$-MSDH) assumption~\cite{RSA:PoiSan18}.
 
 \begin{assumptionbox}{$q$-Modified Strong Diffie-Hellman ($q$-MSDH)}{qmsdh}
 
   The $q$-MSDH assumption holds if, given $(\gen, \gen^{\chi}, \ggen,
-  \ggen^{\chi}, \ggen^{\omega_1}, \ldots, \ggen^{\omega_q}, \gen^{1/(\chi+\omega_1)},
-  \ldots, \gen^{1/(\chi+\omega_q)})$ for uniformly random $\chi, \omega_1, \ldots, \omega_q
-  \sample \Zp$, no PPT adversary can output a tuple $(\omega, \gen^\nu,
-  \gen^{\nu/(\chi+\omega)})$ for $\nu \neq 0$ and $\omega \notin \{\omega_1, \ldots, \omega_q\}$ with
-  non-negligible probability.
+  \ggen^{\chi}, \ggen^{\omega_1}, \ldots, \ggen^{\omega_q},
+  \gen^{1/(\chi+\omega_1)}, \ldots, \gen^{1/(\chi+\omega_q)})$ for uniformly
+  random $\chi, \omega_1, \ldots, \omega_q \sample \Zp$, no PPT adversary can
+  output a tuple $(\omega, \gen^\nu, \gen^{\nu/(\chi+\omega)})$ for $\nu \neq
+  0$ and $\omega \notin \{\omega_1, \ldots, \omega_q\}$ with non-negligible
+  probability.
 
 \end{assumptionbox}
 
-Pointcheval-Sanders signatures can also be extended to support
-blind signing: a signer can sign a committed vector without
-learning any information about it, cf.~\cite{NDSS:SABMD19}.
+Pointcheval-Sanders signatures can also be extended to support blind signing: a
+signer can sign a committed vector without learning any information about
+it~\cite{NDSS:SABMD19}.
 
 \paragraph{Blind signing over committed inputs.}\label{sec:blindsig} Let
-$\vec{\gen} = (\gen_0, \ldots, \gen_n) \in \group{1}^{n+1}$ be a vector of
-$n+1$ random generators and $\vec{m} = (m_0, \ldots, m_{n-1}) \in \Zp^n$ a
-vector of $n$ messages. Signatures over committed
-inputs are produced via an interactive
-protocol between a signer and a recipient, in which the signer signs a
-vector of committed messages such that only the recipient learns
-their content~\cite{SCN:CamLys02,ASIACCS:LMPY16}.
+$\vec{\gen} = (\gen_0, \ldots, \gen_\ell) \in \group{1}^{\ell+1}$ be a vector
+of $\ell+1$ random generators and $\msg = (\msg_0, \ldots, \msg_{\ell-1}) \in
+\Zp^\ell$ a vector of $\ell$ messages. Signatures over committed inputs are
+produced via an interactive protocol between a signer and a recipient, in which
+the signer signs a vector of committed messages such that only the recipient
+learns their content~\cite{SCN:CamLys02,ASIACCS:LMPY16}.
 
 The recipient selects an ElGamal secret key $\mu \in \Zp$ with public key
-$(\gen, b = \gen^\mu)$, computes $\com = \vec{\gen}^{\vec{m}\|r}$, $k =
+$(\gen, b = \gen^\mu)$, computes $\com = \vec{\gen}^{\msg\|r}$, $k =
 \hash_{\group{1}}(\com)$, and $n$ ciphertexts $\ciph_i = (\gen^{\rho_i},
-k^{m_i} b^{\rho_i})$ for $i \in [n]$, together with a proof $\Pi \leftarrow
-\NIZKprove(\crs, \inst, \witness)$ for $\inst =
-(\vec{\gen}, \gen, b, \com, k, (\ciph_i)_{i \in [n]})$, $\witness = ((m_i,
-\rho_i)_{i \in [n]}, r)$, and relation as follows:
+k^{\msg_i} b^{\rho_i})$ for $i \in [\ell]$, together with a proof $\Pi
+\leftarrow \NIZKprove(\crs, \inst, \witness)$ for $\inst = (\vec{\gen}, \gen,
+b, \com, k, (\ciph_i)_{i \in [\ell]})$, $\witness = ((\msg_i, \rho_i)_{i \in
+[\ell]}, r)$, and relation as follows:
+%
 \begin{align*}
-  1 = \vec{\gen}^{\vec{m}\|r} \ \wedge \ \ciph_i = (\gen^{\rho_i},
-  k^{m_i}b^{\rho_i}), \ \forall i \in [n].
+%
+  1 = \vec{\gen}^{\msg\|r} \ \wedge \ \ciph_i = (\gen^{\rho_i},
+  k^{\msg_i}b^{\rho_i}), \ \forall i \in [\ell].
+  %
 \end{align*}
-It then sends the signer $(\com, \ciph_0, \ldots, \ciph_{n-1}, \gen, b,
+%
+It then sends the signer $(\com, \ciph_0, \ldots, \ciph_{\ell-1}, \gen, b,
 \Pi)$. The signer recomputes $k = \hash_{\group{1}}(\com)$, verifies $\Pi$
 against $\com$, $k$, and $(\gen, b)$, and rejects if it does not hold.
-Otherwise, it parses each $\ciph_i$ as $(e_{i,1}, e_{i,2})$, randomly
-selects $\omega \in \Zp$, and computes the following:
+Otherwise, it parses each $\ciph_i$ as $(e_{i,1}, e_{i,2})$, randomly selects
+$\omega \in \Zp$, and computes the following:
+%
 \begin{align*}
-  \ciph &= (e_1, e_2) = \Bigl(\prod_{i=0}^{n-1} e_{i,1}^{\lambda_i}, \ k^\chi
-  \prod_{i=1}^n e_{i,2}^{\lambda_i} k^{\omega\iota}\Bigr).
-\end{align*}
-It then sends $(\omega, \ciph)$ to the recipient, who decrypts $\ciph = (e_1,
-e_2)$ by computing $l = e_2 / e_1^\mu$ and outputs $\psi = (\omega, k, l)$ if it is
-a valid Pointcheval-Sanders signature on $\vec{m}$; if the signer followed
-the protocol honestly, $l = k^\chi \bigl(\prod_{i=0}^{n-1} k^{\lambda_i m_i}\bigr)
-k^{\omega\iota}$.
+%
+  \ciph &= (e_1, e_2) = \Bigl(\prod_{i=0}^{\ell-1} e_{i,1}^{\lambda_i}, \
+  k^\chi \prod_{i=1}^n e_{i,2}^{\lambda_i} k^{\omega\iota}\Bigr).
+  %
+  \end{align*}
+%
+  It then sends $(\omega, \ciph)$ to the recipient, who decrypts $\ciph = (e_1,
+  e_2)$ by computing $l = e_2 / e_1^\mu$ and outputs $\psi = (\omega, k, l)$ if
+  it is a valid Pointcheval-Sanders signature on $\msg$; if the signer followed
+  the protocol honestly, $l = k^\chi \bigl(\prod_{i=0}^{\ell-1} k^{\lambda_i
+  \msg_i}\bigr) k^{\omega\iota}$.
 
-This protocol adapts readily to partially opened vectors: for $\algo{Disc}
-\subseteq [n]$ with $(m_i)_{i \in \algo{Disc}}$ revealed to the signer, the
-recipient computes $\com = \prod_{i \in [n]\setminus\algo{Disc}} \gen_i^{m_i}$
-and a proof for $\inst = (\algo{Disc}, \vec{\gen}, \gen, b, \com, k,
-(\ciph_i)_{i \in [n]\setminus\algo{Disc}})$, $\witness = ((m_i, \rho_i)_{i \in
-[n]\setminus\algo{Disc}}, r)$, and relation as follows:
-\begin{align*}
-  \com &= \gen_n^r \prod_{i \in [n]\setminus\algo{Disc}} \gen_i^{m_i} \ \wedge \
-  \ciph_i = (\gen^{\rho_i}, k^{m_i} b^{\rho_i}), \ \forall i \in
-  [n]\setminus\algo{Disc}.
-\end{align*}
-It sends $m_i$ for $i \in \algo{Disc}$ in the clear, and the signer computes the following:
-\begin{align*}
-  \ciph &= (e_1, e_2) = \Bigl(\prod_{i \in [n]\setminus\algo{Disc}}
-  e_{i,1}^{\lambda_i}, \ k^\chi \prod_{i \in \algo{Disc}} k^{m_i \lambda_i} \prod_{i \in
-  [n]\setminus\algo{Disc}} e_{i,2}^{\lambda_i} k^{\omega\iota}\Bigr).
-\end{align*}
-This protocol adapts directly to the withdrawal protocol of
-Section~\ref{sec:withdrawal}: we execute it on the vector of messages
-$(\algo{uid}_0, v, s_0)$ with randomness $r = 0$.
+  This protocol adapts readily to partially opened vectors: for $\algo{Disc}
+  \subseteq [\ell]$ with $(\msg_i)_{i \in \algo{Disc}}$ revealed to the signer,
+  the recipient computes $\com = \prod_{i \in [\ell]\setminus\algo{Disc}}
+  \gen_i^{\msg_i}$ and a proof for $\inst = (\algo{Disc}, \vec{\gen}, \gen, b,
+  \com, k, (\ciph_i)_{i \in [\ell]\setminus\algo{Disc}})$, $\witness =
+  ((\msg_i, \rho_i)_{i \in [\ell]\setminus\algo{Disc}}, r)$, and relation as
+  follows:
+%
+  \begin{align*}
+%
+    \com &= \gen_\ell^r \prod_{i \in [\ell]\setminus\algo{Disc}}
+    \gen_i^{\msg_i} \ \wedge \ \ciph_i = (\gen^{\rho_i}, k^{\msg_i}
+    b^{\rho_i}), \ \forall i \in [\ell]\setminus\algo{Disc}.
+  %
+  \end{align*}
+%
+  It sends $\msg_i$ for $i \in \algo{Disc}$ in the clear, and the signer
+  computes the following:
+%
+  \begin{align*}
+%
+    \ciph &= (e_1, e_2) = \Bigl(\prod_{i \in [\ell]\setminus\algo{Disc}}
+    e_{i,1}^{\lambda_i}, \ k^\chi \prod_{i \in \algo{Disc}} k^{\msg_i
+  \lambda_i} \prod_{i \in [\ell]\setminus\algo{Disc}} e_{i,2}^{\lambda_i}
+k^{\omega\iota}\Bigr).
+  %
+    \end{align*}
+%
+    This protocol adapts directly to the withdrawal protocol of
+    Section~\ref{sec:withdrawal}: we execute it on the vector of messages
+    $(\algo{uid}_0, v, s_0)$ with randomness $r = 0$.
 
-\paragraph{Proof of withdrawal $\Sigma$.}\label{sec:ps-proof} Let $\tau =
-(v, c = \gen_0^{\algo{uid}} \gen_1^s)$ be a token, and let $\pk_{\algo{PS}} = (\tilde{x},
-\tilde{y}_0, \tilde{y}_1, \tilde{y}_2, \tilde{z})$ be the public key of the central
-bank $\algo{cb}$. Let $\psi = (\omega, k, l)$ be a Pointcheval-Sanders signature that
-verifies $1 \gets \algo{PS}\algo{.Verify}(\pk_{\algo{PS}}, (\algo{uid}, v, s), \psi)$, so $\pairing(k,
-\tilde{x} \tilde{y}_0^{\algo{uid}} \tilde{y}_1^v \tilde{y}_2^s \tilde{z}^\omega) = \pairing(l,
-\ggen)$. To prove that $\tau$ was issued by $\algo{cb}$, the token's owner uses
-her mobile device $\algo{dev}$ to compute $\Sigma$ as follows.
+    \paragraph{Proof of withdrawal $\Sigma$.}\label{sec:ps-proof} Let $\tau =
+    (v, c = \gen_0^{\algo{uid}} \gen_1^s)$ be a token, and let $\pk_{\algo{PS}}
+    = (\tilde{x}, \tilde{y}_0, \tilde{y}_1, \tilde{y}_2, \tilde{z})$ be the
+    public key of the central bank $\algo{cb}$. Let $\psi = (\omega, k, l)$ be
+    a Pointcheval-Sanders signature that verifies $1 \gets
+    \algo{PS}\algo{.Verify}(\pk_{\algo{PS}}, (\algo{uid}, v, s), \psi)$, so
+    $\pairing(k, \tilde{x} \tilde{y}_0^{\algo{uid}} \tilde{y}_1^v \tilde{y}_2^s
+    \tilde{z}^\omega) = \pairing(l, \ggen)$. To prove that $\tau$ was issued by
+    $\algo{cb}$, the token's owner uses her mobile device $\algo{dev}$ to
+    compute $\Sigma$ as follows.
 
-\begin{protocolbox}{Proof of withdrawal}{ps-proof}
+    \begin{protocolbox}{Proof of withdrawal}{ps-proof}
 
-  \begin{description}
+      \begin{description}
 
-    \item[$\Sigma \leftarrow \algo{ProveWithdrawal}(\pk_{\algo{PS}}, \tau, \omega, \algo{uid}, s)$ :]
-      On input the central bank's public key $\pk_{\algo{PS}}$, token $\tau = (v,
-      c)$, and witness $(\omega, \algo{uid}, s)$ for a Pointcheval-Sanders signature
-      $\psi = (\omega, k, l)$ on $(\algo{uid}, v, s)$, do:
+        \item[$\Sigma \leftarrow \algo{ProveWithdrawal}(\pk_{\algo{PS}}, \tau,
+          \omega, \algo{uid}, s)$ :] On input the central bank's public key
+          $\pk_{\algo{PS}}$, token $\tau = (v, c)$, and witness $(\omega,
+          \algo{uid}, s)$ for a Pointcheval-Sanders signature $\psi = (\omega,
+          k, l)$ on $(\algo{uid}, v, s)$, do:
 
-      \begin{enumerate}
+          \begin{enumerate}
 
-        \item Select random $\iota \in \Zp$ and compute $(k^*, l^*) = (k^\iota,
-          l^\iota)$.
+            \item Select random $\iota \in \Zp$ and compute $(k^*, l^*) =
+              (k^\iota, l^\iota)$.
 
-        \item Generate $\Delta \leftarrow \NIZKprove(\crs, \inst,
-          \witness)$, with $\inst = (\gen_0, \gen_1, \tilde{x}, \tilde{y}_0,
-          \tilde{y}_1, \tilde{y}_2, \tilde{z}, v, c, k^*, l^*)$, $\witness = (\omega, \algo{uid}, s)$,
-          and relation as follows:
-          \begin{align*}
-            \pairing(l^*, \ggen) &= \pairing(k^*, \tilde{x} \tilde{y}_0^{\algo{uid}} \tilde{y}_1^v
-            \tilde{y}_2^s \tilde{z}^\omega) \ \wedge \ c = \gen_0^{\algo{uid}} \gen_1^s.
-          \end{align*}
+            \item Generate $\Delta \leftarrow \NIZKprove(\crs, \inst,
+              \witness)$, with $\inst = (\gen_0, \gen_1, \tilde{x},
+              \tilde{y}_0, \tilde{y}_1, \tilde{y}_2, \tilde{z}, v, c, k^*,
+              l^*)$, $\witness = (\omega, \algo{uid}, s)$, and relation as
+              follows:
+          %
+              \begin{align*}
+          %
+                \pairing(l^*, \ggen) &= \pairing(k^*, \tilde{x}
+                \tilde{y}_0^{\algo{uid}} \tilde{y}_1^v \tilde{y}_2^s
+                \tilde{z}^\omega) \ \wedge \ c = \gen_0^{\algo{uid}} \gen_1^s.
+            %
+              \end{align*}
+          %
 
-        \item Return $\Sigma = (k^*, l^*, \Delta)$.
+            \item Return $\Sigma = (k^*, l^*, \Delta)$.
 
-      \end{enumerate}
+          \end{enumerate}
 
-  \end{description}
+      \end{description}
 
-\end{protocolbox}
+    \end{protocolbox}
 
-Since $s_0$ is random and not known, $(k^*, l^*)$ leaks no information about
-$\algo{uid}_0$. To compute $\Delta$, $\algo{dev}$ first computes $\tilde{c} =
-\tilde{y}_0^{\algo{uid}} \tilde{y}_2^s \tilde{z}^\omega$, randomly selects $\alpha, \beta,
-\delta \in \Zp$, computes $a = \gen_0^\alpha \gen_1^\beta$, $\tilde{a} =
-\tilde{y}_0^\alpha \tilde{y}_2^\beta \tilde{z}^\delta$, and challenge $\gamma =
-\hash_p(\inst, \tilde{c}, a, \tilde{a})$, then computes $\pi_{\algo{uid}} =
-\alpha + \gamma \algo{uid}$, $\pi_s = \beta + \gamma s$, and $\pi_\omega = \delta +
-\gamma \omega$, and sets $\Delta = (\tilde{c}, a, \tilde{a}, \pi_{\algo{uid}}, \pi_s,
-\pi_\omega)$. These are standard Schnorr proofs for $\inst' = (\gen_0,
-\gen_1, \tilde{y}_0, \tilde{y}_2, \tilde{z}, c, \tilde{c})$, $\witness' = (\omega, \algo{uid},
-s)$, and $\rel(\inst', \witness') = 1$ equivalent to $c = \gen_0^{\algo{uid}}
-\gen_1^s \wedge \tilde{c} = \tilde{y}_0^{\algo{uid}} \tilde{y}_2^s \tilde{z}^\omega$.
+    Since $s_0$ is random and not known, $(k^*, l^*)$ leaks no information
+    about $\algo{uid}_0$. To compute $\Delta$, $\algo{dev}$ first computes
+    $\tilde{c} = \tilde{y}_0^{\algo{uid}} \tilde{y}_2^s \tilde{z}^\omega$,
+    randomly selects $\alpha, \beta, \delta \in \Zp$, computes $a =
+    \gen_0^\alpha \gen_1^\beta$, $\tilde{a} = \tilde{y}_0^\alpha
+    \tilde{y}_2^\beta \tilde{z}^\delta$, and challenge $\gamma = \hash_p(\inst,
+    \tilde{c}, a, \tilde{a})$, then computes $\pi_{\algo{uid}} = \alpha +
+    \gamma \algo{uid}$, $\pi_s = \beta + \gamma s$, and $\pi_\omega = \delta +
+    \gamma \omega$, and sets $\Delta = (\tilde{c}, a, \tilde{a},
+    \pi_{\algo{uid}}, \pi_s, \pi_\omega)$. These are standard Schnorr proofs
+    for $\inst' = (\gen_0, \gen_1, \tilde{y}_0, \tilde{y}_2, \tilde{z}, c,
+    \tilde{c})$, $\witness' = (\omega, \algo{uid}, s)$, and $\rel(\inst',
+    \witness') = 1$ equivalent to $c = \gen_0^{\algo{uid}} \gen_1^s \wedge
+    \tilde{c} = \tilde{y}_0^{\algo{uid}} \tilde{y}_2^s \tilde{z}^\omega$.
 
-If $(\omega, k^*, l^*)$ is a valid Pointcheval-Sanders signature on $(\algo{uid}, v,
-s)$ under $\pk_{\algo{PS}}$, then $\pairing(l^*, \ggen) = \pairing(k^*, \tilde{x} \tilde{c}
-\tilde{y}_1^v)$, so a verifier, given $\Sigma = (k^*, l^*, \Delta)$ and token
-$\tau = (v, c)$, checks that $\tau$ was issued by $\algo{cb}$ by parsing $\Delta =
-(\tilde{c}, a, \tilde{a}, \pi_{\algo{uid}}, \pi_s, \pi_\omega)$, computing $\gamma =
-\hash_p(\inst', a, \tilde{a})$, and verifying the following:
-\begin{align*}
-  \pairing(l^*, \ggen) &= \pairing(k^*, \tilde{x} \tilde{c} \tilde{y}_1^v) \ \wedge \
-  c^\gamma a = \gen_0^{\pi_{\algo{uid}}} \gen_1^{\pi_s} \ \wedge \
-  \tilde{c}^\gamma \tilde{a} = \tilde{y}_0^{\pi_{\algo{uid}}} \tilde{y}_2^{\pi_s}
-  \tilde{z}^{\pi_\omega}.
-\end{align*}
+    If $(\omega, k^*, l^*)$ is a valid Pointcheval-Sanders signature on
+    $(\algo{uid}, v, s)$ under $\pk_{\algo{PS}}$, then $\pairing(l^*, \ggen) =
+    \pairing(k^*, \tilde{x} \tilde{c} \tilde{y}_1^v)$, so a verifier, given
+    $\Sigma = (k^*, l^*, \Delta)$ and token $\tau = (v, c)$, checks that $\tau$
+    was issued by $\algo{cb}$ by parsing $\Delta = (\tilde{c}, a, \tilde{a},
+    \pi_{\algo{uid}}, \pi_s, \pi_\omega)$, computing $\gamma = \hash_p(\inst',
+    a, \tilde{a})$, and verifying the following:
+%
+    \begin{align*}
+%
+      \pairing(l^*, \ggen) &= \pairing(k^*, \tilde{x} \tilde{c} \tilde{y}_1^v)
+      \ \wedge \ c^\gamma a = \gen_0^{\pi_{\algo{uid}}} \gen_1^{\pi_s} \ \wedge
+      \ \tilde{c}^\gamma \tilde{a} = \tilde{y}_0^{\pi_{\algo{uid}}}
+      \tilde{y}_2^{\pi_s} \tilde{z}^{\pi_\omega}.
+  %
+    \end{align*}

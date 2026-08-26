@@ -18,14 +18,14 @@ When the system moves to a new epoch, users derive a fresh epoch tracing key,
 and tracing capabilities granted for prior epochs expire automatically.
 
 The protocol is built from four cryptographic primitives, each used as a black
-box. The registration authority certifies users' keys with a digital signature scheme $\DS$.
-Users bind their tracing keys across several
-proofs using a commitment scheme $\Com$. Two pseudorandom
-functions, $\FE$ for epoch keys and $\FT$ for tags, derive epoch tracing keys and transaction tags from users'
-long term tracing keys. These keys are also bound using one way
-functions $\G$ and $\G'$. The user proves that these values were derived
-correctly, and, where the proof must also authenticate a message, that the
-message originated from the same user, using zero knowledge proofs of knowledge.
+box. The registration authority certifies users' keys with a digital signature
+scheme $\DS$.  Users bind their tracing keys across several proofs using a
+commitment scheme $\Com$. Two pseudorandom functions, $\FE$ for epoch keys and
+$\FT$ for tags, derive epoch tracing keys and transaction tags from users' long
+term tracing keys. These keys are also bound using one way functions $\G$ and
+$\G'$. The user proves that these values were derived correctly, and, where the
+proof must also authenticate a message, that the message originated from the
+same user, using zero knowledge proofs of knowledge.
 
 The number of relations below reflects the roles the ledger imposes, rather
 than an accumulation of unrelated design choices. Unlike a credential system
