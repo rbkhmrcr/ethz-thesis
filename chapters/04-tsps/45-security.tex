@@ -7,6 +7,14 @@ message-independent pre-processing round, analogous to $\algo{OffSign}$, may be
 interactive; both of our constructions from
 Section~\ref{sec:tsps-instantiation} fall into this class.
 
+Both constructions are described entirely in terms of calls to the MPC ideal
+functionalities of Section~\ref{sec:MPC}, over $\Zp$ and over $\group{}$. We
+therefore prove security in the corresponding $\mathcal{F}$-hybrid model: signers
+have access to these functionalities directly, rather than to a concrete MPC
+protocol realising them. Existing MPC results instantiate the functionalities
+concretely, with security against either an honest or a dishonest majority of
+corrupted parties, as discussed in Section~\ref{sec:tsps-evaluation}.
+
 \begin{theorem}\label{thm:tsps-security}
 
   Let $\Sigma$ be the structure-preserving signature scheme of
@@ -26,13 +34,11 @@ Section~\ref{sec:tsps-instantiation} fall into this class.
 We argue by contrapositive. Suppose the threshold structure-preserving
 signature scheme does not achieve adaptive TS-UF-1 security. Using the
 adversary $\adv$ of the adp-TS-UF-1 game as a subroutine, we construct an
-adversary $\advB$ that either breaks the ideal functionalities of
-Section~\ref{sec:MPC} (case 1), or wins the wUF-CMA game of
-Experiment~\ref{exp:sps-uf-cma} against the underlying structure-preserving
-signature scheme (case 2). By design of the ideal functionalities, case 1 does
-not occur for either the scheme of Section~\ref{sec:tsps-abe} or that of
-Section~\ref{sec:tsps-kiltz}, and the transformation from $\adv$ to $\advB$
-that we now describe is generic to both schemes.
+adversary $\advB$ that wins the wUF-CMA game of Experiment~\ref{exp:sps-uf-cma}
+against the underlying structure-preserving signature scheme, with advantage
+at least that of $\adv$ in the adp-TS-UF-1 game. The transformation from $\adv$
+to $\advB$ is generic to both schemes of Section~\ref{sec:tsps-abe} and
+Section~\ref{sec:tsps-kiltz}.
 
 $\advB$ forwards the setup parameters it receives to $\adv$. On receiving $(n,
 t, \Cor)$ from $\adv$, and $\pk$ from its own challenger, $\advB$ samples
@@ -42,36 +48,63 @@ public key shares, consistent with the sharing $\lbrack \pk\rbrack $ of $\pk$.
 It forwards $\pk$, $\{\sk_i\}_{i \in \Cor}$, and $\lbrack \pk\rbrack $ to
 $\adv$.
 
-$\advB$ answers $\adv$'s $\TSPSsigno$ queries in one of two ways. If, for the
-queried $\vec{{m}}$, $|S(\vec{{m}})| < t - |\Cor|$, then $\advB$ forms the
-requested signature share $\sigma_i$ directly from its sampled $\sk_i$; the
-information-theoretic hiding property of the linear secret sharing scheme means
-$\adv$ cannot distinguish this simulated share from a genuine one. Once
-$|S(\vec{{m}})|$ reaches $t - |\Cor|$, $\advB$ instead queries its own signing
-oracle for $\vec{{m}}$, and uses the information exchanged during the (possibly
-interactive) threshold signing protocol to construct a signature share
-$\sigma_i$ that, combined with the shares it has already issued, yields a
-signature verifying correctly under $\algo{Combine}$ and $\SPSverify$. In both
-cases, $\advB$ can respond to every query of $\adv$ without ever calling its
-own signing oracle on a message for which it would later need to produce a
-forgery.
+\paragraph{Simulating the hybrid functionalities.} Because $\advB$ itself
+samples every key share $\{\sk_i\}_{i \in [1,n]}$ — honest shares of its own
+choosing, corrupt shares supplied by $\adv$ — it holds every secret value that
+$\algo{KeyGen}$, $\algo{OffSign}$, and $\algo{OnSign}$ derive and pass between
+functionality calls: every intermediate field and group element in
+Section~\ref{sec:tsps-abe} and Section~\ref{sec:tsps-kiltz} is a fixed function
+of these key shares and of freshly sampled randomness. This lets $\advB$
+answer each functionality query made by $\adv$ on behalf of the honest signers
+exactly as the functionality's specification requires: for a randomised query
+(such as $\idfu{\algo{RandShare}}$, or the fresh randomness sampled inside
+$\idfu{\algo{ExpGenGrp}}$), $\advB$ samples the honest parties' shares itself,
+consistently with whatever corrupt shares $\adv$ supplies, exactly as an
+honest execution of the functionality would; for a deterministic query (such
+as $\idfu{\algo{Add}}$, $\idfu{\algo{Mul}}$, $\idfu{\algo{Inv}}$, or a
+$\idfu{\algo{Combine}}$-type query), $\advB$ computes the specified output
+directly from the secret values it already holds. In both cases the shares
+$\advB$ returns are distributed identically to those a real invocation of the
+functionality would produce, so $\adv$'s view of key generation and of every
+offline phase is perfectly simulated. This is what excludes the possibility,
+left unjustified in an earlier version of this proof, that $\adv$ could win by
+causing some functionality of Section~\ref{sec:MPC} to behave incorrectly:
+$\advB$ does not approximate these functionalities, it realises them exactly,
+so no such gap exists for $\adv$ to exploit.
+
+\paragraph{Simulating the online phase and bounding forgeries.} $\advB$
+answers $\adv$'s $\TSPSsigno$ queries in one of two ways. If, for the queried
+$\vec{{m}}$, $|S(\vec{{m}})| < t - |\Cor|$, then $\advB$ forms the requested
+signature share $\sigma_i$ directly from its sampled $\sk_i$, using the local
+computation of $\algo{OnSign}$; the information-theoretic hiding property of
+the linear secret sharing scheme means $\adv$ cannot distinguish this
+simulated share from a genuine one. Once $|S(\vec{{m}})|$ reaches $t -
+|\Cor|$, $\advB$ instead queries its own signing oracle for $\vec{{m}}$, and
+uses the values exchanged during the (possibly interactive) offline phase,
+simulated as above, to construct a signature share $\sigma_i$ that, combined
+with the shares it has already issued, yields a signature verifying correctly
+under $\algo{Combine}$ and $\SPSverify$. In both cases, $\advB$ can respond to
+every query of $\adv$ without ever calling its own signing oracle on a
+message for which it would later need to produce a forgery.
 
 Since $\advB$ never queries its own signing oracle on $\vec{{m}}^*$ itself, if
 $\adv$ outputs a forgery $(\vec{{m}^*}, \signature^*)$ satisfying the winning
 condition of the adp-TS-UF-1 game, then $(\vec{{m}^*}, \signature^*)$ also
-satisfies the winning condition of the wUF-CMA game for $\advB$. So the
-advantage of $\adv$ in the adp-TS-UF-1 game is bounded by the advantage of
-$\advB$ in the wUF-CMA game of the underlying structure-preserving signature
-scheme, which is negligible by assumption.
+satisfies the winning condition of the wUF-CMA game for $\advB$. Combined with
+the perfect simulation established above, the advantage of $\adv$ in the
+adp-TS-UF-1 game is therefore bounded by the advantage of $\advB$ in the
+wUF-CMA game of the underlying structure-preserving signature scheme, which is
+negligible by assumption.
 
-It remains to handle $\adv$'s queries to $\corrupto$. $\advB$ simulates these
-directly, returning the sampled $\sk_k$ for each newly corrupted party, until
-$|\Cor| = t$. Beyond this point, $\advB$ cannot return a further share $\sk_k$
-consistent with $\pk$ without being able to reconstruct the full secret key
-itself, and correspondingly the adp-TS-UF-1 game's winning condition requires
-$|\Cor| < t$. For $|\Cor| < t$, every query to $\corrupto$ can be simulated as
-above, so the reduction goes through, and the threshold structure-preserving
-signature scheme achieves adaptive TS-UF-1 security with corruption bound
-$|\Cor| < t$. This concludes the proof of~\Cref{thm:tsps-security}.
+\paragraph{Handling corruption.} It remains to handle $\adv$'s queries to
+$\corrupto$. $\advB$ simulates these directly, returning the sampled $\sk_k$
+for each newly corrupted party, until $|\Cor| = t$. Beyond this point, $\advB$
+cannot return a further share $\sk_k$ consistent with $\pk$ without being able
+to reconstruct the full secret key itself, and correspondingly the
+adp-TS-UF-1 game's winning condition requires $|\Cor| < t$. For $|\Cor| < t$,
+every query to $\corrupto$ can be simulated as above, so the reduction goes
+through, and the threshold structure-preserving signature scheme achieves
+adaptive TS-UF-1 security with corruption bound $|\Cor| < t$. This concludes
+the proof of~\Cref{thm:tsps-security}.
 
 \end{proof}

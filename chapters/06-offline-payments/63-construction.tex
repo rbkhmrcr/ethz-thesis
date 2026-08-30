@@ -3,8 +3,6 @@
 We first build intuition for the construction by describing, informally, a
 sequence of increasingly refined solutions, before giving the protocol in full.
 
-\subsection{Design overview}
-
 In its simplest form, a token is a triple $\tau = (\pk, v, s)$, where $\pk$ is
 the public key of its owner, $v$ is its value, and $s$ is a random number that
 uniquely identifies it.
@@ -339,51 +337,34 @@ instantiates each of them.
 
 \end{protocolbox}
 
-
-\subsection{Extensions}
-
-The above proves security cryptographically, assuming a real-world deployment
-realises each ideal primitive it relies on. We close with informal deployment
-considerations.
-
-\paragraph{Revocation.} Revocation is complicated: it must not itself leak
-information about a user's past transactions, and it interacts poorly with the
-offline setting's lack of up-to-date information - a payee who goes offline
-just before a payer is revoked will accept, and may unwittingly propagate, the
-revoked payer's token.
-
-A useful mitigation is an expiry policy organised into epochs, capping either
+Revocation must not leak
+information about a user's past transactions, and it is difficult to address with
+the inherent lack of verified real time information of the offline setting. A payee who goes offline
+just before a payer is revoked will accept the
+revoked payer's token. A useful mitigation is an expiry policy organised into epochs, capping either
 spending hops or time since withdrawal. Payees, not spenders, enforce this by
-rejecting payments outside the current window, tuned to transaction value
-(shorter for higher value). Capping individual transaction values is a
+rejecting payments outside the current window, tuned to transaction value.
+ Capping individual transaction values is a
 complementary mitigation, together making double spending financially
-unattractive even before detection. A fuller treatment is left to future work.
+unattractive even before detection.
 
-\paragraph{Custody of the secret key.} Users must never hold
-$\sk_{\algo{usr}}$ directly: with direct access, they can produce unlimited
-valid-looking payments from the same token, since detecting double spending
-before reconciliation is inherently impossible offline. Auditability still
-holds under cascade double spending, since every payment encrypts the payer's
-identity and every perpetrator is identified. But identification only deters
-deliberate double spending, not key compromise, since both leave the same
-trail; cryptography can support double-spending resistance here but not
-enforce it, leaving the gap to governance - insurance, liability, and
-expiry-based exposure limits.
+Users must never hold
+$\sk_{\algo{usr}}$ directly. With direct access, they can produce unlimited
+payments from the same token, since detecting separate double spendings
+is inherently impossible offline. The secure elements and key-splitting techniques
+ support double spending resistance but cannot
+enforce it. The gap is then left to governance.
 
-Mediating key access through a trusted element issuing one payment per token
-closes off this attack, at the cost of new ones: cloning or rolling back the
-element still enables double spending, now at real hardware cost, with the
-same reporting incentives discouraging undetected reuse. This requires a
-recovery mechanism for lost devices, risking abuse via false loss claims; a
-waiting period exceeding the token expiry window, plus flagging frequent
-recoveries, limits this without sacrificing usability.
+Use of secure elements and inaccessible keys requires a
+recovery mechanism for lost devices.
+Other techniques are then needed to understand and address this without sacrificing usability.
 
-\paragraph{Instantiating the secure element.} Mobile TEEs protect app secrets
+Mobile TEEs protect app secrets
 from a malicious owner but expose them to developers only via key-management
-APIs~\cite{trustzone,secureenclave}; key confidentiality doesn't guarantee
-logic integrity, so arbitrary code execution (app exploit or rooting) still
-allows repeated spending via the key manager. Smart cards (Javacard, MIFARE)
-protect both key and logic via tamper-resistant, isolated
+APIs~\cite{trustzone,secureenclave}. Key confidentiality doesn't guarantee
+logic integrity, so arbitrary code execution could still
+enable repeated spending via the key manager. Smart cards (Javacard, MIFARE)
+instead protect both the key and logic with tamper resistant, isolated
 execution~\cite{javacard,mifare}. No hardware security is unconditional, so
-deployment is ultimately a governance trade-off between rollout cost,
-system-wide value limits, and the cost of attacking a card.
+deployment involves trade offs between infrastructure and equipment costs,
+system wide value limits, and the cost of attacking a card.

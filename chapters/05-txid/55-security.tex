@@ -222,13 +222,7 @@ We rely on the following security properties of the underlying primitives:
 
 \end{proof}
 
-\subsection{Auxiliary security arguments}
-
-\subsubsection*{PRF Security of $\FE$}\label{sec:txid-fe-prf-proof}
-
-\begin{lemma}\label{lem:txid-fe-prf} Under the DDH assumption in $\group{1}$
-and modeling $\HE$ as a random oracle, the function $\FE(\utk, \epoch) =
-\HE(\epoch)^{\utk}$ is a secure pseudorandom function.  \end{lemma}
+\subsection{Proof of Lemma~\ref{lem:txid-fe-prf}}
 
 We show that no polynomial-time adversary can distinguish $\FE(\cdot, \cdot)$
 from a random function with non-negligible advantage.
@@ -282,21 +276,7 @@ from a random function with non-negligible advantage.
 %
 \end{proof}
 
-\subsubsection*{PRF Security of $\FT$}\label{sec:txid-ft-prf-proof}
-
-\begin{lemma}\label{lem:txid-ft-prf} Under the $q$-BDHI assumption in
-  bilinear groups (\Cref{qbdhi-txid}, with $q = \Max$), the DDH assumption in
-  $\group{1}$, and modelling $\HE$ as a random oracle, the function
-%
-  \begin{equation*}
-%
-    \FT(\ek, \gamma) = \pairing\big(\ek', \ggen_D^{1/(\utk'+\gamma)}\big),
-    \qquad \ek = (\ek', \utk'), \ \ \ek' = \HE(\epoch)^{\utk},
-%
-  \end{equation*}
-%
-  is a secure pseudorandom function against adversaries that make at most
-  $\Max$ queries $\FT(\ek,\cdot)$ per epoch key $\ek$.  \end{lemma}
+\subsection{Proof of Lemma~\ref{lem:txid-ft-prf}}
 
 \begin{proof}
 
@@ -312,7 +292,6 @@ from a random function with non-negligible advantage.
 %
   \end{equation*}
 %
-
   Given a $q$-BDHI challenge $(\gen,
   \gen^{\theta}, \ldots, \gen^{\theta^{\Max}}, \ggen, \ggen^{\theta}, Z)$ where
   $Z = \pairing(\gen,\ggen)^{1/\theta}$ or $Z \sample \group{T}$, a simulator
@@ -347,12 +326,12 @@ from a random function with non-negligible advantage.
 
 \subsubsection*{$\rel_7$ and $\rel_8$ equivalence proofs}
 
-Recall from Section~\ref{sec:tag-computation} that $\rel_7$ is defined for
+We define $\rel_7$ with
 instance $\inst_7 = (\HE, \ggen_D, \gen_2, \gen_3, \gen_4, \com, \Max, \epoch,
 \Tag_\gamma)$ and witness $\witness_7 = (\utk, \utk', \openinfo, \ek',
 \gamma)$, as follows:
 %
-\begin{equation}\label{eq:rel7-concrete-recall} \begin{gathered}
+\begin{equation} \begin{gathered}
 %
   \rel_7 = \{\ \com = \gen_2^{\utk}\cdot\gen_3^{\utk'}\cdot\gen_4^{\openinfo} \
   \wedge \ \ek' = \HE(\epoch)^{\utk} \\ \wedge \ \Tag_{\gamma} =
@@ -364,7 +343,7 @@ instance $\inst_7 = (\HE, \ggen_D, \gen_2, \gen_3, \gen_4, \com, \Max, \epoch,
 $\rel_8$ is defined for instance $\inst_8 = (\inst_7, U, V, \Xi)$ and witness
 $\witness_8 = (\witness_7, s)$, as follows:
 %
-\begin{equation}\label{eq:rel7-hat-recall} \begin{gathered}
+\begin{equation} \begin{gathered}
 %
   \rel_8 = \{\ \com = \gen_2^{\utk}\cdot\gen_3^{\utk'}\cdot\gen_4^{\openinfo}
   \ \wedge \ U = \HE(\epoch)^s \ \wedge \ V = U^{\utk} \\ \wedge \ \Xi =

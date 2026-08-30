@@ -4,12 +4,10 @@ We evaluate the concrete instantiation of Section~\ref{sec:txid-instantiation},
 benchmarking each relation's proof and verification cost individually before
 reporting end-to-end figures for the full protocol.
 
-\subsection{Experimental evaluation}\label{sec:txid-eval-experimental}
-
 All experiments were conducted on an Apple M2 with 16GB RAM using Go's
 benchmarking framework. The algebraic construction is implemented as a research
 prototype without batching, precomputation, or multi-exponentiation
-optimizations; benchmarks represent conservative performance estimates.
+optimisations; benchmarks represent conservative performance estimates.
 
 For the proof of knowledge of a signature from the BBS+ signature scheme
 ($\rel_4$ and $\rel_9$), which now range over the three secrets
@@ -23,7 +21,7 @@ over the credential proof coming from checking the disclosed $\utk'$ against
 the credential directly.
 
 For the transaction tag proof, $\rel_8$, following the Dodis-Yampolskiy
-instantiation of $\FT$ (\Cref{sec:tag-computation}), the prover cost for the
+instantiation of $\FT$, the prover cost for the
 commitment, epoch-key term, and tag correctness is one 3-base
 multi-exponentiation and two single exponentiations in $\group{1}$, up to
 three exponentiations in $\group{T}$, one exponentiation in $\group{2}$ to
@@ -31,11 +29,8 @@ derive the tag, and one pairing evaluation. The verifier cost is one pairing
 evaluation, one 3-base multi-exponentiation and five single exponentiations in
 $\group{1}$, and four exponentiations in $\group{T}$. For the range check, the
 prover costs are $O(\ell)$ exponentiations plus the Bulletproofs inner product
-argument of $O(\ell)$ group operations~\cite{SP:BBBPWM18}, and the verifier
-cost is $O(\ell)$ exponentiations. Unlike the tag correctness proof above, the
-range check no longer needs $\ell$ dedicated $\group{2}$ generators, since
-$\gamma$ is bound directly through the Dodis-Yampolskiy exponent rather than
-through an explicit bit decomposition.
+argument of $O(\ell)$ group operations, and the verifier
+cost is $O(\ell)$ exponentiations~\cite{SP:BBBPWM18}.
 
 We note that the proof of $\rel_4$ is computed once at registration and once
 per Grant invocation, and the proof of $\rel_5$ once per epoch.  The proofs of
@@ -54,10 +49,7 @@ Table~\ref{tab:algebraic} reports results with $\ell = 10$.
 
   Proof generation completes in a few milliseconds and verification in under
   10ms even without optimisation, demonstrating practical deployability.  For
-  context, Idemix~\cite{CCS:CamVan02}, a widely deployed anonymous credential
+  context, Idemix, a widely deployed anonymous credential
   system over BLS12-381, requires approximately 4ms for signing and 3ms for
-  verification without tracing support. Our construction achieves comparable
-  verification cost while additionally supporting epoch-bound tracing. A
-  hash-based instantiation using zk-SNARKs, achieving sub-millisecond
-  verification at the cost of a trusted setup, is benchmarked in the full
-  version of this paper.
+  verification without tracing support~\cite{CCS:CamVan02}. Our construction achieves comparable
+  verification cost while additionally supporting epoch-bound tracing. 

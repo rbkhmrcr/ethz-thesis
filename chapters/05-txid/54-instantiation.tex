@@ -7,9 +7,58 @@ that would result in computations expensive proofs. We instead rewrite the
 equations to require only proofs of statements involving discrete logarithms,
 so that they can be handled by efficient sigma protocols.
 
-\subsection{Building blocks}
+\subsection{Instantiating $\FE$}
 
-\subsubsection{The BBS+ signature scheme.} The BBS+ signature scheme enables
+  \begin{assumptionbox}{Decisional Diffie-Hellman (DDH)}{ddh-txid}
+
+    The DDH assumption holds in $\group{1}$ if no PPT adversary can distinguish
+    $(\gen^x, \gen^y, \gen^{xy})$ from $(\gen^x, \gen^y, \gen^z)$ for uniformly
+    random $x, y, z \sample \Zp$.
+
+  \end{assumptionbox}
+  
+  \begin{lemma}\label{lem:txid-fe-prf} 
+  %
+  Under the DDH assumption in $\group{1}$
+and modeling $\HE$ as a random oracle, the function $\FE(\utk, \epoch) =
+\HE(\epoch)^{\utk}$ is a secure pseudorandom function. 
+%
+ \end{lemma}
+
+\subsection{Instantiating $\FT$}
+
+  \begin{assumptionbox}{$q$-Bilinear Diffie-Hellman Inversion
+    ($q$-BDHI)}{qbdhi-txid}
+
+    The $q$-BDHI assumption holds if, given $(\gen, \gen^{x}, \gen^{x^2},
+    \dots, \gen^{x^q}, \ggen, \ggen^{x})$ for uniformly random $x \sample \Zp$,
+    no PPT adversary can distinguish $\pairing(\gen,\ggen)^{1/x}$ from a
+    uniformly random element of $\group{T}$ with non-negligible probability.
+
+  \end{assumptionbox}
+
+\begin{primitivebox}{The Dodis-Yampolskiy PRF scheme.}{fig:pedersen}
+
+\end{primitivebox}
+
+\paragraph{The Dodis-Yampolskiy PRF scheme.} ....
+
+  \begin{equation*}
+%
+    \FT(\ek, \gamma) = \pairing\big(\ek', \ggen_D^{1/(\utk'+\gamma)}\big),
+    \qquad \ek = (\ek', \utk'), \ \ \ek' = \HE(\epoch)^{\utk},
+%
+  \end{equation*}
+
+\begin{lemma}\label{lem:txid-ft-prf} Under the $q$-BDHI assumption,
+ the DDH assumption in $\group{1}$, and modelling $\HE$ as a random oracle, $\FT$
+  is a secure pseudorandom function against adversaries that make at most
+  $\Max$ queries $\FT(\ek,\cdot)$ per epoch key $\ek$.  \end{lemma}
+  
+\subsection{Instantiating $\mathsf{txid}$}
+
+
+\paragraph{The BBS+ signature scheme.} The BBS+ signature scheme enables
 signers to sign multiple messages at once, using the following
 algorithms~\cite{C:BonBoySha04,SCN:AuSusMu06,EPRINT:CamDriLeh16}.
 
@@ -79,7 +128,7 @@ Diffie-Hellman ($q$-SDH) assumption.
 
 \end{assumptionbox}
 
-\begin{primitivebox}{Pedersen commitment scheme}{fig:pedersen}
+\begin{primitivebox}{The Pedersen commitment scheme}{fig:pedersen}
 
   \begin{description}
 
@@ -98,13 +147,8 @@ Diffie-Hellman ($q$-SDH) assumption.
 
 \end{primitivebox}
 
-The Pedersen commitment scheme is perfectly hiding, so nobody, not even the
-registration authority or an auditor, learns anything about a committed tracing
-key beyond what is explicitly disclosed.  Commitments are group elements, so
-users can prove statements using cheap sigma protocols over discrete logarithms
-rather than requiring general purpose zero knowledge proofs.
-
-\subsection{Our tracing scheme}\label{sec:algebraic}
+\paragraph{The Pedersen commitment scheme.} This scheme is perfectly hiding 
+and computationally binding under the discrete log assumption. Commitments are group elements.
 
 \begin{protocolbox}{Tracing protocol}{txid}
 
@@ -262,8 +306,8 @@ The protocol instantiation is described in full in~\Cref{prot:txid}. The
 remaining algorithms follow~\Cref{sec:txid-construction} directly; we highlight
 below only the design choices specific to this instantiation.
 
-The registration authority's key pair is for the BBS+ signature scheme
-(\Cref{fig:bbs}). During registration, the user accordingly sends only the
+The registration authority's key pair is for the BBS+ signature scheme.
+ During registration, the user accordingly sends only the
 group elements $S = \gen_1^{\sk}$, $T = \gen_2^{\utk}$, and $T' =
 \gen_3^{\utk'}$, together with a proof of knowledge of the underlying secrets,
 rather than the secrets themselves. The user's tracing key is the pair
@@ -289,14 +333,13 @@ Deriving the epoch tracing key deterministically from the long term tracing key
 and the epoch identifier is what confines an auditor's tracing power to a
 single epoch, since a key derived for one epoch is useless for any other. Each
 transaction tag is computed by evaluating a Dodis-Yampolskiy pairing based PRF
-at the user's epoch key and a fresh counter, so it looks random to anyone
-without that key. The tag carries two separate proofs, that it was correctly
-derived from a properly committed tracing key (\Cref{sec:tag-computation}), and
-that the committed key was signed by the registration authority
-(\Cref{sec:tx-auth}).
+at the user's epoch key and a fresh counter. The tag carries two separate proofs,
+one attesting that it was correctly
+derived from a properly committed tracing key, and
+one that the committed key was signed by the registration authority.
 
-\subsubsection*{Verifiable tag computation.}\label{sec:tag-computation} The
-user first computes a commitment under the Pedersen commitment scheme, $\com =
+\paragraph{Verifiable tag computation.} The
+user first computes a commitment $\com =
 \gen_2^{\utk}\cdot\gen_3^{\utk'}\cdot\gen_4^{\openinfo}$, and $\Tag = \FT(\ek,
 \gamma)$, where, for $\ek = (\ek',\utk')$, $\FT(\ek, \gamma)$ is defined,
 following the Dodis-Yampolskiy construction~\cite{PKC:DodYam05}, as
@@ -452,10 +495,7 @@ u^e\cdot v^{\zeta} \ \wedge \ (\gen_0\cdot\com)^{-1} = v^{\eta}\cdot
 \end{gathered} \end{equation}
 %
 
-$\rel_9$ can be proven using sigma protocols, and the Fiat Shamir heuristic
-transforms the resulting proof into a message-bound NIZK proof.
-
-\begin{protocolbox}{Transaction authorisation NIZK proof}{txid-tx-nizk}
+\begin{protocolbox}{Transaction authorisation proof}{txid-tx-nizk}
 
   \begin{description}
 
@@ -508,33 +548,6 @@ transforms the resulting proof into a message-bound NIZK proof.
     \end{description}
 
   \end{protocolbox}
-
-  \begin{assumptionbox}{Decisional Diffie-Hellman (DDH)}{ddh-txid}
-
-    The DDH assumption holds in $\group{1}$ if no PPT adversary can distinguish
-    $(\gen^x, \gen^y, \gen^{xy})$ from $(\gen^x, \gen^y, \gen^z)$ for uniformly
-    random $x, y, z \sample \Zp$.
-
-  \end{assumptionbox}
-
-  \begin{assumptionbox}{$q$-Bilinear Diffie-Hellman Inversion
-    ($q$-BDHI)}{qbdhi-txid}
-
-    The $q$-BDHI assumption holds if, given $(\gen, \gen^{x}, \gen^{x^2},
-    \dots, \gen^{x^q}, \ggen, \ggen^{x})$ for uniformly random $x \sample \Zp$,
-    no PPT adversary can distinguish $\pairing(\gen,\ggen)^{1/x}$ from a
-    uniformly random element of $\group{T}$ with non-negligible probability.
-
-  \end{assumptionbox}
-
-  \begin{assumptionbox}{$q$-Strong Diffie-Hellman ($q$-SDH)}{qsdh-txid}
-
-    The $q$-SDH assumption holds if, given $(\gen, \gen^{x}, \gen^{x^2}, \dots,
-    \gen^{x^q}, \ggen, \ggen^{x})$ for uniformly random $x \sample \Zp$, no PPT
-    adversary can output a pair $(c, \gen^{1/(x+c)})$ for any $c \in \Zp
-    \setminus \{-x\}$ with non-negligible probability.
-
-  \end{assumptionbox}
 
   \begin{theorem}\label{thm:inst} The instantiation presented
     in~\Cref{sec:algebraic} securely realises $\idfu{\algo{trace}}$ in the

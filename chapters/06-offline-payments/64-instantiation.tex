@@ -9,7 +9,7 @@ learning their content. Both are pairing based multi-message signature schemes,
 which lets us build efficient sigma protocols directly over their verification
 equations rather than relying on general purpose zero knowledge proofs.
 
-\subsection{Building blocks}
+We first introduce all of the primitives used in our system.
 
 A BBS+ signature is a signature scheme that lets a signer sign multiple
 messages at once, using the following
@@ -180,9 +180,7 @@ as follows:
 \end{equation*}
 %
 
-\subsection{Pointcheval-Sanders signatures}\label{sec:ps-sign}
-
-The Pointcheval-Sanders signature scheme, like BBS+, signs vectors of messages.
+The Pointcheval-Sanders signature scheme also signs vectors of messages.
 It does so through the following algorithms~\cite{RSA:PoiSan16,RSA:PoiSan18}.
 
 \begin{primitivebox}{The Pointcheval-Sanders signature scheme}{ps}
