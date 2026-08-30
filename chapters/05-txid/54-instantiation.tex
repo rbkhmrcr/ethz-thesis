@@ -27,6 +27,8 @@ and modeling $\HE$ as a random oracle, the function $\FE(\utk, \epoch) =
 
 \subsection{Instantiating $\FT$}
 
+\subsection{Instantiating $\FT$}
+
   \begin{assumptionbox}{$q$-Bilinear Diffie-Hellman Inversion
     ($q$-BDHI)}{qbdhi-txid}
 
@@ -37,18 +39,43 @@ and modeling $\HE$ as a random oracle, the function $\FE(\utk, \epoch) =
 
   \end{assumptionbox}
 
-\begin{primitivebox}{The Dodis-Yampolskiy PRF scheme.}{fig:pedersen}
+\begin{primitivebox}{The Dodis-Yampolskiy pseudorandom
+  function}{fig:dy-prf}
+
+  \begin{description}
+
+    \item[$\ggen_D \sample \PRFgen(\secparam)$ :] On input the security
+      parameter, sample and return a generator $\ggen_D \sample \group{2}$.
+
+    \item[$y \leftarrow \PRFeval(\ggen_D, \gen, k, x)$ :] On input generator
+      $\ggen_D$, group element $\gen \in \group{1}$, key $k \in \Zp$, and
+      input $x \in \Zp \setminus \{-k\}$, return the following:
+      %
+      \begin{equation*}
+      %
+        y = \pairing\big(\gen, \ggen_D^{1/(k+x)}\big).
+      %
+      \end{equation*}
+
+  \end{description}
 
 \end{primitivebox}
 
-\paragraph{The Dodis-Yampolskiy PRF scheme.} ....
+The Dodis-Yampolskiy PRF is pseudorandom under the $q$-BDHI assumption~\cite{PKC:DodYam05}.
 
-  \begin{equation*}
+We instantiate $\FT$ by fixing $\gen$ to the epoch tracing key $\ek'$ rather
+than a fixed public generator, and the PRF key $k$ to $\utk'$, so that
 %
-    \FT(\ek, \gamma) = \pairing\big(\ek', \ggen_D^{1/(\utk'+\gamma)}\big),
-    \qquad \ek = (\ek', \utk'), \ \ \ek' = \HE(\epoch)^{\utk},
+\begin{equation*}
 %
-  \end{equation*}
+  \FT(\ek, \gamma) = \PRFeval(\ggen_D, \ek', \utk', \gamma) =
+  \pairing\big(\ek', \ggen_D^{1/(\utk'+\gamma)}\big), \qquad \ek =
+  (\ek', \utk'), \ \ \ek' = \HE(\epoch)^{\utk}.
+%
+\end{equation*}
+%
+Because $\ek'$ is itself a value derived from $\FE$ rather than a fixed
+generator, pseudorandomness of $\FT$ does not follow from $q$-BDHI alone.
 
 \begin{lemma}\label{lem:txid-ft-prf} Under the $q$-BDHI assumption,
  the DDH assumption in $\group{1}$, and modelling $\HE$ as a random oracle, $\FT$
@@ -57,8 +84,7 @@ and modeling $\HE$ as a random oracle, the function $\FE(\utk, \epoch) =
   
 \subsection{Instantiating $\mathsf{txid}$}
 
-
-\paragraph{The BBS+ signature scheme.} The BBS+ signature scheme enables
+The BBS+ signature scheme enables
 signers to sign multiple messages at once, using the following
 algorithms~\cite{C:BonBoySha04,SCN:AuSusMu06,EPRINT:CamDriLeh16}.
 
@@ -108,13 +134,6 @@ algorithms~\cite{C:BonBoySha04,SCN:AuSusMu06,EPRINT:CamDriLeh16}.
 
 \end{primitivebox}
 
-This variant of the BBS+ signature scheme signs the group elements $M_i =
-\gen_i^{m_i}$ directly, rather than the scalars $m_i$ themselves. Because
-computing $\prod_i M_i$ requires no knowledge of the discrete logarithms $m_i$,
-a signer can produce a valid signature on committed values without ever
-learning them; this is exactly what lets the registration authority certify a
-user's keys below without ever seeing them~\cite{SCN:AuSusMu06,EC:TesZhu23b}.
-
 BBS+ signatures are existentially unforgeable under the $q$-strong
 Diffie-Hellman ($q$-SDH) assumption.
 
@@ -127,6 +146,13 @@ Diffie-Hellman ($q$-SDH) assumption.
   $\varepsilon \in \Zp \setminus \{-\theta\}$ with non-negligible probability.
 
 \end{assumptionbox}
+
+This variant of the BBS+ signature scheme signs the group elements $M_i =
+\gen_i^{m_i}$ directly, rather than the scalars $m_i$ themselves. Because
+computing $\prod_i M_i$ requires no knowledge of the discrete logarithms $m_i$,
+a signer can produce a valid signature on committed values without ever
+learning them; this is exactly what lets the registration authority certify a
+user's keys below without ever seeing them~\cite{SCN:AuSusMu06,EC:TesZhu23b}.
 
 \begin{primitivebox}{The Pedersen commitment scheme}{fig:pedersen}
 

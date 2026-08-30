@@ -1,7 +1,5 @@
 \section{Definitions}\label{sec:txid-definitions}
 
-\subsection{Tracing}
-
 A tracing scheme involves four types of participants. The ledger operator
 maintains a publicly accessible, append-only ledger that stores submitted
 transactions, and runs the transaction validators that decide, on input of the
@@ -15,8 +13,6 @@ permission to trace the transactions of specific users during specific epochs.
 
 We consider static corruption throughout: the simulator corrupts users and
 auditors of its choice before any call to the ideal functionality is made.
-Neither the registration authority nor the ledger operator is modelled as
-capable of independent corruption.
 
 \begin{description}
 
@@ -46,6 +42,8 @@ capable of independent corruption.
     under $\ek$ during $\epoch$.
 
 \end{description}
+
+\subsection{Ideal functionality $\idfu{\algo{trace}}$}
 
 We define security of tracing through an ideal functionality
 $\idfu{\algo{trace}}$ that represents a trusted third party which executes the
