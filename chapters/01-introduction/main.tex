@@ -167,6 +167,11 @@ authority. We use this existing role to bind credentials issued to the same
 user, preventing credentials belonging to different users from being aggregated
 without requiring expensive proofs during presentation.
 
+We then construct threshold structure-preserving
+signature schemes that require no interaction during the online signing phase, 
+making them suitable for efficient transaction authorisation or other multi-certifier settings. Here again, 
+the existing structure becomes a resource rather than an obstacle to be removed.
+
 We next consider accountability in transaction systems that protect user
 privacy.  Financial systems may require both the ability to investigate a
 particular transaction and the ability, under prescribed circumstances, to
@@ -176,15 +181,6 @@ a transaction identification mechanism that supports concurrent transaction
 creation without requiring the auditor to maintain persistent per-user state.
 Auditing is restricted to a specified epoch, limiting both the
 scope and duration of the information disclosed to an auditor.
-
-We then consider transaction authorisation in permissioned distributed systems.
-In these systems, transactions are verified by known endorsing parties rather
-than anonymous participants. We construct threshold structure-preserving
-signature schemes that allow the required endorsers to jointly authorise
-transactions without relying on a single signing authority.  The schemes
-require no interaction during the online signing phase, making them suitable
-for efficient transaction authorisation. The existing structure
-becomes a resource rather than an obstacle to be removed.
 
 Finally, we study privacy in offline payments. Offline operation improves
 availability and accessibility, but changes how double spending must be
@@ -205,15 +201,9 @@ than removed in pursuit of decentralisation.
 
 The remainder of this thesis is organised as follows.  Preliminary information
 is found in \Cref{chap:preliminaries}.  \Cref{chap:agg-creds} presents our
-aggregate anonymous credential construction. \Cref{chap:txid} presents the
-transaction identification mechanism, Chapter 5 presents the threshold
-signing protocol for transaction authorisation, and
-Chapter 6 presents the offline payment mechanism.
-Chapter 7 summarises the contributions and discusses open
+aggregate anonymous credential construction. \Cref{chap:tsps} presents the threshold
+signing protocol for transaction authorisation, \Cref{chap:txid} presents the
+transaction identification mechanism, and
+\Cref{chap:offline-payments} presents the offline payment mechanism.
+\Cref{chap:conclusion} summarises the contributions and discusses open
 questions.
-
-% \Cref{chap:tsps} presents the threshold
-%signing protocol for transaction authorisation, and
-%\Cref{chap:offline-payments} presents the offline payment mechanism.
-%\Cref{chap:conclusion} summarises the contributions and discusses open
-%questions.
