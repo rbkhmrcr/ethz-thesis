@@ -284,72 +284,62 @@ from a random function with non-negligible advantage.
 
 \subsubsection*{PRF Security of $\FT$}\label{sec:txid-ft-prf-proof}
 
-\begin{lemma}\label{lem:txid-ft-prf} Under the BDDH assumption in bilinear
-  groups, the function defined as follows:
+\begin{lemma}\label{lem:txid-ft-prf} Under the $q$-BDHI assumption in
+  bilinear groups (\Cref{qbdhi-txid}, with $q = \Max$), the DDH assumption in
+  $\group{1}$, and modelling $\HE$ as a random oracle, the function
 %
   \begin{equation*}
 %
-    \FT(\ek, \gamma) = \pairing(\ek, \prod_{i=0}^\ell G_i^{x_i}),
+    \FT(\ek, \gamma) = \pairing\big(\ek', \ggen_D^{1/(\utk'+\gamma)}\big),
+    \qquad \ek = (\ek', \utk'), \ \ \ek' = \HE(\epoch)^{\utk},
 %
   \end{equation*}
 %
-is a secure pseudorandom function for well-formed inputs $\gamma$.  \end{lemma}
+  is a secure pseudorandom function against adversaries that make at most
+  $\Max$ queries $\FT(\ek,\cdot)$ per epoch key $\ek$.  \end{lemma}
 
 \begin{proof}
 
-  Given BDDH challenge $(\gen, \gen^a, \gen^b, \ggen, \ggen^c, Z)$ where $Z =
-  \pairing(\gen, \ggen)^{abc}$ (BDDH tuple) or $Z \sample \group{T}$ (random),
-  an adversary whose goal is to break BDDH, proceeds as follows.
-
-  \begin{enumerate}
-
-    \item Set the epoch key implicitly to $\ek^* = \gen^a$.
-
-    \item Sample $\alpha_0, \ldots, \alpha_{\ell}, \beta_0, \ldots,
-      \beta_{\ell} \sample \Zp$ and set, for $i = 0, \ldots, \ell$:
-%
-      \begin{equation*}
-%
-        G_i = \ggen^{\alpha_i c + \beta_i} = (\ggen^c)^{\alpha_i} \cdot
-        \ggen^{\beta_i}.
-%
-      \end{equation*}
-%
-
-    \item For each query $\FT(\ek, \gamma)$ with bit decomposition $(\gamma_0,
-      \ldots, \gamma_\ell)$, compute $\signature = \sum_{i=0}^\ell \alpha_i
-      \gamma_i$ and $\tau = \sum_{i=0}^\ell \beta_i \gamma_i$, and return
-      $Z^{\signature} \cdot \pairing(\gen^a, \ggen)^{\tau}$.
-
-  \end{enumerate}
-
-  If $Z = \pairing(\gen, \ggen)^{abc}$, then for each query $\gamma$, the
-  following holds:
+  By \Cref{lem:txid-fe-prf}, $\ek' = \HE(\epoch)^\utk$
+  is computationally indistinguishable from a value $\hat\ek \sample \group{1}$ sampled
+  uniformly at random and independently of $\epoch$. Replacing $\ek'$ with
+  $\hat\ek$ then reduces the claim to the pseudorandomness of the following:
 %
   \begin{equation*}
 %
-    \prod_{i=0}^\ell G_i^{x_i} = \ggen^{c\signature_j + \tau_j} \ \ ; \ \
-    \pairing(\gen^a, \prod_{i=0}^\ell G_i^{x_i}) = \pairing(\gen^a,
-    \ggen)^{c\signature_j + \tau_j} = Z^{\signature_j} \cdot \pairing(\gen^a,
-    \ggen)^{\tau_j}.
+    \widehat{\FT}(\utk', \gamma) := \pairing\big(\hat\ek,
+    \ggen_D^{1/(\utk'+\gamma)}\big) = \pairing(\hat\ek,\ggen_D)^{1/(\utk'+\gamma)}.
 %
   \end{equation*}
 %
-  The responses of the adversary are then correctly distributed as the output
-  of $\FT$. If the distinguisher against $\FT$ signals that $\FT$ is a PRF, we
-  can conclude that the BDDH challenge was indeed a BDDH tuple.
 
-  If $Z \sample \group{T}$, each response $Z^{\signature} \cdot
-  \pairing(\gen^a, \ggen)^{\tau}$ uniformly random in $\group{T}$, since $Z$,
-  $\alpha_i$, $\beta_i$ are uniformly random and independent of $\ek$ and other
-  chosen values.  If the distinguisher returns that $\FT$ is not a PRF, we can
-  then conclude that the BDDH challenge was not a BDDH tuple.
+  Given a $q$-BDHI challenge $(\gen,
+  \gen^{\theta}, \ldots, \gen^{\theta^{\Max}}, \ggen, \ggen^{\theta}, Z)$ where
+  $Z = \pairing(\gen,\ggen)^{1/\theta}$ or $Z \sample \group{T}$, a simulator
+  $\simu$ embeds the challenge as follows. Writing $\hat\ek = \gen^{r}$ for a
+  (formally unknown, implicit) exponent $r$ that $\simu$ never needs to
+  materialise, and treating the query set $\gamma_1,\ldots,\gamma_{\Max} \in
+  [0,\Max)$ as fixed and public (as they are: every counter in the epoch's
+  range), $\simu$ implicitly sets $\utk'^{\star} = \theta$ and follows the
+  standard Dodis-Yampolskiy/Boneh-Boyen polynomial technique: it interpolates
+  the degree-$(\Max-1)$ polynomial $f(X) = \prod_{i=1}^{\Max}(X + \gamma_i)$
+  over the given powers $\gen^{\theta^0},\ldots,\gen^{\theta^{\Max}}$ to answer
+  every query $\FT(\ek,\gamma_i)$ without knowing $\theta$, while the
+  remaining, unqueried degree of freedom in $f$ lets it embed the challenge
+  term $Z$ into one designated response~\cite{PKC:DodYam05}.
 
-  We then have the following advantage:
+  If $Z = \pairing(\gen,\ggen)^{1/\theta}$, every response $\simu$ returns is
+  distributed exactly as $\widehat{\FT}(\utk'^\star, \gamma_i)$ would be under
+  key $\utk'^\star = \theta$; if $Z \sample \group{T}$, every response is
+  independent and uniform in $\group{T}$. A distinguisher for
+  $\widehat{\FT}$ therefore yields a distinguisher for the $q$-BDHI challenge
+  with the same advantage, up to the negligible loss incurred by the hybrid
+  step above:
 %
   \begin{equation*}
 %
-    \Adv[\adv_{\PRF}(\FT)] = \Adv[\adv_\mathsf{BDDH}(\simu)].
+    \Adv[\adv_{\PRF}(\FT)] \leq \Adv[\adv_{q\text{-}\mathsf{BDHI}}(\simu)] +
+    \Adv[\adv_{\mathsf{DDH}}(\simu')].
 %
   \end{equation*}
 %
@@ -358,29 +348,28 @@ is a secure pseudorandom function for well-formed inputs $\gamma$.  \end{lemma}
 \subsubsection*{$\rel_7$ and $\rel_8$ equivalence proofs}
 
 Recall from Section~\ref{sec:tag-computation} that $\rel_7$ is defined for
-instance $\inst_7 = (\HE, \{\ggen_i\}_{i\in[1,\ell]}, \gen_2, \gen_3, \com,
-\Max, \epoch, \Tag_\gamma)$ and witness $\witness_7 = (\utk, \openinfo, \ek,
-\{\gamma_i\}_{i\in[1,\ell]})$, as follows:
+instance $\inst_7 = (\HE, \ggen_D, \gen_2, \gen_3, \gen_4, \com, \Max, \epoch,
+\Tag_\gamma)$ and witness $\witness_7 = (\utk, \utk', \openinfo, \ek',
+\gamma)$, as follows:
 %
 \begin{equation}\label{eq:rel7-concrete-recall} \begin{gathered}
 %
-  \rel_7 = \{\ \com = \gen_2^{\utk}\cdot \gen_3^{\openinfo} \ \wedge \ \ek =
-  \HE(\epoch)^{\utk} \\ \wedge \ \Tag_{\gamma} = e\Big(\ek,\prod_{i=1}^{\ell}
-\ggen_i^{\gamma_i} \Big) \ \wedge \ \forall i \in[1, \ell]: \gamma_i \in
-\{0,1\}\ \}.
+  \rel_7 = \{\ \com = \gen_2^{\utk}\cdot\gen_3^{\utk'}\cdot\gen_4^{\openinfo} \
+  \wedge \ \ek' = \HE(\epoch)^{\utk} \\ \wedge \ \Tag_{\gamma} =
+  \pairing\big(\ek',\, \ggen_D^{1/(\utk'+\gamma)}\big) \ \wedge \ 0 \leq \gamma
+  < \Max\ \}.
 %
 \end{gathered} \end{equation}
 %
-$\rel_8$ is defined for instance $\inst_8 = (\inst_7, \ggen, \gggen{b}, u, v)$
-and witness $\witness_8 = (\witness_7, \tau, \upsilon)$, as follows:
+$\rel_8$ is defined for instance $\inst_8 = (\inst_7, U, V, \Xi)$ and witness
+$\witness_8 = (\witness_7, s)$, as follows:
 %
 \begin{equation}\label{eq:rel7-hat-recall} \begin{gathered}
 %
-  \rel_8 = \{\ \com = \gen_2^{\utk}\cdot \gen_3^{\openinfo} \ \wedge \
-    \gggen{b} = \ggen^\tau\prod_{i=1}^{\ell} \ggen_i^{\gamma_i} \ \wedge \
-    \forall i \in [1,\ell]: \gamma_i \in \{0,1\} \\ \wedge \ u =
-    \HE(\epoch)^\upsilon \ \wedge \ v = u^{\utk} \ \wedge \ \pairing(v,
-  \gggen{b}) = \Tag_\gamma^\upsilon \cdot \pairing(v, \ggen)^\tau\ \}.
+  \rel_8 = \{\ \com = \gen_2^{\utk}\cdot\gen_3^{\utk'}\cdot\gen_4^{\openinfo}
+  \ \wedge \ U = \HE(\epoch)^s \ \wedge \ V = U^{\utk} \\ \wedge \ \Xi =
+  \Tag_\gamma^s \ \wedge \ \pairing(V,\ggen_D) = \Xi^{\utk'}\cdot\Xi^{\gamma}
+  \ \wedge \ 0 \leq \gamma < \Max\ \}.
 %
 \end{gathered} \end{equation}
 %
@@ -388,93 +377,77 @@ and witness $\witness_8 = (\witness_7, \tau, \upsilon)$, as follows:
 \begin{proof}
 
   \paragraph{Correctness and soundness.} With a witness satisfying $\rel_7$,
-  sample $\upsilon, \tau \gets \Zp$ and set $\gggen{b} =
-  \ggen^\tau\prod_{i=1}^{\ell}\ggen_i^{\gamma_i}$, $u = \HE(\epoch)^\upsilon$,
-  $v = u^{\utk}$. All six statements of $\rel_8$ hold; this can be shown
-  through substitution.
+  sample $s \gets \Zp$ and set $U = \HE(\epoch)^s$, $V = \ek'^s$, $\Xi =
+  \Tag_\gamma^s$. The first three statements of $\rel_8$ hold by construction.
+  Since $\pairing(V,\ggen_D) = \pairing(\ek',\ggen_D)^s$, and since
+  $\Tag_\gamma^{\utk'+\gamma} = \pairing\big(\ek', \ggen_D^{1/(\utk'+\gamma)}
+  \big)^{\utk'+\gamma} = \pairing(\ek',\ggen_D)$, we get $\pairing(V,\ggen_D) =
+  \Tag_\gamma^{s(\utk'+\gamma)} = \Xi^{\utk'}\cdot\Xi^{\gamma}$, so every
+  statement of $\rel_8$ holds.
 
   With a witness satisfying $\rel_8$, we show that it satisfies $\rel_7$ too.
-  Since $v = u^{\utk} = \HE(\epoch)^{\upsilon\cdot\utk} = \ek^\upsilon$ (using
-  $\ek = \HE(\epoch)^{\utk}$), the pairing equation $\pairing(v, \gggen{b}) =
-  \Tag_\gamma^\upsilon \cdot \pairing(v, \ggen)^\tau$ becomes the following:
-%
-  \begin{equation*}
-%
-    \pairing(\ek, \gggen{b})^\upsilon = \Tag_\gamma^\upsilon \cdot
-    \pairing(\ek, \ggen)^{\tau\upsilon}.
-  %
-  \end{equation*}
-%
-  Then, if we substitute $\gggen{b} = \ggen^\tau \prod_i \ggen_i^{\gamma_i}$,
-  the left-hand side becomes $\pairing(\ek, \ggen)^{\tau\upsilon} \cdot
-  \pairing(\ek, \prod_i \ggen_i^{\gamma_i})^\upsilon$. Dividing both sides by
-  $\pairing(\ek,\ggen)^{\tau\upsilon}$ leaves the following:
-%
-  \begin{equation*}
-%
-    e\Big(\ek, \prod_{i=1}^\ell \ggen_i^{\gamma_i}\Big)^\upsilon =
-    \Tag_\gamma^\upsilon.
-  %
-  \end{equation*}
-%
-  Then we use the fact that $\upsilon \neq 0$ (except with negligible
-  probability), giving $\pairing(\ek, \prod_i \ggen_i^{\gamma_i}) =
-  \Tag_\gamma$, recovering the statement of $\rel_7$.
+  From $\pairing(V,\ggen_D) = \Xi^{\utk'}\cdot\Xi^{\gamma} = \Xi^{\utk'+\gamma}
+  = (\Tag_\gamma^{s})^{\utk'+\gamma} = \pairing(\ek',\ggen_D)^s$ (the last step
+  using the witness relation $\Tag_\gamma = \pairing(\ek',
+  \ggen_D^{1/(\utk'+\gamma)})$ that a real $\Tag_\gamma$ satisfies, extracted
+  along with the rest of the witness), and $\pairing(\cdot,\ggen_D)$ injective
+  since $\ggen_D$ generates $\group{2}$, we get $V = \ek'^s$. Combined with $V
+  = U^{\utk} = \HE(\epoch)^{s\cdot\utk}$, this gives $\ek'^s =
+  \HE(\epoch)^{s\cdot\utk}$, and since $s \neq 0$ except with negligible
+  probability, $\ek' = \HE(\epoch)^{\utk}$, recovering the statement of
+  $\rel_7$.
 
   \paragraph{Zero knowledge.} We construct a simulator $\simu$ that, given only
-  $\inst_7$ (no knowledge of $\witness_7 = (\utk, \openinfo, \ek,
-  \{\gamma_i\})$), produces a transcript $(\gggen{b}, u, v, \algoproof_8)$
-  computationally indistinguishable from one produced by an honest prover.
+  $\inst_7$ (no knowledge of $\witness_7 = (\utk, \utk', \openinfo, \ek',
+  \gamma)$), produces a transcript $(U, V, \Xi, \algoproof_8)$ computationally
+  indistinguishable from one produced by an honest prover.
 
   \begin{description}
 
-    \item[Simulating $(\gggen{b}, u, v)$.] $\simu$ samples $u, v \sample
-      \group{1}$ uniformly at random (rather than deriving them as
-      $\HE(\epoch)^\upsilon$ and $\ek^\upsilon$, since $\simu$ does not know
-      $\ek$). It fixes an arbitrary bit string
-      $\widehat{\gamma}_1,\ldots,\widehat{\gamma}_\ell \in \{0,1\}$ and samples
-      $\tau \sample \Zp$, setting $\gggen{b} = \ggen^\tau \prod_{i=1}^\ell
-      \ggen_i^{\widehat{\gamma}_i}$. Choosing $\gggen{b}$ this way lets us use
-      the bit-range proof's simulator as a black box in the second part of the
-      argument.
+    \item[Simulating $(U, V, \Xi)$.] $\simu$ samples $U \sample \group{1}$, $V
+      \sample \group{1}$, and $\Xi \sample \group{T}$ uniformly at random,
+      rather than deriving them as $\HE(\epoch)^s$, $\ek'^s$, and
+      $\Tag_\gamma^s$, since $\simu$ knows neither $\ek'$ nor $s$.
 
-      By assuming hardness of DDH, we have indistinguishability of $(\gen,
-      \gen^s, \ek, \ek^s)$ from $(\gen, \gen^s, \ek, \ek^t)$ for random $s,t$.
-      This means that a uniformly random pair $(u,v)$ is computationally
-      indistinguishable from an honestly generated one, so the substitution is
-      undetectable to any distinguisher.
+      By hardness of DDH in $\group{1}$, the tuple $(\HE(\epoch), U, \ek',
+      V)$ sampled uniformly at random is computationally indistinguishable
+      from an honestly generated one, $(\HE(\epoch), \HE(\epoch)^s, \ek',
+      \ek'^s)$; a standard hybrid extends this indistinguishability to the
+      further, identically-keyed pair $(\Tag_\gamma, \Xi)$, so the joint
+      substitution of $(U,V,\Xi)$ is undetectable to any distinguisher.
 
-    \item[Simulating the Sigma protocol.] With $(\gggen{b}, u, v)$ fixed,
-      $\simu$ simulates the algebraic clauses of the proof using the standard
+    \item[Simulating the Sigma protocol.] With $(U, V, \Xi)$ fixed, $\simu$
+      simulates the algebraic clauses of the proof using the standard
       honest-verifier zero-knowledge simulator for Sigma protocols.
 
-      Specifically, it samples the challenge $c$ and the responses $\pi_1,
-      \pi_2, \pi_3, \{\pi_{4,i}\}, \pi_5 \sample \Zp$ uniformly at random, and
-      then derives the commitments by solving the verification equations
-      backwards. Concretely, they are defined as follows:
+      Specifically, it samples the challenge $c$ and the responses $\theta_1,
+      \theta_2, \theta_h, \theta_s, \theta_\gamma \sample \Zp$ uniformly at
+      random, and then derives the commitments by solving the verification
+      equations backwards. Concretely, they are defined as follows:
   %
       \begin{gather*}
   %
-        t_1 = \gen_2^{\pi_1}\cdot \gen_3^{\pi_2}\cdot\com^{-c}, \qquad
-        \gggen{t}_2 = \ggen^{\pi_3}\prod_{i=1}^{\ell}
-        \ggen_i^{\pi_{4,i}}\cdot\gggen{b}^{-c}, \qquad t_3 =
-        \HE(\epoch)^{\pi_5}\cdot u^{-c}, \\
+        A = \gen_2^{\theta_1}\cdot\gen_3^{\theta_2}\cdot\gen_4^{\theta_h}\cdot
+        \com^{-c}, \qquad B = \HE(\epoch)^{\theta_s}\cdot U^{-c}, \qquad D =
+        U^{\theta_1}\cdot V^{-c}, \\
     %
-        t_4 = u^{\pi_1}\cdot v^{-c}, \qquad T_5 = \Tag_\gamma^{\pi_5} \cdot
-        \pairing(v, \ggen)^{\pi_3}\cdot \pairing(v,\gggen{b})^{-c}.
+        C = \Tag_\gamma^{\theta_s}\cdot\Xi^{-c}, \qquad F =
+        \Xi^{\theta_2}\cdot\Xi^{\theta_\gamma}\cdot\pairing(V,\ggen_D)^{-c}.
     %
       \end{gather*}
   %
-      By construction,
-      $(t_1,\gggen{t}_2,t_3,t_4,T_5,c,\pi_1,\pi_2,\pi_3,\{\pi_{4,i}\},\pi_5)$
-      satisfies every verification equation, and since $c$ and the responses
-      are uniform and independent, the simulated transcript is distributed
-      identically to a real one, given $(\gggen{b}, u, v)$.
+      By construction, $(A,B,D,C,F,c,\theta_1,\theta_2,\theta_h,\theta_s,
+      \theta_\gamma)$ satisfies every verification equation, and since $c$ and
+      the responses are uniform and independent, the simulated transcript is
+      distributed identically to a real one, given $(U, V, \Xi)$.
 
-      Bit validity of $\{\gamma_i\}$ is shown by $\simu$ invoking the simulator
-      of the underlying inner-product/range argument on $\gggen{b}$ directly,
-      which is why $\gggen{b}$ was constructed from an explicit bit string
-      rather than sampled uniformly at random.
+      The range proof $0 \leq \gamma < \Max$ is simulated separately, by
+      invoking the zero-knowledge simulator of the underlying generic
+      Bulletproofs range argument~\cite{SP:BBBPWM18} on a freshly sampled
+      commitment to an arbitrary in-range value, independent of $\gamma$;
+      unlike the earlier bit-decomposition scheme, this range argument no
+      longer shares any generator with the sigma protocol above, so the two
+      simulations compose directly.
 
       For the interactive protocol, this establishes honest-verifier zero
       knowledge: $\simu$ fixes the challenge before the commitments, requiring
@@ -482,15 +455,14 @@ and witness $\witness_8 = (\witness_7, \tau, \upsilon)$, as follows:
       rewind a general verifier until it reuses an already-programmed
       challenge. In the non-interactive setting, this rewinding is replaced by
       programming the random oracle: $\simu$ samples $c$ and the responses
-      first as above, computes $t_1,\gggen{t}_2,t_3,t_4,T_5$, and then programs
-      $\hash(\inst_8, t_1,\gggen{t}_2,t_3,t_4,T_5) = c$. Since $\hash$ is
-      modelled as a random oracle, this is possible and indistinguishable from
-      normal use of the hash function, so the non-interactive version is
-      simulatable without rewinding.
+      first as above, computes $A,B,D,C,F$, and then programs $\hash(\inst_8,
+      A,B,D,C,F) = c$. Since $\hash$ is modelled as a random oracle, this is
+      possible and indistinguishable from normal use of the hash function, so
+      the non-interactive version is simulatable without rewinding.
 
   \end{description}
 
-  So $(\gggen{b}, u, v, \algoproof_8)$ produced by $\simu$ is computationally
+  So $(U, V, \Xi, \algoproof_8)$ produced by $\simu$ is computationally
   indistinguishable from that of an honest execution, under the DDH assumption
   and in the random oracle model, establishing zero knowledge of $\rel_8$ and
   by the equivalence above, of $\rel_7$.
