@@ -23,7 +23,7 @@ in~\Cref{sec:txid-instantiation}.
 
 Let $\phi = (\varepsilon, s, e) \gets \BBSsign(\sk_{\BBS}, \msg)$. By
 construction $e = (\hgen \vec{q}^{\msg\|s})^{1/(\theta+\varepsilon)}$ for
-$\sk_{\BBS} = \theta$; setting $\inst = \pk_{\BBS} = (\ggen, \tilde{t},
+$\sk_{\BBS} = \theta$. Setting $\inst = \pk_{\BBS} = (\ggen, \tilde{t},
 \vec{q}, \hgen)$ and $\witness = (\msg, \phi)$, a proof of knowledge of a BBS+
 signature shows that $(\inst, \witness)$ satisfies the equation as follows:
 %
@@ -290,7 +290,7 @@ $\omega \in \Zp$, and computes the following:
 %
   It then sends $(\omega, \ciph)$ to the recipient, who decrypts $\ciph = (e_1,
   e_2)$ by computing $l = e_2 / e_1^\mu$ and outputs $\psi = (\omega, k, l)$ if
-  it is a valid Pointcheval-Sanders signature on $\msg$; if the signer followed
+  it is a valid Pointcheval-Sanders signature on $\msg$. If the signer followed
   the protocol honestly, $l = k^\chi \bigl(\prod_{i=0}^{\ell-1} k^{\lambda_i
   \msg_i}\bigr) k^{\omega\iota}$.
 

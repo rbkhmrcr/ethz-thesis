@@ -14,7 +14,7 @@ $\algo{usr}_0$ has enough funds, $I_0$ sends the triple $\langle \pk_0, v, s_0
 \rangle$ to the central bank, which checks that $I_0$ has enough funds and
 responds with signature $\psi_0$ on $\langle \pk_0, v, s_0 \rangle$. With
 $\psi_0$, $\algo{usr}_0$ can spend token $\tau_0 = (\pk_0, v, s_0)$. A payment
-in this scheme transfers ownership of a token from a payer to a payee; it never
+in this scheme transfers ownership of a token from a payer to a payee. It never
 splits or merges tokens.
 
 \paragraph{Payments.} To pay user $\algo{usr}_1$ with $\tau_0$, $\algo{usr}_0$
@@ -35,7 +35,7 @@ which forwards the deposit to the central bank. The central bank verifies that
 $\sigma_n$ is a valid signature on $(v, s_0, \pk_n)$, that $\psi_0$ is a valid
 signature of the central bank on $(\pk_0, v, s_0)$, and that every $\sigma_i$
 is a valid signature on $(v, s_0, \pk_i, \pk_{i+1})$ under $\pk_i$. If all
-checks pass, the deposit is accepted; if another deposit request already starts
+checks pass, the deposit is accepted. If another deposit request already starts
 with $(v, s_0, \pk_0)$, the central bank rejects it as double spending.
 
 \paragraph{Identifying double spenders.} This simple scheme is prone to
@@ -54,7 +54,7 @@ risk of being framed. Concretely, $\algo{usr}_i$ paying $\algo{usr}_{i+1}$
 receives a fresh random number $s_{i+1}$ from $\algo{usr}_{i+1}$, computes
 $\sigma_i$ on $(v, s_i, s_{i+1}, \pk_i, \pk_{i+1})$, and sends $\langle v, s_0,
 \pk_0, s_1, \pk_1, \ldots, s_{i+1}, \pk_{i+1}, \sigma_0, \ldots, \sigma_i,
-\psi_0 \rangle$ to $\algo{usr}_{i+1}$; at deposit, $\algo{usr}_n$ computes
+\psi_0 \rangle$ to $\algo{usr}_{i+1}$. At deposit, $\algo{usr}_n$ computes
 $\sigma_n$ on $(v, s_n, \pk_n)$ and sends the analogous deposit request.  Given
 two conflicting deposit requests both spending $(v, s_0, \pk_0)$, the double
 spender is now the user with public key $\pk_j$ such that $(\pk_i, s_i) =
@@ -101,7 +101,7 @@ intermediaries collude, they can de-anonymise the payment. We avoid this using
 a blind signature scheme, which lets the central bank sign the token $\tau_0 =
 (v, C_0)$ without learning $C_0$ or the resulting signature $\psi_0$. We note
 that the withdrawal and deposit of a token can still be linked through its
-value; this can be avoided by using a single denomination, or mitigated by
+value. This can be avoided by using a single denomination, or mitigated by
 using fixed denominations together with aggregated deposits, which let a
 depositor disclose only the aggregate value of several deposited tokens rather
 than the value of each.
@@ -118,17 +118,18 @@ mobile device handles everything else, in particular verifying received
 payments, computing the verifiable encryption, and generating the
 zero-knowledge proofs that show the user is enrolled in the system.
 
-\paragraph{Privacy guarantees.} To summarise: (1) transactors are anonymous to
-anyone who sees a transaction transcript, assuming payer and payee exchange
-identities out of band; (2) withdrawals and deposits are unlinkable to every
-party in the system, so no one can trace a deposit or payment to its origin or
-destination from the payment transcripts; and (3) the auditor may deanonymise
-payments, and is trusted to do so only with evidence of double spending, with
-the auditor role recommended to be distributed via threshold decryption.
+\paragraph{Privacy guarantees.} To summarise, the scheme gives three
+guarantees. First, transactors are anonymous to anyone who sees a transaction
+transcript, assuming payer and payee exchange identities out of band. Second,
+withdrawals and deposits are unlinkable to every party in the system, so no
+one can trace a deposit or payment to its origin or destination from the
+payment transcripts. Third, the auditor may deanonymise payments, and is
+trusted to do so only with evidence of double spending, with the auditor role
+recommended to be distributed via threshold decryption.
 
 We now describe the complete protocol formally, stated generically with respect
 to the underlying commitment scheme, digital signature scheme, blind signature
-scheme, and public key encryption scheme; \Cref{sec:offline-instantiation}
+scheme, and public key encryption scheme. \Cref{sec:offline-instantiation}
 instantiates each of them.
 
 \begin{protocolbox}{Offline payment protocol}{offline}
@@ -216,7 +217,7 @@ instantiates each of them.
 
         \item $\algo{dev}_0$ unblinds $\algo{resp}$ to obtain a signature $\psi
           \leftarrow \DSsign(\sk_{\algo{cb}}, (\algo{uid}_0, v_0); s_0)$ and
-          stores $(v_0, s_0, \com_0, \psi)$; $\algo{se}_0$ stores the original
+          stores $(v_0, s_0, \com_0, \psi)$. $\algo{se}_0$ stores the original
           token $\tau_0 = (v_0, \com_0)$.
 
         \item $\algo{dev}_0$ produces a proof of withdrawal $\Sigma$ with
@@ -246,7 +247,7 @@ instantiates each of them.
         \item $\algo{dev}_{i+1}$ sends $\com_{i+1}$ to $\algo{dev}_i$.
 
         \item $\algo{dev}_i$ notifies $\algo{se}_i$ that a payment is under
-          way; $\algo{se}_i$ locks token $\tau_i = (v, \com_i)$.
+          way. $\algo{se}_i$ locks token $\tau_i = (v, \com_i)$.
 
         \item $\algo{dev}_i$ computes the audit ciphertext $\ciph_i \leftarrow
           \PKEencrypt(\pk_{\auditor}, \algo{uid}_i; \rho_i)$ and a proof of
@@ -268,7 +269,7 @@ instantiates each of them.
         \ciph_i, \sigma_i, \Gamma_i, \algo{hist}_i)$ to $\algo{dev}_{i+1}$.
 
       \item $\algo{dev}_{i+1}$ verifies $\algo{hist}_i$: if $i = 0$, it checks
-        $\Sigma$; otherwise it verifies every $(\Sigma, \Gamma_k, \sigma_k)_{k
+        $\Sigma$. Otherwise it verifies every $(\Sigma, \Gamma_k, \sigma_k)_{k
         \in [i]}$.
 
       \item If $\Gamma_i$ and $\sigma_i$ also verify, $\algo{dev}_{i+1}$
@@ -288,7 +289,7 @@ instantiates each of them.
 
     \begin{enumerate}
 
-      \item $\algo{usr}_n$ instructs $\algo{dev}_n$ to deposit $\tau_n$;
+      \item $\algo{usr}_n$ instructs $\algo{dev}_n$ to deposit $\tau_n$.
         $\algo{dev}_n$ informs $\algo{se}_n$ to lock $\tau_n$.
 
       \item $\algo{dev}_n$ and $\algo{se}_n$ jointly compute a signature of
@@ -299,11 +300,11 @@ instantiates each of them.
         \algo{hist}_n)$ to $\algo{Int}_n$, which forwards it to the central
         bank.
 
-      \item The central bank verifies $\sigma_n$ and $\algo{hist}_n$; if either
+      \item The central bank verifies $\sigma_n$ and $\algo{hist}_n$. If either
         check fails, return $0$.
 
       \item Otherwise, the central bank checks whether any prior deposit shares
-        the same origin $\com_0$; if so, it records double spending, notifies
+        the same origin $\com_0$. If so, it records double spending, notifies
         the auditor, and returns $0$.
 
       \item Otherwise, the central bank credits $\algo{Int}_n$'s account, which

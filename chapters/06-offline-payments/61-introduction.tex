@@ -29,14 +29,14 @@ withdraw or deposit their CBDCs.
 
 To facilitate adoption against cash or other offline payment instruments, CBDC
 offline payments must mimic some of the properties of physical cash. More
-specifically, offline payments must be (1) fast: an offline payment
-should take only a few seconds to complete; (2) transferable: CBDCs
-received offline can be used in subsequent offline payments without
-restriction; and (3) privacy-preserving: the central bank and the
-commercial banks (the intermediaries) should not learn any information about
-an offline payment beyond what is necessarily leaked at the withdrawal and
-deposit of the CBDCs involved, such as the value of and identities of the
-participants.
+specifically, offline payments must satisfy three properties. First, they
+must be fast: an offline payment should take only a few seconds to complete.
+Second, they must be transferable: CBDCs received offline can be used in
+subsequent offline payments without restriction. Third, they must be
+privacy-preserving: the central bank and the commercial banks (the
+intermediaries) should not learn any information about an offline payment
+beyond what is necessarily leaked at the withdrawal and deposit of the CBDCs
+involved, such as the value of and identities of the participants.
 
 \paragraph{The challenge of offline double spending.} The complexity of
 offline payments stems from the inability of the payee to verify in real time
@@ -45,11 +45,11 @@ verification, double spending is trivial: a malicious payer can spend the same
 token, offline, over and over again without restriction. Curtailing this
 ability can be pursued through preventive or deterrent measures,
 or a combination of both. A preventive measure is a mobile app that forbids
-double spending by design, deleting a token as soon as it is sent; the caveat
+double spending by design, deleting a token as soon as it is sent. The caveat
 is that an attacker can tamper with the app and bypass such restrictions. An
 alternative is to leverage a secure element so that these restrictions
 cannot easily be bypassed. A deterrent measure instead identifies double
-spenders when double spending is detected at the time of deposit; combined
+spenders when double spending is detected at the time of deposit. Combined
 with the right punitive measures, this can discourage double spending by
 individuals, though it will not deter state actors.
 
@@ -109,7 +109,7 @@ costs~\cite{PKC:CPST15,ACNS:CPST15}. While divisibility is a useful feature, we 
 future work and focus instead on transferability.
 
 \paragraph{Transferable ecash.} Some schemes present ecash that is both
-transferable and divisible, at the cost of high computational complexity; we
+transferable and divisible, at the cost of high computational complexity. We
 instead focus on efficiency and scalability~\cite{C:OkaOht91,EC:ChaPed92}.
 Another system maintains a constant token size regardless of
 the number of transfers, but require user interaction to identify double
@@ -132,7 +132,7 @@ overhead and to the fact that physical cash does not satisfy it either.
 
 The bounded-anonymity model keeps
 transactions anonymous as long as each user interacts with a given merchant no
-more than a fixed number of times; beyond this, the user becomes
+more than a fixed number of times. Beyond this, the user becomes
 identifiable~\cite{SCN:CamHohLys06}.
 We instead let the conditions under which anonymity is revoked be defined
 outside of the protocol itself.
@@ -161,16 +161,15 @@ Polaris\footnote{Project Polaris: secure and resilient CBDC systems, offline
 and online.
 \url{https://www.bis.org/about/bisih/topics/cbdc/polaris.htm}.} from the Bank
 for International Settlements sets out design goals for offline payment
-systems, distinguishing fully offline systems, where settlement occurs
-offline; intermittently offline systems, where settlement is generally
-offline but occasional synchronisation with the ledger is required once, for
-example, the total value transferred crosses a risk threshold; and staged
-offline systems, where value is exchanged offline but not settled until the
-payee comes online.
+systems, distinguishing three types. Fully offline systems settle offline.
+Intermittently offline systems settle offline in general, but require
+occasional synchronisation with the ledger, once, for example, the total
+value transferred crosses a risk threshold. Staged offline systems exchange
+value offline but do not settle it until the payee comes online.
 
 Sweden has piloted its e-krona project on the Corda
 platform, focusing on legal analysis
-and integration with point-of-sale terminals; locally stored e-krona can be
+and integration with point-of-sale terminals. Locally stored e-krona can be
 used offline and, like cash, is not recoverable if the wallet is lost, and
 transactions formed offline are not settled until the device goes online due
 to online double-spending checks~\cite{brown2016corda,soderberg2019krona}. The People's Bank of China has designed a
@@ -185,7 +184,7 @@ while emphasising privacy alongside regulatory compliance. The US Federal
 Reserve Board's report on offline payments
 distinguishes hybrid payment systems, where the payee must come online to
 settle, from fully offline systems, where this is not required, and finds no
-production examples of the latter; it highlights the digital Rupee from the
+production examples of the latter. It highlights the digital Rupee from the
 National Payments Corporation of
 India\footnote{Reported at \url{https://rbi.org.in/scripts/FAQView.aspx?Id=169}.}, which
 allows offline transactions from a smartphone app with settlement once the
@@ -206,7 +205,7 @@ issuance and consider divisible offline payments, while we
 focus on efficient transferability~\cite{PoPETS:RiaPio23}. PayOff offers a
 transferable offline CBDC solution using more complex cryptography than ours,
 and assigns the central bank responsibility for covering double spent values,
-potentially inflating the total value in the system; we instead prioritise
+potentially inflating the total value in the system. We instead prioritise
 equipping users with a secure element to prevent double spending rather than
 only detect it~\cite{Beer2024}.
 

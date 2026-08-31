@@ -9,7 +9,7 @@ $\simu$ that interacts with system participants through ideal functionality
 $\idfu{\algo{op}}$. We define a sequence of indistinguishable games that start
 with Game 0 representing the real world, and end with Game 12 representing the
 ideal world. Throughout, we call a user
-corrupt if both their device and secure element are compromised; the more
+corrupt if both their device and secure element are compromised. The more
 general split-corruption setting follows analogously. We also simplify
 exposition by treating the randomness $\rho$ produced by $\idfu{\algo{op}}$ during
 $\OPwithdraw$ and $\OPexecute$ as the output of $\com(\ck, \cdot; \cdot)$.
@@ -158,7 +158,7 @@ exactly one of the following holds:
     representations of $\rho$ as in (b) give $\algo{uid} \neq \algo{uid}^*$,
     again contradicting (P1). If $\algo{usr}^*$ is honest, $\com_0 \leftarrow
     \com(\ck, \algo{uid}^*; s^*)$ was chosen by $\simu$, so $\algo{usr}$ cannot
-    have guessed it except with negligible probability; if $\algo{usr}'$
+    have guessed it except with negligible probability. If $\algo{usr}'$
     accepts $p_0$, then $\sigma_0$ is a valid signature of knowledge proving
     possession of a credential on $(\algo{uid}, \sk)$, and by (P5) $\simu$
     extracts credential $\varphi$ and pair $(\algo{uid}, \sk)$. Since
@@ -242,12 +242,12 @@ $\ciph_j$. The commitment $\com_j$ is fixed by Game 11's argument (binding of
 the commitment scheme and EUF-CMA of the blind signature scheme) through the
 chain via simulation-extractability of $\sigma_{j-1}$.  The ciphertext $\ciph_j
 \leftarrow \PKEencrypt(\pk_{\auditor}, \algo{uid}_j; \rho_j)$ encrypts the same
-value as is committed in $\com_j$, as certified by proof $\Gamma_j$; were this
+value as is committed in $\com_j$, as certified by proof $\Gamma_j$. Were this
 false, it would either yield two valid openings of $\com_j$ under $\ComOpen$,
 contradicting binding (P1), or a proof $\Gamma_j$ with no valid witness,
 contradicting simulation-extractability (P5). An honest recipient cannot be
 framed, as $\com_j$ is chosen by the recipient before being signed by the payer
-in $\sigma_{j-1}$; so $\com_j = \com_j'$ if and only if the owner of $\com_j$
+in $\sigma_{j-1}$. So $\com_j = \com_j'$ if and only if the owner of $\com_j$
 is the double spender.
 
 If $\ciph_j$ decrypts to an unregistered user, then $\sigma_j$ is a valid
