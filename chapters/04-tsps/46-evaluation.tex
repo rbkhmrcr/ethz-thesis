@@ -8,7 +8,7 @@ describes the ideal functionalities that our constructions assume for secure
 MPC over $\Zp$ and over a generic group $\G$. The functionalities over $\Zp$
 are realised directly by existing MPC frameworks. Realising those over $\G$
 required us to extend MP-SPDZ with support for computation on secret-shared
-group elements~\cite{CCS:Keller20}, which, to our knowledge, is the first such
+group elements~\cite{CCS:Keller20}. To our knowledge, this is the first such
 extension. We benchmark two concrete frameworks built on this extension: ATLAS,
 in the honest-majority setting, and MASCOT, in the dishonest-majority setting.
 
@@ -76,7 +76,8 @@ $\idfu{\algo{Combine}}$ taking the role of \texttt{output}.
 We run benchmarks on a 16-core machine running RHEL 9.0-64 with 32GB of RAM,
 inside Docker containers based on Ubuntu 22.
 
-\begin{table*}[!ht] \centering \resizebox{\textwidth}{!}{% \begin{tabular}{ c
+\begin{table*}[!ht] \centering \resizebox{\textwidth}{!}{
+\begin{tabular}{ c
   || c | c | c || c | c | c } \toprule & Assumption & Message space & $|\sk|$ &
   $|\pk|$ & $|\signature|$ & Verification cost \\ \midrule ~\cite{AC:CKPSS23} &
   PS + ROM & $(\gen^{\vec{m}}, \ggen^{\vec{m}}) \in \group{1}^l \times
@@ -88,7 +89,8 @@ inside Docker containers based on Ubuntu 22.
   l| \group{2} | $ & $ | \group{1} | + 2 | \group{2} | $ & $l+4$ \\
   Section~\ref{sec:tsps-kiltz} & SXDH & $ \vec{m} \in \group{1}^l$ & $ l |\Zp |
 + 6 | \group{1} | $ & $ (l+6)| \group{2} | $ & $ 6 | \group{1} | + | \group{2}
-|$ & $2l+10$ \\ \bottomrule \end{tabular}% } \caption{Comparison of threshold
+|$ & $2l+10$ \\ \bottomrule \end{tabular} } 
+\caption{Comparison of threshold
 structure-preserving signature schemes.  Verification cost lists the number of
 pairing evaluations needed during verification.} \label{table:comp}
 \end{table*}
@@ -115,8 +117,8 @@ Section~\ref{sec:tsps-kiltz} & 40ms & 88ms & 61ms & 352ms & 94ms \\ \bottomrule
 
 Table~\ref{table:comp} compares our two schemes against two prior threshold
 structure-preserving signature schemes in terms of assumptions, message space,
-key and signature size, and verification cost~\cite{AC:CKPSS23,PKC:MMSST24},
-while Table~\ref{table:comms} compares per-party communication complexity
+key and signature size, and verification cost~\cite{AC:CKPSS23,PKC:MMSST24}.
+Table~\ref{table:comms} compares per-party communication complexity
 across the offline, online, and combining phases. Table~\ref{table:benchmarks}
 reports concrete timings for both of our schemes, using ATLAS and MASCOT to
 realise the underlying MPC functionalities, and against a centralised
@@ -127,7 +129,7 @@ execution time varies with the total number of parties, fixing the threshold of
 participating parties and the message length at two group elements. In each
 case, ATLAS is around twice as fast as MASCOT, which is expected, since MASCOT
 relies on public key cryptography to handle dishonest majorities.
-Figures~\ref{eval-keygen} and~\ref{eval-offline} further show that ATLAS scales
+Figures~\ref{eval-keygen} and~\ref{eval-offline} show that ATLAS scales
 better than MASCOT as the number of parties increases. Since our benchmarks
 build on MP-SPDZ, they reflect the standard MPC offline and online phases,
 where the output is constructed within the online phase. This means the online
