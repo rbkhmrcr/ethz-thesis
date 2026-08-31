@@ -134,7 +134,7 @@ without ever learning the keys themselves.
 The registration authority first checks that the user has not registered
 before, then sends a fresh nonce. The user generates a signing key pair and a
 tracing key, derives their corresponding public values $\PSK$ and $\PTK$, and
-responds with a NIZK proof of knowledge of both secrets, bound to the nonce so
+responds with a zero-knowledge proof of knowledge of both secrets, bound to the nonce so
 the proof cannot be replayed, exactly as captured by $\rel_4$.
 
 If the proof verifies, the registration authority certifies the user's public
@@ -151,7 +151,7 @@ not depend on the auditor, it can be generated once and reused for every
 authorisation granted during the epoch.
 
 To authorise this particular auditor, the user binds the epoch-key proof and
-the auditor's nonce together with a second NIZK proof of knowledge of their
+the auditor's nonce together with a second zero-knowledge proof of knowledge of their
 long term keys, again relative to $\rel_4$, preventing the authorisation from
 being replayed elsewhere. The user then sends the auditor their registration
 credential, the epoch tracing key, and both proofs. The auditor accepts the key
@@ -194,5 +194,5 @@ $\ledger[\Tag]$ where present.
 
 \begin{theorem}\label{thm:txid-bb} Assuming that $\DS$ satisfies existential
 unforgeability, $\FE$ and $\FT$ are pseudorandom, $\G$ and $\G'$ are one way,
-and the NIZK proof system is secure, the protocol described above securely
+and the zero-knowledge proof system is secure, the protocol described above securely
 realises $\idfu{\algo{trace}}$.  \end{theorem}

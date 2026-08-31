@@ -103,7 +103,7 @@ We rely on the following security properties of the underlying primitives:
   relation $\rel_5$.
 
   When such a user submits a transaction, $\simu$ follows $\Pi$ but simulates
-  the ZK proof for relation $\rel_7$, since $\ek$ is now random. By the
+  the zero-knowledge proof for relation $\rel_7$, since $\ek$ is now random. By the
   pseudorandomness of $\FE$ (P3) and (P4), this game is indistinguishable from
   Game 3.
 
@@ -145,8 +145,8 @@ We rely on the following security properties of the underlying primitives:
       the confidential payload to an arbitrary ciphertext, and instead of
       computing the commitment as $\com = \ComCommit(\ck, \utk, \openinfo)$ and
       the tag as $\Tag_\gamma = \FT(\ek,\gamma)$, samples uniformly at random
-      commitment $\com^{\star}$ and tag $\Tag_{\gamma}^\star$ and simulates the
-      corresponding proof and ZK proof. Epoch keys for other epochs are
+      commitment $\com^{\star}$ and tag $\Tag_{\gamma}^\star$ and simulates both
+      corresponding proofs. Epoch keys for other epochs are
       independent of the current one, so by (P2), the pseudorandomness of $\FT$
       (P3), and (P4), this is indistinguishable from submitting transactions in
       an execution of $\Pi$.
@@ -170,7 +170,7 @@ We rely on the following security properties of the underlying primitives:
   $\IDsubmit$ interface.
 
   When a corrupt user $\user$ submits a transaction with a valid tag (a tag
-  with valid ZK proof and proof and which does not appear in the ledger),
+  with valid proofs which does not appear in the ledger),
   $\simu$ uses (P4) to extract $\user$'s witness, and (P1) to identify $\user$
   via $\regsimu$. $\simu$ then sends an $\IDsubmit$ request on $\user$'s behalf
   to $\idfu{\algo{trace}}$ and returns its output. If $\idfu{\algo{trace}}$
@@ -210,7 +210,7 @@ We rely on the following security properties of the underlying primitives:
   Event $e_2$ occurs only with negligible probability. A transaction $\tx$ from
   a corrupt user is recorded in $\txnssimu$ and forwarded to
   $\idfu{\algo{trace}}$ only if it carries a valid tag $\Tag_{\gamma}$, meaning
-  the proof for relation $\rel_6$ and the ZK proof for relation $\rel_7$ are
+  the proof for relation $\rel_6$ and the proof for relation $\rel_7$ are
   both valid. By (P4), this gives $\Tag_{\gamma} = \FT(\ek, \gamma) \ \wedge \
   \ek = \FE(\utk, \epoch)$ with $\utk$ verifying Equations \ref{eq:rel6} and
   \ref{eq:rel7}. An honest auditor with the right permission then fails to
@@ -448,8 +448,9 @@ $\witness_8 = (\witness_7, s)$, as follows:
 
       The range proof $0 \leq \gamma < \Max$ is simulated separately, by
       invoking the zero-knowledge simulator of the underlying generic
-      Bulletproofs range argument~\cite{SP:BBBPWM18} on a freshly sampled
-      commitment to an arbitrary in-range value, independent of $\gamma$.
+      Bulletproofs range argument on a freshly sampled
+      commitment to an arbitrary in-range value, independent of
+      $\gamma$~\cite{SP:BBBPWM18}.
       Unlike the earlier bit-decomposition scheme, this range argument no
       longer shares any generator with the sigma protocol above, so the two
       simulations compose directly.

@@ -17,15 +17,24 @@ so that they can be handled by efficient sigma protocols.
 
 \end{assumptionbox}
 
+We instantiate $\FE$ by fixing the generator to $\HE(\epoch)$, for hash
+function $\HE : \{0,1\}^* \to \group{1}$ modelled as a random oracle, and the
+PRF key to the user's tracing key $\utk$, as follows:
+%
+\begin{equation*}
+%
+  \FE(\utk, \epoch) = \HE(\epoch)^{\utk}.
+%
+\end{equation*}
+%
+
 \begin{lemma}\label{lem:txid-fe-prf}
   %
   Under the DDH assumption in $\group{1}$ and modeling $\HE$ as a random
-  oracle, the function $\FE(\utk, \epoch) = \HE(\epoch)^{\utk}$ is a secure
+  oracle, $\FE$ is a secure
   pseudorandom function.
 %
 \end{lemma}
-
-\subsection{Instantiating $\FT$}
 
 \subsection{Instantiating $\FT$}
 
@@ -177,7 +186,7 @@ user's keys below without ever seeing them~\cite{SCN:AuSusMu06,EC:TesZhu23b}.
 computationally binding under the discrete log assumption. Commitments are
 group elements.
 
-\begin{protocolbox}{Tracing protocol}{txid}
+\begin{protocolbox}{Tracing protocol}{prot:txid}
 
   \begin{description}
 
@@ -202,10 +211,10 @@ group elements.
           (\gen_2,\gen_3,\gen_4)$, reusing the generators of Step 2.
 
         \item Set $\Max \leftarrow 2^\ell$, $\FE(\utk,\epoch) :=
-          \HE(\epoch)^{\utk}$, and, following the Dodis-Yampolskiy
-          construction~\cite{PKC:DodYam05}, $\FT(\ek,\gamma) := \pairing(\ek',
+          \HE(\epoch)^{\utk}$, and $\FT(\ek,\gamma) := \pairing(\ek',
           \ggen_D^{1/(\utk'+\gamma)})$ for epoch tracing key $\ek =
-          (\ek',\utk')$.
+          (\ek',\utk')$, following the Dodis-Yampolskiy
+          construction~\cite{PKC:DodYam05}.
 
         \item Set $\crs \leftarrow (\group{1},\group{2},\group{T},e,
           \gen_0,\gen_1,\gen_2,\gen_3,\gen_4,\ggen,\ggen_D,\HE,
@@ -365,17 +374,19 @@ proofs, one attesting that it was correctly derived from a properly committed
 tracing key, and one that the committed key was signed by the registration
 authority.
 
-\paragraph{Verifiable tag computation.} The user first computes a commitment
+\paragraph{Verifiable tag computation.}\label{sec:tag-computation} The user first computes a commitment
 $\com = \gen_2^{\utk}\cdot\gen_3^{\utk'}\cdot\gen_4^{\openinfo}$, and $\Tag =
 \FT(\ek, \gamma)$, where, for $\ek = (\ek',\utk')$, $\FT(\ek, \gamma)$ is
-defined, following the Dodis-Yampolskiy construction~\cite{PKC:DodYam05}, as
-$\pairing\!\left(\ek',\, \ggen_D^{1/(\utk'+\gamma)}\right)$. Under the $q$-BDHI
-assumption (\Cref{qbdhi-txid}), $\FT$ can be shown to be a PRF, in the random
-oracle model.
+defined as $\pairing\!\left(\ek',\, \ggen_D^{1/(\utk'+\gamma)}\right)$,
+following the Dodis-Yampolskiy construction~\cite{PKC:DodYam05}. Under the
+$q$-BDHI assumption (\Cref{qbdhi-txid}), $\FT$ can be shown to be a PRF, in the
+random oracle model.
 
 $\rel_7$ is defined for $\crs_7 \leftarrow \NIZKgen(\rel_7)$, with $\crs_7$
-describing a hash function $\hash \colon \{0,1\}^* \rightarrow \Zp$, and
-instance, witness, and relation given as follows:
+describing a hash function $\hash \colon \{0,1\}^* \rightarrow \Zp$, used to
+derive the verifier's challenge non-interactively via the Fiat-Shamir
+transform, as seen later in the sigma protocol of~\Cref{prot:txid-tag-sigma}.
+The instance, witness, and relation are given as follows:
 %
 \begin{equation} \begin{gathered}
 %
@@ -417,7 +428,7 @@ We prove this in two parts: a sigma protocol for the equalities of $\rel_8$
 involving $\witness_8$, and a separate, generic range argument that $0 \leq
 \gamma < \Max$.
 
-\begin{protocolbox}{Tag correctness sigma protocol}{txid-tag-sigma}
+\begin{protocolbox}{Tag correctness sigma protocol}{prot:txid-tag-sigma}
 
   \begin{description}
 
@@ -462,19 +473,21 @@ involving $\witness_8$, and a separate, generic range argument that $0 \leq
 \end{protocolbox}
 
 The range check $0 \leq \gamma < \Max$ is established using a generic
-Bulletproofs range argument~\cite{SP:BBBPWM18} over a Pedersen commitment to
-$\gamma$. Binding response $\theta_\gamma$ above to that commitment's own sigma
+Bulletproofs range argument over a Pedersen commitment to
+$\gamma$~\cite{SP:BBBPWM18}. Binding response $\theta_\gamma$ above to that commitment's own sigma
 protocol ties $\gamma$ consistently across both arguments.
 
 \subsubsection*{Transaction authorisation.}\label{sec:tx-auth} Each transaction
-carries a NIZK proof that attests it has originated from a registered user,
+carries a proof that attests it has originated from a registered user,
 following relation $\rel_6$ defined below.
 
 Since the user is registered using a signature $\signature = (e, r, E =
 ({\gen_0}\cdot\gen_1^{\sk} \cdot \gen_2^{\utk}\cdot\gen_3^{\utk'}\cdot
 \gen_4^r)^{1/(z+e)})$ from the BBS+ signature scheme, $\rel_6$ is defined for
 $\crs_6 \leftarrow \NIZKgen(\rel_6)$, with $\crs_6$ describing a hash function
-$\hash \colon \{0,1\}^* \rightarrow \Zp$, and instance, witness, and relation
+$\hash \colon \{0,1\}^* \rightarrow \Zp$, used, as with $\rel_7$ above, to
+derive the verifier's challenge non-interactively via the Fiat-Shamir
+transform. The instance, witness, and relation are
 given as follows:
 %
 \begin{equation} \begin{gathered}
@@ -490,10 +503,10 @@ given as follows:
 \end{gathered} \end{equation}
 %
 
-The NIZK proof for $\rel_6$ on message $\msg$ is obtained by rewriting $\rel_6$
+The zero-knowledge proof for $\rel_6$ on message $\msg$ is obtained by rewriting $\rel_6$
 as an equivalent relation $\rel_9$ that avoids proofs over bilinear
-equations~\cite{EPRINT:CamDriLeh16,USENIX:HesSinSor23}, for $\crs_9 = \crs_6$
-and instance, witness, and relation given as follows:
+equations, for $\crs_9 = \crs_6$~\cite{EPRINT:CamDriLeh16,USENIX:HesSinSor23}.
+The instance, witness, and relation are given as follows:
 %
 \begin{equation}
 %
@@ -521,7 +534,7 @@ u^e\cdot v^{\zeta} \ \wedge \ (\gen_0\cdot\com)^{-1} = v^{\eta}\cdot
 \end{gathered} \end{equation}
 %
 
-\begin{protocolbox}{Transaction authorisation proof}{txid-tx-nizk}
+\begin{protocolbox}{Transaction authorisation proof}{prot:txid-tx-nizk}
 
   \begin{description}
 
@@ -576,7 +589,7 @@ u^e\cdot v^{\zeta} \ \wedge \ (\gen_0\cdot\com)^{-1} = v^{\eta}\cdot
 \end{protocolbox}
 
 \begin{theorem}\label{thm:inst} The instantiation presented
-  in~\Cref{sec:algebraic} securely realises $\idfu{\algo{trace}}$ in the random
+  in~\Cref{sec:txid-instantiation} securely realises $\idfu{\algo{trace}}$ in the random
   oracle model, under the Decisional Diffie Hellman assumption in $\group{1}$,
   the $q$-Bilinear Diffie-Hellman Inversion assumption, and the $q$-Strong
 Diffie Hellman assumption.  \end{theorem}

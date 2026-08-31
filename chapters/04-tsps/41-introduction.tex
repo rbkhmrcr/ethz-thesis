@@ -12,8 +12,7 @@ few~\cite{AFRICACRYPT:FucVer10,CCS:CamDriDub17,RSA:CriLys19,PoPETS:MSBM23,AC:Gro
 
 Structure-preserving signatures also find use in blockchain-based
 privacy-preserving payment systems. Currency is represented by a token encoding
-the triple $\langle \text{owner}, \ \text{value}, \ \text{serial\_number}
-\rangle$~\cite{EPRINT:ACDDET19,EPRINT:TBAAGP22,CCS:KiaKohSar22}.  For privacy,
+the owner, value, and a unique serial number~\cite{EPRINT:ACDDET19,EPRINT:TBAAGP22,CCS:KiaKohSar22}.  For privacy,
 the shared ledger records a hiding commitment to the token, generally a
 Pedersen commitment, rather than the token itself~\cite{C:Pedersen91}. To
 transfer ownership privately, the owner interacts with a certifier to obtain a
@@ -61,11 +60,9 @@ controlled by one or a small number of authorities. Permissioned ledgers are of
 particular interest for platforms such as Central Bank Digital Currencies
 (CBDCs), as they offer a transparent system enabling regulatory oversight while
 still supporting transaction privacy and compliance with the monetary policy of
-the central bank in question.\footnote{A citation for CBDC permissioned ledger
-designs is still to be added.} One way to build such a system has every
+the central bank in question. One way to build such a system has every
 transaction executed and, if valid, signed by an endorser before being added to
-the ledger,\footnote{A citation for endorser-based ledger designs is still to
-be added.} where the signed state committed to the ledger is a commitment to
+the ledger, where the signed state committed to the ledger is a commitment to
 the value and type of asset. Threshold structure-preserving signatures would
 let trust be distributed between multiple endorsers via the threshold property,
 while the structure-preserving property lets users perform efficient proofs of
@@ -83,7 +80,7 @@ techniques~\cite{C:AGHO11,C:KilPanWee15,C:DPSZ12,CCS:KelOrsSch16,C:GLOPS21}.
 We select the scheme of Abe, Groth, Haralambiev, and Ohkubo for its optimal
 signature size, and that of Kiltz, Pan, and Wee for its reliance on standard
 assumptions alone~\cite{C:AGHO11,C:KilPanWee15}. Both underlying signatures let
-the threshold signers perform the bulk of their computation offline, in a
+the threshold signers perform the majority of their computation offline, in a
 pre-processing phase before the message to be signed is known, which suits
 high-throughput applications, such as payments, that experience interspersed
 periods of low and high traffic. Since our threshold signatures require
@@ -121,20 +118,26 @@ lets a user also prove statements about their own key. The cost is that
 signature length grows with the square root of the message
 length~\cite{EC:GroSah08}.
 
-\begin{table*}[!ht] \centering \begin{tabular}{ c || c | c | c } \toprule &
-  Assumption/model & $|\signature|$ & Notable property \\ \midrule
-  \cite{C:AFGHO10} & standard model, non-interactive assumption & 7 group
-  elements & signs messages of arbitrary length \\ \cite{C:AGHO11} & GGM & 3
-  group elements & strong unforgeability, size-optimal in type III groups \\
-  \cite{C:LPJY13} & -- & 3 group elements & linearly homomorphic \\
-  \cite{JC:AGKOT19} & -- & grows with $\sqrt{\cdot}$ of message length & fully
-  structure-preserving (group-element secret key) \\ \cite{C:KilPanWee15} & DDH
-                                                                          & 7
-group elements & security from a standard, non-$q$-type assumption \\
-\bottomrule \end{tabular} \caption{Structure-preserving signature schemes
-  discussed above. Entries marked `--' are not stated explicitly in the cited
-work as summarised here. Please verify against the original papers before
-submission.} \label{table:related-sps} \end{table*}
+\begin{table*}[!ht]
+  \centering
+  \resizebox{\textwidth}{!}{
+  \begin{tabular}{ c | c | c | c }
+   \toprule
+    & Assumption/model & $|\signature|$ & Notable property \\
+   \midrule
+    \cite{C:AFGHO10} & standard model, non-interactive assumption & 7 group elements & signs messages of arbitrary length \\
+    \cite{C:AGHO11} & GGM & 3 group elements & strong unforgeability, size-optimal in type III groups \\
+    \cite{C:LPJY13} & -- & 3 group elements & linearly homomorphic \\
+    \cite{JC:AGKOT19} & -- & grows with $\sqrt{\cdot}$ of message length & fully structure-preserving (group-element secret key) \\
+    \cite{C:KilPanWee15} & DDH & 7 group elements & security from a standard, non-$q$-type assumption \\
+   \bottomrule
+  \end{tabular}
+  }
+  \caption{Structure-preserving signature schemes discussed above. Entries
+  marked `--' are not stated explicitly in the cited work as summarised
+  here. Please verify against the original papers before submission.}
+  \label{table:related-sps}
+\end{table*}
 
 \paragraph{Threshold structure-preserving signatures.} Threshold
 structure-preserving signatures have only recently been considered. One
@@ -150,18 +153,24 @@ assumption~\cite{PKC:MMSST24}. It builds on the structure-preserving signature
 of Kiltz, Pan, and Wee, and its signatures consist of seven group
 elements~\cite{C:KilPanWee15}.
 
-\begin{table*}[!ht] \centering \begin{tabular}{ c || c | c | c } \toprule &
-  Assumption & Message space & Built from \\ \midrule \cite{AC:CKPSS23} & PS +
-  ROM & indexed Diffie-Hellman tuples $(\gen^m, \ggen^m)$ & -- \\
-  \cite{PKC:MMSST24} & SXDH & arbitrary $\vec{m} \in \group{1}^l$ &
-  \cite{C:KilPanWee15} \\ Section~\ref{sec:tsps-abe} (ours) & q-type &
-  arbitrary $\vec{m} \in \group{1}^l$ & \cite{C:AGHO11} \\
-  Section~\ref{sec:tsps-kiltz} (ours) & SXDH & arbitrary $\vec{m} \in
-  \group{1}^l$ & \cite{C:KilPanWee15} \\ \bottomrule \end{tabular}
+\begin{table*}[!ht]
+  \centering
+  \begin{tabular}{ c | c | c | c }
+   \toprule
+    & Assumption & Message space & Built from \\
+   \midrule
+    \cite{AC:CKPSS23} & PS + ROM & indexed Diffie-Hellman tuples $(\gen^m, \ggen^m)$ & -- \\
+    \cite{PKC:MMSST24} & SXDH & arbitrary $\vec{m} \in \group{1}^l$ & \cite{C:KilPanWee15} \\
+    Section~\ref{sec:tsps-abe} (ours) & q-type & arbitrary $\vec{m} \in \group{1}^l$ & \cite{C:AGHO11} \\
+    Section~\ref{sec:tsps-kiltz} (ours) & SXDH & arbitrary $\vec{m} \in \group{1}^l$ & \cite{C:KilPanWee15} \\
+   \bottomrule
+  \end{tabular}
   \caption{Threshold structure-preserving signature schemes. Concrete key,
-    signature, and communication sizes for these schemes are compared in
-    Table~\ref{table:comp} and Table~\ref{table:comms} in
-Section~\ref{sec:tsps-evaluation}.} \label{table:related-tsps} \end{table*}
+  signature, and communication sizes for these schemes are compared in
+  Table~\ref{table:comp} and Table~\ref{table:comms} in
+  Section~\ref{sec:tsps-evaluation}.}
+  \label{table:related-tsps}
+\end{table*}
 
 We give two threshold structure-preserving signature schemes for arbitrary
 group elements, built respectively from the schemes of Abe, Groth, Haralambiev,
