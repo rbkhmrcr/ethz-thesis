@@ -180,8 +180,8 @@ as follows:
 \end{equation*}
 %
 
-The Pointcheval-Sanders signature scheme also signs vectors of messages.
-It does so through the following algorithms~\cite{RSA:PoiSan16,RSA:PoiSan18}.
+The Pointcheval-Sanders signature scheme also signs vectors of messages.  It
+does so through the following algorithms~\cite{RSA:PoiSan16,RSA:PoiSan18}.
 
 \begin{primitivebox}{The Pointcheval-Sanders signature scheme}{ps}
 
@@ -326,9 +326,9 @@ k^{\omega\iota}\Bigr).
     Section~\ref{sec:withdrawal}: we execute it on the vector of messages
     $(\algo{uid}_0, v, s_0)$ with randomness $r = 0$.
 
-    \paragraph{Proof of withdrawal.}\label{sec:ps-proof} Let $\tau =
-    (v, c = \gen_0^{\algo{uid}} \gen_1^s)$ be a token, and let $\pk_{\algo{PS}}
-    = (\tilde{x}, \tilde{y}_0, \tilde{y}_1, \tilde{y}_2, \tilde{z})$ be the
+    \paragraph{Proof of withdrawal.}\label{sec:ps-proof} Let $\tau = (v, c =
+    \gen_0^{\algo{uid}} \gen_1^s)$ be a token, and let $\pk_{\algo{PS}} =
+    (\tilde{x}, \tilde{y}_0, \tilde{y}_1, \tilde{y}_2, \tilde{z})$ be the
     public key of the central bank $\algo{cb}$. Let $\psi = (\omega, k, l)$ be
     a Pointcheval-Sanders signature that verifies $1 \gets
     \algo{PS}\algo{.Verify}(\pk_{\algo{PS}}, (\algo{uid}, v, s), \psi)$, so

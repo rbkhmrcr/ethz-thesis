@@ -1,23 +1,21 @@
 \section{Summary}\label{sec:txid-summary}
 
-This chapter addresses regulatory oversight in privacy preserving transaction
-systems. Prior work typically supports either anonymity revocation, which
-lets an auditor identify the user responsible for a single transaction, or
-tracing, which lets an auditor recover every transaction associated with a
-given user. Existing tracing mechanisms achieve this by deriving
-tags from a sequential counter, meaning that users'
-transactions cannot be created in parallel. This degrades performance in
-high throughput settings.
- 
+This chapter addresses regulatory oversight in privacy-preserving transaction
+systems. Prior work typically supports either anonymity revocation, which lets
+an auditor identify the user responsible for a single transaction, or tracing,
+which lets an auditor recover every transaction associated with a given user.
+Existing tracing mechanisms achieve this by deriving tags from a sequential
+counter, meaning that users' transactions cannot be created in parallel. This
+degrades performance in high-throughput settings.
+
 We introduce a tracing mechanism that supports both anonymity revocation and
 efficient tracing without requiring encrypted user identifiers or sequential
-counters, letting users generate and submit multiple transactions
-concurrently. Auditors are granted epoch bound
-permission. We formalise this as through an ideal functionality
-capturing anonymity, non repudiation, and permission expiration, and give a
-abstract construction from signatures, commitments, pseudorandom functions,
-and zero knowledge proofs.
- 
+counters, letting users generate and submit multiple transactions concurrently.
+Auditors are granted epoch-bound permission. We formalise this through an ideal
+functionality capturing anonymity, non-repudiation, and permission expiration,
+and give an abstract construction from signatures, commitments, pseudorandom
+functions, and zero-knowledge proofs.
+
 We instantiate the construction concretely in pairing-based groups with a
 transparent setup, using the BBS+ signature scheme so that the registration
 authority can certify users' keys without ever learning their tracing key.

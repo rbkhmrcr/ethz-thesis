@@ -7,7 +7,8 @@ reporting end-to-end figures for the full protocol.
 All experiments were conducted on an Apple M2 with 16GB RAM using Go's
 benchmarking framework. The algebraic construction is implemented as a research
 prototype without batching, precomputation, or multi-exponentiation
-optimisations; benchmarks represent conservative performance estimates.
+optimisations. The benchmarks below represent conservative performance
+estimates.
 
 For the proof of knowledge of a signature from the BBS+ signature scheme
 ($\rel_4$ and $\rel_9$), which now range over the three secrets
@@ -21,16 +22,16 @@ over the credential proof coming from checking the disclosed $\utk'$ against
 the credential directly.
 
 For the transaction tag proof, $\rel_8$, following the Dodis-Yampolskiy
-instantiation of $\FT$, the prover cost for the
-commitment, epoch-key term, and tag correctness is one 3-base
-multi-exponentiation and two single exponentiations in $\group{1}$, up to
-three exponentiations in $\group{T}$, one exponentiation in $\group{2}$ to
-derive the tag, and one pairing evaluation. The verifier cost is one pairing
-evaluation, one 3-base multi-exponentiation and five single exponentiations in
-$\group{1}$, and four exponentiations in $\group{T}$. For the range check, the
-prover costs are $O(\ell)$ exponentiations plus the Bulletproofs inner product
-argument of $O(\ell)$ group operations, and the verifier
-cost is $O(\ell)$ exponentiations~\cite{SP:BBBPWM18}.
+instantiation of $\FT$, the prover cost for the commitment, epoch-key term, and
+tag correctness is one 3-base multi-exponentiation and two single
+exponentiations in $\group{1}$, up to three exponentiations in $\group{T}$, one
+exponentiation in $\group{2}$ to derive the tag, and one pairing evaluation.
+The verifier cost is one pairing evaluation, one 3-base multi-exponentiation
+and five single exponentiations in $\group{1}$, and four exponentiations in
+$\group{T}$. For the range check, the prover costs are $O(\ell)$
+exponentiations plus the Bulletproofs inner product argument of $O(\ell)$ group
+operations, and the verifier cost is $O(\ell)$
+exponentiations~\cite{SP:BBBPWM18}.
 
 We note that the proof of $\rel_4$ is computed once at registration and once
 per Grant invocation, and the proof of $\rel_5$ once per epoch.  The proofs of
@@ -40,16 +41,16 @@ Table~\ref{tab:algebraic} reports results with $\ell = 10$.
 
 \begin{table}[t] \centering \caption{Algebraic PRF instantiation benchmarks
   (BN254 / BLS12-381).} \label{tab:algebraic} \begin{tabular}{l r r} \toprule
-    Operation & \ \ BN254 & \ \ BLS12-381 \\ \midrule Epoch proof time (ms)
-              & 0.08 & 0.14 \\ Epoch verification time (ms) & 0.13 & 0.24 \\
-    Tag proof time (ms)          & 4.29 & 5.55 \\ Tag verification time (ms)
-                                 & 6.39 & 8.00 \\ \midrule Total proof time
-    (ms)        & 4.37 & 5.69 \\ Total verification time (ms) & 6.52 & 8.24 \\
-  \bottomrule \end{tabular} \end{table}
+    Operation & \ \ BN254 & \ \ BLS12-381 \\ \midrule Epoch proof time (ms) &
+    0.08 & 0.14 \\ Epoch verification time (ms) & 0.13 & 0.24 \\ Tag proof time
+    (ms)          & 4.29 & 5.55 \\ Tag verification time (ms) & 6.39 & 8.00 \\
+    \midrule Total proof time (ms)        & 4.37 & 5.69 \\ Total verification
+    time (ms) & 6.52 & 8.24 \\ \bottomrule \end{tabular} \end{table}
 
-  Proof generation completes in a few milliseconds and verification in under
-  10ms even without optimisation, demonstrating practical deployability.  For
-  context, Idemix, a widely deployed anonymous credential
-  system over BLS12-381, requires approximately 4ms for signing and 3ms for
-  verification without tracing support~\cite{CCS:CamVan02}. Our construction achieves comparable
-  verification cost while additionally supporting epoch-bound tracing. 
+    Proof generation completes in a few milliseconds and verification in under
+    10ms even without optimisation, demonstrating practical deployability.  For
+    context, Idemix, a widely deployed anonymous credential system over
+    BLS12-381, requires approximately 4ms for signing and 3ms for verification
+    without tracing support~\cite{CCS:CamVan02}. Our construction achieves
+    comparable verification cost while additionally supporting epoch-bound
+    tracing.

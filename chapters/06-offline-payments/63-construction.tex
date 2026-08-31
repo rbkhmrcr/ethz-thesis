@@ -121,11 +121,11 @@ zero-knowledge proofs that show the user is enrolled in the system.
 \paragraph{Privacy guarantees.} To summarise, the scheme gives three
 guarantees. First, transactors are anonymous to anyone who sees a transaction
 transcript, assuming payer and payee exchange identities out of band. Second,
-withdrawals and deposits are unlinkable to every party in the system, so no
-one can trace a deposit or payment to its origin or destination from the
-payment transcripts. Third, the auditor may deanonymise payments, and is
-trusted to do so only with evidence of double spending, with the auditor role
-recommended to be distributed via threshold decryption.
+withdrawals and deposits are unlinkable to every party in the system, so no one
+can trace a deposit or payment to its origin or destination from the payment
+transcripts. Third, the auditor may deanonymise payments, and is trusted to do
+so only with evidence of double spending, with the auditor role recommended to
+be distributed via threshold decryption.
 
 We now describe the complete protocol formally, stated generically with respect
 to the underlying commitment scheme, digital signature scheme, blind signature
@@ -161,8 +161,8 @@ instantiates each of them.
 
       \end{enumerate}
 
-    \item[$\cred \leftarrow \OPregister(\rask)$ :] When a user
-      $\algo{usr}$ opens an account, do:
+    \item[$\cred \leftarrow \OPregister(\rask)$ :] When a user $\algo{usr}$
+      opens an account, do:
 
       \begin{enumerate}
 
@@ -224,148 +224,143 @@ instantiates each of them.
           $\inst = (\ck, \pk_{\algo{cb}}, v_0, \com_0)$, $\witness =
           (\algo{uid}_0, s_0, \psi)$, and relation as follows:
           \begin{equation*} \DSverify(\pk_{\algo{cb}}, (\algo{uid}_0, v_0);
-            s_0, \psi) = 1 \;\wedge\; \ComOpen(\ck, \algo{uid}_0; s_0, \com_0)
-          = 1.  \end{equation*}
+          s_0, \psi) = 1 \;\wedge\; \ComOpen(\ck, \algo{uid}_0; s_0, \com_0) =
+        1.  \end{equation*}
 
-        \item Return $T_0 = (v_0, s_0, \com_0, \algo{hist}_0 = \Sigma)$.
-
-      \end{enumerate}
-
-    \item[$p_i \leftarrow \OPexecute(v, s_i, \com_i, \algo{hist}_i)$
-      :]\label{sec:payments} User $\algo{usr}_i$ pays $\algo{usr}_{i+1}$ using
-      token $(v, s_i, \com_i, \algo{hist}_i)$, do:
-
-      \begin{enumerate}
-
-        \item $\algo{dev}_{i+1}$ instructs $\algo{se}_{i+1}$ to prepare to
-          receive a payment of value $v$.
-
-        \item $\algo{se}_{i+1}$ selects random $s_{i+1}$, computes $\com_{i+1}
-          \leftarrow \com(\ck, \algo{uid}_{i+1}; s_{i+1})$, and returns
-          $(s_{i+1}, \com_{i+1})$ to $\algo{dev}_{i+1}$.
-
-        \item $\algo{dev}_{i+1}$ sends $\com_{i+1}$ to $\algo{dev}_i$.
-
-        \item $\algo{dev}_i$ notifies $\algo{se}_i$ that a payment is under
-          way. $\algo{se}_i$ locks token $\tau_i = (v, \com_i)$.
-
-        \item $\algo{dev}_i$ computes the audit ciphertext $\ciph_i \leftarrow
-          \PKEencrypt(\pk_{\auditor}, \algo{uid}_i; \rho_i)$ and a proof of
-          correctness $\Gamma_i$, with $\inst = (\com_i, \ciph_i)$, $\witness =
-          (\algo{uid}_i, s_i, \rho_i)$, and relation as follows:
-          \begin{equation*} \ComOpen(\ck, \algo{uid}_i, s_i, \com_i) = 1
-          \;\wedge\; \ciph_i = \PKEencrypt(\pk_{\auditor}, \algo{uid}_i;
-        \rho_i).  \end{equation*}
-
-      \item $\algo{se}_i$ and $\algo{dev}_i$ jointly compute a signature of
-        knowledge $\sigma_i$ for the relation as follows: \begin{equation*}
-          \DSverify(\rapk, \algo{uid}_i, \sk_{\algo{usr}_i}, \varphi_i) = 1
-          \;\wedge\; \ComOpen(\ck, \algo{uid}_i, s_i, \com_i) = 1.
-        \end{equation*} Here, $\algo{se}_i$ contributes knowledge of
-        $\sk_{\algo{usr}_i}$ and $\algo{dev}_i$ contributes the remaining
-        witness.
-
-      \item $\algo{dev}_i$ sends payment $p_i = (v, \com_i, \com_{i+1},
-        \ciph_i, \sigma_i, \Gamma_i, \algo{hist}_i)$ to $\algo{dev}_{i+1}$.
-
-      \item $\algo{dev}_{i+1}$ verifies $\algo{hist}_i$: if $i = 0$, it checks
-        $\Sigma$. Otherwise it verifies every $(\Sigma, \Gamma_k, \sigma_k)_{k
-        \in [i]}$.
-
-      \item If $\Gamma_i$ and $\sigma_i$ also verify, $\algo{dev}_{i+1}$
-        accepts and stores $T_{i+1} = (v, s_{i+1}, \com_{i+1},
-        \algo{hist}_{i+1} = (\com_i, \ciph_i, \sigma_i, \Gamma_i) \, \| \,
-        \algo{hist}_i)$, and $\algo{se}_{i+1}$ stores $\tau_{i+1} = (v,
-        \com_{i+1})$.
-
-      \item Upon acknowledgement, $\algo{se}_i$ deletes $\com_i$, and
-        $\algo{dev}_i$ returns $p_i$.
+      \item Return $T_0 = (v_0, s_0, \com_0, \algo{hist}_0 = \Sigma)$.
 
     \end{enumerate}
 
-  \item[$\{0,1\} \leftarrow \OPdeposit(\tau_n, \algo{hist}_n)$
-    :]\label{sec:deposit} User $\algo{usr}_n$ deposits token $\tau_n = (v,
-    \com_n)$, do:
+  \item[$p_i \leftarrow \OPexecute(v, s_i, \com_i, \algo{hist}_i)$
+    :]\label{sec:payments} User $\algo{usr}_i$ pays $\algo{usr}_{i+1}$ using
+    token $(v, s_i, \com_i, \algo{hist}_i)$, do:
 
     \begin{enumerate}
 
-      \item $\algo{usr}_n$ instructs $\algo{dev}_n$ to deposit $\tau_n$.
-        $\algo{dev}_n$ informs $\algo{se}_n$ to lock $\tau_n$.
+      \item $\algo{dev}_{i+1}$ instructs $\algo{se}_{i+1}$ to prepare to
+        receive a payment of value $v$.
 
-      \item $\algo{dev}_n$ and $\algo{se}_n$ jointly compute a signature of
-        knowledge $\sigma_n$ over $\tau_n$, structured analogously to the
-        signature $\sigma_i$ computed during $\OPexecute$.
+      \item $\algo{se}_{i+1}$ selects random $s_{i+1}$, computes $\com_{i+1}
+        \leftarrow \com(\ck, \algo{uid}_{i+1}; s_{i+1})$, and returns
+        $(s_{i+1}, \com_{i+1})$ to $\algo{dev}_{i+1}$.
 
-      \item $\algo{dev}_n$ sends deposit request $d_n = (\tau_n, \sigma_n,
-        \algo{hist}_n)$ to $\algo{Int}_n$, which forwards it to the central
-        bank.
+      \item $\algo{dev}_{i+1}$ sends $\com_{i+1}$ to $\algo{dev}_i$.
 
-      \item The central bank verifies $\sigma_n$ and $\algo{hist}_n$. If either
-        check fails, return $0$.
+      \item $\algo{dev}_i$ notifies $\algo{se}_i$ that a payment is under way.
+        $\algo{se}_i$ locks token $\tau_i = (v, \com_i)$.
 
-      \item Otherwise, the central bank checks whether any prior deposit shares
-        the same origin $\com_0$. If so, it records double spending, notifies
-        the auditor, and returns $0$.
+      \item $\algo{dev}_i$ computes the audit ciphertext $\ciph_i \leftarrow
+        \PKEencrypt(\pk_{\auditor}, \algo{uid}_i; \rho_i)$ and a proof of
+        correctness $\Gamma_i$, with $\inst = (\com_i, \ciph_i)$, $\witness =
+        (\algo{uid}_i, s_i, \rho_i)$, and relation as follows:
+        \begin{equation*} \ComOpen(\ck, \algo{uid}_i, s_i, \com_i) = 1
+        \;\wedge\; \ciph_i = \PKEencrypt(\pk_{\auditor}, \algo{uid}_i; \rho_i).
+      \end{equation*}
 
-      \item Otherwise, the central bank credits $\algo{Int}_n$'s account, which
-        in turn credits $\algo{usr}_n$'s account, and $\algo{se}_n$ deletes
-        $\tau_n$ upon notification.
+    \item $\algo{se}_i$ and $\algo{dev}_i$ jointly compute a signature of
+      knowledge $\sigma_i$ for the relation as follows: \begin{equation*}
+        \DSverify(\rapk, \algo{uid}_i, \sk_{\algo{usr}_i}, \varphi_i) = 1
+        \;\wedge\; \ComOpen(\ck, \algo{uid}_i, s_i, \com_i) = 1.
+      \end{equation*} Here, $\algo{se}_i$ contributes knowledge of
+      $\sk_{\algo{usr}_i}$ and $\algo{dev}_i$ contributes the remaining
+      witness.
 
-      \item Return $1$.
+    \item $\algo{dev}_i$ sends payment $p_i = (v, \com_i, \com_{i+1}, \ciph_i,
+      \sigma_i, \Gamma_i, \algo{hist}_i)$ to $\algo{dev}_{i+1}$.
 
-    \end{enumerate}
+    \item $\algo{dev}_{i+1}$ verifies $\algo{hist}_i$: if $i = 0$, it checks
+      $\Sigma$. Otherwise it verifies every $(\Sigma, \Gamma_k, \sigma_k)_{k
+      \in [i]}$.
 
-  \item[$\algo{uid}^* \leftarrow \OPidentify(d_n, d_m)$ :] On input two
-    conflicting deposit requests $d_n$ and $d_m$ involving the same original
-    token, the auditor does:
+    \item If $\Gamma_i$ and $\sigma_i$ also verify, $\algo{dev}_{i+1}$ accepts
+      and stores $T_{i+1} = (v, s_{i+1}, \com_{i+1}, \algo{hist}_{i+1} =
+      (\com_i, \ciph_i, \sigma_i, \Gamma_i) \, \| \, \algo{hist}_i)$, and
+      $\algo{se}_{i+1}$ stores $\tau_{i+1} = (v, \com_{i+1})$.
 
-    \begin{enumerate}
+    \item Upon acknowledgement, $\algo{se}_i$ deletes $\com_i$, and
+      $\algo{dev}_i$ returns $p_i$.
 
-      \item Parse $\algo{hist}_n = ((\com_k, \ciph_k, \sigma_k, \Gamma_k)_{k
-        \in [n]}, \Sigma)$ and $\algo{hist}_m$ analogously.
+  \end{enumerate}
 
-      \item Find the divergence index $j$ such that $\com_k = \com'_k$ for all
-        $k \leq j$ but $\com_{j+1} \neq \com'_{j+1}$.
+\item[$\{0,1\} \leftarrow \OPdeposit(\tau_n, \algo{hist}_n)$
+  :]\label{sec:deposit} User $\algo{usr}_n$ deposits token $\tau_n = (v,
+  \com_n)$, do:
 
-      \item Decrypt $\ciph_j$ (or $\ciph'_j$) using $\sk_{\auditor}$ to recover
-        $\algo{uid}^*$, the identifier of the owner of $\tau_j = (v, \com_j)$.
+  \begin{enumerate}
 
-      \item Return $\algo{uid}^*$.
+    \item $\algo{usr}_n$ instructs $\algo{dev}_n$ to deposit $\tau_n$.
+      $\algo{dev}_n$ informs $\algo{se}_n$ to lock $\tau_n$.
 
-    \end{enumerate}
+    \item $\algo{dev}_n$ and $\algo{se}_n$ jointly compute a signature of
+      knowledge $\sigma_n$ over $\tau_n$, structured analogously to the
+      signature $\sigma_i$ computed during $\OPexecute$.
+
+    \item $\algo{dev}_n$ sends deposit request $d_n = (\tau_n, \sigma_n,
+      \algo{hist}_n)$ to $\algo{Int}_n$, which forwards it to the central bank.
+
+    \item The central bank verifies $\sigma_n$ and $\algo{hist}_n$. If either
+      check fails, return $0$.
+
+    \item Otherwise, the central bank checks whether any prior deposit shares
+      the same origin $\com_0$. If so, it records double spending, notifies the
+      auditor, and returns $0$.
+
+    \item Otherwise, the central bank credits $\algo{Int}_n$'s account, which
+      in turn credits $\algo{usr}_n$'s account, and $\algo{se}_n$ deletes
+      $\tau_n$ upon notification.
+
+    \item Return $1$.
+
+  \end{enumerate}
+
+\item[$\algo{uid}^* \leftarrow \OPidentify(d_n, d_m)$ :] On input two
+  conflicting deposit requests $d_n$ and $d_m$ involving the same original
+  token, the auditor does:
+
+  \begin{enumerate}
+
+    \item Parse $\algo{hist}_n = ((\com_k, \ciph_k, \sigma_k, \Gamma_k)_{k \in
+      [n]}, \Sigma)$ and $\algo{hist}_m$ analogously.
+
+    \item Find the divergence index $j$ such that $\com_k = \com'_k$ for all $k
+      \leq j$ but $\com_{j+1} \neq \com'_{j+1}$.
+
+    \item Decrypt $\ciph_j$ (or $\ciph'_j$) using $\sk_{\auditor}$ to recover
+      $\algo{uid}^*$, the identifier of the owner of $\tau_j = (v, \com_j)$.
+
+    \item Return $\algo{uid}^*$.
+
+  \end{enumerate}
 
 \end{description}
 
 \end{protocolbox}
 
-Revocation must not leak
-information about a user's past transactions, and it is difficult to address with
-the inherent lack of verified real time information of the offline setting. A payee who goes offline
-just before a payer is revoked will accept the
-revoked payer's token. A useful mitigation is an expiry policy organised into epochs, capping either
-spending hops or time since withdrawal. Payees, not spenders, enforce this by
-rejecting payments outside the current window, tuned to transaction value.
- Capping individual transaction values is a
-complementary mitigation, together making double spending financially
-unattractive even before detection.
+Revocation must not leak information about a user's past transactions, and it
+is difficult to address with the inherent lack of verified real time
+information of the offline setting. A payee who goes offline just before a
+payer is revoked will accept the revoked payer's token. A useful mitigation is
+an expiry policy organised into epochs, capping either spending hops or time
+since withdrawal. Payees, not spenders, enforce this by rejecting payments
+outside the current window, tuned to transaction value.  Capping individual
+transaction values is a complementary mitigation, together making double
+spending financially unattractive even before detection.
 
-Users must never hold
-$\sk_{\algo{usr}}$ directly. With direct access, they can produce unlimited
-payments from the same token, since detecting separate double spendings
-is inherently impossible offline. The secure elements and key-splitting techniques
- support double spending resistance but cannot
-enforce it. The gap is then left to governance.
+Users must never hold $\sk_{\algo{usr}}$ directly. With direct access, they can
+produce unlimited payments from the same token, since detecting separate double
+spendings is inherently impossible offline. The secure elements and
+key-splitting techniques support double spending resistance but cannot enforce
+it. The gap is then left to governance.
 
-Use of secure elements and inaccessible keys requires a
-recovery mechanism for lost devices.
-Other techniques are then needed to understand and address this without sacrificing usability.
+Use of secure elements and inaccessible keys requires a recovery mechanism for
+lost devices.  Other techniques are then needed to understand and address this
+without sacrificing usability.
 
-Mobile TEEs protect app secrets
-from a malicious owner but expose them to developers only via key-management
-APIs~\cite{trustzone,secureenclave}. Key confidentiality doesn't guarantee
-logic integrity, so arbitrary code execution could still
-enable repeated spending via the key manager. Smart cards (Javacard, MIFARE)
-instead protect both the key and logic with tamper resistant, isolated
-execution~\cite{javacard,mifare}. No hardware security is unconditional, so
-deployment involves trade offs between infrastructure and equipment costs,
-system wide value limits, and the cost of attacking a card.
+Mobile TEEs protect app secrets from a malicious owner but expose them to
+developers only via key-management APIs~\cite{trustzone,secureenclave}. Key
+confidentiality doesn't guarantee logic integrity, so arbitrary code execution
+could still enable repeated spending via the key manager. Smart cards
+(Javacard, MIFARE) instead protect both the key and logic with tamper
+resistant, isolated execution~\cite{javacard,mifare}. No hardware security is
+unconditional, so deployment involves trade offs between infrastructure and
+equipment costs, system wide value limits, and the cost of attacking a card.

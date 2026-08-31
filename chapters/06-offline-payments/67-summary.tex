@@ -1,23 +1,22 @@
 \section{Summary}\label{sec:offline-summary}
 
-This chapter addresses offline retail CBDC payments: payments conducted
-while both payer and payee are disconnected from the network, and settled
-only when tokens are eventually deposited. The central difficulty in this
-setting is that a payee has no way to verify, in real time, that the token
-they are receiving has not already been spent elsewhere. Rather than rely on
-prevention or detection alone, we combine the two: a secure element makes
-double spending expensive and impractical to mount at scale, while an
-efficient auditing mechanism ensures that, should an attack succeed, the
-responsible party can still be identified and held accountable.
+This chapter addresses offline retail CBDC payments: payments conducted while
+both payer and payee are disconnected from the network, and settled only when
+tokens are eventually deposited. The central difficulty in this setting is that
+a payee has no way to verify, in real time, that the token they are receiving
+has not already been spent elsewhere. Rather than rely on prevention or
+detection alone, we combine the two: a secure element makes double spending
+expensive and impractical to mount at scale, while an efficient auditing
+mechanism ensures that, should an attack succeed, the responsible party can
+still be identified and held accountable.
 
-We demonstrate the
-viability of the protocol on commodity smart cards and mobile
-phones. Withdrawal and the payer side of a payment both complete in under
-half a second, and even a payment chain of 32 hops verifies in under a
-second on the payee's side, with the smart card itself authorising a
-payment in under $400\,\mathrm{ms}$. Auditing adds no overhead for the
-payer and a modest 10-20\% overhead for the payee.
+We demonstrate the viability of the protocol on commodity smart cards and
+mobile phones. Withdrawal and the payer side of a payment both complete in
+under half a second, and even a payment chain of 32 hops verifies in under a
+second on the payee's side, with the smart card itself authorising a payment in
+under $400\,\mathrm{ms}$. Auditing adds no overhead for the payer and a modest
+10-20\% overhead for the payee.
 
-We focus on transferability rather than divisibility. Extending the scheme to support splitting
-and merging tokens and to support aggregated deposits are both
-natural directions for future work.
+We focus on transferability rather than divisibility. Extending the scheme to
+support splitting and merging tokens and to support aggregated deposits are
+both natural directions for future work.

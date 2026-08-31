@@ -9,38 +9,37 @@ so that they can be handled by efficient sigma protocols.
 
 \subsection{Instantiating $\FE$}
 
-  \begin{assumptionbox}{Decisional Diffie-Hellman (DDH)}{ddh-txid}
+\begin{assumptionbox}{Decisional Diffie-Hellman (DDH)}{ddh-txid}
 
-    The DDH assumption holds in $\group{1}$ if no PPT adversary can distinguish
-    $(\gen^x, \gen^y, \gen^{xy})$ from $(\gen^x, \gen^y, \gen^z)$ for uniformly
-    random $x, y, z \sample \Zp$.
+  The DDH assumption holds in $\group{1}$ if no PPT adversary can distinguish
+  $(\gen^x, \gen^y, \gen^{xy})$ from $(\gen^x, \gen^y, \gen^z)$ for uniformly
+  random $x, y, z \sample \Zp$.
 
-  \end{assumptionbox}
-  
-  \begin{lemma}\label{lem:txid-fe-prf} 
+\end{assumptionbox}
+
+\begin{lemma}\label{lem:txid-fe-prf}
   %
-  Under the DDH assumption in $\group{1}$
-and modeling $\HE$ as a random oracle, the function $\FE(\utk, \epoch) =
-\HE(\epoch)^{\utk}$ is a secure pseudorandom function. 
+  Under the DDH assumption in $\group{1}$ and modeling $\HE$ as a random
+  oracle, the function $\FE(\utk, \epoch) = \HE(\epoch)^{\utk}$ is a secure
+  pseudorandom function.
 %
- \end{lemma}
+\end{lemma}
 
 \subsection{Instantiating $\FT$}
 
 \subsection{Instantiating $\FT$}
 
-  \begin{assumptionbox}{$q$-Bilinear Diffie-Hellman Inversion
-    ($q$-BDHI)}{qbdhi-txid}
+\begin{assumptionbox}{$q$-Bilinear Diffie-Hellman Inversion
+  ($q$-BDHI)}{qbdhi-txid}
 
-    The $q$-BDHI assumption holds if, given $(\gen, \gen^{x}, \gen^{x^2},
-    \dots, \gen^{x^q}, \ggen, \ggen^{x})$ for uniformly random $x \sample \Zp$,
-    no PPT adversary can distinguish $\pairing(\gen,\ggen)^{1/x}$ from a
-    uniformly random element of $\group{T}$ with non-negligible probability.
+  The $q$-BDHI assumption holds if, given $(\gen, \gen^{x}, \gen^{x^2}, \dots,
+  \gen^{x^q}, \ggen, \ggen^{x})$ for uniformly random $x \sample \Zp$, no PPT
+  adversary can distinguish $\pairing(\gen,\ggen)^{1/x}$ from a uniformly
+  random element of $\group{T}$ with non-negligible probability.
 
-  \end{assumptionbox}
+\end{assumptionbox}
 
-\begin{primitivebox}{The Dodis-Yampolskiy pseudorandom
-  function}{fig:dy-prf}
+\begin{primitivebox}{The Dodis-Yampolskiy pseudorandom function}{fig:dy-prf}
 
   \begin{description}
 
@@ -48,8 +47,8 @@ and modeling $\HE$ as a random oracle, the function $\FE(\utk, \epoch) =
       parameter, sample and return a generator $\ggen_D \sample \group{2}$.
 
     \item[$y \leftarrow \PRFeval(\ggen_D, \gen, k, x)$ :] On input generator
-      $\ggen_D$, group element $\gen \in \group{1}$, key $k \in \Zp$, and
-      input $x \in \Zp \setminus \{-k\}$, return the following:
+      $\ggen_D$, group element $\gen \in \group{1}$, key $k \in \Zp$, and input
+      $x \in \Zp \setminus \{-k\}$, return the following:
       %
       \begin{equation*}
       %
@@ -61,7 +60,8 @@ and modeling $\HE$ as a random oracle, the function $\FE(\utk, \epoch) =
 
 \end{primitivebox}
 
-The Dodis-Yampolskiy PRF is pseudorandom under the $q$-BDHI assumption~\cite{PKC:DodYam05}.
+The Dodis-Yampolskiy PRF is pseudorandom under the $q$-BDHI
+assumption~\cite{PKC:DodYam05}.
 
 We instantiate $\FT$ by fixing $\gen$ to the epoch tracing key $\ek'$ rather
 than a fixed public generator, and the PRF key $k$ to $\utk'$, as follows:
@@ -69,23 +69,23 @@ than a fixed public generator, and the PRF key $k$ to $\utk'$, as follows:
 \begin{equation*}
 %
   \FT(\ek, \gamma) = \PRFeval(\ggen_D, \ek', \utk', \gamma) =
-  \pairing\big(\ek', \ggen_D^{1/(\utk'+\gamma)}\big), \qquad \ek =
-  (\ek', \utk'), \ \ \ek' = \HE(\epoch)^{\utk}.
+  \pairing\big(\ek', \ggen_D^{1/(\utk'+\gamma)}\big), \qquad \ek = (\ek',
+  \utk'), \ \ \ek' = \HE(\epoch)^{\utk}.
 %
 \end{equation*}
 %
 Because $\ek'$ is itself a value derived from $\FE$ rather than a fixed
 generator, pseudorandomness of $\FT$ does not follow from $q$-BDHI alone.
 
-\begin{lemma}\label{lem:txid-ft-prf} Under the $q$-BDHI assumption,
- the DDH assumption in $\group{1}$, and modelling $\HE$ as a random oracle, $\FT$
-  is a secure pseudorandom function against adversaries that make at most
-  $\Max$ queries $\FT(\ek,\cdot)$ per epoch key $\ek$.  \end{lemma}
-  
+\begin{lemma}\label{lem:txid-ft-prf} Under the $q$-BDHI assumption, the DDH
+assumption in $\group{1}$, and modelling $\HE$ as a random oracle, $\FT$ is a
+secure pseudorandom function against adversaries that make at most $\Max$
+queries $\FT(\ek,\cdot)$ per epoch key $\ek$.  \end{lemma}
+
 \subsection{Instantiating $\mathsf{txid}$}
 
-The BBS+ signature scheme enables
-signers to sign multiple messages at once, using the following
+The BBS+ signature scheme enables signers to sign multiple messages at once,
+using the following
 algorithms~\cite{C:BonBoySha04,SCN:AuSusMu06,EPRINT:CamDriLeh16}.
 
 \begin{primitivebox}{The BBS+ signature scheme}{fig:bbs}
@@ -151,7 +151,7 @@ This variant of the BBS+ signature scheme signs the group elements $M_i =
 \gen_i^{m_i}$ directly, rather than the scalars $m_i$ themselves. Because
 computing $\prod_i M_i$ requires no knowledge of the discrete logarithms $m_i$,
 a signer can produce a valid signature on committed values without ever
-learning them; this is exactly what lets the registration authority certify a
+learning them. This is exactly what lets the registration authority certify a
 user's keys below without ever seeing them~\cite{SCN:AuSusMu06,EC:TesZhu23b}.
 
 \begin{primitivebox}{The Pedersen commitment scheme}{fig:pedersen}
@@ -173,8 +173,9 @@ user's keys below without ever seeing them~\cite{SCN:AuSusMu06,EC:TesZhu23b}.
 
 \end{primitivebox}
 
-\paragraph{The Pedersen commitment scheme.} This scheme is perfectly hiding 
-and computationally binding under the discrete log assumption. Commitments are group elements.
+\paragraph{The Pedersen commitment scheme.} This scheme is perfectly hiding and
+computationally binding under the discrete log assumption. Commitments are
+group elements.
 
 \begin{protocolbox}{Tracing protocol}{txid}
 
@@ -329,20 +330,20 @@ and computationally binding under the discrete log assumption. Commitments are g
 \end{protocolbox}
 
 The protocol instantiation is described in full in~\Cref{prot:txid}. The
-remaining algorithms follow~\Cref{sec:txid-construction} directly; we highlight
+remaining algorithms follow~\Cref{sec:txid-construction} directly. We highlight
 below only the design choices specific to this instantiation.
 
-The registration authority's key pair is for the BBS+ signature scheme.
- During registration, the user accordingly sends only the
-group elements $S = \gen_1^{\sk}$, $T = \gen_2^{\utk}$, and $T' =
-\gen_3^{\utk'}$, together with a proof of knowledge of the underlying secrets,
-rather than the secrets themselves. The user's tracing key is the pair
-$(\utk,\utk')$: $\utk$ keys the epoch PRF $\FE$, while $\utk'$ stays fixed
-across all epochs and keys the Dodis-Yampolskiy term inside $\FT$ below.
+The registration authority's key pair is for the BBS+ signature scheme.  During
+registration, the user accordingly sends only the group elements $S =
+\gen_1^{\sk}$, $T = \gen_2^{\utk}$, and $T' = \gen_3^{\utk'}$, together with a
+proof of knowledge of the underlying secrets, rather than the secrets
+themselves. The user's tracing key is the pair $(\utk,\utk')$: $\utk$ keys the
+epoch PRF $\FE$, while $\utk'$ stays fixed across all epochs and keys the
+Dodis-Yampolskiy term inside $\FT$ below.
 
 The commitment key reuses the triple of generators $(\gen_2,\gen_3,\gen_4)$
-that appear in the registration authority's public key, purely for compactness;
-randomness used at signing time and at commitment time remains independently
+that appear in the registration authority's public key, purely for compactness.
+Randomness used at signing time and at commitment time remains independently
 sampled at each use. Reusing these generators is safe because both primitives
 rely on the same underlying property: nobody knows the discrete logarithm of
 one relative to the other. Key generation for the BBS+ signature scheme samples
@@ -359,16 +360,15 @@ Deriving the epoch tracing key deterministically from the long term tracing key
 and the epoch identifier is what confines an auditor's tracing power to a
 single epoch, since a key derived for one epoch is useless for any other. Each
 transaction tag is computed by evaluating a Dodis-Yampolskiy pairing based PRF
-at the user's epoch key and a fresh counter. The tag carries two separate proofs,
-one attesting that it was correctly
-derived from a properly committed tracing key, and
-one that the committed key was signed by the registration authority.
+at the user's epoch key and a fresh counter. The tag carries two separate
+proofs, one attesting that it was correctly derived from a properly committed
+tracing key, and one that the committed key was signed by the registration
+authority.
 
-\paragraph{Verifiable tag computation.} The
-user first computes a commitment $\com =
-\gen_2^{\utk}\cdot\gen_3^{\utk'}\cdot\gen_4^{\openinfo}$, and $\Tag = \FT(\ek,
-\gamma)$, where, for $\ek = (\ek',\utk')$, $\FT(\ek, \gamma)$ is defined,
-following the Dodis-Yampolskiy construction~\cite{PKC:DodYam05}, as
+\paragraph{Verifiable tag computation.} The user first computes a commitment
+$\com = \gen_2^{\utk}\cdot\gen_3^{\utk'}\cdot\gen_4^{\openinfo}$, and $\Tag =
+\FT(\ek, \gamma)$, where, for $\ek = (\ek',\utk')$, $\FT(\ek, \gamma)$ is
+defined, following the Dodis-Yampolskiy construction~\cite{PKC:DodYam05}, as
 $\pairing\!\left(\ek',\, \ggen_D^{1/(\utk'+\gamma)}\right)$. Under the $q$-BDHI
 assumption (\Cref{qbdhi-txid}), $\FT$ can be shown to be a PRF, in the random
 oracle model.
@@ -463,7 +463,7 @@ involving $\witness_8$, and a separate, generic range argument that $0 \leq
 
 The range check $0 \leq \gamma < \Max$ is established using a generic
 Bulletproofs range argument~\cite{SP:BBBPWM18} over a Pedersen commitment to
-$\gamma$; binding response $\theta_\gamma$ above to that commitment's own sigma
+$\gamma$. Binding response $\theta_\gamma$ above to that commitment's own sigma
 protocol ties $\gamma$ consistently across both arguments.
 
 \subsubsection*{Transaction authorisation.}\label{sec:tx-auth} Each transaction
@@ -504,7 +504,7 @@ and instance, witness, and relation given as follows:
 %
 with $u = E^{\zeta/\eta}$, $v =
 ({\gen_0}\cdot{\gen_1}^{\sk}\cdot{\gen_2}^{\utk}\cdot{\gen_3}^{\utk'}\cdot
-{\gen_4}^r)^{1/\zeta}$, and $w = u^e v^{\zeta}$; the extra factor
+{\gen_4}^r)^{1/\zeta}$, and $w = u^e v^{\zeta}$. The extra factor
 ${\gen_3}^{\utk'}$ inside $v$ enters and cancels the same way $\gen_2^{\utk}$
 already does, since $\utk'$, like $\utk$, is bound identically inside both $v$
 and $\com$. The randomiser generator $\gen_4$, reused between the credential
@@ -564,19 +564,19 @@ u^e\cdot v^{\zeta} \ \wedge \ (\gen_0\cdot\com)^{-1} = v^{\eta}\cdot
         \item Return the result of the following checks:
           %
           \begin{gather*} t_1\cdot\com^c \checkcheck
-            \gen_2^{\pi_1}\cdot\gen_3^{\pi_2}\cdot\gen_4^{\pi_3}, \quad
-            t_2\cdot w^c \checkcheck u^{\pi_4}v^{\pi_5}, \\
-            t_3\cdot(\gen_0\cdot\com)^c \checkcheck v^{\pi_6}\cdot
-            \gen_1^{\pi_7}\cdot\gen_4^{\pi_8}.  \end{gather*}
+          \gen_2^{\pi_1}\cdot\gen_3^{\pi_2}\cdot\gen_4^{\pi_3}, \quad t_2\cdot
+        w^c \checkcheck u^{\pi_4}v^{\pi_5}, \\ t_3\cdot(\gen_0\cdot\com)^c
+      \checkcheck v^{\pi_6}\cdot \gen_1^{\pi_7}\cdot\gen_4^{\pi_8}.
+    \end{gather*}
 
-        \end{enumerate}
+\end{enumerate}
 
-    \end{description}
+\end{description}
 
-  \end{protocolbox}
+\end{protocolbox}
 
-  \begin{theorem}\label{thm:inst} The instantiation presented
-    in~\Cref{sec:algebraic} securely realises $\idfu{\algo{trace}}$ in the
-    random oracle model, under the Decisional Diffie Hellman assumption in
-    $\group{1}$, the $q$-Bilinear Diffie-Hellman Inversion assumption, and the
-    $q$-Strong Diffie Hellman assumption.  \end{theorem}
+\begin{theorem}\label{thm:inst} The instantiation presented
+  in~\Cref{sec:algebraic} securely realises $\idfu{\algo{trace}}$ in the random
+  oracle model, under the Decisional Diffie Hellman assumption in $\group{1}$,
+  the $q$-Bilinear Diffie-Hellman Inversion assumption, and the $q$-Strong
+Diffie Hellman assumption.  \end{theorem}

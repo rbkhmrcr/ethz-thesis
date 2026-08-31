@@ -86,14 +86,14 @@ registration succeeds.
 
 \paragraph{$\IDsubmit$.} A registered user calls $\IDsubmit$ to submit up to
 $\Max$ transactions during the current epoch. Each successful call is recorded
-together with the identity of the user and the current epoch; $\simu$ learns
+together with the identity of the user and the current epoch. $\simu$ learns
 the transaction itself on every call, along with the user's identity if the
 user is corrupt.
 
 \paragraph{$\IDgrant$.} A user calls $\IDgrant$ to authorise an auditor to
 trace their transactions for a specific epoch. $\idfu{\algo{trace}}$ records
-that the auditor is authorised to trace the user's transactions for that epoch;
-once the epoch elapses, the authorisation lapses with it.
+that the auditor is authorised to trace the user's transactions for that epoch.
+Once the epoch elapses, the authorisation lapses with it.
 
 \paragraph{$\IDidentify$.} An auditor who has been granted permission for a
 given user and epoch calls $\IDidentify$ to obtain the list of that user's
@@ -113,7 +113,7 @@ transactions if the auditor is corrupt.
       auditors. It also maintains a current epoch counter
       $\epoch_{\mathsf{cur}}$, initialised to $1$. We consider a static
       corruption model, where $\simu$ corrupts users and auditors of its choice
-      before any call to $\idfu{\algo{trace}}$ is made; $\Cor$ is the set of
+      before any call to $\idfu{\algo{trace}}$ is made. $\Cor$ is the set of
       corrupt participants.
 
       \begin{multicols}{2}
@@ -148,7 +148,7 @@ transactions if the auditor is corrupt.
           \item If $|\txns[(\user,\epoch_{\mathsf{cur}})]| + 1 > \Max$, then
             stop. (Users can submit at most $\Max$ transactions per epoch.)
 
-          \item If $\user \in \Cor$, then $\mathsf{origin} \leftarrow \user$;
+          \item If $\user \in \Cor$, then $\mathsf{origin} \leftarrow \user$,
             else $\mathsf{origin} \leftarrow \varnothing$.
 
           \item Send $(\IDsubmit, \tx, \epoch, \mathsf{origin})$ to $\simu$,
@@ -197,7 +197,7 @@ transactions if the auditor is corrupt.
             ($\auditor$ traces every transaction $\user$ submitted during
             $\epoch$: non-repudiation.)
 
-          \item If $\auditor \in \Cor$, then $T^\star \leftarrow T$; else
+          \item If $\auditor \in \Cor$, then $T^\star \leftarrow T$, else
             $T^\star \leftarrow \varnothing$.
 
           \item Return $(\IDidentifyend, T)$ to $\auditor$ and
