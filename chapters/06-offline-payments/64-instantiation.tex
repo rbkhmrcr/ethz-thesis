@@ -154,8 +154,11 @@ Here, $\inst = (\pk_{\BBS}, u, w, x, \com)$ and $\witness = (\varepsilon, s',
   \end{primitivebox}
 
   \paragraph{Mapping to our solution.}\label{sec:pok-sol} In our protocol, the
-  secure element $\algo{se}$ and mobile device $\algo{dev}$ jointly produce
-  $\sigma \leftarrow \NIZKprove(\crs, \inst, \witness)$, where $\inst =
+  user's secure element and mobile device jointly produce a proof of
+  knowledge of the user's credential, splitting the witness so that the
+  secure element contributes only knowledge of the user's secret key while
+  the device supplies the rest. Concretely, they jointly produce $\sigma
+  \leftarrow \NIZKprove(\crs, \inst, \witness)$, where $\inst =
   (\gen_0, \gen_1, \pk_{\BBS}, u, w, x, c)$ with $\pk_{\BBS} = (\ggen,
   \tilde{t}, q_0, q_1, q_2, \hgen)$, $\witness = (\varepsilon, \iota, \lambda,
   s, \algo{uid}, \sk, r)$, and $\rel(\inst, \witness) = 1$ is equivalent to the
@@ -180,8 +183,8 @@ as follows:
 \end{equation*}
 %
 
-The Pointcheval-Sanders signature scheme also signs vectors of messages.  It
-does so through the following algorithms~\cite{RSA:PoiSan16,RSA:PoiSan18}.
+The Pointcheval-Sanders signature scheme also signs vectors of messages.
+It does so through the following algorithms~\cite{RSA:PoiSan16,RSA:PoiSan18}.
 
 \begin{primitivebox}{The Pointcheval-Sanders signature scheme}{ps}
 
@@ -326,15 +329,15 @@ k^{\omega\iota}\Bigr).
     Section~\ref{sec:withdrawal}: we execute it on the vector of messages
     $(\algo{uid}_0, v, s_0)$ with randomness $r = 0$.
 
-    \paragraph{Proof of withdrawal.}\label{sec:ps-proof} Let $\tau = (v, c =
-    \gen_0^{\algo{uid}} \gen_1^s)$ be a token, and let $\pk_{\algo{PS}} =
-    (\tilde{x}, \tilde{y}_0, \tilde{y}_1, \tilde{y}_2, \tilde{z})$ be the
+    \paragraph{Proof of withdrawal.}\label{sec:ps-proof} Let $\tau =
+    (v, c = \gen_0^{\algo{uid}} \gen_1^s)$ be a token, and let $\pk_{\algo{PS}}
+    = (\tilde{x}, \tilde{y}_0, \tilde{y}_1, \tilde{y}_2, \tilde{z})$ be the
     public key of the central bank $\algo{cb}$. Let $\psi = (\omega, k, l)$ be
     a Pointcheval-Sanders signature that verifies $1 \gets
     \algo{PS}\algo{.Verify}(\pk_{\algo{PS}}, (\algo{uid}, v, s), \psi)$, so
     $\pairing(k, \tilde{x} \tilde{y}_0^{\algo{uid}} \tilde{y}_1^v \tilde{y}_2^s
     \tilde{z}^\omega) = \pairing(l, \ggen)$. To prove that $\tau$ was issued by
-    $\algo{cb}$, the token's owner uses her mobile device $\algo{dev}$ to
+    $\algo{cb}$, the token's owner uses their mobile device $\algo{dev}$ to
     compute $\Sigma$ as follows.
 
     \begin{protocolbox}{Proof of withdrawal}{ps-proof}

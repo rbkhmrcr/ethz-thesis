@@ -1,60 +1,64 @@
 \section{Evaluation}\label{sec:offline-evaluation}
 
-We establish the practicality of the scheme by integrating the protocol into a
-mobile wallet and benchmarking its performance on both iOS and Android.  Four
-entities are involved: a mobile phone, a secure element, an intermediary, and a
-central bank. We focus our evaluation on the mobile phone and the secure
-element, to establish whether they can implement the protocol efficiently given
-their hardware and storage limitations. The intermediary and the central bank
-need no such evaluation, since they are expected to run on servers or in the
+We establish the practicality of the scheme by integrating the protocol into
+a mobile wallet and benchmarking its performance on both iOS and Android.
+Four entities are
+involved: a mobile phone, a secure element, an intermediary, and a central
+bank. We focus our evaluation on the mobile phone and the secure element, to
+establish whether they can implement the protocol efficiently given their
+hardware and storage limitations. The intermediary and the central bank need
+no such evaluation, since they are expected to run on servers or in the
 cloud. The mobile phone and secure element take on three different personas
-across the protocol: the holder, who receives funds during withdrawal, and the
-payer and payee, who exchange possession of a token during payment.
+across the protocol: the holder, who receives funds during withdrawal, and
+the payer and payee, who exchange possession of a token during payment.
 
 \subsection{Implementation}
 
 \paragraph{Secure element.} A fundamental aspect of a realistic benchmark is
-the choice of secure element. We consider four options: software emulation of
-the secure element in the wallet app, a TEE-based secure element in the mobile
-platform, an HSM-based secure element in the mobile platform, and an external
-secure element. We discard software emulation, since it would present
-unrealistically good performance by ignoring both the resource-constrained
-environment of a real secure element and the communication overhead of talking
-to one. We discard TEE-based secure elements as insufficiently secure, given
-their wider attack surface and history of compromise~\cite{TEEsBad}. We discard
-HSM-based secure elements because those integrated into Apple and Android
-platforms do not implement our scheme and are not extensible. We therefore
-adopt an external secure element, implemented on smart cards.
+the choice of secure element. We consider four options: software emulation
+of the secure element in the wallet app, a TEE-based secure element in the
+mobile platform, an HSM-based secure element in the mobile platform, and an
+external secure element. We discard software emulation, since it would
+present unrealistically good performance by ignoring both the
+resource-constrained environment of a real secure element and the
+communication overhead of talking to one. We discard TEE-based secure
+elements as insufficiently secure, given their wider attack surface and
+history of compromise~\cite{TEEsBad}. We discard HSM-based secure elements
+because those integrated into Apple and Android platforms do not implement
+our scheme and are not extensible. We therefore adopt an external secure
+element, implemented on smart cards.
 
 A smart card is a physical card embedded with an integrated circuit that can
-process and securely store data, including a dedicated security component that
-protects sensitive data and cryptographic operations. We use Javacard, a
-Java-based framework for smart cards, in which the protocol running on the
-secure element is implemented as an applet, a small application supported by a
-subset of the Java runtime~\cite{javacard}. Javacard applets communicate
-through Application Protocol Data Units (APDUs), which identify the applet
-function that should process a given request. The Javacard framework supports
-elliptic curve operations.
+process and securely store data, including a dedicated security component
+that protects sensitive data and cryptographic operations. We use
+Javacard, a Java-based framework for smart cards, in which
+the protocol running on the secure element is implemented as an
+applet, a small application supported by a subset of the Java
+runtime~\cite{javacard}. Javacard applets communicate through Application Protocol Data
+Units (APDUs), which identify the applet function that should process a
+given request. The Javacard framework supports elliptic curve operations.
 
-Our smart card implementation exposes two functions, receive and sign.
+Our smart card implementation exposes two functions, receive and
+sign.
 
 Recall that, with the smart card's help, the payer produces a signature of
 knowledge over two commitments, the payer's and the payee's ($C_i$ and
-$C_{i+1}$). To prevent double spending, the smart card is programmed to sign
-only $(v, C_i, C_{i+1})$ triples such that $C_i$ is the commitment the card
-generated when it received the token, and to sign against only a single
-destination commitment $C_{i+1}$ for that token once it is spent. The first
-constraint ensures the card signs off payments only for the token last
-received, avoiding re-spending of past ones. The second ensures the current
-token can be transferred to only one recipient. To tolerate errors on the NFC
-channel between the smart card and the mobile phone, which are not uncommon, we
-permit multiple invocations of sign provided the supplied destination
-commitment $C_{i+1}$ never changes, all of which generate valid signatures of
-knowledge for the same payer/payee commitment pair. The card is reset by
-invoking receive, which deletes the previous commitment and generates a new
-one. We introduce the concept of a slot, each able to hold one pair of
-payer/payee commitments, to let a single card handle multiple tokens. The
-protocols above simply need to be augmented with a slot identifier.
+$C_{i+1}$). To prevent double spending, the
+smart card is programmed to sign only $(v, C_i, C_{i+1})$ triples such that
+$C_i$ is the commitment the card generated when it received the token, and
+to sign against only a single destination commitment $C_{i+1}$ for that
+token once it is spent. The first constraint ensures the card signs off
+payments only for the token last received, avoiding re-spending of past
+ones. The second ensures the current token can be transferred to only one
+recipient. To tolerate errors on the NFC channel between the smart card and
+the mobile phone, which are not uncommon, we permit multiple invocations of
+sign provided the supplied destination commitment $C_{i+1}$ never
+changes, all of which generate valid signatures of knowledge for the same
+payer/payee commitment pair. The card is reset by invoking receive,
+which deletes the previous commitment and generates a new one. We introduce
+the concept of a slot, each able to hold one pair of payer/payee
+commitments, to let a single card handle multiple tokens. The protocols
+above simply need to be augmented with a slot identifier.
 
 \paragraph{Mobile wallet.} The mobile wallet is an app that implements the
 functionality needed for a user to withdraw and transfer tokens. It handles
@@ -66,42 +70,43 @@ also exposed as a cloud service.
 \subsection{Protocols}
 
 \paragraph{Withdraw.} Withdrawing a token involves local invocations of the
-mobile function, NFC communication between the mobile phone and the smart card,
-and a single remote call to the intermediary, which in turn contacts the
-central bank (omitted from the message sequence diagram for space). The
-protocol starts with the holder scanning her card to obtain values $s$ and $c$,
-using these to generate a withdrawal request (steps W1 and W2) and issuing it
-to the REST endpoint of her intermediary over HTTPS.
+mobile function, NFC communication between the mobile phone and the smart
+card, and a single remote call to the intermediary, which in turn contacts
+the central bank (omitted from the message sequence diagram for space). The
+protocol starts with the holder scanning their card to obtain values $s$ and
+$c$, using these to generate a withdrawal request (steps W1 and
+W2) and issuing it to the REST
+endpoint of their intermediary over HTTPS.
 
-\paragraph{Payment.} Before the offline payment protocol can start, payer and
-payee negotiate the terms of the payment and set up a BLE channel. The payee
-displays a request, base64-encoded as a QR code, containing the payment terms
-and a BLE service identifier, and starts a BLE GATT server advertising that
-service. Under the service, a Notify characteristic sends data to the payer,
-and a Write without response characteristic receives data from the payer.  The
-QR code also carries the cryptographic material for a secure BLE exchange based
-on Diffie-Hellman. The payer scans the QR code to retrieve the BLE information
-and payment details and, if she agrees, completes the Diffie-Hellman exchange
-over BLE and confirms the payment terms. All subsequent messages, including
-this one, are encrypted and CBOR-encoded.
+\paragraph{Payment.} Before the offline payment protocol can start, payer and payee negotiate the
+terms of the payment and set up a BLE channel. The payee displays a request,
+base64-encoded as a QR code, containing the payment terms and a BLE service
+identifier, and starts a BLE GATT server advertising that service. Under the
+service, a Notify characteristic sends data to the payer, and a
+Write without response characteristic receives data from the payer.
+The QR code also carries the cryptographic material for a secure BLE
+exchange based on Diffie-Hellman. The payer scans the QR code to retrieve
+the BLE information and payment details and, if they agree, completes the
+Diffie-Hellman exchange over BLE and confirms the payment terms. All
+subsequent messages, including this one, are encrypted and CBOR-encoded.
 
 \subsection{Results}
 
-We implement the protocol on Android (Samsung Galaxy A34, Android 14) and Apple
-(iPhone 13 mini, iOS 17.6.1) platforms, both running a crypto library built
-with Go 1.21.8. We benchmark two versions of the protocol, with and without
-auditing, i.e. with and without verifiable encryption of the payer's identifier
-for the auditor, to clearly show the overhead auditing imposes. The smart card
-is an NXP 1ID white plastic card with a Smart MX D600 chip (400\,KiB of
-available memory) running JCOP 4.5 OS with NXP's JCOPx extensions at version
-1.1.4. Card and phone communicate over NFC.
+We implement the protocol on Android (Samsung Galaxy A34, Android 14) and
+Apple (iPhone 13 mini, iOS 17.6.1) platforms, both running a crypto library
+built with Go 1.21.8. We benchmark two versions of the protocol, with and
+without auditing, i.e. with and without verifiable encryption of the
+payer's identifier for the auditor, to clearly show the overhead auditing
+imposes. The smart card is an NXP 1ID white plastic card with a Smart MX
+D600 chip (400\,KiB of available memory) running JCOP 4.5 OS with NXP's
+JCOPx extensions at version 1.1.4. Card and phone communicate over NFC.
 
 \paragraph{State storage requirements.} The issuer must store two lists: all
-issued tokens and all deposited tokens. The list of deposited tokens is needed
-to detect double spending and can never be pruned outright, though mechanisms
-such as logical or wall-clock timestamps that bound a token's validity span
-allow it to be pruned once that span elapses. The list of issued tokens is kept
-only to support monetary policy, and is not required by the protocol itself.
-Intermediaries typically store user accounts to determine reserve requirements,
-again not a protocol requirement, and users store the payment chains of any
-unspent tokens they hold.
+issued tokens and all deposited tokens. The list of deposited tokens is
+needed to detect double spending and can never be pruned outright, though
+mechanisms such as logical or wall-clock timestamps that bound a token's
+validity span allow it to be pruned once that span elapses. The list of
+issued tokens is kept only to support monetary policy, and is not required
+by the protocol itself. Intermediaries typically store user accounts to
+determine reserve requirements, again not a protocol requirement, and
+users store the payment chains of any unspent tokens they hold.
