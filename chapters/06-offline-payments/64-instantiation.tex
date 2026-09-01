@@ -7,19 +7,32 @@ Pointcheval-Sanders signatures, extended to support blind signing over
 committed inputs, to let the central bank sign tokens at withdrawal without
 learning their content. Both are pairing based multi-message signature schemes,
 which lets us build efficient sigma protocols directly over their verification
-equations rather than relying on general purpose zero knowledge proofs.
+equations rather than relying on general purpose zero knowledge proofs. The
+same pair of schemes underlies the transaction system
+of~\Cref{chap:txid}, so the two chapters instantiate the same
+infrastructure.
 
-We first introduce all of the primitives used in our system.
+\paragraph{Notation.} We use the notation of the preceding chapters. Groups
+$\group{1}$, $\group{2}$, and $\group{T}$ have prime order $p$ and are equipped
+with an efficiently computable pairing $\pairing \colon \group{1} \times
+\group{2} \rightarrow \group{T}$, and we work in the asymmetric setting.
+Elements of $\group{1}$ are written using lower case letters, elements of
+$\group{2}$ are distinguished using a tilde, and elements of $\Zp$ are written
+using lower case Greek letters. We use generators $\gen \in \group{1}$ and
+$\ggen \in \group{2}$, and hash functions $\hash_p$ into $\Zp$ and
+$\hash_{\group{1}}$ into $\group{1}$.
 
-A BBS+ signature is a signature scheme that lets a signer sign multiple
-messages at once, using the following
-algorithms~\cite{C:BonBoySha04,SCN:AuSusMu06,EPRINT:CamDriLeh16}.
+\subsection{Instantiating the joint proof of knowledge}\label{sec:joint-proof}
 
-BBS+ signatures are existentially unforgeable under the $q$-strong
-Diffie-Hellman ($q$-SDH) assumption, and are described
-in~\Cref{sec:txid-instantiation}.
+We instantiate the joint proof of knowledge of~\Cref{sec:joint-pok-def} over
+BBS+ signatures. A BBS+ signature lets a signer sign several messages at once,
+and is existentially unforgeable under the $q$-strong Diffie-Hellman ($q$-SDH)
+assumption. We use it exactly as it is described
+in~\Cref{sec:txid-instantiation}, and do not repeat the algorithms here. We
+first recall the standard proof of knowledge of a BBS+ signature, then split it
+between two provers.
 
-\paragraph{Proof of knowledge of a BBS+ signature.}\label{sec:joint-proof}
+\paragraph{Proof of knowledge of a BBS+ signature.}
 
 Let $\phi = (\varepsilon, s, e) \gets \BBSsign(\sk_{\BBS}, \msg)$. By
 construction $e = (\hgen \vec{q}^{\msg\|s})^{1/(\theta+\varepsilon)}$ for
@@ -45,7 +58,8 @@ u^\varepsilon w^\iota \ \wedge \ \hgen^{-1} = w^\lambda \vec{q}^{\msg\|s}.
 \label{eq:BBSrel} \end{align}
 %
 This holds~\cite{EC:TesZhu23b}. A prover $\algo{Prv}$ for this relation follows
-a sigma protocol made non-interactive via the
+a sigma protocol made non-interactive via the Fiat-Shamir
+heuristic~\cite{C:FiaSha86}.
 
 Concretely, $\algo{Prv}$ selects $\alpha, \beta, \delta, \gamma_0, \ldots,
 \gamma_{\ell-1}, \gamma \in \Zp$ and computes the following:
@@ -75,12 +89,13 @@ accepts if and only if the following holds:
   %
 \end{align*}
 
-We now show how two provers $\algo{Prv}_0$ and $\algo{Prv}_1$ jointly produce
-$\Pi$, where $\algo{Prv}_0$ is a lightweight device that knows $\msg_{\ell-1}$
-and $\algo{Prv}_1$ is computationally more powerful and knows $(\varepsilon, s,
-\msg_0, \ldots, \msg_{n-2})$, following the approach introduced
-in~\cite{USENIX:HesSinSor23}. Rather than proving Equation~\eqref{eq:BBSrel},
-$\algo{Prv}_0$ and $\algo{Prv}_1$ jointly prove the relation as follows:
+\paragraph{Splitting the proof between two provers.} We now instantiate
+$\algo{JProve}_0$ and $\algo{JProve}_1$, where $\algo{Prv}_0$ is a lightweight
+device that knows $\msg_{\ell-1}$ and $\algo{Prv}_1$ is computationally more
+powerful and knows $(\varepsilon, s, \msg_0, \ldots, \msg_{n-2})$, following
+the approach introduced in~\cite{USENIX:HesSinSor23}. Rather than proving
+Equation~\eqref{eq:BBSrel}, $\algo{Prv}_0$ and $\algo{Prv}_1$ jointly prove the
+relation as follows:
 %
 \begin{align*}
 %
@@ -93,7 +108,12 @@ $\algo{Prv}_0$ and $\algo{Prv}_1$ jointly prove the relation as follows:
 \end{align*}
 %
 Here, $\inst = (\pk_{\BBS}, u, w, x, \com)$ and $\witness = (\varepsilon, s',
-\iota, \lambda, \msg, \rho)$.
+\iota, \lambda, \msg, \rho)$. The protocol is given in
+Primitive~\ref{prim:bbs-joint-proof}. Note that all $\algo{Prv}_1$ receives
+from $\algo{Prv}_0$ is the commitment $\com$, its randomness $\rho$, and a
+proof of knowledge of the opening, which gives the witness hiding property
+required of a joint proof of knowledge: the more powerful prover never sees
+$\msg_{\ell-1}$.
 
 \begin{primitivebox}{Joint proof of knowledge of a BBS+
   signature}{bbs-joint-proof}
@@ -183,8 +203,13 @@ as follows:
 \end{equation*}
 %
 
-The Pointcheval-Sanders signature scheme also signs vectors of messages.
-It does so through the following algorithms~\cite{RSA:PoiSan16,RSA:PoiSan18}.
+\subsection{Instantiating the token signatures}
+
+The central bank signs each token at withdrawal, and must do so without
+learning what it is signing. We use the Pointcheval-Sanders signature scheme,
+which also signs vectors of messages, and extend it to sign committed inputs.
+The algorithms are given in
+Primitive~\ref{prim:ps}~\cite{RSA:PoiSan16,RSA:PoiSan18}.
 
 \begin{primitivebox}{The Pointcheval-Sanders signature scheme}{ps}
 
@@ -237,7 +262,8 @@ It does so through the following algorithms~\cite{RSA:PoiSan16,RSA:PoiSan18}.
 \end{primitivebox}
 
 The resulting signatures are existentially unforgeable under the $q$-modified
-strong Diffie-Hellman ($q$-MSDH) assumption~\cite{RSA:PoiSan18}.
+strong Diffie-Hellman ($q$-MSDH) assumption of
+Assumption~\ref{assum:qmsdh}~\cite{RSA:PoiSan18}.
 
 \begin{assumptionbox}{$q$-Modified Strong Diffie-Hellman ($q$-MSDH)}{qmsdh}
 
@@ -325,8 +351,8 @@ k^{\omega\iota}\Bigr).
   %
     \end{align*}
 %
-    This protocol adapts directly to the withdrawal protocol of
-    Section~\ref{sec:withdrawal}: we execute it on the vector of messages
+    This protocol adapts directly to the withdrawal step of
+    Protocol~\ref{prot:offline}: we execute it on the vector of messages
     $(\algo{uid}_0, v, s_0)$ with randomness $r = 0$.
 
     \paragraph{Proof of withdrawal.}\label{sec:ps-proof} Let $\tau =
@@ -409,3 +435,53 @@ k^{\omega\iota}\Bigr).
       \tilde{y}_2^{\pi_s} \tilde{z}^{\pi_\omega}.
   %
     \end{align*}
+
+\subsection{The instantiated protocol}\label{sec:offline-full-inst}
+
+The pieces above instantiate every generic component of
+Protocol~\ref{prot:offline}, as follows.
+
+\begin{description}
+
+  \item[Commitment scheme.] Pedersen commitments in $\group{1}$. A user's
+    pseudonym is $\com = \gen_0^{\algo{uid}} \gen_1^{s}$, which is perfectly
+    hiding and computationally binding under the discrete logarithm assumption
+    in $\group{1}$.
+
+  \item[Credential signature scheme.] BBS+, used by the registration authority
+    to sign the pair $(\algo{uid}, \sk_{\algo{usr}})$, existentially
+    unforgeable under $q$-SDH.
+
+  \item[Blind signature scheme.] Pointcheval-Sanders signatures over committed
+    inputs, used by the central bank to sign the token vector $(\algo{uid}_0,
+    v, s_0)$ at withdrawal without learning $\algo{uid}_0$ or $s_0$,
+    existentially unforgeable under $q$-MSDH.
+
+  \item[Public key encryption scheme.] ElGamal in $\group{1}$, under the
+    auditor's public key, encrypting the payer's identifier. This is IND-CPA
+    secure under DDH in $\group{1}$, and admits an efficient sigma protocol
+    proving that the ciphertext encrypts the value committed in the payer's
+    pseudonym, which is the proof $\Gamma_i$ of Protocol~\ref{prot:offline}.
+
+  \item[Joint proof of knowledge.] The BBS+ instantiation of
+    Primitive~\ref{prim:bbs-joint-proof}, producing the signature of knowledge
+    $\sigma_i$ that authorises each payment and each deposit. The proof of
+    withdrawal $\Sigma$ is produced by the device alone, using
+    Protocol~\ref{prot:ps-proof}.
+
+\end{description}
+
+Every proof in the instantiation is a sigma protocol over discrete logarithms
+with the Fiat-Shamir heuristic applied, which is simulation extractable in the
+random oracle model~\cite{C:FiaSha86,INDOCRYPT:FKMV12}. This gives the
+following.
+
+\begin{theorem}\label{thm:offline-instantiation-security}
+
+  If the discrete logarithm and DDH assumptions hold in $\group{1}$, the
+  $q$-SDH assumption holds for the BBS+ signature scheme, and the $q$-MSDH
+  assumption holds for the Pointcheval-Sanders signature scheme, then the
+  instantiated offline payment protocol securely realises ideal functionality
+  $\idfu{\algo{op}}$ in the random oracle model.
+
+\end{theorem}

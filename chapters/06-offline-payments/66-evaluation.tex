@@ -16,14 +16,14 @@ the payer and payee, who exchange possession of a token during payment.
 
 \paragraph{Secure element.} A fundamental aspect of a realistic benchmark is
 the choice of secure element. We consider four options: software emulation
-of the secure element in the wallet app, a TEE-based secure element in the
-mobile platform, an HSM-based secure element in the mobile platform, and an
+of the secure element in the wallet app, a TEE based secure element in the
+mobile platform, an HSM based secure element in the mobile platform, and an
 external secure element. We discard software emulation, since it would
 present unrealistically good performance by ignoring both the
-resource-constrained environment of a real secure element and the
-communication overhead of talking to one. We discard TEE-based secure
+resource constrained environment of a real secure element and the
+communication overhead of talking to one. We discard TEE based secure
 elements as insufficiently secure, given their wider attack surface and
-history of compromise~\cite{TEEsBad}. We discard HSM-based secure elements
+history of compromise~\cite{TEEsBad}. We discard HSM based secure elements
 because those integrated into Apple and Android platforms do not implement
 our scheme and are not extensible. We therefore adopt an external secure
 element, implemented on smart cards.
@@ -31,7 +31,7 @@ element, implemented on smart cards.
 A smart card is a physical card embedded with an integrated circuit that can
 process and securely store data, including a dedicated security component
 that protects sensitive data and cryptographic operations. We use
-Javacard, a Java-based framework for smart cards, in which
+Javacard, a Java based framework for smart cards, in which
 the protocol running on the secure element is implemented as an
 applet, a small application supported by a subset of the Java
 runtime~\cite{javacard}. Javacard applets communicate through Application Protocol Data
@@ -72,11 +72,10 @@ also exposed as a cloud service.
 \paragraph{Withdraw.} Withdrawing a token involves local invocations of the
 mobile function, NFC communication between the mobile phone and the smart
 card, and a single remote call to the intermediary, which in turn contacts
-the central bank (omitted from the message sequence diagram for space). The
-protocol starts with the holder scanning their card to obtain values $s$ and
-$c$, using these to generate a withdrawal request (steps W1 and
-W2) and issuing it to the REST
-endpoint of their intermediary over HTTPS.
+the central bank. The protocol starts with the holder scanning their card to
+obtain values $s$ and $c$, using these to generate a withdrawal request and
+issuing it to the REST endpoint of their intermediary over HTTPS. The full
+message sequence is given in Figure~\ref{fig:offline/withdraw-sequence}.
 
 \paragraph{Payment.} Before the offline payment protocol can start, payer and payee negotiate the
 terms of the payment and set up a BLE channel. The payee displays a request,
@@ -88,7 +87,8 @@ The QR code also carries the cryptographic material for a secure BLE
 exchange based on Diffie-Hellman. The payer scans the QR code to retrieve
 the BLE information and payment details and, if they agree, completes the
 Diffie-Hellman exchange over BLE and confirms the payment terms. All
-subsequent messages, including this one, are encrypted and CBOR-encoded.
+subsequent messages, including this one, are encrypted and CBOR-encoded. The
+full message sequence is given in Figure~\ref{fig:offline/payment-sequence}.
 
 \subsection{Results}
 
@@ -101,10 +101,28 @@ imposes. The smart card is an NXP 1ID white plastic card with a Smart MX
 D600 chip (400\,KiB of available memory) running JCOP 4.5 OS with NXP's
 JCOPx extensions at version 1.1.4. Card and phone communicate over NFC.
 
+Withdrawal and the payer side of a payment both complete in under half a
+second, and the smart card authorises a payment in under $400\,\mathrm{ms}$.
+Payee verification grows linearly with the number of hops, since each hop
+contributes one signature of knowledge and one audit proof to check, and even a
+chain of 32 hops verifies in under a second. Auditing adds no overhead for the
+payer, whose audit ciphertext and proof are computed once regardless of chain
+length, and a 10 to 20\% overhead for the payee, who checks one additional
+proof per hop.
+
+These figures sit comfortably within the latency expected of an everyday
+payment, on hardware that is already deployed. The comparison that matters here
+is not with the ecash schemes of~\Cref{sec:offline-related}, which are not
+benchmarked on constrained hardware, but with the alternative of putting the
+whole protocol on the secure element. A smart card cannot carry the pairing
+operations that the proofs of~\Cref{sec:offline-instantiation} require, so
+without the split the scheme would not run at all. The split is what makes the
+cost on the card comparable to that of an ordinary digital signature.
+
 \paragraph{State storage requirements.} The issuer must store two lists: all
 issued tokens and all deposited tokens. The list of deposited tokens is
 needed to detect double spending and can never be pruned outright, though
-mechanisms such as logical or wall-clock timestamps that bound a token's
+mechanisms such as logical or wall clock timestamps that bound a token's
 validity span allow it to be pruned once that span elapses. The list of
 issued tokens is kept only to support monetary policy, and is not required
 by the protocol itself. Intermediaries typically store user accounts to

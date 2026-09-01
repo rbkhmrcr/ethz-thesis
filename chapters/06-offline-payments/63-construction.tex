@@ -49,7 +49,7 @@ reject duplicates, but this is unreasonable to expect. Instead, we have each
 payee select a random number that uniquely identifies the payment they are
 about to receive, and that is carried forward in subsequent payments,
 following an approach also used in transferable
-e-cash~\cite{EC:CamHohLys05,CANS:FucPoiVer09,PKC:BCFK15}. This ensures that two
+ecash~\cite{EC:CamHohLys05,CANS:FucPoiVer09,PKC:BCFK15}. This ensures that two
 payments from the same payer to the same payee using the same token still
 carry distinct random numbers, so a payee who received the same token twice is
 not at risk of being framed. Concretely, before paying the token onward the
@@ -67,7 +67,7 @@ two distinct payments, one carrying $s_{j+1}$ and the other $s'_{j+1}$.
 \paragraph{Adding anonymity.} The scheme so far achieves token unforgeability,
 double spending detection, and double spender identification, but not privacy:
 the chain of payments reveals every payer's and payee's public key. We add
-anonymity by having users obtain long-term credentials from the registration
+anonymity by having users obtain long term credentials from the registration
 authority that bind their unique identifier to their secret key. Rather than a
 public key, a token's owner is now identified by a pseudonym: a hiding
 commitment to the owner's unique identifier, so a token is $\tau = (v, C)$ for
@@ -90,7 +90,7 @@ $\langle v, C_0, \ciph'_0, \ldots, C'_n, \ciph'_n, \sigma'_0, \ldots,
 \sigma'_n, \psi_0 \rangle$ starting from the same $(v, C_0)$, the double
 spender is identified by decrypting the ciphertext $\ciph_j$ at the index $j$
 where $C_i = C'_i$ for all $i \leq j$ but $C_{j+1} \neq C'_{j+1}$. Since the
-auditor can de-anonymise payments, we recommend distributing it via threshold
+auditor can deanonymise payments, we recommend distributing it via threshold
 decryption, so decryption succeeds only if more than a threshold $t$ of
 auditors cooperate.
 
@@ -99,7 +99,7 @@ does not prevent linking a withdrawal to a deposit. This is a genuine privacy
 concern even though payments themselves are anonymised, since users identify
 themselves to their intermediaries at both withdrawal and deposit: if a token
 is transferred only once before being deposited, and the payer's and payee's
-intermediaries collude, they can de-anonymise the payment. We avoid this using
+intermediaries collude, they can deanonymise the payment. We avoid this using
 a blind signature scheme, which lets the central bank sign the token $\tau_0 =
 (v, C_0)$ without learning $C_0$ or the resulting signature $\psi_0$. We note
 that the withdrawal and deposit of a token can still be linked through its
@@ -118,7 +118,7 @@ the commitment $C_i$, producing the signature of knowledge of the user's secret
 key, which only it can access, and deleting a token once it has been spent. The
 mobile device handles everything else, in particular verifying received
 payments, computing the verifiable encryption, and generating the
-zero-knowledge proofs that show the user is enrolled in the system.
+zero knowledge proofs that show the user is enrolled in the system.
 
 \paragraph{Privacy guarantees.} To summarise, the scheme gives three
 guarantees. First, transactors are anonymous to anyone who sees a transaction
@@ -129,17 +129,17 @@ payment transcripts. Third, the auditor may deanonymise payments, and is
 trusted to do so only with evidence of double spending, with the auditor role
 recommended to be distributed via threshold decryption.
 
-We now describe the complete protocol formally, stated generically with respect
-to the underlying commitment scheme, digital signature scheme, blind signature
-scheme, and public key encryption scheme. \Cref{sec:offline-instantiation}
-instantiates each of them.
+The complete protocol is given in Protocol~\ref{prot:offline}. It is stated
+generically with respect to the underlying commitment scheme, digital signature
+scheme, blind signature scheme, public key encryption scheme, and joint proof
+of knowledge. \Cref{sec:offline-instantiation} instantiates each of them.
 
 \begin{protocolbox}{Offline payment protocol}{offline}
 
   \begin{description}
 
     \item[$(\pk_{\algo{cb}}, \ck, \pk_{\auditor}, \rapk) \leftarrow
-      \OPgen(\secparam)$ :]\label{sec:offline:construction:setup} On input
+      \OPgen(\secparam)$ :] On input
       security parameter $\secparam$, do:
 
       \begin{enumerate}
@@ -174,7 +174,7 @@ instantiates each of them.
 
         \item The registration authority verifies that $\algo{uid}$ is fresh
           and that $\algo{se}$ knows $\sk_{\algo{usr}}$, via an interactive
-          zero-knowledge proof of knowledge.
+          zero knowledge proof of knowledge.
 
         \item The registration authority issues credential $\cred =
           (\algo{uid}, \pk_{\algo{usr}}, \varphi)$ with $\varphi \leftarrow
@@ -187,7 +187,7 @@ instantiates each of them.
 
       \end{enumerate}
 
-    \item[$T_0 \leftarrow \OPwithdraw(v_0)$ :]\label{sec:withdrawal} The user
+    \item[$T_0 \leftarrow \OPwithdraw(v_0)$ :] The user
       withdraws a token of value $v_0$. Do the following:
 
       \begin{enumerate}
@@ -204,7 +204,7 @@ instantiates each of them.
 
         \item The device prepares a blind signature request on the committed
           vector $(\algo{uid}_0, v_0, s_0)$, hiding $\algo{uid}_0$ and $s_0$
-          and disclosing $v_0$, together with a zero-knowledge proof $\Pi$
+          and disclosing $v_0$, together with a zero knowledge proof $\Pi$
           that $\com$ is correctly formed and that the accompanying
           ciphertexts are correct, and sends $\algo{req} = (\algo{uid}_0, \com,
           \ciph_0, v_0, \ciph_2, \Pi, \rho_0)$ to the intermediary.
@@ -234,7 +234,7 @@ instantiates each of them.
       \end{enumerate}
 
     \item[$p_i \leftarrow \OPexecute(v, s_i, \com_i, \algo{hist}_i)$
-      :]\label{sec:payments} The payer pays the payee using token $(v, s_i,
+      :] The payer pays the payee using token $(v, s_i,
       \com_i, \algo{hist}_i)$. Do the following:
 
       \begin{enumerate}
@@ -263,8 +263,11 @@ instantiates each of them.
         of knowledge $\sigma_i$ for the relation as follows: \begin{equation*}
           \DSverify(\rapk, \algo{uid}_i, \sk_{\algo{usr}_i}, \varphi_i) = 1
           \;\wedge\; \ComOpen(\ck, \algo{uid}_i, s_i, \com_i) = 1.
-        \end{equation*} Here, the secure element contributes knowledge of the
-        payer's secret key and the device contributes the remaining witness.
+        \end{equation*} This is a joint proof of knowledge in the sense
+        of~\Cref{sec:joint-pok-def}: the secure element takes the role of
+        $\algo{Prv}_0$ and contributes knowledge of the payer's secret key,
+        and the device takes the role of $\algo{Prv}_1$ and contributes the
+        remaining witness.
 
       \item The payer's device sends payment $p_i = (v, \com_i, \com_{i+1},
         \ciph_i, \sigma_i, \Gamma_i, \algo{hist}_i)$ to the payee's device.
@@ -285,7 +288,7 @@ instantiates each of them.
     \end{enumerate}
 
   \item[$\{0,1\} \leftarrow \OPdeposit(\tau_n, \algo{hist}_n)$
-    :]\label{sec:deposit} The user deposits token $\tau_n = (v, \com_n)$. Do
+    :] The user deposits token $\tau_n = (v, \com_n)$. Do
     the following:
 
     \begin{enumerate}
@@ -339,34 +342,46 @@ instantiates each of them.
 
 \end{protocolbox}
 
-Revocation must not leak
-information about a user's past transactions, and it is difficult to address with
-the inherent lack of verified real time information of the offline setting. A payee who goes offline
-just before a payer is revoked will accept the
-revoked payer's token. A useful mitigation is an expiry policy organised into epochs, capping either
-spending hops or time since withdrawal. Payees, not spenders, enforce this by
-rejecting payments outside the current window, tuned to transaction value.
- Capping individual transaction values is a
-complementary mitigation, together making double spending financially
-unattractive even before detection.
+\begin{theorem}\label{thm:offline-construction-security} If the commitment
+  scheme is binding, the public key encryption scheme is IND-CPA secure, the
+  blind signature scheme used by the central bank and the signature scheme used
+  by the registration authority are existentially unforgeable, and the proofs
+  and signatures of knowledge are simulation extractable, then
+  Protocol~\ref{prot:offline} securely realises ideal functionality
+  $\idfu{\algo{op}}$.
+\end{theorem}
 
-Users must never hold
-$\sk_{\algo{usr}}$ directly. With direct access, they can produce unlimited
-payments from the same token, since detecting separate double spendings
-is inherently impossible offline. The secure elements and key-splitting techniques
- support double spending resistance but cannot
-enforce it. The gap is then left to governance.
+\paragraph{Extensions.} The construction leaves several things open, each of
+which admits a partial answer.
 
-Use of secure elements and inaccessible keys requires a
-recovery mechanism for lost devices.
-Other techniques are then needed to understand and address this without sacrificing usability.
+Revocation must not leak information about a user's past transactions, and it
+is difficult to address with the inherent lack of verified real time
+information of the offline setting. A payee who goes offline just before a
+payer is revoked will accept the revoked payer's token. A useful mitigation is
+an expiry policy organised into epochs, capping either spending hops or time
+since withdrawal. Payees, not spenders, enforce this by rejecting payments
+outside the current window, tuned to transaction value. Capping individual
+transaction values is a complementary mitigation, together making double
+spending financially unattractive even before detection.
 
-Mobile TEEs protect app secrets
-from a malicious owner but expose them to developers only via key-management
-APIs~\cite{trustzone,secureenclave}. Key confidentiality doesn't guarantee
-logic integrity, so arbitrary code execution could still
-enable repeated spending via the key manager. Smart cards (Javacard, MIFARE)
-instead protect both the key and logic with tamper resistant, isolated
-execution~\cite{javacard,mifare}. No hardware security is unconditional, so
-deployment involves trade offs between infrastructure and equipment costs,
-system wide value limits, and the cost of attacking a card.
+Users must never hold $\sk_{\algo{usr}}$ directly. With direct access, they can
+produce unlimited payments from the same token, since detecting separate double
+spendings is inherently impossible offline. The secure elements and key
+splitting techniques support double spending resistance but cannot enforce it.
+The gap is then left to governance.
+
+Use of secure elements and inaccessible keys requires a recovery mechanism for
+lost devices. Other techniques are then needed to understand and address this
+without sacrificing usability.
+
+Mobile TEEs protect app secrets from a malicious owner but expose them to
+developers only via key management APIs~\cite{trustzone,secureenclave}. Key
+confidentiality does not guarantee logic integrity, so arbitrary code execution
+could still enable repeated spending via the key manager. Smart cards, such as
+Javacard and MIFARE, instead protect both the key and logic with tamper
+resistant, isolated execution~\cite{javacard,mifare}. No hardware security is
+unconditional, so deployment involves trade offs between infrastructure and
+equipment costs, system wide value limits, and the cost of attacking a card.
+
+We leave divisibility, aggregated deposits, and coin transparency to future
+work.

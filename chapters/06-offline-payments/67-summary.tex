@@ -1,23 +1,48 @@
 \section{Summary}\label{sec:offline-summary}
 
-This chapter addresses offline retail CBDC payments: payments conducted
-while both payer and payee are disconnected from the network, and settled
-only when tokens are eventually deposited. The central difficulty in this
-setting is that a payee has no way to verify, in real time, that the token
-they are receiving has not already been spent elsewhere. Rather than rely on
-prevention or detection alone, we combine the two: a secure element makes
-double spending expensive and impractical to mount at scale, while an
-efficient auditing mechanism ensures that, should an attack succeed, the
-responsible party can still be identified and held accountable.
+This chapter addresses offline retail CBDC payments: payments conducted while
+both payer and payee are disconnected from the network, and settled only when
+tokens are eventually deposited. The central difficulty in this setting is that
+a payee has no way to verify, in real time, that the token they are receiving
+has not already been spent elsewhere. Rather than rely on prevention or
+detection alone, we combine the two: a secure element makes double spending
+expensive and impractical to mount at scale, while an efficient auditing
+mechanism ensures that, should an attack succeed, the responsible party can
+still be identified and held accountable.
 
-We demonstrate the
-viability of the protocol on commodity smart cards and mobile
-phones. Withdrawal and the payer side of a payment both complete in under
-half a second, and even a payment chain of 32 hops verifies in under a
-second on the payee's side, with the smart card itself authorising a
-payment in under $400\,\mathrm{ms}$. Auditing adds no overhead for the
-payer and a modest 10-20\% overhead for the payee.
+The scheme keeps the institutions that an offline payment system already has,
+and constrains what each of them learns. The central bank issues and redeems
+tokens without learning what it signs at withdrawal or which withdrawal a
+deposit corresponds to. Intermediaries hold accounts and route requests, and
+learn the identity of a user only when that user withdraws or deposits. The
+registration authority enrols users once and plays no part in payments. The
+auditor recovers an identity, and only then from a payment that double spends a
+token, and the role can be distributed via threshold decryption. None of these
+participants is removed in pursuit of decentralisation, and none of them is
+trusted with the privacy of honest users.
 
-We focus on transferability rather than divisibility. Extending the scheme to support splitting
-and merging tokens and to support aggregated deposits are both
-natural directions for future work.
+We claim no new primitive. The contribution is a combination: anonymous
+credentials, blind signatures, verifiable encryption, and a joint proof of
+knowledge that splits a payment between a secure element holding the user's key
+and a mobile device doing the heavy work. What the combination buys is that all
+of the properties an offline payment system needs, unforgeability, theft
+prevention, double spending identification, non-frameability, anonymity, and
+unlinkability, hold at once, on hardware that exists today.
+
+We demonstrate the viability of the protocol on commodity smart cards and
+mobile phones. Withdrawal and the payer side of a payment both complete in
+under half a second, and even a payment chain of 32 hops verifies in under a
+second on the payee's side, with the smart card itself authorising a payment in
+under $400\,\mathrm{ms}$. Auditing adds no overhead for the payer and a modest
+10 to 20\% overhead for the payee.
+
+The transaction system underlying this chapter is the same one used
+in~\Cref{chap:txid}, so the two mechanisms compose: a deployment can identify
+transactions within an epoch online and identify double spenders offline
+without maintaining two separate sets of credentials.
+
+We focus on transferability rather than divisibility. Extending the scheme to
+support splitting and merging tokens and to support aggregated deposits are
+both natural directions for future work. Revocation in the offline setting
+remains the sharpest limitation, and we discuss the expiry based mitigations we
+consider practical in~\Cref{sec:offline-construction}.

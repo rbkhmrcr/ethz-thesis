@@ -1,6 +1,6 @@
 \section{Definitions}\label{sec:offline-definitions}
 
-\subsection{System entities}
+\subsection{Offline payments}
 
 An offline payment system involves five types of participants: the central
 bank, intermediaries, users, a registration authority, and an auditor.
@@ -24,9 +24,9 @@ previously been deposited.
 
 Intermediaries maintain users' bank deposit accounts and mediate the
 interaction of users with the central bank. They also onboard users into the
-system, opening accounts for them and helping them obtain long-term credentials
+system, opening accounts for them and helping them obtain long term credentials
 from the registration authority. The registration authority issues these
-long-term credentials, which users subsequently use to authorise and
+long term credentials, which users subsequently use to authorise and
 authenticate payments. The auditor is authorised to trace a fraudulent offline
 payment, such as one that double spends a token, to its originator.
 
@@ -38,15 +38,58 @@ are honest but curious: they follow the protocol, but may collude with other
 participants to learn information about offline payments.  The registration
 authority is additionally trusted to assign each user a unique identifier, to
 generate a correctly formed credential that will be accepted by all other
-participants, and to issue that credential only following well-established KYC
+participants, and to issue that credential only following well established KYC
 processes. Users may be arbitrarily malicious: they may collude to forge
 tokens, double spend them, or steal the tokens of honest users, and may collude
 with other participants to undermine the privacy of honest users. Users have
 full control of their mobile devices, but we assume they cannot easily tamper
 with their secure elements. The auditor is fully trusted to inspect only
-fraudulent payments and to de-anonymise only misbehaving users. We consider
+fraudulent payments and to deanonymise only misbehaving users. We consider
 static corruption throughout: the adversary fixes the set of corrupt
 participants before any protocol interaction takes place.
+
+An offline payment scheme is defined by the following algorithms. Account
+creation is an operation of the intermediary rather than of the scheme, so we
+do not give it as an algorithm here, though the ideal functionality below
+exposes an interface for it.
+
+\begin{description}
+
+  \item[$(\pk_{\algo{cb}}, \ck, \pk_{\auditor}, \rapk) \leftarrow
+    \OPgen(\secparam)$ :] The setup algorithm, on input security parameter
+    $\secparam$, generates the public keys of the central bank, the auditor,
+    and the registration authority, together with a public commitment key
+    $\ck$.
+
+  \item[$\cred \leftarrow \OPregister(\rask)$ :] The registration algorithm, on
+    input the registration authority's secret key $\rask$, provisions the
+    user's secure element and outputs long term credential $\cred$.
+
+  \item[$T_0 \leftarrow \OPwithdraw(v_0)$ :] The withdrawal algorithm, on input
+    value $v_0$, outputs token $T_0$ of that value, obtained by the user from
+    the central bank through their intermediary.
+
+  \item[$p_i \leftarrow \OPexecute(v, s_i, \com_i, \algo{hist}_i)$ :] The
+    payment algorithm, on input a token of value $v$ with randomness $s_i$,
+    pseudonym $\com_i$, and history $\algo{hist}_i$, outputs payment $p_i$
+    transferring the token to the payee.
+
+  \item[$\{0,1\} \leftarrow \OPdeposit(\tau_n, \algo{hist}_n)$ :] The deposit
+    algorithm, on input token $\tau_n$ and its history $\algo{hist}_n$, returns
+    1 if the token is redeemed for commercial bank money and 0 otherwise.
+
+  \item[$\algo{uid}^* \leftarrow \OPidentify(d_n, d_m)$ :] The identification
+    algorithm, on input two conflicting deposit requests $d_n$ and $d_m$ for
+    the same original token, outputs the identifier $\algo{uid}^*$ of the
+    double spender.
+
+\end{description}
+
+We define security of an offline payment scheme through an ideal functionality
+that represents a trusted third party which executes the operations of the
+payment system on behalf of system participants in a way that perfectly meets
+the system requirements. The properties this functionality captures are stated
+informally below and formalised in~\Cref{sec:ideal-func}.
 
 \subsection{Security goals}
 
@@ -58,7 +101,7 @@ the intermediaries. More specifically, it must ensure:
 
   \item[Unforgeability.] An honest payee should not be tricked, during a
     payment, into accepting a token that was not issued by the central bank.
-    Similarly, the honest-but-curious central bank will not declare a deposit
+    Similarly, the honest but curious central bank will not declare a deposit
     successful unless it previously issued the corresponding token.
 
   \item[Theft prevention.] A malicious payer should not be able to convince an
@@ -66,7 +109,7 @@ the intermediaries. More specifically, it must ensure:
     malicious user should not be able to successfully deposit a token they do
     not own.
 
-  \item[Double-spending detection and identification.] An honest user uses a
+  \item[Double spending detection and identification.] An honest user uses a
     token only once, in either a payment or a deposit, after which the token is
     deleted. A malicious user may instead use a token in multiple payments or
     deposits. A secure offline payment system must ensure that such double
@@ -99,15 +142,72 @@ the intermediaries. More specifically, it must ensure:
 
 \end{description}
 
+\subsection{Joint proofs of knowledge}\label{sec:joint-pok-def}
+
+Each payment carries a proof that the payer holds a credential on the
+identifier committed in their pseudonym, and knows the secret key that
+credential is bound to. The secret key never leaves the secure element, and the
+secure element does not have the compute to produce the whole proof. We
+therefore need a proof system in which two provers cooperate to produce a
+single proof for a relation whose witness is split between them, with the
+weaker prover holding only a small part of it.
+
+We call this a joint proof of knowledge. It is a proof system for a relation
+$\rel$ over instance $\inst$ and witness $\witness = (\witness_0,
+\witness_1)$, where $\witness_0$ is held by prover $\algo{Prv}_0$ and
+$\witness_1$ by prover $\algo{Prv}_1$. It is defined by the following
+algorithms.
+
+\begin{description}
+
+  \item[$\crs \sample \algo{JGen}(\secparam)$ :] The setup algorithm, on input
+    security parameter $\secparam$, outputs a common reference string $\crs$.
+
+  \item[$\Pi \sample \algo{JProve}_0(\crs, \inst, \witness_0) \leftrightarrow
+    \algo{JProve}_1(\crs, \inst, \witness_1)$ :] The proving protocol, run
+    between $\algo{Prv}_0$ on input witness share $\witness_0$ and
+    $\algo{Prv}_1$ on input witness share $\witness_1$, with $\algo{Prv}_1$
+    outputting proof $\Pi$.
+
+  \item[$\{0,1\} \leftarrow \algo{JVerify}(\crs, \inst, \Pi)$ :] The
+    verification algorithm, on input $\crs$, instance $\inst$, and proof $\Pi$,
+    returns 0 or 1.
+
+\end{description}
+
+A joint proof of knowledge should satisfy the following, in addition to the
+usual properties of a non-interactive proof system.
+
+\paragraph{Correctness.} If both provers follow the protocol on a witness
+$\witness = (\witness_0, \witness_1)$ with $\rel(\inst, \witness) = 1$, then
+$\algo{JVerify}(\crs, \inst, \Pi) = 1$.
+
+\paragraph{Simulation extractability.} From any proof accepted by
+$\algo{JVerify}$, a witness $\witness$ for $\inst$ can be extracted, and this
+holds even after the adversary has observed simulated proofs of its own
+choosing. This is the property the security proof relies on, since the
+simulator must extract the payer's identifier and credential from a payment
+produced by a corrupt user.
+
+\paragraph{Witness hiding against a co-prover.} $\algo{Prv}_1$ learns nothing
+about $\witness_0$ beyond a commitment to it and the randomness of that
+commitment. This is what lets the mobile device carry out the bulk of the
+proof without ever holding the user's secret key, which is the point of the
+split: the device is under the user's full control, while the secure element
+is not.
+
+We instantiate this primitive over BBS+ signatures
+in~\Cref{sec:offline-instantiation}.
+
 \subsection{Ideal functionality $\idfu{\algo{op}}$}\label{sec:ideal-func}
 
 We define security for the offline payment protocol through an ideal
 functionality $\idfu{\algo{op}}$, which represents an incorruptible trusted
 party that receives the inputs of each protocol task and returns the
-prescribed outputs. $\idfu{\algo{op}}$ interacts with the system's
-participants — users, who act as both payers and payees, intermediaries, the
-registration authority, the central bank, and the auditor — and with the
-ideal-world simulator $\simu$. Each user is represented as a pair consisting
+prescribed outputs. $\idfu{\algo{op}}$ interacts with the ideal world simulator
+$\simu$ and with the system's participants. These are the users, who act as
+both payers and payees, the intermediaries, the registration authority, the
+central bank, and the auditor. Each user is represented as a pair consisting
 of a mobile device and a secure element, so that an individual holding
 multiple bank accounts is modelled as multiple such users, one per account.
 The registration authority, the central bank, and the intermediaries are
@@ -178,13 +278,13 @@ the auditor and the central bank.
         Before any call to the offline payment interfaces, $\simu$ issues
         corruption queries:
 
-        {$\algo{corrupt}$.} Upon an active corruption request $(\algo{corrupt},
+        {$\OPcorrupt$.} Upon an active corruption request $(\OPcorrupt,
         P)$ for $P \in \algo{Dev} \cup \algo{SE}$ from $\simu$ do: $\algo{mal}
         \gets \algo{mal} \cup P$.
 
-        {$\algo{create}$.} Upon receiving for the first time $(\algo{create},
+        {$\OPcreate$.} Upon receiving for the first time $(\OPcreate,
         \algo{usr}, v)$ from $\algo{Int} \in \algo{I}$ for $\algo{usr} \in
-        \algo{usrs}$, send $(\algo{create}, \algo{usr}, \algo{Int}, v)$ to
+        \algo{usrs}$, send $(\OPcreate, \algo{usr}, \algo{Int}, v)$ to
         $\simu$ and wait for the go-ahead. On receiving it, do:
 
         \begin{enumerate}
@@ -209,7 +309,7 @@ the auditor and the central bank.
 
         {$\OPregister$.} Upon receiving for the first time
         $(\OPregister, \algo{usr})$ from $\reg$ for $\algo{usr} \in
-        \algo{usrs}$ that already has an account -- send $(\OPregister,
+        \algo{usrs}$ that already has an account, send $(\OPregister,
         \algo{usr})$ to $\simu$ and wait for the go-ahead. On receiving it,
         do:
 

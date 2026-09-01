@@ -147,12 +147,28 @@ Randomisation also preserves validity, meaning that the following holds:
 \end{gather*}
 %
 
-\paragraph{Existential unforgeability under tag based aggregation.} We say an
-ATS scheme is existentially unforgeable under tag based aggregation if for any
-probabilistic polynomial time adversary $\adv$, with access to corruption
-oracle $\corrupto$ and signing oracle $\signo$, the probability that $\adv$
-wins the experiment depicted in Experiment~\ref{exp:ats-euf} is negligible in
-security parameter $\secparam$.
+\paragraph{Existential unforgeability under tag based aggregation.} For a PPT
+adversary $\adv$, with access to corruption oracle $\corrupto$ and signing
+oracle $\signo$, define advantage as follows:
+%
+\begin{equation*}
+%
+  \Adv_{\mathrm{ATS}, \adv}^{\text{EUF-TBA}}(\secparam) = \Pr\left[
+  \mathbf{G}_{\mathrm{ATS}, \adv}^{\text{EUF-TBA}}(\secparam) = 1\right].
+%
+\end{equation*}
+%
+Here, game $\mathbf{G}_{\mathrm{ATS}, \adv}^{\text{EUF-TBA}}$ and its oracles
+$\corrupto$ and $\signo$ are given in Experiment~\ref{exp:ats-euf}. An ATS
+scheme is existentially unforgeable under tag based aggregation if, for every
+PPT adversary $\adv$, the following holds:
+%
+\begin{equation*}
+%
+  \Adv_{\mathrm{ATS}, \adv}^{\text{EUF-TBA}}(\secparam) \leq
+  \operatorname{negl}(\secparam).
+%
+\end{equation*}
 
 \begin{experimentbox}{Existential unforgeability under tag based
   aggregation}{ats-euf}
@@ -182,7 +198,6 @@ security parameter $\secparam$.
   \notin \Cor \wedge (\pk_i, \Tag, \msg_i) \notin \Query$.
 
 \end{experimentbox}
-
 
 \subsection{Ideal functionality $\idfu{\AAC}$.}
 

@@ -12,13 +12,13 @@ A structure-preserving signature scheme is defined by the following algorithms:
 
   \item[$(\pk, \sk) \sample \SPSgen(\secparam, \ell)$ :] The key generation
     algorithm, on input security parameter $\secparam$ and length
-    $\ell$,outputs key pair $(\pk, \sk)$. Public keys are group elements.
+    $\ell$, outputs key pair $(\pk, \sk)$. Public keys are group elements.
 
   \item[$\signature \sample \SPSsign(\sk, \mssg)$ :] The signing algorithm, on
     input secret key $\sk$ and message $\mssg$, outputs signature $\signature$.
     Messages and signatures are vectors of group elements, messages from the
-    space $\group{1}^\ell$, and signatures in $\group{1}^{poly(\secparam)}
-    \times \group{2}^{poly(\secparam)}$.
+    space $\group{1}^\ell$, and signatures in $\group{1}^{\mathrm{poly}(\secparam)}
+    \times \group{2}^{\mathrm{poly}(\secparam)}$.
 
   \item[$\{0,1\} \leftarrow \SPSverify(\pk, \mssg, \signature)$ :] The
     verification algorithm, on input public key $\pk$, message $\mssg$, and
@@ -29,7 +29,7 @@ A structure-preserving signature scheme is defined by the following algorithms:
 
 A structure-preserving signature scheme satisfies correctness if, for all
 security parameters $\secparam$, all $(\pk, \sk) \sample \SPSgen(\secparam,
-l)$, and all $\mssg \in \group{1}^\ell$, the following holds:
+\ell)$, and all $\mssg \in \group{1}^\ell$, the following holds:
 %
 \begin{equation*}
 %
@@ -43,8 +43,8 @@ follows:
 %
 \begin{equation*}
 %
-  \Adv_{\mathrm{SPS}, \adv}^{\text{UF-CMA}}(\secparam) = \Pr\left\lbrack
-  \mathbf{G}_{\mathrm{SPS}, \adv}^{\text{UF-CMA}}(\secparam) = 1\right\rbrack .
+  \Adv_{\mathrm{SPS}, \adv}^{\text{UF-CMA}}(\secparam) = \Pr\left[
+  \mathbf{G}_{\mathrm{SPS}, \adv}^{\text{UF-CMA}}(\secparam) = 1\right].
 %
 \end{equation*}
 %
@@ -62,7 +62,9 @@ the following holds:
 %
 Excluding the message $\mssg^*$ from the set $S$ of queried messages, as shown
 in Experiment~\ref{exp:sps-uf-cma}, gives weak unforgeability (wUF-CMA), the
-notion we rely on throughout this chapter. Excluding instead the pair
+notion we rely on throughout this chapter; we write
+$\Adv_{\mathrm{SPS}, \adv}^{\text{wUF-CMA}}(\secparam)$ for the corresponding
+advantage. Excluding instead the pair
 $(\mssg^*, \signature^*)$ gives strong unforgeability (sUF-CMA), which rules
 out an adversary producing a fresh signature on an already-signed message.
 
@@ -71,7 +73,7 @@ out an adversary producing a fresh signature on an already-signed message.
 
   \begin{enumerate}
 
-    \item The challenger generates $(\pk, \sk) \gets \SPSgen(\secparam, l)$ and
+    \item The challenger generates $(\pk, \sk) \gets \SPSgen(\secparam, \ell)$ and
       sends $\pk$ to $\adv$.
 
     \item The adversary is given oracle access to $\signo$, which on input
@@ -97,24 +99,23 @@ $\TSPSverify$ as follows.
 
 \begin{description}
 
-  \item[$(\pk, \lbrack \sk\rbrack ) \sample \TSPSgen(\secparam, \ell, t, n)$ :]
-    The key generation algorithm takes a triple of integers $(\ell, t, n > t)$,
-    where $\ell$ is the length of the vectors to be signed, $t$ is an upper
-    bound on the number of corrupted parties, and $n$ is the total number of
-    threshold signers. It returns a public key $\pk$ and $n$ shares $\lbrack
-    \sk\rbrack $ such that any $t+1$ shares reconstruct the secret key
-    underlying $\pk$.  $\pk$ consists of group elements, and $\sk$ of elements
-    of $\Zp$ and/or group elements.
+  \item[{$(\pk, [\sk]) \sample \TSPSgen(\secparam, \ell, t, n)$ :}] The key
+    generation algorithm takes a triple of integers $(\ell, t, n > t)$, where
+    $\ell$ is the length of the vectors to be signed, $t$ is an upper bound on
+    the number of corrupted parties, and $n$ is the total number of threshold
+    signers. It returns a public key $\pk$ and $n$ shares $[\sk]$ such that
+    any $t+1$ shares reconstruct the secret key underlying $\pk$. $\pk$
+    consists of group elements, and $\sk$ of elements of $\Zp$ and/or group
+    elements.
 
-  \item[$\lbrack \signature\rbrack  \sample \TSPSsign(\lbrack \sk\rbrack ,
-    \mssg)$ :] The threshold signing algorithm takes a secret key share
-    $\lbrack \sk\rbrack $ and message $\mssg$ with elements in $\group{1}$
-    and/or $\group{2}$, and outputs a signature share $\lbrack
-    \signature\rbrack $ with elements in $\group{1}$ and $\group{2}$.
+  \item[{$[\signature] \sample \TSPSsign([\sk], \mssg)$ :}] The threshold
+    signing algorithm takes a secret key share $[\sk]$ and message $\mssg$
+    with elements in $\group{1}$ and/or $\group{2}$, and outputs a signature
+    share $[\signature]$ with elements in $\group{1}$ and $\group{2}$.
 
-  \item[$\signature \leftarrow \TSPScombine(\lbrack \signature\rbrack )$ :] The
-    combining algorithm is non-interactive, and takes signature shares $\lbrack
-    \signature\rbrack $ to output signature $\signature$.
+  \item[{$\signature \leftarrow \TSPScombine([\signature])$ :}] The combining
+    algorithm is non-interactive, and takes signature shares $[\signature]$
+    to output signature $\signature$.
 
   \item[$\{0,1\} \leftarrow \TSPSverify(\pk, \mssg, \signature)$ :] The
     verification algorithm takes public key $\pk$, message $\mssg$, and
@@ -130,14 +131,19 @@ distinguishing fully and partially non-interactive schemes~\cite{C:BCKMTZ22}.
 With TS-UF-0 security, the adversary has access to a partial signature oracle
 $\signo$, and the unforgeability game is defined so that the adversary cannot
 win with message-signature pair $(\mssg^*, \signature^*)$ if the partial
-signature oracle has already been queried, even once, on $\mssg^*$.  TS-UF-1
+signature oracle has already been queried, even once, on $\mssg^*$. TS-UF-1
 relaxes this: the winning condition can be triggered as long as the adversary
-has queried for partial signatures on $\mssg^*$ from no more than $t - |\Cor| -
-1$ parties, where $\Cor$ is the set of corrupted parties.  When the adversary
-corrupts $t-1$ parties, TS-UF-0 and TS-UF-1 coincide. In the adaptive variants,
-adp-TS-UF-0 and adp-TS-UF-1, the adversary additionally has access to a
-corruption oracle $\corrupto$, alongside the partial signature oracle $\signo$.
-We rely on adaptive TS-UF-1 security throughout this chapter.
+has queried for partial signatures on $\mssg^*$ from no more than $t - |\Cor|
+- 1$ parties, where $\Cor$ is the set of corrupted parties. When the adversary
+corrupts $t-1$ parties, TS-UF-0 and TS-UF-1 coincide. In the adaptive
+variants, adp-TS-UF-0 and adp-TS-UF-1, the adversary additionally has access
+to a corruption oracle $\corrupto$, alongside the partial signature oracle
+$\signo$. We rely on adaptive TS-UF-1 security throughout this chapter. These
+notions also distinguish fully from partially non-interactive schemes. A
+partially non-interactive scheme is one whose $\algo{OnSign}$ protocol is
+non-interactive, but whose message-independent pre-processing round, analogous
+to $\algo{OffSign}$, may be interactive. Both of the schemes of
+\Cref{sec:tsps-instantiation} fall into this class.
 
 Let $\mathrm{TSPS} = (\TSPSgen, \TSPSsign, \TSPScombine, \SPSverify)$ be an
 $(n, t)$-TSPS scheme over message space $\mathcal{M}$. The advantage of a PPT
@@ -145,8 +151,8 @@ adversary $\adv$ is defined as follows:
 %
 \begin{equation*}
 %
-  \Adv_{\TSPS, \adv}^{\text{adp-TS-UF-1}}(\secparam) = \Pr\left\lbrack
-  \mathbf{G}_{\TSPS, \adv}^{\text{adp-TS-UF-1}}(\secparam) = 1 \right\rbrack .
+  \Adv_{\TSPS, \adv}^{\text{adp-TS-UF-1}}(\secparam) = \Pr\left[
+  \mathbf{G}_{\TSPS, \adv}^{\text{adp-TS-UF-1}}(\secparam) = 1 \right].
 %
 \end{equation*}
 %
@@ -170,9 +176,9 @@ security if, for every PPT adversary $\adv$, the following holds:
     \item The adversary outputs $(n, t, \Cor)$, and the challenger sets
       $\mathcal{H} := [1,n] \backslash \Cor$.
 
-    \item The challenger generates $(\pk, \lbrack \sk\rbrack , \lbrack
-      \pk\rbrack ) \gets \TSPSgen(\secparam, \ell, t, n)$, and sends $\pk$,
-      $\{\sk_i\}_{i \in \Cor}$, and $\lbrack \pk\rbrack $ to $\adv$.
+    \item The challenger generates $(\pk, [\sk], [\pk]) \gets
+      \TSPSgen(\secparam, \ell, t, n)$, and sends $\pk$, $\{\sk_i\}_{i \in
+      \Cor}$, and $[\pk]$ to $\adv$.
 
     \item The adversary is given oracle access to $\TSPSsigno$, which on input
       $(i, \mssg)$, asserts $\mssg \in \mathcal{M} \wedge i \in \mathcal{H}$,
@@ -195,16 +201,16 @@ security if, for every PPT adversary $\adv$, the following holds:
 \end{experimentbox}
 
 Let $x \in \Zp$ be a secret value additively shared between $n$ parties such
-that any $t+1$ parties can reconstruct it with the help of a pre-defined linear
-combination. We denote such a sharing $\lbrack x\rbrack $: the vector $(x_1,
-\ldots, x_n)$ where $x_i$ is the share held by the $i^{\mathrm{th}}$ party. For
-$\vec{x} = (x_1, \ldots, x_l) \in \Zp^l$, we write $\lbrack \vec{x}\rbrack $
-for the vector $(\lbrack x_1\rbrack , \ldots, \lbrack x_l\rbrack )$.
+that any $t+1$ parties can reconstruct it with the help of a pre-defined
+linear combination. We denote such a sharing $[x]$: the vector $(x_1, \ldots,
+x_n)$ where $x_i$ is the share held by the $i^{\mathrm{th}}$ party. For
+$\vec{x} = (x_1, \ldots, x_\ell) \in \Zp^\ell$, we write $[\vec{x}]$ for the vector
+$([x_1], \ldots, [x_\ell])$.
 
 Our threshold signing algorithms are built from secure multiparty computation
 (MPC). We introduce the ideal functionalities for MPC that they rely on below.
 
-\subsection{Secure multiparty computation}\label{sec:MPC}
+\subsection{Secure multiparty computation}\label{sec:tsps-mpc}
 
 Rather than specifying how the signers jointly compute each step, we assume
 access to functionalities that perform the relevant computation on their
@@ -214,7 +220,7 @@ prime order field $\Zp$ and a generic prime order group $\group{}$.
 
 \subsubsection{Functionalities for secure multiparty computation in $\Zp$}
 
-\begin{figure*} \centering \hspace*{-0.05\textwidth}
+\begin{figure} \centering \hspace*{-0.05\textwidth}
   \begin{minipage}{1.1\textwidth}
 
     \begin{framed} \scriptsize
@@ -230,9 +236,9 @@ prime order field $\Zp$ and a generic prime order group $\group{}$.
 
         \begin{enumerate}
 
-          \item Sample a random $t$-additive sharing $\lbrack x\rbrack = (x_1,
-            ..., x_n)$ such that $x^*_i = x_i, \forall i : {P}_i \in \Cor$. If
-            no such sharing exists, send $\bot$ to all honest parties and stop.
+          \item Sample a random $t$-additive sharing $[x]= (x_1, ..., x_n)$
+            such that $x^*_i = x_i, \forall i : {P}_i \in \Cor$. If no such
+            sharing exists, send $\bot$ to all honest parties and stop.
 
           \item Otherwise, distribute to each honest party its share $\langle
             \mathit{id}_x, x_i\rangle$, and store entries $\langle
@@ -280,8 +286,8 @@ prime order field $\Zp$ and a generic prime order group $\group{}$.
                 \mathit{id}_x,x\rangle$ and $\langle \algo{secret},
                 \mathit{id}_y,y\rangle$.
 
-              \item Compute $z = xy$ and a $t$-additive sharing $\lbrack z
-                \rbrack  = (z_1, ..., z_n)$ of $z$.
+              \item Compute $z = xy$ and a $t$-additive sharing $[z] = (z_1,
+                ..., z_n)$ of $z$.
 
               \item Send to each party ${P}_i$ its share $z_i$.
 
@@ -312,8 +318,8 @@ prime order field $\Zp$ and a generic prime order group $\group{}$.
               \item Get entry $\langle \algo{secret}, \mathit{id}_x, x
                 \rangle$.
 
-              \item Compute $z = 1/x$ and a $t$-additive sharing $\lbrack
-                z\rbrack  =(z_1, ..., z_n)$ of $z$.
+              \item Compute $z = 1/x$ and a $t$-additive sharing $[z] =(z_1,
+                ..., z_n)$ of $z$.
 
               \item Send to each party ${P}_i$ its share $z_i$.
 
@@ -350,62 +356,59 @@ prime order field $\Zp$ and a generic prime order group $\group{}$.
     \end{framed}
 
   \end{minipage} \caption{Ideal functionalities for MPC in $\Zp$.}
-\label{fig:ideal-func} \end{figure*}
+\label{fig:tsps-ideal-func} \end{figure}
 
 Our constructions of threshold structure-preserving signatures build upon
 existing frameworks for secure MPC over inputs in $\Zp$. Concretely, we assume
 some realisation of the ideal MPC functionality over $\Zp$ described in
-Figure~\ref{fig:ideal-func}, where $\mathcal{H}$ and $\Cor$ denote the sets of
+\Cref{fig:tsps-ideal-func}, where $\mathcal{H}$ and $\Cor$ denote the sets of
 honest and corrupted parties respectively. Unless otherwise specified, we
-assume security against malicious corruption of parties. Recall that $\lbrack x
-\rbrack $, for $x \in \Zp$, denotes that $x$ is secret-shared: no individual
-party has access to $x$, but each party holds some share $x_i$ of $x$ (for
-simplicity, we assume this notation incorporates the additional authentication
-components required for malicious security).
+assume security against malicious corruption of parties. Recall that $[x]$,
+for $x \in \Zp$, denotes that $x$ is secret-shared: no individual party has
+access to $x$, but each party holds some share $x_i$ of $x$ (for simplicity,
+we assume this notation incorporates the additional authentication components
+required for malicious security).
 
 \paragraph{Linearity-preservation.} Fundamentally, we require that the
-secret-shared representation $\lbrack x\rbrack $ is linearity-preserving.
-Given secret shares $\lbrack x\rbrack $ and $\lbrack y\rbrack $, and public
+secret-shared representation $[x]$ is linearity-preserving.
+Given secret shares $[x]$ and $[y]$, and public
 values $z,\alpha,\beta \in \Zp$, the parties can compute a secret sharing of $u
 = \alpha x + \beta y + z$ ``for free'', as follows:
 %
-\[ \lbrack u\rbrack = \alpha\cdot \lbrack x\rbrack + \beta \cdot \lbrack
-y\rbrack + z.  \]
+\[[u]= \alpha\cdot [x]+ \beta \cdot [y]+ z. \]
 %
 Since we assume malicious security, this property must also be preserved for
 any additional authentication components, which we otherwise abstract out for
 ease of exposition.
 
 \paragraph{Functionalities for secure MPC in $\Zp$.}
-Figure~\ref{fig:ideal-func} describes the ideal functionalities we assume for
+\Cref{fig:tsps-ideal-func} describes the ideal functionalities we assume for
 secure MPC in $\Zp$. We assume a randomised functionality that generates a
-secret-shared representation $\lbrack r\rbrack $ for a randomly sampled value
-$r\gets \Zp$, together with four deterministic functionalities, described below
-(all arithmetic is in $\Zp$):
+secret-shared representation $[r]$ for a randomly sampled value $r\gets \Zp$,
+together with four deterministic functionalities, described below (all
+arithmetic is in $\Zp$):
 
 \begin{enumerate}
 
-  \item A functionality that adds secret-shared inputs: given $\lbrack x
-    \rbrack $ and $\lbrack y\rbrack $, produces $\lbrack z \rbrack $ such that
-    $z = x + y$. By linearity-preservation, this comes for free, as it can be
-    performed locally by each party.
+  \item A functionality that adds secret-shared inputs: given $[x]$ and
+    $[y]$, produces $[z]$ such that $z = x + y$. By linearity-preservation,
+    this comes for free, as it can be performed locally by each party.
 
-  \item A functionality that multiplies secret-shared inputs: given $\lbrack
-    x\rbrack $ and $\lbrack y\rbrack $, produces $\lbrack z\rbrack $ such that
-    $z = x \cdot y$.
+  \item A functionality that multiplies secret-shared inputs: given $[x]$ and
+    $[y]$, produces $[z]$ such that $z = x \cdot y$.
 
-  \item A functionality that inverts a secret-shared value: given $\lbrack
-    x\rbrack $, produces $\lbrack z\rbrack $ such that $z = x^{-1}$.
+  \item A functionality that inverts a secret-shared value: given $[x]$,
+    produces $[z]$ such that $z = x^{-1}$.
 
   \item A functionality that combines the shares of a secret-shared value
-    $\lbrack x\rbrack $: reconstructs and distributes $x$ to all, or a subset,
-    of the parties.
+    $[x]$: reconstructs and distributes $x$ to all, or a subset, of the
+    parties.
 
 \end{enumerate}
 
 \subsubsection{Functionalities for secure multiparty computation in $\group{}$}
 
-\begin{figure*} \centering \hspace*{-0.05\textwidth}
+\begin{figure} \centering \hspace*{-0.05\textwidth}
   \begin{minipage}{1.1\textwidth}
 
     \begin{framed} \scriptsize
@@ -421,16 +424,16 @@ $r\gets \Zp$, together with four deterministic functionalities, described below
 
         \begin{enumerate}
 
-          \item Sample a random $t$-additive sharing $\lbrack x\rbrack = (x_1,
-            ..., x_n)$ such that $x_i = x^*_i, \forall i : {P}_i \in \Cor$. If
-            no such sharing exists, send $\bot$ to all honest parties and stop.
+          \item Sample a random $t$-additive sharing $[x]= (x_1, ..., x_n)$
+            such that $x_i = x^*_i, \forall i : {P}_i \in \Cor$. If no such
+            sharing exists, send $\bot$ to all honest parties and stop.
 
           \item Otherwise:
 
             \begin{enumerate}
 
-              \item Compute the shares $\lbrack {X}\rbrack  = ({X}_1, ...,
-                {X}_n)$ such that ${X}_i = x_i\gen$.
+              \item Compute the shares $[{X}] = ({X}_1, ..., {X}_n)$ such that
+                ${X}_i = x_i\gen$.
 
               \item Distribute to each honest party the tuple $\langle
                 \mathit{id}_{{X}}, X_i, x_i\rangle$.
@@ -539,7 +542,7 @@ $r\gets \Zp$, together with four deterministic functionalities, described below
     \end{framed}
 
   \end{minipage} \caption{Ideal functionalities for MPC in $\group{}$.}
-\label{fig:ideal-func-group} \end{figure*}
+\label{fig:tsps-ideal-func-group} \end{figure}
 
 We additionally assume a framework for secure MPC over inputs in a cyclic group
 $(\group{},+)$ of prime order $p$. In practice, this framework is satisfied by
@@ -549,68 +552,65 @@ and raising a public generator $\gen$ to each share of $x$. Each resulting
 group element is then an additive share of $x\gen$, as captured by the
 $\idfu{\algo{RandShareGrp}}$ interface below. Concretely, we assume some
 realisation of the ideal MPC functionality over $\group{}$ described in
-Figure~\ref{fig:ideal-func-group}, where $\mathcal{H}$ and $\Cor$ again denote
+\Cref{fig:tsps-ideal-func-group}, where $\mathcal{H}$ and $\Cor$ again denote
 the sets of honest and corrupted parties respectively. As for MPC over $\Zp$,
 unless otherwise specified, we assume security against malicious corruption of
 parties.
 
-We use the representation $\lbrack X\rbrack $, for $X\in \group{}$, to denote
-that $X$ is secret-shared: no individual party has access to $X$, but each
-party holds some share $X_i$ of $X$. We assume this notation incorporates the
+We use the representation $[X]$, for $X\in \group{}$, to denote that $X$ is
+secret-shared: no individual party has access to $X$, but each party holds
+some share $X_i$ of $X$. We assume this notation incorporates the
 authentication components required for malicious security.
 
 \paragraph{Linearity-preservation.} We again require that the secret-shared
-representation $\lbrack X\rbrack $ is linearity-preserving. Given secret shares
-$\lbrack X\rbrack $ and $\lbrack Y \rbrack $, a public group element $Z$, and
+representation $[X]$ is linearity-preserving. Given secret shares
+$[X]$ and $[Y]$, a public group element $Z$, and
 public values $\alpha,\beta \in \Zp$, the parties can compute a secret sharing
 of $U = \alpha X + \beta Y + Z$ ``for free'', as follows:
   %
-\[ \lbrack U\rbrack = \alpha\lbrack X\rbrack + \beta \lbrack Y \rbrack + Z.  \]
+\[[U]= \alpha[X]+ \beta [Y]+ Z. \]
   %
 Again, since we assume malicious security, this property must also be preserved
 for any additional authentication components.
 
 \paragraph{Functionalities for secure MPC in $\group{}$.}
-Figure~\ref{fig:ideal-func-group} describes the functionalities we assume for
-secure MPC in $\group{}$, analogous to those of Figure~\ref{fig:ideal-func} for
-$\Zp$. We again assume a randomised functionality that generates a
-secret-shared representation $\lbrack R\rbrack $ for a randomly sampled group
-element $R\gets \group{}$, together with four deterministic functionalities,
-described below:
+\Cref{fig:tsps-ideal-func-group} describes the functionalities we assume for
+secure MPC in $\group{}$, analogous to those of \Cref{fig:tsps-ideal-func}
+for $\Zp$. We again assume a randomised functionality that generates a
+secret-shared representation $[R]$ for a randomly sampled group element
+$R\gets \group{}$, together with four deterministic functionalities, described
+below:
 
 \begin{enumerate}
 
-  \item A functionality that adds secret-shared group elements: given $\lbrack
-    X\rbrack $ and $\lbrack Y\rbrack $, produces $\lbrack Z\rbrack $ such that
-    $Z = X + Y$. By linearity-preservation this comes for free, as it can be
-    performed locally by each party.
+  \item A functionality that adds secret-shared group elements: given $[X]$
+    and $[Y]$, produces $[Z]$ such that $Z = X + Y$. By linearity-preservation
+    this comes for free, as it can be performed locally by each party.
 
   \item A functionality that multiplies a secret-shared field element with a
-    public group element: given $\lbrack x\rbrack $ and public $Y$, produces
-    $\lbrack Z\rbrack $ such that $Z = xY$. As with addition, this comes for
-    free, as it can be executed locally by each party.
+    public group element: given $[x]$ and public $Y$, produces $[Z]$ such that
+    $Z = xY$. As with addition, this comes for free, as it can be executed
+    locally by each party.
 
   \item A functionality that multiplies a secret-shared field element with a
-    secret-shared group element: given $\lbrack x\rbrack $ and $\lbrack
-    Y\rbrack $, produces $\lbrack Z\rbrack $ such that $Z = xY$.
+    secret-shared group element: given $[x]$ and $[Y]$, produces $[Z]$ such
+    that $Z = xY$.
 
   \item A functionality that combines the shares of a secret-shared group
-    element $\lbrack X\rbrack $: reconstructs and distributes $X$ to all, or a
-    subset, of the parties.
+    element $[X]$: reconstructs and distributes $X$ to all, or a subset, of
+    the parties.
 
 \end{enumerate}
 
-Multiplying a secret-shared group element $\lbrack X\rbrack $ by a public value
-$y \in \Zp$, to produce $\lbrack Z\rbrack $ such that $Z = yX$, can also be
-performed locally, as this is essentially a repeated application of the local
-addition functionality above.
+Multiplying a secret-shared group element $[X]$ by a public value $y \in \Zp$,
+to produce $[Z]$ such that $Z = yX$, can also be performed locally, as this is
+essentially a repeated application of the local addition functionality above.
 
-In practice, $\G$ corresponds to either $\group{1}$ or $\group{2}$, most often
+In practice, $\group{}$ corresponds to either $\group{1}$ or $\group{2}$, most often
 represented concretely by elliptic curve groups, whose elements are coordinate
-pairs satisfying the curve equation, e.g. $(x_0, y_0)$. Sharing a group element
-is not achieved by two independent secret sharings of the coordinates $x_0$ and
-$y_0$, that is, $(\lbrack x_0\rbrack , \lbrack y_0\rbrack )$, as this would
-require parties to communicate in order to compute group operations on the
-shares. Instead, the group element is shared as a single unit, $\lbrack
-(x_0,y_0)\rbrack $, so that group operations can be performed by each party
-locally, as desired.
+pairs satisfying the curve equation, e.g. $(x_0, y_0)$. Sharing a group
+element is not achieved by two independent secret sharings of the coordinates
+$x_0$ and $y_0$, that is, $([x_0], [y_0])$, as this would require parties to
+communicate in order to compute group operations on the shares. Instead, the
+group element is shared as a single unit, $[(x_0,y_0)]$, so that group
+operations can be performed by each party locally, as desired.
