@@ -1,18 +1,15 @@
 \section{Security}\label{sec:tsps-security}
 
-%%%% proof 1 - the generic construction is secure (Theorem 1)
-
 \subsection{Proof
 of~\Cref{thm:tsps-construction-security}}\label{sec:tsps-proof-1}
 
 The construction of \Cref{sec:tsps-construction} is described entirely in terms
-of calls to the MPC ideal functionalities of \Cref{sec:tsps-mpc}, over $\Zp$
-and over $\group{}$. We therefore prove security in the corresponding
-$\mathcal{F}$-hybrid model: signers have access to these functionalities
-directly, rather than to a concrete MPC protocol realising them. Existing MPC
-results instantiate the functionalities concretely, with security against
-either an honest or a dishonest majority of corrupted parties, as discussed in
-\Cref{sec:tsps-evaluation}.
+of calls to $\algo{MPC}$, over $\Zp$ and over $\group{}$, together with
+operations the signers perform locally. We therefore prove security relative to
+the properties $\algo{MPC}$ is assumed to satisfy in \Cref{sec:tsps-mpc},
+rather than to any concrete protocol realising it. Existing MPC results provide
+such realisations, with security against either an honest or a dishonest
+majority, as discussed in \Cref{sec:tsps-evaluation}.
 
 We rely on the following properties:
 
@@ -22,14 +19,13 @@ We rely on the following properties:
     wUF-CMA secure: no PPT adversary can produce a valid signature on a message
     vector it never queried.
 
-  \item[(P2)] The secret sharing scheme is linearity-preserving, as required in
-    \Cref{sec:tsps-mpc}, and information-theoretically hiding: any set of at
-    most $t$ shares is distributed independently of the shared value.
+  \item[(P2)] The secret sharing underlying $\algo{MPC}$ is
+    linearity-preserving and private, as required in \Cref{sec:tsps-mpc}: any
+    set of at most $t$ shares is distributed independently of the shared value.
 
   \item[(P3)] The signing algorithm of $\SPS$ admits the decomposition of
     \Cref{sec:tsps-construction}, so that the message-dependent part of signing
-    uses only operations the functionalities of \Cref{sec:tsps-mpc} perform
-    locally.
+    uses only operations the signers perform locally.
 
 \end{enumerate}
 
@@ -48,29 +44,29 @@ We rely on the following properties:
   samples random shares $\{\sk_i\}_{i \in [1, t-1]}$ and their corresponding
   public key shares, together with shares $\{\sk_i\}_{i \in \Cor}$ and their
   corresponding public key shares, consistent with the sharing $\shr{\pk}$ of
-  $\pk$. It forwards $\pk$, $\{\sk_i\}_{i \in \Cor}$, and $\shr{\pk}$ to $\adv$.
+  $\pk$. It forwards $\pk$, $\{\sk_i\}_{i \in \Cor}$, and $\shr{\pk}$ to
+  $\adv$.
 
-  \paragraph{Simulating the hybrid functionalities.} Because $\advB$ itself
+  \paragraph{Simulating the calls to $\algo{MPC}$.} Because $\advB$ itself
   samples every key share $\{\sk_i\}_{i \in [1,n]}$ — honest shares of its own
   choosing, corrupt shares supplied by $\adv$ — it holds every secret value
   that $\algo{KeyGen}$, $\algo{OffSign}$, and $\algo{OnSign}$ derive and pass
-  between functionality calls: by (P3), every intermediate field and group
-  element is a fixed function of these key shares and of freshly sampled
-  randomness. This lets $\advB$ answer each functionality query made by $\adv$
-  on behalf of the honest signers exactly as the functionality's specification
-  requires. For a randomised query (such as $\idfu{\algo{RandShare}}$, or the
-  fresh randomness sampled inside $\idfu{\algo{ExpGenGrp}}$), $\advB$ samples
-  the honest parties' shares itself, consistently with whatever corrupt shares
-  $\adv$ supplies, exactly as an honest execution of the functionality would.
-  For a deterministic query (such as $\idfu{\algo{Add}}$, $\idfu{\algo{Mul}}$,
-  $\idfu{\algo{Inv}}$, or a $\idfu{\algo{Combine}}$-type query), $\advB$
+  between calls: by (P3), every intermediate field and group element is a fixed
+  function of these key shares and of freshly sampled randomness. This lets
+  $\advB$ answer each call $\adv$ makes on behalf of the honest signers exactly
+  as \Cref{sec:tsps-mpc} specifies. For a randomised interface
+  ($\algo{RandShare}$ and $\algo{RandShareGrp}$), $\advB$ samples the honest
+  signers' shares itself, consistently with whatever corrupt shares $\adv$
+  supplies, exactly as an honest execution would. For a deterministic one
+  ($\algo{Mul}$, $\algo{Inv}$, $\algo{ExpGrp}$, or $\algo{Open}$), $\advB$
   computes the specified output directly from the secret values it already
-  holds. In both cases the shares $\advB$ returns are distributed identically
-  to those a real invocation of the functionality would produce, so $\adv$'s
-  view of key generation and of every offline phase is perfectly simulated.
-  Note in particular that this leaves $\adv$ no scope to win by causing some
-  functionality of \Cref{sec:tsps-mpc} to behave incorrectly: $\advB$ does not
-  approximate these functionalities, it realises them exactly.
+  holds. Operations the signers perform locally need no simulation at all,
+  since $\adv$ computes them on its own shares. In every case the shares
+  $\advB$ returns are distributed identically to those a real execution would
+  produce, so $\adv$'s view of key generation and of every offline phase is
+  perfectly simulated. Note in particular that this leaves $\adv$ no scope to
+  win by causing $\algo{MPC}$ to behave incorrectly: $\advB$ does not
+  approximate it, it realises it exactly.
 
   \paragraph{Simulating the online phase and bounding forgeries.} $\advB$
   answers $\adv$'s $\TSPSsigno$ queries in one of two ways. If, for the queried
@@ -82,9 +78,9 @@ We rely on the following properties:
   values exchanged during the (possibly interactive) offline phase, simulated
   as above, to construct a signature share $\sigma_i$ that, combined with the
   shares it has already issued, yields a signature verifying correctly under
-  $\algo{Combine}$ and $\SPSverify$. In both cases, $\advB$ can respond to
-  every query of $\adv$ without ever calling its own signing oracle on a
-  message for which it would later need to produce a forgery.
+  $\TSPScombine$ and $\SPSverify$. In both cases, $\advB$ can respond to every
+  query of $\adv$ without ever calling its own signing oracle on a message for
+  which it would later need to produce a forgery.
 
   Since $\advB$ never queries its own signing oracle on $\vec{m}^*$ itself, if
   $\adv$ outputs a forgery $(\vec{m}^*, \signature^*)$ satisfying the winning
@@ -97,9 +93,8 @@ We rely on the following properties:
   %
   \begin{equation*}
   %
-    \Adv_{\TSPS, \adv}^{\text{adp-TS-UF-1}}(\secparam) \leq
-    \Adv_{\mathrm{SPS}, \advB}^{\text{wUF-CMA}}(\secparam) \leq
-    \operatorname{negl}(\secparam).
+    \Adv_{\TSPS, \adv}^{\text{adp-TS-UF-1}}(\secparam) \leq \Adv_{\mathrm{SPS},
+    \advB}^{\text{wUF-CMA}}(\secparam) \leq \operatorname{negl}(\secparam).
   %
   \end{equation*}
 
@@ -116,14 +111,12 @@ We rely on the following properties:
 
 \end{proof}
 
-%%%% proof 2 - the two concrete instantiations are secure (Theorem 2)
-
 \subsection{Proof of~\Cref{thm:tsps-security}}\label{sec:tsps-proof-2}
 
 \begin{proof}
 
   It suffices to check that each of the two schemes of
-  \Cref{sec:tsps-instantiation} satisfies the hypotheses
+  \Cref{sec:tsps-instantiation} satisfy the properties
   of~\Cref{thm:tsps-construction-security}.
 
   For (P1), the scheme of \Cref{sec:tsps-sps-ggm} is existentially unforgeable
@@ -136,19 +129,18 @@ We rely on the following properties:
   Existential unforgeability of either scheme therefore gives wUF-CMA security.
 
   For (P2), both threshold schemes share their secret key using the
-  $t$-additive sharing of \Cref{sec:tsps-definitions}, which is
-  linearity-preserving by assumption and information-theoretically hiding
-  against any set of at most $t$ parties.
+  $t$-additive sharing of \Cref{sec:tsps-mpc}, which is linearity-preserving
+  and private against any set of at most $t$ signers by assumption.
 
   For (P3), the required decomposition is exhibited for each scheme alongside
   its description: in \Cref{prot:tsps-abe} the message enters only through the
   terms $\mu_i\rho{m}_i$, and in \Cref{prot:tsps-kiltz} only through $(\gen,
   \mssg)\boldsymbol{\kappa}$. In both cases a secret-shared field element
-  multiplies a public group element, which by \Cref{sec:tsps-mpc} each signer
-  computes locally, and the remaining online operations are additions of
-  shares, also local. Everything else in either signing algorithm depends only
-  on the secret key and on randomness sampled independently of the message, and
-  so is carried out during $\algo{OffSign}$.
+  multiplies a public group element, which by the linearity-preservation of
+  \Cref{sec:tsps-mpc} each signer computes locally, and the remaining online
+  operations are additions of shares, also local. Everything else in either
+  signing algorithm depends only on the secret key and on randomness sampled
+  independently of the message, and so is carried out during $\algo{OffSign}$.
 
   Both schemes therefore fall within the scope
   of~\Cref{thm:tsps-construction-security}, which gives the claim.

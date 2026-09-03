@@ -3,12 +3,12 @@
 To assess the concrete performance of our protocols, we implement and benchmark
 the schemes of \Cref{sec:tsps-abe} and~\ref{sec:tsps-kiltz}.
 
-\paragraph{Realising the ideal MPC functionalities.} \Cref{sec:tsps-mpc}
-describes the ideal functionalities that our constructions assume for secure
-MPC over $\Zp$ and over a generic group $\group{}$. The functionalities over $\Zp$
-are realised directly by existing MPC frameworks. Realising those over $\group{}$
-required us to extend MP-SPDZ with support for computation on secret-shared
-group elements~\cite{CCS:Keller20}. To our knowledge, this is the first such
+\paragraph{Realising $\algo{MPC}$.} \Cref{sec:tsps-mpc} describes the
+interfaces our constructions assume for secure MPC over $\Zp$ and over a
+generic group $\group{}$. Those over $\Zp$ are provided directly by existing
+MPC frameworks. Providing those over $\group{}$ required us to extend MP-SPDZ
+with support for computation on secret-shared group
+elements~\cite{CCS:Keller20}. To our knowledge, this is the first such
 extension. We benchmark two concrete frameworks built on this extension: ATLAS,
 in the honest-majority setting, and MASCOT, in the dishonest-majority setting.
 
@@ -20,11 +20,11 @@ malicious adversaries~\cite{C:GLOPS21}. It builds on an existing protocol,
 improving its round complexity by a factor of two by combining ideas from
 Beaver triples with existing multiplication techniques, letting parties use one
 round of communication to cover two rounds' worth of multiplication
-gates~\cite{C:DamNie07}. In terms of the functionalities of
-\Cref{sec:tsps-mpc}, addition is performed locally, since ATLAS is built from
-a linear secret sharing scheme. Multiplication is performed by consuming
-correlated randomness prepared during pre-processing. Shares are combined by
-broadcasting them to all parties.
+gates~\cite{C:DamNie07}. In terms of \Cref{sec:tsps-mpc}, linearity is
+preserved and addition is therefore local, since ATLAS is built from a linear
+secret sharing scheme. Multiplication is performed by consuming correlated
+randomness prepared during pre-processing. Shares are combined by broadcasting
+them to all parties.
 
 \subsection{MASCOT}\label{sec:tsps-mascot}
 
@@ -34,11 +34,10 @@ multiplication triples this relies on using oblivious transfer, extended to the
 arithmetic setting, together with MACs and standard sacrifice techniques, so
 that the protocol either correctly outputs the product of the shared elements
 or aborts once malicious behaviour is detected~\cite{CCS:KelOrsSch16}. In terms
-of the functionalities of \Cref{sec:tsps-mpc}, addition and inversion are
-performed locally, since MASCOT is also built over a linear secret sharing
-scheme. Multiplication consumes the triples generated via oblivious transfer.
-Shares are combined by broadcasting them, with MACs checked to ensure the
-reconstruction is correct.
+of \Cref{sec:tsps-mpc}, addition is local, since MASCOT is also built over a
+linear secret sharing scheme. Multiplication consumes the triples generated via
+oblivious transfer.  Shares are combined by broadcasting them, with MACs
+checked to ensure the reconstruction is correct.
 
 \paragraph{Implementation.} Our implementation builds on MP-SPDZ, a framework
 for implementing MPC with pre-processing~\cite{CCS:Keller20}. MP-SPDZ is built
@@ -58,68 +57,66 @@ groups~\cite{NDSS:GPVRNC23,relictoolkit}.
 
 MP-SPDZ operates with a pre-processing (offline) phase and an online phase. In
 our setting, $\algo{OffSign}$ corresponds to the pre-processing phase, and
-$\algo{OnSign}$ and $\algo{Combine}$ run in the online phase.
+$\algo{OnSign}$ and $\TSPScombine$ run in the online phase.
 
 We benchmark both the honest-majority and dishonest-majority settings, using
 ATLAS and MASCOT respectively to realise multiplication of shared secrets
 ~\cite{CCS:KelOrsSch16,C:GLOPS21}. ATLAS is designed to work in both the
 semi-honest and malicious settings, but the implementation available in MP-SPDZ
 captures only the semi-honest case~\cite{CCS:Keller20}. ATLAS and MASCOT both
-implement the ideal functionality of \Cref{sec:tsps-mpc}: MASCOT via the
-arithmetic black box functionality, which defines \texttt{init},
-\texttt{input}, \texttt{add}, \texttt{multiply}, and \texttt{output}, and ATLAS
-via its own ideal functionality, which defines similar operations. In both
-cases, $\idfu{\algo{Inv}}$ is built from $\idfu{\algo{Mul}}$, with
-$\idfu{\algo{RandShare}}$ taking the role of \texttt{input} and
-$\idfu{\algo{Combine}}$ taking the role of \texttt{output}.
+provide the interfaces of \Cref{sec:tsps-mpc}: MASCOT via the arithmetic black
+box functionality, which defines \texttt{init}, \texttt{input}, \texttt{add},
+\texttt{multiply}, and \texttt{output}, and ATLAS via its own ideal
+functionality, which defines similar operations. In both cases, $\algo{Inv}$ is
+built from $\algo{Mul}$, with $\algo{RandShare}$ taking the role of
+\texttt{input} and $\algo{Open}$ taking the role of \texttt{output}.
 
 We run benchmarks on a 16-core machine running RHEL 9.0-64 with 32GB of RAM,
 inside Docker containers based on Ubuntu 22.
 
-\begin{table}[t] \centering \resizebox{\textwidth}{!}{
-\begin{tabular}{ c
-  || c | c | c || c | c | c } \toprule & Assumption & Message space & $|\sk|$ &
-  $|\pk|$ & $|\signature|$ & Verification cost \\ \midrule ~\cite{AC:CKPSS23} &
-  PS + ROM & $(\gen^{\vec{m}}, \ggen^{\vec{m}}) \in \group{1}^l \times
-  \group{2}^l$ & $ (l+1) | \Zp | $ & $ l | \group{1} | + (l+1) | \group{2} | $
-               & $ 2 | \group{1} | $ & $3l+2$ \\ ~\cite{PKC:MMSST24} & SXDH & $
-  \vec{m} \in \group{1}^l$ & $ 2(l+1) | \Zp | $ & $ (l+1) | \group{2} | $ & $ 6
-  | \group{1} | + | \group{2} | $ & $l+11$ \\ \Cref{sec:tsps-abe} &
-  q-type & $ \vec{m} \in \group{1}^l$ & $ (l+1) | \Zp | $ & $ | \group{1} | +
-  l| \group{2} | $ & $ | \group{1} | + 2 | \group{2} | $ & $l+4$ \\
-  \Cref{sec:tsps-kiltz} & SXDH & $ \vec{m} \in \group{1}^l$ & $ l |\Zp |
-+ 6 | \group{1} | $ & $ (l+6)| \group{2} | $ & $ 6 | \group{1} | + | \group{2}
-|$ & $2l+10$ \\ \bottomrule \end{tabular} } 
-\caption{Comparison of threshold
-structure-preserving signature schemes. Verification cost lists the number of
-pairing evaluations needed during verification.} \label{tab:tsps-comp}
-\end{table}
+\begin{table}[t] \centering \resizebox{\textwidth}{!}{ \begin{tabular}{ c || c
+    | c | c || c | c | c } \toprule & Assumption & Message space & $|\sk|$ &
+    $|\pk|$ & $|\signature|$ & Verification cost \\ \midrule ~\cite{AC:CKPSS23}
+            & PS + ROM & $(\gen^{\vec{m}}, \ggen^{\vec{m}}) \in \group{1}^l
+            \times \group{2}^l$ & $ (l+1) | \Zp | $ & $ l | \group{1} | + (l+1)
+            | \group{2} | $ & $ 2 | \group{1} | $ & $3l+2$ \\
+            ~\cite{PKC:MMSST24} & SXDH & $ \vec{m} \in \group{1}^l$ & $ 2(l+1)
+            | \Zp | $ & $ (l+1) | \group{2} | $ & $ 6 | \group{1} | + |
+            \group{2} | $ & $l+11$ \\ \Cref{sec:tsps-abe} & q-type & $ \vec{m}
+            \in \group{1}^l$ & $ (l+1) | \Zp | $ & $ | \group{1} | + l|
+            \group{2} | $ & $ | \group{1} | + 2 | \group{2} | $ & $l+4$ \\
+        \Cref{sec:tsps-kiltz} & SXDH & $ \vec{m} \in \group{1}^l$ & $ l |\Zp |
+    + 6 | \group{1} | $ & $ (l+6)| \group{2} | $ & $ 6 | \group{1} | + |
+\group{2} |$ & $2l+10$ \\ \bottomrule \end{tabular} } \caption{Comparison of
+threshold structure-preserving signature schemes. Verification cost lists the
+number of pairing evaluations needed during verification.}
+\label{tab:tsps-comp} \end{table}
 
 \begin{table}[t] \centering \begin{tabular}{ c || c | c | c } \toprule &
   $\algo{OffSign}$ & $\algo{OnSign}$ & $\algo{Combine}$ \\ \midrule
   ~\cite{AC:CKPSS23} & 0 & 0 & $ 2 | \group{1} |$ \\ ~\cite{PKC:MMSST24} & 0 &
   0 & $ 6 | \group{1} | + | \group{2} |$ \\ \Cref{sec:tsps-abe} & $
-  n(l+4)|\Zp|$ & 0 & $| \group{1} | + 2 | \group{2} |$ \\
-  \Cref{sec:tsps-kiltz} & $ n(12|\Zp| + 6|\group{1}|) $ & 0 & $6 |
-  \group{1} | + | \group{2} | $ \\ \bottomrule \end{tabular} \caption{Per-party
-communication complexity for the signing and combining phases of the threshold
-signing schemes.} \label{tab:tsps-comms} \end{table}
+n(l+4)|\Zp|$ & 0 & $| \group{1} | + 2 | \group{2} |$ \\ \Cref{sec:tsps-kiltz} &
+$ n(12|\Zp| + 6|\group{1}|) $ & 0 & $6 | \group{1} | + | \group{2} | $ \\
+\bottomrule \end{tabular} \caption{Per-party communication complexity for the
+signing and combining phases of the threshold signing schemes.}
+\label{tab:tsps-comms} \end{table}
 
 \begin{table}[t] \centering \begin{tabular}{ c || c || c | c || c | c }
   \toprule & Centralised & \multicolumn{2}{c||}{ATLAS~\cite{C:GLOPS21}} &
   \multicolumn{2}{c}{MASCOT~\cite{CCS:KelOrsSch16}} \\ & & $\algo{OffSign}$ &
   $\algo{OnSign}$ & $\algo{OffSign}$ & $\algo{OnSign}$ \\ \midrule
-\Cref{sec:tsps-abe} & 10ms & 46ms & 56ms & 92ms & 84ms \\
-\Cref{sec:tsps-kiltz} & 40ms & 88ms & 61ms & 352ms & 94ms \\ \bottomrule
+\Cref{sec:tsps-abe} & 10ms & 46ms & 56ms & 92ms & 84ms \\ \Cref{sec:tsps-kiltz}
+                    & 40ms & 88ms & 61ms & 352ms & 94ms \\ \bottomrule
 \end{tabular} \caption{Timings of the sub-protocols of our threshold
-  structure-preserving signatures, averaged over 1000 runs, for $n = 5$.}
+structure-preserving signatures, averaged over 1000 runs, for $n = 5$.}
 \label{tab:tsps-benchmarks} \end{table}
 
 Table~\ref{tab:tsps-comp} compares our two schemes against two prior threshold
 structure-preserving signature schemes in terms of assumptions, message space,
 key and signature size, and verification cost~\cite{AC:CKPSS23,PKC:MMSST24}.
-Table~\ref{tab:tsps-comms} compares per-party communication complexity
-across the offline, online, and combining phases. Table~\ref{tab:tsps-benchmarks}
+Table~\ref{tab:tsps-comms} compares per-party communication complexity across
+the offline, online, and combining phases. Table~\ref{tab:tsps-benchmarks}
 reports concrete timings for both of our schemes, using ATLAS and MASCOT to
 realise the underlying MPC functionalities, and against a centralised
 (non-threshold) baseline, for $n = 5$ parties.
@@ -129,11 +126,11 @@ execution time varies with the total number of parties, fixing the threshold of
 participating parties and the message length at two group elements. In each
 case, ATLAS is around twice as fast as MASCOT, which is expected, since MASCOT
 relies on public key cryptography to handle dishonest majorities.
-Figures~\ref{eval-keygen} and~\ref{eval-offline} show that ATLAS scales
-better than MASCOT as the number of parties increases. Since our benchmarks
-build on MP-SPDZ, they reflect the standard MPC offline and online phases,
-where the output is constructed within the online phase. This means the online
-and combining phases are benchmarked together, so their timings grow with the
+Figures~\ref{eval-keygen} and~\ref{eval-offline} show that ATLAS scales better
+than MASCOT as the number of parties increases. Since our benchmarks build on
+MP-SPDZ, they reflect the standard MPC offline and online phases, where the
+output is constructed within the online phase. This means the online and
+combining phases are benchmarked together, so their timings grow with the
 number of parties. In practice, when using threshold signatures, parties may
 instead perform only the constant-time $\algo{OnSign}$ locally, and submit
 their signature shares to a single party to perform $\algo{Combine}$, rather
