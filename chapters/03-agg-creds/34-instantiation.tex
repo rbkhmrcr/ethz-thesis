@@ -38,8 +38,7 @@ requiring that exponent to be recovered.  Our constructions use pairing
 equations to verify signatures and algebraic relations across $\group{1}$ and
 $\group{2}$.
 
-\subsection{Instantiating $\ATS$}
-\label{sec:tag-scheme}
+\subsection{Instantiating $\ATS$} \label{sec:tag-scheme}
 
 Our tag based aggregate signature scheme is an enhanced aggregate BLS signature
 scheme that signs pairs of messages and tags~\cite{JC:BonLynSha04,EC:BGLS03}.
@@ -69,8 +68,8 @@ signatures.  Our scheme is comprised of the following algorithms:
 
         \item Sample $\upsilon \sample \Zp$.
 
-        \item Return $\signature = (\ggen^\upsilon, \hashone(\msg)^\sk
-          \cdot \hashtwo(\Tag)^\upsilon)$.
+        \item Return $\signature = (\ggen^\upsilon, \hashone(\msg)^\sk \cdot
+          \hashtwo(\Tag)^\upsilon)$.
 
       \end{enumerate}
 
@@ -183,7 +182,8 @@ messages, and signatures consisting of elements of the same group.  This allows
 us to build a more efficient protocol. We explain how in more detail once the
 registration algorithm has been described.
 
-\begin{primitivebox} {Optimal structure preserving signatures from the GGM} {agho}
+\begin{primitivebox} {Optimal structure preserving signatures from the GGM}
+  {agho}
 
   \begin{description}
 
@@ -202,11 +202,11 @@ registration algorithm has been described.
         %
       \end{gather*}
      %
-    \item[$\SPSsig \sample \SPSsign(\sk, \vec{\msg})$ :] On input the secret key
-      $\sk = (\mu_1, \dots, \mu_\ell, \tau)$ and message $\vec{\msg} = (\msg_1,
-      \dots, \msg_\ell) \in \group{1}^\ell$, the signing algorithm randomly
-      samples $\omega \sample \Zp$ and outputs the signature constructed as
-      follows:
+    \item[$\SPSsig \sample \SPSsign(\sk, \vec{\msg})$ :] On input the secret
+      key $\sk = (\mu_1, \dots, \mu_\ell, \tau)$ and message $\vec{\msg} =
+      (\msg_1, \dots, \msg_\ell) \in \group{1}^\ell$, the signing algorithm
+      randomly samples $\omega \sample \Zp$ and outputs the signature
+      constructed as follows:
     %
       \begin{equation*}
      %
@@ -228,16 +228,16 @@ registration algorithm has been described.
     %
       \end{equation*}
      %
-    \item[$ \{0,1\} \leftarrow \SPSverify(\pk, \vec{\msg}, \SPSsig)$ :] On input a
-      public key $\pk$, message $\vec{\msg} = (\msg_1, \dots, \msg_\ell) \in
-      \group{1}^\ell$, and signature $\SPSsig = (\widetilde{r}, \widetilde{s},
-      t)$, output the result of the following check:
+    \item[$ \{0,1\} \leftarrow \SPSverify(\pk, \vec{\msg}, \SPSsig)$ :] On
+      input a public key $\pk$, message $\vec{\msg} = (\msg_1, \dots,
+      \msg_\ell) \in \group{1}^\ell$, and signature $\SPSsig = (\widetilde{r},
+      \widetilde{s}, t)$, output the result of the following check:
     %
       \begin{equation*}
     %
         \pairing(v, \widetilde{r}) \checkcheck \pairing(\gen, \widetilde{s}) \
-        \wedge\ \pairing(t, \widetilde{r}) \cdot \prod_{i=1}^\ell \pairing(\msg_i,
-        \widetilde{u}_i) \checkcheck \pairing(\gen, \ggen).
+        \wedge\ \pairing(t, \widetilde{r}) \cdot \prod_{i=1}^\ell
+        \pairing(\msg_i, \widetilde{u}_i) \checkcheck \pairing(\gen, \ggen).
   %
     \end{equation*} \end{description} \end{primitivebox}
 
@@ -247,10 +247,10 @@ registration algorithm has been described.
 
     \begin{assumptionbox}{$q$-Strong Diffie-Hellman ($q$-SDH)}{qsdh}
 
-      The $q$-SDH assumption holds if, given $(\gen, \gen^x, \gen^{x^2},
-      \dots, \gen^{x^q}, \ggen, \ggen^x)$ for uniformly random $x \sample
-      \Zp$, no PPT adversary can output a pair $(c, \gen^{1/(x+c)})$ for any $c
-      \in \Zp \setminus \{-x\}$ with non-negligible probability.
+      The $q$-SDH assumption holds if, given $(\gen, \gen^x, \gen^{x^2}, \dots,
+      \gen^{x^q}, \ggen, \ggen^x)$ for uniformly random $x \sample \Zp$, no PPT
+      adversary can output a pair $(c, \gen^{1/(x+c)})$ for any $c \in \Zp
+      \setminus \{-x\}$ with non-negligible probability.
 
     \end{assumptionbox}
 
@@ -346,9 +346,9 @@ the following:
 %
 \begin{equation} \label{eq:proof-rel}
 %
-  \rel_3 = \{\ \bar{\gen} = \gen^\delta \ \wedge\ \bar{v} = v^\delta \
-  \wedge\ H_i = \hashone(\atv{i})^\delta\ \ \forall i \in \ISSUERS \ \wedge\
-\pk' = \bar{\gen}^\sk\ \}.
+  \rel_3 = \{\ \bar{\gen} = \gen^\delta \ \wedge\ \bar{v} = v^\delta \ \wedge\
+  H_i = \hashone(\atv{i})^\delta\ \ \forall i \in \ISSUERS \ \wedge\ \pk' =
+\bar{\gen}^\sk\ \}.
 %
 \end{equation}
 %
@@ -365,41 +365,35 @@ relation:
 %
 This is because in the concrete instantiation, the user instead randomises
 $\signature'$ and $\SPSsig'$.  This means that these values can be sent in the
-clear within $\algoproof$, as they reveal nothing about which original signature
-they came from. This means that the signature verification equations can be
-used directly. $\algoproof$ then captures the full original relation, with
-signature verification performed directly instead of proven, and the discrete
-log equalities enforcing consistency through $\eta$. This allows us to build a
-concretely efficient proof rather than requiring zero knowledge proofs over
-pairing equations and elements of $\group{T}$.
+clear within $\algoproof$, as they reveal nothing about which original
+signature they came from. This means that the signature verification equations
+can be used directly. $\algoproof$ then captures the full original relation,
+with signature verification performed directly instead of proven, and the
+discrete log equalities enforcing consistency through $\eta$. This allows us to
+build a concretely efficient proof rather than requiring zero knowledge proofs
+over pairing equations and elements of $\group{T}$.
 
 If a user is able to produce a valid $\eta$, we can extract a witness for the
 original relation. Under the DDH assumption in $\group{1}$, the resulting
 presentation is simulatable: it leaks no information about the witness beyond
 the disclosed attribute values.
 
-\begin{lemma}\label{lem:agg-creds-extract}
+\begin{lemma}\label{lem:agg-creds-sigma}
 
   If a user produces a presentation that verifies, a witness for
-  relation~\eqref{eq:proof-original} can be extracted.
+  relation~\eqref{eq:proof-original} can be extracted. If the DDH assumption
+  holds in $\group{1}$, a valid presentation can be simulated without access to
+  a witness.
 
 \end{lemma}
 
-\begin{lemma}\label{lem:agg-creds-simulate}
-
-  If the DDH assumption holds in $\group{1}$, a valid presentation can be
-  simulated without access to a witness.
-
-\end{lemma}
-
-Lemmas~\ref{lem:agg-creds-extract} and~\ref{lem:agg-creds-simulate} give
-extractability and simulatability separately. \Cref{thm:agg-creds-thm-2} needs
-simulation-extractability, which additionally allows extraction after the
-adversary has observed simulated proofs of its own choosing. Our simulator does
-both within the same experiment, so this is the property we rely on.
-Protocol~\ref{prot:paac-2} is a sigma protocol with the Fiat-Shamir heuristic
-applied~\cite{C:FiaSha86}. This combination satisfies simulation-extractability
-in the random oracle model~\cite{INDOCRYPT:FKMV12}.
+Lemma~\ref{lem:agg-creds-sigma} gives extractability and simulatability.
+\Cref{thm:agg-creds-thm-2} needs simulation-extractability, which additionally
+allows extraction after the adversary has observed simulated proofs of its own
+choosing. Our simulator does both within the same experiment, so this is the
+property we rely on.  Protocol~\ref{prot:paac-2} is a sigma protocol with the
+Fiat-Shamir heuristic applied~\cite{C:FiaSha86}. This combination satisfies
+simulation-extractability in the random oracle model~\cite{INDOCRYPT:FKMV12}.
 
 We give the resulting protocol in full below, before presenting the complete
 instantiation.
@@ -572,9 +566,9 @@ the full instantiation of the aggregate anonymous credentials protocol.
             \inst_3 = (\pk', \{\atv{i}, H_i\}_{i\in\ISSUERS}, \bar{\gen}),
             \quad \witness_3 = (\delta, \sk), \\
           %
-            \rel_3 = \{\ \bar{\gen} = \gen^\delta \ \wedge\ \bar{v} =
-            v^\delta \ \wedge\ H_i = \hashone(\atv{i})^\delta\ \ \forall i
-          \in \ISSUERS \ \wedge\ \pk' = \bar{\gen}^\sk\ \}.
+            \rel_3 = \{\ \bar{\gen} = \gen^\delta \ \wedge\ \bar{v} = v^\delta
+            \ \wedge\ H_i = \hashone(\atv{i})^\delta\ \ \forall i \in \ISSUERS
+          \ \wedge\ \pk' = \bar{\gen}^\sk\ \}.
           %
         \end{gathered}\end{equation*}
           %

@@ -24,18 +24,17 @@ from a linear secret sharing scheme. Multiplication is performed by consuming
 correlated randomness prepared during pre-processing. Shares are combined by
 broadcasting them to all parties.
 
-\subsection{MASCOT}\label{sec:tsps-mascot}
-
-MASCOT performs authenticated secure multiplication of shared field elements in
-the maliciously secure dishonest majority setting, generating the
-multiplication triples this relies on using oblivious transfer, extended to the
-arithmetic setting, together with MACs and standard sacrifice techniques, so
-that the protocol either correctly outputs the product of the shared elements
-or aborts once malicious behaviour is detected~\cite{CCS:KelOrsSch16}. In terms
-of \Cref{sec:tsps-mpc}, addition is local, since MASCOT is also built over a
-linear secret sharing scheme. Multiplication consumes the triples generated via
-oblivious transfer.  Shares are combined by broadcasting them, with MACs
-checked to ensure the reconstruction is correct.
+\paragraph{MASCOT.} MASCOT performs authenticated secure multiplication of
+shared field elements in the maliciously secure dishonest majority setting,
+generating the multiplication triples this relies on using oblivious transfer,
+extended to the arithmetic setting, together with MACs and standard sacrifice
+techniques, so that the protocol either correctly outputs the product of the
+shared elements or aborts once malicious behaviour is
+detected~\cite{CCS:KelOrsSch16}. In terms of \Cref{sec:tsps-mpc}, addition is
+local, since MASCOT is also built over a linear secret sharing scheme.
+Multiplication consumes the triples generated via oblivious transfer.  Shares
+are combined by broadcasting them, with MACs checked to ensure the
+reconstruction is correct.
 
 \paragraph{Implementation.} Our implementation builds on MP-SPDZ, a framework
 for implementing MPC with pre-processing~\cite{CCS:Keller20}. MP-SPDZ is built
@@ -82,9 +81,9 @@ inside Docker containers based on Ubuntu 22.
     | $ & $ | \group{1} | + 2 | \group{2} | $ & $\ell+4$ \\
     \Cref{sec:tsps-kiltz} & SXDH & $ \vec{\msg} \in \group{1}^\ell$ & $ \ell
     |\Zp | + 6 | \group{1} | $ & $ (\ell+6)| \group{2} | $ & $ 6 | \group{1} |
-    + | \group{2} |$ & $2\ell+10$ \\ \bottomrule \end{tabular} }
-  \caption{Comparison of threshold structure preserving signature schemes.
-Verification cost lists the number of pairing evaluations needed during
++ | \group{2} |$ & $2\ell+10$ \\ \bottomrule \end{tabular} }
+\caption{Comparison of threshold structure preserving signature schemes.
+  Verification cost lists the number of pairing evaluations needed during
 verification.} \label{tab:tsps-comp} \end{table}
 
 \begin{table}[t] \centering \begin{tabular}{ c || c | c | c } \toprule &
@@ -94,7 +93,7 @@ verification.} \label{tab:tsps-comp} \end{table}
 n(\ell+4)|\Zp|$ & 0 & $| \group{1} | + 2 | \group{2} |$ \\
 \Cref{sec:tsps-kiltz} & $ n(12|\Zp| + 6|\group{1}|) $ & 0 & $6 | \group{1} | +
 | \group{2} | $ \\ \bottomrule \end{tabular} \caption{Per party communication
-  complexity for the signing and combining phases of the threshold signing
+complexity for the signing and combining phases of the threshold signing
 schemes.} \label{tab:tsps-comms} \end{table}
 
 \begin{table}[t] \centering \begin{tabular}{ c || c || c | c || c | c }

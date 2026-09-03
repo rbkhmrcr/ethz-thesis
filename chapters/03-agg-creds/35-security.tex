@@ -34,235 +34,243 @@ We rely on the following security properties of the underlying primitives:
 
 \begin{proof}
 
-\paragraph{Game 0.} This is the execution of protocol $\Pi$.
+  \paragraph{Game 0.} This is the execution of protocol $\Pi$.
 
-\paragraph{Game 1.} As Game 0, except $\simu$ executes protocol $\Pi$ on
-behalf of the honest parties: $\simu$ is provided with the inputs (including
-secrets) of the honest parties, and interacts with corrupt parties, through
-the adversary, in the real world, following $\Pi$'s specifications, and
-returns the corresponding output. This change is purely syntactic, so Game 1
-is indistinguishable from Game 0 by construction.
+  \paragraph{Game 1.} As Game 0, except $\simu$ executes protocol $\Pi$ on
+  behalf of the honest parties: $\simu$ is provided with the inputs (including
+  secrets) of the honest parties, and interacts with corrupt parties, through
+  the adversary, in the real world, following $\Pi$'s specifications, and
+  returns the corresponding output. This change is purely syntactic, so Game 1
+  is indistinguishable from Game 0 by construction.
 
-\paragraph{Game 2.} As Game 1, except we introduce dummy functionality
-$\idfu{\AAC}'$ that forwards the inputs from the honest parties to $\simu$ and
-returns the outputs. This modification is syntactic, so Game 2 is
-indistinguishable from Game 1.
+  \paragraph{Game 2.} As Game 1, except we introduce dummy functionality
+  $\idfu{\AAC}'$ that forwards the inputs from the honest parties to $\simu$
+  and returns the outputs. This modification is syntactic, so Game 2 is
+  indistinguishable from Game 1.
 
-\paragraph{Game 3.} As Game 2, except $\idfu{\AAC}'$ handles register calls
-from honest users following the description of ideal functionality
-$\idfu{\AAC}$. $\simu$ first assigns each honest user a key pair $(\sk, \pk)$.
-Now, when an honest user $\user$ calls $\idfu{\AAC}'$ to register, $\simu$
-learns the user's identity. Given this information, $\simu$ retrieves the
-corresponding key pair $(\sk,\pk)$ and contacts the registration authority to
-register $\user$. $\simu$ receives a unique tag $\Tag$ and a signature $\psi
-\leftarrow \DSsign(\rask, (\pk, \Tag))$ and stores entry $\langle \user, \Tag,
-\pk, \psi\rangle $.
+  \paragraph{Game 3.} As Game 2, except $\idfu{\AAC}'$ handles register calls
+  from honest users following the description of ideal functionality
+  $\idfu{\AAC}$. $\simu$ first assigns each honest user a key pair $(\sk,
+  \pk)$.  Now, when an honest user $\user$ calls $\idfu{\AAC}'$ to register,
+  $\simu$ learns the user's identity. Given this information, $\simu$ retrieves
+  the corresponding key pair $(\sk,\pk)$ and contacts the registration
+  authority to register $\user$. $\simu$ receives a unique tag $\Tag$ and a
+  signature $\psi \leftarrow \DSsign(\rask, (\pk, \Tag))$ and stores entry
+  $\langle \user, \Tag, \pk, \psi\rangle $.
 
-Since the registration authority and $\idfu{\AAC}'$ both register each user
-exactly once and reject duplicates, they accept or reject the same requests, so
-this game is indistinguishable from Game 2.
+  Since the registration authority and $\idfu{\AAC}'$ both register each user
+  exactly once and reject duplicates, they accept or reject the same requests,
+  so this game is indistinguishable from Game 2.
 
-\paragraph{Game 4.} As Game 3, except $\idfu{\AAC}'$ also handles credential
-issuance calls from honest users following the description of ideal
-functionality $\idfu{\AAC}$.  When  $\idfu{\AAC}'$ receives issuance request
-$(\AACissue, \att{i}, \atv{i})$ from honest user $\user$, $\simu$ learns the
-triple $(\user, \att{i}, \atv{i})$.  To simulate the corresponding credential
-issuance for $\user$ in the real world, $\simu$ retrieves $(\sk, \pk)$ and
-$(\Tag, \psi)$.  If the pair $(\Tag, \psi)$ for $\user$ does not exist, meaning
-$\user$ did not call register before, then $\simu$ aborts. Otherwise, it
-honestly executes $\Pi$ with issuer $\issuer{i}$.  There are two cases to
-consider.
+  \paragraph{Game 4.} As Game 3, except $\idfu{\AAC}'$ also handles credential
+  issuance calls from honest users following the description of ideal
+  functionality $\idfu{\AAC}$.  When  $\idfu{\AAC}'$ receives issuance request
+  $(\AACissue, \att{i}, \atv{i})$ from honest user $\user$, $\simu$ learns the
+  triple $(\user, \att{i}, \atv{i})$.  To simulate the corresponding credential
+  issuance for $\user$ in the real world, $\simu$ retrieves $(\sk, \pk)$ and
+  $(\Tag, \psi)$.  If the pair $(\Tag, \psi)$ for $\user$ does not exist,
+  meaning $\user$ did not call register before, then $\simu$ aborts. Otherwise,
+  it honestly executes $\Pi$ with issuer $\issuer{i}$.  There are two cases to
+  consider.
 
-\begin{description}
+  \begin{description}
 
-  \item[$\issuer{i}$ is honest.] If this is the first time $\simu$ simulates
-    $\user$ for $\issuer{i}$, then as per $\Pi$'s specification,  $\simu$ will
-    receive signature $\signature_i \leftarrow \AACissue(\isk{i}, \Tag,
-    \atv{i})$, and record entry $\langle \user, \Tag, \atv{i}, \signature_i
-    \rangle$.  Otherwise, $\issuer{i}$ will reject the credential issuance
-    request.
+    \item[$\issuer{i}$ is honest.] If this is the first time $\simu$ simulates
+      $\user$ for $\issuer{i}$, then as per $\Pi$'s specification,  $\simu$
+      will receive signature $\signature_i \leftarrow \AACissue(\isk{i}, \Tag,
+      \atv{i})$, and record entry $\langle \user, \Tag, \atv{i}, \signature_i
+      \rangle$.  Otherwise, $\issuer{i}$ will reject the credential issuance
+      request.
 
-  \item[$\issuer{i}$ is corrupt.] If the execution of $\Pi$ terminates with
-    $\simu$ receiving signature $\signature_i : \AACverify(\ipk{i}, \Tag,
-    \atv{i}, \signature_i) = 1$, then $\simu$ records entry $\langle \user,
-    \Tag, \atv{i}, \signature_i \rangle$, and sends accept.
+    \item[$\issuer{i}$ is corrupt.] If the execution of $\Pi$ terminates with
+      $\simu$ receiving signature $\signature_i : \AACverify(\ipk{i}, \Tag,
+      \atv{i}, \signature_i) = 1$, then $\simu$ records entry $\langle \user,
+      \Tag, \atv{i}, \signature_i \rangle$, and sends accept.
 
-\end{description}
+  \end{description}
 
-In both cases, $\idfu{\AAC}'$ follows $\simu$: an honest issuer accepts a
-request exactly once per user, matching the first branch, and for a dishonest
-issuer, $\idfu{\AAC}'$ accepts only when $\simu$ does, when the issuer produced
-a genuinely valid aggregate signature.  So $\idfu{\AAC}'$'s output matches
-$\Pi$'s in both cases, and this game is indistinguishable from Game 3 as long
-as $\simu$ does not abort.  Since $\user$ is honest, she always registers
-before requesting credentials, so the abort event never occurs.
+  In both cases, $\idfu{\AAC}'$ follows $\simu$: an honest issuer accepts a
+  request exactly once per user, matching the first branch, and for a dishonest
+  issuer, $\idfu{\AAC}'$ accepts only when $\simu$ does, when the issuer
+  produced a genuinely valid aggregate signature.  So $\idfu{\AAC}'$'s output
+  matches $\Pi$'s in both cases, and this game is indistinguishable from Game 3
+  as long as $\simu$ does not abort.  Since $\user$ is honest, she always
+  registers before requesting credentials, so the abort event never occurs.
 
-\paragraph{Game 5.} As Game 4, except $\idfu{\AAC}'$ executes aggregate
-requests from honest users following the description of $\idfu{\AAC}$. Since
-credential aggregation is a local operation where adversary $\adv$ observes
-nothing, $\simu$ need not do anything, so Game 5 is indistinguishable from
-Game 4.
+  \paragraph{Game 5.} As Game 4, except $\idfu{\AAC}'$ executes aggregate
+  requests from honest users following the description of $\idfu{\AAC}$. Since
+  credential aggregation is a local operation where adversary $\adv$ observes
+  nothing, $\simu$ need not do anything, so Game 5 is indistinguishable from
+  Game 4.
 
-\paragraph{Game 6.} As Game 5, except $\idfu{\AAC}'$ takes charge of signature
-requests from honest users, following the specifications of $\idfu{\AAC}$.
-Given message $(\AACpresentend, \vec{\atv{}}, \msg, \algoproof)$ from
-$\idfu{\AAC}'$ for $\vec{\atv{}} = (\atv{1}, \ldots, \atv{N})$, $\simu$ defines
-$\inst_1 = (\pk, (\ipk{i}, \atv{i})_{i \in \ISSUERS})$ such that $\forall i \in
-\ISSUERS: \atv{i} \neq \varnothing$, and, using its ability to program the
-random oracle as the simulation trapdoor $\td$, outputs $\algoproof^\star
-\leftarrow \NIZKsimprove(\crs, \td, \inst_1, \msg)$, which gives
-$\NIZKverify(\crs, \inst_1, \algoproof^\star, \msg) = 1$. By (P3), this
-simulated proof is indistinguishable from a real one, so Game 6 is
-indistinguishable from Game 5.
+  \paragraph{Game 6.} As Game 5, except $\idfu{\AAC}'$ takes charge of
+  signature requests from honest users, following the specifications of
+  $\idfu{\AAC}$.  Given message $(\AACpresentend, \vec{\atv{}}, \msg,
+  \algoproof)$ from $\idfu{\AAC}'$ for $\vec{\atv{}} = (\atv{1}, \ldots,
+  \atv{N})$, $\simu$ defines $\inst_1 = (\pk, (\ipk{i}, \atv{i})_{i \in
+  \ISSUERS})$ such that $\forall i \in \ISSUERS: \atv{i} \neq \varnothing$,
+  and, using its ability to program the random oracle as the simulation
+  trapdoor $\td$, outputs $\algoproof^\star \leftarrow \NIZKsimprove(\crs, \td,
+  \inst_1, \msg)$, which gives $\NIZKverify(\crs, \inst_1, \algoproof^\star,
+  \msg) = 1$. By (P3), this simulated proof is indistinguishable from a real
+  one, so Game 6 is indistinguishable from Game 5.
 
-\paragraph{Game 7.} As Game 6, except $\idfu{\AAC}'$ processes verification
-requests from honest verifiers following the description of $\idfu{\AAC}$, and
-$\simu$ simulates the honest verifiers in the real world.  On receiving a
-signature in the real world, $\simu$ translates the signature into calls to
-$\idfu{\AAC}'$, and instead of returning the output of $\NIZKverify$, it
-returns the verification result received from $\idfu{\AAC}'$.  In the
-following, we describe $\simu$'s simulation.
+  \paragraph{Game 7.} As Game 6, except $\idfu{\AAC}'$ processes verification
+  requests from honest verifiers following the description of $\idfu{\AAC}$,
+  and $\simu$ simulates the honest verifiers in the real world.  On receiving a
+  signature in the real world, $\simu$ translates the signature into calls to
+  $\idfu{\AAC}'$, and instead of returning the output of $\NIZKverify$, it
+  returns the verification result received from $\idfu{\AAC}'$.  In the
+  following, we describe $\simu$'s simulation.
 
-\begin{description}
+  \begin{description}
 
-  \item[Register.] For each registration request $\pk$ that a corrupt user
-    sends, in the real world, to the honest registration authority, $\simu$
-    (acting as the registration authority) first checks if the user knows the
-    secret key $\sk$ underlying $\pk$.  If not, then $\simu$ stops.  Otherwise,
-    it executes the rest of the registration protocol, records entry
-    $\langle\user, \Tag, \pk, \psi \rangle$, and then (acting as a user)
-    transmits the corresponding registration request $register$ to
-    $\idfu{\AAC}'$ which processes it in a similar fashion to $\idfu{\AAC}$.
+    \item[Register.] For each registration request $\pk$ that a corrupt user
+      sends, in the real world, to the honest registration authority, $\simu$
+      (acting as the registration authority) first checks if the user knows the
+      secret key $\sk$ underlying $\pk$.  If not, then $\simu$ stops.
+      Otherwise, it executes the rest of the registration protocol, records
+      entry $\langle\user, \Tag, \pk, \psi \rangle$, and then (acting as a
+      user) transmits the corresponding registration request $register$ to
+      $\idfu{\AAC}'$ which processes it in a similar fashion to $\idfu{\AAC}$.
 
-    The simulated registration authority and $\idfu{\AAC}'$ accept or reject
-    the same requests by construction, so their outputs are indistinguishable.
+      The simulated registration authority and $\idfu{\AAC}'$ accept or reject
+      the same requests by construction, so their outputs are
+      indistinguishable.
 
-  \item[Issue.] For each issuance request $(\Tag, \pk, \psi, \atv{i})$ that a
-    corrupt user $\user$ sends, in the real world, to an honest issuer
-    $\issuer{i}$ (simulated by $\simu$), $\simu$ (acting as $\user$) sends
-    $(\AACissue, \att{i}, \atv{i})$ to $\idfu{\AAC}'$, and stores entry
-    $\langle \user, \Tag, \att{i}, \atv{i}, \signature_i\rangle$ on success.
-    $\idfu{\AAC}'$ issues the credential exactly when $\user$ is registered and
-    this is her first request for $\att{i}$, and the simulated $\issuer{i}$
-    returns $\signature_i \leftarrow \AACissue(\isk{i}, \Tag, \atv{i})$ under
-    the same conditions, so their outputs are indistinguishable.
+    \item[Issue.] For each issuance request $(\Tag, \pk, \psi, \atv{i})$ that a
+      corrupt user $\user$ sends, in the real world, to an honest issuer
+      $\issuer{i}$ (simulated by $\simu$), $\simu$ (acting as $\user$) sends
+      $(\AACissue, \att{i}, \atv{i})$ to $\idfu{\AAC}'$, and stores entry
+      $\langle \user, \Tag, \att{i}, \atv{i}, \signature_i\rangle$ on success.
+      $\idfu{\AAC}'$ issues the credential exactly when $\user$ is registered
+      and this is her first request for $\att{i}$, and the simulated
+      $\issuer{i}$ returns $\signature_i \leftarrow \AACissue(\isk{i}, \Tag,
+      \atv{i})$ under the same conditions, so their outputs are
+      indistinguishable.
 
-  \item[Verify.] For each signature $(\vec{\atv{}} = (\atv{1}, ..., \atv{N}),
-    \msg, \algoproof)$ that a user $\user$ presents, in the real world, to an
-    honest verifier $V$, $\simu$ (simulating $V$) calls $b \leftarrow
-    \NIZKverify(\crs, \inst_1, \algoproof, \msg)$.  We recall that $\atv{i} =
-    \varnothing$ if the attribute value is not disclosed.
+    \item[Verify.] For each signature $(\vec{\atv{}} = (\atv{1}, ..., \atv{N}),
+      \msg, \algoproof)$ that a user $\user$ presents, in the real world, to an
+      honest verifier $V$, $\simu$ (simulating $V$) calls $b \leftarrow
+      \NIZKverify(\crs, \inst_1, \algoproof, \msg)$.  We recall that $\atv{i} =
+      \varnothing$ if the attribute value is not disclosed.
 
-    If $b  = 0$,  $\simu$ sends $(\msg, \vec{\atv{}} = (\atv{1}, ..., \atv{N}),
-    \algoproof)$ to $\idfu{\AAC}'$, which returns $(\AACverifyend, b^\star)$.  Two
-    scenarios present themselves. Either there exists a dishonest user with
-    attribute values $\vec{\atv'{}} = (\atv'{1}, ..., \atv'N)$, $\forall
-    \atv{i} \neq \varnothing$, we either have $\atv{i} = \atv'i$, or have
-    $\atv{i} \neq \atv'i$ but issuer $\issuer{i}$ is dishonest.  Or $\forall
-    i: \atv{i} \neq \varnothing$, issuers $\issuer{i}$ and users holding
-    attribute values $\atv{i}$ are honest.
+      If $b  = 0$,  $\simu$ sends $(\msg, \vec{\atv{}} = (\atv{1}, ...,
+      \atv{N}), \algoproof)$ to $\idfu{\AAC}'$, which returns $(\AACverifyend,
+      b^\star)$.  Two scenarios present themselves. Either there exists a
+      dishonest user with attribute values $\vec{\atv'{}} = (\atv'{1}, ...,
+      \atv'N)$, $\forall \atv{i} \neq \varnothing$, we either have $\atv{i} =
+      \atv'i$, or have $\atv{i} \neq \atv'i$ but issuer $\issuer{i}$ is
+      dishonest.  Or $\forall i: \atv{i} \neq \varnothing$, issuers
+      $\issuer{i}$ and users holding attribute values $\atv{i}$ are honest.
 
-    In case of scenario one, the output of $\idfu{\AAC}'$ is defined by
-    $\simu$, which instructs $\idfu{\AAC}'$ to return $(\AACverifyend, 0)$.  In
-    case of scenario two, $\idfu{\AAC}'$ outputs $(\AACverifyend, 1)$.
-    However, thanks to the correctness of protocol $\Pi$ this scenario never
-    occurs.  Given a proof that was computed honestly,  $\NIZKverify$ will
-    never output $0$, so the output of $\idfu{\AAC}'$ matches that of $\Pi$.
+      In case of scenario one, the output of $\idfu{\AAC}'$ is defined by
+      $\simu$, which instructs $\idfu{\AAC}'$ to return $(\AACverifyend, 0)$.
+      In case of scenario two, $\idfu{\AAC}'$ outputs $(\AACverifyend, 1)$.
+      However, thanks to the correctness of protocol $\Pi$ this scenario never
+      occurs.  Given a proof that was computed honestly,  $\NIZKverify$ will
+      never output $0$, so the output of $\idfu{\AAC}'$ matches that of $\Pi$.
 
-    If $b = 1$, then by (P3), $\simu$ can extract the witness $\witness_1 =
-    (\Tag, \sk, \pk, \psi, \signature)$. They then execute the following steps:
+      If $b = 1$, then by (P3), $\simu$ can extract the witness $\witness_1 =
+      (\Tag, \sk, \pk, \psi, \signature)$. They then execute the following
+      steps:
 
-    \begin{description}
+      \begin{description}
 
-      \item[No key entry.] If there is no recorded entry $\langle \star, \Tag,
-        \pk, \star\rangle$, then $\simu$ aborts (call this event $a_1$).
+        \item[No key entry.] If there is no recorded entry $\langle \star,
+          \Tag, \pk, \star\rangle$, then $\simu$ aborts (call this event
+          $a_1$).
 
-      \item[No attribute entry.] Otherwise, if there exists $1 \leq i \leq n$
-        such that $\atv{i} \neq \varnothing$ and $\issuer{i}$ is honest, and
-        there is no recorded entry $\langle \star, \Tag, \atv{i}, \star
-        \rangle$, then $\simu$ aborts (call this event $a_2$).
+        \item[No attribute entry.] Otherwise, if there exists $1 \leq i \leq n$
+          such that $\atv{i} \neq \varnothing$ and $\issuer{i}$ is honest, and
+          there is no recorded entry $\langle \star, \Tag, \atv{i}, \star
+          \rangle$, then $\simu$ aborts (call this event $a_2$).
 
-      \item[Otherwise.] $\simu$ sends to $\idfu{\AAC}'$ signature request
-        $(\AACissue, \vec{\atv{}}, \signature, \msg)$.
+        \item[Otherwise.] $\simu$ sends to $\idfu{\AAC}'$ signature request
+          $(\AACissue, \vec{\atv{}}, \signature, \msg)$.
 
-        Either $\idfu{\AAC}'$ aborts, and $\simu$ sends request $(\AACverify,
-        V,\vec{\atv{}}, \algoproof)$ to $\idfu{\AAC}'$, or $\idfu{\AAC}'$ returns
-        $(\AACpresentend, \algoproof^\star)$, and $\simu$ sends request
-        $(\AACverify, V, \vec{\atv{}}, \algoproof^\star)$ to $\idfu{\AAC}'$.
+          Either $\idfu{\AAC}'$ aborts, and $\simu$ sends request $(\AACverify,
+          V,\vec{\atv{}}, \algoproof)$ to $\idfu{\AAC}'$, or $\idfu{\AAC}'$
+          returns $(\AACpresentend, \algoproof^\star)$, and $\simu$ sends
+          request $(\AACverify, V, \vec{\atv{}}, \algoproof^\star)$ to
+          $\idfu{\AAC}'$.
 
-    \end{description}
+      \end{description}
 
-    $\simu$ receives $(\AACverifyend, b)$ and outputs $b$.
+      $\simu$ receives $(\AACverifyend, b)$ and outputs $b$.
 
-\end{description}
+  \end{description}
 
-In what follows, we show that if $\simu$ does not abort, then $b = 1$.
+  In what follows, we show that if $\simu$ does not abort, then $b = 1$.
 
-If $a_1$ does not occur, then the registration request for $\user$ was
-successfully processed by $\simu$, and $\user$ was successfully registered by
-$\idfu{\AAC}$.  If $a_2$ does not occur then this implies one of two things:
+  If $a_1$ does not occur, then the registration request for $\user$ was
+  successfully processed by $\simu$, and $\user$ was successfully registered by
+  $\idfu{\AAC}$.  If $a_2$ does not occur then this implies one of two things:
 
-\begin{description}
+  \begin{description}
 
-  \item[Case one :] $\forall i : \atv{i} \neq \varnothing$, there exists an
-    entry $\langle \star, \Tag, \atv{i}, \star \rangle$.
+    \item[Case one :] $\forall i : \atv{i} \neq \varnothing$, there exists an
+      entry $\langle \star, \Tag, \atv{i}, \star \rangle$.
 
-  \item[Case two :]  $\exists j: \atv{j} \neq \varnothing$ such that there is
-    no recorded entry $\langle \star, \Tag, \atv{j}, \star \rangle$ but issuer
-    $\issuer{j}$ is dishonest.
+    \item[Case two :]  $\exists j: \atv{j} \neq \varnothing$ such that there is
+      no recorded entry $\langle \star, \Tag, \atv{j}, \star \rangle$ but
+      issuer $\issuer{j}$ is dishonest.
 
-\end{description}
+  \end{description}
 
-Case one implies that $\simu$ issued credentials for $\user$ for the relevant
-attributes, and so did $\idfu{\AAC}'$.  During the $\AACpresent$ call,
-$\idfu{\AAC}'$ will not abort and will return $(\AACpresentend,
-\algoproof^\star)$, and the subsequent call $(\AACverify, V, \vec{\atv{}},
-\algoproof^\star)$ will result in $\idfu{\AAC}'$ returning $(\AACverifyend, 1)$.
-This matches the output of the verification in the real world.
+  Case one implies that $\simu$ issued credentials for $\user$ for the relevant
+  attributes, and so did $\idfu{\AAC}'$.  During the $\AACpresent$ call,
+  $\idfu{\AAC}'$ will not abort and will return $(\AACpresentend,
+  \algoproof^\star)$, and the subsequent call $(\AACverify, V, \vec{\atv{}},
+  \algoproof^\star)$ will result in $\idfu{\AAC}'$ returning $(\AACverifyend,
+  1)$.  This matches the output of the verification in the real world.
 
-Case two implies that $\user$ is in possession of a credential that was issued
-by a dishonest issuer and never recorded by either $\simu$ or $\idfu{\AAC}'$.
-In this case,  $\idfu{\AAC}'$ aborts during $\AACpresent$, and when $\simu$
-calls $\idfu{\AAC}'$ with  $(\AACverify, V, \vec{\atv{}}, \algoproof)$, the output
-of $\idfu{\AAC}'$ is dictated by $\simu$.  $\simu$ sets this output to $1$ to
-match the output of the verification in the real world.
+  Case two implies that $\user$ is in possession of a credential that was
+  issued by a dishonest issuer and never recorded by either $\simu$ or
+  $\idfu{\AAC}'$.  In this case,  $\idfu{\AAC}'$ aborts during $\AACpresent$,
+  and when $\simu$ calls $\idfu{\AAC}'$ with  $(\AACverify, V, \vec{\atv{}},
+  \algoproof)$, the output of $\idfu{\AAC}'$ is dictated by $\simu$.  $\simu$
+  sets this output to $1$ to match the output of the verification in the real
+  world.
 
-This game is indistinguishable from Game 6 as long as $a_1$ and $a_2$ do not
-occur. We now show that the probability of these events occuring is negligible.
+  This game is indistinguishable from Game 6 as long as $a_1$ and $a_2$ do not
+  occur. We now show that the probability of these events occuring is
+  negligible.
 
-\begin{description}
+  \begin{description}
 
-  \item[$a_1$.] Occurs if there is no recorded entry $\langle \star, \Tag, \pk,
-    \star \rangle$ in the system.  By (P3), we can extract witness $\witness_1
-    = (\Tag, \sk, \pk, \psi, \signature)$.  This means that $\user$ has
-    knowledge of a valid $\psi$ such that $1 \leftarrow \DSverify(\rapk, (\pk,
-    \Tag), \psi)$ with no corresponding entry, contradicting (P1).
+    \item[$a_1$.] Occurs if there is no recorded entry $\langle \star, \Tag,
+      \pk, \star \rangle$ in the system.  By (P3), we can extract witness
+      $\witness_1 = (\Tag, \sk, \pk, \psi, \signature)$.  This means that
+      $\user$ has knowledge of a valid $\psi$ such that $1 \leftarrow
+      \DSverify(\rapk, (\pk, \Tag), \psi)$ with no corresponding entry,
+      contradicting (P1).
 
-  \item[$a_2$.] Occurs if $\exists j \in [1, n]$ such that $\atv{j} \neq
-    \varnothing$ and $\issuer{j}$ is honest, and there is no recorded entry
-    $\langle \star, \Tag, \atv{j}, \star \rangle$.  By (P3), we can again
-    extract a valid witness $\witness_1 = (\Tag, \sk, \pk, \psi, \signature)$.
-    This means that $\signature$ satisfies the following:
+    \item[$a_2$.] Occurs if $\exists j \in [1, n]$ such that $\atv{j} \neq
+      \varnothing$ and $\issuer{j}$ is honest, and there is no recorded entry
+      $\langle \star, \Tag, \atv{j}, \star \rangle$.  By (P3), we can again
+      extract a valid witness $\witness_1 = (\Tag, \sk, \pk, \psi,
+      \signature)$.  This means that $\signature$ satisfies the following:
     %
-    \begin{equation*}
+      \begin{equation*}
     %
-      \ATSverifyagg((\ipk{i})_{i\in \ISSUERS},\Tag,(\atv{i})_{i\in\ISSUERS},
-      \signature).
+        \ATSverifyagg((\ipk{i})_{i\in \ISSUERS},\Tag,(\atv{i})_{i\in\ISSUERS},
+        \signature).
     %
-    \end{equation*}
+      \end{equation*}
     %
-    $\ISSUERS$ here identifies the indices with $\atv{i} \neq \varnothing$ and
-    $j \in \ISSUERS$.  Given that there is no recorded entry $\langle \star,
-    \Tag, \atv{j}, \star \rangle$, this implies that the honest issuer
-    $\issuer{j}$ never issued a signature $\signature_j$ for pair $(\Tag,
-    \atv{j})$, contradicting (P2).
+      $\ISSUERS$ here identifies the indices with $\atv{i} \neq \varnothing$
+      and $j \in \ISSUERS$.  Given that there is no recorded entry $\langle
+      \star, \Tag, \atv{j}, \star \rangle$, this implies that the honest issuer
+      $\issuer{j}$ never issued a signature $\signature_j$ for pair $(\Tag,
+      \atv{j})$, contradicting (P2).
 
-\end{description}
+  \end{description}
 
-\paragraph{Game 8.} This is the ideal world. As Game 7, except $\idfu{\AAC}'$
-is now identical to ideal functionality $\idfu{\AAC}$, so Game 8 is
-indistinguishable from Game 7. This concludes the proof
-of~\Cref{thm:agg-creds-construction-security}.
+  \paragraph{Game 8.} This is the ideal world. As Game 7, except $\idfu{\AAC}'$
+  is now identical to ideal functionality $\idfu{\AAC}$, so Game 8 is
+  indistinguishable from Game 7. This concludes the proof
+  of~\Cref{thm:agg-creds-construction-security}.
 
 \end{proof}
 
@@ -302,280 +310,282 @@ signature has not been issued by the signature oracle on triple $(\pk_j,
 
 \begin{proof}
 
-Both reductions share the same $\corrupto$
-simulation and follow the same template. $\advB$ embeds a Diffie-Hellman
-challenge into the uncorrupted key $\pk_j$. It programs $\hashone$ and
-$\hashtwo$ so that most queries are answered correctly, but one of the two hash
-functions secretly carries the embedded challenge. It simulates $\signo$ so the
-embedding stays hidden from $\adv$. It extracts the target group element from
-$\adv$'s forgery by dividing out the elements from the simulated corrupted
-keys. The two reductions differ only in which hash function carries the
-embedding, and in the resulting assumption. A Type 1 forgery never reuses a tag
-signed under $\pk_j$, so $\advB$ embeds the challenge in $\hashone$ and
-recovers the target under BCDH. A Type 2 forgery reuses a tag and so $\advB$
-embeds in $\hashtwo$ instead and needs the m-BCDH assumption. We give the Type
-1 reduction in full, then present the changes needed for the Type 2 version.
+  Both reductions share the same $\corrupto$ simulation and follow the same
+  template. $\advB$ embeds a Diffie-Hellman challenge into the uncorrupted key
+  $\pk_j$. It programs $\hashone$ and $\hashtwo$ so that most queries are
+  answered correctly, but one of the two hash functions secretly carries the
+  embedded challenge. It simulates $\signo$ so the embedding stays hidden from
+  $\adv$. It extracts the target group element from $\adv$'s forgery by
+  dividing out the elements from the simulated corrupted keys. The two
+  reductions differ only in which hash function carries the embedding, and in
+  the resulting assumption. A Type 1 forgery never reuses a tag signed under
+  $\pk_j$, so $\advB$ embeds the challenge in $\hashone$ and recovers the
+  target under BCDH. A Type 2 forgery reuses a tag and so $\advB$ embeds in
+  $\hashtwo$ instead and needs the m-BCDH assumption. We give the Type 1
+  reduction in full, then present the changes needed for the Type 2 version.
 
-\paragraph{Simulating $\corrupto$ (shared by both reductions).} Without loss of
-generality, we assume that $\adv$ corrupts all public keys except for one.
-$\advB$ simulates $\corrupto$ as follows.
+  \paragraph{Simulating $\corrupto$ (shared by both reductions).} Without loss
+  of generality, we assume that $\adv$ corrupts all public keys except for one.
+  $\advB$ simulates $\corrupto$ as follows.
 
-\begin{enumerate}
+  \begin{enumerate}
 
-  \item $\advB$ randomly selects $j \in [1, n]$ and sets $\pk_j =
-    \widetilde{x}$.
+    \item $\advB$ randomly selects $j \in [1, n]$ and sets $\pk_j =
+      \widetilde{x}$.
 
-  \item For all $k \neq j$, $\advB$ randomly selects $\xi_k \in \Zp^*$ and sets
-    $\sk_k = \xi_k$ and $\pk_k = \widetilde{x}_k = \ggen^{\xi_k}$.
+    \item For all $k \neq j$, $\advB$ randomly selects $\xi_k \in \Zp^*$ and
+      sets $\sk_k = \xi_k$ and $\pk_k = \widetilde{x}_k = \ggen^{\xi_k}$.
 
-  \item On a corruption request for $\pk_i \neq \pk_j$, $\advB$ returns $\sk_i
-    = \xi_i$. On a corruption request for $\pk_j$, $\advB$ stops.
+    \item On a corruption request for $\pk_i \neq \pk_j$, $\advB$ returns
+      $\sk_i = \xi_i$. On a corruption request for $\pk_j$, $\advB$ stops.
 
-\end{enumerate}
+  \end{enumerate}
 
-This does not depend on which hash function carries the embedded challenge, so
-it is used unchanged in both Type 1 and Type 2.
+  This does not depend on which hash function carries the embedded challenge,
+  so it is used unchanged in both Type 1 and Type 2.
 
-\paragraph{Extraction quantity $d$ (shared by both reductions).} In both
-reductions, on receiving $\adv$'s forgery $(\ISSUERS, (\pk_i)_{i\in\ISSUERS},
-\Tag^*, (\msg^*_i)_{i \in \ISSUERS}, \signature^* = (\signatureone^*,
-\signaturetwo^*))$, $\advB$ removes the corrupted key contributions from
-$\signaturetwo^*$ by computing $d$ as follows:
+  \paragraph{Extraction quantity $d$ (shared by both reductions).} In both
+  reductions, on receiving $\adv$'s forgery $(\ISSUERS, (\pk_i)_{i\in\ISSUERS},
+  \Tag^*, (\msg^*_i)_{i \in \ISSUERS}, \signature^* = (\signatureone^*,
+  \signaturetwo^*))$, $\advB$ removes the corrupted key contributions from
+  $\signaturetwo^*$ by computing $d$ as follows:
 %
-\begin{equation*}
+  \begin{equation*}
 %
-  d = \signaturetwo^* / \prod_{i \in \ISSUERS, i \neq
-  j}\hashone(\msg^*_i)^{\xi_i}.
+    d = \signaturetwo^* / \prod_{i \in \ISSUERS, i \neq
+    j}\hashone(\msg^*_i)^{\xi_i}.
 %
-\end{equation*}
+  \end{equation*}
 %
-This does not depend on which hash carries the embedding, so $d$ is the same in
-both cases.
+  This does not depend on which hash carries the embedding, so $d$ is the same
+  in both cases.
 
-\paragraph{Type 1 Forgery.} Let $\advB$ be an adversary whose goal is to break
-BCDH. $\advB$ is given a challenge tuple as follows:
+  \paragraph{Type 1 Forgery.} Let $\advB$ be an adversary whose goal is to
+  break BCDH. $\advB$ is given a challenge tuple as follows:
 %
-\begin{equation*}
+  \begin{equation*}
 %
-  (\gen, x, y, z, \ggen, \widetilde{x}, \widetilde{y}, \widetilde{z}) = (\gen,
-  \gen^\gamma, \gen^\omega, \gen^\chi, \ggen, \ggen^\gamma, \ggen^\omega,
-  \ggen^\chi).
+    (\gen, x, y, z, \ggen, \widetilde{x}, \widetilde{y}, \widetilde{z}) =
+    (\gen, \gen^\gamma, \gen^\omega, \gen^\chi, \ggen, \ggen^\gamma,
+    \ggen^\omega, \ggen^\chi).
 %
-\end{equation*}
+  \end{equation*}
 %
-It must compute $\pairing(\gen, \ggen)^{\gamma\omega\chi}$, using $\adv$ and
-the random oracle as described below.
+  It must compute $\pairing(\gen, \ggen)^{\gamma\omega\chi}$, using $\adv$ and
+  the random oracle as described below.
 
-\paragraph{Random oracle programming.} $\advB$ initialises two lists $L_1$ and
-$L_2$, and computes $\hashone$ and $\hashtwo$ as follows.
+  \paragraph{Random oracle programming.} $\advB$ initialises two lists $L_1$
+  and $L_2$, and computes $\hashone$ and $\hashtwo$ as follows.
 
-\begin{description}
+  \begin{description}
 
-  \item[$\hashone$.] For each new query $\msg$, with probability $p_\hashone$,
-    $\advB$ sets $\hashone(\msg) = y$, the embedded branch, and stores $\langle
-    \msg, \perp, \hashone(\msg)\rangle$ in $L_1$. Otherwise, with probability
-    $1-p_\hashone$, the honest branch, $\advB$ generates $\rho \sample \Zp$,
-    sets $\hashone(\msg) = \gen^\rho$, and stores $\langle \msg, \rho,
-    \hashone(\msg)\rangle$ in $L_1$.
+    \item[$\hashone$.] For each new query $\msg$, with probability
+      $p_\hashone$, $\advB$ sets $\hashone(\msg) = y$, the embedded branch, and
+      stores $\langle \msg, \perp, \hashone(\msg)\rangle$ in $L_1$. Otherwise,
+      with probability $1-p_\hashone$, the honest branch, $\advB$ generates
+      $\rho \sample \Zp$, sets $\hashone(\msg) = \gen^\rho$, and stores
+      $\langle \msg, \rho, \hashone(\msg)\rangle$ in $L_1$.
 
-  \item[$\hashtwo$.] For each new query $\Tag$, $\advB$ samples $\eta \sample
-    \Zp$, sets $\hashtwo(\Tag) = \gen^\eta$, and stores $\langle \Tag, \eta,
-    \hashtwo(\Tag)\rangle$ in $L_2$.
+    \item[$\hashtwo$.] For each new query $\Tag$, $\advB$ samples $\eta \sample
+      \Zp$, sets $\hashtwo(\Tag) = \gen^\eta$, and stores $\langle \Tag, \eta,
+      \hashtwo(\Tag)\rangle$ in $L_2$.
 
-\end{description}
+  \end{description}
 
-\paragraph{Simulating $\signo$.} On a signature request $(\pk_i, \Tag, \msg)$,
-$\advB$ proceeds as follows. If $i \neq j$, $\advB$ outputs $\signature \sample
-\ATSsign(\sk_i, \Tag, \msg)$, since it knows $\sk_i$. If $i = j$, $\advB$ stops
-if $\hashone(\msg) = y$. Otherwise it retrieves $\langle \msg, \rho,
-\hashone(\msg) = \gen^\rho\rangle$ and sets $\signature$ as follows:
+  \paragraph{Simulating $\signo$.} On a signature request $(\pk_i, \Tag,
+  \msg)$, $\advB$ proceeds as follows. If $i \neq j$, $\advB$ outputs
+  $\signature \sample \ATSsign(\sk_i, \Tag, \msg)$, since it knows $\sk_i$. If
+  $i = j$, $\advB$ stops if $\hashone(\msg) = y$. Otherwise it retrieves
+  $\langle \msg, \rho, \hashone(\msg) = \gen^\rho\rangle$ and sets $\signature$
+  as follows:
 %
-\begin{equation*}
+  \begin{equation*}
 %
-  \signature = (\signatureone, \signaturetwo) = (\ggen^\phi,
-  x^\rho\hashtwo(\Tag)^\phi).
+    \signature = (\signatureone, \signaturetwo) = (\ggen^\phi,
+    x^\rho\hashtwo(\Tag)^\phi).
 %
-\end{equation*}
+  \end{equation*}
 %
-This is a valid signature relative to $\pk_j = \widetilde{x} = \ggen^\gamma$,
-since $x^\rho = \gen^{\gamma\rho} = \hashone(\msg)^\gamma$, giving $\signature
-= (\ggen^\phi, \hashone(\msg)^\gamma\hashtwo(\Tag)^\phi)$ as required by
-$\ATSsign$.
+  This is a valid signature relative to $\pk_j = \widetilde{x} = \ggen^\gamma$,
+  since $x^\rho = \gen^{\gamma\rho} = \hashone(\msg)^\gamma$, giving
+  $\signature = (\ggen^\phi, \hashone(\msg)^\gamma\hashtwo(\Tag)^\phi)$ as
+  required by $\ATSsign$.
 
-\paragraph{Forgery.} After receiving $\adv$'s forgery $(\ISSUERS,
-(\pk_i)_{i\in\ISSUERS}, \Tag^*,  (\msg^*_i)_{i \in \ISSUERS}, \signature^*)$,
-$\advB$ proceeds as follows.
+  \paragraph{Forgery.} After receiving $\adv$'s forgery $(\ISSUERS,
+  (\pk_i)_{i\in\ISSUERS}, \Tag^*,  (\msg^*_i)_{i \in \ISSUERS}, \signature^*)$,
+  $\advB$ proceeds as follows.
 
-\begin{enumerate}
+  \begin{enumerate}
 
-  \item $\advB$ stops if $\hashone(\msg^*_j) \neq y$.
+    \item $\advB$ stops if $\hashone(\msg^*_j) \neq y$.
 
-  \item Otherwise, $\advB$ parses $\signature^*$ as $(\signatureone^*,
-    \signaturetwo^*)$ and retrieves $\langle\Tag^*, \eta^*, \hashtwo(\Tag^*)
-    \rangle$ from $L_2$.
+    \item Otherwise, $\advB$ parses $\signature^*$ as $(\signatureone^*,
+      \signaturetwo^*)$ and retrieves $\langle\Tag^*, \eta^*, \hashtwo(\Tag^*)
+      \rangle$ from $L_2$.
 
-  \item $\advB$ computes $d$ as above, and sets $X$ as follows:
+    \item $\advB$ computes $d$ as above, and sets $X$ as follows:
     %
-    \begin{equation*}
+      \begin{equation*}
     %
-      X = \pairing(d, \widetilde{z}) / \pairing(z^{\eta^*},\signatureone^*).
+        X = \pairing(d, \widetilde{z}) / \pairing(z^{\eta^*},\signatureone^*).
     %
-    \end{equation*}
+      \end{equation*}
 
-\end{enumerate}
+  \end{enumerate}
 
-We now show that $X = \pairing(\gen, \ggen)^{\gamma\omega\chi}$. Since
-$\signature^*$ verifies, dividing the verification equation by every factor
-except the one for the uncorrupted key $\pk_j$, and using $\hashtwo(\Tag^*) =
-\gen^{\eta^*}$ and $\hashone(\msg^*_j) = y$, gives the result as follows:
+  We now show that $X = \pairing(\gen, \ggen)^{\gamma\omega\chi}$. Since
+  $\signature^*$ verifies, dividing the verification equation by every factor
+  except the one for the uncorrupted key $\pk_j$, and using $\hashtwo(\Tag^*) =
+  \gen^{\eta^*}$ and $\hashone(\msg^*_j) = y$, gives the result as follows:
 %
-\begin{equation*}
+  \begin{equation*}
 %
-  \pairing(d, \ggen) = \pairing(\gen^{\eta^*}, \signatureone^*) \, \pairing(y,
-  \widetilde{x}).
+    \pairing(d, \ggen) = \pairing(\gen^{\eta^*}, \signatureone^*) \,
+    \pairing(y, \widetilde{x}).
 %
-\end{equation*}
+  \end{equation*}
 %
-Rearranging and raising to the power $\chi$ recovers $X$ as follows:
+  Rearranging and raising to the power $\chi$ recovers $X$ as follows:
 %
-\begin{equation*}
+  \begin{equation*}
 %
-  \pairing(y, \widetilde{x})^\chi = \pairing(d, \widetilde{z}) /
-  \pairing(z^{\eta^*}, \signatureone^*) = X.
+    \pairing(y, \widetilde{x})^\chi = \pairing(d, \widetilde{z}) /
+    \pairing(z^{\eta^*}, \signatureone^*) = X.
 %
-\end{equation*}
+  \end{equation*}
 %
-Since $y = \gen^\omega$ and $\widetilde{x} = \ggen^\gamma$, this is
-$\pairing(\gen, \ggen)^{\gamma\omega\chi}$, as required.
+  Since $y = \gen^\omega$ and $\widetilde{x} = \ggen^\gamma$, this is
+  $\pairing(\gen, \ggen)^{\gamma\omega\chi}$, as required.
 
-\paragraph{Type 2 Forgery.} Let $\advB$ be an adversary whose goal is to break
-m-BCDH. $\advB$ is given a challenge tuple as follows:
+  \paragraph{Type 2 Forgery.} Let $\advB$ be an adversary whose goal is to
+  break m-BCDH. $\advB$ is given a challenge tuple as follows:
 %
-\begin{equation*}
+  \begin{equation*}
 %
-  (\gen, y, \ggen, \widetilde{x}, \widetilde{y}) = (\gen, \gen^{1/\omega},
-  \ggen, \ggen^\gamma, \ggen^\omega).
+    (\gen, y, \ggen, \widetilde{x}, \widetilde{y}) = (\gen, \gen^{1/\omega},
+    \ggen, \ggen^\gamma, \ggen^\omega).
 %
-\end{equation*}
+  \end{equation*}
 %
-It must compute $\pairing(\gen, \ggen)^{\gamma\omega}$. The Type 2 reduction is
-follows the same structure as the Type 1 reduction but with the roles of
-$\hashone$ and $\hashtwo$ reversed. The challenge is embedded in $\hashtwo$,
-and $\advB$ no longer learns $\gamma$ directly, only $\omega$. We describe the
-differences.
+  It must compute $\pairing(\gen, \ggen)^{\gamma\omega}$. The Type 2 reduction
+  is follows the same structure as the Type 1 reduction but with the roles of
+  $\hashone$ and $\hashtwo$ reversed. The challenge is embedded in $\hashtwo$,
+  and $\advB$ no longer learns $\gamma$ directly, only $\omega$. We describe
+  the differences.
 
-\paragraph{Random oracle programming.} $\hashone$ is now programmed without
-embedding, exactly as $\hashtwo$ is in the Type 1 case. For each new query
-$\msg$, $\advB$ generates $\rho \sample \Zp$, sets $\hashone(\msg) =
-\gen^\rho$, and stores $\langle \msg, \rho, \hashone(\msg)\rangle$ in $L_1$.
-The embedding moves to $\hashtwo$ instead. For each new query $\Tag$, $\advB$
-samples $\eta \sample \Zp$. With probability $p_\hashtwo$, $\advB$ sets
-$\hashtwo(\Tag) = y^\eta$, the embedded branch. Otherwise, with probability
-$1-p_\hashtwo$, $\advB$ sets $\hashtwo(\Tag) = \gen^\eta$, the honest branch.
-Either way, $\advB$ stores $\langle \Tag, \eta, \hashtwo(\Tag)\rangle$ in
-$L_2$.
+  \paragraph{Random oracle programming.} $\hashone$ is now programmed without
+  embedding, exactly as $\hashtwo$ is in the Type 1 case. For each new query
+  $\msg$, $\advB$ generates $\rho \sample \Zp$, sets $\hashone(\msg) =
+  \gen^\rho$, and stores $\langle \msg, \rho, \hashone(\msg)\rangle$ in $L_1$.
+  The embedding moves to $\hashtwo$ instead. For each new query $\Tag$, $\advB$
+  samples $\eta \sample \Zp$. With probability $p_\hashtwo$, $\advB$ sets
+  $\hashtwo(\Tag) = y^\eta$, the embedded branch. Otherwise, with probability
+  $1-p_\hashtwo$, $\advB$ sets $\hashtwo(\Tag) = \gen^\eta$, the honest branch.
+  Either way, $\advB$ stores $\langle \Tag, \eta, \hashtwo(\Tag)\rangle$ in
+  $L_2$.
 
-\paragraph{Simulating $\signo$.} The case $i \neq j$, and the $\corrupto$
-simulation, are exactly as in the Type 1 reduction. The case $i=j$ differs.
-Type 1 could compute $\signaturetwo$ directly because $\advB$ knows
-$x=\gen^\gamma$. Here $\advB$ only knows $\ggen^\gamma$, so it instead
-retrieves $\langle \msg, \rho, \hashone(\msg)\rangle$ and $\langle \Tag, \eta,
-\hashtwo(\Tag)\rangle$, and stops if $\hashtwo(\Tag) \neq \gen^\eta$ or $\eta
-= 0$. Otherwise, $\advB$ samples $\upsilon \sample \Zp$ and solves the
-verification equation for $\signatureone$ instead of computing it directly, as
-follows:
+  \paragraph{Simulating $\signo$.} The case $i \neq j$, and the $\corrupto$
+  simulation, are exactly as in the Type 1 reduction. The case $i=j$ differs.
+  Type 1 could compute $\signaturetwo$ directly because $\advB$ knows
+  $x=\gen^\gamma$. Here $\advB$ only knows $\ggen^\gamma$, so it instead
+  retrieves $\langle \msg, \rho, \hashone(\msg)\rangle$ and $\langle \Tag,
+  \eta, \hashtwo(\Tag)\rangle$, and stops if $\hashtwo(\Tag) \neq \gen^\eta$ or
+  $\eta = 0$. Otherwise, $\advB$ samples $\upsilon \sample \Zp$ and solves the
+  verification equation for $\signatureone$ instead of computing it directly,
+  as follows:
 %
-\begin{equation*}
+  \begin{equation*}
 %
-  (\signatureone, \signaturetwo) = \left(\left(\ggen^\upsilon /
-  \widetilde{x}^\rho\right)^{1/\eta}, \ \gen^\upsilon\right).
+    (\signatureone, \signaturetwo) = \left(\left(\ggen^\upsilon /
+    \widetilde{x}^\rho\right)^{1/\eta}, \ \gen^\upsilon\right).
 %
-\end{equation*}
+  \end{equation*}
 %
-By construction, $\pairing(\signaturetwo, \ggen) = \pairing(\hashone(\msg),
-\widetilde{x}) \cdot \pairing(\hashtwo(\Tag), \signatureone)$, exactly the
-check performed by $\ATSverify$. So this is a valid signature relative to
-$\pk_j = \widetilde{x} = \ggen^\gamma$.
+  By construction, $\pairing(\signaturetwo, \ggen) = \pairing(\hashone(\msg),
+  \widetilde{x}) \cdot \pairing(\hashtwo(\Tag), \signatureone)$, exactly the
+  check performed by $\ATSverify$. So this is a valid signature relative to
+  $\pk_j = \widetilde{x} = \ggen^\gamma$.
 
-\paragraph{Forgery.} After receiving $\adv$'s forgery $(\ISSUERS,
-(\pk_i)_{i\in\ISSUERS}, \Tag^*,  (\msg^*_i)_{i \in \ISSUERS}, \signature^*)$,
-$\advB$ proceeds as follows.
+  \paragraph{Forgery.} After receiving $\adv$'s forgery $(\ISSUERS,
+  (\pk_i)_{i\in\ISSUERS}, \Tag^*,  (\msg^*_i)_{i \in \ISSUERS}, \signature^*)$,
+  $\advB$ proceeds as follows.
 
-\begin{enumerate}
+  \begin{enumerate}
 
-  \item $\advB$ retrieves $\langle \msg^*, \rho^*, \hashone(\msg^*)\rangle$ and
-    $\langle \Tag^*, \eta^*, \hashtwo(\Tag^*)\rangle$.
+    \item $\advB$ retrieves $\langle \msg^*, \rho^*, \hashone(\msg^*)\rangle$
+      and $\langle \Tag^*, \eta^*, \hashtwo(\Tag^*)\rangle$.
 
-  \item $\advB$ stops if $\hashtwo(\Tag^*) \neq y^{\eta^*}$ or $\rho^* = 0$.
+    \item $\advB$ stops if $\hashtwo(\Tag^*) \neq y^{\eta^*}$ or $\rho^* = 0$.
 
-  \item Otherwise, $\advB$ parses $\signature^*$, computes $d$ as above, and
-    sets $X$ as follows:
+    \item Otherwise, $\advB$ parses $\signature^*$, computes $d$ as above, and
+      sets $X$ as follows:
     %
-    \begin{equation*}
+      \begin{equation*}
     %
-      X = \left(\pairing(d, \widetilde{y}) /
-      \pairing(\gen^{\eta^*},\signatureone^*)\right)^{1/\rho^*}.
+        X = \left(\pairing(d, \widetilde{y}) /
+        \pairing(\gen^{\eta^*},\signatureone^*)\right)^{1/\rho^*}.
     %
-    \end{equation*}
+      \end{equation*}
 
-\end{enumerate}
+  \end{enumerate}
 
-We now show that $X = \pairing(\gen, \ggen)^{\gamma\omega}$. As before,
-$\signature^*$ verifies. Dividing the verification equation by every factor
-except $\pk_j$, and using $\hashtwo(\Tag^*) = y^{\eta^*}$ and
-$\hashone(\msg^*_j) = \gen^{\rho^*}$, gives the result as follows:
+  We now show that $X = \pairing(\gen, \ggen)^{\gamma\omega}$. As before,
+  $\signature^*$ verifies. Dividing the verification equation by every factor
+  except $\pk_j$, and using $\hashtwo(\Tag^*) = y^{\eta^*}$ and
+  $\hashone(\msg^*_j) = \gen^{\rho^*}$, gives the result as follows:
 %
-\begin{equation*}
+  \begin{equation*}
 %
-  \pairing(d, \ggen) = \pairing(y^{\eta^*}, \signatureone^*) \cdot
-  \pairing(\gen^{\rho^*}, \widetilde{x}).
+    \pairing(d, \ggen) = \pairing(y^{\eta^*}, \signatureone^*) \cdot
+    \pairing(\gen^{\rho^*}, \widetilde{x}).
 %
-\end{equation*}
+  \end{equation*}
 %
-Isolating $\pairing(\gen^{\rho^*}, \widetilde{x})^\omega$, then taking the
-$1/\rho^*$ power, recovers $X$ as follows:
+  Isolating $\pairing(\gen^{\rho^*}, \widetilde{x})^\omega$, then taking the
+  $1/\rho^*$ power, recovers $X$ as follows:
 %
-\begin{equation*}
+  \begin{equation*}
 %
-  \pairing(\gen, \widetilde{x})^\omega = \left(\pairing(d, \widetilde{y}) /
-  \pairing(\gen^{\eta^*}, \signatureone^*)\right)^{1/\rho^*} = X.
+    \pairing(\gen, \widetilde{x})^\omega = \left(\pairing(d, \widetilde{y}) /
+    \pairing(\gen^{\eta^*}, \signatureone^*)\right)^{1/\rho^*} = X.
 %
-\end{equation*}
+  \end{equation*}
 %
-Since $\widetilde{x} = \ggen^\gamma$, this is $\pairing(\gen,
-\ggen)^{\gamma\omega}$, as required.
+  Since $\widetilde{x} = \ggen^\gamma$, this is $\pairing(\gen,
+  \ggen)^{\gamma\omega}$, as required.
 
-\paragraph{Simulation consistency.} In both reductions, $\advB$'s view of the
-experiment matches a real execution, and it goes on to extract $X$, exactly
-when three independent events all hold.
+  \paragraph{Simulation consistency.} In both reductions, $\advB$'s view of the
+  experiment matches a real execution, and it goes on to extract $X$, exactly
+  when three independent events all hold.
 
-\begin{enumerate}
+  \begin{enumerate}
 
-  \item $\adv$ never asks to corrupt $\pk_j$ itself. This happens with
-    probability $1/n$, since $j$ is chosen uniformly.
+    \item $\adv$ never asks to corrupt $\pk_j$ itself. This happens with
+      probability $1/n$, since $j$ is chosen uniformly.
 
-  \item The query tied to the forgery under $\pk_j$ lands on the embedded
-    branch, so $\advB$ can extract from it. This happens with probability $p$.
+    \item The query tied to the forgery under $\pk_j$ lands on the embedded
+      branch, so $\advB$ can extract from it. This happens with probability
+      $p$.
 
-  \item Each of the $q$ signing queries made under $\pk_j$ lands on the honest
-    branch instead, so $\advB$ can still answer them. Each does so
-    independently with probability $1-p$, so all $q$ together do so with
-    probability $(1-p)^q$.
+    \item Each of the $q$ signing queries made under $\pk_j$ lands on the
+      honest branch instead, so $\advB$ can still answer them. Each does so
+      independently with probability $1-p$, so all $q$ together do so with
+      probability $(1-p)^q$.
 
-\end{enumerate}
+  \end{enumerate}
 
-This gives the same bound in both cases, $\Pr[\text{success}] = \frac{1}n
-\cdot p \cdot (1-p)^q$.  Here $p = p_\hashone$ is the probability that
-$\hashone$ takes its embedded branch for the Type 1 reduction, and $p =
-p_\hashtwo$ for the Type 2 reduction. If $\advB$'s simulation departs from
-this because $\pk_j$ gets corrupted, the forgery misses the embedded branch, or
-a signing query lands on it, $\advB$ simply stops and outputs a random guess
-for the BCDH or m-BCDH challenge.
+  This gives the same bound in both cases, $\Pr[\text{success}] = \frac{1}n
+  \cdot p \cdot (1-p)^q$.  Here $p = p_\hashone$ is the probability that
+  $\hashone$ takes its embedded branch for the Type 1 reduction, and $p =
+  p_\hashtwo$ for the Type 2 reduction. If $\advB$'s simulation departs from
+  this because $\pk_j$ gets corrupted, the forgery misses the embedded branch,
+  or a signing query lands on it, $\advB$ simply stops and outputs a random
+  guess for the BCDH or m-BCDH challenge.
 
-So any successful Type 1 or Type 2 forgery allows construction of an adversary
-that breaks either the BCDH or m-BCDH assumption with non-negligible
-probability. This means the ATS scheme satisfies existential unforgeability
-under tag-based aggregation.
+  So any successful Type 1 or Type 2 forgery allows construction of an
+  adversary that breaks either the BCDH or m-BCDH assumption with
+  non-negligible probability. This means the ATS scheme satisfies existential
+  unforgeability under tag-based aggregation.
 
 \end{proof}
 
@@ -590,203 +600,202 @@ zero knowledge proofs of Section~\ref{sec:proof-inst}.
 
 \begin{proof}
 
-\begin{description}
+  \begin{description}
 
-  \item[$\DS$ is existentially unforgeable.] The AGHO signature scheme is
-    existentially unforgeable under chosen message attack under the $q$-SDH
-    assumption~\cite{C:AGHO11}.
+    \item[$\DS$ is existentially unforgeable.] The AGHO signature scheme is
+      existentially unforgeable under chosen message attack under the $q$-SDH
+      assumption~\cite{C:AGHO11}.
 
-  \item[$\ATS$ is existentially unforgeable under tag based aggregation.] This
-    is~\Cref{thm:agg-creds-thm-1}, proven in~\Cref{sec:agg-creds-proof-2} under
-    the BCDH and m-BCDH assumptions.
+    \item[$\ATS$ is existentially unforgeable under tag based aggregation.]
+      This is~\Cref{thm:agg-creds-thm-1}, proven
+      in~\Cref{sec:agg-creds-proof-2} under the BCDH and m-BCDH assumptions.
 
-  \item[The proof system is simulation-extractable.]
-    Lemma~\ref{lem:agg-creds-extract} and Lemma~\ref{lem:agg-creds-simulate},
-    proved in~\Cref{sec:agg-creds-proof-lemmas} under the DDH assumption in
-    $\group{1}$, establish extractability and simulatability separately.
-    Combined with the discussion following Lemma~\ref{lem:agg-creds-simulate},
-    this gives simulation-extractability as required.
+    \item[The proof system is simulation-extractable.]
+      Lemma~\ref{lem:agg-creds-sigma} as proven
+      in~\Cref{sec:agg-creds-proof-lemma} under the DDH assumption in
+      $\group{1}$ establishes extractability and simulatability separately.
+      With the Fiat-Shamir heuristic applied, this gives
+      simulation-extractability as required in the random oracle
+      model~\cite{INDOCRYPT:FKMV12}.
 
-\end{description}
+  \end{description}
 
-The instantiated protocol securely realises ideal functionality $\idfu{\AAC}$
-in the random oracle model.
+  The instantiated protocol securely realises ideal functionality $\idfu{\AAC}$
+  in the random oracle model.
 
 \end{proof}
 
 %%% proof 4 - extractability and simulatability of the sigma-protocol proof
 
-\subsection{Proof of Lemma~\ref{lem:agg-creds-extract} and
-Lemma~\ref{lem:agg-creds-simulate}}\label{sec:agg-creds-proof-lemmas}
+\subsection{Proof of
+Lemma~\ref{lem:agg-creds-sigma}}\label{sec:agg-creds-proof-lemma}
 
 \begin{proof}
 
-Recall that $\algoproof = (\eta, \bar{\gen}, \bar{v},
-\widetilde{r}', \widetilde{s}', \bar{t}, \signatureone', \bar{\signaturetwo},
-\bar{\tid}, \pk', \{\atv{i}, H_i\}_{i\in \ISSUERS})$.
+  Recall that $\algoproof = (\eta, \bar{\gen}, \bar{v}, \widetilde{r}',
+  \widetilde{s}', \bar{t}, \signatureone', \bar{\signaturetwo}, \bar{\tid},
+  \pk', \{\atv{i}, H_i\}_{i\in \ISSUERS})$.
 
-Note that given the extractability property of NIZKs, if a user is able to
-produce a valid signature $\eta$ for relation $\rel_3$, then it is possible to
-extract the corresponding witness $\witness_3 = (\delta, \sk)$ satisfying the
-following:
+  \paragraph{Extractability.} Given the extractability property of NIZKs, if a
+  user is able to produce a valid signature $\eta$ for relation $\rel_3$, then
+  it is possible to extract the corresponding witness $\witness_3 = (\delta,
+  \sk)$ satisfying the following:
 %
-\begin{equation*}
+  \begin{equation*}
 %
-  \bar{\gen} = \gen^\delta, \quad \bar{v} = v^\delta, \quad H_i =
-  \hashone(\atv{i})^\delta, \quad \pk' = \bar{\gen}^\sk.
+    \bar{\gen} = \gen^\delta, \quad \bar{v} = v^\delta, \quad H_i =
+    \hashone(\atv{i})^\delta, \quad \pk' = \bar{\gen}^\sk.
 %
-\end{equation*}
+  \end{equation*}
 %
-Since $\bar{\gen} \neq 1$, we have $\delta \neq 0$, and can write $\gen =
-\bar{\gen}^{1/\delta}$, $v = \bar{v}^{1/\delta}$, and $\pk'^{1/\delta} =
-\bar{\gen}^{\sk/\delta} = \gen^\sk$.  A valid presentation satisfies the
-blinded $\ATSverifyagg$ and $\SPSverify$ equations:
+  Since $\bar{\gen} \neq 1$, we have $\delta \neq 0$, and can write $\gen =
+  \bar{\gen}^{1/\delta}$, $v = \bar{v}^{1/\delta}$, and $\pk'^{1/\delta} =
+  \bar{\gen}^{\sk/\delta} = \gen^\sk$.  A valid presentation satisfies the
+  blinded $\ATSverifyagg$ and $\SPSverify$ equations:
 %
-\begin{gather*}
+  \begin{gather*}
 %
-  \pairing(\bar{\signaturetwo}, \ggen) =
-  \prod_{i\in\ISSUERS}\pairing(H_i,\ipk{i}) \cdot
-  \pairing(\bar{\tid},\signatureone') \ \wedge \\ \pairing(\bar{\gen},\ggen) =
-  \pairing(\bar{t},\widetilde{r}')\cdot \pairing(\pk',\widetilde{u}_1) \cdot
-  \pairing(\bar{\tid},\widetilde{u}_2) \ \wedge \\
-  \pairing(\bar{v},\widetilde{r}') = \pairing(\bar{\gen},\widetilde{s}').
+    \pairing(\bar{\signaturetwo}, \ggen) =
+    \prod_{i\in\ISSUERS}\pairing(H_i,\ipk{i}) \cdot
+    \pairing(\bar{\tid},\signatureone') \ \wedge \\ \pairing(\bar{\gen},\ggen)
+    = \pairing(\bar{t},\widetilde{r}')\cdot \pairing(\pk',\widetilde{u}_1)
+    \cdot \pairing(\bar{\tid},\widetilde{u}_2) \ \wedge \\
+    \pairing(\bar{v},\widetilde{r}') = \pairing(\bar{\gen},\widetilde{s}').
 %
-\end{gather*}
+  \end{gather*}
 %
-Substituting $\bar{\gen}^{1/\delta} = \gen$, $\bar{v}^{1/\delta} = v$, and
-raising the first two equalities to the power $1/\delta$, we can deduce that:
+  Substituting $\bar{\gen}^{1/\delta} = \gen$, $\bar{v}^{1/\delta} = v$, and
+  raising the first two equalities to the power $1/\delta$, we can deduce that:
 %
-\begin{gather*}
+  \begin{gather*}
 %
-  \pairing(\bar{v}^{1/\delta}, \widetilde{r}) = \pairing(v, \widetilde{r}) =
-  \pairing(\bar{\gen}^{1/\delta}, \widetilde{s}) = \pairing(\gen,
-  \widetilde{s}) \ \wedge \\
+    \pairing(\bar{v}^{1/\delta}, \widetilde{r}) = \pairing(v, \widetilde{r}) =
+    \pairing(\bar{\gen}^{1/\delta}, \widetilde{s}) = \pairing(\gen,
+    \widetilde{s}) \ \wedge \\
   %
-  \pairing(\bar{t}^{1/\delta}, \widetilde{r}) \cdot \pairing( \pk'^{1/\delta},
-  \widetilde{u}_1) \cdot \pairing(\bar{\tid}^{1/\delta},  \widetilde{u}_2) =
-  \pairing(\bar{\gen}^{1/\delta}, \ggen)= \pairing(\gen, \ggen) \ \wedge \\
+    \pairing(\bar{t}^{1/\delta}, \widetilde{r}) \cdot \pairing(
+    \pk'^{1/\delta}, \widetilde{u}_1) \cdot \pairing(\bar{\tid}^{1/\delta},
+    \widetilde{u}_2) = \pairing(\bar{\gen}^{1/\delta}, \ggen)= \pairing(\gen,
+    \ggen) \ \wedge \\
   %
-  \pairing(\bar{\signaturetwo}^{1/\delta}, \ggen) =
-  \pairing(\bar{\tid}^{1/\delta},
-  \signatureone)\cdot\prod_{i\in\ISSUERS}\pairing(H_i^{1/\delta}, \ipk{i}).
+    \pairing(\bar{\signaturetwo}^{1/\delta}, \ggen) =
+    \pairing(\bar{\tid}^{1/\delta},
+    \signatureone)\cdot\prod_{i\in\ISSUERS}\pairing(H_i^{1/\delta}, \ipk{i}).
   %
-\end{gather*}
+  \end{gather*}
 %
-So $(\signatureone, \bar{\signaturetwo}^{1/\delta})$ is a valid tag-based
-aggregate signature on the preimage of $\bar{\tid}^{1/\delta}$ and attributes
-$\atv{i}$, and that $(\widetilde{r}, \widetilde{s}, \bar{t}^{1/\delta})$ is a
-valid signature on pair $\pk'^{1/\delta}, \bar{\tid}^{1/\delta}$.
+  So $(\signatureone, \bar{\signaturetwo}^{1/\delta})$ is a valid tag-based
+  aggregate signature on the preimage of $\bar{\tid}^{1/\delta}$ and attributes
+  $\atv{i}$, and that $(\widetilde{r}, \widetilde{s}, \bar{t}^{1/\delta})$ is a
+  valid signature on pair $\pk'^{1/\delta}, \bar{\tid}^{1/\delta}$.
 
-To extract the preimage of $\bar{\tid}^{1/\delta}$, we use the following:
+  To extract the preimage of $\bar{\tid}^{1/\delta}$, we use the following:
 
-\begin{enumerate}
+  \begin{enumerate}
 
-  \item Random oracle $\hashtwo$, which is initialised with two maps $L_1$ and
-    $L_2$, and which for each query $\Tag$, checks if $L_1[\Tag]$ is empty. If
-    so, it  selects a random group element $\tid \in \group{1}$, and sets
-    $L_1[\Tag] \leftarrow \tid$ and $L_2[\tid] \leftarrow \Tag$.  Finally,
-    returns $L_1[\Tag]$.
+    \item Random oracle $\hashtwo$, which is initialised with two maps $L_1$
+      and $L_2$, and which for each query $\Tag$, checks if $L_1[\Tag]$ is
+      empty. If so, it  selects a random group element $\tid \in \group{1}$,
+      and sets $L_1[\Tag] \leftarrow \tid$ and $L_2[\tid] \leftarrow \Tag$.
+      Finally, returns $L_1[\Tag]$.
 
-  \item The fact that the registration authority only signs well-formed pairs
-    defined as $(\pk, \hashtwo(\Tag))$.
+    \item The fact that the registration authority only signs well-formed pairs
+      defined as $(\pk, \hashtwo(\Tag))$.
 
-\end{enumerate}
+  \end{enumerate}
 
-Notice that if $(\widetilde{r}, \widetilde{s}, \bar{t}^{1/\delta})$ is a valid
-signature on pair $(\pk'^{1/\delta}, \bar{\tid}^{1/\delta})$, then under the
-existential unforgeability of the AGHO signature scheme, this signature
-corresponds to either a signature or a randomisation of a signature computed by
-the registration authority on the same pair.  Since the registration authority
-is trusted to sign only well-formed pairs, then this entails that
-$\bar{\tid}^{1/\delta}$ was computed by calling $\hashtwo$ on some input $\Tag
-\in \{0,1\}^*$, and that $\Tag$ corresponds to $L_2[\bar{\tid}^{1/\delta}]$.
+  Notice that if $(\widetilde{r}, \widetilde{s}, \bar{t}^{1/\delta})$ is a
+  valid signature on pair $(\pk'^{1/\delta}, \bar{\tid}^{1/\delta})$, then
+  under the existential unforgeability of the AGHO signature scheme, this
+  signature corresponds to either a signature or a randomisation of a signature
+  computed by the registration authority on the same pair.  Since the
+  registration authority is trusted to sign only well-formed pairs, then this
+  entails that $\bar{\tid}^{1/\delta}$ was computed by calling $\hashtwo$ on
+  some input $\Tag \in \{0,1\}^*$, and that $\Tag$ corresponds to
+  $L_2[\bar{\tid}^{1/\delta}]$.
 
-Putting the pieces together: extracting $(\delta, \sk)$ from $\eta$ gives us
-$\Tag$ (so $\tid = \bar{\tid}^{1/\delta}$), $\sk$ (so $\pk = \gen^\sk$), the
-AGHO signature $\SPSsig = (\widetilde{r}, \widetilde{s}, \bar{t}^{1/\delta})$
-on $(\pk, \tid)$, and the tag-based aggregate signature $\signature =
-(\signatureone, \bar{\signaturetwo}^{1/\delta})$ on $\tid$ and the attributes
-$\atv{i}$: exactly a witness $\witness_2 = (\sk, \pk, \tid, \signature,
-\SPSsig)$ for relation $\rel_2$ as defined in~\eqref{eq:proof-original},
-proving Lemma~\ref{lem:agg-creds-extract}.
+  Putting the pieces together: extracting $(\delta, \sk)$ from $\eta$ gives us
+  $\Tag$ (so $\tid = \bar{\tid}^{1/\delta}$), $\sk$ (so $\pk = \gen^\sk$), the
+  AGHO signature $\SPSsig = (\widetilde{r}, \widetilde{s}, \bar{t}^{1/\delta})$
+  on $(\pk, \tid)$, and the tag-based aggregate signature $\signature =
+  (\signatureone, \bar{\signaturetwo}^{1/\delta})$ on $\tid$ and the attributes
+  $\atv{i}$: exactly a witness $\witness_2 = (\sk, \pk, \tid, \signature,
+  \SPSsig)$ for relation $\rel_2$ as defined in~\eqref{eq:proof-original}.
 
-\end{proof}
+  \paragraph{Simulatability.} We now show that if DDH holds in $\group{1}$, we
+  can simulate a valid presentation $\algoproof$ without access to a valid
+  witness.
 
-\begin{proof}
+  \begin{enumerate}
 
-We now show that if DDH holds in $\group{1}$, we can simulate a valid
-presentation $\algoproof$ without access to a valid witness.
-
-\begin{enumerate}
-
-  \item Randomly select $\alpha, \beta, \kappa, \delta, \nu, \{\eta_i\}_{i\in
-    \ISSUERS},  \iota \in \Zp^*$, and set the following:
+    \item Randomly select $\alpha, \beta, \kappa, \delta, \nu, \{\eta_i\}_{i\in
+      \ISSUERS},  \iota \in \Zp^*$, and set the following:
 %
-    \begin{equation*}
+      \begin{equation*}
 %
-      \bar{\gen} = \gen^\alpha, \quad \bar{v} = \gen^\beta, \quad \bar{t} =
-      \gen^\kappa, \quad \bar{\signaturetwo} = \gen^\delta, \quad
-      \bar{\tid} = \gen^\nu, \quad H_i = \gen^{\eta_i}, \quad \pk' =
-      \gen^\iota.
+        \bar{\gen} = \gen^\alpha, \quad \bar{v} = \gen^\beta, \quad \bar{t} =
+        \gen^\kappa, \quad \bar{\signaturetwo} = \gen^\delta, \quad \bar{\tid}
+        = \gen^\nu, \quad H_i = \gen^{\eta_i}, \quad \pk' = \gen^\iota.
 %
-    \end{equation*}
+      \end{equation*}
 %
-    If the DDH assumption holds in $\group{1}$, it is computationally
-    infeasible to distinguish between $(\bar{\gen}, \bar{v}, \bar{t},
-    \bar{\signaturetwo}, \bar{\tid})$ as above and those generated following
-    the protocol description.
+      If the DDH assumption holds in $\group{1}$, it is computationally
+      infeasible to distinguish between $(\bar{\gen}, \bar{v}, \bar{t},
+      \bar{\signaturetwo}, \bar{\tid})$ as above and those generated following
+      the protocol description.
 
-  \item We define the randomised signature elements as follows:
+    \item We define the randomised signature elements as follows:
 %
-    \begin{equation*}
+      \begin{equation*}
 %
-      \widetilde{r}' =
-      (\ggen^\alpha\widetilde{u}_1^{-\iota}\widetilde{u}_2^{-\nu})^{1/\kappa},
-      \quad \widetilde{s}' = \widetilde{r}'^{\beta/\alpha}, \quad
-      \signatureone' = (\ggen\textstyle\prod_{i \in
-      \ISSUERS}\ipk{i}^{-\eta_i})^{\delta/\nu}.
+        \widetilde{r}' =
+        (\ggen^\alpha\widetilde{u}_1^{-\iota}\widetilde{u}_2^{-\nu})^{1/\kappa},
+        \quad \widetilde{s}' = \widetilde{r}'^{\beta/\alpha}, \quad
+        \signatureone' = (\ggen\textstyle\prod_{i \in
+        \ISSUERS}\ipk{i}^{-\eta_i})^{\delta/\nu}.
 %
-    \end{equation*}
+      \end{equation*}
 %
-    Now we have by construction that $(\bar{\gen}, \bar{v}, \widetilde{r}',
-    \widetilde{s}', \bar{t}, \signatureone', \bar{\signaturetwo}, \bar{\tid},
-    \pk', \{\atv{i}, H_i\}_{i\in \ISSUERS})$ satisfies the following:
+      Now we have by construction that $(\bar{\gen}, \bar{v}, \widetilde{r}',
+      \widetilde{s}', \bar{t}, \signatureone', \bar{\signaturetwo}, \bar{\tid},
+      \pk', \{\atv{i}, H_i\}_{i\in \ISSUERS})$ satisfies the following:
     %
-    \begin{gather*}
+      \begin{gather*}
     %
-      \pairing(\bar{\signaturetwo}, \ggen) =
-      \prod_{i\in\ISSUERS}\pairing(H_i,\ipk{i}) \cdot
-      \pairing(\bar{\tid},\signatureone'), \\
+        \pairing(\bar{\signaturetwo}, \ggen) =
+        \prod_{i\in\ISSUERS}\pairing(H_i,\ipk{i}) \cdot
+        \pairing(\bar{\tid},\signatureone'), \\
       %
-      \pairing(\bar{\gen},\ggen) = \pairing(\bar{t},\widetilde{r}')\cdot
-      \pairing(\pk',\widetilde{u}_1) \cdot
-      \pairing(\bar{\tid},\widetilde{u}_2), \\
+        \pairing(\bar{\gen},\ggen) = \pairing(\bar{t},\widetilde{r}')\cdot
+        \pairing(\pk',\widetilde{u}_1) \cdot
+        \pairing(\bar{\tid},\widetilde{u}_2), \\
       %
-      \pairing(\bar{v},\widetilde{r}') = \pairing(\bar{\gen},\widetilde{s}').
+        \pairing(\bar{v},\widetilde{r}') = \pairing(\bar{\gen},\widetilde{s}').
     %
-    \end{gather*}
+      \end{gather*}
     %
 
-  \item Pick $\pi_1$, $\pi_2$ and $c$ randomly in $\Zp$, and set the following:
+    \item Pick $\pi_1$, $\pi_2$ and $c$ randomly in $\Zp$, and set the
+      following:
 %
-    \begin{equation*}
+      \begin{equation*}
 %
-      f = \gen^{\pi_1}\cdot\bar{\gen}^{-c}, \quad h =
-      v^{\pi_1}\cdot\bar{v}^{-c}, \quad k_i = \hashone(\atv{i})^{\pi_1}\cdot
-      H_i^{-c}, \quad w = \bar{\gen}^{\pi_2}\cdot\pk'^{-c}.
+        f = \gen^{\pi_1}\cdot\bar{\gen}^{-c}, \quad h =
+        v^{\pi_1}\cdot\bar{v}^{-c}, \quad k_i = \hashone(\atv{i})^{\pi_1}\cdot
+        H_i^{-c}, \quad w = \bar{\gen}^{\pi_2}\cdot\pk'^{-c}.
 %
-    \end{equation*}
+      \end{equation*}
 
-  \item Using random oracle $\hash$, define the hash $\hash(f, h, \{k_i\}_{i
-    \in \ISSUERS}, w, \msg)$ as value $c$.
+    \item Using random oracle $\hash$, define the hash $\hash(f, h, \{k_i\}_{i
+      \in \ISSUERS}, w, \msg)$ as value $c$.
 
-  \item Finally, set $\eta$ to tuple $(f, h, \{k_i\}_{i \in \ISSUERS}, w,
-    \pi_1, \pi_2)$.
+    \item Finally, set $\eta$ to tuple $(f, h, \{k_i\}_{i \in \ISSUERS}, w,
+      \pi_1, \pi_2)$.
 
-\end{enumerate}
+  \end{enumerate}
 
-So under the DDH assumption in \(\mathbb{G}_1\), the simulated presentation is
-computationally indistinguishable from an honestly generated one, proving
-Lemma~\ref{lem:agg-creds-simulate}.
+  So under the DDH assumption in \(\mathbb{G}_1\), the simulated and honestly
+  generated presentations are computationally indistinguishable. This proves
+  Lemma~\ref{lem:agg-creds-sigma}.
 
 \end{proof}
