@@ -138,7 +138,7 @@ of knowledge. \Cref{sec:offline-instantiation} instantiates each of them.
 
   \begin{description}
 
-    \item[$(\pk_{\algo{cb}}, \ck, \pk_{\auditor}, \rapk) \leftarrow
+    \item[$(\pk_{\algo{cb}}, \ck, \pk_\auditor, \rapk) \leftarrow
       \OPgen(\secparam)$ :] On input
       security parameter $\secparam$, do:
 
@@ -152,14 +152,14 @@ of knowledge. \Cref{sec:offline-instantiation} instantiates each of them.
           obtain a public commitment key.
 
         \item The auditor generates an asymmetric encryption key pair
-          $(\sk_{\auditor}, \pk_{\auditor}) \leftarrow \PKEgen(\secparam)$.
+          $(\sk_\auditor, \pk_\auditor) \leftarrow \PKEgen(\secparam)$.
 
         \item The registration authority generates keys for a multi-message
           signature scheme supporting two-message vectors, obtaining $(\rask,
           \rapk) \leftarrow \DSgen(\secparam, 2)$.
 
         \item Publish all public keys and generators to every participant, and
-          return $(\pk_{\algo{cb}}, \ck, \pk_{\auditor}, \rapk)$.
+          return $(\pk_{\algo{cb}}, \ck, \pk_\auditor, \rapk)$.
 
       \end{enumerate}
 
@@ -252,11 +252,11 @@ of knowledge. \Cref{sec:offline-instantiation} instantiates each of them.
           under way. The secure element locks token $\tau_i = (v, \com_i)$.
 
         \item The payer's device computes the audit ciphertext $\ciph_i
-          \leftarrow \PKEencrypt(\pk_{\auditor}, \algo{uid}_i; \rho_i)$ and a
+          \leftarrow \PKEencrypt(\pk_\auditor, \algo{uid}_i; \rho_i)$ and a
           proof of correctness $\Gamma_i$, with $\inst = (\com_i, \ciph_i)$,
           $\witness = (\algo{uid}_i, s_i, \rho_i)$, and relation as follows:
           \begin{equation*} \ComOpen(\ck, \algo{uid}_i, s_i, \com_i) = 1
-          \;\wedge\; \ciph_i = \PKEencrypt(\pk_{\auditor}, \algo{uid}_i;
+          \;\wedge\; \ciph_i = \PKEencrypt(\pk_\auditor, \algo{uid}_i;
         \rho_i).  \end{equation*}
 
       \item The payer's secure element and device jointly compute a signature
@@ -331,7 +331,7 @@ of knowledge. \Cref{sec:offline-instantiation} instantiates each of them.
       \item Find the divergence index $j$ such that $\com_k = \com'_k$ for all
         $k \leq j$ but $\com_{j+1} \neq \com'_{j+1}$.
 
-      \item Decrypt $\ciph_j$ (or $\ciph'_j$) using $\sk_{\auditor}$ to recover
+      \item Decrypt $\ciph_j$ (or $\ciph'_j$) using $\sk_\auditor$ to recover
         $\algo{uid}^*$, the identifier of the owner of $\tau_j = (v, \com_j)$.
 
       \item Return $\algo{uid}^*$.

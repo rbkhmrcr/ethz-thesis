@@ -64,8 +64,7 @@ ATLAS and MASCOT respectively to realise multiplication of shared secrets
 ~\cite{CCS:KelOrsSch16,C:GLOPS21}. ATLAS is designed to work in both the
 semi-honest and malicious settings, but the implementation available in MP-SPDZ
 captures only the semi-honest case~\cite{CCS:Keller20}. ATLAS and MASCOT both
-provide the interfaces of \Cref{sec:tsps-mpc}: MASCOT via the arithmetic black
-box functionality, which defines \texttt{init}, \texttt{input}, \texttt{add},
+provide the interfaces of \Cref{sec:tsps-mpc}: MASCOT via its arithmetic abstraction, which defines \texttt{init}, \texttt{input}, \texttt{add},
 \texttt{multiply}, and \texttt{output}, and ATLAS via its own ideal
 functionality, which defines similar operations. In both cases, $\algo{Inv}$ is
 built from $\algo{Mul}$, with $\algo{RandShare}$ taking the role of
@@ -76,19 +75,19 @@ inside Docker containers based on Ubuntu 22.
 
 \begin{table}[t] \centering \resizebox{\textwidth}{!}{ \begin{tabular}{ c || c
     | c | c || c | c | c } \toprule & Assumption & Message space & $|\sk|$ &
-    $|\pk|$ & $|\signature|$ & Verification cost \\ \midrule ~\cite{AC:CKPSS23}
-            & PS + ROM & $(\gen^{\vec{m}}, \ggen^{\vec{m}}) \in \group{1}^l
-            \times \group{2}^l$ & $ (l+1) | \Zp | $ & $ l | \group{1} | + (l+1)
-            | \group{2} | $ & $ 2 | \group{1} | $ & $3l+2$ \\
-            ~\cite{PKC:MMSST24} & SXDH & $ \vec{m} \in \group{1}^l$ & $ 2(l+1)
-            | \Zp | $ & $ (l+1) | \group{2} | $ & $ 6 | \group{1} | + |
-            \group{2} | $ & $l+11$ \\ \Cref{sec:tsps-abe} & q-type & $ \vec{m}
-            \in \group{1}^l$ & $ (l+1) | \Zp | $ & $ | \group{1} | + l|
-            \group{2} | $ & $ | \group{1} | + 2 | \group{2} | $ & $l+4$ \\
-        \Cref{sec:tsps-kiltz} & SXDH & $ \vec{m} \in \group{1}^l$ & $ l |\Zp |
-    + 6 | \group{1} | $ & $ (l+6)| \group{2} | $ & $ 6 | \group{1} | + |
-\group{2} |$ & $2l+10$ \\ \bottomrule \end{tabular} } \caption{Comparison of
-threshold structure-preserving signature schemes. Verification cost lists the
+    $|\pk|$ & $|\SPSsig|$ & Verification cost \\ \midrule ~\cite{AC:CKPSS23}
+            & PS + ROM & $(\gen^{\vec{\msg}}, \ggen^{\vec{\msg}}) \in \group{1}^\ell
+            \times \group{2}^\ell$ & $ (\ell+1) | \Zp | $ & $ \ell | \group{1} | + (\ell+1)
+            | \group{2} | $ & $ 2 | \group{1} | $ & $3\ell+2$ \\
+            ~\cite{PKC:MMSST24} & SXDH & $ \vec{\msg} \in \group{1}^\ell$ & $ 2(\ell+1)
+            | \Zp | $ & $ (\ell+1) | \group{2} | $ & $ 6 | \group{1} | + |
+            \group{2} | $ & $\ell+11$ \\ \Cref{sec:tsps-abe} & q-type & $ \vec{\msg}
+            \in \group{1}^\ell$ & $ (\ell+1) | \Zp | $ & $ | \group{1} | + \ell|
+            \group{2} | $ & $ | \group{1} | + 2 | \group{2} | $ & $\ell+4$ \\
+        \Cref{sec:tsps-kiltz} & SXDH & $ \vec{\msg} \in \group{1}^\ell$ & $ \ell |\Zp |
+    + 6 | \group{1} | $ & $ (\ell+6)| \group{2} | $ & $ 6 | \group{1} | + |
+\group{2} |$ & $2\ell+10$ \\ \bottomrule \end{tabular} } \caption{Comparison of
+threshold structure preserving signature schemes. Verification cost lists the
 number of pairing evaluations needed during verification.}
 \label{tab:tsps-comp} \end{table}
 
@@ -96,7 +95,7 @@ number of pairing evaluations needed during verification.}
   $\algo{OffSign}$ & $\algo{OnSign}$ & $\algo{Combine}$ \\ \midrule
   ~\cite{AC:CKPSS23} & 0 & 0 & $ 2 | \group{1} |$ \\ ~\cite{PKC:MMSST24} & 0 &
   0 & $ 6 | \group{1} | + | \group{2} |$ \\ \Cref{sec:tsps-abe} & $
-n(l+4)|\Zp|$ & 0 & $| \group{1} | + 2 | \group{2} |$ \\ \Cref{sec:tsps-kiltz} &
+n(\ell+4)|\Zp|$ & 0 & $| \group{1} | + 2 | \group{2} |$ \\ \Cref{sec:tsps-kiltz} &
 $ n(12|\Zp| + 6|\group{1}|) $ & 0 & $6 | \group{1} | + | \group{2} | $ \\
 \bottomrule \end{tabular} \caption{Per-party communication complexity for the
 signing and combining phases of the threshold signing schemes.}
@@ -104,16 +103,16 @@ signing and combining phases of the threshold signing schemes.}
 
 \begin{table}[t] \centering \begin{tabular}{ c || c || c | c || c | c }
   \toprule & Centralised & \multicolumn{2}{c||}{ATLAS~\cite{C:GLOPS21}} &
-  \multicolumn{2}{c}{MASCOT~\cite{CCS:KelOrsSch16}} \\ & & $\algo{OffSign}$ &
+  \multicolumn{2}c{MASCOT~\cite{CCS:KelOrsSch16}} \\ & & $\algo{OffSign}$ &
   $\algo{OnSign}$ & $\algo{OffSign}$ & $\algo{OnSign}$ \\ \midrule
 \Cref{sec:tsps-abe} & 10ms & 46ms & 56ms & 92ms & 84ms \\ \Cref{sec:tsps-kiltz}
                     & 40ms & 88ms & 61ms & 352ms & 94ms \\ \bottomrule
 \end{tabular} \caption{Timings of the sub-protocols of our threshold
-structure-preserving signatures, averaged over 1000 runs, for $n = 5$.}
+structure preserving signatures, averaged over 1000 runs, for $n = 5$.}
 \label{tab:tsps-benchmarks} \end{table}
 
 Table~\ref{tab:tsps-comp} compares our two schemes against two prior threshold
-structure-preserving signature schemes in terms of assumptions, message space,
+structure preserving signature schemes in terms of assumptions, message space,
 key and signature size, and verification cost~\cite{AC:CKPSS23,PKC:MMSST24}.
 Table~\ref{tab:tsps-comms} compares per-party communication complexity across
 the offline, online, and combining phases. Table~\ref{tab:tsps-benchmarks}

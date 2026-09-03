@@ -20,19 +20,19 @@ auditors of its choice before any call to the ideal functionality is made.
     input security parameter $\secparam$, generates the public ledger
     parameters $\crs$ together with the initial ledger state $\state$.
 
-  \item[$(\sk,\rc) \sample \IDregister(\crs,\state)$ :] The registration
+  \item[$(\sk,\regcred) \sample \IDregister(\crs,\state)$ :] The registration
     algorithm, run interactively between a user and the registration authority
     on input public parameters $\crs$ and state $\state$, outputs user secret
-    key $\sk$ and registration credential $\rc$ to the user.
+    key $\sk$ and registration credential $\regcred$ to the user.
 
-  \item[$\ek \sample \IDgrant(\crs,\sk,\rc,\epoch)$ :] The authorisation
+  \item[$\ek \sample \IDgrant(\crs,\sk,\regcred,\epoch)$ :] The authorisation
     algorithm, run interactively between a user and an auditor on input public
-    parameters $\crs$, user secret key $\sk$, registration credential $\rc$,
+    parameters $\crs$, user secret key $\sk$, registration credential $\regcred$,
     and epoch $\epoch$, outputs epoch tracing key $\ek$ to the auditor.
 
-  \item[$\tx \sample \IDsubmit(\crs,\sk,\rc,\epoch,\payload)$ :] The submission
+  \item[$\tx \sample \IDsubmit(\crs,\sk,\regcred,\epoch,\payload)$ :] The submission
     algorithm, on input public parameters $\crs$, user secret key $\sk$,
-    registration credential $\rc$, epoch $\epoch$, and transaction payload
+    registration credential $\regcred$, epoch $\epoch$, and transaction payload
     $\payload$, outputs transaction $\tx$, and appends it to the ledger if
     valid.
 

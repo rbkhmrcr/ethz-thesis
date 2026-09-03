@@ -225,7 +225,7 @@ group elements.
 
       \end{enumerate}
 
-    \item[$(\sk,\rc) \sample \IDregister(\crs,\state)$ :] Interactively between
+    \item[$(\sk,\regcred) \sample \IDregister(\crs,\state)$ :] Interactively between
       the user and the registration authority, do:
 
       \begin{enumerate}
@@ -248,18 +248,18 @@ group elements.
         \item Else, the registration authority computes $\signature \sample
           \BBSsign(\sk_{RA},(S,T,T'))$ and records $(S,T,T')$ as registered.
 
-        \item Return $(\sk,\utk,\utk')$ as the user's secret key, and $\rc
+        \item Return $(\sk,\utk,\utk')$ as the user's secret key, and $\regcred
           \leftarrow (S,T,T',\signature)$ as their registration credential.
 
       \end{enumerate}
 
-    \item[$\ek \sample \IDgrant(\crs,\sk,\utk,\utk',\rc,\epoch)$ :]
+    \item[$\ek \sample \IDgrant(\crs,\sk,\utk,\utk',\regcred,\epoch)$ :]
       Interactively between the user and an auditor, on a fresh nonce $\rand$
       from the auditor, do:
 
       \begin{enumerate}
 
-        \item Parse $\rc = (S,T,T',\signature)$.
+        \item Parse $\regcred = (S,T,T',\signature)$.
 
         \item The user computes $\ek' \leftarrow \FE(\utk,\epoch) =
           \HE(\epoch)^{\utk}$ and sets $\ek \leftarrow (\ek',\utk')$.
@@ -285,12 +285,12 @@ group elements.
 
       \end{enumerate}
 
-    \item[$\tx \sample \IDsubmit(\crs,\sk,\utk,\utk',\rc,\epoch,\payload)$ :]
-      On input $(\crs,\sk,\utk,\utk',\rc,\epoch,\payload)$ from the user, do:
+    \item[$\tx \sample \IDsubmit(\crs,\sk,\utk,\utk',\regcred,\epoch,\payload)$ :]
+      On input $(\crs,\sk,\utk,\utk',\regcred,\epoch,\payload)$ from the user, do:
 
       \begin{enumerate}
 
-        \item Parse $\rc = (S,T,T',\signature)$, compute $\ek' \leftarrow
+        \item Parse $\regcred = (S,T,T',\signature)$, compute $\ek' \leftarrow
           \FE(\utk,\epoch)$, and set $\ek \leftarrow (\ek',\utk')$.
 
         \item Sample a fresh, unused counter $0 \leq \gamma < \Max$ and compute

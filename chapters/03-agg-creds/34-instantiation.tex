@@ -8,7 +8,7 @@ computable pairing written as $\pairing \colon \group{1} \times \group{2}
     %
 \begin{equation*}
      %
-  \pairing(a^x,\widetilde{b}^{y}) = \pairing(a,\widetilde{b})^{xy}.
+  \pairing(a^x,\widetilde{b}^y) = \pairing(a,\widetilde{b})^{xy}.
     %
 \end{equation*}
      %
@@ -57,7 +57,7 @@ signatures.  Our scheme is comprised of the following algorithms:
 
         \item Sample $\sk \sample \Zp$.
 
-        \item Return $(\sk, \pk = \ggen^{\sk})$.
+        \item Return $(\sk, \pk = \ggen^\sk)$.
 
       \end{enumerate}
 
@@ -69,7 +69,7 @@ signatures.  Our scheme is comprised of the following algorithms:
 
         \item Sample $\upsilon \sample \Zp$.
 
-        \item Return $\signature = (\ggen^{\upsilon}, \hashone(\msg)^{\sk}
+        \item Return $\signature = (\ggen^\upsilon, \hashone(\msg)^\sk
           \cdot \hashtwo(\Tag)^\upsilon)$.
 
       \end{enumerate}
@@ -168,7 +168,7 @@ unforgeable under tag based aggregation in the random oracle model.
 \paragraph{Overview.} In this instantiation, each user has a pair of secret and
 public keys $(\sk, \pk = \gen^\sk)$.  The digital signature $\DS$ uses the AGHO
 structure preserving signature scheme~\cite{C:AGHO11}. Every user is assigned a
-unique tag $\Tag \in \Zp$. Since structure-preserving signatures signs vectors
+unique tag $\Tag \in \Zp$. Since structure preserving signatures signs vectors
 of group elements rather than scalars, we take $\tid = \hashtwo(\Tag)$ and it
 is the pair $(\pk, \tid)$ that the registration authority signs, with $\pk$ the
 user's public key.  Every other computation in the protocol uses $\Tag$
@@ -183,7 +183,7 @@ messages, and signatures consisting of elements of the same group.  This allows
 us to build a more efficient protocol. We explain how in more detail once the
 registration algorithm has been described.
 
-\begin{primitivebox} {Optimal structure-preserving signatures from the GGM} {agho}
+\begin{primitivebox} {Optimal structure preserving signatures from the GGM} {agho}
 
   \begin{description}
 
@@ -202,9 +202,9 @@ registration algorithm has been described.
         %
       \end{gather*}
      %
-    \item[$\SPSsig \sample \SPSsign(\sk, \vec{m})$ :] On input the secret key
-      $\sk = (\mu_1, \dots, \mu_\ell, \tau)$ and message $\vec{m} = (m_1,
-      \dots, m_\ell) \in \group{1}^\ell$, the signing algorithm randomly
+    \item[$\SPSsig \sample \SPSsign(\sk, \vec{\msg})$ :] On input the secret key
+      $\sk = (\mu_1, \dots, \mu_\ell, \tau)$ and message $\vec{\msg} = (\msg_1,
+      \dots, \msg_\ell) \in \group{1}^\ell$, the signing algorithm randomly
       samples $\omega \sample \Zp$ and outputs the signature constructed as
       follows:
     %
@@ -212,7 +212,7 @@ registration algorithm has been described.
      %
         \SPSsig =  (\widetilde{r}, \widetilde{s}, t) = (\ggen^\omega,
         \widetilde{r}^\tau, (\gen \cdot \prod_{i=1}^\ell
-        m_i^{-\mu_i})^{1/\omega}).
+        \msg_i^{-\mu_i})^{1/\omega}).
     %
       \end{equation*}
      %
@@ -228,15 +228,15 @@ registration algorithm has been described.
     %
       \end{equation*}
      %
-    \item[$ \{0,1\} \leftarrow \SPSverify(\pk, \vec{m}, \SPSsig)$ :] On input a
-      public key $\pk$, message $\vec{m} = (m_1, \dots, m_\ell) \in
+    \item[$ \{0,1\} \leftarrow \SPSverify(\pk, \vec{\msg}, \SPSsig)$ :] On input a
+      public key $\pk$, message $\vec{\msg} = (\msg_1, \dots, \msg_\ell) \in
       \group{1}^\ell$, and signature $\SPSsig = (\widetilde{r}, \widetilde{s},
       t)$, output the result of the following check:
     %
       \begin{equation*}
     %
         \pairing(v, \widetilde{r}) \checkcheck \pairing(\gen, \widetilde{s}) \
-        \wedge\ \pairing(t, \widetilde{r}) \cdot \prod_{i=1}^\ell \pairing(m_i,
+        \wedge\ \pairing(t, \widetilde{r}) \cdot \prod_{i=1}^\ell \pairing(\msg_i,
         \widetilde{u}_i) \checkcheck \pairing(\gen, \ggen).
   %
     \end{equation*} \end{description} \end{primitivebox}
@@ -247,8 +247,8 @@ registration algorithm has been described.
 
     \begin{assumptionbox}{$q$-Strong Diffie-Hellman ($q$-SDH)}{qsdh}
 
-      The $q$-SDH assumption holds if, given $(\gen, \gen^{x}, \gen^{x^2},
-      \dots, \gen^{x^q}, \ggen, \ggen^{x})$ for uniformly random $x \sample
+      The $q$-SDH assumption holds if, given $(\gen, \gen^x, \gen^{x^2},
+      \dots, \gen^{x^q}, \ggen, \ggen^x)$ for uniformly random $x \sample
       \Zp$, no PPT adversary can output a pair $(c, \gen^{1/(x+c)})$ for any $c
       \in \Zp \setminus \{-x\}$ with non-negligible probability.
 
@@ -266,7 +266,7 @@ registration algorithm has been described.
     \begin{equation*}
 %
       \rapk = (\widetilde{u}_1, \widetilde{u}_2, v), \quad \ipk{i} =
-      \ggen^{\xi_i}, \quad \pk = \gen^{\sk}.
+      \ggen^{\xi_i}, \quad \pk = \gen^\sk.
 %
     \end{equation*}
 %
@@ -295,11 +295,11 @@ registration algorithm has been described.
     \begin{equation}\label{eq:proof-original} \begin{gathered}
 %
       \rel_2 = \{\ \pairing(v, \widetilde{r}) = \pairing(\gen, \widetilde{s}) \
-        \wedge\ \pairing(t, \widetilde{r}) \cdot \pairing(\gen^{\sk},
+        \wedge\ \pairing(t, \widetilde{r}) \cdot \pairing(\gen^\sk,
         \widetilde{u}_1)\cdot \pairing(\tid, \widetilde{u}_2) = \pairing(\gen,
         \ggen) \\
   %
-      \wedge\ \pk = \gen^{\sk} \ \wedge\ \pairing(\signaturetwo, \ggen) =
+      \wedge\ \pk = \gen^\sk \ \wedge\ \pairing(\signaturetwo, \ggen) =
     \pairing(\tid,
   \signatureone)\cdot\prod_{i\in\ISSUERS}\pairing(\hashone(\atv{i}), \ipk{i})\
 \}.
@@ -330,12 +330,12 @@ $\AACpresent$ proceeds as follows.
     %
     \begin{equation*}\begin{gathered}
     %
-      \bar{\gen} = \gen^{\delta}, \quad \bar{t} = {t'}^{\delta}, \quad
-      \bar{\signaturetwo} = {\signaturetwo'}^{\delta}, \quad \bar{\tid} =
-      \tid^{\delta}, \\
+      \bar{\gen} = \gen^\delta, \quad \bar{t} = {t'}^\delta, \quad
+      \bar{\signaturetwo} = {\signaturetwo'}^\delta, \quad \bar{\tid} =
+      \tid^\delta, \\
       %
-      \bar{v} = v^{\delta}, \quad \pk' = \pk^{\delta}, \quad \forall i \in
-      \ISSUERS: \ H_i = \hashone(\atv{i})^{\delta}.
+      \bar{v} = v^\delta, \quad \pk' = \pk^\delta, \quad \forall i \in
+      \ISSUERS: \ H_i = \hashone(\atv{i})^\delta.
     %
     \end{gathered} \end{equation*}
 %
@@ -346,9 +346,9 @@ the following:
 %
 \begin{equation} \label{eq:proof-rel}
 %
-  \rel_3 = \{\ \bar{\gen} = \gen^{\delta} \ \wedge\ \bar{v} = v^{\delta} \
-  \wedge\ H_i = \hashone(\atv{i})^{\delta}\ \ \forall i \in \ISSUERS \ \wedge\
-\pk' = \bar{\gen}^{\sk}\ \}.
+  \rel_3 = \{\ \bar{\gen} = \gen^\delta \ \wedge\ \bar{v} = v^\delta \
+  \wedge\ H_i = \hashone(\atv{i})^\delta\ \ \forall i \in \ISSUERS \ \wedge\
+\pk' = \bar{\gen}^\sk\ \}.
 %
 \end{equation}
 %
@@ -417,9 +417,9 @@ instantiation.
 
         \item Sample $\alpha, \beta \sample \Zp$.
 
-        \item Compute $(f, h, \{k_i\}_{i \in \ISSUERS}, w) = (\gen^{\alpha},
-          v^{\alpha}, \{\hashone(\atv{i})^{\alpha}\}_{i \in \ISSUERS},
-          \bar{\gen}^{\beta})$.
+        \item Compute $(f, h, \{k_i\}_{i \in \ISSUERS}, w) = (\gen^\alpha,
+          v^\alpha, \{\hashone(\atv{i})^\alpha\}_{i \in \ISSUERS},
+          \bar{\gen}^\beta)$.
 
         \item Compute challenge $c \leftarrow \hash(f, h, \{k_i\}_{i \in
           \ISSUERS}, w, \msg)$, for cryptographic hash function $\hash \colon
@@ -572,9 +572,9 @@ the full instantiation of the aggregate anonymous credentials protocol.
             \inst_3 = (\pk', \{\atv{i}, H_i\}_{i\in\ISSUERS}, \bar{\gen}),
             \quad \witness_3 = (\delta, \sk), \\
           %
-            \rel_3 = \{\ \bar{\gen} = \gen^{\delta} \ \wedge\ \bar{v} =
-            v^{\delta} \ \wedge\ H_i = \hashone(\atv{i})^{\delta}\ \ \forall i
-          \in \ISSUERS \ \wedge\ \pk' = \bar{\gen}^{\sk}\ \}.
+            \rel_3 = \{\ \bar{\gen} = \gen^\delta \ \wedge\ \bar{v} =
+            v^\delta \ \wedge\ H_i = \hashone(\atv{i})^\delta\ \ \forall i
+          \in \ISSUERS \ \wedge\ \pk' = \bar{\gen}^\sk\ \}.
           %
         \end{gathered}\end{equation*}
           %
@@ -607,7 +607,7 @@ the full instantiation of the aggregate anonymous credentials protocol.
           \widetilde{s}'), \\
 		%
           \pairing(\bar{\signaturetwo}, \ggen) \checkcheck \prod_{i\in
-          \ISSUERS}\pairing(H_{i}, \ipk{i})\cdot \pairing(\bar{\tid},
+          \ISSUERS}\pairing(H_i, \ipk{i})\cdot \pairing(\bar{\tid},
           \signatureone'), \\
           	%
           \pairing(\bar{\gen}, \ggen) \checkcheck \pairing(\bar{t},
@@ -626,7 +626,7 @@ The protocol instantiation is described in full in Protocol~\ref{prot:paac}.
 There are design choices made in $\AACgen$ and $\AACregister$, and the
 remaining algorithms follow the previous description entirely.
 
-The registration authority's key pair is for the structure-preserving signature
+The registration authority's key pair is for the structure preserving signature
 scheme, since messages and signatures consist of elements of the same group as
 everything else in the protocol. This lets users prove knowledge of a valid
 registration signature with an efficient sigma protocol over discrete

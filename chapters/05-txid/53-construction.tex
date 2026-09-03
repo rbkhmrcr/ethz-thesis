@@ -17,8 +17,8 @@ epoch.
 When the system moves to a new epoch, users derive a fresh epoch tracing key,
 and tracing capabilities granted for prior epochs expire automatically.
 
-The protocol is built from four cryptographic primitives, each used as a black
-box. The registration authority certifies users' keys with a digital signature
+The protocol is built from four cryptographic primitives, each used
+abstractly. The registration authority certifies users' keys with a digital signature
 scheme $\DS$.  Users bind their tracing keys across several proofs using a
 commitment scheme $\Com$. Two pseudorandom functions, $\FE$ for epoch keys and
 $\FT$ for tags, derive epoch tracing keys and transaction tags from users' long

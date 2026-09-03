@@ -1,6 +1,6 @@
 \section{Security}\label{sec:agg-creds-security}
 
-%%%% proof 1 - the generic black-box construction is secure (Theorem 1)
+%%%% proof 1 - the generic construction is secure (Theorem 1)
 
 \subsection{Proof
 of~\Cref{thm:agg-creds-construction-security}}\label{sec:agg-creds-proof-1}
@@ -109,9 +109,9 @@ Given message $(\AACpresentend, \vec{\atv{}}, \msg, \algoproof)$ from
 $\idfu{\AAC}'$ for $\vec{\atv{}} = (\atv{1}, \ldots, \atv{N})$, $\simu$ defines
 $\inst_1 = (\pk, (\ipk{i}, \atv{i})_{i \in \ISSUERS})$ such that $\forall i \in
 \ISSUERS: \atv{i} \neq \varnothing$, and, using its ability to program the
-random oracle as the simulation trapdoor $\td$, outputs $\algoproof^{\star}
+random oracle as the simulation trapdoor $\td$, outputs $\algoproof^\star
 \leftarrow \NIZKsimprove(\crs, \td, \inst_1, \msg)$, which gives
-$\NIZKverify(\crs, \inst_1, \algoproof^{\star}, \msg) = 1$. By (P3), this
+$\NIZKverify(\crs, \inst_1, \algoproof^\star, \msg) = 1$. By (P3), this
 simulated proof is indistinguishable from a real one, so Game 6 is
 indistinguishable from Game 5.
 
@@ -156,9 +156,9 @@ following, we describe $\simu$'s simulation.
     If $b  = 0$,  $\simu$ sends $(\msg, \vec{\atv{}} = (\atv{1}, ..., \atv{N}),
     \algoproof)$ to $\idfu{\AAC}'$, which returns $(\AACverifyend, b^\star)$.  Two
     scenarios present themselves. Either there exists a dishonest user with
-    attribute values $\vec{\atv'{}} = (\atv'{1}, ..., \atv'{N})$, $\forall
-    \atv{i} \neq \varnothing$, we either have $\atv{i} = \atv'{i}$, or have
-    $\atv{i} \neq \atv'{i}$ but issuer $\issuer{i}$ is dishonest.  Or $\forall
+    attribute values $\vec{\atv'{}} = (\atv'{1}, ..., \atv'N)$, $\forall
+    \atv{i} \neq \varnothing$, we either have $\atv{i} = \atv'i$, or have
+    $\atv{i} \neq \atv'i$ but issuer $\issuer{i}$ is dishonest.  Or $\forall
     i: \atv{i} \neq \varnothing$, issuers $\issuer{i}$ and users holding
     attribute values $\atv{i}$ are honest.
 
@@ -187,8 +187,8 @@ following, we describe $\simu$'s simulation.
 
         Either $\idfu{\AAC}'$ aborts, and $\simu$ sends request $(\AACverify,
         V,\vec{\atv{}}, \algoproof)$ to $\idfu{\AAC}'$, or $\idfu{\AAC}'$ returns
-        $(\AACpresentend, \algoproof^{\star})$, and $\simu$ sends request
-        $(\AACverify, V, \vec{\atv{}}, \algoproof^{\star})$ to $\idfu{\AAC}'$.
+        $(\AACpresentend, \algoproof^\star)$, and $\simu$ sends request
+        $(\AACverify, V, \vec{\atv{}}, \algoproof^\star)$ to $\idfu{\AAC}'$.
 
     \end{description}
 
@@ -216,8 +216,8 @@ $\idfu{\AAC}$.  If $a_2$ does not occur then this implies one of two things:
 Case one implies that $\simu$ issued credentials for $\user$ for the relevant
 attributes, and so did $\idfu{\AAC}'$.  During the $\AACpresent$ call,
 $\idfu{\AAC}'$ will not abort and will return $(\AACpresentend,
-\algoproof^{\star})$, and the subsequent call $(\AACverify, V, \vec{\atv{}},
-\algoproof^{\star})$ will result in $\idfu{\AAC}'$ returning $(\AACverifyend, 1)$.
+\algoproof^\star)$, and the subsequent call $(\AACverify, V, \vec{\atv{}},
+\algoproof^\star)$ will result in $\idfu{\AAC}'$ returning $(\AACverifyend, 1)$.
 This matches the output of the verification in the real world.
 
 Case two implies that $\user$ is in possession of a credential that was issued
@@ -375,11 +375,11 @@ $L_2$, and computes $\hashone$ and $\hashtwo$ as follows.
     $\advB$ sets $\hashone(\msg) = y$, the embedded branch, and stores $\langle
     \msg, \perp, \hashone(\msg)\rangle$ in $L_1$. Otherwise, with probability
     $1-p_\hashone$, the honest branch, $\advB$ generates $\rho \sample \Zp$,
-    sets $\hashone(\msg) = \gen^{\rho}$, and stores $\langle \msg, \rho,
+    sets $\hashone(\msg) = \gen^\rho$, and stores $\langle \msg, \rho,
     \hashone(\msg)\rangle$ in $L_1$.
 
   \item[$\hashtwo$.] For each new query $\Tag$, $\advB$ samples $\eta \sample
-    \Zp$, sets $\hashtwo(\Tag) = \gen^{\eta}$, and stores $\langle \Tag, \eta,
+    \Zp$, sets $\hashtwo(\Tag) = \gen^\eta$, and stores $\langle \Tag, \eta,
     \hashtwo(\Tag)\rangle$ in $L_2$.
 
 \end{description}
@@ -388,18 +388,18 @@ $L_2$, and computes $\hashone$ and $\hashtwo$ as follows.
 $\advB$ proceeds as follows. If $i \neq j$, $\advB$ outputs $\signature \sample
 \ATSsign(\sk_i, \Tag, \msg)$, since it knows $\sk_i$. If $i = j$, $\advB$ stops
 if $\hashone(\msg) = y$. Otherwise it retrieves $\langle \msg, \rho,
-\hashone(\msg) = \gen^{\rho}\rangle$ and sets $\signature$ as follows:
+\hashone(\msg) = \gen^\rho\rangle$ and sets $\signature$ as follows:
 %
 \begin{equation*}
 %
   \signature = (\signatureone, \signaturetwo) = (\ggen^\phi,
-  x^{\rho}\hashtwo(\Tag)^\phi).
+  x^\rho\hashtwo(\Tag)^\phi).
 %
 \end{equation*}
 %
 This is a valid signature relative to $\pk_j = \widetilde{x} = \ggen^\gamma$,
 since $x^\rho = \gen^{\gamma\rho} = \hashone(\msg)^\gamma$, giving $\signature
-= (\ggen^\phi, \hashone(\msg)^{\gamma}\hashtwo(\Tag)^\phi)$ as required by
+= (\ggen^\phi, \hashone(\msg)^\gamma\hashtwo(\Tag)^\phi)$ as required by
 $\ATSsign$.
 
 \paragraph{Forgery.} After receiving $\adv$'s forgery $(\ISSUERS,
@@ -467,11 +467,11 @@ differences.
 \paragraph{Random oracle programming.} $\hashone$ is now programmed without
 embedding, exactly as $\hashtwo$ is in the Type 1 case. For each new query
 $\msg$, $\advB$ generates $\rho \sample \Zp$, sets $\hashone(\msg) =
-\gen^{\rho}$, and stores $\langle \msg, \rho, \hashone(\msg)\rangle$ in $L_1$.
+\gen^\rho$, and stores $\langle \msg, \rho, \hashone(\msg)\rangle$ in $L_1$.
 The embedding moves to $\hashtwo$ instead. For each new query $\Tag$, $\advB$
 samples $\eta \sample \Zp$. With probability $p_\hashtwo$, $\advB$ sets
-$\hashtwo(\Tag) = y^{\eta}$, the embedded branch. Otherwise, with probability
-$1-p_\hashtwo$, $\advB$ sets $\hashtwo(\Tag) = \gen^{\eta}$, the honest branch.
+$\hashtwo(\Tag) = y^\eta$, the embedded branch. Otherwise, with probability
+$1-p_\hashtwo$, $\advB$ sets $\hashtwo(\Tag) = \gen^\eta$, the honest branch.
 Either way, $\advB$ stores $\langle \Tag, \eta, \hashtwo(\Tag)\rangle$ in
 $L_2$.
 
@@ -480,15 +480,15 @@ simulation, are exactly as in the Type 1 reduction. The case $i=j$ differs.
 Type 1 could compute $\signaturetwo$ directly because $\advB$ knows
 $x=\gen^\gamma$. Here $\advB$ only knows $\ggen^\gamma$, so it instead
 retrieves $\langle \msg, \rho, \hashone(\msg)\rangle$ and $\langle \Tag, \eta,
-\hashtwo(\Tag)\rangle$, and stops if $\hashtwo(\Tag) \neq \gen^{\eta}$ or $\eta
+\hashtwo(\Tag)\rangle$, and stops if $\hashtwo(\Tag) \neq \gen^\eta$ or $\eta
 = 0$. Otherwise, $\advB$ samples $\upsilon \sample \Zp$ and solves the
 verification equation for $\signatureone$ instead of computing it directly, as
 follows:
 %
 \begin{equation*}
 %
-  (\signatureone, \signaturetwo) = \left(\left(\ggen^{\upsilon} /
-  \widetilde{x}^{\rho}\right)^{1/\eta}, \ \gen^{\upsilon}\right).
+  (\signatureone, \signaturetwo) = \left(\left(\ggen^\upsilon /
+  \widetilde{x}^\rho\right)^{1/\eta}, \ \gen^\upsilon\right).
 %
 \end{equation*}
 %
@@ -564,10 +564,10 @@ when three independent events all hold.
 
 \end{enumerate}
 
-This gives the same bound in both cases, $\Pr[\text{success}] = \frac{1}{n}
-\cdot p \cdot (1-p)^{q}$.  Here $p = p_{\hashone}$ is the probability that
+This gives the same bound in both cases, $\Pr[\text{success}] = \frac{1}n
+\cdot p \cdot (1-p)^q$.  Here $p = p_\hashone$ is the probability that
 $\hashone$ takes its embedded branch for the Type 1 reduction, and $p =
-p_{\hashtwo}$ for the Type 2 reduction. If $\advB$'s simulation departs from
+p_\hashtwo$ for the Type 2 reduction. If $\advB$'s simulation departs from
 this because $\pk_j$ gets corrupted, the forgery misses the embedded branch, or
 a signing query lands on it, $\advB$ simply stops and outputs a random guess
 for the BCDH or m-BCDH challenge.
@@ -584,7 +584,7 @@ under tag-based aggregation.
 \subsection{Proof of~\Cref{thm:agg-creds-thm-2}}\label{sec:agg-creds-proof-3}
 
 The instantiation is an instance of the abstract construction that sets $\DS$
-to the AGHO structure-preserving signature scheme, $\ATS$ to our tag based
+to the AGHO structure preserving signature scheme, $\ATS$ to our tag based
 aggregate signature scheme (defined in Protocol~\ref{prot:ats}), and using the
 zero knowledge proofs of Section~\ref{sec:proof-inst}.
 
@@ -632,14 +632,14 @@ following:
 %
 \begin{equation*}
 %
-  \bar{\gen} = \gen^{\delta}, \quad \bar{v} = v^{\delta}, \quad H_i =
-  \hashone(\atv{i})^{\delta}, \quad \pk' = \bar{\gen}^{\sk}.
+  \bar{\gen} = \gen^\delta, \quad \bar{v} = v^\delta, \quad H_i =
+  \hashone(\atv{i})^\delta, \quad \pk' = \bar{\gen}^\sk.
 %
 \end{equation*}
 %
 Since $\bar{\gen} \neq 1$, we have $\delta \neq 0$, and can write $\gen =
 \bar{\gen}^{1/\delta}$, $v = \bar{v}^{1/\delta}$, and $\pk'^{1/\delta} =
-\bar{\gen}^{\sk/\delta} = \gen^{\sk}$.  A valid presentation satisfies the
+\bar{\gen}^{\sk/\delta} = \gen^\sk$.  A valid presentation satisfies the
 blinded $\ATSverifyagg$ and $\SPSverify$ equations:
 %
 \begin{gather*}
@@ -702,7 +702,7 @@ $\bar{\tid}^{1/\delta}$ was computed by calling $\hashtwo$ on some input $\Tag
 \in \{0,1\}^*$, and that $\Tag$ corresponds to $L_2[\bar{\tid}^{1/\delta}]$.
 
 Putting the pieces together: extracting $(\delta, \sk)$ from $\eta$ gives us
-$\Tag$ (so $\tid = \bar{\tid}^{1/\delta}$), $\sk$ (so $\pk = \gen^{\sk}$), the
+$\Tag$ (so $\tid = \bar{\tid}^{1/\delta}$), $\sk$ (so $\pk = \gen^\sk$), the
 AGHO signature $\SPSsig = (\widetilde{r}, \widetilde{s}, \bar{t}^{1/\delta})$
 on $(\pk, \tid)$, and the tag-based aggregate signature $\signature =
 (\signatureone, \bar{\signaturetwo}^{1/\delta})$ on $\tid$ and the attributes
@@ -724,10 +724,10 @@ presentation $\algoproof$ without access to a valid witness.
 %
     \begin{equation*}
 %
-      \bar{\gen} = \gen^{\alpha}, \quad \bar{v} = \gen^{\beta}, \quad \bar{t} =
-      \gen^{\kappa}, \quad \bar{\signaturetwo} = \gen^{\delta}, \quad
-      \bar{\tid} = \gen^{\nu}, \quad H_i = \gen^{\eta_i}, \quad \pk' =
-      \gen^{\iota}.
+      \bar{\gen} = \gen^\alpha, \quad \bar{v} = \gen^\beta, \quad \bar{t} =
+      \gen^\kappa, \quad \bar{\signaturetwo} = \gen^\delta, \quad
+      \bar{\tid} = \gen^\nu, \quad H_i = \gen^{\eta_i}, \quad \pk' =
+      \gen^\iota.
 %
     \end{equation*}
 %
@@ -741,7 +741,7 @@ presentation $\algoproof$ without access to a valid witness.
     \begin{equation*}
 %
       \widetilde{r}' =
-      (\ggen^{\alpha}\widetilde{u}_1^{-\iota}\widetilde{u}_2^{-\nu})^{1/\kappa},
+      (\ggen^\alpha\widetilde{u}_1^{-\iota}\widetilde{u}_2^{-\nu})^{1/\kappa},
       \quad \widetilde{s}' = \widetilde{r}'^{\beta/\alpha}, \quad
       \signatureone' = (\ggen\textstyle\prod_{i \in
       \ISSUERS}\ipk{i}^{-\eta_i})^{\delta/\nu}.

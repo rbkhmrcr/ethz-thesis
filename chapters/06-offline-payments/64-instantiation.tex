@@ -34,9 +34,9 @@ between two provers.
 
 \paragraph{Proof of knowledge of a BBS+ signature.}
 
-Let $\phi = (\varepsilon, s, e) \gets \BBSsign(\sk_{\BBS}, \msg)$. By
+Let $\phi = (\varepsilon, s, e) \gets \BBSsign(\sk_\BBS, \msg)$. By
 construction $e = (\hgen \vec{q}^{\msg\|s})^{1/(\theta+\varepsilon)}$ for
-$\sk_{\BBS} = \theta$. Setting $\inst = \pk_{\BBS} = (\ggen, \tilde{t},
+$\sk_\BBS = \theta$. Setting $\inst = \pk_\BBS = (\ggen, \tilde{t},
 \vec{q}, \hgen)$ and $\witness = (\msg, \phi)$, a proof of knowledge of a BBS+
 signature shows that $(\inst, \witness)$ satisfies the equation as follows:
 %
@@ -49,7 +49,7 @@ signature shows that $(\inst, \witness)$ satisfies the equation as follows:
 %
 A prover can instead compute $u = e^{-\iota/\lambda}$, $w = (\hgen
 \vec{q}^{\msg\|s})^{-1/\lambda}$, and $x = u^\varepsilon w^\iota$, for randomly
-selected $\iota, \lambda$, and prove that for $\inst = (\pk_{\BBS}, u, w, x)$
+selected $\iota, \lambda$, and prove that for $\inst = (\pk_\BBS, u, w, x)$
 and $\witness = (\varepsilon, s, \iota, \lambda, \msg)$ the relation as
 follows:
 %
@@ -84,7 +84,7 @@ accepts if and only if the following holds:
 %
 \begin{align*}
 %
-  a x^\algo{chal} &= u^\eta w^\nu \ ; \ b \hgen^{-\algo{chal}} = w^\xi
+  a x^{\algo{chal}} &= u^\eta w^\nu \ ; \ b \hgen^{-\algo{chal}} = w^\xi
   q_\ell^\pi \prod_{i=0}^{\ell-1} q_i^{\pi_i}.
   %
 \end{align*}
@@ -107,7 +107,7 @@ relation as follows:
   %
 \end{align*}
 %
-Here, $\inst = (\pk_{\BBS}, u, w, x, \com)$ and $\witness = (\varepsilon, s',
+Here, $\inst = (\pk_\BBS, u, w, x, \com)$ and $\witness = (\varepsilon, s',
 \iota, \lambda, \msg, \rho)$. The protocol is given in
 Primitive~\ref{prim:bbs-joint-proof}. Note that all $\algo{Prv}_1$ receives
 from $\algo{Prv}_0$ is the commitment $\com$, its randomness $\rho$, and a
@@ -138,7 +138,7 @@ $\msg_{\ell-1}$.
           (c, \pi_{\ell-1}, \zeta)$.
 
         \item $\algo{Prv}_1$ computes a proof $\Pi_1$ that, for $\inst_1 =
-          (\pk_{\BBS}, u, w, x, \com)$ and $\witness_1 = (\varepsilon, s',
+          (\pk_\BBS, u, w, x, \com)$ and $\witness_1 = (\varepsilon, s',
           \iota, \lambda, \msg[{:}\ell-1])$ with $s' = s - \rho$, the following
           holds:
           %
@@ -179,16 +179,16 @@ $\msg_{\ell-1}$.
   secure element contributes only knowledge of the user's secret key while
   the device supplies the rest. Concretely, they jointly produce $\sigma
   \leftarrow \NIZKprove(\crs, \inst, \witness)$, where $\inst =
-  (\gen_0, \gen_1, \pk_{\BBS}, u, w, x, c)$ with $\pk_{\BBS} = (\ggen,
+  (\gen_0, \gen_1, \pk_\BBS, u, w, x, c)$ with $\pk_\BBS = (\ggen,
   \tilde{t}, q_0, q_1, q_2, \hgen)$, $\witness = (\varepsilon, \iota, \lambda,
   s, \algo{uid}, \sk, r)$, and $\rel(\inst, \witness) = 1$ is equivalent to the
   following: \begin{align*} &\pairing(u, \tilde{t}) \pairing(x, \ggen) = 1 \
   \wedge \ x = u^\varepsilon w^\iota \\ &\wedge \ \hgen^{-1} = w^\lambda
-q_0^{\algo{uid}} q_1^{\sk} q_2^s \ \wedge \ c = \gen_0^{\algo{uid}} \gen_1^r.
+q_0^{\algo{uid}} q_1^\sk q_2^s \ \wedge \ c = \gen_0^{\algo{uid}} \gen_1^r.
 \end{align*} That is, this is an instantiation of Equation~\eqref{eq:BBSrel}
 with $\msg = (\algo{uid}, \sk)$ and $c = \gen_0^{\algo{uid}} \gen_1^r$. In this
 instantiation, $\algo{se}$ executes $\algo{Prv}_0$, outputting $\com =
-q_1^{\sk} q_2^\rho$, $\rho$, and proof $\Pi_0$ computed as above except that
+q_1^\sk q_2^\rho$, $\rho$, and proof $\Pi_0$ computed as above except that
 the challenge $\algo{chal}_0$ also hashes the message to be signed.
 $\algo{dev}$ computes a proof $\Pi_1 \leftarrow \NIZKprove(\crs, \inst_1,
 \witness_1)$, for $\inst_1 = (\gen_0, \gen_1, \pk, u, w, x, \com, c)$,
@@ -251,7 +251,7 @@ Primitive~\ref{prim:ps}~\cite{RSA:PoiSan16,RSA:PoiSan18}.
       %
       \begin{equation*}
       %
-        \pairing(k, \tilde{x} \vec{\tilde{y}}^{\msg} \tilde{z}^\omega) =
+        \pairing(k, \tilde{x} \vec{\tilde{y}}^\msg \tilde{z}^\omega) =
         \pairing(l, \ggen).
             %
       \end{equation*}
@@ -267,8 +267,8 @@ Assumption~\ref{assum:qmsdh}~\cite{RSA:PoiSan18}.
 
 \begin{assumptionbox}{$q$-Modified Strong Diffie-Hellman ($q$-MSDH)}{qmsdh}
 
-  The $q$-MSDH assumption holds if, given $(\gen, \gen^{\chi}, \ggen,
-  \ggen^{\chi}, \ggen^{\omega_1}, \ldots, \ggen^{\omega_q},
+  The $q$-MSDH assumption holds if, given $(\gen, \gen^\chi, \ggen,
+  \ggen^\chi, \ggen^{\omega_1}, \ldots, \ggen^{\omega_q},
   \gen^{1/(\chi+\omega_1)}, \ldots, \gen^{1/(\chi+\omega_q)})$ for uniformly
   random $\chi, \omega_1, \ldots, \omega_q \sample \Zp$, no PPT adversary can
   output a tuple $(\omega, \gen^\nu, \gen^{\nu/(\chi+\omega)})$ for $\nu \neq
@@ -444,7 +444,7 @@ Protocol~\ref{prot:offline}, as follows.
 \begin{description}
 
   \item[Commitment scheme.] Pedersen commitments in $\group{1}$. A user's
-    pseudonym is $\com = \gen_0^{\algo{uid}} \gen_1^{s}$, which is perfectly
+    pseudonym is $\com = \gen_0^{\algo{uid}} \gen_1^s$, which is perfectly
     hiding and computationally binding under the discrete logarithm assumption
     in $\group{1}$.
 

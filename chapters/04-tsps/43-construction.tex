@@ -1,7 +1,7 @@
 \section{Construction}\label{sec:tsps-construction}
 
 In brief, the construction proceeds as follows. The signing key of an
-underlying structure-preserving signature scheme is secret-shared among $n$
+underlying structure preserving signature scheme is secret-shared among $n$
 signers. Rather than reconstructing it, the signers use the MPC protocol of
 \Cref{sec:tsps-mpc} to jointly compute shares of every value that the signing
 algorithm derives from the key and from its own randomness. All of this is done
@@ -10,18 +10,18 @@ signer performs a purely local computation to produce a signature share, and
 any party holding $t+1$ shares combines them into a signature that verifies
 exactly as an ordinary signature of the underlying scheme would.
 
-The construction is generic in the underlying structure-preserving signature
+The construction is generic in the underlying structure preserving signature
 scheme $\SPS$, subject to one requirement, which both schemes of
-\Cref{sec:tsps-instantiation} satisfy. Write $\SPSsign(\sk, \mssg)$ as a
+\Cref{sec:tsps-instantiation} satisfy. Write $\SPSsign(\sk, \vec{\msg})$ as a
 computation on the secret key, on randomness sampled during signing, and on the
 message vector. We require that this computation decomposes into a
 message-independent part, consisting of samplings from $\Zp$ and of field and
 group operations that $\algo{MPC}$ provides, and a message-dependent part that
 uses only operations the signers perform locally: addition of shares, and
 multiplication of a secret-shared field element by a public group element.
-Since the messages of a structure-preserving signature scheme are themselves
+Since the messages of a structure preserving signature scheme are themselves
 group elements, and are public at signing time, this second condition is what
-makes the online phase non-interactive. It is the linearity-preservation
+makes the online phase non-interactive. It is the linearity preservation
 property of \Cref{sec:tsps-mpc}, applied to the message vector, that supplies
 it.
 
@@ -33,7 +33,7 @@ discusses two concrete realisations. We now present the construction in full.
 \paragraph{Setup.} During setup, the signers fix the vector length $\ell$, the
 corruption threshold $t$, and the number of signers $n > t$, together with the
 description of the pairing groups over which the underlying
-structure-preserving signature scheme is defined.
+structure preserving signature scheme is defined.
 
 \paragraph{Key generation.} Key generation produces a public key distributed
 exactly as one produced by $\SPSgen$, together with a $t$-additive sharing of
@@ -46,9 +46,9 @@ The signers invoke $\algo{RandShare}$ once for each field element of $\sk$,
 obtaining $t$-additive shares $\shr{\sk}$. Where the underlying scheme derives
 further secret material from these values, they invoke $\algo{Mul}$, and add
 shares locally, to obtain shares of the derived values. Each signer then lifts
-its shares to the group elements comprising $\pk$, computing $\shr{X} =
-\shr{x}\gen$ and $\shr{\widetilde{X}} = \shr{x}\ggen$ against the appropriate
-generators, which by linearity-preservation requires no interaction. Finally
+its shares to the group elements comprising $\pk$, computing $\shr{a} =
+\shr{\alpha}\gen$ in $\group{1}$ and $\shr{\widetilde{a}} = \shr{\alpha}\ggen$
+in $\group{2}$, which by linearity preservation requires no interaction. Finally
 the signers call $\algo{Open}$ in each source group to reconstruct and publish
 $\pk$. Each signer stores its share of $\shr{\sk}$, together with any shares of
 derived values that the online phase will need. If any call to $\algo{MPC}$
@@ -68,7 +68,7 @@ local liftings to the source groups and local additions of shares, to obtain
 shares of every value the signing algorithm derives from the secret key and
 that randomness.  Those components of the signature that do not depend on the
 message are complete at the end of this phase, and are stored as
-$\shr{\signature}_{\algo{OffSign}}$ along with the shares the online phase
+$\shr{\SPSsig}_{\algo{OffSign}}$ along with the shares the online phase
 consumes. If any call to $\algo{MPC}$ returns $\bot$, the signers abort.
 
 \paragraph{Online signing.} Online signing takes the message vector and
@@ -78,12 +78,12 @@ share by a public group element, both of which each signer performs locally. No
 signer communicates with any other during this phase, and its cost is
 comparable to that of an ordinary invocation of $\SPSsign$.
 
-On input a message vector $\mssg \in \group{1}^\ell$, each signer combines its
-share of the pre-processed material with $\mssg$, multiplying its shares of
-field elements by the public group elements of $\mssg$ and adding the results,
-to produce its share $\shr{\signature}_{\algo{OnSign}}$ of the
+On input a message vector $\vec{\msg} \in \group{1}^\ell$, each signer combines its
+share of the pre-processed material with $\vec{\msg}$, multiplying its shares of
+field elements by the public group elements of $\vec{\msg}$ and adding the results,
+to produce its share $\shr{\SPSsig}_{\algo{OnSign}}$ of the
 message-dependent part of the signature. Both operations are local by
-linearity-preservation, so this phase makes no call to $\algo{MPC}$ at all.
+linearity preservation, so this phase makes no call to $\algo{MPC}$ at all.
 
 \paragraph{Combining.} Combining reconstructs the signature from the shares. It
 is performed by whichever party is to hold the signature, and needs no
@@ -91,14 +91,14 @@ participation from the signers beyond their having published their shares.
 
 On input $t+1$ signature shares, the combining party calls $\algo{Open}$ in
 each source group to reconstruct each group element of the signature from the
-corresponding shares, and returns $\signature$. If any call returns $\bot$, it
+corresponding shares, and returns $\SPSsig$. If any call returns $\bot$, it
 returns $\bot$ instead.
 
 \paragraph{Verification.} Verification is that of the underlying
-structure-preserving signature scheme, unchanged.
+structure preserving signature scheme, unchanged.
 
-On input $(\pk, \mssg, \signature)$, the verifier returns $\SPSverify(\pk,
-\mssg, \signature)$; that is, $\TSPSverify = \SPSverify$.
+On input $(\pk, \vec{\msg}, \SPSsig)$, the verifier returns $\SPSverify(\pk,
+\vec{\msg}, \SPSsig)$; that is, $\TSPSverify = \SPSverify$.
 
 \paragraph{Robustness and abort.} In the honest-majority setting, where $t <
 n/2$, the signature can always be reconstructed from the shares of the honest
@@ -111,13 +111,13 @@ Which of the two settings applies is a property of the realisation, not of the
 construction, and \Cref{sec:tsps-evaluation} benchmarks one of each.
 
 \begin{theorem}\label{thm:tsps-construction-security} Let $\SPS$ be a
-  structure-preserving signature scheme satisfying wUF-CMA security whose
+  structure preserving signature scheme satisfying wUF-CMA security whose
   signing algorithm admits the decomposition described above, and let
   $\algo{MPC}$ satisfy the properties of \Cref{sec:tsps-mpc}. Then the
-threshold structure-preserving signature scheme obtained from $\SPS$ by the
+threshold structure preserving signature scheme obtained from $\SPS$ by the
 construction above is adaptive TS-UF-1 secure, for any corruption bound $|\Cor|
 < t$.  \end{theorem}
 
 \Cref{sec:tsps-instantiation} turns this construction into full descriptions of
-two threshold structure-preserving signature schemes, and
+two threshold structure preserving signature schemes, and
 \Cref{sec:tsps-security} proves both secure.

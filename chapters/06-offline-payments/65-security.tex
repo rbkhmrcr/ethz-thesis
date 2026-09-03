@@ -77,7 +77,7 @@ $\algo{prot}$, so the games are indistinguishable.
 $\OPwithdraw$ queries from honest users. When an honest $\algo{usr}$ withdraws
 value $v$, $\simu$ calls $(\OPwithdraw, \algo{Int}, v)$, learns $(\algo{usr},
 v)$, and produces a simulated withdrawal transcript in which $\com$ is a
-uniformly random commitment, $\ciph_0 \leftarrow \PKEencrypt(\pk_{\auditor},
+uniformly random commitment, $\ciph_0 \leftarrow \PKEencrypt(\pk_\auditor,
 \algo{uid}; \rho_0)$ is a well-formed encryption of $\algo{uid}$, $\ciph_2$ is
 a random ciphertext, and $\Pi$ is a simulated proof. By (P1), (P2), and (P5),
 this transcript is computationally indistinguishable from one produced by
@@ -111,7 +111,7 @@ Case $i = 0$. $\algo{usr}$ pays $\algo{usr}'$ by calling $(\OPexecute, \rho, v,
   \item If $\algo{usr}'$ is corrupt: $\simu$ additionally learns the identities
     of both parties. It computes $\rho' \leftarrow \com(\ck, \algo{uid}'; s')$
     from the commitment $\com_1$ that $\algo{usr}'$ supplies in $\algo{prot}$,
-    calls $\idfu{\algo{op}}$, and sets $\ciph_0 \leftarrow \PKEencrypt(\pk_{\auditor},
+    calls $\idfu{\algo{op}}$, and sets $\ciph_0 \leftarrow \PKEencrypt(\pk_\auditor,
     \algo{uid}; \rho_0)$.
 
 \end{itemize}
@@ -122,7 +122,7 @@ In both cases $\simu$ records $\mathbb{R}[(\com_0, \com_1)] \gets (\rho,
 Case $i > 0$. $\simu$ recovers $(\com_0, \ldots, \com_i)$ from
 $\mathbb{C}[\vec{\rho}]$, produces a simulated payment $p_i$ with simulated
 proofs and random ciphertexts (or $\ciph_i \leftarrow
-\PKEencrypt(\pk_{\auditor}, \algo{uid}_i; \rho_i)$ if $\algo{usr}'$ is
+\PKEencrypt(\pk_\auditor, \algo{uid}_i; \rho_i)$ if $\algo{usr}'$ is
 corrupt), and updates the maps as needed. By IND-CPA security of the encryption
 scheme (P2) and simulation extractable security of the NIZK scheme (P5),
 simulated payments are indistinguishable from real ones, so Game 8 is
@@ -245,7 +245,7 @@ In $\algo{prot}$, the double spender at index $j$ is identified by decrypting
 $\ciph_j$. The commitment $\com_j$ is fixed by Game 11's argument (binding of
 the commitment scheme and EUF-CMA of the blind signature scheme) through the
 chain via simulation extractability of $\sigma_{j-1}$.  The ciphertext $\ciph_j
-\leftarrow \PKEencrypt(\pk_{\auditor}, \algo{uid}_j; \rho_j)$ encrypts the same
+\leftarrow \PKEencrypt(\pk_\auditor, \algo{uid}_j; \rho_j)$ encrypts the same
 value as is committed in $\com_j$, as certified by proof $\Gamma_j$. Were this
 false, it would either yield two valid openings of $\com_j$ under $\ComOpen$,
 contradicting binding (P1), or a proof $\Gamma_j$ with no valid witness,
