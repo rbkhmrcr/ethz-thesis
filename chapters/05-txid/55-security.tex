@@ -292,36 +292,40 @@ from a random function with non-negligible advantage.
 %
   \end{equation*}
 %
-  Given a $q$-BDHI challenge $(\gen, \gen^{\theta}, \ldots,
-  \gen^{\theta^{\Max}}, \ggen, \ggen^{\theta}, Z)$ where $Z =
-  \pairing(\gen,\ggen)^{1/\theta}$ or $Z \sample \group{T}$, a simulator
-  $\simu$ embeds the challenge as follows. Writing $\hat\ek = \gen^{r}$ for a
-  (formally unknown, implicit) exponent $r$ that $\simu$ never needs to
-  materialise, and treating the query set $\gamma_1,\ldots,\gamma_{\Max} \in
-  [0,\Max)$ as fixed and public (as they are: every counter in the epoch's
-  range), $\simu$ implicitly sets $\utk'^{\star} = \theta$ and follows the
-  standard Dodis-Yampolskiy/Boneh-Boyen polynomial technique: it interpolates
-  the degree-$(\Max-1)$ polynomial $f(X) = \prod_{i=1}^{\Max}(X + \gamma_i)$
-  over the given powers $\gen^{\theta^0},\ldots,\gen^{\theta^{\Max}}$ to answer
-  every query $\FT(\ek,\gamma_i)$ without knowing $\theta$, while the
-  remaining, unqueried degree of freedom in $f$ lets it embed the challenge
-  term $Z$ into one designated response~\cite{PKC:DodYam05}.
+  Given a $q$-mDBDHI challenge $(\gen, \ggen_D,
+  \{\ggen_D^{1/(\theta+\gamma)}\}_{\gamma\in[0,\Max)}, Z_0,\ldots,Z_{\Max-1})$
+  where either $Z_\gamma = \pairing(A,\ggen_D^{1/(\theta+\gamma)})$ for all
+  $\gamma$, for hidden $A \sample \group{1}$, or every $Z_\gamma \sample
+  \group{T}$ independently, a simulator $\simu$ forwards
+  $\{\ggen_D^{1/(\theta+\gamma)}\}_{\gamma\in[0,\Max)}$ to $\adv$ as the
+  published points and $(Z_0,\ldots,Z_{\Max-1})$ as the tag vector, implicitly
+  setting $\hat\ek = A$ and $\utk'^\star = \theta$, and echoes $\adv$'s guess.
+  No interpolation over the queried counters is needed, since the mDBDHI
+  challenge already supplies every point $\{W_\gamma\}_{\gamma\in[0,\Max)}$
+  directly, matching exactly what an auditor receives in the real protocol.
 
-  If $Z = \pairing(\gen,\ggen)^{1/\theta}$, every response $\simu$ returns is
-  distributed exactly as $\widehat{\FT}(\utk'^\star, \gamma_i)$ would be under
-  key $\utk'^\star = \theta$. If $Z \sample \group{T}$, every response is
+  If the challenge is real, the distribution $\simu$ hands to $\adv$ is
+  exactly $\{\widehat{\FT}(\utk'^\star,\gamma)\}_{\gamma\in[0,\Max)}$ under key
+  $\utk'^\star = \theta$; if the challenge is random, every entry is
   independent and uniform in $\group{T}$. A distinguisher for $\widehat{\FT}$
-  then yields a distinguisher for the $q$-BDHI challenge with the same
+  then yields a distinguisher for the $q$-mDBDHI challenge with the same
   advantage, up to the negligible loss incurred by the hybrid step above,
   giving the following equation:
 %
   \begin{equation*}
 %
-    \Adv[\adv_{\PRF}(\FT)] \leq \Adv[\adv_{q\text{-}\mathsf{BDHI}}(\simu)] +
+    \Adv[\adv_{\PRF}(\FT)] \leq \Adv[\adv_{q\text{-}\mathsf{mDBDHI}}(\simu)] +
     \Adv[\adv_{\mathsf{DDH}}(\simu')].
 %
   \end{equation*}
 %
+  We also note that the points $\{W_\gamma\}$ do not compromise $\utk'$
+  itself: recovering $\utk'$ from them would break the $q$-SDH assumption
+  (\Cref{qsdh-txid}), which we already assume for BBS+. Since $\utk'$ is fixed
+  once at registration and never leaves the user, and the points
+  $\{W_\gamma\}$ published to an auditor are identical in every epoch, no
+  component of $\ek$ links one epoch to another beyond what $\ek'$ itself
+  discloses to auditors already holding permission for that epoch.
 \end{proof}
 
 \subsubsection*{$\rel_7$ and $\rel_8$ equivalence proofs}

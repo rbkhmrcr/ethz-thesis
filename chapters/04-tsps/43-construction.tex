@@ -45,14 +45,14 @@ public key, and finally reconstruct the public key alone, keeping the secret
 shares.
 
 The signers invoke $\idfu{\algo{RandShare}}$ once for each field element of
-$\sk$, obtaining $t$-additive shares $[\sk]$. Where the underlying scheme
+$\sk$, obtaining $t$-additive shares $\shr{\sk}$. Where the underlying scheme
 derives further secret material from these values, they invoke
 $\idfu{\algo{Mul}}$ and $\idfu{\algo{Add}}$ to obtain shares of the derived
 values. They then invoke $\idfu{\algo{ExpGenGrp}_1}$ and
 $\idfu{\algo{ExpGenGrp}_2}$ with the appropriate generators to obtain shares of
 the group elements comprising $\pk$, and call $\idfu{\algo{CombineGrp}_1}$ and
 $\idfu{\algo{CombineGrp}_2}$ to reconstruct and publish $\pk$. Each signer
-stores its share of $[\sk]$, together with any shares of derived values that
+stores its share of $\shr{\sk}$, together with any shares of derived values that
 the online phase will need. If any functionality returns $\bot$, the signers
 abort.
 
@@ -71,7 +71,7 @@ $\idfu{\algo{MulGrp}_1}$ as the scheme requires, to obtain shares of every
 value the signing algorithm derives from the secret key and that randomness.
 Those components of the signature that do not depend on the message are
 complete at the end of this phase, and are stored as
-$[\signature]_{\algo{OffSign}}$ along with the shares the online phase
+$\shr{\signature}_{\algo{OffSign}}$ along with the shares the online phase
 consumes. If any functionality returns $\bot$, the signers abort.
 
 \paragraph{Online signing.} Online signing takes the message vector and
@@ -84,7 +84,7 @@ comparable to that of an ordinary invocation of $\SPSsign$.
 On input a message vector $\mssg \in \group{1}^\ell$, each signer combines its
 share of the pre-processed material with $\mssg$, using the local operations
 that $\idfu{\algo{ExpGenGrp}_1}$ and $\idfu{\algo{MulGrp}_1}$ perform without
-interaction, to produce its share $[\signature]_{\algo{OnSign}}$ of the
+interaction, to produce its share $\shr{\signature}_{\algo{OnSign}}$ of the
 message-dependent part of the signature.
 
 \paragraph{Combining.} Combining reconstructs the signature from the shares. It

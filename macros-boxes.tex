@@ -1,0 +1,65 @@
+% define box for protocols
+
+\definecolor{boxgreen}{RGB}{11, 110, 79}
+\definecolor{boxblue}{RGB}{20, 95, 175}
+\definecolor{boxberry}{RGB}{160, 30, 85} 
+\definecolor{boxpurple}{RGB}{95, 45, 120} 
+
+\newtcbtheorem[
+  auto counter,
+  number within=chapter
+]{protocolbox}{Protocol}{
+  colback=boxpurple!9,
+  colframe=boxpurple!55,
+  coltitle=black,
+  fonttitle=\normalfont,
+  fontupper=\small,
+  boxrule=0.6pt,
+  arc=1mm,
+  breakable
+}{prot}
+
+% define box for primitives
+
+\newtcbtheorem[
+  auto counter,
+  number within=chapter
+]{primitivebox}{Primitive}{
+  colback=boxblue!5,
+  colframe=boxblue!35,
+  coltitle=black,
+  fonttitle=\normalfont,
+  fontupper=\small,
+  boxrule=0.5pt,
+  arc=1mm
+}{prim}
+
+% box for assumptions
+
+\newtcbtheorem[
+  auto counter,
+  number within=chapter
+]{assumptionbox}{Assumption}{
+  colback=boxberry!5,
+  colframe=boxberry!35,
+  coltitle=black,
+  fonttitle=\normalfont,
+  fontupper=\small,
+  boxrule=0.4pt,
+  arc=1mm
+}{asm}
+
+% box for experiments
+
+\newtcbtheorem[
+  auto counter,
+  number within=chapter
+]{experimentbox}{Experiment}{
+  colback=boxgreen!5,
+  colframe=boxgreen!35,
+  coltitle=black,
+  fonttitle=\normalfont,
+  fontupper=\small,
+  boxrule=0.4pt,
+  arc=1mm
+}{exp}

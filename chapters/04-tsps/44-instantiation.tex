@@ -47,7 +47,7 @@ structure-preserving signature scheme for asymmetric pairings~\cite{C:AGHO11}.
       \end{enumerate}
 
     \item[$\signature \sample \SPSsign(\sk, \mssg)$ :] On input secret key $\sk
-      = (\vec{\mu}, \tau)$ and vector $\mssg = ({m}_1, \ldots, m_\ell) \in
+      = (\vec{\mu}, \tau)$ and vector $\mssg = (\msg_1, \ldots, m_\ell) \in
       \group{1}^\ell$, do:
 
       \begin{enumerate}
@@ -75,7 +75,7 @@ structure-preserving signature scheme for asymmetric pairings~\cite{C:AGHO11}.
       \begin{equation}\label{eq:abe-ver}
       %
         \pairing({v}, \widetilde{r}) = \pairing(\gen, \widetilde{s}) \ \wedge \
-        \pairing({z}, \widetilde{r})\prod_{i=1}^\ell\pairing({m}_i,
+        \pairing({z}, \widetilde{r})\prod_{i=1}^\ell\pairing(\msg_i,
         \widetilde{u}_i) = \pairing(\gen, \ggen).
       %
       \end{equation}
@@ -129,7 +129,7 @@ existentially unforgeable under the DDH assumption~\cite{C:KilPanWee15}.
 
     \item[$\signature \sample \SPSsign(\sk, \mssg)$ :] On input secret key $\sk
       = (\boldsymbol{\kappa}, \vec{{b}}, \vec{{x}}, \vec{{y}})$ and vector
-      $\mssg = ({m}_1, \ldots, {m}_\ell)$, do:
+      $\mssg = (\msg_1, \ldots, \msg_\ell)$, do:
 
       \begin{enumerate}
 
@@ -179,7 +179,7 @@ from the MPC ideal functionalities of \Cref{sec:tsps-mpc}~\cite{C:AGHO11}. The
 scheme is given in \Cref{prot:tsps-abe}. Its signing algorithm has the
 decomposition the construction requires: the randomness $\rho$ and every value
 derived from it are independent of the message, and the message enters only
-through terms of the form $\mu_i\rho{m}_i$, in which a secret-shared field
+through terms of the form $\mu_i\rho\msg_i$, in which a secret-shared field
 element multiplies a public group element.
 
 \begin{protocolbox}{Optimal threshold structure-preserving
@@ -187,101 +187,98 @@ element multiplies a public group element.
 
   \begin{description}
 
-    \item[$(\pk, [\sk]) \sample \TSPSgen(\secparam, \ell, t, n)$ :] On input
+    \item[$(\pk, \shr{\sk}) \sample \TSPSgen(\secparam, \ell, t, n)$ :] On input
       the security parameter, vector length $\ell$, corruption threshold $t$,
       and number of signers $n$, the honest signers do the following:
 
       \begin{enumerate}
 
         \item Issue $\ell+1$ parallel calls to $\idfu{\algo{RandShare}}$ to
-          compute $t$-additive shares $([\mu_1], \ldots, [\mu_\ell],
-          [\tau])$.
+          compute $t$-additive shares $(\shr{\mu_1}, \ldots, \shr{\mu_\ell},
+          \shr{\tau})$.
 
         \item Call $\idfu{\algo{ExpGenGrp}_1}$ with generator $\gen$ and
-          shares $[\tau]$ to obtain $t$-additive shares $[{v}] =
-          {[\tau]}\gen$, and $\idfu{\algo{ExpGenGrp}_2}$ with $\ggen$ and
-          shares $[\mu_i]$ to obtain $t$-additive shares $[\widetilde{u}_i]
-          = {[\mu_i]}\ggen$ for $i \in [\ell]$.
+          shares $\shr{\tau}$ to obtain $t$-additive shares $\shr{{v}} =
+          {\shr{\tau}}\gen$, and $\idfu{\algo{ExpGenGrp}_2}$ with $\ggen$ and
+          shares $\shr{\mu_i}$ to obtain $t$-additive shares $\shr{\widetilde{u}_i}
+          = {\shr{\mu_i}}\ggen$ for $i \in [\ell]$.
 
-        \item Query $\idfu{\algo{CombineGrp}_1}$ with the shares $[{v}]$, and
-          $\idfu{\algo{CombineGrp}_2}$ with the shares $([\widetilde{u}_1],
-          \ldots, [\widetilde{u}_\ell])$.
+        \item Query $\idfu{\algo{CombineGrp}_1}$ with the shares $\shr{{v}}$, and
+          $\idfu{\algo{CombineGrp}_2}$ with the shares $(\shr{\widetilde{u}_1},
+          \ldots, \shr{\widetilde{u}_\ell})$.
 
         \item If no $\bot$ occurs, return public key $\pk =
           (\vec{\widetilde{u}}, {v})$ with $\vec{\widetilde{u}} =
           (\widetilde{u}_1, \ldots, \widetilde{u}_\ell)$, with corresponding
-          secret shares $[\sk] = ([\mu_1], \ldots, [\mu_\ell], [\tau])$
+          secret shares $\shr{\sk} = (\shr{\mu_1}, \ldots, \shr{\mu_\ell}, \shr{\tau})$
           distributed to the signers.
 
       \end{enumerate}
 
-    \item[$[\signature]_{\algo{OffSign}} \sample \algo{OffSign}([\sk])$ :] On
+    \item[$\shr{\signature}_{\algo{OffSign}} \sample \algo{OffSign}(\shr{\sk})$ :] On
       input the secret key shares, the honest signers do the following:
 
       \begin{enumerate}
 
         \item Invoke $\idfu{\algo{RandShare}}$ to get $t$-additive shares
-          $[\rho]$.
+          $\shr{\rho}$.
 
         \item If no $\bot$ occurs, call $\idfu{\algo{Inv}}$ to compute
-          $t$-additive shares $[1/\rho]$.
+          $t$-additive shares $\shr{1/\rho}$.
 
         \item Issue, potentially in parallel, $\ell+1$ calls to
-          $\idfu{\algo{Mul}}$ to compute the $t$-additive shares $([
-          \rho\mu_1], \ldots,[\rho\mu_\ell], [\tau/\rho])$.
+          $\idfu{\algo{Mul}}$ to compute the $t$-additive shares $(\shr{\rho\mu_1}, \ldots,\shr{\rho\mu_\ell}, \shr{\tau/\rho})$.
 
         \item If the calls to $\idfu{\algo{Inv}}$ and $\idfu{\algo{Mul}}$ all
-          succeed, the signers hold shares $([1/\rho], [\tau/\rho],
-          [\rho\mu_1], \ldots, [\rho\mu_\ell])$.
+          succeed, the signers hold shares $(\shr{1/\rho}, \shr{\tau/\rho},
+          \shr{\rho\mu_1}, \ldots, \shr{\rho\mu_\ell})$.
 
         \item Invoke $\idfu{\algo{ExpGenGrp}_1}$ with generator $\gen$ and
-          shares $[\rho]$ to compute $[\rho\gen]$, and
+          shares $\shr{\rho}$ to compute $\shr{\rho\gen}$, and
           $\idfu{\algo{ExpGenGrp}_2}$ with generator $\ggen$ and shares
-          $[1/\rho]$ and $[\tau/\rho]$ to compute $[\widetilde{r}] =
-          [\tfrac{1}{\rho}\ggen] $ and $[\widetilde{s}] = [
-          \tfrac{\tau}{\rho}\ggen]$.
+          $\shr{1/\rho}$ and $\shr{\tau/\rho}$ to compute $\shr{\widetilde{r}} =
+          \shr{\tfrac{1}{\rho}\ggen} $ and $\shr{\widetilde{s}} = \shr{\tfrac{\tau}{\rho}\ggen}$.
 
-        \item Conclude the offline phase by storing $([\rho\mu_1] , \ldots,
-          [\rho\mu_\ell], [\rho\gen], [\widetilde{r}], [\widetilde{s}])$.
+        \item Conclude the offline phase by storing $(\shr{\rho\mu_1} , \ldots,
+          \shr{\rho\mu_\ell}, \shr{\rho\gen}, \shr{\widetilde{r}}, \shr{\widetilde{s}})$.
 
       \end{enumerate}
 
-    \item[$[\signature]_{\algo{OnSign}} \sample \algo{OnSign}(\mssg)$ :] On
+    \item[$\shr{\signature}_{\algo{OnSign}} \sample \algo{OnSign}(\mssg)$ :] On
       input message vector $\mssg$, the honest signers do the following:
 
       \begin{enumerate}
 
-        \item For each ${m}_i \neq 0$, issue a call to
-          $\idfu{\algo{ExpGenGrp}_1}$ with shares $[\mu_i\rho]$ and generator
-          $-{m}_i$ to obtain $t$-additive shares $[-\mu_i\rho{m}_i]$.
+        \item For each $\msg_i \neq 0$, issue a call to
+          $\idfu{\algo{ExpGenGrp}_1}$ with shares $\shr{\mu_i\rho}$ and generator
+          $-\msg_i$ to obtain $t$-additive shares $\shr{-\mu_i\rho\msg_i}$.
 
         \item Issue consecutive calls to $\idfu{\algo{MulGrp}_1}$ to compute
-          the shares $[{z}] = [\rho\gen + \sum_{i=1, {m}_i \neq 0}^\ell
-          {-\mu_i\rho{m}_i}]$, noting that this sum is equivalent to $\rho\gen
-          - \sum_{i=1}^\ell \mu_i\rho{m}_i$.
+          the shares $\shr{{z}} = \shr{\rho\gen + \sum_{i=1, \msg_i \neq 0}^\ell {-\mu_i\rho\msg_i}}$, noting that this sum is equivalent to $\rho\gen
+          - \sum_{i=1}^\ell \mu_i\rho\msg_i$.
 
       \end{enumerate}
 
-    \item[$\signature \leftarrow \TSPScombine([\signature])$ :] On input the
+    \item[$\signature \leftarrow \TSPScombine(\shr{\signature})$ :] On input the
       signature shares, the honest signers do the following:
 
       \begin{enumerate}
 
-        \item Call $\idfu{\algo{CombineGrp}_2}$ with $[\widetilde{r}]$ and
-          $[\widetilde{s}]$ to obtain $\widetilde{r} = \tfrac{1}{\rho}\ggen$
+        \item Call $\idfu{\algo{CombineGrp}_2}$ with $\shr{\widetilde{r}}$ and
+          $\shr{\widetilde{s}}$ to obtain $\widetilde{r} = \tfrac{1}{\rho}\ggen$
           and $\widetilde{s} = \tfrac{\tau}{\rho}\ggen$, and
-          $\idfu{\algo{CombineGrp}_1}$ with shares $[{z}]$ to compute ${z} =
-          \rho(\gen - \sum_{i=1}^\ell \mu_i{m}_i)$.
+          $\idfu{\algo{CombineGrp}_1}$ with shares $\shr{{z}}$ to compute ${z} =
+          \rho(\gen - \sum_{i=1}^\ell \mu_i\msg_i)$.
 
         \item If no $\bot$ occurs, return the valid signature $\signature =
-          (\widetilde{r}, \widetilde{s}, {z})$ on the vector $({m}_1,
-          \ldots,{m}_\ell) \in \group{1}^\ell$.
+          (\widetilde{r}, \widetilde{s}, {z})$ on the vector $(\msg_1,
+          \ldots,\msg_\ell) \in \group{1}^\ell$.
 
       \end{enumerate}
 
     \item[$\{0,1\} \leftarrow \SPSverify(\pk, \mssg, \signature)$ :] On input
       signature $\signature = (\widetilde{r}, \widetilde{s}, {z})$, vector
-      $({m}_1, \ldots, {m}_\ell) \in \group{1}^\ell$, and public key $\pk =
+      $(\msg_1, \ldots, \msg_\ell) \in \group{1}^\ell$, and public key $\pk =
       (\vec{\widetilde{u}}, {v})$, do the following:
 
       \begin{enumerate}
@@ -299,9 +296,8 @@ element multiplies a public group element.
 DDH~\cite{C:KilPanWee15}}\label{sec:tsps-kiltz}
 
 We now formally describe a threshold structure-preserving signature scheme
-based on the structure-preserving scheme of Kiltz, Pan, and Wee, again built
-from the MPC ideal functionalities of
-\Cref{sec:tsps-mpc}~\cite{C:KilPanWee15}. The scheme is given in
+based on the structure-preserving scheme of Kiltz, Pan, and Wee, built
+from the functions of \Cref{sec:tsps-mpc}~\cite{C:KilPanWee15}. The scheme is given in
 \Cref{prot:tsps-kiltz}. Its signing algorithm again has the required
 decomposition: $\rho$, $\sigma$, and the terms derived from them are
 message-independent, and the message enters only through
@@ -313,154 +309,154 @@ $\boldsymbol{\kappa}$ multiply the public group elements of $\mssg$.
 
   \begin{description}
 
-    \item[$(\pk, [\sk]) \sample \TSPSgen(\secparam, \ell, t, n)$ :] On input
+    \item[$(\pk, \shr{\sk}) \sample \TSPSgen(\secparam, \ell, t, n)$ :] On input
       the security parameter, vector length $\ell$, corruption threshold $t$, and
       number of signers $n$, the honest signers do the following.
 
-      \begin{enumerate}
+      \begin{description}[style=nextline]
 
-        \item \emph{$\vec{\alpha} = (1, \alpha)^{\mathsf{T}} \in \Zp^2$ and
-          $\vec{\beta} = (1, \beta)^{\mathsf{T}} \in \Zp^2$.} Issue two calls
+        \item[{$\vec{\alpha} = (1, \alpha)^{\mathsf{T}} \in \Zp^2$ and
+          $\vec{\beta} = (1, \beta)^{\mathsf{T}} \in \Zp^2$}] Issue two calls
           to $\idfu{\algo{RandShare}}$ to compute $t$-additive secret shares
-          $([\alpha], [\beta])$.
+          $(\shr{\alpha}, \shr{\beta})$.
 
-        \item \emph{$\boldsymbol{\kappa} \in \Zp^{(\ell+1)\times 2}$.} Issue
+        \item[{$\boldsymbol{\kappa} \in \Zp^{(\ell+1)\times 2}$}] Issue
           $2(\ell+1)$ calls to $\idfu{\algo{RandShare}}$ to get $t$-additive
-          secret shares $[\boldsymbol{\kappa}] = ([\kappa_{1,1}], \ldots,
-          [\kappa_{\ell+1,2}])$.
+          secret shares $\shr{\boldsymbol{\kappa}} = (\shr{\kappa_{1,1}},
+          \ldots, \shr{\kappa_{\ell+1,2}})$.
 
-        \item \emph{$\boldsymbol{\gamma}, \boldsymbol{\delta} \in \Zp^{2\times
-          2}$.} Invoke $\idfu{\algo{RandShare}}$ to obtain $t$-additive secret
-          shares $([\gamma_{1,1}],\ldots, [\gamma_{2,2}],
-          [\delta_{1,1}],\ldots, [\delta_{2,2}])$. If no $\bot$ occurs during
-          randomness generation, continue.
+        \item[{$\boldsymbol{\gamma}, \boldsymbol{\delta} \in \Zp^{2\times
+          2}$}] Invoke $\idfu{\algo{RandShare}}$ to obtain $t$-additive secret
+          shares $(\shr{\gamma_{1,1}},\ldots, \shr{\gamma_{2,2}},
+          \shr{\delta_{1,1}},\ldots, \shr{\delta_{2,2}})$. If no $\bot$ occurs
+          during randomness generation, continue.
 
-        \item \emph{$\vec{\mu} = \boldsymbol{\kappa}\vec{\alpha}$.} Invoke
-          $\idfu{\algo{Mul}}$ with shares $[\alpha]$ and $[\kappa_{i, 2}]$,
-          for $i \in [\ell+1]$, to compute $t$-additive secret shares
-          $([\kappa_{1, 2}\alpha],\ldots, [\kappa_{\ell+1,2}\alpha])$. If no
-          $\bot$ occurs, call $\idfu{\algo{Add}}$ with shares $[\kappa_{i,
-          1}]$ and $[\kappa_{i, 2}\alpha]$ to obtain $t$-additive secret
-          shares $([\mu_1],\ldots, [\mu_{\ell+1}])$ with $\mu_i = \kappa_{i,
+        \item[{$\vec{\mu} = \boldsymbol{\kappa}\vec{\alpha}$}] Invoke
+          $\idfu{\algo{Mul}}$ with shares $\shr{\alpha}$ and
+          $\shr{\kappa_{i, 2}}$, for $i \in [\ell+1]$, to compute $t$-additive
+          secret shares $(\shr{\kappa_{1, 2}\alpha},\ldots,
+          \shr{\kappa_{\ell+1,2}\alpha})$. If no $\bot$ occurs, call
+          $\idfu{\algo{Add}}$ with shares $\shr{\kappa_{i, 1}}$ and
+          $\shr{\kappa_{i, 2}\alpha}$ to obtain $t$-additive secret shares
+          $(\shr{\mu_1},\ldots, \shr{\mu_{\ell+1}})$ with $\mu_i = \kappa_{i,
           1}+ \kappa_{i, 2}\alpha$ for all $i \in [\ell+1]$.
 
-        \item \emph{$\vec{\nu} = \boldsymbol{\gamma}\vec{\alpha}$.} Invoke
-          $\idfu{\algo{Mul}}$ with shares $[\alpha]$ and $[\gamma_{1, 2}]$,
-          and with $[\alpha]$ and $[\gamma_{2, 2}]$, to compute $t$-additive
-          secret shares $([\gamma_{1, 2}\alpha],[\gamma_{2,2}\alpha])$. If no
-          $\bot$ occurs, call $\idfu{\algo{Add}}$ with shares $[\gamma_{1,
-          1}]$ and $[\gamma_{1, 2}\alpha]$, and with $[\gamma_{2, 1}]$ and
-          $[\gamma_{2, 2}\alpha]$, to obtain $t$-additive secret shares
-          $([\nu_1], [\nu_2])$ with $\nu_1 = \gamma_{1, 1}+ \gamma_{1,
+        \item[{$\vec{\nu} = \boldsymbol{\gamma}\vec{\alpha}$}] Invoke
+          $\idfu{\algo{Mul}}$ with shares $\shr{\alpha}$ and
+          $\shr{\gamma_{1, 2}}$, and with $\shr{\alpha}$ and
+          $\shr{\gamma_{2, 2}}$, to compute $t$-additive secret shares
+          $(\shr{\gamma_{1, 2}\alpha},\shr{\gamma_{2,2}\alpha})$. If no $\bot$
+          occurs, call $\idfu{\algo{Add}}$ with shares $\shr{\gamma_{1, 1}}$
+          and $\shr{\gamma_{1, 2}\alpha}$, and with $\shr{\gamma_{2, 1}}$ and
+          $\shr{\gamma_{2, 2}\alpha}$, to obtain $t$-additive secret shares
+          $(\shr{\nu_1}, \shr{\nu_2})$ with $\nu_1 = \gamma_{1, 1}+ \gamma_{1,
           2}\alpha$ and $\nu_2 = \gamma_{2, 1}+ \gamma_{2, 2}\alpha$.
 
-        \item \emph{$\vec{\omega} = \boldsymbol{\delta}\vec{\alpha}$.} Follow
+        \item[{$\vec{\omega} = \boldsymbol{\delta}\vec{\alpha}$}] Follow
           the same steps as for $\vec{\nu}$, with $\boldsymbol{\gamma}$
           replaced by $\boldsymbol{\delta}$ and $\vec{\nu}$ replaced by
           $\vec{\omega}$.
 
-        \item \emph{$\vec{\xi} =
-          \vec{\beta}^{\mathsf{T}}\boldsymbol{\gamma}$.} Invoke
-          $\idfu{\algo{Mul}}$ with shares $[\beta]$ and $[\gamma_{2, 1}]$, and
-          with $[\beta]$ and $[\gamma_{2, 2}]$, to get $t$-additive secret
-          shares $([\beta\gamma_{2, 1}],[\beta\gamma_{2,2}])$. If no $\bot$
-          occurs, call $\idfu{\algo{Add}}$ with shares $[\gamma_{1, 1}]$ and
-          $[\beta\gamma_{2, 1}]$, and with $[\gamma_{1, 2}]$ and $[
-          \beta\gamma_{2, 2}]$, to obtain $t$-additive secret shares
-          $([\xi_1], [\xi_2])$ with $\xi_1 = \gamma_{1, 1}+ \beta\gamma_{2,
-          1}$ and $\xi_2 = \gamma_{1, 2}+ \beta\gamma_{2, 2}$.
+        \item[{$\vec{\xi} = \vec{\beta}^{\mathsf{T}}\boldsymbol{\gamma}$}]
+          Invoke $\idfu{\algo{Mul}}$ with shares $\shr{\beta}$ and
+          $\shr{\gamma_{2, 1}}$, and with $\shr{\beta}$ and
+          $\shr{\gamma_{2, 2}}$, to get $t$-additive secret shares
+          $(\shr{\beta\gamma_{2, 1}},\shr{\beta\gamma_{2,2}})$. If no $\bot$
+          occurs, call $\idfu{\algo{Add}}$ with shares $\shr{\gamma_{1, 1}}$
+          and $\shr{\beta\gamma_{2, 1}}$, and with $\shr{\gamma_{1, 2}}$ and
+          $\shr{\beta\gamma_{2, 2}}$, to obtain $t$-additive secret shares
+          $(\shr{\xi_1}, \shr{\xi_2})$ with $\xi_1 = \gamma_{1, 1}+
+          \beta\gamma_{2, 1}$ and $\xi_2 = \gamma_{1, 2}+ \beta\gamma_{2, 2}$.
 
-        \item \emph{$\vec{\upsilon} =
-          \vec{\beta}^{\mathsf{T}}\boldsymbol{\delta}$.} Follow the same steps
+        \item[{$\vec{\upsilon} =
+          \vec{\beta}^{\mathsf{T}}\boldsymbol{\delta}$}] Follow the same steps
           as for $\vec{\xi}$, with $\boldsymbol{\gamma}$ replaced by
           $\boldsymbol{\delta}$ and $\vec{\xi}$ replaced by $\vec{\upsilon}$.
 
-        \item \emph{$(\kappa_{1, 1}\gen, \kappa_{1,2}\gen)$, $\vec{{b}} =
+        \item[{$(\kappa_{1, 1}\gen, \kappa_{1,2}\gen)$, $\vec{{b}} =
           (\gen, \beta\gen)$, $\vec{{x}} = ({x}_1, {x}_2) = (\xi_1\gen,
           \xi_2\gen)$, $\vec{{y}} = ({y}_1, {y}_2) = (\upsilon_1\gen,
-          \upsilon_2\gen)$.} Invoke $\idfu{\algo{ExpGenGrp}_1}$ with generator
-          $\gen$ and shares $[\kappa_{1, 1}]$, $[\kappa_{1, 2}]$, $[\beta]$,
-          $[\xi_1]$, $[\xi_2]$, $[\upsilon_1]$, and $[\upsilon_2]$, to
-          compute the corresponding $t$-additive shares.
+          \upsilon_2\gen)$}] Invoke $\idfu{\algo{ExpGenGrp}_1}$ with generator
+          $\gen$ and shares $\shr{\kappa_{1, 1}}$, $\shr{\kappa_{1, 2}}$,
+          $\shr{\beta}$, $\shr{\xi_1}$, $\shr{\xi_2}$, $\shr{\upsilon_1}$, and
+          $\shr{\upsilon_2}$, to compute the corresponding $t$-additive shares.
 
-    \item \emph{$\vec{\widetilde{a}} = (\ggen, \alpha\ggen)$,
-      $\vec{\widetilde{u}} = (\mu_1\ggen, \ldots, \mu_{\ell+1}\ggen)$,
-      $\vec{\widetilde{v}} = (\nu_1\ggen, \nu_2\ggen)$, $\vec{\widetilde{w}} =
-      (\omega_1\ggen, \omega_2\ggen)$.} Invoke $\idfu{\algo{ExpGenGrp}_2}$
-      with generator $\ggen$ and shares $[\alpha]$, $[\mu_1] \ldots
-      [\mu_{\ell+1}]$, $[\nu_1]$, $[\nu_2]$, $[\omega_1]$, and $[\omega_2]$, to
-      compute the corresponding $t$-additive shares.
+        \item[{$\vec{\widetilde{a}} = (\ggen, \alpha\ggen)$,
+          $\vec{\widetilde{u}} = (\mu_1\ggen, \ldots, \mu_{\ell+1}\ggen)$,
+          $\vec{\widetilde{v}} = (\nu_1\ggen, \nu_2\ggen)$,
+          $\vec{\widetilde{w}} = (\omega_1\ggen, \omega_2\ggen)$}] Invoke
+          $\idfu{\algo{ExpGenGrp}_2}$ with generator $\ggen$ and shares
+          $\shr{\alpha}$, $\shr{\mu_1} \ldots \shr{\mu_{\ell+1}}$,
+          $\shr{\nu_1}$, $\shr{\nu_2}$, $\shr{\omega_1}$, and
+          $\shr{\omega_2}$, to compute the corresponding $t$-additive shares.
 
-\item Call $\idfu{\algo{CombineGrp}_2}$ to compute and publish public key $\pk
-  =(\vec{\widetilde{a}}, \vec{\widetilde{u}},
-  \vec{\widetilde{v}},\vec{\widetilde{w}})$. If no $\bot$ occurs, proceed to
-  the next step.
+        \item[{$\pk = (\vec{\widetilde{a}}, \vec{\widetilde{u}},
+          \vec{\widetilde{v}}, \vec{\widetilde{w}})$}] Call
+          $\idfu{\algo{CombineGrp}_2}$ to compute and publish the public key.
+          If no $\bot$ occurs, proceed to the next step.
 
-\item Conclude key generation by storing the shares $[\sk] =
-  ([\boldsymbol{\kappa}], [{b}], [\vec{{x}}], [\vec{{y}}])$, together with
-  the pair $\langle [\kappa_{1, 1}\gen],[\kappa_{1, 2}\gen] \rangle$.
+        \item[{$\shr{\sk} = (\shr{\boldsymbol{\kappa}}, \shr{{b}},
+          \shr{\vec{{x}}}, \shr{\vec{{y}}})$}] Conclude key generation by
+          storing the shares, together with the pair
+          $\langle \shr{\kappa_{1, 1}\gen},\shr{\kappa_{1, 2}\gen} \rangle$.
 
-\end{enumerate}
+      \end{description}
 
-\item[$[\signature]_{\algo{OffSign}} \sample \algo{OffSign}([\sk])$ :] On
+\item[$\shr{\signature}_{\algo{OffSign}} \sample \algo{OffSign}(\shr{\sk})$ :] On
   input the secret key shares, the honest signers do the following:
 
   \begin{enumerate}
 
-    \item Invoke $\idfu{\algo{RandShare}}$ to get $t$-additive shares $[
-      \rho]$ and $[\sigma]$.
+    \item Invoke $\idfu{\algo{RandShare}}$ to get $t$-additive shares $\shr{\rho}$ and $\shr{\sigma}$.
 
-    \item If no $\bot$ occurs, call $\idfu{\algo{Mul}}$ with shares $[\rho]$
-      and $[\sigma]$ to compute $t$-additive shares $[\rho\sigma]$.
+    \item If no $\bot$ occurs, call $\idfu{\algo{Mul}}$ with shares $\shr{\rho}$
+      and $\shr{\sigma}$ to compute $t$-additive shares $\shr{\rho\sigma}$.
 
     \item If this succeeds, invoke $\idfu{\algo{ExpGrp}_1}$ to compute
-      $t$-additive shares $[\rho{b}]$, $[\rho\sigma{b}]$, $[\rho\vec{{x}}]$,
-      and $[\rho\sigma\vec{{y}}]$.
+      $t$-additive shares $\shr{\rho{b}}$, $\shr{\rho\sigma{b}}$, $\shr{\rho\vec{{x}}}$,
+      and $\shr{\rho\sigma\vec{{y}}}$.
 
     \item If $\idfu{\algo{ExpGrp}_1}$ does not abort, invoke
-      $\idfu{\algo{ExpGenGrp}_1}$ to obtain $t$-additive shares $[\rho\gen]$
-      and $[\rho\sigma\gen]$, and $\idfu{\algo{ExpGenGrp}_2}$ to get
-      $t$-additive shares $[\sigma\ggen]$.
+      $\idfu{\algo{ExpGenGrp}_1}$ to obtain $t$-additive shares $\shr{\rho\gen}$
+      and $\shr{\rho\sigma\gen}$, and $\idfu{\algo{ExpGenGrp}_2}$ to get
+      $t$-additive shares $\shr{\sigma\ggen}$.
 
     \item If no $\bot$ occurs, call $\idfu{\algo{MulGrp}_1}$ to receive
-      $t$-additive shares $[\vec{{z}}^{\star}] = [\rho\vec{{x}} +
-      \rho\sigma\vec{{y}}]= [\rho\vec{{x}}] +[\rho\sigma\vec{{y}}]$.
+      $t$-additive shares $\shr{\vec{{z}}^{\star}} = \shr{\rho\vec{{x}} + \rho\sigma\vec{{y}}}= \shr{\rho\vec{{x}}} +\shr{\rho\sigma\vec{{y}}}$.
 
-    \item Conclude the offline phase by storing $([\sigma\ggen], [\rho\gen],
-      [\rho\sigma\gen], [\rho{b}], [\rho\sigma{b}], [\vec{{z}}^{\star}])$.
+    \item Conclude the offline phase by storing $(\shr{\sigma\ggen}, \shr{\rho\gen},
+      \shr{\rho\sigma\gen}, \shr{\rho{b}}, \shr{\rho\sigma{b}}, \shr{\vec{{z}}^{\star}})$.
 
   \end{enumerate}
 
-\item[$[\signature]_{\algo{OnSign}} \sample \algo{OnSign}(\mssg)$ :] On input
+\item[$\shr{\signature}_{\algo{OnSign}} \sample \algo{OnSign}(\mssg)$ :] On input
   message vector $\mssg$, the honest signers do the following:
 
   \begin{enumerate}
 
-    \item For each ${m}_i \neq 0$, issue a call to $\idfu{\algo{ExpGenGrp}_1}$
-      with shares $[\kappa_{i, 1}]$ and $[\kappa_{i, 2}]$ to obtain
-      $t$-additive shares $[\kappa_{i, 1} {m}_i] = [\kappa_{i, 1}] {m}_i$ and
-      $[\kappa_{i+1, 2} {m}_i] = [\kappa_{i+1, 2}]{m}_i$.
+    \item For each $\msg_i \neq 0$, issue a call to $\idfu{\algo{ExpGenGrp}_1}$
+      with shares $\shr{\kappa_{i, 1}}$ and $\shr{\kappa_{i, 2}}$ to obtain
+      $t$-additive shares $\shr{\kappa_{i, 1} \msg_i} = \shr{\kappa_{i, 1}} \msg_i$ and
+      $\shr{\kappa_{i+1, 2} \msg_i} = \shr{\kappa_{i+1, 2}}\msg_i$.
 
     \item Issue consecutive calls to $\idfu{\algo{MulGrp}_1}$ to compute the
-      $t$-additive shares $[(\gen, \mssg)\boldsymbol{\kappa}]$,
+      $t$-additive shares $\shr{(\gen, \mssg)\boldsymbol{\kappa}}$,
       comprising:
           %
       \begin{equation*}
           %
-        \left([\kappa_{1, 1}\gen] + \sum_{i=1, {m}_i \neq
-        0}^{\ell+1} [\kappa_{i+1, 1}{m}_i] , [\kappa_{1,
-      2}\gen] + \sum_{i=1, {m}_i \neq 0}^{\ell+1} [\kappa_{i+1,
-    2}{m}_i]\right).
+        \left(\shr{\kappa_{1, 1}\gen} + \sum_{i=1, \msg_i \neq
+        0}^{\ell+1} \shr{\kappa_{i+1, 1}\msg_i} , \shr{\kappa_{1, 2}\gen} + \sum_{i=1, \msg_i \neq 0}^{\ell+1} \shr{\kappa_{i+1, 2}\msg_i}\right).
           %
   \end{equation*}
 
 \item Issue one final call to $\idfu{\algo{MulGrp}_1}$ to compute the shares
-  $[\vec{{z}}] = [(\gen, \mssg)\boldsymbol{\kappa} + \vec{{z}}^{\star}] =
-  [(\gen, \mssg)\boldsymbol{\kappa}]+ [\vec{{z}}^{\star}]$.
+  $\shr{\vec{{z}}} = \shr{(\gen, \mssg)\boldsymbol{\kappa} + \vec{{z}}^{\star}} =
+  \shr{(\gen, \mssg)\boldsymbol{\kappa}}+ \shr{\vec{{z}}^{\star}}$.
 
 \end{enumerate}
 
-\item[$\signature \leftarrow \TSPScombine([\signature])$ :] On input the
+\item[$\signature \leftarrow \TSPScombine(\shr{\signature})$ :] On input the
   signature shares, the honest signers do the following:
 
   \begin{enumerate}
@@ -475,13 +471,13 @@ $\boldsymbol{\kappa}$ multiply the public group elements of $\mssg$.
 
     \item If no $\bot$ occurs, return the valid signature $\signature =
       (\widetilde{q}, \vec{{r}}, \vec{{s}}, \vec{{z}})$ on vector $\mssg =
-      ({m}_1, \ldots, {m}_\ell)$.
+      (\msg_1, \ldots, \msg_\ell)$.
 
   \end{enumerate}
 
 \item[$\{0,1\} \leftarrow \SPSverify(\pk, \mssg, \signature)$ :] On input
   signature $\signature = (\widetilde{q}, \vec{{r}}, \vec{{s}}, \vec{{z}})$,
-  vector $({m}_1, \ldots,{m}_\ell) \in \group{1}^\ell$, and public key $\pk
+  vector $(\msg_1, \ldots,\msg_\ell) \in \group{1}^\ell$, and public key $\pk
   =(\vec{\widetilde{a}}, \vec{\widetilde{u}},
   \vec{\widetilde{v}},\vec{\widetilde{w}})$, do the following:
 

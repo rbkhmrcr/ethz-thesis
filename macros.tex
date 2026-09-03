@@ -1,3 +1,9 @@
+\newenvironment{proof}{%
+  \par\noindent\textbf{Proof.}\ \small
+}{%
+  \unskip\nobreak\hfill$\square$\par\medskip
+}
+
 \newcommand{\rebekah}[1]{\textcolor{orange}{{Rebekah}:#1}}
 
 % new environments
@@ -5,81 +11,12 @@
 \newtheorem{lemma}{Lemma}
 \newtheorem{definition}{Definition}
 
-\newenvironment{proof}{%
-  \par\noindent\textbf{Proof.}\ \small
-}{%
-  \unskip\nobreak\hfill$\square$\par\medskip
-}
-
-% define box for protocols
-
-\definecolor{boxgreen}{RGB}{11, 110, 79}
-\definecolor{boxblue}{RGB}{20, 95, 175}
-\definecolor{boxberry}{RGB}{160, 30, 85} 
-\definecolor{boxpurple}{RGB}{95, 45, 120} 
-
-\newtcbtheorem[
-  auto counter,
-  number within=chapter
-]{protocolbox}{Protocol}{
-  colback=boxpurple!9,
-  colframe=boxpurple!55,
-  coltitle=black,
-  fonttitle=\normalfont,
-  fontupper=\small,
-  boxrule=0.6pt,
-  arc=1mm,
-  breakable
-}{prot}
-
-% define box for primitives
-
-\newtcbtheorem[
-  auto counter,
-  number within=chapter
-]{primitivebox}{Primitive}{
-  colback=boxblue!5,
-  colframe=boxblue!35,
-  coltitle=black,
-  fonttitle=\normalfont,
-  fontupper=\small,
-  boxrule=0.5pt,
-  arc=1mm
-}{prim}
-
-% box for assumptions
-
-\newtcbtheorem[
-  auto counter,
-  number within=chapter
-]{assumptionbox}{Assumption}{
-  colback=boxberry!5,
-  colframe=boxberry!35,
-  coltitle=black,
-  fonttitle=\normalfont,
-  fontupper=\small,
-  boxrule=0.4pt,
-  arc=1mm
-}{asm}
-
-% box for experiments
-
-\newtcbtheorem[
-  auto counter,
-  number within=chapter
-]{experimentbox}{Experiment}{
-  colback=boxgreen!5,
-  colframe=boxgreen!35,
-  coltitle=black,
-  fonttitle=\normalfont,
-  fontupper=\small,
-  boxrule=0.4pt,
-  arc=1mm
-}{exp}
+\input{macros-boxes}
 
 \newcommand{\algo}[1]{\mathsf{#1}}
 \newcommand{\sample}{\overset{\$}{\leftarrow}}
 \newcommand{\secparam}{\kappa}
+\newcommand{\negl}{\mathsf{negl}}
 \newcommand{\checkcheck}{\overset{?}{=}}
 
 % commitments
@@ -118,7 +55,7 @@
 \newcommand{\SPSrandomise}{\SPS\algo{.Randomise}}
 \newcommand{\SPSverify}{\SPS\algo{.Verify}}
 \newcommand{\SPSsig}{\SPS\algo{.sig}}
-\newcommand{\mssg}{\algo{msg}}
+\newcommand{\mssg}{M}
 
 % tsps
 \newcommand{\TSPS}{\algo{TSPS}}
@@ -130,6 +67,7 @@
 \newcommand{\TSPSsig}{\TSPS\algo{.sig}}
 \newcommand{\pp}{\algo{pp}}
 \newcommand{\TSPSsigno}{\mathcal{O}_{\TSPSsign}}
+\newcommand{\shr}[1]{[#1]}
 
 % encryption
 \newcommand{\PKE}{\algo{PKE}}
@@ -191,6 +129,7 @@
 \newcommand{\sokext}{\SOK\algo{.Extract}}
 
 % txid
+\newcommand{\uid}{\algo{uid}}
 \newcommand{\ID}{\algo{ID}}
 \newcommand{\IDregister}{\ID\algo{.Register}}
 \newcommand{\IDgrant}{\ID\algo{.Grant}}
@@ -215,7 +154,10 @@
 \newcommand{\OPexecute}{\OP\algo{.Execute}}
 \newcommand{\OPidentify}{\OP\algo{.Trace}}
 
-\newcommand{\OPcreateend}{\msgend{\algo{create}}}
+%% reconsider these maybe? 
+\newcommand{\OPcorrupt}{\OP\algo{.Corrupt}}
+\newcommand{\OPcreate}{\OP\algo{.Create}}
+\newcommand{\OPcreateend}{\msgend{\OPcreate}}
 \newcommand{\OPregisterend}{\msgend{\OPregister}}
 \newcommand{\OPwithdrawend}{\msgend{\OPwithdraw}}
 \newcommand{\OPexecuteend}{\msgend{\OPexecute}}

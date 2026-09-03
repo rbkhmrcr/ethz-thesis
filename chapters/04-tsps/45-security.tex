@@ -47,8 +47,8 @@ We rely on the following properties:
   $(n, t, \Cor)$ from $\adv$, and $\pk$ from its own challenger, $\advB$
   samples random shares $\{\sk_i\}_{i \in [1, t-1]}$ and their corresponding
   public key shares, together with shares $\{\sk_i\}_{i \in \Cor}$ and their
-  corresponding public key shares, consistent with the sharing $[\pk]$ of
-  $\pk$. It forwards $\pk$, $\{\sk_i\}_{i \in \Cor}$, and $[\pk]$ to $\adv$.
+  corresponding public key shares, consistent with the sharing $\shr{\pk}$ of
+  $\pk$. It forwards $\pk$, $\{\sk_i\}_{i \in \Cor}$, and $\shr{\pk}$ to $\adv$.
 
   \paragraph{Simulating the hybrid functionalities.} Because $\advB$ itself
   samples every key share $\{\sk_i\}_{i \in [1,n]}$ — honest shares of its own
