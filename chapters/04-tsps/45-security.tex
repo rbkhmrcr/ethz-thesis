@@ -19,9 +19,9 @@ We rely on the following properties:
     wUF-CMA secure: no PPT adversary can produce a valid signature on a message
     vector it never queried.
 
-  \item[(P2)] The secret sharing underlying $\algo{MPC}$ is
-    linearity preserving and private, as required in \Cref{sec:tsps-mpc}: any
-    set of at most $t$ shares is distributed independently of the shared value.
+  \item[(P2)] The secret sharing underlying $\algo{MPC}$ is linearity
+    preserving and private, as required in \Cref{sec:tsps-mpc}: any set of at
+    most $t$ shares is distributed independently of the shared value.
 
   \item[(P3)] The signing algorithm of $\SPS$ admits the decomposition of
     \Cref{sec:tsps-construction}, so that the message-dependent part of signing
@@ -70,26 +70,26 @@ We rely on the following properties:
 
   \paragraph{Simulating the online phase and bounding forgeries.} $\advB$
   answers $\adv$'s $\TSPSsigno$ queries in one of two ways. If, for the queried
-  $\vec{\msg}$, $|S(\vec{\msg})| < t - |\Cor|$, then $\advB$ forms the requested
-  signature share $\sigma_i$ directly from its sampled $\sk_i$, using the local
-  computation of $\algo{OnSign}$. By (P2), $\adv$ cannot distinguish this
-  simulated share from a genuine one. Once $|S(\vec{\msg})|$ reaches $t - |\Cor|$,
-  $\advB$ instead queries its own signing oracle for $\vec{\msg}$, and uses the
-  values exchanged during the (possibly interactive) offline phase, simulated
-  as above, to construct a signature share $\sigma_i$ that, combined with the
-  shares it has already issued, yields a signature verifying correctly under
-  $\TSPScombine$ and $\SPSverify$. In both cases, $\advB$ can respond to every
-  query of $\adv$ without ever calling its own signing oracle on a message for
-  which it would later need to produce a forgery.
+  $\vec{\msg}$, $|S(\vec{\msg})| < t - |\Cor|$, then $\advB$ forms the
+  requested signature share $\sigma_i$ directly from its sampled $\sk_i$, using
+  the local computation of $\algo{OnSign}$. By (P2), $\adv$ cannot distinguish
+  this simulated share from a genuine one. Once $|S(\vec{\msg})|$ reaches $t -
+  |\Cor|$, $\advB$ instead queries its own signing oracle for $\vec{\msg}$, and
+  uses the values exchanged during the (possibly interactive) offline phase,
+  simulated as above, to construct a signature share $\sigma_i$ that, combined
+  with the shares it has already issued, yields a signature verifying correctly
+  under $\TSPScombine$ and $\SPSverify$. In both cases, $\advB$ can respond to
+  every query of $\adv$ without ever calling its own signing oracle on a
+  message for which it would later need to produce a forgery.
 
-  Since $\advB$ never queries its own signing oracle on $\vec{\msg}^*$ itself, if
-  $\adv$ outputs a forgery $(\vec{\msg}^*, \SPSsig^*)$ satisfying the winning
-  condition of the adp-TS-UF-1 game, then $(\vec{\msg}^*, \SPSsig^*)$ also
-  satisfies the winning condition of the wUF-CMA game for $\advB$. Combined
-  with the perfect simulation established above, the advantage of $\adv$ in the
-  adp-TS-UF-1 game is therefore bounded by the advantage of $\advB$ in the
-  wUF-CMA game of the underlying structure preserving signature scheme, which
-  is negligible by (P1):
+  Since $\advB$ never queries its own signing oracle on $\vec{\msg}^*$ itself,
+  if $\adv$ outputs a forgery $(\vec{\msg}^*, \SPSsig^*)$ satisfying the
+  winning condition of the adp-TS-UF-1 game, then $(\vec{\msg}^*, \SPSsig^*)$
+  also satisfies the winning condition of the wUF-CMA game for $\advB$.
+  Combined with the perfect simulation established above, the advantage of
+  $\adv$ in the adp-TS-UF-1 game is therefore bounded by the advantage of
+  $\advB$ in the wUF-CMA game of the underlying structure preserving signature
+  scheme, which is negligible by (P1):
   %
   \begin{equation*}
   %
@@ -124,9 +124,10 @@ We rely on the following properties:
   existentially unforgeable under the DDH assumption in both source
   groups~\cite{C:AGHO11,C:KilPanWee15}. Of the three notions of
   \Cref{sec:tsps-definitions}, wUF-CMA is the weakest, since its winning
-  condition is the most restrictive: it excludes any $\vec{\msg}^*$ the adversary
-  queried, whereas UF-CMA and sUF-CMA admit forgeries on queried messages.
-  Existential unforgeability of either scheme therefore gives wUF-CMA security.
+  condition is the most restrictive: it excludes any $\vec{\msg}^*$ the
+  adversary queried, whereas UF-CMA and sUF-CMA admit forgeries on queried
+  messages.  Existential unforgeability of either scheme therefore gives
+  wUF-CMA security.
 
   For (P2), both threshold schemes share their secret key using the
   $t$-additive sharing of \Cref{sec:tsps-mpc}, which is linearity preserving
@@ -135,8 +136,8 @@ We rely on the following properties:
   For (P3), the required decomposition is exhibited for each scheme alongside
   its description: in \Cref{prot:tsps-abe} the message enters only through the
   terms $\mu_i\rho{m}_i$, and in \Cref{prot:tsps-kiltz} only through $(\gen,
-  \vec{\msg})\mat{K}$. In both cases a secret-shared field element
-  multiplies a public group element, which by the linearity preservation of
+  \vec{\msg})\mat{K}$. In both cases a secret-shared field element multiplies a
+  public group element, which by the linearity preservation of
   \Cref{sec:tsps-mpc} each signer computes locally, and the remaining online
   operations are additions of shares, also local. Everything else in either
   signing algorithm depends only on the secret key and on randomness sampled

@@ -26,14 +26,14 @@ property of \Cref{sec:tsps-mpc}, applied to the message vector, that supplies
 it.
 
 We assume throughout that the signers agree in advance on the parameters
-$(\ell, t, n)$, and that $\algo{MPC}$ is available to them. How $\algo{MPC}$ is
-realised is orthogonal to the construction; \Cref{sec:tsps-evaluation}
-discusses two concrete realisations. We now present the construction in full.
+$(\ell, t, n)$, and that $\algo{MPC}$ is available to them.
+\Cref{sec:tsps-evaluation} discusses two concrete realisations. We present the
+construction in full.
 
 \paragraph{Setup.} During setup, the signers fix the vector length $\ell$, the
 corruption threshold $t$, and the number of signers $n > t$, together with the
-description of the pairing groups over which the underlying
-structure preserving signature scheme is defined.
+description of the pairing groups over which the underlying structure
+preserving signature scheme is defined.
 
 \paragraph{Key generation.} Key generation produces a public key distributed
 exactly as one produced by $\SPSgen$, together with a $t$-additive sharing of
@@ -48,11 +48,11 @@ further secret material from these values, they invoke $\algo{Mul}$, and add
 shares locally, to obtain shares of the derived values. Each signer then lifts
 its shares to the group elements comprising $\pk$, computing $\shr{a} =
 \shr{\alpha}\gen$ in $\group{1}$ and $\shr{\widetilde{a}} = \shr{\alpha}\ggen$
-in $\group{2}$, which by linearity preservation requires no interaction. Finally
-the signers call $\algo{Open}$ in each source group to reconstruct and publish
-$\pk$. Each signer stores its share of $\shr{\sk}$, together with any shares of
-derived values that the online phase will need. If any call to $\algo{MPC}$
-returns $\bot$, the signers abort.
+in $\group{2}$, which by linearity preservation requires no interaction.
+Finally the signers call $\algo{Open}$ in each source group to reconstruct and
+publish $\pk$. Each signer stores its share of $\shr{\sk}$, together with any
+shares of derived values that the online phase will need. If any call to
+$\algo{MPC}$ returns $\bot$, the signers abort.
 
 \paragraph{Offline signing.} The offline phase performs, ahead of time, every
 part of signing that does not depend on the message. Because $\SPSsign$ samples
@@ -78,12 +78,12 @@ share by a public group element, both of which each signer performs locally. No
 signer communicates with any other during this phase, and its cost is
 comparable to that of an ordinary invocation of $\SPSsign$.
 
-On input a message vector $\vec{\msg} \in \group{1}^\ell$, each signer combines its
-share of the pre-processed material with $\vec{\msg}$, multiplying its shares of
-field elements by the public group elements of $\vec{\msg}$ and adding the results,
-to produce its share $\shr{\SPSsig}_{\algo{OnSign}}$ of the
-message-dependent part of the signature. Both operations are local by
-linearity preservation, so this phase makes no call to $\algo{MPC}$ at all.
+On input a message vector $\vec{\msg} \in \group{1}^\ell$, each signer combines
+its share of the pre-processed material with $\vec{\msg}$, multiplying its
+shares of field elements by the public group elements of $\vec{\msg}$ and
+adding the results, to produce its share $\shr{\SPSsig}_{\algo{OnSign}}$ of the
+message-dependent part of the signature. Both operations are local by linearity
+preservation, so this phase makes no call to $\algo{MPC}$ at all.
 
 \paragraph{Combining.} Combining reconstructs the signature from the shares. It
 is performed by whichever party is to hold the signature, and needs no
@@ -94,30 +94,23 @@ each source group to reconstruct each group element of the signature from the
 corresponding shares, and returns $\SPSsig$. If any call returns $\bot$, it
 returns $\bot$ instead.
 
-\paragraph{Verification.} Verification is that of the underlying
-structure preserving signature scheme, unchanged.
+\paragraph{Verification.} Verification is that of the underlying structure
+preserving signature scheme, unchanged.
 
 On input $(\pk, \vec{\msg}, \SPSsig)$, the verifier returns $\SPSverify(\pk,
 \vec{\msg}, \SPSsig)$; that is, $\TSPSverify = \SPSverify$.
 
-\paragraph{Robustness and abort.} In the honest-majority setting, where $t <
+\paragraph{Robustness and abort.} In the honest majority setting, where $t <
 n/2$, the signature can always be reconstructed from the shares of the honest
-signers alone, so the scheme is robust. In the dishonest-majority setting,
+signers alone, so the scheme is robust. In the dishonest majority setting,
 where $t > n/2$, robustness is no longer guaranteed. If the realisation of
 $\algo{MPC}$ supports identifiable abort, however, then so does the threshold
 signature scheme: a corrupt signer that contributes a bogus share causes an
 abort in which it is identified, and can be excluded from subsequent signing.
-Which of the two settings applies is a property of the realisation, not of the
-construction, and \Cref{sec:tsps-evaluation} benchmarks one of each.
 
-\begin{theorem}\label{thm:tsps-construction-security} Let $\SPS$ be a
-  structure preserving signature scheme satisfying wUF-CMA security whose
-  signing algorithm admits the decomposition described above, and let
-  $\algo{MPC}$ satisfy the properties of \Cref{sec:tsps-mpc}. Then the
-threshold structure preserving signature scheme obtained from $\SPS$ by the
-construction above is adaptive TS-UF-1 secure, for any corruption bound $|\Cor|
-< t$.  \end{theorem}
-
-\Cref{sec:tsps-instantiation} turns this construction into full descriptions of
-two threshold structure preserving signature schemes, and
-\Cref{sec:tsps-security} proves both secure.
+\begin{theorem}\label{thm:tsps-construction-security} Let $\SPS$ be a structure
+  preserving signature scheme satisfying wUF-CMA security whose signing
+  algorithm admits the decomposition described above, and let $\algo{MPC}$
+  satisfy the properties of \Cref{sec:tsps-mpc}. Then the threshold structure
+preserving signature scheme obtained from $\SPS$ by the construction above is
+adaptive TS-UF-1 secure, for any corruption bound $|\Cor| < t$.  \end{theorem}

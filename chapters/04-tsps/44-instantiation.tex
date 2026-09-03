@@ -21,8 +21,8 @@ assumption~\cite{C:KilPanWee15}.
 \subsubsection{Optimal re-randomisable structure preserving signatures in the
 GGM}\label{sec:tsps-sps-ggm}
 
-Abe, Groth, Haralambiev, and Ohkubo introduced the first optimal-size
-structure preserving signature scheme for asymmetric pairings~\cite{C:AGHO11}.
+Abe, Groth, Haralambiev, and Ohkubo introduced the first optimal-size structure
+preserving signature scheme for asymmetric pairings~\cite{C:AGHO11}.
 
 \begin{primitivebox}{Optimal structure preserving signatures (Abe, Groth,
   Haralambiev, and Ohkubo)}{sps-ggm}
@@ -46,16 +46,16 @@ structure preserving signature scheme for asymmetric pairings~\cite{C:AGHO11}.
 
       \end{enumerate}
 
-    \item[$\SPSsig \sample \SPSsign(\sk, \vec{\msg})$ :] On input secret key $\sk
-      = (\vec{\mu}, \tau)$ and vector $\vec{\msg} = (\msg_1, \ldots, \msg_\ell) \in
-      \group{1}^\ell$, do:
+    \item[$\SPSsig \sample \SPSsign(\sk, \vec{\msg})$ :] On input secret key
+      $\sk = (\vec{\mu}, \tau)$ and vector $\vec{\msg} = (\msg_1, \ldots,
+      \msg_\ell) \in \group{1}^\ell$, do:
 
       \begin{enumerate}
 
         \item Sample $\rho \sample \Zp^*$.
 
-        \item Return $\SPSsig = (\widetilde{r}, \widetilde{s}, z)$ such
-          that the following holds:
+        \item Return $\SPSsig = (\widetilde{r}, \widetilde{s}, z)$ such that
+          the following holds:
           %
           \begin{equation*}
           %
@@ -68,9 +68,9 @@ structure preserving signature scheme for asymmetric pairings~\cite{C:AGHO11}.
       \end{enumerate}
 
     \item[$\{0,1\} \leftarrow \SPSverify(\pk, \vec{\msg}, \SPSsig)$ :] On input
-      signature $\SPSsig = (\widetilde{r}, \widetilde{s}, z) \in
-      \group{2}^2 \times \group{1}$ and vector $\vec{\msg} \in \group{1}^\ell$,
-      return 1 if the following holds, and 0 otherwise:
+      signature $\SPSsig = (\widetilde{r}, \widetilde{s}, z) \in \group{2}^2
+      \times \group{1}$ and vector $\vec{\msg} \in \group{1}^\ell$, return 1 if
+      the following holds, and 0 otherwise:
       %
       \begin{equation}\label{eq:abe-ver}
       %
@@ -105,32 +105,30 @@ existentially unforgeable under the DDH assumption~\cite{C:KilPanWee15}.
         \item Sample column vectors $\vec{\alpha} = (1, \alpha)^{\mathsf{T}}$
           and $\vec{\beta} = (1, \beta)^{\mathsf{T}}$, for uniformly random
           $\alpha, \beta \in \Zp$, together with uniformly random matrices
-          $\mat{K} \in \Zp^{(\ell+1)\times 2}$,
-          $\mat{\Gamma} \in \Zp^{2\times 2}$, and $\mat{\Delta}
-          \in \Zp^{2\times 2}$.
+          $\mat{K} \in \Zp^{(\ell+1)\times 2}$, $\mat{\Gamma} \in \Zp^{2\times
+          2}$, and $\mat{\Delta} \in \Zp^{2\times 2}$.
 
-        \item Compute $\vec{\mu} = \mat{K}\vec{\alpha}$, $\vec{\nu}
-          = \mat{\Gamma}\vec{\alpha}$, $\vec{\omega} =
-          \mat{\Delta}\vec{\alpha}$, $\vec{\xi} =
-          \vec{\beta}^{\mathsf{T}}\mat{\Gamma}$, and $\vec{\upsilon} =
-          \vec{\beta}^{\mathsf{T}}\mat{\Delta}$.
+        \item Compute $\vec{\mu} = \mat{K}\vec{\alpha}$, $\vec{\nu} =
+          \mat{\Gamma}\vec{\alpha}$, $\vec{\omega} = \mat{\Delta}\vec{\alpha}$,
+          $\vec{\xi} = \vec{\beta}^{\mathsf{T}}\mat{\Gamma}$, and
+          $\vec{\upsilon} = \vec{\beta}^{\mathsf{T}}\mat{\Delta}$.
 
-        \item Compute $\vec{b} = \gen(1, \beta)$, $\vec{x} =
-          \gen\vec{\xi}$, and $\vec{y} = \gen\vec{\upsilon}$.
+        \item Compute $\vec{b} = \gen(1, \beta)$, $\vec{x} = \gen\vec{\xi}$,
+          and $\vec{y} = \gen\vec{\upsilon}$.
 
         \item Compute $\vec{\widetilde{a}} = \ggen(1, \alpha)$,
           $\vec{\widetilde{u}} = \ggen\vec{\mu}$, $\vec{\widetilde{v}} =
           \ggen\vec{\nu}$, and $\vec{\widetilde{w}} = \ggen\vec{\omega}$.
 
-        \item Return $\sk = (\mat{K}, \vec{b}, \vec{x},
-          \vec{y})$ and $\pk = (\vec{\widetilde{a}}, \vec{\widetilde{u}},
-          \vec{\widetilde{v}}, \vec{\widetilde{w}})$.
+        \item Return $\sk = (\mat{K}, \vec{b}, \vec{x}, \vec{y})$ and $\pk =
+          (\vec{\widetilde{a}}, \vec{\widetilde{u}}, \vec{\widetilde{v}},
+          \vec{\widetilde{w}})$.
 
       \end{enumerate}
 
-    \item[$\SPSsig \sample \SPSsign(\sk, \vec{\msg})$ :] On input secret key $\sk
-      = (\mat{K}, \vec{b}, \vec{x}, \vec{y})$ and vector
-      $\vec{\msg} = (\msg_1, \ldots, \msg_\ell)$, do:
+    \item[$\SPSsig \sample \SPSsign(\sk, \vec{\msg})$ :] On input secret key
+      $\sk = (\mat{K}, \vec{b}, \vec{x}, \vec{y})$ and vector $\vec{\msg} =
+      (\msg_1, \ldots, \msg_\ell)$, do:
 
       \begin{enumerate}
 
@@ -140,14 +138,13 @@ existentially unforgeable under the DDH assumption~\cite{C:KilPanWee15}.
           %
           \begin{align*}
           %
-            \widetilde{q} &= \sigma\ggen, \qquad \vec{r} = \rho\vec{b},
-            \qquad \vec{s} = \rho\sigma\vec{b}, \\ \vec{z} &= (\gen,
+            \widetilde{q} &= \sigma\ggen, \qquad \vec{r} = \rho\vec{b}, \qquad
+            \vec{s} = \rho\sigma\vec{b}, \\ \vec{z} &= (\gen,
             \vec{\msg})\mat{K} + \rho (\vec{x}+\sigma\vec{y}).
           %
           \end{align*}
 
-        \item Return $\SPSsig = (\widetilde{q}, \vec{r}, \vec{s},
-          \vec{z})$.
+        \item Return $\SPSsig = (\widetilde{q}, \vec{r}, \vec{s}, \vec{z})$.
 
       \end{enumerate}
 
@@ -202,8 +199,8 @@ public group element.
           $\shr{\widetilde{u}_i} = \shr{\mu_i}\ggen$ for $i \in [\ell]$,
           multiplying its own share by the relevant generator.
 
-        \item Query $\algo{Open}$ with the shares $\shr{v}$, and
-          $\algo{Open}$ with the shares $(\shr{\widetilde{u}_1}, \ldots,
+        \item Query $\algo{Open}$ with the shares $\shr{v}$, and $\algo{Open}$
+          with the shares $(\shr{\widetilde{u}_1}, \ldots,
           \shr{\widetilde{u}_\ell})$.
 
         \item If no $\bot$ occurs, return public key $\pk =
@@ -214,8 +211,8 @@ public group element.
 
       \end{enumerate}
 
-    \item[$\shr{\SPSsig}_{\algo{OffSign}} \sample \algo{OffSign}(\shr{\sk})$
-      :] On input the secret key shares, the honest signers do the following:
+    \item[$\shr{\SPSsig}_{\algo{OffSign}} \sample \algo{OffSign}(\shr{\sk})$ :]
+      On input the secret key shares, the honest signers do the following:
 
       \begin{enumerate}
 
@@ -245,8 +242,9 @@ public group element.
 
       \end{enumerate}
 
-    \item[$\shr{\SPSsig}_{\algo{OnSign}} \sample \algo{OnSign}(\vec{\msg})$ :] On
-      input message vector $\vec{\msg}$, the honest signers do the following:
+    \item[$\shr{\SPSsig}_{\algo{OnSign}} \sample \algo{OnSign}(\vec{\msg})$ :]
+      On input message vector $\vec{\msg}$, the honest signers do the
+      following:
 
       \begin{enumerate}
 
@@ -261,16 +259,16 @@ public group element.
 
       \end{enumerate}
 
-    \item[$\SPSsig \leftarrow \TSPScombine(\shr{\SPSsig})$ :] On input
-      the signature shares, the honest signers do the following:
+    \item[$\SPSsig \leftarrow \TSPScombine(\shr{\SPSsig})$ :] On input the
+      signature shares, the honest signers do the following:
 
       \begin{enumerate}
 
         \item Call $\algo{Open}$ with $\shr{\widetilde{r}}$ and
-          $\shr{\widetilde{s}}$ to obtain $\widetilde{r} =
-          \tfrac{1}\rho\ggen$ and $\widetilde{s} = \tfrac{\tau}\rho\ggen$,
-          and $\algo{Open}$ with shares $\shr{z}$ to compute $z = \rho(\gen
-          - \sum_{i=1}^\ell \mu_i\msg_i)$.
+          $\shr{\widetilde{s}}$ to obtain $\widetilde{r} = \tfrac{1}\rho\ggen$
+          and $\widetilde{s} = \tfrac{\tau}\rho\ggen$, and $\algo{Open}$ with
+          shares $\shr{z}$ to compute $z = \rho(\gen - \sum_{i=1}^\ell
+          \mu_i\msg_i)$.
 
         \item If no $\bot$ occurs, return the valid signature $\SPSsig =
           (\widetilde{r}, \widetilde{s}, z)$ on the vector $(\msg_1,
@@ -279,8 +277,8 @@ public group element.
       \end{enumerate}
 
     \item[$\{0,1\} \leftarrow \SPSverify(\pk, \vec{\msg}, \SPSsig)$ :] On input
-      signature $\SPSsig = (\widetilde{r}, \widetilde{s}, z)$, vector
-      $(\msg_1, \ldots, \msg_\ell) \in \group{1}^\ell$, and public key $\pk =
+      signature $\SPSsig = (\widetilde{r}, \widetilde{s}, z)$, vector $(\msg_1,
+      \ldots, \msg_\ell) \in \group{1}^\ell$, and public key $\pk =
       (\vec{\widetilde{u}}, v)$, do the following:
 
       \begin{enumerate}
@@ -303,8 +301,8 @@ MPC protocol of \Cref{sec:tsps-mpc}~\cite{C:KilPanWee15}. The scheme is given
 in \Cref{prot:tsps-kiltz}. Its signing algorithm again has the required
 decomposition: $\rho$, $\sigma$, and the terms derived from them are
 message-independent, and the message enters only through $(\gen,
-\vec{\msg})\mat{K}$, in which the secret-shared entries of
-$\mat{K}$ multiply the public group elements of $\vec{\msg}$.
+\vec{\msg})\mat{K}$, in which the secret-shared entries of $\mat{K}$ multiply
+the public group elements of $\vec{\msg}$.
 
 \begin{protocolbox}{Threshold structure preserving signature based
   on~\cite{C:KilPanWee15}}{tsps-kiltz}
@@ -322,65 +320,63 @@ $\mat{K}$ multiply the public group elements of $\vec{\msg}$.
           to $\algo{RandShare}$ to compute $t$-additive secret shares
           $(\shr{\alpha}, \shr{\beta})$.
 
-        \item[{$\mat{K} \in \Zp^{(\ell+1)\times 2}$}] Issue
-          $2(\ell+1)$ calls to $\algo{RandShare}$ to get $t$-additive secret
-          shares $\shr{\mat{K}} = (\shr{\kappa_{1,1}}, \ldots,
+        \item[{$\mat{K} \in \Zp^{(\ell+1)\times 2}$}] Issue $2(\ell+1)$ calls
+          to $\algo{RandShare}$ to get $t$-additive secret shares
+          $\shr{\mat{K}} = (\shr{\kappa_{1,1}}, \ldots,
           \shr{\kappa_{\ell+1,2}})$.
 
-        \item[{$\mat{\Gamma}, \mat{\Delta} \in \Zp^{2\times 2}$}]
-          Invoke $\algo{RandShare}$ to obtain $t$-additive secret shares
+        \item[{$\mat{\Gamma}, \mat{\Delta} \in \Zp^{2\times 2}$}] Invoke
+          $\algo{RandShare}$ to obtain $t$-additive secret shares
           $(\shr{\gamma_{1,1}},\ldots, \shr{\gamma_{2,2}},
           \shr{\delta_{1,1}},\ldots, \shr{\delta_{2,2}})$. If no $\bot$ occurs
           during randomness generation, continue.
 
-        \item[{$\vec{\mu} = \mat{K}\vec{\alpha}$}] Invoke
-          $\algo{Mul}$ with shares $\shr{\alpha}$ and $\shr{\kappa_{i, 2}}$,
-          for $i \in [\ell+1]$, to compute $t$-additive secret shares
-          $(\shr{\kappa_{1, 2}\alpha},\ldots, \shr{\kappa_{\ell+1,2}\alpha})$.
-          If no $\bot$ occurs, call each signer locally adds its shares
-          $\shr{\kappa_{i, 1}}$ and $\shr{\kappa_{i, 2}\alpha}$ to obtain
-          $t$-additive secret shares $(\shr{\mu_1},\ldots, \shr{\mu_{\ell+1}})$
-          with $\mu_i = \kappa_{i, 1}+ \kappa_{i, 2}\alpha$ for all $i \in
-          [\ell+1]$.
+        \item[{$\vec{\mu} = \mat{K}\vec{\alpha}$}] Invoke $\algo{Mul}$ with
+          shares $\shr{\alpha}$ and $\shr{\kappa_{i, 2}}$, for $i \in
+          [\ell+1]$, to compute $t$-additive secret shares $(\shr{\kappa_{1,
+          2}\alpha},\ldots, \shr{\kappa_{\ell+1,2}\alpha})$.  If no $\bot$
+          occurs, call each signer locally adds its shares $\shr{\kappa_{i,
+          1}}$ and $\shr{\kappa_{i, 2}\alpha}$ to obtain $t$-additive secret
+          shares $(\shr{\mu_1},\ldots, \shr{\mu_{\ell+1}})$ with $\mu_i =
+          \kappa_{i, 1}+ \kappa_{i, 2}\alpha$ for all $i \in [\ell+1]$.
 
-        \item[{$\vec{\nu} = \mat{\Gamma}\vec{\alpha}$}] Invoke
-          $\algo{Mul}$ with shares $\shr{\alpha}$ and $\shr{\gamma_{1, 2}}$,
-          and with $\shr{\alpha}$ and $\shr{\gamma_{2, 2}}$, to compute
-          $t$-additive secret shares $(\shr{\gamma_{1,
-          2}\alpha},\shr{\gamma_{2,2}\alpha})$. If no $\bot$ occurs, each
-          signer locally adds its shares $\shr{\gamma_{1, 1}}$ and
-          $\shr{\gamma_{1, 2}\alpha}$, and with $\shr{\gamma_{2, 1}}$ and
-          $\shr{\gamma_{2, 2}\alpha}$, to obtain $t$-additive secret shares
-          $(\shr{\nu_1}, \shr{\nu_2})$ with $\nu_1 = \gamma_{1, 1}+ \gamma_{1,
-          2}\alpha$ and $\nu_2 = \gamma_{2, 1}+ \gamma_{2, 2}\alpha$.
+        \item[{$\vec{\nu} = \mat{\Gamma}\vec{\alpha}$}] Invoke $\algo{Mul}$
+          with shares $\shr{\alpha}$ and $\shr{\gamma_{1, 2}}$, and with
+          $\shr{\alpha}$ and $\shr{\gamma_{2, 2}}$, to compute $t$-additive
+          secret shares $(\shr{\gamma_{1, 2}\alpha},\shr{\gamma_{2,2}\alpha})$.
+          If no $\bot$ occurs, each signer locally adds its shares
+          $\shr{\gamma_{1, 1}}$ and $\shr{\gamma_{1, 2}\alpha}$, and with
+          $\shr{\gamma_{2, 1}}$ and $\shr{\gamma_{2, 2}\alpha}$, to obtain
+          $t$-additive secret shares $(\shr{\nu_1}, \shr{\nu_2})$ with $\nu_1 =
+          \gamma_{1, 1}+ \gamma_{1, 2}\alpha$ and $\nu_2 = \gamma_{2, 1}+
+          \gamma_{2, 2}\alpha$.
 
-        \item[{$\vec{\omega} = \mat{\Delta}\vec{\alpha}$}] Follow the
-          same steps as for $\vec{\nu}$, with $\mat{\Gamma}$ replaced by
+        \item[{$\vec{\omega} = \mat{\Delta}\vec{\alpha}$}] Follow the same
+          steps as for $\vec{\nu}$, with $\mat{\Gamma}$ replaced by
           $\mat{\Delta}$ and $\vec{\nu}$ replaced by $\vec{\omega}$.
 
-        \item[{$\vec{\xi} = \vec{\beta}^{\mathsf{T}}\mat{\Gamma}$}]
-          Invoke $\algo{Mul}$ with shares $\shr{\beta}$ and $\shr{\gamma_{2,
-          1}}$, and with $\shr{\beta}$ and $\shr{\gamma_{2, 2}}$, to get
-          $t$-additive secret shares $(\shr{\beta\gamma_{2,
-          1}},\shr{\beta\gamma_{2,2}})$. If no $\bot$ occurs, each signer
-          locally adds its shares $\shr{\gamma_{1, 1}}$ and
-          $\shr{\beta\gamma_{2, 1}}$, and with $\shr{\gamma_{1, 2}}$ and
-          $\shr{\beta\gamma_{2, 2}}$, to obtain $t$-additive secret shares
-          $(\shr{\xi_1}, \shr{\xi_2})$ with $\xi_1 = \gamma_{1, 1}+
-          \beta\gamma_{2, 1}$ and $\xi_2 = \gamma_{1, 2}+ \beta\gamma_{2, 2}$.
+        \item[{$\vec{\xi} = \vec{\beta}^{\mathsf{T}}\mat{\Gamma}$}] Invoke
+          $\algo{Mul}$ with shares $\shr{\beta}$ and $\shr{\gamma_{2, 1}}$, and
+          with $\shr{\beta}$ and $\shr{\gamma_{2, 2}}$, to get $t$-additive
+          secret shares $(\shr{\beta\gamma_{2, 1}},\shr{\beta\gamma_{2,2}})$.
+          If no $\bot$ occurs, each signer locally adds its shares
+          $\shr{\gamma_{1, 1}}$ and $\shr{\beta\gamma_{2, 1}}$, and with
+          $\shr{\gamma_{1, 2}}$ and $\shr{\beta\gamma_{2, 2}}$, to obtain
+          $t$-additive secret shares $(\shr{\xi_1}, \shr{\xi_2})$ with $\xi_1 =
+          \gamma_{1, 1}+ \beta\gamma_{2, 1}$ and $\xi_2 = \gamma_{1, 2}+
+          \beta\gamma_{2, 2}$.
 
-        \item[{$\vec{\upsilon} = \vec{\beta}^{\mathsf{T}}\mat{\Delta}$}]
-          Follow the same steps as for $\vec{\xi}$, with $\mat{\Gamma}$
-          replaced by $\mat{\Delta}$ and $\vec{\xi}$ replaced by
-          $\vec{\upsilon}$.
+        \item[{$\vec{\upsilon} = \vec{\beta}^{\mathsf{T}}\mat{\Delta}$}] Follow
+          the same steps as for $\vec{\xi}$, with $\mat{\Gamma}$ replaced by
+          $\mat{\Delta}$ and $\vec{\xi}$ replaced by $\vec{\upsilon}$.
 
         \item[{$(\kappa_{1, 1}\gen, \kappa_{1,2}\gen)$, $\vec{b} = (\gen,
           \beta\gen)$, $\vec{x} = (x_1, x_2) = (\xi_1\gen, \xi_2\gen)$,
-        $\vec{y} = (y_1, y_2) = (\upsilon_1\gen, \upsilon_2\gen)$}] Each
-        signer locally multiplies by the generator $\gen$ and shares
-        $\shr{\kappa_{1, 1}}$, $\shr{\kappa_{1, 2}}$, $\shr{\beta}$,
-        $\shr{\xi_1}$, $\shr{\xi_2}$, $\shr{\upsilon_1}$, and
-        $\shr{\upsilon_2}$, to compute the corresponding $t$-additive shares.
+        $\vec{y} = (y_1, y_2) = (\upsilon_1\gen, \upsilon_2\gen)$}] Each signer
+        locally multiplies by the generator $\gen$ and shares $\shr{\kappa_{1,
+        1}}$, $\shr{\kappa_{1, 2}}$, $\shr{\beta}$, $\shr{\xi_1}$,
+        $\shr{\xi_2}$, $\shr{\upsilon_1}$, and $\shr{\upsilon_2}$, to compute
+        the corresponding $t$-additive shares.
 
       \item[{$\vec{\widetilde{a}} = (\ggen, \alpha\ggen)$, $\vec{\widetilde{u}}
         = (\mu_1\ggen, \ldots, \mu_{\ell+1}\ggen)$, $\vec{\widetilde{v}} =
@@ -394,15 +390,14 @@ $\mat{K}$ multiply the public group elements of $\vec{\msg}$.
     \vec{\widetilde{w}})$}] Call $\algo{Open}$ to compute and publish the
     public key.  If no $\bot$ occurs, proceed to the next step.
 
-  \item[{$\shr{\sk} = (\shr{\mat{K}}, \shr{b}, \shr{\vec{x}},
-    \shr{\vec{y}})$}] Conclude key generation by storing the shares, together
-    with the pair $\langle \shr{\kappa_{1, 1}\gen},\shr{\kappa_{1, 2}\gen}
-    \rangle$.
+  \item[{$\shr{\sk} = (\shr{\mat{K}}, \shr{b}, \shr{\vec{x}}, \shr{\vec{y}})$}]
+    Conclude key generation by storing the shares, together with the pair
+    $\langle \shr{\kappa_{1, 1}\gen},\shr{\kappa_{1, 2}\gen} \rangle$.
 
 \end{description}
 
-\item[$\shr{\SPSsig}_{\algo{OffSign}} \sample \algo{OffSign}(\shr{\sk})$ :]
-  On input the secret key shares, the honest signers do the following:
+\item[$\shr{\SPSsig}_{\algo{OffSign}} \sample \algo{OffSign}(\shr{\sk})$ :] On
+  input the secret key shares, the honest signers do the following:
 
   \begin{enumerate}
 
@@ -452,9 +447,8 @@ $\mat{K}$ multiply the public group elements of $\vec{\msg}$.
     \end{equation*}
 
   \item Each signer performs one final local addition to compute the shares
-    $\shr{\vec{z}} = \shr{(\gen, \vec{\msg})\mat{K} +
-    \vec{z}^{\star}} = \shr{(\gen, \vec{\msg})\mat{K}}+
-    \shr{\vec{z}^{\star}}$.
+    $\shr{\vec{z}} = \shr{(\gen, \vec{\msg})\mat{K} + \vec{z}^{\star}} =
+    \shr{(\gen, \vec{\msg})\mat{K}}+ \shr{\vec{z}^{\star}}$.
 
 \end{enumerate}
 
@@ -467,8 +461,8 @@ $\mat{K}$ multiply the public group elements of $\vec{\msg}$.
       \rho{b})$ and $\vec{s} = (\rho\sigma\gen, \rho\sigma{b})$, and
       $\algo{Open}$ to compute $\widetilde{q} = \sigma\ggen$.
 
-    \item Invoke $\algo{Open}$ to compute $\vec{z}= (\gen,
-      \vec{\msg})\mat{K} + \vec{z^{\star}}$.
+    \item Invoke $\algo{Open}$ to compute $\vec{z}= (\gen, \vec{\msg})\mat{K} +
+      \vec{z^{\star}}$.
 
     \item If no $\bot$ occurs, return the valid signature $\SPSsig =
       (\widetilde{q}, \vec{r}, \vec{s}, \vec{z})$ on vector $\vec{\msg} =
@@ -477,8 +471,8 @@ $\mat{K}$ multiply the public group elements of $\vec{\msg}$.
   \end{enumerate}
 
 \item[$\{0,1\} \leftarrow \SPSverify(\pk, \vec{\msg}, \SPSsig)$ :] On input
-  signature $\SPSsig = (\widetilde{q}, \vec{r}, \vec{s}, \vec{z})$,
-  vector $(\msg_1, \ldots,\msg_\ell) \in \group{1}^\ell$, and public key $\pk
+  signature $\SPSsig = (\widetilde{q}, \vec{r}, \vec{s}, \vec{z})$, vector
+  $(\msg_1, \ldots,\msg_\ell) \in \group{1}^\ell$, and public key $\pk
   =(\vec{\widetilde{a}}, \vec{\widetilde{u}},
   \vec{\widetilde{v}},\vec{\widetilde{w}})$, do the following:
 
