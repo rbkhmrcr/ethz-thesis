@@ -1,67 +1,57 @@
 \section{Introduction}
 
-The contributions of the next three sections are heavily motivated by
-transaction systems. Though each construction could be presented compactly and
-in isolation, the contributions are clearer when explained in context.
+The contributions of this chapter are heavily motivated by transaction systems.
+Though each construction could be presented compactly and in isolation, the
+contributions are clearer when explained in context.
 
 We use the term transaction system to broadly capture all systems that involve
 moving value. We describe the systems as if they handle just one type of
 currency, but extensions to labelled assets are generally simple. Transaction
-systems in these chapters must satisfy three properties. Balance, which means
-that no money can be created by transactions.  Theft prevention, which means
-that no user of the system can spend money belonging to another, and finally,
-privacy. We will define privacy formally in the definitions sections, but note
-here that it is an intrinsic property of the transaction systems we are working
-with.
+systems in this chapter must satisfy three properties: balance, meaning that no
+money can be created by transactions; theft prevention, meaning that no user of
+the system can spend money belonging to another; and privacy, which we define
+formally in~\Cref{sec:txid-definitions} and which is an intrinsic property of
+the transaction systems we are working with.
 
-Privacy of money in motion versus wealth at rest is a question with deep
-economic and political roots. We will not attempt to address this question
-directly here, and will defer to the relevant state, political, legal, and
-economic structures to determine the answers.
+The mechanism we give is agnostic to how the first two properties are achieved.
+It constrains only the tag attached to a transaction, never its contents, so it
+composes with any transaction system that already provides balance and theft
+prevention: the confidential payload of a transaction in our scheme is exactly
+the transaction of the underlying system, carried through unchanged. What we add
+is a way for a designated auditor to recover which of those payloads belong to a
+given user, and only during a window that the user has agreed to.
+
+Confidentiality of wealth at rest is a trivial problem for cryptography, since
+it can be solved by encrypting the value. Privacy of money in motion is the open
+problem, and how much of it a system should offer has deep economic and
+political roots that we do not attempt to settle here, deferring instead to the
+relevant state, political, legal, and economic structures.
 %(Domesday Book of 1086, Return of Owners of Land of 1873, and then Valuation
 %Office Survey of 1910-1915, but significant portions of that are lost due to
 %WWII bombings of the National Archives.)
-We acknowledge that confidentiality of wealth at rest is a trivial problem when
-it comes to cryptography. It can be solved by simply encrypting the value. The
-open problems are instead concerned with privacy of money in motion.
 
-We must first distinguish between fiat and non-fiat transaction
-systems\footnote{Fiat is Latin for `let it be done'.}. Fiat money is issued by
-an entity such as a central bank. The backing of the state gives the currency
-its value and so its issuance is centralised by design. Fiat money exists in
-different forms. Those we are interested in are cash, the current banking
-system, and the banking system of the near future.
+The technical distinction that matters for us is not fiat versus non-fiat money,
+but the treatment of identity. Fiat money is issued by an entity such as a
+central bank, whose backing gives the currency its value and so centralises
+issuance by design\footnote{Fiat is Latin for `let it be done'.}. Behaviour in
+such systems is enforced not by protocol-level incentive compatibility but by
+the ability of regulators and legal authorities to act against malicious
+parties, which requires participants to be identifiable and so introduces the
+requirement of registered identities. Cryptocurrencies instead replace the
+issuer with a public ledger whose validators follow the protocol for economic
+rather than institutional reasons. This is what lets them remain permissionless,
+and lets them function with participants who have no registered identities at
+all. They cover the entire spectrum of privacy, from pseudonymity with each
+transaction in the clear to hidden values and anonymity sets equal to the total
+number of users of the
+system~\cite{bitcoin,ethereum,EPRINT:Noether15,SP:BCGGMT14}. Stable coins sit
+between the two: cryptocurrencies with completely centralised issuance, backed
+by fiat assets in an unofficial capacity and issued by private companies. By
+trading volume and usage they, rather than central bank digital currencies
+(CBDCs), are the largest digital assets backed by fiat~\cite{BIS26stablecoins}.
 
-Cryptocurrencies are the main non-fiat type of transaction systems. These are
-not backed by governments, and not a form of legal tender. Their issuance is
-generally decentralised and tokens are tracked by publicly readable distributed
-ledgers. Anyone can generate a key pair and start participating in the system,
-minting and using the currencies as they desire. Cryptocurrencies cover the
-entire spectrum of privacy: from offering pseudonymity with each transaction in
-the clear, to hidden values and anonymity sets equal to the total number of
-users of the system~\cite{bitcoin,ethereum,EPRINT:Noether15,SP:BCGGMT14}.
-
-Cryptocurrencies with decentralised issuance exist in contrast to stable coins.
-These are generally backed by fiat assets in an unofficial capacity, issued by
-private companies. They are cryptocurrencies with completely centralised
-issuance. By trading volume and usage, stable coins, rather than central bank
-digital currencies (CBDCs), are the largest digital assets backed by
-fiat~\cite{BIS26stablecoins}.
-
-Fiat systems have a single issuer controlling both monetary policy and
-validation.  Cryptocurrencies replace this issuer with a public ledger, whose
-validators follow the protocol for economic rather than institutional reasons.
-This allows the system to remain permissionless, and this in turn is how
-cryptocurrencies function with participants with no registered identities. In
-fiat systems, behaviour is enforced not by protocol level incentive
-compatibility, but by the ability of regulators and legal authorities to act
-against malicious parties. This requires participants to be identifiable, and
-so introduces the requirement of registered identities.
-
-Our protocols generally deal with fiat money and so assume the role of a
-central bank as issuer. The issuer role is easy to distribute, so the main
-technical distinction between fiat and non-fiat money is the treatment of
-identity.
+Our protocols generally deal with fiat money and so assume the role of a central
+bank as issuer, though the issuer role is easy to distribute.
 
 Cash is anonymous and tied to no identity at all, though depositing large sums
 into the banking system often requires proof of provenance. The current digital
@@ -69,7 +59,7 @@ fiat system gives up this anonymity. Though transactions are not seen by the
 central banks or other users, commercial banks see their clients' transactions
 in the clear and tied to their identities. States can also compel commercial
 banks to disclose this information in all its detail\footnote{United States
-  Congress, Bank Secrecy Act (1970) and Uniting and Strengthening America by
+Congress, Bank Secrecy Act (1970) and Uniting and Strengthening America by
 Providing Appropriate Tools Required to Intercept and Obstruct Terrorism (USA
 PATRIOT) Act (2001)}.  Future digital fiat systems aim to improve the situation
 with users proving ownership over the money being moved while the transactions
@@ -78,16 +68,16 @@ stay private. This is generally achieved through anonymous credentials.
 \subsection{Related work}\label{sec:txid-related}
 
 Prior work on regulatory oversight in privacy-preserving payment systems
-typically supports either anonymity revocation or tracing.  Anonymity
-revocation lets an auditor identify the user responsible for a specific
-transaction. Tracing, by contrast, lets the auditor recover all transactions
-associated with a given user. Tracing can be emulated by applying anonymity
-revocation to every transaction in turn, but this costs time linear in the
-number of transactions and exposes information about non-targeted users.
+typically supports either anonymity revocation or tracing.  Anonymity revocation
+lets an auditor identify the user responsible for a specific transaction.
+Tracing, by contrast, lets the auditor recover all transactions associated with
+a given user. Tracing can be emulated by applying anonymity revocation to every
+transaction in turn, but this costs time linear in the number of transactions
+and exposes information about non-targeted users.
 
 Anonymity revocation is achieved through attaching a verifiable encryption or
-other hidden user identifier to each transaction, so that an auditor holding
-the corresponding secret key can selectively recover the sender's
+other hidden user identifier to each transaction, so that an auditor holding the
+corresponding secret key can selectively recover the sender's
 identity~\cite{SCN:CamHohLys06,CANS:BDET21,INDOCRYPT:CDLP22}.  Tracing a user's
 activity this way requires scanning and decrypting every transaction on the
 ledger, incurring overhead linear in the ledger size and exposing unrelated
@@ -95,19 +85,20 @@ users' activity to the auditor. These protocols enable identity recovery, but
 not efficient targeted tracing.
 
 Per-transaction tags can be derived from users' tracing keys combined with a
-monotonically increasing counter, and use zero-knowledge proofs to show the
-tags are correctly formed and bound to the transaction's
+monotonically increasing counter, and use zero-knowledge proofs to show the tags
+are correctly formed and bound to the transaction's
 origin~\cite{CCS:KiaKohSar22,CANS:SarKiaKoh24}.  Given the tracing secret of a
-target user, an auditor identifies the corresponding transactions by
-recomputing the tags and matching them against the ledger, and the counter
-binding also stops a user later repudiating their own transactions. These
-systems are necessarily tied to users' identities.  All of these share the same
-limitation: a user's transactions must be generated sequentially, which
-prevents concurrent transaction creation and degrades performance in
-high-throughput settings.
+target user, an auditor identifies the corresponding transactions by recomputing
+the tags and matching them against the ledger, and the counter binding also
+stops a user later repudiating their own transactions. These systems are
+necessarily tied to users' identities.  All of these share the same limitation:
+because the counter must increase by one with each transaction and leave no
+gaps, a user's transactions must be generated sequentially, which prevents
+concurrent transaction creation and degrades performance in high-throughput
+settings.
 
-Cryptocurrencies generally provide auditability through interactive protocols
-or global consistency checks. ZKLedger lets auditors verify transaction
+Cryptocurrencies generally provide auditability through interactive protocols or
+global consistency checks. ZKLedger lets auditors verify transaction
 correctness, but requires interaction and incurs overhead linear in the number
 of participants~\cite{EPRINT:NarVasVir18}.  Privacy-focused cryptocurrencies
 such as Monero, Zcash, and Quisquis achieve strong anonymity guarantees but do
@@ -118,27 +109,75 @@ cooperation, or linear-time analysis~\cite{ACNS:PBGP25}.
 
 Platypus and ZKAT incorporate regulatory policy enforcement, including
 enforcement of balance limits, but neither provides a mechanism for efficient
-per user tracing across arbitrary
+per-user tracing across arbitrary
 transactions~\cite{CCS:WKDC22,EPRINT:ACDDET19}.
 
+\Cref{tab:txid-related} summarises the comparison. The column that matters is
+the third: the cost of recovering one user's transactions for one epoch. For
+revocation-based schemes this is linear in the size of the ledger $|L|$, because
+every transaction must be decrypted before it is known whether it belongs to the
+target. For our scheme it is $\Max$ pairings and $\Max$ lookups in a ledger
+indexed by tag, where $\Max$ is the per-epoch transaction bound. At $\Max =
+2^{10}$ this is under a second, and crucially it does not grow as the ledger
+does, nor does it reveal anything about the transactions of any user other than
+the target.
+
+\begin{table}[t] \centering \caption{Comparison with prior approaches to
+regulatory oversight. $|L|$ is the number of transactions on the ledger, $n$ the
+number of registered users, and $\Max$ the per-epoch transaction bound.}
+\label{tab:txid-related}
+  %
+  \small
+  %
+  \begin{tabular}{l l l c c} \toprule
+    %
+    Scheme & Mechanism & Trace one user & Concurrent & Expiring \\ & & &
+submission & permission \\
+    %
+    \midrule
+    %
+    \cite{SCN:CamHohLys06,CANS:BDET21,INDOCRYPT:CDLP22} & revocation & $O(|L|)$
+decryptions & yes & no \\
+    %
+    \cite{CCS:KiaKohSar22,CANS:SarKiaKoh24} & tags, sequential counter &
+$O(|L|)$ tag matches & no & no \\
+    %
+    \cite{EPRINT:NarVasVir18} & interactive audit & $O(n)$, interactive & yes &
+no \\
+    %
+    \cite{CCS:WKDC22,EPRINT:ACDDET19} & policy enforcement & not supported & yes
+& --- \\
+    %
+    \midrule
+    %
+    This chapter & tags, unordered index & $O(\Max)$ pairings & yes & yes \\
+    %
+    \bottomrule \end{tabular}
+%
+\end{table}
+
 \paragraph{Our contribution.} We introduce a tracing mechanism that eliminates
-the need for encrypted user identifiers and sequential counters, supporting
-efficient tracing while letting users generate and submit multiple transactions
-in parallel without restriction. The design gives users fine grained control
+the need for encrypted user identifiers and for the monotonically increasing
+counters of prior tag-based schemes. In place of an ordered counter, a
+transaction carries an index drawn from a bounded, epoch-local space $[0,\Max)$,
+and the only constraint is that an index is not reused within an epoch. Order is
+irrelevant, so a user may partition the space among concurrent workers and
+submit transactions in parallel and in any order, which is what the sequential
+counter of prior work forbids. The design gives users fine-grained control
 through epoch-bound tracing permissions: these let an auditor identify every
 transaction linked to a specific user within a predefined time window, and
 automatically become invalid once that epoch expires, requiring a fresh
-permission to be issued for any subsequent one. We formalise tracing as an
-ideal functionality capturing anonymity, non-repudiation, and permission
-expiration, give a black-box construction from signatures, commitments,
-pseudorandom functions, and zero-knowledge proofs, and instantiate it
+permission to be issued for any subsequent one. We formalise tracing as an ideal
+functionality capturing anonymity, non-repudiation, and permission expiration,
+give a black-box construction from signatures, commitments, pseudorandom
+functions, one-way functions, and zero-knowledge proofs, and instantiate it
 concretely in pairing-based groups with a transparent setup, using the BBS+
-signature scheme to let the registration authority certify a users' keys
-without ever learning their tracing key.
+signature scheme to let the registration authority certify a user's keys without
+ever learning their tracing key.
 
-\paragraph{Layout.} Section~\ref{sec:txid-definitions} formalises the problem
-as an ideal functionality. Section~\ref{sec:txid-construction} gives a
-construction from generic building blocks.
-Section~\ref{sec:txid-instantiation} gives a concrete instantiation in
-pairing-based groups, proved secure in Section~\ref{sec:txid-security}.
-Section~\ref{sec:txid-evaluation} evaluates the concrete instantiation.
+\paragraph{Layout.} \Cref{sec:txid-definitions} gives the syntax of a tracing
+scheme and formalises its security as an ideal functionality.
+\Cref{sec:txid-construction} gives a construction from generic building blocks.
+\Cref{sec:txid-instantiation} gives a concrete instantiation in pairing-based
+groups, proved secure in \Cref{sec:txid-security}.  \Cref{sec:txid-evaluation}
+evaluates the concrete instantiation, and \Cref{sec:txid-summary} concludes.

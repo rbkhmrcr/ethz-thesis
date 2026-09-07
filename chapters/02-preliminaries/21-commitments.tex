@@ -1,7 +1,7 @@
 \section{Commitments}\label{sec:prelims-commitments}
 
-Commitment schemes enable a party to commit to a message while keeping it
-hidden, until it is later revealed.
+Commitment schemes enable a party to commit to a message while keeping it hidden
+until it is later revealed.
 
 \paragraph{Syntax.} A commitment scheme consists of algorithms defined as
 follows:
@@ -9,15 +9,15 @@ follows:
 \begin{description}
 
   \item[$\ck \sample \ComGen(\secparam)$ :] The key generation algorithm takes
-    the security parameter as input, and outputs a commitment key $\ck$.
+the security parameter as input, and outputs a commitment key $\ck$.
 
   \item[$\com \leftarrow \ComCommit(\ck, \msg, \openinfo)$ :] The commitment
-    algorithm outputs commitment $\com$ to message $\msg$ using key $\ck$ and
-    opening information $\openinfo$.
+algorithm outputs commitment $\com$ to message $\msg$ using key $\ck$ and
+opening information $\openinfo$.
 
-  \item[$\msg \leftarrow \ComOpen(\ck, \com,\openinfo)$ :] The opening
-    algorithm outputs message $\msg$ corresponding to commitment $\com$ using
-    $\openinfo$ and $\ck$.
+  \item[$\msg \leftarrow \ComOpen(\ck, \com,\openinfo)$ :] The opening algorithm
+outputs message $\msg$ corresponding to commitment $\com$ using $\openinfo$ and
+$\ck$.
 
 \end{description}
 %
@@ -43,13 +43,13 @@ about its message before it is opened.
   \begin{enumerate}
 
     \item The challenger generates $\ck \sample \ComGen(\secparam)$ and sends
-      $\ck$ to $\adv$.
+$\ck$ to $\adv$.
 
     \item The adversary outputs two messages $(\msg_0, \msg_1)$.
 
     \item The challenger samples $b \sample \{0,1\}$, computes the challenge
-      commitment $\com^\star \leftarrow \ComCommit(\ck, \msg_b, \openinfo)$,
-      and sends $\com^\star$ to $\adv$.
+commitment $\com^\star \leftarrow \ComCommit(\ck, \msg_b, \openinfo)$, and sends
+$\com^\star$ to $\adv$.
 
     \item The adversary outputs a bit $b'$.
 
@@ -64,7 +64,7 @@ The hiding advantage of $\adv$ is defined as follows:
 \begin{equation*}
 %
   \Adv_{\Com,\adv}^{\mathsf{hiding}}(\secparam) = \left| \Pr[b'=b]-\frac{1}{2}
-  \right|.
+\right|.
 %
 \end{equation*}
 %
@@ -80,10 +80,10 @@ different messages.
   \begin{enumerate}
 
     \item The challenger generates $\ck \sample \ComGen(\secparam)$ and sends
-      $\ck$ to $\adv$.
+$\ck$ to $\adv$.
 
     \item The adversary outputs $(\com, \msg, \msg', \openinfo, \openinfo')$
-      where $\msg \neq \msg'$.
+where $\msg \neq \msg'$.
 
   \end{enumerate}
 
@@ -91,8 +91,8 @@ different messages.
   %
   \begin{equation*}
   %
-    \ComOpen(\ck, \com, \openinfo) = \msg \ \wedge\ \ComOpen(\ck,
-    \com, \openinfo') = \msg'.
+    \ComOpen(\ck, \com, \openinfo) = \msg \ \wedge\ \ComOpen(\ck, \com,
+\openinfo') = \msg'.
   %
   \end{equation*}
 

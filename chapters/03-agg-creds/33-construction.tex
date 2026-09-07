@@ -1,27 +1,27 @@
 \section{Construction}\label{sec:agg-creds-construction}
 
-In brief, the protocol proceeds as follows.
-Each user first establishes a pseudonymous identity with the registration
-authority. Issuers then issue credentials to that identity for the attributes
-they certify. Before presentation, the user aggregates the credentials
-corresponding to the attributes they wish to disclose into a single aggregate
-signature. Finally, the user proves knowledge of the aggregate credential and
-their registered identity using a NIZK.
+In brief, the protocol proceeds as follows.  Each user first establishes a
+pseudonymous identity with the registration authority. Issuers then issue
+credentials to that identity for the attributes they certify. Before
+presentation, the user aggregates the credentials corresponding to the
+attributes they wish to disclose into a single aggregate signature. Finally, the
+user proves knowledge of the aggregate credential and their registered identity
+using a NIZK.
 
 The construction assumes that the registration authority ensures each user's
 public key is unique, and that the user holds the corresponding secret key.
-This prevents users from registering others' public keys and pooling
-credentials across identities.  The registration authority assigns each user
-exactly one tag, and signs only messages of the prescribed form: public keys
-and tags. A malicious registration authority could violate these, for instance
-by assigning duplicate tags or registering users under adversarially chosen
-identities. Addressing this is orthogonal to our contribution.  We assume that
-verifiers accept credentials only from the set of issuers with published public
-keys. This prevents a malicious user from being able to impersonate an issuer
-to an honest verifier. We now present the construction in full.
+This prevents users from registering others' public keys and pooling credentials
+across identities.  The registration authority assigns each user exactly one
+tag, and signs only messages of the prescribed form: public keys and tags. A
+malicious registration authority could violate these, for instance by assigning
+duplicate tags or registering users under adversarially chosen identities.
+Addressing this is orthogonal to our contribution.  We assume that verifiers
+accept credentials only from the set of issuers with published public keys. This
+prevents a malicious user from being able to impersonate an issuer to an honest
+verifier. We now present the construction in full.
 
-\paragraph{Setup.} During setup, the registration authority generates a key
-pair for the digital signature scheme and public parameters for the proofs used
+\paragraph{Setup.} During setup, the registration authority generates a key pair
+for the digital signature scheme and public parameters for the proofs used
 throughout the protocol. Each issuer independently generates a key pair for the
 aggregate tag based signature scheme. The registration authority's public key,
 each issuer's public key, and the public parameters are published.
@@ -33,8 +33,8 @@ parameters $\crs$. Each issuer then generates a key pair $(\isk{i}, \ipk{i})
 scheme~$\ATS$ and publishes~$\ipk{i}$.
 
 \paragraph{Registration.} During registration, the user establishes a long term
-pseudonymous identity with the registration authority. The user proves
-knowledge of the secret key corresponding to their public key, after which the
+pseudonymous identity with the registration authority. The user proves knowledge
+of the secret key corresponding to their public key, after which the
 registration authority binds that public key to a unique user tag. This tag is
 what later links the credentials a user obtains from different issuers to one
 another and to the user's registration: it is embedded in every credential
@@ -52,15 +52,15 @@ The user initialises their credential state as $(\Tag, \sk, \pk, \psi, \cred_1,
 \ldots, \cred_N)$, with $\cred_i = \varnothing$ for all $i \in [N]$.
 
 \paragraph{Issuance.} To obtain an attribute credential, the user authenticates
-their registered identity to an issuer. If the issuer is satisfied that the
-user possesses the requested attribute value, it issues an aggregate tag-based
+their registered identity to an issuer. If the issuer is satisfied that the user
+possesses the requested attribute value, it issues an aggregate tag based
 signature on that attribute.
 
-On input $(\Tag, \pk, \psi, \atv{i})$ from the user, the issuer checks that 
-$\psi$ verifies, and rejects if it does not.  Otherwise, the user next proves knowledge of $\sk$.  If this
-succeeds and the user holds attribute value $\atv{i}$, the issuer sends back
-$\signature_i \leftarrow \ATSsign(\isk{i}, \Tag, \atv{i})$. The user sets $\cred_i
-= (\atv{i}, \signature_i)$.
+On input $(\Tag, \pk, \psi, \atv{i})$ from the user, the issuer checks that
+$\psi$ verifies, and rejects if it does not.  Otherwise, the user next proves
+knowledge of $\sk$.  If this succeeds and the user holds attribute value
+$\atv{i}$, the issuer sends back $\signature_i \leftarrow \ATSsign(\isk{i},
+\Tag, \atv{i})$. The user sets $\cred_i = (\atv{i}, \signature_i)$.
 
 \paragraph{Aggregation.} Before presenting credentials, the user aggregates the
 signatures corresponding to the attributes they wish to disclose into a single
@@ -68,18 +68,18 @@ aggregate signature. Aggregating under a common tag lets credentials issued by
 different issuers be compressed into one short signature, so that presentation
 requires a single proof of possession rather than one per issuer.
 
-\paragraph{Presentation.} To prove possession of a collection of attributes,
-the user aggregates the corresponding credentials and produces a proof.  This
+\paragraph{Presentation.} To prove possession of a collection of attributes, the
+user aggregates the corresponding credentials and produces a proof.  This
 simultaneously demonstrates possession of a valid registration credential and
-that the aggregate signature verifies under the disclosed issuer public keys
-and attribute values, without linking the presentation to the user's identity,
-to their registration, or to any other presentation of the same underlying
+that the aggregate signature verifies under the disclosed issuer public keys and
+attribute values, without linking the presentation to the user's identity, to
+their registration, or to any other presentation of the same underlying
 credentials.
 
 The user has $(\Tag, \sk, \pk, \psi, \cred_1, \ldots, \cred_N)$, where $\cred_i
-= (\atv{i}, \signature_i)$.  To prove possession of attribute values $(\atv{i})_{i
-\in \ISSUERS}$ to a verifier providing a fresh message $\msg$, the user first
-constructs the aggregate signature as follows:
+= (\atv{i}, \signature_i)$.  To prove possession of attribute values
+$(\atv{i})_{i \in \ISSUERS}$ to a verifier providing a fresh message $\msg$, the
+user first constructs the aggregate signature as follows:
 %
 \begin{equation*}
 %
@@ -92,56 +92,52 @@ They then construct a proof of knowledge with the following parameters:
 \begin{equation}
 %
   \inst_1 = (\rapk, \ISSUERS, \{\ipk{i}, \atv{i}\}_{i \in \ISSUERS}), \qquad
-  \witness_1 = (\Tag, \sk, \pk, \psi, \signature),
+\witness_1 = (\Tag, \sk, \pk, \psi, \signature),
 %
 \end{equation}
 %
-\begin{equation}\label{eq:proof-abstract}
-\begin{gathered}
+\begin{equation}\label{eq:agg-creds-proof-abstract} \begin{gathered}
 %
   \rel_1 = \{\ (\sk, \pk) \leftarrow \DSgen(\secparam) \ \wedge \
-    \DSverify(\rapk, (\pk, \Tag), \psi) = 1 \\
+\DSverify(\rapk, (\pk, \Tag), \psi) = 1 \\
 %
-  \wedge\ \ATSverifyagg(\{\ipk{i}\}_{i \in \ISSUERS}, \Tag, \{\atv{i}\}_{i
-    \in \ISSUERS}, \signature) = 1\ \}.
+  \wedge\ \ATSverifyagg(\{\ipk{i}\}_{i \in \ISSUERS}, \Tag, \{\atv{i}\}_{i \in
+\ISSUERS}, \signature) = 1\ \}.
 %
-\end{gathered}
-\end{equation}
+\end{gathered} \end{equation}
 %
 
 \paragraph{Verification.} The verifier checks the proof with respect to the
-disclosed attributes and issuer public keys. The presentation is accepted if
-and only if the verification succeeds.
+disclosed attributes and issuer public keys. The presentation is accepted if and
+only if the verification succeeds.
 
-On input $(\{\atv{i}\}_{i \in \ISSUERS}, \msg, \algoproof)$, the verifier returns
-the output of the proof verification algorithm.
+On input $(\{\atv{i}\}_{i \in \ISSUERS}, \msg, \algoproof)$, the verifier
+returns the output of the proof verification algorithm.
 
-\begin{theorem}\label{thm:agg-creds-construction-security} If $\DS$ is an existentially unforgeable
-  digital signature scheme, $\ATS$ an existentially unforgeable aggregate tag
-  based signature scheme under tag based aggregation, and the proof system is
-  secure, then the above protocol securely realises ideal
+\begin{theorem}\label{thm:agg-creds-construction-security} If $\DS$ is an
+existentially unforgeable digital signature scheme, $\ATS$ an existentially
+unforgeable aggregate tag based signature scheme under tag based aggregation,
+and the proof system is secure, then the above protocol securely realises ideal
 functionality~$\idfu{\AAC}$.  \end{theorem}
 
 \paragraph{Extensions.} The construction supports several straightforward
 extensions.
 
 New issuers can join the system without impacting the construction. The
-aggregation of credentials and their presentation is agnostic to the number
-of issuers.
+aggregation of credentials and their presentation is agnostic to the number of
+issuers.
 
-The construction as described assumes each issuer certifies a single
-attribute type. To support an issuer certifying multiple attribute types
-under one key, the issuer instead signs $(\Tag, \att{} \| \atv{})$ rather
-than $(\Tag, \atv{})$, with $\att{}$ the attribute type and $\atv{}$ the
-attribute value.
+The construction as described assumes each issuer certifies a single attribute
+type. To support an issuer certifying multiple attribute types under one key,
+the issuer instead signs $(\Tag, \att{} \| \atv{})$ rather than $(\Tag,
+\atv{})$, with $\att{}$ the attribute type and $\atv{}$ the attribute value.
 
-The construction extends to epoch-based revocation. The registration
-authority signs triple $(\pk, \Tag, \epoch)$ rather than pair $(\pk, \Tag)$,
-where $\epoch$ identifies the current epoch, and issuers sign $(\Tag, \epoch
-\| \atv{})$ rather than $(\Tag, \atv{})$, tying each attribute credential to
-that epoch. At presentation, users additionally prove that their
-registration signature and aggregate signatures all correspond to the
-current epoch.
+The construction extends to epoch-based revocation. The registration authority
+signs triple $(\pk, \Tag, \epoch)$ rather than pair $(\pk, \Tag)$, where
+$\epoch$ identifies the current epoch, and issuers sign $(\Tag, \epoch \|
+\atv{})$ rather than $(\Tag, \atv{})$, tying each attribute credential to that
+epoch. At presentation, users additionally prove that their registration
+signature and aggregate signatures all correspond to the current epoch.
 
 We leave the study of accumulator-based revocation and the revocation of
 individual attribute credentials to future work.

@@ -2,10 +2,9 @@
 
 Anonymous credential schemes let a user prove they hold certain attributes
 without revealing who they are or anything about their undisclosed attribute
-values. The two main security properties are unlinkability, so two
-presentations of the same user cannot be tied to one another, and
-unforgeability, so only credentials that the user actually possesses will
-verify~\cite{EC:CamLys01}.
+values. The two main security properties are unlinkability, so two presentations
+of the same user cannot be tied to one another, and unforgeability, so only
+credentials that the user actually possesses will verify~\cite{EC:CamLys01}.
 
 Early anonymous credential schemes assume a single issuer certifying all
 attributes, creating a single entity responsible for all issuance, and able to
@@ -20,8 +19,8 @@ In decentralised identity systems, different authorities each typically certify
 a small number of attributes: age, residency, citizenship, possession of a
 driving licence, possession of a professional qualification. Credential systems
 with distributed issuance still require coordination between the issuers, which
-becomes impractical or even impossible if there are many issuers worldwide,
-with only a subset relevant to any one user.
+becomes impractical or even impossible if there are many issuers worldwide, with
+only a subset relevant to any one user.
 
 We give an aggregate anonymous credential scheme for this setting: credentials
 from independent, uncoordinated issuers combine into one compact credential,
@@ -31,45 +30,59 @@ A registration authority handles registration only, binding a user's key to a
 fresh tag. Every credential they later obtain carries that tag. To present
 attributes, they aggregate the relevant credentials and prove, in zero
 knowledge, that they know the key, hold a valid aggregate credential for the
-disclosed values, and that both share a tag. The tag-based binding is what
-stops different users' credentials being pooled, and lets honest users
-aggregate alone, without contacting any issuer again.
+disclosed values, and that both share a tag. The tag based binding is what stops
+different users' credentials being pooled, and lets honest users aggregate
+alone, without contacting any issuer again.  The registration authority is not a
+new party that we add to the model. Every anonymous credential scheme already
+assumes that a user's key is certified, so that credentials cannot be issued to
+a key the user does not control. That assumption is usually left implicit, or
+discharged by the issuer itself. We instead name the role, give it exactly one
+job, and give it no other capability. It binds a key to a tag at registration
+and does nothing else. It never sees an attribute value, is never contacted
+again by the user or by any issuer, and holds no state beyond the tags it has
+assigned. Making the role explicit is what makes the scheme efficient. Because
+every credential carries the same tag, a user can aggregate credentials from
+issuers that have never communicated, and a verifier can check the result
+without any proof that the credentials belong to the same person. The
+alternative, in a model with no registration authority, is to prove that binding
+during presentation, which is exactly the cost we avoid. The gain here comes
+from describing a participant that the setting already contains, rather than
+from removing one.
 
 \subsection{Related work}\label{sec:agg-creds-related}
 
 \paragraph{Single issuer anonymous credential systems.} An early anonymous
-credential system issues signatures on committed values, with security under
-the strong-RSA assumption~\cite{EC:CamLys01,SCN:CamLys02}. A later
-pairing-based construction works under the LRSW assumption, though signature
-size and verification complexity grow linearly with the number of attribute
-values signed~\cite{C:CamLys04}.  An extension supports a constrained form of
+credential system issues signatures on committed values, with security under the
+strong-RSA assumption~\cite{EC:CamLys01,SCN:CamLys02}. A later pairing based
+construction works under the LRSW assumption, though signature size and
+verification complexity grow linearly with the number of attribute values
+signed~\cite{C:CamLys04}.  An extension supports a constrained form of
 aggregation, but only in settings where all values are known ahead of
 time~\cite{FC:LeeLeeYun13}.
 
-Credentials built on the BBS+ signature scheme support selective disclosure in
-a single-issuer setting, with verification linear in the number of revealed
+Credentials built on the BBS+ signature scheme support selective disclosure in a
+single issuer setting, with verification linear in the number of revealed
 attributes, and form the basis of the ongoing IETF standardisation
 effort~\cite{EC:BonBoy04a,SCN:AuSusMu06}.
 
 Further improvements targeted efficiency. The Pointcheval-Sanders signature
 scheme introduces randomisable signatures with sequential aggregation, and
 proves unforgeability in the generic bilinear group model~\cite{RSA:PoiSan16}.
-These systems operate in a centralised, single-issuer setting where one
+These systems operate in a centralised, single issuer setting where one
 authority certifies all attributes. More recently, structure preserving
-signatures on equivalence classes enable very efficient privacy-preserving
+signatures on equivalence classes enable very efficient privacy preserving
 proofs, with security proven in the generic group model~\cite{JC:FucHanSla19}.
-Unlinkable proofs of knowledge over a subset of signed messages, building on
-the Pointcheval-Sanders signature scheme, achieve the same generic-group-model
+Unlinkable proofs of knowledge over a subset of signed messages, building on the
+Pointcheval-Sanders signature scheme, achieve the same generic group-model
 security~\cite{PKC:Sanders20}.
 
 \paragraph{Multi-issuer anonymous credential systems.} Other work decentralises
 the issuer, delegating issuance to sub issuers or distributing issuance
 responsibilities amongst several
 issuers~\cite{TCC:BCKL08,CCS:CamDriDub17,NDSS:SABMD19}. In these cases, the now
-decentralised issuer is still responsible for all attributes. While this
-reduces the trust placed in a central authority, it does not fully reflect real
-world scenarios where different authorities independently certify distinct
-attributes.
+decentralised issuer is still responsible for all attributes. While this reduces
+the trust placed in a central authority, it does not fully reflect real world
+scenarios where different authorities independently certify distinct attributes.
 
 A UC-secure, composable multi-issuer credential system supports selective
 disclosure and pseudonyms~\cite{AC:CDHK15}. Its construction is built from
@@ -77,33 +90,32 @@ several distinct building blocks, each analysed under its own assumptions,
 including $n$-BSDH and $n$-RootDH.
 
 \paragraph{Aggregate anonymous credentials.} Aggregate credentials aim to
-combine independently issued credentials into a single compact credential,
-while maintaining user privacy during presentations. Indexed aggregate
-signatures support anonymous credentials this way, with unforgeability under
-the $q$-Asymmetric Double Hidden Strong Diffie-Hellman assumption, and
-anonymity under DDH in the random oracle model~\cite{canard2011anonymous}.
+combine independently issued credentials into a single compact credential, while
+maintaining user privacy during presentations. Indexed aggregate signatures
+support anonymous credentials this way, with unforgeability under the
+$q$-Asymmetric Double Hidden Strong Diffie-Hellman assumption, and anonymity
+under DDH in the random oracle model~\cite{canard2011anonymous}.
 
 ART-Sign is a traceable aggregate signature scheme using randomisable tags as
 pseudonyms~\cite{SCN:HebPoi22}.  It achieves a showing cost essentially
 independent of both the number of attributes and the number of issuers and
 supports traceability by a designated authority. The construction requires
-issuers to be stateful, tracking which index they use per tag. A variant
-removes this at the cost that the issuer key that grows with a fixed attribute
-limit.
+issuers to be stateful, tracking which index they use per tag. A variant removes
+this at the cost that the issuer key that grows with a fixed attribute limit.
 
 We give an aggregate anonymous credential scheme achieving the same asymptotic
-costs as ART-Sign, but from more standard assumptions (m-BCDH, q-SDH rather
-than the generic group model) and without requiring issuers to be stateful or
-to bound the number of attributes in advance.
-Table~\ref{tab:related-comparison} compares our scheme with several single- and
-multi-issuer credential systems, reporting asymptotic complexities.
+costs as ART-Sign, but from more standard assumptions (m-BCDH, q-SDH rather than
+the generic group model) and without requiring issuers to be stateful or to
+bound the number of attributes in advance.  \Cref{tab:agg-creds-related}
+compares our scheme with several single- and multi-issuer credential systems,
+reporting asymptotic complexities.
 
 \begin{table}[t] \centering \small
  %
   \begin{tabular}{l|c|c|c|c}
  %
     \toprule Scheme & Assumptions & Multi-issuer & $|$cred$|$ & Prover cost \\
-    \midrule
+\midrule
   %
     \hline \cite{SCN:CamLys02} & sRSA & No & $O(1)$ & $O(n)$ \\
   %
@@ -118,17 +130,16 @@ multi-issuer credential systems, reporting asymptotic complexities.
     \cite{SCN:HebPoi22} & GGM & Yes & $O(1)$ & $O(k)$ \\
   %
     \textbf{Our scheme} & BCDH, m-BCDH, $q$-SDH & Yes & $O(1)$ & $O(k)$ \\
-    \bottomrule
+\bottomrule
   %
   \end{tabular}
   %
-  \caption{Comparison with existing single and multi-issuer anonymous
-    credential schemes. $n$ is the total number of attributes a scheme
-    supports, $k$ the number of attributes disclosed in a presentation,
-    $|$cred$|$ is the size of a full aggregated credential.
-\cite{canard2011anonymous} provides aggregate signatures under a shared index,
-but does not consider independent issuers in the sense we require.}
-\label{tab:related-comparison} \end{table}
+  \caption{Comparison with existing single and multi-issuer anonymous credential
+schemes. $n$ is the total number of attributes a scheme supports, $k$ the number
+of attributes disclosed in a presentation, $|$cred$|$ is the size of a full
+aggregated credential.  \cite{canard2011anonymous} provides aggregate signatures
+under a shared index, but does not consider independent issuers in the sense we
+require.} \label{tab:agg-creds-related} \end{table}
 
 \paragraph{Our contribution.} In contrast to classical anonymous credential
 schemes, we explicitly consider a decentralised setting in which each attribute
@@ -137,12 +148,10 @@ authorities are combined into one single compact credential.  Aggregation is
 performed locally by the user without interaction between issuers. The scheme
 supports selective disclosure of attribute values.
 
-\paragraph{Layout.} Section~\ref{sec:agg-creds-definitions} states the problem
-and formalises it as an ideal functionality.
-Section~\ref{sec:agg-creds-construction} gives an abstract construction from
-generic primitives.
-Section~\ref{sec:agg-creds-instantiation} gives a concrete instantiation,
-including our tag-based aggregate signature scheme, which
-Section~\ref{sec:agg-creds-security} proves secure.
-Section~\ref{sec:agg-creds-evaluation} evaluates performance, and
-Section~\ref{sec:agg-creds-summary} concludes.
+\paragraph{Layout.} \Cref{sec:agg-creds-definitions} states the problem and
+formalises it as an ideal functionality.  \Cref{sec:agg-creds-construction}
+gives an abstract construction from generic primitives.
+\Cref{sec:agg-creds-instantiation} gives a concrete instantiation, including our
+tag based aggregate signature scheme, which \Cref{sec:agg-creds-security} proves
+secure.  \Cref{sec:agg-creds-evaluation} evaluates performance, and
+\Cref{sec:agg-creds-summary} concludes.

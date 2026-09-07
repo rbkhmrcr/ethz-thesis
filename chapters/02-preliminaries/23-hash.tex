@@ -7,21 +7,20 @@ follows:
 %
 \begin{description}
 
-  \item[$\key \sample \hashgen(\secparam)$ :] The key generation algorithm
-    takes the security parameter as input, and outputs a key $\key$.
+  \item[$\key \sample \hashgen(\secparam)$ :] The key generation algorithm takes
+the security parameter as input, and outputs a key $\key$.
 
   \item[$y \leftarrow \hasheval(\key, x)$ :] The evaluation algorithm takes key
-    $\key$ and input $x \in \{0,1\}^*$, and outputs digest $y$ in the range
-    $\range$.
+$\key$ and input $x \in \{0,1\}^*$, and outputs digest $y$ in the range
+$\range$.
 
 \end{description}
 %
-We say $\Hash = (\hashgen, \hash)$ is a hash function family with range
-$\range$ if $\hasheval(\key, \cdot)$ is efficiently computable for every $\key$
-output by $\hashgen(\secparam)$. We use the standard syntax and security
-notions for hash functions~\cite{KatLin14}. When the key $\key$ is fixed and
-public, as is the case throughout this thesis, we write $\hash(x)$ for
-$\hasheval(\key, x)$.
+We say $\Hash = (\hashgen, \hash)$ is a hash function family with range $\range$
+if $\hasheval(\key, \cdot)$ is efficiently computable for every $\key$ output by
+$\hashgen(\secparam)$. We use the standard syntax and security notions for hash
+functions~\cite{KatLin14}. When the key $\key$ is fixed and public, as is the
+case throughout this thesis, we write $\hash(x)$ for $\hasheval(\key, x)$.
 
 \paragraph{Collision resistance.} Collision resistance requires that no
 efficient adversary can find two distinct inputs hashing to the same digest.
@@ -31,14 +30,14 @@ efficient adversary can find two distinct inputs hashing to the same digest.
   \begin{enumerate}
 
     \item The challenger generates $\key \sample \hashgen(\secparam)$ and sends
-      $\key$ to $\adv$.
+$\key$ to $\adv$.
 
     \item The adversary outputs $(x, x')$.
 
   \end{enumerate}
 
   $\adv$ wins the experiment if $x \neq x'$ and $\hasheval(\key, x) =
-  \hasheval(\key, x')$.
+\hasheval(\key, x')$.
 
 \end{experimentbox}
 
@@ -62,8 +61,8 @@ choosing.
   \begin{enumerate}
 
     \item The challenger generates $\key \sample \hashgen(\secparam)$, samples
-      $x \sample \{0,1\}^{\secparam}$, computes $y \leftarrow \hasheval(\key,
-      x)$, and sends $(\key, y)$ to $\adv$.
+$x \sample \{0,1\}^{\secparam}$, computes $y \leftarrow \hasheval(\key, x)$, and
+sends $(\key, y)$ to $\adv$.
 
     \item The adversary outputs $x'$.
 
@@ -90,8 +89,8 @@ second preimage resistance, so we do not use it separately.
 \paragraph{The random oracle model.} Our security proofs generally model a hash
 function as a random oracle: a function sampled uniformly at random from all
 functions with the given domain and range, to which every party, including the
-adversary, has oracle access. The random oracle answers each fresh query 
-with an independently and uniformly sampled output from the function's range, 
-records the resulting input and output pair, and returns the same output on
-repeated queries. In security proofs, a simulator may instead choose the output
-assigned to particular queries. We refer to this as programming the random oracle.
+adversary, has oracle access. The random oracle answers each fresh query with an
+independently and uniformly sampled output from the function's range, records
+the resulting input and output pair, and returns the same output on repeated
+queries. In security proofs, a simulator may instead choose the output assigned
+to particular queries. We refer to this as programming the random oracle.

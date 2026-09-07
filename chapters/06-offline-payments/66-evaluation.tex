@@ -1,114 +1,164 @@
 \section{Evaluation}\label{sec:offline-evaluation}
 
-We establish the practicality of the scheme by integrating the protocol into
-a mobile wallet and benchmarking its performance on both iOS and Android.
-Four entities are
-involved: a mobile phone, a secure element, an intermediary, and a central
-bank. We focus our evaluation on the mobile phone and the secure element, to
-establish whether they can implement the protocol efficiently given their
-hardware and storage limitations. The intermediary and the central bank need
-no such evaluation, since they are expected to run on servers or in the
-cloud. The mobile phone and secure element take on three different personas
-across the protocol: the holder, who receives funds during withdrawal, and
-the payer and payee, who exchange possession of a token during payment.
+We establish the practicality of the scheme by integrating the protocol into a
+mobile wallet and benchmarking it on both iOS and Android. Of the six
+participants of~\Cref{sec:offline-definitions}, only the user's wallet is
+resource constrained, so we evaluate the mobile phone and the secure element
+that make it up. The intermediary, the central bank, the registration authority,
+and the auditor are expected to run on servers. The phone and the secure element
+take four roles across the protocol: the holder who receives funds during a
+withdrawal, the payer and the payee who exchange possession of a token during a
+payment, and the depositor who redeems it.
 
 \subsection{Implementation}
 
-\paragraph{Secure element.} A fundamental aspect of a realistic benchmark is
-the choice of secure element. We consider four options: software emulation
-of the secure element in the wallet app, a TEE based secure element in the
-mobile platform, an HSM based secure element in the mobile platform, and an
-external secure element. We discard software emulation, since it would
-present unrealistically good performance by ignoring both the
-resource constrained environment of a real secure element and the
-communication overhead of talking to one. We discard TEE based secure
-elements as insufficiently secure, given their wider attack surface and
-history of compromise~\cite{TEEsBad}. We discard HSM based secure elements
-because those integrated into Apple and Android platforms do not implement
-our scheme and are not extensible. We therefore adopt an external secure
-element, implemented on smart cards.
+\paragraph{Secure element.} The choice of secure element determines what a
+benchmark measures. We discard three options. Software emulation would ignore
+both the constrained environment of a real device and the cost of communicating
+with it. TEE based secure elements are unsuitable for the reasons given
+in~\Cref{sec:offline-construction}. The HSM based secure elements integrated
+into the Apple and Android platforms are not extensible and do not implement our
+scheme. We therefore use an external secure element, realised as a Javacard
+applet on a smart card, which protects the key and the logic together and
+supports the elliptic curve operations the protocol requires~\cite{javacard}.
 
-A smart card is a physical card embedded with an integrated circuit that can
-process and securely store data, including a dedicated security component
-that protects sensitive data and cryptographic operations. We use
-Javacard, a Java based framework for smart cards, in which
-the protocol running on the secure element is implemented as an
-applet, a small application supported by a subset of the Java
-runtime~\cite{javacard}. Javacard applets communicate through Application Protocol Data
-Units (APDUs), which identify the applet function that should process a
-given request. The Javacard framework supports elliptic curve operations.
+The applet exposes two functions, receive and sign. Recall that
+the payer's card contributes a signature of knowledge over the payer's and the
+payee's commitments, $\com_i$ and $\com_{i+1}$. The card signs only triples $(v,
+\com_i, \com_{i+1})$ in which $\com_i$ is the commitment it generated when it
+received the token, and, once that token is spent, only against the single
+destination $\com_{i+1}$ it first signed. The first constraint prevents a token
+that has already been passed on from being spent again, and the second prevents
+the current token from being sent to two recipients. It is this state machine,
+rather than any property of the cryptography, that realises the single-use
+enforcement the construction attributes to the secure element. Repeated
+invocations of sign on an unchanged $\com_{i+1}$ are permitted, so that
+errors on the NFC channel, which are not uncommon, do not cost the user a
+payment. Invoking receive deletes the stored commitment and generates a
+new one, which frees the slot but destroys any token held in it, so a device
+that resets a slot to escape the single destination rule loses the token in
+doing so. A single card holds several tokens by partitioning this state into
+slots, with each message carrying a slot identifier.
 
-Our smart card implementation exposes two functions, receive and
-sign.
-
-Recall that, with the smart card's help, the payer produces a signature of
-knowledge over two commitments, the payer's and the payee's ($C_i$ and
-$C_{i+1}$). To prevent double spending, the
-smart card is programmed to sign only $(v, C_i, C_{i+1})$ triples such that
-$C_i$ is the commitment the card generated when it received the token, and
-to sign against only a single destination commitment $C_{i+1}$ for that
-token once it is spent. The first constraint ensures the card signs off
-payments only for the token last received, avoiding re-spending of past
-ones. The second ensures the current token can be transferred to only one
-recipient. To tolerate errors on the NFC channel between the smart card and
-the mobile phone, which are not uncommon, we permit multiple invocations of
-sign provided the supplied destination commitment $C_{i+1}$ never
-changes, all of which generate valid signatures of knowledge for the same
-payer/payee commitment pair. The card is reset by invoking receive,
-which deletes the previous commitment and generates a new one. We introduce
-the concept of a slot, each able to hold one pair of payer/payee
-commitments, to let a single card handle multiple tokens. The protocols
-above simply need to be augmented with a slot identifier.
-
-\paragraph{Mobile wallet.} The mobile wallet is an app that implements the
-functionality needed for a user to withdraw and transfer tokens. It handles
-communication with the intermediary, which runs as a cloud service, between
-users during a payment, and with the smart card. System parameters and
-credentials for each participant are generated by a registration authority,
-also exposed as a cloud service.
+\paragraph{Mobile wallet.} The wallet is an application that withdraws and
+transfers tokens, communicating with the smart card over NFC, with the payee
+over BLE, and with the intermediary and the registration authority, both exposed
+as cloud services, over HTTPS.
 
 \subsection{Protocols}
 
-\paragraph{Withdraw.} Withdrawing a token involves local invocations of the
-mobile function, NFC communication between the mobile phone and the smart
-card, and a single remote call to the intermediary, which in turn contacts
-the central bank. The protocol starts with the holder scanning their card to
-obtain values $s$ and $c$, using these to generate a withdrawal request and
-issuing it to the REST endpoint of their intermediary over HTTPS. The full
-message sequence is given in Figure~\ref{fig:offline/withdraw-sequence}.
+Withdrawal consists of local computation on the phone, an NFC exchange with the
+card to obtain $s_0$ and $\com_0$, and a single HTTPS call to the intermediary,
+which contacts the central bank on the user's behalf.
+Figure~\ref{fig:offline/withdraw-sequence} gives the message sequence.
 
-\paragraph{Payment.} Before the offline payment protocol can start, payer and payee negotiate the
-terms of the payment and set up a BLE channel. The payee displays a request,
-base64-encoded as a QR code, containing the payment terms and a BLE service
-identifier, and starts a BLE GATT server advertising that service. Under the
-service, a Notify characteristic sends data to the payer, and a
-Write without response characteristic receives data from the payer.
-The QR code also carries the cryptographic material for a secure BLE
-exchange based on Diffie-Hellman. The payer scans the QR code to retrieve
-the BLE information and payment details and, if they agree, completes the
-Diffie-Hellman exchange over BLE and confirms the payment terms. All
-subsequent messages, including this one, are encrypted and CBOR-encoded. The
-full message sequence is given in Figure~\ref{fig:offline/payment-sequence}.
+A payment is preceded by an out of band negotiation of its terms. The payee
+displays a QR code carrying the payment terms, a BLE service identifier, and the
+material for a Diffie-Hellman exchange, and advertises a BLE GATT service with a
+Notify characteristic for data sent to the payer and a Write without response
+characteristic for data received from them. The payer scans the code, completes
+the exchange and confirms the terms, after which every message is encrypted and
+CBOR encoded. Figure~\ref{fig:offline/payment-sequence} gives the message
+sequence for the payment itself.
+
+\paragraph{Interrupted payments.} A payment that stops part way leaves the two
+wallets in one of two states, and neither loses value. If the payer's card has
+signed but the payee never received the payment, the card remains locked to the
+destination it signed, and the payer can retry against that same destination
+until it succeeds; the token is unspendable elsewhere in the meantime, and is
+recovered by completing the payment rather than by any repair step. If the payee
+stored the token but the acknowledgement back to the payer was lost, the payer's
+card still holds $\com_i$ and has not deleted it, but it will sign only the
+destination it already signed, so it cannot spend the token a second time.  The
+payee holds a token that verifies and can spend or deposit it. In both cases the
+resolution is a retry over NFC or BLE.
 
 \subsection{Results}
 
-We implement the protocol on Android (Samsung Galaxy A34, Android 14) and
-Apple (iPhone 13 mini, iOS 17.6.1) platforms, both running a crypto library
-built with Go 1.21.8. We benchmark two versions of the protocol, with and
-without auditing, i.e. with and without verifiable encryption of the
-payer's identifier for the auditor, to clearly show the overhead auditing
-imposes. The smart card is an NXP 1ID white plastic card with a Smart MX
-D600 chip (400\,KiB of available memory) running JCOP 4.5 OS with NXP's
-JCOPx extensions at version 1.1.4. Card and phone communicate over NFC.
+We benchmark on a Samsung Galaxy A34 running Android 14 and an iPhone 13 mini
+running iOS 17.6.1, both using a cryptographic library built with Go 1.21.8.
+The scheme is instantiated over the BLS12-381 pairing system, at roughly $128$
+bits of security; the construction relies only on the bilinearity of the
+pairing, so other pairing systems would serve. The secure element is an NXP 1ID
+white plastic card with a Smart MX D600 chip offering $400\,\mathrm{KiB}$ of
+available memory, running JCOP 4.5 with NXP's JCOPx extensions at version 1.1.4,
+and communicating with the phone over NFC. We benchmark the protocol both with
+and without the verifiable encryption of the payer's identifier, to separate the
+cost of auditing from the cost of the payment itself.
 
-Withdrawal and the payer side of a payment both complete in under half a
-second, and the smart card authorises a payment in under $400\,\mathrm{ms}$.
-Payee verification grows linearly with the number of hops, since each hop
-contributes one signature of knowledge and one audit proof to check, and even a
-chain of 32 hops verifies in under a second. Auditing adds no overhead for the
-payer, whose audit ciphertext and proof are computed once regardless of chain
-length, and a 10 to 20\% overhead for the payee, who checks one additional
-proof per hop.
+Table~\ref{tab:offline-timings} reports the cost of each operation on both
+platforms. Withdrawal and the payer side of a payment each complete in under
+half a second, of which the smart card accounts for under $400\,\mathrm{ms}$.
+Auditing adds no measurable overhead for the payer, whose audit ciphertext and
+proof are computed once regardless of how long the chain already is, and are
+folded into the transfer signature as described
+in~\Cref{sec:offline-instantiation}.
+
+Table~\ref{tab:offline-scaling} reports the payee's cost as the chain grows.
+Verification is linear in the number of hops, since each hop contributes one
+signature of knowledge and one audit proof to check, and a chain of $32$ hops
+still verifies in under a second. Auditing costs the payee a further $10$ to
+$20\%$, one additional proof per hop. The transcript $\algo{hist}_n$ grows
+linearly in the same way, as it does in the transferable ecash schemes
+of~\Cref{sec:offline-related} that identify only the double spender.
+
+Table~\ref{tab:offline-storage} reports the resources the protocol asks of the
+smart card. The applet and its per slot state fit comfortably within the card's
+memory, leaving room for a user to hold several tokens at once.
+
+\begin{table}[t] \centering \small \begin{tabular}{l|rr|rr} \toprule &
+\multicolumn{2}{c|}{Android} & \multicolumn{2}{c}{iOS} \\ 
+%
+Operation & no audit & audit & no audit & audit \\
+%
+ \midrule Withdrawal, device            & & & & \\ 
+% FILL
+ Withdrawal, smart card        & & & & \\ 
+% FILL
+ Payment, payer device & & & & \\ 
+% FILL 
+Payment, payer smart card     & & & & \\
+ % FILL 
+ Payment, payee device, 1 hop  & & & & \\ 
+% FILL 
+Deposit, device               & & & & \\ 
+% FILL
+Deposit, smart card           & & & & \\ 
+% FILL 
+\bottomrule \end{tabular} \caption{Wall clock cost in milliseconds of each
+protocol operation, with and without the verifiable encryption of the payer's
+identifier for the auditor.  Smart card figures include the NFC round trip. Each
+figure is the mean of $[\,\cdot\,]$ runs, with the standard deviation in
+parentheses.} \label{tab:offline-timings} \end{table}
+
+\begin{table}[t] \centering \small \begin{tabular}{l|rrrrrr} \toprule Hops $n$ &
+1 & 2 & 4 & 8 & 16 & 32 \\ \midrule Payee verification, no audit (ms) & & & & &
+& \\ 
+% FILL
+ Payee verification, audit (ms)    & & & & & & \\
+  % FILL 
+  Transcript $|\algo{hist}_n|$ (B)  & & & & & & \\ 
+% FILL
+ \bottomrule \end{tabular} \caption{Scaling of the payee's verification cost and
+of the token transcript with the number of hops the token has taken since
+withdrawal. Verification figures are for Android, and iOS follows the same
+trend. Each figure is the mean of $[\,\cdot\,]$ runs.}
+\label{tab:offline-scaling} \end{table}
+
+\begin{table}[t] \centering \small \begin{tabular}{l|r} \toprule Quantity &
+Value \\ \midrule Applet code size  & \\ 
+% FILL 
+Persistent state per slot & \\
+ % FILL 
+ Slots available in $400\,\mathrm{KiB}$ & \\ 
+% FILL 
+Payment message, payer to payee & \\ 
+% FILL 
+Per hop increment to $\algo{hist}$ & \\
+ % FILL 
+ \bottomrule \end{tabular} \caption{Storage and communication requirements on
+the smart card and the NFC and BLE channels. A slot holds the state for one
+token.} \label{tab:offline-storage} \end{table}
 
 These figures sit comfortably within the latency expected of an everyday
 payment, on hardware that is already deployed. The comparison that matters here
@@ -119,12 +169,11 @@ operations that the proofs of~\Cref{sec:offline-instantiation} require, so
 without the split the scheme would not run at all. The split is what makes the
 cost on the card comparable to that of an ordinary digital signature.
 
-\paragraph{State storage requirements.} The issuer must store two lists: all
-issued tokens and all deposited tokens. The list of deposited tokens is
-needed to detect double spending and can never be pruned outright, though
-mechanisms such as logical or wall clock timestamps that bound a token's
-validity span allow it to be pruned once that span elapses. The list of
-issued tokens is kept only to support monetary policy, and is not required
-by the protocol itself. Intermediaries typically store user accounts to
-determine reserve requirements, again not a protocol requirement, and
-users store the payment chains of any unspent tokens they hold.
+\paragraph{State storage requirements.} The central bank stores two lists, of
+issued and of deposited tokens. The list of deposited tokens is needed to detect
+double spending and cannot be pruned outright, though the epoch based expiry
+of~\Cref{sec:offline-construction} bounds a token's validity and so allows
+entries to be pruned once that span elapses. The list of issued tokens supports
+monetary policy and is not required by the protocol. Intermediaries store user
+accounts to determine reserve requirements, again not a protocol requirement,
+and users store the transcripts of any unspent tokens they hold.

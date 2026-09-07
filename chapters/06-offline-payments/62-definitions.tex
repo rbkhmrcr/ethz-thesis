@@ -2,8 +2,8 @@
 
 \subsection{Offline payments}
 
-An offline payment system involves five types of participants: the central
-bank, intermediaries, users, a registration authority, and an auditor.
+An offline payment system involves five types of participants: the central bank,
+intermediaries, users, a registration authority, and an auditor.
 
 The central bank issues tokens to users and manages the reserves of the
 intermediaries. Issuance is triggered by a withdrawal request from an
@@ -22,13 +22,13 @@ bank deposits in exchange for the token. A deposit succeeds only if the token
 was issued by the central bank, was initiated by its owner, and had not
 previously been deposited.
 
-Intermediaries maintain users' bank deposit accounts and mediate the
-interaction of users with the central bank. They also onboard users into the
-system, opening accounts for them and helping them obtain long term credentials
-from the registration authority. The registration authority issues these
-long term credentials, which users subsequently use to authorise and
-authenticate payments. The auditor is authorised to trace a fraudulent offline
-payment, such as one that double spends a token, to its originator.
+Intermediaries maintain users' bank deposit accounts and mediate the interaction
+of users with the central bank. They also onboard users into the system, opening
+accounts for them and helping them obtain long term credentials from the
+registration authority. The registration authority issues these long term
+credentials, which users subsequently use to authorise and authenticate
+payments. The auditor is authorised to trace a fraudulent offline payment, such
+as one that double spends a token, to its originator.
 
 We instantiate each user's wallet with a mobile device and a secure element,
 which together let the user perform offline payments securely and accountably.
@@ -39,49 +39,50 @@ participants to learn information about offline payments.  The registration
 authority is additionally trusted to assign each user a unique identifier, to
 generate a correctly formed credential that will be accepted by all other
 participants, and to issue that credential only following well established KYC
-processes. Users may be arbitrarily malicious: they may collude to forge
-tokens, double spend them, or steal the tokens of honest users, and may collude
-with other participants to undermine the privacy of honest users. Users have
-full control of their mobile devices, but we assume they cannot easily tamper
-with their secure elements. The auditor is fully trusted to inspect only
-fraudulent payments and to deanonymise only misbehaving users. We consider
-static corruption throughout: the adversary fixes the set of corrupt
-participants before any protocol interaction takes place.
+processes. Users may be arbitrarily malicious: they may collude to forge tokens,
+double spend them, or steal the tokens of honest users, and may collude with
+other participants to undermine the privacy of honest users. Users have full
+control of their mobile devices, but we assume they cannot easily tamper with
+their secure elements. The auditor is fully trusted to inspect only fraudulent
+payments and to deanonymise only misbehaving users. We consider static
+corruption throughout: the adversary fixes the set of corrupt participants
+before any protocol interaction takes place.
 
 An offline payment scheme is defined by the following algorithms. Account
-creation is an operation of the intermediary rather than of the scheme, so we
-do not give it as an algorithm here, though the ideal functionality below
-exposes an interface for it.
+creation is an operation of the intermediary rather than of the scheme, so we do
+not give it as an algorithm here, though the ideal functionality below exposes
+an interface for it. Throughout, we suppress the public parameters, the long
+term credential, and the counterparty's inputs from the algorithm signatures,
+and name only the state that distinguishes one call from another.
 
 \begin{description}
 
   \item[$(\pk_{\algo{cb}}, \ck, \pk_\auditor, \rapk) \leftarrow
-    \OPgen(\secparam)$ :] The setup algorithm, on input security parameter
-    $\secparam$, generates the public keys of the central bank, the auditor,
-    and the registration authority, together with a public commitment key
-    $\ck$.
+\OPgen(\secparam)$ :] The setup algorithm, on input security parameter
+$\secparam$, generates the public keys of the central bank, the auditor, and the
+registration authority, together with a public commitment key $\ck$.
 
   \item[$\cred \leftarrow \OPregister(\rask)$ :] The registration algorithm, on
-    input the registration authority's secret key $\rask$, provisions the
-    user's secure element and outputs long term credential $\cred$.
+input the registration authority's secret key $\rask$, provisions the user's
+secure element and outputs long term credential $\cred$.
 
   \item[$T_0 \leftarrow \OPwithdraw(v_0)$ :] The withdrawal algorithm, on input
-    value $v_0$, outputs token $T_0$ of that value, obtained by the user from
-    the central bank through their intermediary.
+value $v_0$, outputs token $T_0$ of that value, obtained by the user from the
+central bank through their intermediary.
 
   \item[$p_i \leftarrow \OPexecute(v, s_i, \com_i, \algo{hist}_i)$ :] The
-    payment algorithm, on input a token of value $v$ with randomness $s_i$,
-    pseudonym $\com_i$, and history $\algo{hist}_i$, outputs payment $p_i$
-    transferring the token to the payee.
+payment algorithm, on input a token of value $v$ with randomness $s_i$,
+pseudonym $\com_i$, and history $\algo{hist}_i$, outputs payment $p_i$
+transferring the token to the payee.
 
   \item[$\{0,1\} \leftarrow \OPdeposit(\tau_n, \algo{hist}_n)$ :] The deposit
-    algorithm, on input token $\tau_n$ and its history $\algo{hist}_n$, returns
-    1 if the token is redeemed for commercial bank money and 0 otherwise.
+algorithm, on input token $\tau_n$ and its history $\algo{hist}_n$, returns 1 if
+the token is redeemed for commercial bank money and 0 otherwise.
 
-  \item[$\algo{uid}^* \leftarrow \OPidentify(d_n, d_m)$ :] The identification
-    algorithm, on input two conflicting deposit requests $d_n$ and $d_m$ for
-    the same original token, outputs the identifier $\algo{uid}^*$ of the
-    double spender.
+  \item[$\algo{DS} \leftarrow \OPidentify(d_n, d_m)$ :] The identification
+algorithm, on input two conflicting deposit requests $d_n$ and $d_m$ for the
+same original token, outputs the set $\algo{DS}$ of identifiers of the users who
+double spent it.
 
 \end{description}
 
@@ -94,180 +95,160 @@ informally below and formalised in~\Cref{sec:ideal-func}.
 \subsection{Security goals}
 
 An offline payment system must protect against forgery, token theft, and double
-spending, and must preserve the privacy of users against the central bank and
-the intermediaries. More specifically, it must ensure:
+spending, must conserve value, and must preserve the privacy of users against
+the central bank and the intermediaries. More specifically, it must ensure:
 
 \begin{description}
 
   \item[Unforgeability.] An honest payee should not be tricked, during a
-    payment, into accepting a token that was not issued by the central bank.
-    Similarly, the honest but curious central bank will not declare a deposit
-    successful unless it previously issued the corresponding token.
+payment, into accepting a token that was not issued by the central bank.
+Similarly, the honest but curious central bank will not declare a deposit
+successful unless it previously issued the corresponding token.
 
   \item[Theft prevention.] A malicious payer should not be able to convince an
-    honest payee to accept a token the payer does not own. Likewise, a
-    malicious user should not be able to successfully deposit a token they do
-    not own.
+honest payee to accept a token the payer does not own. Likewise, a malicious
+user should not be able to successfully deposit a token they do not own.
 
   \item[Double spending detection and identification.] An honest user uses a
-    token only once, in either a payment or a deposit, after which the token is
-    deleted. A malicious user may instead use a token in multiple payments or
-    deposits. A secure offline payment system must ensure that such double
-    spending is swiftly detected at the time of deposit, and that the malicious
-    user is identified by the authorised auditor.
+token only once, in either a payment or a deposit, after which the token is
+deleted. A malicious user may instead use a token in multiple payments or
+deposits. A secure offline payment system must ensure that such double spending
+is swiftly detected at the time of deposit, and that the malicious user is
+identified by the authorised auditor.
+
+  \item[Conservation of value.] The total value in the system must not change
+other than through issuance and redemption by the central bank. No sequence of
+payments may create value, and the value credited on deposit must be the value
+that was withdrawn.
 
   \item[Non-frameability.] An honest user should never be accused of double
-    spending by the authorised auditor, even if every other user, the
-    intermediaries, and the central bank collude.
+spending by the authorised auditor, even if every other user, the
+intermediaries, and the central bank collude.
 
   \item[User anonymity.] Only the intermediary of an honest user making a
-    withdrawal should learn their identity. During a payment, the history of the
-    token being transferred leaks no information about the honest users
-    involved in previous payments beyond what is unavoidably revealed: namely,
-    that the payee of the last payment is the payer of the current one, and a
-    growing list of random values fixed throughout the token's lifetime. We
-    assume the payer and the payee know each other, and that this knowledge is
-    not derived from the payment transcript. The same holds for deposits and
-    withdrawals: the intermediary of a withdrawing or depositing user knows
-    their identity, but the history of a deposited token leaks nothing about
-    the honest users involved in payments preceding the deposit, beyond the
-    list of random values associated with the token and the intermediary that
-    identifies the depositor for accounting purposes.
+withdrawal should learn their identity. During a payment, the history of the
+token being transferred leaks no information about the honest users involved in
+previous payments beyond what is unavoidably revealed. What is unavoidably
+revealed is that the payee of the last payment is the payer of the current one,
+together with a growing list of random values fixed throughout the token's
+lifetime. We assume the payer and the payee know each other, and that this
+knowledge is not derived from the payment transcript. The same holds for
+deposits and withdrawals. The intermediary of a withdrawing or depositing user
+knows their identity, but the history of a deposited token leaks nothing about
+the honest users involved in payments preceding the deposit, beyond that same
+list of random values and the intermediary that identifies the depositor for
+accounting purposes.
 
-  \item[Token unlinkability.] The intermediaries and the central bank should
-    not be able to link the withdrawal of an honest user to a deposit, beyond
-    what is revealed by the value of the withdrawal and the deposit, even if
-    the intermediaries and the central bank collude with every other user in
-    the system.
-
-\end{description}
-
-\subsection{Joint proofs of knowledge}\label{sec:joint-pok-def}
-
-Each payment carries a proof that the payer holds a credential on the
-identifier committed in their pseudonym, and knows the secret key that
-credential is bound to. The secret key never leaves the secure element, and the
-secure element does not have the compute to produce the whole proof. We
-therefore need a proof system in which two provers cooperate to produce a
-single proof for a relation whose witness is split between them, with the
-weaker prover holding only a small part of it.
-
-We call this a joint proof of knowledge. It is a proof system for a relation
-$\rel$ over instance $\inst$ and witness $\witness = (\witness_0,
-\witness_1)$, where $\witness_0$ is held by prover $\algo{Prv}_0$ and
-$\witness_1$ by prover $\algo{Prv}_1$. It is defined by the following
-algorithms.
-
-\begin{description}
-
-  \item[$\crs \sample \algo{JGen}(\secparam)$ :] The setup algorithm, on input
-    security parameter $\secparam$, outputs a common reference string $\crs$.
-
-  \item[$\Pi \sample \algo{JProve}_0(\crs, \inst, \witness_0) \leftrightarrow
-    \algo{JProve}_1(\crs, \inst, \witness_1)$ :] The proving protocol, run
-    between $\algo{Prv}_0$ on input witness share $\witness_0$ and
-    $\algo{Prv}_1$ on input witness share $\witness_1$, with $\algo{Prv}_1$
-    outputting proof $\Pi$.
-
-  \item[$\{0,1\} \leftarrow \algo{JVerify}(\crs, \inst, \Pi)$ :] The
-    verification algorithm, on input $\crs$, instance $\inst$, and proof $\Pi$,
-    returns 0 or 1.
+  \item[Token unlinkability.] The intermediaries and the central bank should not
+be able to link the withdrawal of an honest user to a deposit, beyond what is
+revealed by the value of the withdrawal and the deposit, even if the
+intermediaries and the central bank collude with every other user in the system.
 
 \end{description}
-
-A joint proof of knowledge should satisfy the following, in addition to the
-usual properties of a non-interactive proof system.
-
-\paragraph{Correctness.} If both provers follow the protocol on a witness
-$\witness = (\witness_0, \witness_1)$ with $\rel(\inst, \witness) = 1$, then
-$\algo{JVerify}(\crs, \inst, \Pi) = 1$.
-
-\paragraph{Simulation extractability.} From any proof accepted by
-$\algo{JVerify}$, a witness $\witness$ for $\inst$ can be extracted, and this
-holds even after the adversary has observed simulated proofs of its own
-choosing. This is the property the security proof relies on, since the
-simulator must extract the payer's identifier and credential from a payment
-produced by a corrupt user.
-
-\paragraph{Witness hiding against a co-prover.} $\algo{Prv}_1$ learns nothing
-about $\witness_0$ beyond a commitment to it and the randomness of that
-commitment. This is what lets the mobile device carry out the bulk of the
-proof without ever holding the user's secret key, which is the point of the
-split: the device is under the user's full control, while the secure element
-is not.
-
-We instantiate this primitive over BBS+ signatures
-in~\Cref{sec:offline-instantiation}.
 
 \subsection{Ideal functionality $\idfu{\algo{op}}$}\label{sec:ideal-func}
 
 We define security for the offline payment protocol through an ideal
 functionality $\idfu{\algo{op}}$, which represents an incorruptible trusted
-party that receives the inputs of each protocol task and returns the
-prescribed outputs. $\idfu{\algo{op}}$ interacts with the ideal world simulator
-$\simu$ and with the system's participants. These are the users, who act as
-both payers and payees, the intermediaries, the registration authority, the
-central bank, and the auditor. Each user is represented as a pair consisting
-of a mobile device and a secure element, so that an individual holding
-multiple bank accounts is modelled as multiple such users, one per account.
-The registration authority, the central bank, and the intermediaries are
-honest but curious, so $\simu$ learns their inputs and outputs by default. We
-consider a static corruption model, in which $\simu$ corrupts the devices and
-secure elements of its choosing before they interact with $\idfu{\algo{op}}$.
-The formal description is given in Figure~\ref{fig:ideal-func}. We summarise
-each interface below.
+party that receives the inputs of each protocol task and returns the prescribed
+outputs. We have the outputs of the honest parties and $\adv$ during an
+execution of protocol $\algo{prot}$ in the real world captured in
+$\textsc{Exec}_{\algo{prot},\adv}(\secparam)$, and the outputs of the honest
+parties and $\simu$ interacting with $\idfu{\algo{op}}$ in the ideal world
+captured by $\textsc{Exec}_{\idfu{\algo{op}},\simu}(\secparam)$. We then say
+that $\algo{prot}$ securely realises $\idfu{\algo{op}}$ if for every PPT
+adversary $\adv$ there exists a PPT simulator $\simu$ such that
+$\textsc{Exec}_{\algo{prot},\adv}(\secparam)$ is computationally
+indistinguishable from $\textsc{Exec}_{\idfu{\algo{op}},\simu}(\secparam)$. This
+is a standalone simulation based definition rather than a universally composable
+one, and the distinction matters: our simulator extracts from some proofs by
+rewinding the adversary, which a universally composable simulator may not do. We
+return to this point in~\Cref{sec:offline-security}.
 
-\paragraph{Corrupt.} $\simu$ calls this to compromise a user's mobile device
-or secure element. We assume that corrupting the secure element also corrupts
-the device, since compromising a secure element is significantly harder in
-practice.
+$\idfu{\algo{op}}$ interacts with $\simu$ and with the system's participants.
+These are the users, who act as both payers and payees, the intermediaries, the
+registration authority, the central bank, and the auditor. Each user is
+represented as a pair consisting of a mobile device and a secure element, so
+that an individual holding multiple bank accounts is modelled as multiple such
+users, one per account.  The registration authority, the central bank, and the
+intermediaries are honest but curious, so $\simu$ learns their inputs and
+outputs by default. We consider a static corruption model, in which $\simu$
+corrupts the devices and secure elements of its choosing before they interact
+with $\idfu{\algo{op}}$.  The formal description is given
+in~\Cref{fig:ideal-func}. We summarise each interface below.
+
+\paragraph{Corrupt.} $\simu$ calls this to compromise a user's mobile device or
+secure element. We assume that corrupting the secure element also corrupts the
+device, since compromising a secure element is significantly harder in practice.
 
 \paragraph{Create.} An intermediary calls this to open an account for a user
 with an initial value. Each user may hold only one account in the system.
 
-\paragraph{Register.} The registration authority calls this to enrol a user
-who already holds an account. A user can be registered only once.
+\paragraph{Register.} The registration authority calls this to enrol a user who
+already holds an account. A user can be registered only once.
 
-\paragraph{Withdraw.} An intermediary calls this on behalf of one of its
-users, indicating the value to withdraw. If the user's account and the
-intermediary's reserves hold enough value, the user obtains a token
-identified by a fresh random number, ready for use in subsequent offline
-payments. This identifier is kept hidden from the intermediary and the
-central bank, to ensure a withdrawal cannot later be linked to a deposit.
-$\simu$ learns it whenever the user's device or secure element is corrupt,
-and otherwise learns only the user's identity and the withdrawn value,
-reflecting that the intermediary and the central bank are honest but
-curious.
+\paragraph{Withdraw.} An intermediary calls this on behalf of one of its users,
+indicating the value to withdraw. If the user's account and the intermediary's
+reserves hold enough value, the user obtains a token identified by a fresh
+random number, ready for use in subsequent offline payments. This identifier is
+kept hidden from the intermediary and the central bank, to ensure a withdrawal
+cannot later be linked to a deposit. It is chosen by $\simu$ whenever the user's
+secure element is corrupt, since it is the secure element that generates it in
+the protocol.  $\simu$ learns it whenever either the device or the secure
+element is corrupt, since the device sees it too, and otherwise learns only the
+user's identity and the withdrawn value, reflecting that the intermediary and
+the central bank are honest but curious.
 
-\paragraph{Execute.} A registered user calls this to pay another user,
-transferring ownership of a token they hold. $\idfu{\algo{op}}$ checks that
-the payee is willing to accept the payment, and that the token genuinely
+\paragraph{Execute.} A registered user calls this to pay another registered
+user, transferring ownership of a token they hold. $\idfu{\algo{op}}$ checks
+that the payee is willing to accept the payment, and that the token genuinely
 belongs to the payer and has the claimed value. If so, the payee receives the
 token under a fresh identifier that lets them transfer it onward in turn. A
-corrupt payee may choose to accept an invalid token, but can never pass it on
-to an honest user, since only genuinely valid tokens are recorded as owned.
+corrupt payee may choose to accept an invalid token, but can never pass it on to
+an honest user, since only genuinely valid tokens are recorded as owned.
 $\simu$ learns the identities of the payer and payee only when one of their
-devices or secure elements is corrupt, and otherwise learns only the value
-and the token's history. An unregistered payee can accept a payment, but can
-never transfer it onward.
+devices or secure elements is corrupt, and otherwise learns only the value and
+the token's history.
 
-\paragraph{Deposit.} An intermediary calls this to let a registered user
-redeem a token for commercial bank money. $\idfu{\algo{op}}$ checks that the
-token genuinely belongs to the depositing user, has the claimed value, and
-has not already been deposited: a second deposit of the same withdrawal
-signals double spending and the call fails. Otherwise, the user's account and
-the intermediary's reserves are credited accordingly. $\simu$ learns the
-deposit information by default, since the central bank and the intermediary
-are honest but curious.
+\paragraph{Deposit.} An intermediary calls this to let a registered user redeem
+a token for commercial bank money. $\idfu{\algo{op}}$ checks that the token
+genuinely belongs to the depositing user, has the claimed value, and has not
+already been deposited: a second deposit of the same withdrawal signals double
+spending and the call fails. Otherwise, the user's account and the
+intermediary's reserves are credited accordingly, and by exactly the value that
+was withdrawn, which is what gives conservation of value. $\simu$ learns the
+deposit information by default, since the central bank and the intermediary are
+honest but curious.
 
-\paragraph{Identify.} The auditor calls this with the identifier of a
-withdrawn token, to find out whether it has been double spent. If it has,
-$\idfu{\algo{op}}$ identifies the double spender as the owner of the token at
-the point where two conflicting deposit chains diverge, and returns this to
-the auditor and the central bank.
+\paragraph{Identify.} The auditor calls this with the identifier of a withdrawn
+token, to find out whether it has been double spent. If it has,
+$\idfu{\algo{op}}$ identifies each double spender as the owner of the token at a
+point where two deposit chains for it diverge, and returns the resulting set to
+the auditor and the central bank. Settlement of the double spent value against
+those users is an operation of the central bank rather than of the scheme, so
+$\idfu{\algo{op}}$ reports the responsible parties and does not model the
+accounting that follows.
+
+\paragraph{How the goals are captured.} Each informal goal above corresponds to
+a specific behaviour of $\idfu{\algo{op}}$. Unforgeability is the check in
+$\OPdeposit$ and $\OPexecute$ that $\algo{tokens}[\vec{\rho}]$ is defined, so
+that only tokens recorded at a prior $\OPwithdraw$ can be spent or redeemed.
+Theft prevention is the stronger check that $\algo{tokens}[\vec{\rho}]$ names
+the calling user. Double spending detection is the test on
+$|\algo{deposited}[\vec{\rho}[0]]|$ in $\OPdeposit$, and identification is
+$\OPidentify$ returning the owner recorded at the divergence prefix. That this
+owner is recorded rather than inferred is what gives non-frameability, since an
+honest user is only ever written into $\algo{tokens}$ as the owner of a token
+they were actually paid. Conservation of value is the pairing of the debits in
+$\OPwithdraw$ with the credits in $\OPdeposit$, both of the same $v$, with no
+interface that alters $\algo{accounts}$ or $\algo{reserves}$ otherwise.
+Anonymity and unlinkability are what $\simu$ does not receive: on a withdrawal
+by an honest user it learns the user and the value but not $\rho$, and on the
+matching deposit it learns $\vec{\rho}$ but has no way to associate it with that
+withdrawal.
 
 \begin{figure} \centering \hspace*{-0.05\textwidth}
-  \begin{minipage}{1.1\textwidth}
+\begin{minipage}{1.1\textwidth}
 
     \begin{framed} \scriptsize
 
@@ -275,258 +256,256 @@ the auditor and the central bank.
 
       \begin{multicols}{2}
 
-        Before any call to the offline payment interfaces, $\simu$ issues
-        corruption queries:
+	Before any call to the offline payment interfaces, $\simu$ issues
+corruption queries:
 
-        {$\OPcorrupt$.} Upon an active corruption request $(\OPcorrupt,
-        P)$ for $P \in \algo{Dev} \cup \algo{SE}$ from $\simu$ do: $\algo{mal}
-        \gets \algo{mal} \cup P$.
+	{$\OPcorrupt$.} Upon an active corruption request $(\OPcorrupt, P)$ for
+$P \in \algo{Dev} \cup \algo{SE}$ from $\simu$ do: $\algo{mal} \gets \algo{mal}
+\cup P$.
 
-        {$\OPcreate$.} Upon receiving for the first time $(\OPcreate,
-        \algo{usr}, v)$ from $\algo{Int} \in \algo{I}$ for $\algo{usr} \in
-        \algo{usrs}$, send $(\OPcreate, \algo{usr}, \algo{Int}, v)$ to
-        $\simu$ and wait for the go-ahead. On receiving it, do:
+	{$\OPcreate$.} Upon receiving for the first time $(\OPcreate,
+\algo{usr}, v)$ from $\algo{Int} \in \algo{I}$ for $\algo{usr} \in \algo{usrs}$,
+send $(\OPcreate, \algo{usr}, \algo{Int}, v)$ to $\simu$ and wait for the
+go-ahead. On receiving it, do:
 
-        \begin{enumerate}
+	\begin{enumerate}
 
-          \item If $\algo{accounts}[\algo{usr}] \neq \perp$, then stop.
+	  \item If $\algo{accounts}[\algo{usr}] \neq \bot$, then stop.
 
-          \item Otherwise:
+	  \item Otherwise:
 
-            \begin{enumerate}
+	    \begin{enumerate}
 
-              \item Set $\algo{accounts}[\algo{usr}] \leftarrow \langle
-                \algo{Int}, v\rangle$.
+	      \item Set $\algo{accounts}[\algo{usr}] \leftarrow \langle
+\algo{Int}, v\rangle$.
 
-              \item Set $\algo{reserves}[\algo{Int}] \leftarrow
-                \algo{reserves}[\algo{Int}]+v$.
+	      \item Set $\algo{reserves}[\algo{Int}] \leftarrow
+\algo{reserves}[\algo{Int}]+v$.
 
-              \item Return $\OPcreateend$ to $\algo{Int}$.
+	      \item Return $\OPcreateend$ to $\algo{Int}$.
 
-            \end{enumerate}
+	    \end{enumerate}
 
-        \end{enumerate}
+	\end{enumerate}
 
-        {$\OPregister$.} Upon receiving for the first time
-        $(\OPregister, \algo{usr})$ from $\reg$ for $\algo{usr} \in
-        \algo{usrs}$ that already has an account, send $(\OPregister,
-        \algo{usr})$ to $\simu$ and wait for the go-ahead. On receiving it,
-        do:
+	{$\OPregister$.} Upon receiving for the first time $(\OPregister,
+\algo{usr})$ from $\reg$ for $\algo{usr} \in \algo{usrs}$ that already has an
+account, send $(\OPregister, \algo{usr})$ to $\simu$ and wait for the go-ahead.
+On receiving it, do:
 
-        \begin{enumerate}
+	\begin{enumerate}
 
-          \item Set $\algo{registered} \gets \algo{registered} \cup
-            \algo{usr}$.
+	  \item Set $\algo{registered} \gets \algo{registered} \cup \algo{usr}$.
 
-          \item Return $\OPregisterend$ to $\reg$.
+	  \item Return $\OPregisterend$ to $\reg$.
 
-        \end{enumerate}
+	\end{enumerate}
 
-        {$\OPwithdraw$.} On receiving a $(\OPwithdraw, \algo{usr} =
-        (\algo{se}, \algo{dev}), \algo{Int}, v)$ from registered user
-        $\algo{usr}$ that has an account with $\algo{Int}$, send
-        $(\OPwithdraw, \algo{usr}, \algo{Int}, v)$ to $\algo{Int}$ and
-        $(\OPwithdraw, \algo{Int}, v)$ to $\algo{cb}$ and await their
-        go-ahead. Then send message $\OPwithdraw$ to $\simu$ and wait for the
-        go-ahead. On receiving it, fetch $\algo{accounts}[\algo{usr}]
-        \rightarrow \langle \algo{Int}, v^*\rangle$, and do:
+	{$\OPwithdraw$.} On receiving a $(\OPwithdraw, \algo{usr} = (\algo{se},
+\algo{dev}), \algo{Int}, v)$ from registered user $\algo{usr}$ that has an
+account with $\algo{Int}$, send $(\OPwithdraw, \algo{usr}, \algo{Int}, v)$ to
+$\algo{Int}$ and $(\OPwithdraw, \algo{Int}, v)$ to $\algo{cb}$ and await their
+go-ahead. Then send message $\OPwithdraw$ to $\simu$ and wait for the go-ahead.
+On receiving it, fetch $\algo{accounts}[\algo{usr}] \rightarrow \langle
+\algo{Int}, v^*\rangle$, and do:
 
-        \begin{enumerate}
+	\begin{enumerate}
 
-          \item If $v^* < v$ or  $\algo{reserves}[\algo{Int}] < v$, then
-            stop.
+	  \item If $v^* < v$ or  $\algo{reserves}[\algo{Int}] < v$, then stop.
 
-          \item Otherwise, do:
+	  \item Otherwise, do:
 
-            \begin{enumerate}
+	    \begin{enumerate}
 
-              \item Set $\algo{accounts}[\algo{usr}] \leftarrow \langle
-                \algo{Int}, v^* - v\rangle$.
+	      \item Set $\algo{accounts}[\algo{usr}] \leftarrow \langle
+\algo{Int}, v^* - v\rangle$.
 
-              \item Set $\algo{reserves}[\algo{Int}] \leftarrow
-                \algo{reserves}[\algo{Int}] - v$.
+	      \item Set $\algo{reserves}[\algo{Int}] \leftarrow
+\algo{reserves}[\algo{Int}] - v$.
 
-              \item If $\algo{se} \not\in \algo{mal}$, then randomly select
-                $\rho$.
+	      \item If $\algo{se} \not\in \algo{mal}$, then randomly select
+$\rho$.
 
-              \item Otherwise, receive $\rho$ from $\simu$.
+	      \item Otherwise, receive $\rho$ from $\simu$.
 
-              \item If $\algo{tokens}[(\rho)] \neq \perp$, then stop.
+	      \item Write $\vec{\rho} = (\rho)$. If $\algo{tokens}[\vec{\rho}]
+\neq \bot$, then stop.
 
-              \item Otherwise, do:
+	      \item Otherwise, do:
 
-                \begin{enumerate}
+		\begin{enumerate}
 
-                  \item Set $\algo{tokens}[(\rho)] \gets \langle \algo{usr},
-                    v \rangle$.
+		  \item Set $\algo{tokens}[\vec{\rho}] \gets \langle \algo{usr},
+v \rangle$.
 
-                  \item If $\algo{se} \in \algo{mal}$ or $\algo{dev} \in
-                    \algo{mal}$, then return $(\OPwithdraw, \algo{usr},
-                    \rho, v)$ to $\simu$.
+		  \item If $\algo{se} \in \algo{mal}$ or $\algo{dev} \in
+\algo{mal}$, then return $(\OPwithdraw, \algo{usr}, \rho, v)$ to $\simu$.
 
-                  \item Otherwise, return $(\OPwithdraw, \algo{usr}, v)$ to
-                    $\simu$.
+		  \item Otherwise, return $(\OPwithdraw, \algo{usr}, v)$ to
+$\simu$.
 
-                  \item Return $(\OPwithdraw, \rho, v, \OPwithdrawend)$ to
-                    $\algo{usr}$.
+		  \item Return $(\OPwithdraw, \rho, v, \OPwithdrawend)$ to
+$\algo{usr}$.
 
-                \end{enumerate}
+		\end{enumerate}
 
-            \end{enumerate}
+	    \end{enumerate}
 
-        \end{enumerate}
+	\end{enumerate}
 
-        {$\OPexecute$.} On receiving $(\OPexecute, \vec{\rho}, v, \algo{usr}' =
-        (\algo{se}', \algo{dev}'))$ from registered user $\algo{usr} =
-        (\algo{se}, \algo{dev})$, send $(\OPexecute, \vec{\rho}, v)$ to
-        $\algo{usr}'$. On receiving the response $\algo{accept}$ from
-        $\algo{usr}'$, send $(\OPexecute, \vec{\rho}, v)$ to $\simu$ and wait
-        for the go-ahead. On receiving it, do:
+	{$\OPexecute$.} On receiving $(\OPexecute, \vec{\rho}, v, \algo{usr}' =
+(\algo{se}', \algo{dev}'))$ from registered user $\algo{usr} = (\algo{se},
+\algo{dev})$ for registered user $\algo{usr}'$, send $(\OPexecute, \vec{\rho},
+v)$ to $\algo{usr}'$. On receiving the response $\algo{accept}$ from
+$\algo{usr}'$, send $(\OPexecute, \vec{\rho}, v)$ to $\simu$ and wait for the
+go-ahead. On receiving it, do:
 
-        \begin{enumerate}
+	\begin{enumerate}
 
-          \item If $\algo{se}' \not\in \algo{mal}$ and $\algo{dev}' \not\in
-            \algo{mal}$, then do:
+	  \item If $\algo{se}' \not\in \algo{mal}$ and $\algo{dev}' \not\in
+\algo{mal}$, then do:
 
-            \begin{enumerate}
+	    \begin{enumerate}
 
-              \item If $\algo{tokens}[\vec{\rho}] \neq \langle \algo{usr}, v
-                \rangle$, then stop.
+	      \item If $\algo{tokens}[\vec{\rho}] \neq \langle \algo{usr}, v
+\rangle$, then stop.
 
-              \item Otherwise, do:
+	      \item Otherwise, do:
 
-                \begin{enumerate}
+		\begin{enumerate}
 
-                  \item Randomly select a unique random number $\rho'$.
+		  \item Randomly select a unique random number $\rho'$.
 
-                  \item Set $\algo{tokens}[\vec{\rho'}] \gets
-                    \langle\algo{usr}', v \rangle$ where $\vec{\rho'} =
-                    (\vec{\rho}, \rho')$.
+		  \item Set $\algo{tokens}[\vec{\rho'}] \gets
+\langle\algo{usr}', v \rangle$ where $\vec{\rho'} = (\vec{\rho}, \rho')$.
 
-                  \item If $\algo{se} \in \algo{mal}$ or $\algo{dev} \in
-                    \algo{mal}$, then return $(\OPexecute, \vec{\rho'}, v,
-                    \algo{usr}, \algo{usr}')$ to $\simu$.
+		  \item If $\algo{se} \in \algo{mal}$ or $\algo{dev} \in
+\algo{mal}$, then return $(\OPexecute, \vec{\rho'}, v, \algo{usr}, \algo{usr}')$
+to $\simu$.
 
-                  \item Otherwise, return $(\OPexecute, \vec{\rho'}, v)$ to
-                    $\simu$.
+		  \item Otherwise, return $(\OPexecute, \vec{\rho'}, v)$ to
+$\simu$.
 
-                \end{enumerate}
+		\end{enumerate}
 
-            \end{enumerate}
+	    \end{enumerate}
 
-          \item Otherwise, do:
+	  \item Otherwise, do:
 
-            \begin{enumerate}
+	    \begin{enumerate}
 
-              \item If $\algo{se}' \in \algo{mal}$, then receive $\rho'$ from
-                $\simu$.
+	      \item If $\algo{se}' \in \algo{mal}$, then receive $\rho'$ from
+$\simu$.
 
-              \item Otherwise, randomly select $\rho'$.
+	      \item Otherwise, randomly select $\rho'$.
 
-              \item If $\algo{tokens}[\vec{\rho}] = \langle \algo{usr}, v
-                \rangle$ and $\algo{usr}' \in \algo{registered}$, then set
-                $\algo{tokens}[\vec{\rho'}] \leftarrow \langle \algo{usr}', v
-                \rangle$.
+	      \item Set $\vec{\rho'} = (\vec{\rho}, \rho')$.
 
-              \item Send $(\OPexecute,\vec{\rho'}, v, \algo{usr}, \algo{usr}')$
-                to $\simu$.
+	      \item If $\algo{tokens}[\vec{\rho}] = \langle \algo{usr}, v
+\rangle$, then set $\algo{tokens}[\vec{\rho'}] \leftarrow \langle \algo{usr}', v
+\rangle$. A corrupt payee that accepts a token the payer does not own records
+nothing, so cannot pass it on.
 
-            \end{enumerate}
+	      \item Send $(\OPexecute,\vec{\rho'}, v, \algo{usr}, \algo{usr}')$
+to $\simu$.
 
-        \item Return $(\OPexecute, \vec{\rho'}, v, \OPexecuteend)$ to
-          $\algo{usr}'$.
+	    \end{enumerate}
 
-      \end{enumerate}
+	  \item Return $(\OPexecute, \vec{\rho'}, v, \OPexecuteend)$ to
+$\algo{usr}'$, where $\vec{\rho'}$ is as set above. If branch 1 stopped, return
+nothing.
 
-      {$\OPdeposit$.} On receiving $(\OPdeposit, \vec{\rho}, v,
-      \algo{Int})$ from registered user $\algo{usr}$ that has an account with
-      $\algo{Int}$, send $(\OPdeposit, \vec{\rho}, v, \algo{Int},
-      \algo{usr})$ to $\algo{Int}$ and $(\OPdeposit, v, \algo{Int})$ to
-      $\algo{cb}$ and await their go-ahead. Then send $(\OPdeposit,
-      \vec{\rho}, v, \algo{Int}, \algo{usr})$ to $\simu$ and wait for the
-      go-ahead. On receiving it, do:
+	\end{enumerate}
 
-      \begin{enumerate}
+	{$\OPdeposit$.} On receiving $(\OPdeposit, \vec{\rho}, v, \algo{Int})$
+from registered user $\algo{usr}$ that has an account with $\algo{Int}$, send
+$(\OPdeposit, \vec{\rho}, v, \algo{Int}, \algo{usr})$ to $\algo{Int}$ and
+$(\OPdeposit, v, \algo{Int})$ to $\algo{cb}$ and await their go-ahead. Then send
+$(\OPdeposit, \vec{\rho}, v, \algo{Int}, \algo{usr})$ to $\simu$ and wait for
+the go-ahead. On receiving it, do:
 
-        \item If $\algo{tokens}[\vec{\rho}] \neq \langle \algo{usr}, v
-          \rangle$, then stop.
+	\begin{enumerate}
 
-        \item Otherwise, do:
+	  \item If $\algo{tokens}[\vec{\rho}] \neq \langle \algo{usr}, v
+\rangle$, then stop.
 
-          \begin{enumerate}
+	  \item Otherwise, do:
 
-            \item Set $\algo{deposited}[\vec{\rho}[0]] \gets
-              \algo{deposited}[\vec{\rho}[0]] \cup \{\vec{\rho}\}$.
+	    \begin{enumerate}
 
-            \item If $|\algo{deposited}[\vec{\rho}[0]]| > 1$, then stop.
+	      \item Set $\algo{deposited}[\vec{\rho}[0]] \gets
+\algo{deposited}[\vec{\rho}[0]] \cup \{\vec{\rho}\}$.
 
-            \item Otherwise, do:
+	      \item If $|\algo{deposited}[\vec{\rho}[0]]| > 1$, then stop.
 
-              \begin{enumerate}
+	      \item Otherwise, do:
 
-                \item Fetch $\algo{accounts}[\algo{usr}] \rightarrow \langle
-                  \algo{Int}, v^*\rangle$.
+		\begin{enumerate}
 
-                \item Set $\algo{accounts}[\algo{usr}] \gets \langle
-                  \algo{Int}, v^*+v \rangle$.
+		  \item Fetch $\algo{accounts}[\algo{usr}] \rightarrow \langle
+\algo{Int}, v^*\rangle$.
 
-                \item Set $\algo{reserves}[\algo{Int}] \gets
-                  \algo{reserves}[\algo{Int}] + v$.
+		  \item Set $\algo{accounts}[\algo{usr}] \gets \langle
+\algo{Int}, v^*+v \rangle$.
 
-                \item Return $(\OPdeposit, \OPdepositend)$ to $\algo{usr}$.
+		  \item Set $\algo{reserves}[\algo{Int}] \gets
+\algo{reserves}[\algo{Int}] + v$.
 
-              \end{enumerate}
+		  \item Return $(\OPdeposit, \OPdepositend)$ to $\algo{usr}$.
 
-          \end{enumerate}
+		\end{enumerate}
 
-      \end{enumerate}
+	    \end{enumerate}
 
-      {$\OPidentify$.} On receiving $(\OPidentify, \rho)$ from $\auditor$,
-      send $(\OPidentify, \rho)$ to $\simu$ and wait for the go-ahead. On
-      receiving it, do:
+	\end{enumerate}
 
-      \begin{enumerate}
+	{$\OPidentify$.} On receiving $(\OPidentify, \rho)$ from $\auditor$,
+send $(\OPidentify, \rho)$ to $\simu$ and wait for the go-ahead. On receiving
+it, do:
 
-        \item If $|\algo{deposited}[\vec{\rho}[0]]| \leq 1$, then return
-          $(\OPidentify, \OPidentifyend)$ to $\auditor$.
+	\begin{enumerate}
 
-        \item Otherwise, do:
+	  \item If $|\algo{deposited}[\rho]| \leq 1$, then return $(\OPidentify,
+\emptyset, \OPidentifyend)$ to $\auditor$.
 
-          \begin{enumerate}
+	  \item Otherwise, do:
 
-            \item Fetch $\algo{deposited}[\rho] \rightarrow \{\vec{\rho}_1,
-              \cdots, \vec{\rho}_n\}$.
+	    \begin{enumerate}
 
-            \item Set $\algo{DS} \leftarrow \emptyset$.
+	      \item Fetch $\algo{deposited}[\rho] \rightarrow \{\vec{\rho}_1,
+\cdots, \vec{\rho}_n\}$.
 
-            \item $\forall i\neq j$, do:
+	      \item Set $\algo{DS} \leftarrow \emptyset$.
 
-              \begin{enumerate}
+	      \item $\forall i\neq j$, do:
 
-                \item Let $\vec{\rho}_{ij}$ denote the common prefix, i.e.\
-                  $\vec{\rho}_{ij} = (\rho_0, ..., \rho_{k-1})$ such that
-                  $\vec{\rho}_i[l] = \vec{\rho}_j[l]$ for all $l < k$ and
-                  $\vec{\rho_i}[k] \neq \vec{\rho_j}[k]$.
+		\begin{enumerate}
 
-                \item Fetch $\algo{tokens}[\vec{\rho}_{ij}] \rightarrow
-                  \langle v, \algo{usr}_{ij}\rangle$.
+		  \item Let $\vec{\rho}_{ij}$ denote the longest common prefix
+of $\vec{\rho}_i$ and $\vec{\rho}_j$, that is $\vec{\rho}_{ij} = (\rho_0,
+\ldots, \rho_{k-1})$ with $\vec{\rho}_i[l] = \vec{\rho}_j[l]$ for all $l < k$
+and either $\vec{\rho}_i[k] \neq \vec{\rho}_j[k]$ or one of the two has length
+$k$.
 
-                \item Set $\algo{DS} \gets \algo{DS} \cup \algo{usr}_{ij}$.
+		  \item Fetch $\algo{tokens}[\vec{\rho}_{ij}] \rightarrow
+\langle \algo{usr}_{ij}, v\rangle$.
 
-              \end{enumerate}
+		  \item Set $\algo{DS} \gets \algo{DS} \cup \algo{usr}_{ij}$.
 
-            \item Return $(\OPidentify, \algo{DS}, \OPidentifyend)$ to
-              $\auditor$ and $\algo{cb}$.
+		\end{enumerate}
 
-          \end{enumerate}
+	      \item Return $(\OPidentify, \algo{DS}, \OPidentifyend)$ to
+$\auditor$ and $\algo{cb}$.
 
-      \end{enumerate}
+	    \end{enumerate}
 
-    \end{multicols}
+	\end{enumerate}
 
-  \end{framed}
+      \end{multicols}
 
-\end{minipage}
+    \end{framed}
+
+  \end{minipage}
 
 \caption{Ideal functionality $\idfu{\algo{op}}$ for offline payments.}
 \label{fig:ideal-func} \end{figure}

@@ -4,7 +4,8 @@ Structure preserving signatures sign messages that lie in pairing friendly
 groups, rather than arbitrary strings, and the corresponding verification
 algorithm checks equations comprising products of pairings. A threshold
 structure preserving signature scheme distributes the signing key of such a
-scheme across $n$ signers, any $t+1$ of whom can jointly produce a signature.
+scheme across $n$ signers, any $t+1$ of whom can jointly produce a signature,
+and no $t$ of whom learn anything about the key.
 
 The signers are the only participants in the protocol. They communicate over
 authenticated point to point channels, together with a broadcast channel, and
@@ -14,8 +15,11 @@ key, and needs to know neither $n$, nor $t$, nor which signers took part.
 Signers may be arbitrarily malicious, deviating from the protocol at will, and
 may collude to forge signatures or to recover the signing key. We consider
 adaptive corruption: the adversary chooses which signers to corrupt during
-protocol execution, subject to a bound of $t$, and we write $\Cor$ for the set
-of corrupted signers and $\mathcal{H}$ for its complement.
+protocol execution, subject to the bound $|\Cor| \leq t$, and we write $\Cor$
+for the set of corrupted signers and $\mathcal{H}$ for its complement.
+
+We write group operations multiplicatively throughout, with $\gen$ and $\ggen$
+the fixed generators of $\group{1}$ and $\group{2}$ respectively.
 
 \subsection{Structure preserving signatures}
 
@@ -24,20 +28,19 @@ A structure preserving signature scheme is defined by the following algorithms:
 \begin{description}
 
   \item[$(\pk, \sk) \sample \SPSgen(\secparam, \ell)$ :] The key generation
-    algorithm, on input security parameter $\secparam$ and length $\ell$,
-    outputs key pair $(\pk, \sk)$. Public keys are group elements.
+algorithm, on input security parameter $\secparam$ and length $\ell$, outputs
+key pair $(\pk, \sk)$. Public keys are group elements.
 
-  \item[$\SPSsig \sample \SPSsign(\sk, \vec{\msg})$ :] The signing algorithm,
-    on input secret key $\sk$ and message $\vec{\msg}$, outputs signature
-    $\SPSsig$.  Messages and signatures are vectors of group elements, messages
-    from the space $\group{1}^\ell$, and signatures in
-    $\group{1}^{\mathrm{poly}(\secparam)} \times
-    \group{2}^{\mathrm{poly}(\secparam)}$.
+  \item[$\SPSsig \sample \SPSsign(\sk, \vec{\msg})$ :] The signing algorithm, on
+input secret key $\sk$ and message $\vec{\msg}$, outputs signature $\SPSsig$.
+Messages and signatures are vectors of group elements, messages from the space
+$\group{1}^\ell$, and signatures in $\group{1}^{\mathrm{poly}(\secparam)} \times
+\group{2}^{\mathrm{poly}(\secparam)}$.
 
   \item[$\{0,1\} \leftarrow \SPSverify(\pk, \vec{\msg}, \SPSsig)$ :] The
-    verification algorithm, on input public key $\pk$, message $\vec{\msg}$,
-    and signature $\SPSsig$, returns 0 or 1. Verification consists only of
-    evaluating pairing product equations.
+verification algorithm, on input public key $\pk$, message $\vec{\msg}$, and
+signature $\SPSsig$, returns 0 or 1. Verification consists only of evaluating
+pairing product equations.
 
 \end{description}
 
@@ -58,14 +61,14 @@ follows:
 \begin{equation*}
 %
   \Adv_{\SPS, \adv}^{\text{UF-CMA}}(\secparam) = \Pr\left[ \mathbf{G}_{\SPS,
-  \adv}^{\text{UF-CMA}}(\secparam) = 1\right].
+\adv}^{\text{UF-CMA}}(\secparam) = 1\right].
 %
 \end{equation*}
 %
-Here, game $\mathbf{G}_{\SPS,\adv}^{\text{UF-CMA}}$ and signing oracle $\signo$
-are given in Experiment~\ref{exp:sps-uf-cma}. A structure preserving signature
-scheme achieves UF-CMA security if, for every PPT adversary $\adv$, the
-following holds:
+Here, game $\mathbf{G}_{\SPS,\adv}^{\text{UF-CMA}}$ and signing oracle
+$\TSPSsigno$ are given in Experiment~\ref{exp:sps-uf-cma}. A structure
+preserving signature scheme achieves UF-CMA security if, for every PPT adversary
+$\adv$, the following holds:
 %
 \begin{equation*}
 %
@@ -73,97 +76,163 @@ following holds:
 %
 \end{equation*}
 %
-Excluding $\vec{\msg}^*$ from the set $S$ of queried messages, as
-Experiment~\ref{exp:sps-uf-cma} does, gives weak unforgeability (wUF-CMA), with
-advantage $\Adv_{\SPS, \adv}^{\text{wUF-CMA}}(\secparam)$; excluding instead
-the pair $(\vec{\msg}^*, \SPSsig^*)$ gives strong unforgeability (sUF-CMA). Of
-the three, wUF-CMA is the weakest, since its winning condition is the most
-restrictive. It is the notion we rely on throughout this chapter.
+Experiment~\ref{exp:sps-uf-cma} excludes $\vec{\msg}^*$ from the set $S$ of
+queried messages, so that a forgery must be on a message the adversary never
+asked about. This is existential unforgeability, EUF-CMA. Excluding instead the
+pair $(\vec{\msg}^*, \SPSsig^*)$, so that a second, different signature on an
+already queried message also counts as a forgery, gives strong unforgeability,
+sUF-CMA, with advantage $\Adv_{\SPS, \adv}^{\text{sUF-CMA}}(\secparam)$. The
+sUF-CMA winning condition is the more permissive of the two, so sUF-CMA is the
+stronger notion and implies EUF-CMA.
+
+EUF-CMA is the notion we assume of the underlying scheme throughout this
+chapter, and we take the weaker of the two deliberately rather than for
+convenience. Our construction is generic: it takes an arbitrary structure
+preserving signature scheme and thresholdises it, so the weaker the assumption
+we place on that scheme, the wider the class of schemes the construction covers.
+Assuming only EUF-CMA costs us nothing, because the threshold notion we target
+screens forgeries by message rather than by message and signature together. An
+adversary against the threshold scheme wins only on a $\vec{\msg}^*$ for which
+too few honest signers issued a partial signature.  The reduction of
+\Cref{sec:tsps-proof-1} is arranged so that it queries its own oracle only on
+messages falling outside that condition. The forgery it forwards is therefore
+always on a message it never queried, which is exactly what EUF-CMA asks for,
+and at no point does it need to distinguish two signatures on the same message.
+Strong unforgeability is consequently never used, and requiring it would only
+narrow the class of schemes the construction applies to.
+
+Nothing is lost at the threshold level either. Should an application require the
+strong guarantee, the same reduction gives the strong threshold analogue
+whenever the underlying scheme is sUF-CMA. The only change is to the winning
+condition carried across, and by \Cref{lem:tsps-transparency} a combined
+signature is distributed exactly as an ordinary one. The threshold scheme
+inherits whichever of the two notions the underlying scheme achieves, and we
+state our results under the weaker hypothesis so that they apply to both.
 
 \begin{experimentbox}{Unforgeability under chosen message attack for structure
-  preserving signatures}{sps-uf-cma}
+preserving signatures}{sps-uf-cma}
 
   \begin{enumerate}
 
     \item The challenger generates $(\pk, \sk) \gets \SPSgen(\secparam, \ell)$
-      and sends $\pk$ to $\adv$.
+and sends $\pk$ to $\adv$.
 
-    \item The adversary is given oracle access to $\signo$, which on input
-      $\vec{\msg}$, computes $\SPSsig \gets \SPSsign(\sk, \vec{\msg})$, and if
-      $\SPSsig \neq \perp$, adds $\vec{\msg}$ to $S$, before returning
-      $\SPSsig$.
+    \item The adversary is given oracle access to $\TSPSsigno$, which on input
+$\vec{\msg}$, computes $\SPSsig \gets \SPSsign(\sk, \vec{\msg})$, and if
+$\SPSsig \neq \perp$, adds $\vec{\msg}$ to $S$, before returning $\SPSsig$.
 
     \item The adversary outputs $(\vec{\msg}^*, \SPSsig^*)$.
 
   \end{enumerate}
 
   $\adv$ wins the experiment if $\SPSverify(\pk, \vec{\msg}^*, \SPSsig^*) = 1$
-  and $\vec{\msg}^* \notin S$.
+and $\vec{\msg}^* \notin S$.
 
 \end{experimentbox}
 
 \subsection{Threshold structure preserving signatures}
 
 A threshold structure preserving signature scheme is a structure preserving
-signature scheme whose signing key is distributed across multiple parties. It
-is defined by algorithms $\TSPSgen$, $\TSPSsign$, $\TSPScombine$, and
+signature scheme whose signing key is distributed across multiple parties.
+Because our constructions perform all of their interaction ahead of the message
+being known, we separate signing into an offline and an online algorithm. We
+call a scheme partially non-interactive when $\algo{OnSign}$ requires no
+communication between signers while $\algo{OffSign}$ may. The scheme is defined
+by algorithms $\TSPSgen$, $\algo{OffSign}$, $\algo{OnSign}$, $\TSPScombine$, and
 $\TSPSverify$ as follows.
 
 \begin{description}
 
   \item[{$(\pk, \shr{\sk}) \sample \TSPSgen(\secparam, \ell, t, n)$ :}] The key
-    generation algorithm takes a triple of integers $(\ell, t, n > t)$, where
-    $\ell$ is the length of the vectors to be signed, $t$ is an upper bound on
-    the number of corrupted parties, and $n$ is the total number of threshold
-    signers. It returns a public key $\pk$ and $n$ shares $\shr{\sk}$ such that
-    any $t+1$ shares reconstruct the secret key underlying $\pk$. $\pk$
-    consists of group elements, and $\sk$ of elements of $\Zp$ and/or group
-    elements.
+generation algorithm takes a triple of integers $(\ell, t, n > t)$, where $\ell$
+is the length of the vectors to be signed, $t$ is an upper bound on the number
+of corrupted parties, and $n$ is the total number of threshold signers. It
+returns a public key $\pk$ and $n$ shares $\shr{\sk}$ such that any $t+1$ shares
+reconstruct the secret key underlying $\pk$, and any $t$ shares are independent
+of it. $\pk$ consists of group elements, and $\sk$ of elements of $\Zp$ and/or
+group elements.
 
-  \item[{$\shr{\SPSsig} \sample \TSPSsign(\shr{\sk}, \vec{\msg})$ :}] The
-    threshold signing algorithm takes a secret key share $\shr{\sk}$ and
-    message $\vec{\msg}$ with elements in $\group{1}$ and/or $\group{2}$, and
-    outputs a signature share $\shr{\SPSsig}$ with elements in $\group{1}$ and
-    $\group{2}$.
+  \item[{$\shr{\state} \sample \algo{OffSign}(\shr{\sk})$ :}] The offline
+signing algorithm is run jointly by the signers, before the message is known. It
+takes the secret key shares and outputs a share of pre-processed state
+$\shr{\state}$, comprising those components of the signature that do not depend
+on the message together with the material $\algo{OnSign}$ consumes.  Each
+invocation produces state for exactly one future signature, and that state is
+single-use.
+
+  \item[{$\shr{\SPSsig} \leftarrow \algo{OnSign}(\shr{\sk}, \shr{\state},
+\vec{\msg})$ :}] The online signing algorithm is run locally by each signer. It
+takes that signer's key share, its share of a previously unused pre-processed
+state, and a message $\vec{\msg} \in \group{1}^\ell$, and outputs a signature
+share $\shr{\SPSsig}$ with elements in $\group{1}$ and $\group{2}$.
 
   \item[{$\SPSsig \leftarrow \TSPScombine(\shr{\SPSsig})$ :}] The combining
-    algorithm is non-interactive, and takes signature shares $\shr{\SPSsig}$ to
-    output signature $\SPSsig$.
+algorithm is non-interactive, and takes $t+1$ signature shares $\shr{\SPSsig}$
+to output signature $\SPSsig$.
 
   \item[$\{0,1\} \leftarrow \TSPSverify(\pk, \vec{\msg}, \SPSsig)$ :] The
-    verification algorithm takes public key $\pk$, message $\vec{\msg}$, and
-    signature $\SPSsig$, and returns 0 or 1. $\TSPSverify$ is equal to
-    $\SPSverify$.
+verification algorithm takes public key $\pk$, message $\vec{\msg}$, and
+signature $\SPSsig$, and returns 0 or 1. $\TSPSverify$ is equal to $\SPSverify$.
 
 \end{description}
 
+\paragraph{Correctness.} A threshold structure preserving signature scheme
+satisfies correctness if, for all $\secparam$, all $(\ell, t, n > t)$, all
+$(\pk, \shr{\sk}) \sample \TSPSgen(\secparam, \ell, t, n)$, all $\shr{\state}
+\sample \algo{OffSign}(\shr{\sk})$, all $\vec{\msg} \in \group{1}^\ell$, and
+every subset $Q \subseteq [1,n]$ with $|Q| = t+1$, the signature obtained by
+running $\algo{OnSign}$ at each signer in $Q$ and combining the results
+verifies:
+%
+\begin{equation*}
+%
+  \SPSverify\left(\pk, \vec{\msg}, \TSPScombine\left(\left\{
+\algo{OnSign}(\sk_i, \state_i, \vec{\msg}) \right\}_{i \in Q}\right)\right) = 1.
+%
+\end{equation*}
+%
+Correctness is required to hold for every such $Q$, so that the signature does
+not depend on which $t+1$ signers took part.
+
 \paragraph{Unforgeability.} Threshold signatures admit a hierarchy of
 unforgeability notions~\cite{C:BCKMTZ22}. We rely on adaptive TS-UF-1 security,
-in which the adversary has a partial signature oracle $\signo$ and a corruption
-oracle $\corrupto$, and wins with $(\vec{\msg}^*, \SPSsig^*)$ provided it
-obtained partial signatures on $\vec{\msg}^*$ from fewer than $t - |\Cor|$
-honest signers. The stricter TS-UF-0 disqualifies the adversary as soon as
-$\signo$ is queried on $\vec{\msg}^*$ even once, which is too strong for our
-purposes: our online phase is local, so a signer that has issued a partial
-signature has revealed nothing further. Both schemes of
-\Cref{sec:tsps-instantiation} are partially non-interactive, meaning their
-$\algo{OnSign}$ is non-interactive while $\algo{OffSign}$ may interact.
+in which the adversary has an offline oracle $\mathcal{O}_{\algo{Off}}$, a
+partial signature oracle $\TSPSsigno$, and a corruption oracle $\corrupto$, and
+wins with $(\vec{\msg}^*, \SPSsig^*)$ provided it obtained partial signatures on
+$\vec{\msg}^*$ from fewer than $t + 1 - |\Cor|$ honest signers. That is, the
+partial signatures it holds on $\vec{\msg}^*$, together with the key shares of
+the signers it corrupted, must fall short of the $t+1$ that reconstruct a
+signature. The stricter TS-UF-0 disqualifies the adversary as soon as
+$\TSPSsigno$ is queried on $\vec{\msg}^*$ even once. That is too strong for our
+purposes. our online phase is local, so a signer that has issued a single
+partial signature has revealed nothing further.
 
-Let $\mathrm{TSPS} = (\TSPSgen, \TSPSsign, \TSPScombine, \SPSverify)$ be an
-$(n, t)$-TSPS scheme over message space $\mathcal{M}$. The advantage of a PPT
-adversary $\adv$ is defined as follows:
+The offline oracle is what makes the notion match our syntax. All interaction
+between signers happens in $\algo{OffSign}$, so an adversary that could not
+invoke it would never see the protocol messages in which that interaction is
+carried out. $\mathcal{O}_{\algo{Off}}$ therefore runs the offline phase with
+$\adv$ playing the corrupted signers, and returns the resulting view. Each
+session identifier may be used once by $\mathcal{O}_{\algo{Off}}$ and once by
+$\TSPSsigno$, reflecting the single-use requirement on pre-processed state:
+reusing a state across two messages would reuse the signing randomness, which
+neither underlying signature scheme tolerates.
+
+Let $\mathrm{TSPS} = (\TSPSgen, \algo{OffSign}, \algo{OnSign}, \TSPScombine,
+\SPSverify)$ be an $(n, t)$-TSPS scheme over message space $\mathcal{M}$. The
+advantage of a PPT adversary $\adv$ is defined as follows:
 %
 \begin{equation*}
 %
   \Adv_{\TSPS, \adv}^{\text{adp-TS-UF-1}}(\secparam) = \Pr\left[
-  \mathbf{G}_{\TSPS, \adv}^{\text{adp-TS-UF-1}}(\secparam) = 1 \right].
+\mathbf{G}_{\TSPS, \adv}^{\text{adp-TS-UF-1}}(\secparam) = 1 \right].
 %
 \end{equation*}
 %
 Here, game $\mathbf{G}_{\TSPS, \adv}^{\text{adp-TS-UF-1}}$ and its oracles
-$\signo$ and $\corrupto$ are given in Experiment~\ref{exp:tsps-adp-ts-uf-1}. A
-threshold structure preserving signature scheme achieves adaptive TS-UF-1
-security if, for every PPT adversary $\adv$, the following holds:
+$\mathcal{O}_{\algo{Off}}$, $\TSPSsigno$ and $\corrupto$ are given in
+Experiment~\ref{exp:tsps-adp-ts-uf-1}. A threshold structure preserving
+signature scheme achieves adaptive TS-UF-1 security if, for every PPT adversary
+$\adv$, the following holds:
 %
 \begin{equation*}
 %
@@ -172,34 +241,42 @@ security if, for every PPT adversary $\adv$, the following holds:
 \end{equation*}
 
 \begin{experimentbox}{Adaptive unforgeability under chosen message attack for
-  threshold structure preserving signatures (adp-TS-UF-1)}{tsps-adp-ts-uf-1}
+threshold structure preserving signatures (adp-TS-UF-1)}{tsps-adp-ts-uf-1}
 
   \begin{enumerate}
 
     \item The adversary outputs $(n, t, \Cor)$, and the challenger sets
-      $\mathcal{H} := [1,n] \backslash \Cor$.
+$\mathcal{H} := [1,n] \backslash \Cor$.
 
-    \item The challenger generates $(\pk, \shr{\sk}, \shr{\pk}) \gets
-      \TSPSgen(\secparam, \ell, t, n)$, and sends $\pk$, $\{\sk_i\}_{i \in
-      \Cor}$, and $\shr{\pk}$ to $\adv$.
+    \item The challenger generates $(\pk, \shr{\sk}) \gets \TSPSgen(\secparam,
+\ell, t, n)$, and sends $\pk$ and $\{\sk_i\}_{i \in \Cor}$ to $\adv$.
+
+    \item The adversary is given oracle access to $\mathcal{O}_{\algo{Off}}$,
+which on input a fresh session identifier $\mathsf{sid}$, runs $\algo{OffSign}$
+among all $n$ signers with $\adv$ acting on behalf of $\Cor$, stores the
+resulting shares $\shr{\state}_{\mathsf{sid}}$, and returns the view of the
+corrupted signers. It returns $\perp$ if $\mathsf{sid}$ has been used before.
 
     \item The adversary is given oracle access to $\TSPSsigno$, which on input
-      $(i, \vec{\msg})$, asserts $\vec{\msg} \in \mathcal{M} \wedge i \in
-      \mathcal{H}$, computes $\SPSsig_i \gets \TSPSsign(\sk_i, \vec{\msg})$,
-      and if $\SPSsig_i \neq \perp$, adds $i$ to $S(\vec{\msg})$, before
-      returning $\SPSsig_i$.
+$(i, \mathsf{sid}, \vec{\msg})$, asserts $\vec{\msg} \in \mathcal{M}$, $i \in
+\mathcal{H}$, and that $\mathsf{sid}$ was initialised by
+$\mathcal{O}_{\algo{Off}}$ and not yet used for signing. It then computes
+$\SPSsig_i \gets \algo{OnSign}(\sk_i, \state_{\mathsf{sid},i}, \vec{\msg})$, and
+if $\SPSsig_i \neq \perp$, adds $i$ to $S(\vec{\msg})$ before returning
+$\SPSsig_i$.
 
     \item The adversary is given oracle access to $\corrupto$, which on input
-      $k$, returns $\perp$ if $k \in \Cor$, and otherwise adds $k$ to $\Cor$,
-      removes $k$ from $\mathcal{H}$, and returns $\sk_k$.
+$k$, returns $\perp$ if $k \in \Cor$ or $|\Cor| = t$, and otherwise adds $k$ to
+$\Cor$, removes $k$ from $\mathcal{H}$, and returns $\sk_k$ together with every
+$\state_{\mathsf{sid},k}$ held by signer $k$.
 
     \item The adversary outputs $(\vec{\msg}^*, \SPSsig^*)$.
 
   \end{enumerate}
 
   $\adv$ wins the experiment if $\SPSverify(\pk, \vec{\msg}^*, \SPSsig^*) = 1$,
-  $|\Cor| < t$, and $|S(\vec{\msg}^*)| < t - |\Cor|$, where $S(\vec{\msg})$
-  records which honest signers have issued a partial signature on $\vec{\msg}$.
+$|\Cor| \leq t$, and $|S(\vec{\msg}^*)| < t + 1 - |\Cor|$, where $S(\vec{\msg})$
+records which honest signers have issued a partial signature on $\vec{\msg}$.
 
 \end{experimentbox}
 
@@ -208,79 +285,180 @@ must provide the following.
 
 \begin{description}
 
-  \item[Unforgeability.] No adversary corrupting fewer than $t$ signers can
-    produce a valid signature on a message vector for which it did not obtain
-    partial signatures from enough honest signers, so the scheme is no easier
-    to forge against than the structure preserving signature scheme underlying
-    it.
+  \item[Unforgeability.] No adversary corrupting at most $t$ signers can produce
+a valid signature on a message vector for which it did not obtain partial
+signatures from enough honest signers, so the scheme is no easier to forge
+against than the structure preserving signature scheme underlying it. This is
+\Cref{thm:tsps-construction-security}, proved in \Cref{sec:tsps-proof-1}.
 
   \item[Key secrecy.] No set of at most $t$ signers learns anything about the
-    signing key, at any point in the protocol, including key generation.
+signing key, at any point in the protocol, including key generation. This is
+\Cref{lem:tsps-key-secrecy}, proved in \Cref{sec:tsps-proof-1}.
 
   \item[Transparency.] A public key produced by $\TSPSgen$ is distributed
-    exactly as one produced by $\SPSgen$, and a signature produced by
-    $\TSPScombine$ verifies under $\SPSverify$ exactly as an ordinary signature
-    would. Verification is unchanged by thresholdisation.
+exactly as one produced by $\SPSgen$, and a signature produced by $\TSPScombine$
+verifies under $\SPSverify$ exactly as an ordinary signature would. Verification
+is unchanged by thresholdisation. This is \Cref{lem:tsps-transparency}, proved
+in \Cref{sec:tsps-proof-1}.
 
 \end{description}
 
 \subsection{Secure multiparty computation}\label{sec:tsps-mpc}
 
-Let $\alpha \in \Zp$ be a secret value additively shared between the $n$
-signers, such that any $t+1$ of them can reconstruct it by a predefined linear
-combination. We write $\shr{\alpha}$ for such a sharing: the vector $(\alpha_1,
-\ldots, \alpha_n)$ in which $\alpha_i$ is the share held by the
+Let $\alpha \in \Zp$ be a secret value shared between the $n$ signers under a
+linear $(t+1, n)$-threshold secret sharing scheme, so that any $t+1 $ of them
+reconstruct it by a predefined linear combination and any $t$ of them learn
+nothing about it. We write $\shr{\alpha}$ for such a sharing: the vector
+$(\alpha_1, \ldots, \alpha_n)$ in which $\alpha_i$ is the share held by the
 $i^{\mathrm{th}}$ signer. For $\vec{\alpha} = (\alpha_1, \ldots, \alpha_\ell)
 \in \Zp^\ell$ we write $\shr{\vec{\alpha}}$ for $(\shr{\alpha_1}, \ldots,
 \shr{\alpha_\ell})$, and we use the same notation $\shr{a}$ for a sharing of a
-group element $a \in \group{}$. We assume this notation incorporates the
-authentication components that malicious security requires, which we otherwise
-abstract away.
+group element $a \in \group{}$, where the shares are themselves group elements
+whose reconstruction is the corresponding product. We assume this notation
+incorporates the authentication components that malicious security requires,
+which we otherwise abstract away.
+
+The reconstruction threshold and the corruption bound are related but distinct.
+A dishonest majority realisation such as the one benchmarked in
+\Cref{sec:tsps-evaluation} shares secrets additively between all $n$ parties,
+which is the case $t = n-1$. every signer must then take part in reconstruction,
+and the scheme is $n$-out-of-$n$ rather than $(t+1)$-out-of-$n$ for smaller $t$.
+An honest majority realisation built on Shamir sharing supports any $t < n/2$
+with genuine $(t+1)$-out-of-$n$ reconstruction. We state our constructions and
+proofs for general $(t+1, n)$ and note the restriction where it bites.
 
 Rather than specifying how the signers jointly compute each step of signing, we
 describe our schemes as sequences of calls to a secure multiparty computation
-protocol $\algo{MPC}$, and assume a realisation of it. Note that $\algo{MPC}$
-plays a different role here from the ideal functionalities elsewhere in this
-thesis: it is a resource our protocols consume, not a definitional target they
-are proved to realise. Its interfaces over $\Zp$ are standard; those over
-$\group{}$ are the extension this chapter contributes.
+protocol $\algo{MPC}$, and assume a realisation of it satisfying the properties
+below. $\algo{MPC}$ is a resource our protocols consume, not a definitional
+target they are proved to realise. We do not work in a hybrid model, and the
+security statements of \Cref{sec:tsps-security} are made relative to these
+properties rather than to any ideal functionality.
 
 $\algo{MPC}$ is run jointly by the $n$ signers. Each interface below is invoked
-by all of them together, and the stated output is the share each signer
-obtains. We write $\group{}$ for a generic prime order group, and
-$\algo{MPC}_1$ and $\algo{MPC}_2$ when it matters whether the group is
-$\group{1}$ or $\group{2}$. $\algo{MPC}$ is defined by the following
-interfaces.
+by all of them together, and the stated output is the share each signer obtains.
+Two of the interfaces operate on group elements, and each source group needs its
+own copy of them, since a sharing over $\group{1}$ and a sharing over
+$\group{2}$ are different objects and no interface mixes the two. We write
+$\group{}$ when a statement holds for either group, and we subscript an
+interface with $1$ or $2$ when the choice matters, so that $\algo{ExpGrp}_1$ is
+the interface instantiated at $\group{1}$ and $\algo{ExpGrp}_2$ at $\group{2}$.
+The interfaces over $\Zp$ are standard and are provided directly by existing MPC
+frameworks. Those over $\group{}$ are not, and supplying them is what allows a
+structure preserving signature to be thresholdised at all.
 
-\begin{description}
+\begin{primitivebox}{Secure multiparty computation ($\algo{MPC}$)}{mpc}
 
-  \item[$\shr{\alpha} \sample \algo{RandShare}()$ :] Outputs a $t$-additive
-    sharing of a value $\alpha \sample \Zp$ that no signer learns.
+  \begin{description}
 
-  \item[$\shr{\gamma} \sample \algo{Mul}(\shr{\alpha}, \shr{\beta})$ :] On
-    input sharings of $\alpha$ and $\beta$, outputs a sharing of $\gamma =
-    \alpha\beta$.
+    \item[$\shr{\alpha} \sample \algo{RandShare}()$ :] Outputs a $(t+1, n)$
+sharing of a value $\alpha \sample \Zp$ that no signer learns.
 
-  \item[$\shr{\gamma} \sample \algo{Inv}(\shr{\alpha})$ :] On input a sharing
-    of $\alpha \neq 0$, outputs a sharing of $\gamma = \alpha^{-1}$.
+    \item[$\shr{\gamma} \sample \algo{Mul}(\shr{\alpha}, \shr{\beta})$ :] On
+input sharings of $\alpha$ and $\beta$, outputs a sharing of $\gamma =
+\alpha\beta$.
 
-  \item[$\shr{a} \sample \algo{RandShareGrp}()$ :] Outputs a $t$-additive
-    sharing of a group element $a \sample \group{}$ that no signer learns. The
-    sharing is of the exponent: the signers obtain $\shr{\alpha}$ and each
-    raises the public generator to its own share, taking $a_i = \alpha_i\gen$,
-    so that the shares are themselves group elements additively sharing $a =
-    \alpha\gen$.
+    \item[$\shr{\gamma} \sample \algo{Inv}(\shr{\alpha})$ :] On input a sharing
+of $\alpha \neq 0$, outputs a sharing of $\gamma = \alpha^{-1}$.
 
-  \item[$\shr{c} \sample \algo{ExpGrp}(\shr{\alpha}, \shr{b})$ :] On input a
-    sharing of $\alpha \in \Zp$ and a sharing of $b \in \group{}$, outputs a
-    sharing of $c = \alpha b$.
+    \item[$\shr{c} \sample \algo{ExpGrp}(\shr{\alpha}, \shr{b})$ :] On input a
+sharing of $\alpha \in \Zp$ and a sharing of $b \in \group{}$, outputs a sharing
+of $c = b^\alpha$.
 
-  \item[$\alpha \leftarrow \algo{Open}(\shr{\alpha})$ :] On input a sharing of
-    $\alpha$, reconstructs $\alpha$ from $t+1$ shares and distributes it to all
-    signers, or to a designated subset. Applies equally to a sharing $\shr{a}$
-    of a group element.
+    \item[$\alpha \leftarrow \algo{Open}(\shr{\alpha})$ :] On input a sharing of
+$\alpha$, reconstructs $\alpha$ from $t+1$ shares and distributes it to all
+signers, or to a designated party. Applies equally to a sharing $\shr{a}$ of a
+group element.
 
-\end{description}
+  \end{description}
+
+\end{primitivebox}
+
+\paragraph{Sharing group elements.} In practice $\group{}$ is an elliptic curve
+group, whose elements are coordinate pairs $(x_0, y_0)$ satisfying the curve
+equation. A group element is not shared by independently sharing its
+coordinates, as $(\shr{x_0}, \shr{y_0})$, since computing a group operation on
+such shares would require the signers to communicate. It is instead shared as a
+single unit, $\shr{a} = \shr{(x_0, y_0)}$, with reconstruction the product of
+the shares under the group law, so that the operations below remain local.  A
+share of a group element may be produced without interaction from a share of its
+discrete logarithm: given $\shr{\alpha}$, each signer computes $a_i =
+\gen^{\alpha_i}$, and the resulting $\shr{a}$ shares $a = \gen^{\alpha}$. This
+is how the group elements of a public key, and those parts of a secret key that
+are group elements, are obtained in \Cref{sec:tsps-instantiation}.
+
+\paragraph{Mixed-domain multiplication.} $\algo{ExpGrp}$ is the only interface
+that combines the two domains, multiplying a secret-shared exponent by a secret
+shared group element, and it is what makes $\algo{MPC}$ over $\group{}$ more
+than a relabelling of $\algo{MPC}$ over $\Zp$. It is realised in the Beaver
+style, consuming a mixed triple $(\shr{\eta}, \shr{h}, \shr{h^\eta})$ with $\eta
+\sample \Zp$ and $h \sample \group{}$, generated during pre-processing.  The
+signers open $\epsilon = \alpha - \eta$ over $\Zp$ and $\delta = b \cdot h^{-1}$
+over $\group{}$, and each then computes its share of
+%
+\begin{equation*}
+%
+  c = b^{\alpha} = \left(h^{\eta}\right) \cdot \left(h^{\epsilon}\right) \cdot
+\left(\delta^{\eta}\right) \cdot \delta^{\epsilon}
+%
+\end{equation*}
+%
+locally, from $\shr{h^\eta}$, $\shr{h}$, $\shr{\eta}$ and the two opened values,
+with the public term $\delta^{\epsilon}$ folded in by a designated signer. The
+masks $\epsilon$ and $\delta$ are uniform and independent of $\alpha$ and $b$,
+so the two openings reveal nothing. Under malicious security the triple carries
+authentication components in both domains, and it is supporting these over an
+elliptic curve group that required the extension to MP-SPDZ described in
+\Cref{sec:tsps-evaluation}.
+
+\paragraph{Relation to existing work.} Computing on secret-shared group elements
+is not new, and we set out here what we take from existing work and what we add.
+That a sharing over $\Zp$ can be moved into a group without interaction, by each
+signer raising a public generator to its own share, is folklore, and goes back
+at least as far as verifiable secret sharing~\cite{FOCS:Feldman87}. Smart and
+Talibi Alaoui give a full-threshold, actively secure protocol for computation
+over an elliptic curve group. It takes Beaver triples produced over $\Zp$ in the
+pre-processing model and maps them locally into triples over the curve, which is
+the same route to $\algo{ExpGrp}$ that we take above~\cite{IMA:SmaAla19}.
+Aranha, Dalskov, Escudero, and Orlandi give the most general treatment we are
+aware of, under the name of linear secret sharing isomorphisms. These are linear
+maps between sharings defined over vector spaces over a common field, and moving
+from $\Zp$ into a source group is one instance of them. They extend the idea to
+bilinear maps and hence to pairings~\cite{LATIN:ADEO21}. They apply it to
+realise the Pointcheval-Sanders signature scheme in MPC, which is itself a
+structure preserving scheme. Prior work has also shared group elements between
+two parties and computed on those shares~\cite{NDSS:GPVRNC23}.
+
+We therefore claim no novelty for the sharing $\shr{a}$ or for the idea of
+computing on it, and we have stated the interfaces above in the form our
+constructions consume rather than as a contribution in themselves. What this
+chapter adds is the observation of \Cref{sec:tsps-construction}. The signing
+algorithm of a structure preserving signature scheme decomposes so that its
+message-dependent part uses only the local operations of the linearity
+preservation property below. That is what yields an online phase requiring no
+interaction at all. That, together with the two concrete schemes of
+\Cref{sec:tsps-instantiation} and the extension to MP-SPDZ that makes them
+runnable, is the contribution.
+
+Two further lines of work are adjacent but concern different problems. Secret
+sharing over abelian groups that are not vector spaces over a field is genuinely
+harder, since the reconstruction coefficients can no longer be taken from a
+field, and has its own literature~\cite{C:CraFeh02,C:DesFra91}.  Computation
+over black-box, possibly non-abelian groups is harder still, as there is no
+scalar action to exploit and even the $n$-fold product is
+nontrivial~\cite{C:DPSW07,SCN:DesPieSte12}.
+
+\paragraph{Inversion and non-zero sampling.} $\algo{Inv}$ is not a primitive
+operation but is built from $\algo{Mul}$ and $\algo{Open}$: the signers sample
+$\shr{\beta} \sample \algo{RandShare}()$, open $\gamma = \alpha\beta$, and take
+$\shr{\alpha^{-1}} = \gamma^{-1}\shr{\beta}$, which is local. The opened
+$\gamma$ is uniform and independent of $\alpha$, so nothing is revealed, and the
+call costs one multiplication and one opening. Where a scheme calls for a value
+sampled from $\Zp^*$ rather than $\Zp$, the signers cannot test a sharing for
+zero without opening it. We instead sample from $\Zp$ and abort if the opening
+performed inside $\algo{Inv}$ returns zero, which happens with probability $1/p$
+and is therefore negligible. Where no inversion is performed, the difference
+between the two distributions is statistically negligible and we elide it.
 
 We require $\algo{MPC}$ to satisfy the following.
 
@@ -295,42 +473,38 @@ communication by each applying the combination to its own share:
 %
 \end{equation*}
 %
-The same holds over $\group{}$, $\shr{a}$ and $\shr{b}$ and public group
-element $d$, giving $\shr{c} = \rho\shr{a} + \sigma\shr{b} + d$, and it extends
-to multiplying a shared field element by a public group element, $\shr{c} =
-\shr{\alpha}d$, and a shared group element by a public field element, $\shr{c}
-= \rho\shr{a}$. None of these require interaction, which is why $\algo{MPC}$
-exposes no interface for them. Since we assume malicious security, linearity
-must also be preserved for the authentication components.  It is this property,
-applied to the message vector, that makes the online phase of our schemes
-non-interactive.
+The same holds over $\group{}$: given sharings $\shr{a}$ and $\shr{b}$ and a
+public group element $d$, the signers obtain $\shr{c} = \shr{a}^{\rho}
+\shr{b}^{\sigma} d$ without communication. It extends to raising a public group
+element to a shared exponent, $\shr{c} = d^{\shr{\alpha}}$, and to raising a
+shared group element to a public exponent, $\shr{c} = \shr{a}^{\rho}$. None of
+these require interaction, which is why $\algo{MPC}$ exposes no interface for
+them. Since we assume malicious security, linearity must also be preserved for
+the authentication components. It is this property, applied to the message
+vector, that makes the online phase of our schemes non-interactive.
 
-\paragraph{Privacy.} The joint view of any set of at most $t$ signers over any
-sequence of calls is independent of the shared values, except for those
-disclosed by $\algo{Open}$.
+\paragraph{Privacy.} There is a PPT simulator $\algo{Sim}$ such that, for any
+set $\Cor$ of at most $t$ corrupted signers and any sequence of calls to
+$\algo{MPC}$, the joint view of $\Cor$ is simulatable from the corrupted
+signers' inputs and outputs alone, together with any values disclosed by
+$\algo{Open}$. In particular, the shares held by $\Cor$ are distributed
+independently of every shared value the calls compute.
 
 \paragraph{Security with abort.} Corrupt signers may supply shares of their own
 choosing on input to any interface, and may cause it to return $\bot$ to every
-honest signer, but cannot cause it to return an incorrect output. We require
-these guarantees against an adversary that corrupts signers adaptively, up to
-the bound $|\Cor| < t$, since the unforgeability notion of
-\Cref{sec:tsps-definitions} is itself adaptive; a realisation secure only
-against static corruption yields the corresponding static notion.
+honest signer, but cannot cause it to return an incorrect output.
 
-\paragraph{Sharing group elements.} In practice $\group{}$ is an elliptic curve
-group, whose elements are coordinate pairs $(x_0, y_0)$ satisfying the curve
-equation. A group element is not shared by independently sharing its
-coordinates, as $(\shr{x_0}, \shr{y_0})$, since computing a group operation on
-such shares would require the signers to communicate. It is instead shared as a
-single unit, $\shr{a} = \shr{(x_0, y_0)}$, so that the linear operations above
-remain local, as $\algo{RandShareGrp}$ reflects. To the best of our knowledge,
-$\algo{ExpGrp}$, which multiplies a secret-shared field element by a
-secret-shared group element, is the first such interface to be
-realised~\cite{NDSS:GPVRNC23}.
+\paragraph{Corruption model.} We require the guarantees above against an
+adversary that corrupts signers adaptively, up to the bound $|\Cor| \leq t$,
+since the unforgeability notion above is itself adaptive. Neither realisation
+benchmarked in \Cref{sec:tsps-evaluation} is proved adaptively secure, so the
+concrete schemes of \Cref{sec:tsps-instantiation} inherit the corresponding
+static notion. \Cref{sec:tsps-proof-1} shows what adaptivity costs when it is
+obtained by guessing instead.
 
-\paragraph{Realisation.} Over $\Zp$, these interfaces are provided directly by
-existing MPC frameworks. Over $\group{}$ they are not, and realising them
-required us to extend MP-SPDZ with support for computation on secret-shared
-group elements~\cite{CCS:Keller20}. How $\algo{MPC}$ is realised is orthogonal
-to the constructions that follow; \Cref{sec:tsps-evaluation} benchmarks two
-realisations, one assuming an honest majority and one a dishonest majority.
+\paragraph{Realisation.} Realising the interfaces of $\algo{MPC}$ over
+$\group{}$ required us to extend MP-SPDZ with support for computation on
+secret-shared group elements~\cite{CCS:Keller20}. How $\algo{MPC}$ is realised
+is otherwise orthogonal to the constructions that follow.
+\Cref{sec:tsps-evaluation} benchmarks two realisations, one assuming an honest
+majority and one a dishonest majority.

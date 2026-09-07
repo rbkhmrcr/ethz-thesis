@@ -1,10 +1,5 @@
 \chapter{Introduction}
 
-\paragraph{Privacy and power.} Resources are not equally distributed throughout
-the world. There are infinitely many consequences of this. All of them
-influence our actions in some way, but not all of them can be influenced in any
-way by cryptography.
-
 The desire to conceal written information has been considered for at least the
 last four thousand years, reaching back to the obfuscated hieroglyphs in the
 tomb of Khnumhotep II.  A little more recently, encryption protocols have been
@@ -23,22 +18,22 @@ and attacking entities is well noted, and lies at the foundation of modern
 cryptography itself. But protecting the content of a message says nothing about
 who is exchanging it, when, or how often.
 
-Cryptography today deals in more varied technologies than private
-communication.  Information flows, and the question shifts to reflect that.
-Once the contents of a communication are protected, for example, a resourceful
-adversary may instead attempt to determine the identities of the communicating
-parties, their relationships, or patterns in their behaviour. Protecting that
-then brings into focus the next piece of information that could be observed and
-used. Every answer reveals another question.
+Cryptography today deals in more varied technologies than private communication.
+Information flows, and the question shifts to reflect that.  Once the contents
+of a communication are protected, for example, a resourceful adversary may
+instead attempt to determine the identities of the communicating parties, their
+relationships, or patterns in their behaviour. Protecting that then brings into
+focus the next piece of information that could be observed and used. Every
+answer reveals another question.
 
 Over the last fifty years, privacy-enhancing technologies have been designed to
 answer exactly these broader privacy problems. The surface of information being
 protected has expanded, and so has the number of entities capable of observing
 some part of the system.  Service providers, issuers, validators, network
 operators and public authorities may all learn sensitive information while
-performing otherwise legitimate functions. This raises the question of how
-these participants should be incorporated into the system model, and what
-information they should be permitted to learn.
+performing otherwise legitimate functions. This raises the question of how these
+participants should be incorporated into the system model, and what information
+they should be permitted to learn.
 
 These powerful entities are consequently often modelled as adversaries.
 Protocol designers have understandably been active in designing systems that
@@ -46,17 +41,17 @@ take power away from powerful, centralised entities. Anything that such an
 entity learns is a step away from the ideal world.
 
 \paragraph{Centralisation, responsibility and trust.} In attempting to remove
-trust from centralised institutions, protocols may instead transfer
-computation, storage and operational responsibility to individual users.  But
-centralisation is not a single property, and decentralisation alone is not a
-complete description of any protocol's design.
+trust from centralised institutions, protocols may instead transfer computation,
+storage and operational responsibility to individual users.  But centralisation
+is not a single property, and decentralisation alone is not a complete
+description of any protocol's design.
 
-Computation, state, authority and information may be distributed differently.
-A system may centralise computation while distributing authority between
-several institutions, or centralise storage while using cryptography to prevent
-the storage provider from learning the stored information. The distribution of
-these responsibilities does not by itself determine the trust assumptions of
-the system. An institution may be relied upon to provide availability, maintain
+Computation, state, authority and information may be distributed differently.  A
+system may centralise computation while distributing authority between several
+institutions, or centralise storage while using cryptography to prevent the
+storage provider from learning the stored information. The distribution of these
+responsibilities does not by itself determine the trust assumptions of the
+system. An institution may be relied upon to provide availability, maintain
 state or execute a prescribed computation without ever having access to users'
 private information.
 
@@ -69,31 +64,32 @@ presents the credential, proving they hold given attributes without revealing
 who they are or anything about their undisclosed attribute values. Early
 anonymous credential schemes assume a single issuer certifying all attributes,
 creating one powerful entity. Later schemes decentralise issuance, but the
-issuers as a whole entity remain responsible for all attributes. This means
-that in decentralising the protocol, all issuers can now learn all attribute
-values of each user.
+issuers as a whole entity remain responsible for all attributes. This means that
+in decentralising the protocol, all issuers can now learn all attribute values
+of each user.
 
 Multi-party computation allows a function to be computed by multiple mutually
 distrusting parties, each with a private input. The function is computed on all
 inputs while revealing nothing but the output. This seems to be an instance
 where decentralisation of the protocol does lead to a straightforward privacy
 gain for users. It can even be applied to anonymous credential issuance to
-sidestep the issue just stated above. The new problem it introduces, however,
-is in practicality. Multi-party computation generally involves interaction from
-all participants, which becomes infeasible when, for example, your driving
-licence, birth certificate, and passport are each issued by countries with no
-diplomatic relations with one another. These issuers have no incentive to
-participate in an expensive protocol to allow individuals to privately prove
-statements about themselves. And so practicality is also an aim in all of our
-constructions. By this, we mean minimising the interaction, coordination,
-communication and computational costs required by the protocols.
+sidestep the issue just stated above. The new problem it introduces, however, is
+in practicality. Multi-party computation generally involves interaction from all
+participants, which becomes infeasible when, for example, your driving licence,
+birth certificate, and passport are each issued by countries with no diplomatic
+relations with one another. These issuers have no incentive to participate in an
+expensive protocol to allow individuals to privately prove statements about
+themselves. And so practicality is also an aim in all of our constructions. By
+this, we mean minimising the interaction, coordination, communication and
+computational costs required by the protocols.
 
-Privacy-focused systems are often discussed as if the choice is between decentralised
-privacy and centralised surveillance. This thesis challenges that binary.
-Powerful institutions can perform useful protocol functions while cryptography
-limits both the information available to them and the capabilities they
-receive. Allowing institutions to perform this work may reduce the computation,
-storage, time and specialist knowledge required of individual users.
+Privacy-focused systems are often discussed as if the choice is between
+decentralised privacy and centralised surveillance. This thesis challenges that
+binary.  Powerful institutions can perform useful protocol functions while
+cryptography limits both the information available to them and the capabilities
+they receive. Allowing institutions to perform this work may reduce the
+computation, storage, time and specialist knowledge required of individual
+users.
 
 Systems deployed today to protect user privacy already involve service
 providers, issuers, auditors, validators and other accountable entities with
@@ -104,21 +100,20 @@ involved~\cite{PoPETS:DGSTV18,privaterelay2021}. This thesis explores how
 modelling such roles explicitly can enable practical and efficient systems.
 
 \paragraph{Financial privacy.} Cryptographic protocols are applied in vastly
-different spaces. There are extremely strong arguments against governments
-being able to read the communications of their citizens, and companies the
-messages of their customers.  A private communication system can aim to ensure
-that no party other than the intended recipient learns the contents of a
-message.
+different spaces. There are extremely strong arguments against governments being
+able to read the communications of their citizens, and companies the messages of
+their customers.  A private communication system can aim to ensure that no party
+other than the intended recipient learns the contents of a message.
 
-But in a financial system, there is something slightly different involved.
-Real financial systems have legitimate accountability requirements. They must
+But in a financial system, there is something slightly different involved.  Real
+financial systems have legitimate accountability requirements. They must
 establish the validity of transactions, maintain a consistent shared state,
 control issuance, prevent or detect double spending, and, in many settings,
 support some form of accountability. Financial systems must remain efficient as
 the number of participants grows, ideally without cost per participant growing
 linearly with the size of the system. They must also continue to function for a
-user with no network connection. A system that controls a token of value is
-more complex than a system dealing only with private communication of messages.
+user with no network connection. A system that controls a token of value is more
+complex than a system dealing only with private communication of messages.
 
 This thesis takes the existence of financial auditing requirements as a system
 constraint and asks how narrowly the corresponding capabilities can be defined.
@@ -139,38 +134,39 @@ We start with the presence of these operational roles and ask how the protocols
 can work with them. An institution need not be modelled in the same way for the
 analysis of each property of a system. For availability and correct operation,
 we assume that they perform their prescribed roles. For privacy, the same
-institution need not be trusted to keep information available to it confidential. 
-It may retain and combine this information, share it with other participants, 
-and attempt to learn anything it can. Privacy is
-assessed against the strongest information it can derive in this setting.  The
-institution may therefore be relied upon to perform an operational function
-without being trusted with users' private information.
+institution need not be trusted to keep information available to it
+confidential.  It may retain and combine this information, share it with other
+participants, and attempt to learn anything it can. Privacy is assessed against
+the strongest information it can derive in this setting.  The institution may
+therefore be relied upon to perform an operational function without being
+trusted with users' private information.
 
 \paragraph{The thesis.} This thesis argues that practical privacy is achieved
 not by assuming away existing infrastructure, but by modelling its participants
 and responsibilities accurately, and cryptographically constraining what each
 participant can learn and do. In particular, an institution may perform
-computation, maintain state, issue credentials, validate transactions or
-provide availability without being trusted with users' private information.
-Each of the protocols comes from considering the specific responsibilities of
-participants in each existing system.
+computation, maintain state, issue credentials, validate transactions or provide
+availability without being trusted with users' private information.  Each of the
+protocols comes from considering the specific responsibilities of participants
+in each existing system.
 
-We first consider aggregate anonymous credentials. Existing credential models
-do not always reflect the way that authority is divided in
-practice. A user may receive attributes from several independent issuers and
-later need to demonstrate statements about subsets of attributes. 
-We focus on decentralisation of issuance. We construct an efficient
-multi-issuer aggregate anonymous credential scheme in which independently
-issued credentials can be combined and presented through a single proof.
-Anonymous credential systems already implicitly include a registration
-authority. We use this existing role to bind credentials issued to the same
-user, preventing credentials belonging to different users from being aggregated
-without requiring expensive proofs during presentation.
+We first consider aggregate anonymous credentials. Existing credential models do
+not always reflect the way that authority is divided in practice. A user may
+receive attributes from several independent issuers and later need to
+demonstrate statements about subsets of attributes.  We focus on
+decentralisation of issuance. We construct an efficient multi-issuer aggregate
+anonymous credential scheme in which independently issued credentials can be
+combined and presented through a single proof.  Anonymous credential systems
+already implicitly include a registration authority. We use this existing role
+to bind credentials issued to the same user, preventing credentials belonging to
+different users from being aggregated without requiring expensive proofs during
+presentation.
 
-We then construct threshold structure-preserving
-signature schemes that require no interaction during the online signing phase, 
-making them suitable for efficient transaction authorisation or other multi-certifier settings. Here again, 
-the existing structure becomes a resource rather than an obstacle to be removed.
+We then construct threshold structure-preserving signature schemes that require
+no interaction during the online signing phase, making them suitable for
+efficient transaction authorisation or other multi-certifier settings. Here
+again, the existing structure becomes a resource rather than an obstacle to be
+removed.
 
 We next consider accountability in transaction systems that protect user
 privacy.  Financial systems may require both the ability to investigate a
@@ -179,31 +175,30 @@ identify the transactions associated with a particular user. These capabilities
 are related but distinct, and granting one need not grant the other. We develop
 a transaction identification mechanism that supports concurrent transaction
 creation without requiring the auditor to maintain persistent per-user state.
-Auditing is restricted to a specified epoch, limiting both the
-scope and duration of the information disclosed to an auditor.
+Auditing is restricted to a specified epoch, limiting both the scope and
+duration of the information disclosed to an auditor.
 
 Finally, we study privacy in offline payments. Offline operation improves
-availability and accessibility, but changes how double spending must be
-handled. We develop an offline payment scheme that divides computation between
-a mobile device and a secure element. Payments made by honest users remain
-unlinkable, while information identifying the double spender can be recovered
-following double spending.
+availability and accessibility, but changes how double spending must be handled.
+We develop an offline payment scheme that divides computation between a mobile
+device and a secure element. Payments made by honest users remain unlinkable,
+while information identifying the double spender can be recovered following
+double spending.
 
-To reiterate, centralisation is multidimensional. Computation, state,
-authority, and knowledge can each be centralised or decentralised
-independently.
-Privacy does not automatically follow from decentralisation, nor does it
-automatically disappear when corporations or public institutions participate in
-a protocol. What matters is the information made available to each participant.
-Protocol models should reflect the roles that exist in practice.  Issuers,
-auditors, validators and service providers can be represented explicitly rather
-than removed in pursuit of decentralisation.
+To reiterate, centralisation is multidimensional. Computation, state, authority,
+and knowledge can each be centralised or decentralised independently.  Privacy
+does not automatically follow from decentralisation, nor does it automatically
+disappear when corporations or public institutions participate in a protocol.
+What matters is the information made available to each participant.  Protocol
+models should reflect the roles that exist in practice.  Issuers, auditors,
+validators and service providers can be represented explicitly rather than
+removed in pursuit of decentralisation.
 
 The remainder of this thesis is organised as follows.  Preliminary information
 is found in \Cref{chap:preliminaries}.  \Cref{chap:agg-creds} presents our
-aggregate anonymous credential construction. \Cref{chap:tsps} presents the threshold
-signing protocol for transaction authorisation, \Cref{chap:txid} presents the
-transaction identification mechanism, and
+aggregate anonymous credential construction. \Cref{chap:tsps} presents the
+threshold signing protocol for transaction authorisation, \Cref{chap:txid}
+presents the transaction identification mechanism, and
 \Cref{chap:offline-payments} presents the offline payment mechanism.
 \Cref{chap:conclusion} summarises the contributions and discusses open
 questions.
