@@ -322,6 +322,12 @@ random. We then have the following advantage:
     \Adv[\adv_{\PRF}(\FE)] \leq \Adv[\adv_\mathsf{DDH}(\simu)] + \frac{1}{p}.
 %
   \end{equation*}
+%
+  The additive term is the event $ab = z$ isolated above, on which the
+programmed pairs stop being uniform. Nothing in the bound depends on the number
+of random oracle queries, since a fresh pair $(r_i, t_i)$ is drawn for each new
+epoch and reused thereafter, so no two epochs can collide on a programmed value
+of $\HE$.
 
 \end{proof}
 
