@@ -48,7 +48,9 @@ across several proofs using a commitment scheme $\Com$. Two pseudorandom
 functions, $\FE$ for epoch keys and $\FT$ for tags, derive epoch tracing keys
 and transaction tags from users' long-term tracing keys. These keys are also
 bound using one-way functions $\G$ and $\G'$, where $\G'$ is applied to the
-tracing key as a whole, which the instantiation takes to be a tuple. The user
+tracing key as a whole, which the instantiation takes to be a tuple. The image
+$\PTK = \G'(\utk)$ is the user's public tracing key, and doubles as a public
+parameter of $\FT$. The user
 proves that these values were derived correctly, and, where the proof must also
 authenticate a message, that the message originated from the same user, using
 zero-knowledge proofs of knowledge.
@@ -61,39 +63,28 @@ without learning $\sk$ or $\utk$, and a user must later be able to prove in zero
 knowledge that a commitment $\com$ opens to the same $\utk$ that a credential
 certifies. Instantiating $\DS$ and $\Com$ independently would leave $\rel_6$
 below requiring a generic proof over the signature verification equation, which
-is exactly the expense the instantiation avoids. Second, $\FE$ splits, as
-described next.
+is exactly the expense the instantiation avoids. Second, $\FT$ is parameterised
+by the public tracing key, as described next.
 
-\paragraph{The shape of $\FE$.} We do not require $\FE$ to be a pseudorandom
-function in the ordinary sense, because the instantiation's epoch key is not
-one. Instead we require that its output decomposes as
-%
-\begin{equation}\label{eq:fe-split}
-%
-  \ek = \FE(\utk,\epoch) = (\ek_\epoch,\ \mathsf{aux}),
-%
-\end{equation}
-%
-where $\ek_\epoch$ depends on the epoch and $\mathsf{aux}$ does not, subject to
-two conditions:
-%
-\begin{enumerate}
+\paragraph{The public tracing key is a parameter of $\FT$.} The tag function
+takes three arguments, $\Tag_\gamma = \FT(\PTK, \ek, \gamma)$, where $\PTK =
+\G'(\utk)$ is the public tracing key the registration authority certifies at
+registration. $\PTK$ enters as a public parameter and not as key material: the
+key of $\FT$ is the epoch tracing key $\ek$, and $\PTK$ is fixed once, for the
+lifetime of the user. Correspondingly, we require pseudorandomness of both
+families to hold against a distinguisher that holds $\PTK$, in the sense
+of~\Cref{sec:prelims-prfs}, so that nothing $\PTK$ carries need be kept secret.
 
-  \item[(F1)] the map $\epoch \mapsto \ek_\epoch$, keyed by $\utk$, is a
-pseudorandom function; and
-
-  \item[(F2)] $\FT(\cdot,\gamma)$ is a pseudorandom function on domain
-$[0,\Max)$ even when $\mathsf{aux}$ is given to the adversary, provided
-$\ek_\epoch$ is not.
-
-\end{enumerate}
-%
-Since $\mathsf{aux}$ is constant across epochs, it is sent once, at a user's
-first grant, and treated as public thereafter; only $\ek_\epoch$ need be
-transmitted for subsequent grants. Condition (F2) is what makes releasing it
-harmless, and (F1) is what confines an auditor to the epochs they have been
-granted. A construction in which $\FE$ is a PRF outright is the special case
-$\mathsf{aux} = \varnothing$.
+The distinction matters because whatever the instantiation needs in order to
+evaluate a tag, beyond the epoch key itself, must sit somewhere that does not
+vary with the epoch. Placing such material in the output of $\FE$ would make
+$\FE$ repeat a component of its output in every epoch, and no function that does
+that is pseudorandom, whatever the hardness assumption behind it. Placing it in
+$\PTK$ costs nothing, since $\PTK$ is certified at registration and already
+travels with the grant message, and it leaves $\FE$ a pseudorandom function in
+the ordinary sense. \Cref{sec:txid-instantiation} is exactly this case: $\PTK$
+carries a vector of $\Max$ group elements alongside the image of $\utk$, while
+$\ek$ is a single group element.
 
 \paragraph{Setup.} During setup, the registration authority generates a key pair
 for a digital signature scheme. Their public key is communicated to the ledger
@@ -137,9 +128,11 @@ generation, with instance, witness, and relation given as follows:
 %
 \end{gathered} \end{equation}
 %
-Note that $\rel_5$ covers both components of~\Cref{eq:fe-split}. In the
-instantiation the $\mathsf{aux}$ clause is proved once, at a user's first grant,
-and the $\ek_\epoch$ clause once per epoch.
+Since $\PTK$ appears in $\inst_5$, the same proof establishes that the epoch key
+was derived from the tracing key whose image the credential certifies, and that
+$\PTK$ itself is well formed against that tracing key. In the instantiation the
+second of these is proved once, at an auditor's first grant, and the first once
+per epoch.
 %
 The third relation, $\rel_6$, lets a user prove possession of a valid
 registration credential, and consistency between the tracing key certified by
@@ -156,7 +149,7 @@ witness, and relation defined as follows:
 \begin{equation}\label{eq:rel6} \begin{gathered}
 %
   \rel_6 = \{\ \DSverify(\rapk, \G(\sk) \| \G'(\utk), \signature) = 1 \ \wedge \
-\ComOpen(\ck, \com, \utk, \openinfo) = 1\ \}.
+\ComOpen(\ck, \com, \openinfo) = \utk\ \}.
 %
 \end{gathered} \end{equation}
 %
@@ -166,16 +159,16 @@ same commitment, with instance, witness, and relation defined as follows:
 %
 \begin{equation}
 %
-  \inst_7 = (\FE, \FT, \ck, \com, \epoch, \Max, \Tag_\gamma), \qquad \witness_7
-= (\utk, \openinfo, \ek, \gamma),
+  \inst_7 = (\FE, \FT, \G', \ck, \com, \epoch, \Max, \Tag_\gamma), \qquad
+\witness_7 = (\utk, \openinfo, \ek, \gamma),
 %
 \end{equation}
 %
 \begin{equation}\label{eq:rel7} \begin{gathered}
 %
-  \rel_7 = \{\ \ComOpen(\ck, \com, \utk, \openinfo) = 1 \ \wedge \ \ek =
-\FE(\utk, \epoch) \\ \wedge \ \Tag_\gamma = \FT(\ek, \gamma) \ \wedge \ 0 \leq
-\gamma < \Max\ \}.
+  \rel_7 = \{\ \ComOpen(\ck, \com, \openinfo) = \utk \ \wedge \ \ek =
+\FE(\utk, \epoch) \\ \wedge \ \Tag_\gamma = \FT(\G'(\utk), \ek, \gamma) \ \wedge
+\ 0 \leq \gamma < \Max\ \}.
 %
 \end{gathered} \end{equation}
 %
@@ -274,15 +267,17 @@ $|\txns[(\user,\epoch)]| \leq \Max$ hold in the real world and match step 3 of
 $\IDsubmit$ in $\idfu{\algo{trace}}$. Both checks must therefore be enforced by
 the validators on every transaction.
 
-\paragraph{Tracing.} Given key $\ek$ for epoch $\epoch$, the auditor traces the
-transactions the user submitted during that epoch by computing $\Tag_\gamma =
-\FT(\ek, \gamma)$ for each index $\gamma \in [0,\Max)$ and retrieving entry
-$\ledger[\Tag_\gamma]$ where present.
+\paragraph{Tracing.} Given the user's public tracing key $\PTK$ and epoch key
+$\ek$ for epoch $\epoch$, the auditor traces the transactions the user submitted
+during that epoch by computing $\Tag_\gamma = \FT(\PTK, \ek, \gamma)$ for each
+index $\gamma \in [0,\Max)$ and retrieving entry $\ledger[\Tag_\gamma]$ where
+present. Both values reach the auditor in the grant message of the epoch, so
+tracing requires no state carried over from any earlier epoch.
 
 \paragraph{Increment Epoch.} The system participants move to epoch $\epoch + 1$.
 
 \begin{theorem}\label{thm:txid-bb} Assuming that $\DS$ satisfies existential
-unforgeability, $\FE$ satisfies (F1) and $\FT$ satisfies (F2), $\G$ and $\G'$
-are one way, and the zero-knowledge proof systems for $\rel_4$ through $\rel_7$
+unforgeability, $\FE$ and $\FT$ are pseudorandom against a distinguisher holding
+$\PTK$, $\G$ and $\G'$ are one way, and the zero-knowledge proof systems for $\rel_4$ through $\rel_7$
 are zero knowledge and simulation extractable, the protocol described above
 securely realises $\idfu{\algo{trace}}$.  \end{theorem}

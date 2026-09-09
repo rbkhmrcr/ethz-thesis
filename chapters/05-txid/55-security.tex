@@ -21,13 +21,12 @@ authority.
 computationally indistinguishable from random for any PPT adversary. It is also
 binding, which the extraction step of (P4) relies on.
 
-  \item[(P3)] $\FE$ satisfies condition (F1) and $\FT$ satisfies condition (F2)
-of~\Cref{sec:txid-construction}. Note that we do \emph{not} assume $\FE$ is a
-pseudorandom function: its output contains a component $\mathsf{aux}$ that is
-identical in every epoch, so it cannot be. What (F1) gives is that the
-epoch-varying component $\ek_\epoch$ is pseudorandom, and what (F2) gives is
-that the tags of an epoch remain pseudorandom even once $\mathsf{aux}$ is
-public, so long as $\ek_\epoch$ is not. In the instantiation these are
+  \item[(P3)] $\FE$ and $\FT$ are pseudorandom functions, and remain so against
+a distinguisher holding the user's public tracing key $\PTK$. This is the
+requirement of~\Cref{sec:txid-construction}: $\PTK$ is a public parameter of
+$\FT$ rather than key material, so nothing it carries need be kept secret, and
+because it is fixed for the lifetime of the user it is deliberately kept out of
+the output of $\FE$. In the instantiation the two statements are
 \Cref{lem:txid-fe-prf,lem:txid-ft-prf} respectively.
 
   \item[(P4)] The proofs and signatures of knowledge for relations $\rel_4$
@@ -106,24 +105,24 @@ indistinguishable from Game 2.
 
   \paragraph{Game 4.} As Game 3, except for an authorisation request from a
 corrupt auditor for honest user $\user$ and epoch $\epoch$, $\simu$ replaces the
-epoch-varying component of the epoch key by a uniform value, and simulates the
-proof for relation $\rel_5$.
+epoch tracing key by a uniform value, and simulates the proof for relation
+$\rel_5$.
 
-  Concretely, writing $\ek = (\ek_\epoch, \mathsf{aux})$ as
-in~\Cref{eq:fe-split}, $\simu$ samples $\ek_\epoch$ uniformly and sets
-$\permsimu[(\auditor,\user,\epoch)] \leftarrow (\ek_\epoch,
-\mathsf{aux}_\user)$, where $\mathsf{aux}_\user$ is sampled once per user and
-reused in every epoch. Reusing it is not an optimisation but a requirement:
-$\mathsf{aux}$ is by definition identical across epochs, so a simulator that
-drew a fresh one per grant would be trivially distinguishable by a corrupt
-auditor holding grants for two epochs.
+  Concretely, $\simu$ samples $\ek$ uniformly from the range of $\FE$ and sets
+$\permsimu[(\auditor,\user,\epoch)] \leftarrow \ek$. The user's public tracing
+key $\PTK_\user$ is sampled once per user, at registration, and is reused in
+every grant for that user. Reusing it is not an optimisation but a requirement:
+$\PTK$ is certified once and is by construction identical across epochs, so a
+simulator that drew a fresh one per grant would be trivially distinguishable by
+a corrupt auditor holding grants for two epochs.
 
   When such a user submits a transaction, $\simu$ computes the tag as
-$\FT(\ek,\gamma)$ under this substituted key, so that the corrupt auditor's
-tracing still succeeds, and simulates the zero-knowledge proof for relation
-$\rel_7$. By condition (F1) on $\FE$ (P3), applied as a PRF across the epochs
-for which the auditor holds no permission, and by (P4), this game is
-indistinguishable from Game 3.
+$\FT(\PTK_\user,\ek,\gamma)$ under this substituted key, so that the corrupt
+auditor's tracing still succeeds, and simulates the zero-knowledge proof for
+relation $\rel_7$. By pseudorandomness of $\FE$ (P3), which holds against a
+distinguisher given $\PTK_\user$ and is applied across the epochs for which the
+auditor holds no permission, and by (P4), this game is indistinguishable from
+Game 3.
 
   \paragraph{Game 5.} As Game 4, except $\simu$ also simulates transaction
 submission using $\idfu{\algo{trace}}$'s output on $\IDsubmit$ requests from
@@ -163,12 +162,12 @@ payload. We treat the two cases below.
     \item[No corrupt auditor holds a permission for this epoch.] $\simu$ sets
 the confidential payload to an arbitrary ciphertext, and instead of computing
 the commitment as $\com = \ComCommit(\ck, \utk, \openinfo)$ and the tag as
-$\Tag_\gamma = \FT(\ek,\gamma)$, samples uniformly at random commitment
+$\Tag_\gamma = \FT(\PTK,\ek,\gamma)$, samples uniformly at random commitment
 $\com^{\star}$ and tag $\Tag_{\gamma}^\star$ and simulates both corresponding
-proofs. Condition (F2) is exactly what licenses this: the tags of an epoch are
-pseudorandom to an adversary holding $\mathsf{aux}$ but not $\ek_\epoch$, which
-is the position of every corrupt auditor here. So by (P2), (F2) via (P3), and
-(P4), this is indistinguishable from submitting transactions in an execution of
+proofs. Pseudorandomness of $\FT$ is exactly what licenses this: the tags of an
+epoch are pseudorandom to an adversary holding $\PTK$ but not $\ek$, which is
+the position of every corrupt auditor here. So by (P2), (P3), and (P4), this is
+indistinguishable from submitting transactions in an execution of
 $\Pi$.
 
     \item[A corrupt auditor holds a valid tracing permission for the honest
@@ -177,7 +176,7 @@ honest user and $\algo{TX}$ consists of the payload that $\user$ sent with their
 $\IDsubmit$ query. $\simu$ retrieves tuple $(\sk, \utk,\signature) \leftarrow
 \regsimu[\user]$ and the substituted epoch key $\ek \leftarrow
 \permsimu[(\auditor,\user,\epoch)]$, places that payload in the transaction,
-computes the tag as $\FT(\ek,\gamma)$ so that the corrupt auditor's tracing
+computes the tag as $\FT(\PTK_\user,\ek,\gamma)$ so that the corrupt auditor's tracing
 succeeds, and simulates the rest of the transaction as in Game 4.
 
   \end{description}
@@ -237,10 +236,12 @@ $(\G(\sk), \G'(\utk))$ verifying under~\Cref{eq:rel6}, together with an opening
 of $\com$ to $\utk$; by (P1) the credential was issued by the registration
 authority, so $\utk$ is the tracing key of a registered user, and by the binding
 of $\com$ (P2) it is the same $\utk$ that $\rel_7$ speaks about. From $\rel_7$
-we obtain $\Tag_{\gamma} = \FT(\ek, \gamma)$ with $\ek = \FE(\utk, \epoch)$ and
+we obtain $\Tag_{\gamma} = \FT(\PTK, \ek, \gamma)$ with $\PTK = \G'(\utk)$, $\ek
+= \FE(\utk, \epoch)$, and
 $0 \leq \gamma < \Max$, verifying~\Cref{eq:rel7}. Chaining these, every
 transaction the validators accept from a corrupt user carries a tag lying in the
-set $\{\FT(\FE(\utk,\epoch),\gamma)\}_{\gamma \in [0,\Max)}$ for that user's own
+set $\{\FT(\G'(\utk),\FE(\utk,\epoch),\gamma)\}_{\gamma \in [0,\Max)}$ for that
+user's own
 certified $\utk$, which is exactly the set an authorised auditor enumerates. A
 corrupt user therefore cannot place a transaction on the ledger that a permitted
 auditor will miss, and in particular the range clause is what rules out the
@@ -272,19 +273,45 @@ DDH in $\group{1}$.
 
     \item Set the secret key implicitly to $\utk'^\star = b$.
 
-    \item For each query $\epoch_i$ to $\HE(\epoch_i)$, set $\HE(\epoch_{i}) =
-\gen^{a \cdot {r_i}} = (\gen^a)^{r_i}$ for fresh random $r_i \sample \Zp$.
+    \item For each query $\epoch_i$ to $\HE(\epoch_i)$, draw fresh $r_i, t_i
+\sample \Zp$ and set $\HE(\epoch_{i}) = (\gen^a)^{r_i}\cdot\gen^{t_i} =
+\gen^{a r_i + t_i}$.
 
-    \item For each query $\epoch_i$ to the PRF oracle, return $Z^{r_i}$.
+    \item For each query $\epoch_i$ to the PRF oracle, return
+$Z^{r_i}\cdot(\gen^{b})^{t_i}$.
 
   \end{enumerate}
 
-  If $Z = \gen^{ab}$, then $Z^{r_i} = \HE(\epoch_i)^{b}$, so $\simu$ has
-constructed the real function with key encoded in $\gen^b$, and responses are
-consistent across repeated queries.
+  The pair $(r_i,t_i)$ is stored on the first query on $\epoch_i$ and reused
+afterwards, so both oracles are consistent across repeated queries.
 
-  If $Z \sample \group{1}$, then each response is independent and uniformly
-random in $\group{1}$, since $Z$ is independent of $\gen^a$ and $\gen^b$.
+  If $Z = \gen^{ab}$, then the response is $\gen^{a b r_i + b t_i} =
+\HE(\epoch_i)^{b}$, so $\simu$ has reproduced $\FE$ exactly, with key $b$.
+
+  If $Z = \gen^{z}$ for uniform $z$, then the answer pair for $\epoch_i$ is
+$(\gen^{a r_i + t_i}, \gen^{z r_i + b t_i})$. The exponents are the image of the
+uniform vector $(r_i,t_i)$ under the matrix $\left(\begin{smallmatrix} a & 1 \\
+z & b\end{smallmatrix}\right)$, which is invertible whenever $ab \neq z$. Each
+pair is therefore uniform in $\group{1}^2$, and, as the $(r_i,t_i)$ are drawn
+independently, the pairs are mutually independent. The view of the distinguisher
+is that of a random function, and we lose only the event $ab = z$, of
+probability $1/p$.
+
+  Re-randomising with $r_i$ alone would not suffice. It would give answers
+$\gen^{z r_i} = \HE(\epoch_i)^{z/a}$, which is again $\FE$, under key $z/a$
+rather than $b$, so the two cases would be identically distributed and the
+reduction would say nothing. The term $\gen^{t_i}$ is what breaks that
+correlation.
+
+  The distinguisher may hold $\PTK$ throughout. Its first component $T =
+\gen_2^{\utk'}\cdot\gen_3^{\utk''}$ is a perfectly hiding Pedersen commitment
+for $\utk'' \sample \Zp$, so $\simu$ samples it uniformly, and its second
+component $\{W_\gamma\}$ is a function of $\utk''$ alone, which $\simu$ draws
+itself. Neither touches the challenge. As $\simu$ also plays the registration
+authority it chooses the remaining BBS+ generators and the issuing key, and can
+produce every other public value of the protocol. This is what lets the lemma be
+stated against a distinguisher given the whole of $\PTK$, which
+is~\Cref{lem:txid-ft-prf} needs in order to compose with this one.
 
   An adversary that distinguishes the epoch key from random can then distinguish
 between the case where $Z$ is a valid DDH tuple and the case where $Z$ is
@@ -292,14 +319,9 @@ random. We then have the following advantage:
 %
   \begin{equation*}
 %
-    \Adv[\adv_{\PRF}(\FE)] \leq \Adv[\adv_\mathsf{DDH}(\simu)] +
-\frac{q_{\HE}^2}{2p},
+    \Adv[\adv_{\PRF}(\FE)] \leq \Adv[\adv_\mathsf{DDH}(\simu)] + \frac{1}{p}.
 %
   \end{equation*}
-%
-  where $q_{\HE}$ bounds the number of random oracle queries and the second term
-accounts for a collision among the $r_i$, which would make two epochs share a
-programmed value of $\HE$.
 
 \end{proof}
 
@@ -307,54 +329,53 @@ programmed value of $\HE$.
 
 \begin{proof}
 
-  Let $\adv$ distinguish the tag vectors of $n$ epochs from random with
-advantage $\varepsilon$. We use $\adv$ to build a simulator $\simu$ that breaks
-$(\Max,n)$-mDBDHI.
+  Let $\adv$ distinguish the tag vector of an epoch from random with advantage
+$\varepsilon$. We use $\adv$ to build a simulator $\simu$ that breaks
+$q$-mDBDHI with $q = \Max$.
 
-  $\simu$ receives a $(\Max,n)$-mDBDHI challenge $(\gen, \ggen_D,
+  $\simu$ receives a $q$-mDBDHI challenge $(\gen, \ggen_D,
 \{\ggen_D^{1/(x+\gamma)}\}_{\gamma\in[0,\Max)},
-\{\Delta_{i,\gamma}\}_{i\in[1,n],\gamma\in[0,\Max)})$, where either
-$\Delta_{i,\gamma} = \pairing(A_i, \ggen_D^{1/(x+\gamma)})$ for every
-$(i,\gamma)$ and hidden $A_i \sample \group{1}$, or every $\Delta_{i,\gamma}
-\sample \group{T}$ independently. It forwards
-$\{\ggen_D^{1/(x+\gamma)}\}_{\gamma\in[0,\Max)}$ to $\adv$ as the published
-group elements $\{W_\gamma\}$, and $\{\Delta_{i,\gamma}\}_\gamma$ as the tag
-vector of epoch $i$, implicitly setting $\ek'_i = A_i$ and $\utk''^\star = x$,
-and echoes $\adv$'s guess.
-
-  The multi-instance form is what the protocol needs, and it is not obtained for
-free from the single-instance one by a hybrid: the $n$ instances share the same
-$x$, because $\{W_\gamma\}$ is fixed once at registration and reused in every
-epoch, so a hybrid that swapped one epoch at a time would have to produce the
-other epochs' vectors under that same unknown $x$. The rerandomisation given
-after~\Cref{qmdbdhi-txid} supplies exactly that, which is why the reduction is
-tight in $n$.
+\{\Delta_{\gamma}\}_{\gamma\in[0,\Max)})$, where either $\Delta_{\gamma} =
+\pairing(A, \ggen_D^{1/(x+\gamma)})$ for every $\gamma$ and hidden $A \sample
+\group{1}$, or every $\Delta_{\gamma} \sample \group{T}$ independently. It
+forwards $\{\ggen_D^{1/(x+\gamma)}\}_{\gamma\in[0,\Max)}$ to $\adv$ as the
+public parameters $\{W_\gamma\}$ and $\{\Delta_{\gamma}\}$ as the tag vector,
+implicitly setting $\ek^\star = A$ and $\utk''^\star = x$, and echoes $\adv$'s
+guess.
 
   No interpolation over the queried indices is needed, since the challenge
 already supplies every $W_\gamma$ directly, matching exactly what an auditor
 receives in the real protocol. If the challenge is real, the distribution
-$\simu$ hands to $\adv$ is exactly $\{\FT(\ek_i,\gamma)\}_{\gamma\in[0,\Max)}$
-in each epoch $i$, under key $\utk''^\star$. If the challenge is random, every
-entry is independent and uniform in $\group{T}$. We then have the following
-advantage:
+$\simu$ hands to $\adv$ is exactly $\{\FT(\PTK,\ek^\star,\gamma)\}_{\gamma\in
+[0,\Max)}$ under key $\ek^\star$. If the challenge is random, every entry is
+independent and uniform in $\group{T}$. As the domain $[0,\Max)$ is of
+polynomial size, indistinguishability of the whole vector from a uniform vector,
+which is what the assumption gives, is equivalent to pseudorandomness in the
+sense of~\Cref{sec:prelims-prfs}: an adaptive distinguisher can be run on the
+vector directly. We then have the following advantage:
 %
   \begin{equation*}
 %
     \Adv[\adv_{\PRF}(\FT)] \leq
-\Adv[\adv_{(\Max,n)\text{-}\mathsf{mDBDHI}}(\simu)].
+\Adv[\adv_{q\text{-}\mathsf{mDBDHI}}(\simu)].
 %
   \end{equation*}
 %
-  That each $\ek'_i$ is uniform in $\group{1}$, and independent across the
-epochs for which $\adv$ holds no permission, is~\Cref{lem:txid-fe-prf}.
+  A single instance is enough for the whole lifetime of a user. The epoch keys
+of distinct epochs are uniform and mutually independent
+by~\Cref{lem:txid-fe-prf}, whose statement hands the distinguisher the whole of
+$\PTK$, and it is $\PTK$ alone that the epochs share. The two lemmas therefore
+compose without a hybrid over epochs, which is what the $\{W_\gamma\}$ being
+public parameters rather than a component of $\ek$ buys us.
 
   We also note that the group elements $\{W_\gamma\}$ do not compromise $\utk''$
 itself: recovering $\utk''$ from them would break the $q$-SDH assumption
-(\Cref{qsdh-bbs}), which we already assume for the BBS+ signature scheme. Since
+(\Cref{asm:qsdh-bbs}), which we already assume for the BBS+ signature scheme. Since
 $\utk''$ is fixed once at registration and never leaves the user, and the group
-elements $\{W_\gamma\}$ published to an auditor are identical in every epoch, no
-component of $\ek$ links one epoch to another beyond what $\ek'$ itself
-discloses to auditors already holding permission for that epoch.
+elements $\{W_\gamma\}$ given to an auditor are certified public parameters
+identical in every epoch, nothing in a grant links one epoch to another beyond
+what $\ek$ itself discloses to auditors already holding permission for that
+epoch.
 
 \end{proof}
 
@@ -362,26 +383,26 @@ discloses to auditors already holding permission for that epoch.
 
 Recall from~\Cref{sec:tag-computation} that $\rel_7$ has instance $\inst_7 =
 (\HE, \ggen_D, \gen_2, \gen_3, \gen_4, \com, \Max, \epoch, \Tag_\gamma)$ and
-witness $\witness_7 = (\utk', \utk'', \openinfo, \ek', \gamma)$, and holds
+witness $\witness_7 = (\utk', \utk'', \openinfo, \ek, \gamma)$, and holds
 exactly when the following does:
 %
 \begin{equation} \begin{gathered}
 %
   \com = \gen_2^{\utk'}\cdot\gen_3^{\utk''}\cdot\gen_4^{\openinfo} \ \wedge \
-\ek' = \HE(\epoch)^{\utk'} \\ \wedge \ \Tag_{\gamma} = \pairing\big(\ek',\,
+\ek = \HE(\epoch)^{\utk'} \\ \wedge \ \Tag_{\gamma} = \pairing\big(\ek,\,
 \ggen_D^{1/(\utk''+\gamma)}\big) \ \wedge \ 0 \leq \gamma < \Max.
 %
 \end{gathered} \end{equation}
 %
-$\rel_7'$ is defined for instance $\inst_7' = (\inst_7, U, V, \Xi, \com_\gamma)$
+$\rel_7'$ is defined for instance $\inst_7' = (\inst_7, U, \Pi, X, \com_\gamma)$
 and witness $\witness_7' = (\witness_7, s, r_\gamma)$, and holds exactly when
 the following does:
 %
 \begin{equation} \begin{gathered}
 %
   \com = \gen_2^{\utk'}\cdot\gen_3^{\utk''}\cdot\gen_4^{\openinfo} \ \wedge \ U
-= \HE(\epoch)^s \ \wedge \ V = U^{\utk'} \\ \wedge \ \Xi = \Tag_\gamma^s \
-\wedge \ \pairing(V,\ggen_D) = \Xi^{\utk''}\cdot\Xi^{\gamma} \\ \wedge \
+= \HE(\epoch)^s \ \wedge \ \Pi = \pairing(U,\ggen_D)^{\utk'} \\ \wedge \ X =
+\Tag_\gamma^s \ \wedge \ \Pi = X^{\utk''}\cdot X^{\gamma} \\ \wedge \
 \com_\gamma = \gen_3^{\gamma}\cdot\gen_4^{r_\gamma} \ \wedge \ 0 \leq \gamma <
 \Max.
 %
@@ -394,37 +415,39 @@ non-interactive case at the end.
 \begin{proof}\leavevmode
 
   \paragraph{Correctness.} Let $\witness_7$ satisfy $\rel_7$, and sample $s,
-r_\gamma \sample \Zp$. Set $U = \HE(\epoch)^{s}$, $V = \ek'^{s}$, $\Xi =
-\Tag_\gamma^{s}$, and $\com_\gamma = \gen_3^{\gamma}\cdot\gen_4^{r_\gamma}$.
-The equalities for $\com$, $U$, $\Xi$, $\com_\gamma$, and the range of $\gamma$
-hold by construction, and $V = (\HE(\epoch)^{\utk'})^{s} = U^{\utk'}$ gives the
-one for $V$. For the pairing equality, $\Tag_\gamma = \pairing(\ek',
-\ggen_D^{1/(\utk''+\gamma)})$ gives $\Tag_\gamma^{\utk''+\gamma} =
-\pairing(\ek',\ggen_D)$, which gives the following:
+r_\gamma \sample \Zp$. Set $U = \HE(\epoch)^{s}$, $\Pi =
+\pairing(\ek^{\,s},\ggen_D)$, $X = \Tag_\gamma^{s}$, and $\com_\gamma =
+\gen_3^{\gamma}\cdot\gen_4^{r_\gamma}$. The equalities for $\com$, $U$, $X$,
+$\com_\gamma$, and the range of $\gamma$ hold by construction, and
+$\pairing(U,\ggen_D)^{\utk'} = \pairing(\HE(\epoch)^{s\utk'},\ggen_D) =
+\pairing(\ek^{\,s},\ggen_D) = \Pi$ gives the one for $\Pi$. For the tag
+equality, $\Tag_\gamma = \pairing(\ek, \ggen_D^{1/(\utk''+\gamma)})$ gives
+$\Tag_\gamma^{\utk''+\gamma} = \pairing(\ek,\ggen_D)$, which gives the
+following:
 %
   \begin{equation*}
 %
-    \Xi^{\utk''}\cdot\Xi^{\gamma} = \big(\Tag_\gamma^{\utk''+\gamma}\big)^{s} =
-\pairing(\ek',\ggen_D)^{s} = \pairing(\ek'^{s},\ggen_D) = \pairing(V,\ggen_D).
+    X^{\utk''}\cdot X^{\gamma} = \big(\Tag_\gamma^{\utk''+\gamma}\big)^{s} =
+\pairing(\ek,\ggen_D)^{s} = \pairing(\ek^{\,s},\ggen_D) = \Pi.
 %
   \end{equation*}
 
   \paragraph{Soundness.} The sigma protocol of~\Cref{prot:txid-tag-sigma}
 extracts $(\utk', \utk'', \openinfo, \gamma, s, r_\gamma)$ from two accepting
 transcripts sharing a first message. The epoch key is not extracted directly.
-We instead fix $\ek' := \HE(\epoch)^{\utk'}$, which gives the second equality of
+We instead fix $\ek := \HE(\epoch)^{\utk'}$, which gives the second equality of
 $\rel_7$ by definition, and the first equality is the first verification
 equation. What remains is the tag equality, together with showing that the
 extracted $\gamma$ is the value the range argument speaks about.
 
-  From $U = \HE(\epoch)^{s}$ and $V = U^{\utk'}$ we get $V =
-\HE(\epoch)^{s\cdot\utk'} = \ek'^{s}$. With $\Xi = \Tag_\gamma^{s}$, the pairing
-equality then reads as follows:
+  From $U = \HE(\epoch)^{s}$ and $\Pi = \pairing(U,\ggen_D)^{\utk'}$ we get $\Pi
+= \pairing(\HE(\epoch)^{s\cdot\utk'},\ggen_D) = \pairing(\ek^{\,s},\ggen_D)$.
+With $X = \Tag_\gamma^{s}$, the tag equality then reads as follows:
 %
   \begin{equation*}
 %
-    \pairing(\ek'^{s}, \ggen_D) = \big(\Tag_\gamma^{s}\big)^{\utk''+\gamma},
-\qquad \text{that is} \qquad \pairing(\ek', \ggen_D)^{s} =
+    \pairing(\ek^{\,s}, \ggen_D) = \big(\Tag_\gamma^{s}\big)^{\utk''+\gamma},
+\qquad \text{that is} \qquad \pairing(\ek, \ggen_D)^{s} =
 \big(\Tag_\gamma^{\utk''+\gamma}\big)^{s}.
 %
   \end{equation*}
@@ -435,20 +458,20 @@ random oracle. Cancelling $s$ leaves the following:
 %
   \begin{equation}\label{eq:rel7prime-core}
 %
-    \pairing(\ek', \ggen_D) = \Tag_\gamma^{\utk''+\gamma}.
+    \pairing(\ek, \ggen_D) = \Tag_\gamma^{\utk''+\gamma}.
 %
   \end{equation}
 %
-  The verifier also rejects unless $V \neq 1_{\group{1}}$. As $V = \ek'^{s}$
-with $s \neq 0$, this forces $\ek' \neq 1_{\group{1}}$, and non-degeneracy of
-the pairing gives $\pairing(\ek',\ggen_D) \neq 1_{\group{T}}$.
+  The verifier also rejects unless $\Pi \neq 1_{\group{T}}$. As $\Pi =
+\pairing(\ek^{\,s},\ggen_D)$ with $s \neq 0$, this forces $\ek \neq
+1_{\group{1}}$ and $\pairing(\ek,\ggen_D) \neq 1_{\group{T}}$.
 By~\Cref{eq:rel7prime-core} the right hand side is then not the identity either,
 so $\utk'' + \gamma \neq 0 \bmod p$ and we can invert it as follows:
 %
   \begin{equation*}
 %
-    \Tag_\gamma = \pairing(\ek',\ggen_D)^{1/(\utk''+\gamma)} =
-\pairing\big(\ek',\, \ggen_D^{1/(\utk''+\gamma)}\big).
+    \Tag_\gamma = \pairing(\ek,\ggen_D)^{1/(\utk''+\gamma)} =
+\pairing\big(\ek,\, \ggen_D^{1/(\utk''+\gamma)}\big).
 %
   \end{equation*}
 %
@@ -456,9 +479,9 @@ so $\utk'' + \gamma \neq 0 \bmod p$ and we can invert it as follows:
 used, and neither is redundant: the first ruled out $s = 0$ and the second ruled
 out $\utk'' = -\gamma$.
 
-  Finally, the fifth verification equation is
-$\Xi^{\theta_2}\cdot\Xi^{\theta_\gamma} = F\cdot\pairing(V,\ggen_D)^{c}$. As
-$\Xi^{\theta_2}\cdot\Xi^{\theta_\gamma} = \Xi^{\theta_2+\theta_\gamma}$, this
+  Finally, the fifth verification equation is $X^{\theta_2}\cdot
+X^{\theta_\gamma} = F\cdot\Pi^{c}$. As $X^{\theta_2}\cdot X^{\theta_\gamma} =
+X^{\theta_2+\theta_\gamma}$, this
 equation on its own binds only the sum $\utk'' + \gamma$, which is all
 that~\Cref{eq:rel7prime-core} needs. The two values are separated elsewhere. The
 response $\theta_2$ is shared with the first verification equation, where the
@@ -473,37 +496,43 @@ and $\gamma$ to $\gamma - \delta$ still satisfies the fifth equation, but breaks
 the first.
 
   \paragraph{Zero knowledge.} We construct a simulator $\simu$ that, given only
-$\inst_7$ and without $\witness_7$, produces a transcript $(U, V, \Xi,
+$\inst_7$ and without $\witness_7$, produces a transcript $(U, \Pi, X,
 \com_\gamma, \algoproof_7')$ computationally indistinguishable from an honestly
 generated one.
 
   \begin{description}
 
-    \item[Simulating $(U, V, \Xi, \com_\gamma)$.] $\simu$ samples $s, r_\gamma
-\sample \Zp$ and sets $U = \HE(\epoch)^{s}$ and $\Xi = \Tag_\gamma^{s}$.  It can
+    \item[Simulating $(U, \Pi, X, \com_\gamma)$.] $\simu$ samples $s, r_\gamma
+\sample \Zp$ and sets $U = \HE(\epoch)^{s}$ and $X = \Tag_\gamma^{s}$.  It can
 compute both, as $\HE(\epoch)$ and $\Tag_\gamma$ are public. It sets
 $\com_\gamma = \gen_3^{\gamma^\star}\cdot\gen_4^{r_\gamma}$ for an arbitrary in
-range $\gamma^\star$. It then samples $V \sample \group{1}$ uniformly, as it
-cannot compute $\ek'^{s}$.
+range $\gamma^\star$. It then samples $\Pi \sample \group{T}$ uniformly, as it
+cannot compute $\pairing(\ek^{\,s},\ggen_D)$.
 
-      The only deviation from the real distribution is therefore $V$, and we
-compare the two tuples below:
+      The only deviation from the real distribution is therefore $\Pi$. Writing
+$\hat{\gen} = \pairing(\HE(\epoch),\ggen_D)$ and $\hat{\ek} =
+\pairing(\ek,\ggen_D)$, both of which a distinguisher can compute, we compare
+the two tuples below:
       %
       \begin{equation*}
       %
-	\big(\HE(\epoch),\, \ek',\, \HE(\epoch)^{s},\, \ek'^{s}\big) \quad
-\text{versus} \quad \big(\HE(\epoch),\, \ek',\, \HE(\epoch)^{s},\, V\big).
+	\big(\hat{\gen},\, \hat{\ek},\, \hat{\gen}^{s},\, \hat{\ek}^{s}\big)
+\quad \text{versus} \quad \big(\hat{\gen},\, \hat{\ek},\, \hat{\gen}^{s},\,
+\Pi\big).
       %
       \end{equation*}
       %
-      This is exactly a DDH instance in $\group{1}$, so hardness of DDH in
-$\group{1}$ makes the change undetectable, and it does so whether or not the
-distinguisher holds $\ek'$. An authorised auditor does hold it, so this matters.
-Note that $\Xi$ needs no separate assumption, since it is a function of public
-data and of the simulator's own $s$. In particular, no claim about $\group{T}$
-is required here.
+      This is exactly a DDH instance in $\group{T}$, so hardness of DDH in
+$\group{T}$ makes the change undetectable, and it does so whether or not the
+distinguisher holds $\ek$. An authorised auditor does hold it, so this matters.
+This is where withholding $\ek^{\,s}$ pays: were the $\group{1}$ element
+published, the simulator would have to sample it in $\group{1}$ and the argument
+would need DDH in $\group{1}$ in the presence of $\ek$, a strictly stronger
+requirement, since $\Pi$ is recoverable from $\ek^{\,s}$ by one pairing but not
+conversely. Note that $X$ needs no separate assumption, since it is a function
+of public data and of the simulator's own $s$.
 
-    \item[Simulating the sigma protocol.] With $(U, V, \Xi, \com_\gamma)$ fixed,
+    \item[Simulating the sigma protocol.] With $(U, \Pi, X, \com_\gamma)$ fixed,
 $\simu$ runs the standard honest verifier simulator. It samples the challenge
 $c$ and the responses $\theta_1, \theta_2, \theta_h, \theta_s, \theta_\gamma,
 \theta_r \sample \Zp$ uniformly, and solves the verification equations for the
@@ -512,11 +541,11 @@ first message:
       \begin{gather*}
   %
 	A = \gen_2^{\theta_1}\cdot\gen_3^{\theta_2}\cdot\gen_4^{\theta_h}\cdot
-\com^{-c}, \qquad B = \HE(\epoch)^{\theta_s}\cdot U^{-c}, \qquad D =
-U^{\theta_1}\cdot V^{-c}, \\
+\com^{-c}, \qquad B = \HE(\epoch)^{\theta_s}\cdot U^{-c}, \qquad M =
+\pairing(U,\ggen_D)^{\theta_1}\cdot \Pi^{-c}, \\
     %
-	C = \Tag_\gamma^{\theta_s}\cdot\Xi^{-c}, \qquad F =
-\Xi^{\theta_2+\theta_\gamma}\cdot\pairing(V,\ggen_D)^{-c}, \qquad A_\gamma =
+	C = \Tag_\gamma^{\theta_s}\cdot X^{-c}, \qquad F =
+X^{\theta_2+\theta_\gamma}\cdot\Pi^{-c}, \qquad A_\gamma =
 \gen_3^{\theta_\gamma}\cdot\gen_4^{\theta_r}\cdot \com_\gamma^{-c}.
     %
       \end{gather*}
@@ -537,8 +566,8 @@ independent of $\gen_3$, means no distinguisher can tell which value was used.
 the prover we rely on the forking lemma to extract $\witness_7'$, and the
 argument then follows exactly as above. For zero knowledge, the challenge $c$ is
 a hash modelled as a programmable random oracle: $\simu$ samples $c$, computes
-$(A, B, D, C, F, A_\gamma)$ exactly as above, and then programs $\hash(\inst_7',
-A, B, D, C, F, A_\gamma) = c$. Since $\hash$ is a random oracle this is possible
+$(A, B, M, C, F, A_\gamma)$ exactly as above, and then programs $\hash(\inst_7',
+A, B, M, C, F, A_\gamma) = c$. Since $\hash$ is a random oracle this is possible
 and indistinguishable from normal use of the hash function, so the
 non-interactive version is simulatable without rewinding.
 
@@ -608,28 +637,27 @@ of~\Cref{sec:txid-instantiation}, which the preceding results do as follows.
 
 \begin{description}
 
-  \item[(P1).] $\DS$ is the BBS+ signature scheme of~\Cref{fig:bbs}, which is
-existentially unforgeable under the $q$-SDH assumption (\Cref{qsdh-bbs}). The
+  \item[(P1).] $\DS$ is the BBS+ signature scheme of~\Cref{prim:bbs}, which is
+existentially unforgeable under the $q$-SDH assumption (\Cref{asm:qsdh-bbs}). The
 variant used signs group elements rather than scalars, so unforgeability
 additionally requires that the signer only sign elements accompanied by a proof
 of knowledge of their representation; $\algoproof_4$ in $\IDregister$ supplies
 this.
 
-  \item[(P2).] $\Com$ is the Pedersen commitment scheme of~\Cref{fig:pedersen},
+  \item[(P2).] $\Com$ is the Pedersen commitment scheme of~\Cref{prim:pedersen},
 which is perfectly hiding, and computationally binding under the discrete
 logarithm assumption in $\group{1}$. Binding holds against every party,
 including the registration authority, because Step 2 of $\IDgen$ derives
 $(\gen_2,\gen_3,\gen_4)$ by hash-to-curve from a public seed rather than letting
 any party sample them.
 
-  \item[(P3).] Condition (F1) is~\Cref{lem:txid-fe-prf}, under DDH in
-$\group{1}$ with $\HE$ modelled as a random oracle, with $\ek_\epoch = \ek'$.
-Condition (F2) is~\Cref{lem:txid-ft-prf}, under $(\Max,n)$-mDBDHI, with
-$\mathsf{aux} = \{W_\gamma\}$. Note that these two lemmas are exactly what Game
-4 and Game 5 appeal to, and that no stronger statement about $\FE$ is available
-or needed: $\mathsf{aux}$ is identical in every epoch by construction, and the
-simulator of Game 4 reproduces that by reusing one $\mathsf{aux}_\user$ per
-user.
+  \item[(P3).] Pseudorandomness of $\FE$ is~\Cref{lem:txid-fe-prf}, under DDH in
+$\group{1}$ with $\HE$ modelled as a random oracle; pseudorandomness of $\FT$
+is~\Cref{lem:txid-ft-prf}, under $q$-mDBDHI with $q = \Max$. Both statements
+hand the distinguisher the whole of $\PTK$, including $\{W_\gamma\}$, which is
+what Game 4 and Game 5 need, since every corrupt auditor holds it. The two
+lemmas compose without a hybrid over epochs, and the simulator of Game 4
+reproduces the real distribution by reusing one $\PTK_\user$ per user.
 
   \item[(P4).] The proof systems are the sigma protocols
 of~\Cref{prot:txid-tag-sigma,prot:txid-tx-nizk}, Fiat-Shamir transformed with

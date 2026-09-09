@@ -19,7 +19,7 @@ end with Game 12 representing the ideal world. Throughout, we call a user
 corrupt if both their device and secure element are compromised. The more
 general split corruption setting follows analogously. We also simplify
 exposition by treating the randomness $\rho$ produced by $\idfu{\algo{op}}$
-during $\OPwithdraw$ and $\OPexecute$ as the output of $\com(\ck, \cdot;
+during $\OPwithdraw$ and $\OPexecute$ as the output of $\ComCommit(\ck, \cdot,
 \cdot)$.
 
 We rely on the following security properties of the underlying primitives:
@@ -113,7 +113,8 @@ computationally indistinguishable from one produced by $\algo{prot}$.
 \paragraph{Game 7.} As Game 6, except $\idfu{\algo{op}}$ handles $\OPwithdraw$
 queries from corrupt users. When $\algo{usr}$ submits a withdrawal, $\simu$
 extracts the randomness $s$ from the attached proof using (P6), computes $\rho
-\leftarrow \com(\ck, (\algo{uid}, v); s)$, and calls $(\OPwithdraw, \algo{Int},
+\leftarrow \ComCommit(\ck, (\algo{uid}, v), s)$, and calls $(\OPwithdraw,
+\algo{Int},
 v)$ with $\rho$. Both $\idfu{\algo{op}}$ and $\algo{prot}$ reject if and only if
 the request commitment $C$ to $(\algo{uid}, v, s)$ is a duplicate, which would
 imply a duplicate $\rho$, so the accounting checks agree and the games are
@@ -131,12 +132,13 @@ Case $i = 0$. $\algo{usr}$ pays $\algo{usr}'$ by calling $(\OPexecute, \rho, v,
   \item If $\algo{usr}'$ is honest: $\simu$ learns $(\OPexecute, v, \rho,
 \rho')$ from $\idfu{\algo{op}}$, and produces a simulated payment $p_0 = (v,
 \com_0, \com_1, \ciph_0, \sigma_0, \Gamma_0, \Sigma)$ with random commitments
-$\com_b \leftarrow \com(\ck, r_b; s_b)$ for fresh $r_b, s_b$, a random
+$\com_b \leftarrow \ComCommit(\ck, r_b, s_b)$ for fresh $r_b, s_b$, a random
 ciphertext $\ciph_0$, and simulated proofs $(\sigma_0, \Gamma_0, \Sigma)$,
 possible by simulation extractable security of the NIZK system (P5).
 
   \item If $\algo{usr}'$ is corrupt: $\simu$ additionally learns the identities
-of both parties. It computes $\rho' \leftarrow \com(\ck, \algo{uid}'; s')$ from
+of both parties. It computes $\rho' \leftarrow \ComCommit(\ck, \algo{uid}',
+s')$ from
 the commitment $\com_1$ that $\algo{usr}'$ supplies in $\algo{prot}$, calls
 $\idfu{\algo{op}}$, and sets $\ciph_0 \leftarrow \PKEencrypt(\pk_\auditor,
 \algo{uid}; \rho_0)$.
@@ -161,8 +163,8 @@ again showing the case $i = 0$ before generalising.
 
 Let $p_0 = (v, \com_0, \com_1, \ciph_0, \sigma_0, \Gamma_0, \algo{hist}_0)$ be
 the payment produced by corrupt $\algo{usr}$. By (P5), $\simu$ extracts
-$(\algo{uid}, s)$ from $\Sigma$, computes $\rho \leftarrow \com(\ck,
-(\algo{uid}, v); s)$, and calls $(\OPexecute, \rho, v, \algo{usr}')$.
+$(\algo{uid}, s)$ from $\Sigma$, computes $\rho \leftarrow \ComCommit(\ck,
+(\algo{uid}, v), s)$, and calls $(\OPexecute, \rho, v, \algo{usr}')$.
 
 $\algo{usr}'$ honest. If $\algo{usr}'$ accepts $p_0$ but $\idfu{\algo{op}}$
 rejects, exactly one of the following holds:
@@ -177,17 +179,19 @@ the blind signature scheme (P3).
 
   \item $\algo{tokens}[\rho] = \langle \algo{usr}, v^* \rangle$ with $v^* \neq
 v$: we can extract $(\ck, \algo{uid}', s', \com_0)$ from $\Sigma$ such that
-$\ComOpen(\ck, \algo{uid}', s', \com_0) = 1$, giving $\rho \leftarrow \com(\ck,
-\algo{uid}'; s')$ with value $v$. Combined with $\rho \leftarrow \com(\ck,
-\algo{uid}^*; s^*)$ with value $v^*$ from the prior withdrawal, $v \neq v^*$
+$\ComOpen(\ck, \com_0, s') = \algo{uid}'$, giving $\rho \leftarrow
+\ComCommit(\ck, \algo{uid}', s')$ with value $v$. Combined with $\rho
+\leftarrow \ComCommit(\ck, \algo{uid}^*, s^*)$ with value $v^*$ from the prior
+withdrawal, $v \neq v^*$
 yields two distinct openings of $\rho$, contradicting binding of the commitment
 scheme (P1).
 
   \item $\algo{tokens}[\rho] = \langle \algo{usr}^*, v \rangle$ with
 $\algo{usr}^* \neq \algo{usr}$: if $\algo{usr}^*$ is corrupt, the same two
 representations of $\rho$ as in (b) give $\algo{uid} \neq \algo{uid}^*$, again
-contradicting (P1). If $\algo{usr}^*$ is honest, $\com_0 \leftarrow \com(\ck,
-\algo{uid}^*; s^*)$ was chosen by $\simu$, so $\algo{usr}$ cannot have guessed
+contradicting (P1). If $\algo{usr}^*$ is honest, $\com_0 \leftarrow
+\ComCommit(\ck, \algo{uid}^*, s^*)$ was chosen by $\simu$, so $\algo{usr}$
+cannot have guessed
 it except with negligible probability. If $\algo{usr}'$ accepts $p_0$, then
 $\sigma_0$ is a valid signature of knowledge proving possession of a credential
 on $(\algo{uid}, \sk)$, and by (P5) $\simu$ extracts credential $\varphi$ and
@@ -201,8 +205,8 @@ verifies, and by (P5) $\simu$ extracts a credential forgery $(\varphi,
 \end{enumerate}
 
 $\algo{usr}'$ corrupt. $\simu$ sends $\algo{accept}$ to $\idfu{\algo{op}}$ on
-$\algo{usr}'$'s behalf, provides $\rho' \leftarrow \com(\ck, (\algo{uid}', v);
-s')$ from $\com_1$, and extends the maps.
+$\algo{usr}'$'s behalf, provides $\rho' \leftarrow \ComCommit(\ck,
+(\algo{uid}', v), s')$ from $\com_1$, and extends the maps.
 
 $i > 0$. Suppose $\mathbb{R}[(\com_0, \ldots, \com_i)]$ is not yet recorded.
 $\simu$ fills in the missing intermediate payments as follows. It extracts
@@ -228,8 +232,8 @@ belong to $\algo{usr}$ or has been previously deposited. An honest user never
 deposits a token they do not own, so the only case requiring argument is double
 spend detection.
 
-Each $\rho_i$ is determined by $\com_i$ via $\rho_i \leftarrow \com(\ck,
-(\algo{uid}_i, v); s_i)$, so the mapping $\rho_i \leftrightarrow \com_i$ is
+Each $\rho_i$ is determined by $\com_i$ via $\rho_i \leftarrow \ComCommit(\ck,
+(\algo{uid}_i, v), s_i)$, so the mapping $\rho_i \leftrightarrow \com_i$ is
 one-to-one by binding of the commitment scheme (P1). $\rho_0$ is fixed by
 $\com_0$, which is fixed by the blind signature issued by $\algo{cb}$, which
 binds $(\algo{uid}_0, v, s_0)$. Two withdrawals yielding the same $\com_0$ would
@@ -338,7 +342,7 @@ IND-CPA secure under the DDH assumption in $\group{1}$.
 
   \item[(P3) The blind signature scheme is EUF-CMA secure.] Pointcheval-Sanders
 signatures are existentially unforgeable under the $q$-MSDH assumption of
-Assumption~\ref{assum:qmsdh}~\cite{RSA:PoiSan18}, and blind signing over
+Assumption~\ref{asm:qmsdh}~\cite{RSA:PoiSan18}, and blind signing over
 committed inputs preserves unforgeability~\cite{NDSS:SABMD19}.
 
   \item[(P4) The credential signature scheme is EUF-CMA secure.] BBS+ signatures

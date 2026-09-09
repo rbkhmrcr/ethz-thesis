@@ -18,29 +18,34 @@ $\group{1}$ first-message elements, and 8 $\Zp$ responses.
 
 \paragraph{Epoch key proof ($\rel_5$).} The per-epoch part costs the prover 2
 exponentiations in $\group{1}$ and 2 $\Zp$ responses, and the verifier 4
-exponentiations in $\group{1}$. A user's first grant additionally carries the
-group elements $\{W_\gamma\}_{\gamma\in[0,\Max)}$ and the batched proof that
-they open to the certified $\utk''$: $\Max$ exponentiations in $\group{2}$ to
-form them, and two $\Max$-term multi-exponentiations in $\group{2}$ for
-$\widehat{W}$ and $\widehat{V}$ on each side. At $\ell = 10$ over BLS12-381 this
-is $\Max \cdot |\group{2}| = 1024 \times 96 = 98$KB of compressed communication,
-and it is by some margin the most expensive single operation in the system. The
-elements do not depend on the epoch, so this cost is paid once per user and
-reused for every later epoch and every auditor. All subsequent grants are
-constant size.
+exponentiations in $\group{1}$. An auditor's first grant additionally carries
+the group elements $\{W_\gamma\}_{\gamma\in[0,\Max)}$ of $\PTK$ and the batched
+proof that they are well formed against the certified $\utk''$: $\Max$
+exponentiations in $\group{2}$ to form them, and two $\Max$-term
+multi-exponentiations in $\group{2}$ for $\widehat{W}$ and $\widehat{V}$ on each
+side. At $\ell = 10$ over BLS12-381 this is $\Max \cdot |\group{2}| = 1024
+\times 96 = 98$KB of compressed communication, and it is by some margin the most
+expensive single operation in the system. The elements do not depend on the
+epoch, so the cost is paid once per auditor and reused for every later epoch;
+all subsequent grants to that auditor are constant size. The user forms
+$\{W_\gamma\}$ once, at registration, and stores it. Since $\{W_\gamma\}$ is
+certified public key material rather than epoch-scoped secret material, an
+auditor need not retain it: one that has discarded it is simply sent it again
+with its next grant, at the cost above.
 
 \paragraph{Tag proof ($\rel_7'$).} The sigma protocol
 of~\Cref{prot:txid-tag-sigma} works entirely in $\group{1}$ and $\group{T}$; no
 operation in $\group{2}$ appears, and no cost depends on $\ell$. The prover
-computes $U$ and $V$ in $\group{1}$ and $\Xi$ in $\group{T}$, then $A$, $B$, $D$
-in $\group{1}$ and $C$, $F$ in $\group{T}$, and $A_\gamma$ in $\group{1}$: in
-total 5 exponentiations or small multi-exponentiations in $\group{1}$ and 3 in
-$\group{T}$. The verifier evaluates the single pairing $\pairing(V,\ggen_D)$,
-together with 4 multi-exponentiations in $\group{1}$ and 3 in $\group{T}$. The
-$\group{T}$ operations dominate, which is what the timings below reflect. The
-proof carries 2 $\group{1}$ elements ($U$, $V$), 1 $\group{T}$ element ($\Xi$),
-the commitment $\com_\gamma$, the six first-message elements, and 6 $\Zp$
-responses.
+computes $U$ in $\group{1}$ and $\Pi$, $X$ in $\group{T}$, then $A$, $B$ in
+$\group{1}$, $M$, $C$, $F$ in $\group{T}$, and $A_\gamma$ in $\group{1}$: in
+total 4 exponentiations or small multi-exponentiations in $\group{1}$ and 5 in
+$\group{T}$, plus the single pairing $\pairing(U,\ggen_D)$ whose result is
+reused as a base. The verifier evaluates that same pairing, together with 3
+multi-exponentiations in $\group{1}$ and 4 in $\group{T}$. The $\group{T}$
+operations dominate, which is what the timings below reflect. The proof carries
+1 $\group{1}$ element ($U$), 2 $\group{T}$ elements ($\Pi$, $X$), the commitment
+$\com_\gamma$, the six first-message elements, and 6 $\Zp$ responses. The
+randomised epoch key $\ek^{\,s}$ is not transmitted.
 
 \paragraph{Range proof.} The range check $0 \leq \gamma < \Max$ is where the
 dependence on $\ell$ enters. The prover costs $O(\ell)$ exponentiations plus the

@@ -54,6 +54,9 @@ security parameters $\secparam$, all $(\pk, \sk) \sample \SPSgen(\secparam,
 %
 \end{equation*}
 %
+As in~\Cref{sec:prelims-encryption}, we write $\SPSsign(\sk, \vec{\msg}; \rho)$
+where a security argument needs to name the signing randomness explicitly.
+%
 
 \paragraph{Unforgeability.} For a PPT adversary $\adv$, define advantage as
 follows:
@@ -419,12 +422,12 @@ at least as far as verifiable secret sharing~\cite{FOCS:Feldman87}. Smart and
 Talibi Alaoui give a full-threshold, actively secure protocol for computation
 over an elliptic curve group. It takes Beaver triples produced over $\Zp$ in the
 pre-processing model and maps them locally into triples over the curve, which is
-the same route to $\algo{ExpGrp}$ that we take above~\cite{IMA:SmaAla19}.
+the same route to $\algo{ExpGrp}$ that we take above~\cite{IMA:SmaTal19}.
 Aranha, Dalskov, Escudero, and Orlandi give the most general treatment we are
 aware of, under the name of linear secret sharing isomorphisms. These are linear
 maps between sharings defined over vector spaces over a common field, and moving
 from $\Zp$ into a source group is one instance of them. They extend the idea to
-bilinear maps and hence to pairings~\cite{LATIN:ADEO21}. They apply it to
+bilinear maps and hence to pairings~\cite{LC:ADEO21}. They apply it to
 realise the Pointcheval-Sanders signature scheme in MPC, which is itself a
 structure preserving scheme. Prior work has also shared group elements between
 two parties and computed on those shares~\cite{NDSS:GPVRNC23}.

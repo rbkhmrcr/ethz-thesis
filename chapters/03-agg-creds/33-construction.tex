@@ -83,7 +83,7 @@ user first constructs the aggregate signature as follows:
 %
 \begin{equation*}
 %
-  \signature \leftarrow \ATSaggregate(\{\signature_i\}_{i \in \ISSUERS}).
+  \signature \leftarrow \ATSaggregate((\signature_i)_{i \in \ISSUERS}).
  %
 \end{equation*}
 %
@@ -101,7 +101,7 @@ They then construct a proof of knowledge with the following parameters:
   \rel_1 = \{\ (\sk, \pk) \leftarrow \DSgen(\secparam) \ \wedge \
 \DSverify(\rapk, (\pk, \Tag), \psi) = 1 \\
 %
-  \wedge\ \ATSverifyagg(\{\ipk{i}\}_{i \in \ISSUERS}, \Tag, \{\atv{i}\}_{i \in
+  \wedge\ \ATSverifyagg((\ipk{i})_{i \in \ISSUERS}, \Tag, (\atv{i})_{i \in
 \ISSUERS}, \signature) = 1\ \}.
 %
 \end{gathered} \end{equation}

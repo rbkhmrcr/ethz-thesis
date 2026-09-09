@@ -32,6 +32,22 @@ the tag PRF $\FT$ inverts against. Both components are drawn once at
 registration and certified together in the same credential, and $\utk''$ is
 unchanged across epochs.
 
+The public tracing key carries, alongside the image of $\utk$, the vector of
+group elements that a tag evaluation inverts against:
+%
+\begin{equation}\label{eq:txid-ptk}
+%
+  \PTK = \G'(\utk) = \big(T,\ \{W_\gamma\}_{\gamma\in[0,\Max)}\big), \qquad T =
+\gen_2^{\utk'}\cdot\gen_3^{\utk''}, \qquad W_\gamma =
+\ggen_D^{1/(\utk''+\gamma)}.
+%
+\end{equation}
+%
+The first component is a perfectly hiding Pedersen commitment to the pair, and
+the second is what makes $\{W_\gamma\}$ available to an auditor without
+disclosing $\utk''$. Both are certified in the same credential, and neither
+depends on the epoch.
+
 \begin{assumptionbox}{Decisional Diffie-Hellman (DDH)}{ddh-txid}
 
   The DDH assumption holds in $\group{1}$ if no PPT adversary can distinguish
@@ -42,66 +58,58 @@ random $x, y, z \sample \Zp$.
 
 We instantiate $\FE$ by fixing the generator to $\HE(\epoch)$, for hash function
 $\HE : \{0,1\}^* \to \group{1}$ modelled as a random oracle, and the PRF key to
-$\utk'$. The epoch tracing key is then the pair given below:
+$\utk'$. The epoch tracing key is then the single group element given below:
 %
-\begin{equation*}
+\begin{equation}\label{eq:txid-ek}
 %
-  \ek = \FE(\utk, \epoch) = \big(\ek',\ \{W_\gamma\}_{\gamma\in[0,\Max)}\big),
-\qquad \ek' = \HE(\epoch)^{\utk'}, \qquad W_\gamma =
-\ggen_D^{1/(\utk''+\gamma)}.
+  \ek = \FE(\utk, \epoch) = \HE(\epoch)^{\utk'} \in \group{1}.
 %
-\end{equation*}
+\end{equation}
 %
-This is the split of~\Cref{eq:fe-split}, with $\ek_\epoch = \ek'$ and
-$\mathsf{aux} = \{W_\gamma\}_{\gamma\in[0,\Max)}$. Only $\ek'$ varies with the
-epoch. The group elements $\{W_\gamma\}$ are static across epochs, and are the
-outputs of the tag PRF's inner Dodis-Yampolskiy evaluation. We return below to
-why the auditor receives them rather than $\utk''$ itself.
-\Cref{lem:txid-fe-prf} discharges condition (F1) and \Cref{lem:txid-ft-prf}
-discharges (F2); note that $\FE$ itself is emphatically \emph{not} a
-pseudorandom function, since $\mathsf{aux}$ is the same in every epoch, which is
-precisely why~\Cref{sec:txid-construction} states the requirement as (F1) and
-(F2) rather than as pseudorandomness of $\FE$.
+Every component of the output varies with the epoch, so $\FE$ is a pseudorandom
+function in the ordinary sense of~\Cref{sec:prelims-prfs}, which
+is~\Cref{lem:txid-fe-prf}. The group elements $\{W_\gamma\}$ that a tag
+evaluation also needs are static across epochs and sit in $\PTK$ rather than in
+$\ek$, which is the arrangement~\Cref{sec:txid-construction} asks for: had they
+been emitted by $\FE$ they would repeat in every epoch, and $\FE$ could not have
+been a pseudorandom function at all. Placing them in $\PTK$ costs nothing, since
+$\PTK$ is certified at registration and already travels with the grant message.
+We return below to why the auditor receives them rather than $\utk''$ itself.
 
 \begin{lemma}\label{lem:txid-fe-prf}
   %
-  Under the DDH assumption in $\group{1}$ and modelling $\HE$ as a random
-oracle, the epoch-varying component $\epoch \mapsto \HE(\epoch)^{\utk'}$ is a
-secure pseudorandom function. This is condition (F1)
-of~\Cref{sec:txid-construction}.
+  Under the DDH assumption in $\group{1}$ (\Cref{asm:ddh-txid}) and modelling
+$\HE$ as a random oracle, $\FE(\utk,\epoch) = \HE(\epoch)^{\utk'}$ is a secure
+pseudorandom function, and remains so against a distinguisher given the whole of
+$\PTK$.
 %
 \end{lemma}
 
 \subsection{Instantiating $\FT$}
 
-\begin{assumptionbox}{Multi-instance Decisional Bilinear Diffie-Hellman
-Inversion with published elements ($(q,n)$-mDBDHI)}{qmdbdhi-txid}
+\begin{assumptionbox}{Decisional Bilinear Diffie-Hellman Inversion with
+published elements ($q$-mDBDHI)}{qmdbdhi-txid}
 
   Let $(\group{1},\group{2},\group{T},\pairing)$ be a Type-3 bilinear group of
 prime order $p$ with generators $\gen \in \group{1}$ and $\ggen_D \in
-\group{2}$. The $(q,n)$-mDBDHI assumption holds if, given $(\gen, \ggen_D,
+\group{2}$. The $q$-mDBDHI assumption holds if, given $(\gen, \ggen_D,
 \{\ggen_D^{1/(x+\gamma)}\}_{\gamma\in[0,q)})$ for uniformly random $x \sample
-\Zp$ and $A_1,\ldots,A_n \sample \group{1}$, no PPT adversary can distinguish
-$\{\pairing(A_i, \ggen_D^{1/(x+\gamma)})\}_{\gamma\in[0,q),\, i\in[1,n]}$ from
-$\{\Delta_{i,\gamma}\}_{\gamma \in [0,q),\, i\in[1,n]}$ for uniformly random
-$\Delta_{i,\gamma} \sample \group{T}$ with non-negligible advantage.  Neither
-any $A_i$ nor $x$ is given to the adversary. We use it with $q = \Max$ and $n$
-the number of epochs.
+\Zp$ and $A \sample \group{1}$, no PPT adversary can distinguish
+$\{\pairing(A, \ggen_D^{1/(x+\gamma)})\}_{\gamma\in[0,q)}$ from
+$\{\Delta_{\gamma}\}_{\gamma \in [0,q)}$ for uniformly random $\Delta_{\gamma}
+\sample \group{T}$ with non-negligible advantage. Neither $A$ nor $x$ is given
+to the adversary. We use it with $q = \Max$.
 
 \end{assumptionbox}
 
-The $n$ instances share the base elements $\{\ggen_D^{1/(x+\gamma)}\}$, which is
-what the protocol demands: $\{W_\gamma\}$ is fixed at registration and reused in
-every epoch, while the epoch key varies. The multi-instance version reduces to
-the single-instance one ($n=1$) at no loss, by random self-reducibility: given a
-single challenge $\{\Delta_\gamma\}$, set $\Delta_{i,\gamma} \leftarrow
-\Delta_\gamma^{a_i}$ for fresh $a_i \sample \Zp^*$. In the real case this is a
-valid $n$-instance challenge with $A_i = A^{a_i}$, and in the random case each
-row is uniform in $\group{T}$, so the two distributions map to the two
-distributions. We therefore state and use the multi-instance form directly and
-do not carry a hybrid factor.
+A single instance suffices here, even though a user is traced over many epochs.
+The base elements $\{\ggen_D^{1/(x+\gamma)}\}$ are shared across epochs, since
+$\{W_\gamma\}$ is fixed at registration, but the epoch keys are not: each $\ek$
+is uniform and independent of every other by~\Cref{lem:txid-fe-prf}, whose
+statement hands the distinguisher the whole of $\PTK$. The two lemmas therefore
+compose directly, and no multi-instance variant or hybrid over epochs is needed.
 
-This is the decisional variant of the $q$-BDHI assumption~\cite{EC:BonBoy04},
+This is the decisional variant of the $q$-BDHI assumption~\cite{EC:BonBoy04b},
 with the base elements shared and the $\group{1}$ element withheld. Similar
 $q$-type assumptions are the norm for constructions of this shape: a comparable
 partially oblivious PRF built on the Dodis-Yampolskiy PRF with a secret group
@@ -110,16 +118,17 @@ own~\cite{EC:TCRSTW22}, and it is known that pairing-based constructions of this
 type cannot have both short proofs and a reduction to a simple
 assumption~\cite{TCC:BHKU22}.
 
-\begin{primitivebox}{The Dodis-Yampolskiy pseudorandom function}{fig:dy-prf}
+\begin{primitivebox}{The Dodis-Yampolskiy pseudorandom function}{dy-prf}
 
   \begin{description}
 
-    \item[$\ggen_D \sample \PRFgen(\secparam)$ :] On input the security
-parameter, sample and return a generator $\ggen_D \sample \group{2}$.
+    \item[$(\pp,\key) \sample \PRFgen(\secparam)$ :] On input the security
+parameter, sample a generator $\ggen_D \sample \group{2}$ and a group element $X
+\sample \group{1}$, and return $\pp = (\ggen_D, X)$ and $\key = k \sample \Zp$.
 
-    \item[$y \leftarrow \PRFeval(\ggen_D, X, k, x)$ :] On input generator
-$\ggen_D$, group element $X \in \group{1}$, key $k \in \Zp$, and input $x \in
-\Zp \setminus \{-k\}$, return the following:
+    \item[$y \leftarrow \PRFeval(\pp, \key, x)$ :] On input public parameters
+$\pp = (\ggen_D, X)$, key $\key = k$, and input $x \in \Zp \setminus \{-k\}$,
+return the following:
       %
       \begin{equation*}
       %
@@ -134,45 +143,49 @@ $\ggen_D$, group element $X \in \group{1}$, key $k \in \Zp$, and input $x \in
 The Dodis-Yampolskiy PRF is pseudorandom under the $q$-BDHI
 assumption~\cite{PKC:DodYam05}.
 
-We instantiate $\FT$ by fixing $X$ to the epoch tracing key $\ek'$ rather than a
-fixed public generator, and the PRF key $k$ to $\utk''$, giving $\FT(\ek,\gamma)
-= \PRFeval(\ggen_D, \ek', \utk'', \gamma) = \pairing(\ek', W_\gamma)$ for the
-$W_\gamma$ defined above.
+We instantiate $\FT$ by fixing $X$ to the epoch tracing key $\ek$ rather than a
+fixed public generator, and the Dodis-Yampolskiy key $k$ to $\utk''$, giving
+$\FT(\PTK, \ek, \gamma) = \PRFeval((\ggen_D,\ek), \utk'', \gamma) = \pairing(\ek,
+W_\gamma)$ for the $W_\gamma$ carried by $\PTK$. Which argument is secret differs
+between the two views, and deliberately so: the Dodis-Yampolskiy analysis keys on
+$\utk''$ and treats $\ek$ as a parameter, while~\Cref{lem:txid-ft-prf} keys on
+$\ek$ and treats $\{W_\gamma\}$, and hence $\utk''$ implicitly, as public. Note which argument is the key: $\FT$ is keyed
+by $\ek$, which is exactly the range of $\FE$, while $\{W_\gamma\}$ enters as a
+public parameter.
 
 We use the Dodis-Yampolskiy PRF as a black box, so its key $\utk''$ must stay
 secret for pseudorandomness to hold. We therefore give the auditor its outputs
-rather than its key. The auditor receives $\{W_\gamma\}$ as part of $\ek$, and
-tracing is unaffected, since an auditor holding $\ek$ still computes every tag
-of the epoch directly as $\pairing(\ek', W_\gamma)$.
+rather than its key. The auditor receives $\{W_\gamma\}$ as part of $\PTK$, and
+tracing is unaffected, since an auditor holding $\PTK$ and $\ek$ computes every
+tag of the epoch directly as $\pairing(\ek, W_\gamma)$.
 
 Releasing $\utk''$ instead would break epoch binding outright. Writing $Y =
-\pairing(\ek',\ggen_D)$, the tags of an epoch are $\Tag_\gamma =
+\pairing(\ek,\ggen_D)$, the tags of an epoch are $\Tag_\gamma =
 Y^{1/(\utk''+\gamma)}$. An auditor holding $\utk''$ recovers $Y =
 \Tag_\gamma^{\utk''+\gamma}$ from any single tag on the ledger, and from $Y$
 computes every other tag of that user in that epoch. Since $\utk''$ is the same
 in every epoch, one grant would let that auditor trace the user in all later
 epochs, which is exactly the property the epoch key is meant to deny them.
-Publishing $\{W_\gamma\}$ removes the auditor's need for the scalar, and
-$\utk''$ never leaves the user. The epoch key $\ek'$ blinds the released
-outputs, and the tags rest on that blinding.
+Giving the auditor the group elements $\{W_\gamma\}$ instead removes the need
+for the scalar, and $\utk''$ never leaves the user. The epoch key $\ek$ blinds
+the released outputs, and the tags rest on that blinding.
 
-Because $\{W_\gamma\}$ is fixed at registration, every auditor a user has ever
-granted holds the same copy of it, and it is therefore a persistent pseudonymous
-identifier for that user. This leaks nothing in our model: permissions are
-indexed by $(\auditor,\user,\epoch)$, so an auditor is told which user it is
-being authorised to trace, and two colluding auditors who compare their copies
-of $\{W_\gamma\}$ learn only that they were granted by the same user, which each
-of them already knew. What they cannot do is combine their copies with a tag
-from an epoch for which neither holds $\ek'$, and that is exactly the statement
-of~\Cref{lem:txid-ft-prf}.
+The elements are public parameters, not secrets held in trust. They are a
+component of the certified $\PTK$, they are handed to every auditor a user
+authorises, and the analysis below treats them as known to the adversary
+throughout. Two colluding auditors who compare their copies learn only that they
+were granted by the same user, which each of them already knew, since
+permissions are indexed by $(\auditor,\user,\epoch)$ and an auditor is told which
+user it is authorised to trace. What they cannot do is combine their copies with
+a tag from an epoch for which neither holds $\ek$, and that is exactly the
+statement of~\Cref{lem:txid-ft-prf}.
 
-\begin{lemma}\label{lem:txid-ft-prf} Let $\ek'_1,\ldots,\ek'_n$ be uniform and
-independent in $\group{1}$ and unknown to the adversary, and let
-$\{W_\gamma\}_{\gamma\in[0,\Max)}$ be published. Under the $(\Max,n)$-mDBDHI
-assumption, the tag vectors $\FT(\ek_i,\gamma) = \pairing(\ek'_i, W_\gamma)$ are
-jointly indistinguishable from independent uniform elements of $\group{T}$; in
-particular $\FT$ is a secure pseudorandom function on domain $[0,\Max)$ in each
-epoch. This is condition (F2) of~\Cref{sec:txid-construction}.  \end{lemma}
+\begin{lemma}\label{lem:txid-ft-prf} Let $\ek$ be uniform in $\group{1}$ and
+unknown to the adversary, and let the public parameters
+$\{W_\gamma\}_{\gamma\in[0,\Max)}$ be given to the adversary. Under the
+$q$-mDBDHI assumption (\Cref{asm:qmdbdhi-txid}) with $q = \Max$, the function
+$\FT(\PTK, \ek, \gamma) = \pairing(\ek, W_\gamma)$ is a secure pseudorandom
+function on domain $[0,\Max)$.  \end{lemma}
 
 \subsection{Instantiating the tracing scheme}
 
@@ -180,7 +193,7 @@ The BBS+ signature scheme enables signers to sign multiple messages at once,
 using the following
 algorithms~\cite{C:BonBoySha04,SCN:AuSusMu06,EPRINT:CamDriLeh16}.
 
-\begin{primitivebox}{The BBS+ signature scheme}{fig:bbs}
+\begin{primitivebox}{The BBS+ signature scheme}{bbs}
 
   \begin{description}
 
@@ -265,7 +278,7 @@ protocol below supplies exactly that, in the shape of $\algoproof_4$, and
 $\rel_4$ is therefore not an optional hardening step but a precondition of the
 signature scheme's security in this setting~\cite{SCN:AuSusMu06,EC:TesZhu23b}.
 
-\begin{primitivebox}{The Pedersen commitment scheme}{fig:pedersen}
+\begin{primitivebox}{The Pedersen commitment scheme}{pedersen}
 
   \begin{description}
 
@@ -278,10 +291,10 @@ input commitment key $\ck$, messages $(m_1,\ldots,m_n) \in \Zp^n$, and opening
 $\openinfo \in \Zp$, return $\com = \prod_{i=1}^{n} \gen_i^{m_i}\cdot
 \hgen^{\openinfo}$.
 
-    \item[$\{0,1\} \leftarrow \ComOpen(\ck,\com,(m_1,\ldots,m_n),\openinfo)$ :]
-On input $\ck$, commitment $\com$, messages $(m_1,\ldots,m_n)$, and opening
-$\openinfo$, return $1$ if $\com = \prod_{i=1}^{n}
-\gen_i^{m_i}\cdot\hgen^{\openinfo}$, and $0$ otherwise.
+    \item[$(m_1,\ldots,m_n) \leftarrow \ComOpen(\ck,\com,\openinfo)$ :] On
+input $\ck$, commitment $\com$, and opening $\openinfo = (m_1,\ldots,m_n,
+\openinfo')$, return $(m_1,\ldots,m_n)$ if $\com = \prod_{i=1}^{n}
+\gen_i^{m_i}\cdot\hgen^{\openinfo'}$, and $\bot$ otherwise.
 
   \end{description}
 
@@ -291,7 +304,7 @@ $\openinfo$, return $1$ if $\com = \prod_{i=1}^{n}
 computationally binding under the discrete log assumption. Commitments are group
 elements.
 
-\begin{protocolbox}{Tracing protocol}{prot:txid}
+\begin{protocolbox}{Tracing protocol}{txid}
 
   \begin{description}
 
@@ -319,10 +332,11 @@ scalar $z$ and publishes $\ggen_Z = \ggen^z$.
 generators of Step 2, so that $(\gen_2,\gen_3)$ commit to $(\utk',\utk'')$ and
 $\gen_4$ plays the role of the Pedersen hiding generator.
 
-	\item Set $\Max \leftarrow 2^{\ell}$, $\FE(\utk,\epoch) := (\ek',
-\{W_\gamma\}_{\gamma\in[0,\Max)})$ for $\ek' = \HE(\epoch)^{\utk'}$ and
-$W_\gamma = \ggen_D^{1/(\utk''+\gamma)}$, and $\FT(\ek,\gamma) := \pairing(\ek',
-W_\gamma)$, following the Dodis-Yampolskiy construction~\cite{PKC:DodYam05}.
+	\item Set $\Max \leftarrow 2^{\ell}$, $\G'(\utk) := (T,
+\{W_\gamma\}_{\gamma\in[0,\Max)})$ for $T = \gen_2^{\utk'}\cdot\gen_3^{\utk''}$
+and $W_\gamma = \ggen_D^{1/(\utk''+\gamma)}$, $\FE(\utk,\epoch) :=
+\HE(\epoch)^{\utk'}$, and $\FT(\PTK,\ek,\gamma) := \pairing(\ek, W_\gamma)$,
+following the Dodis-Yampolskiy construction~\cite{PKC:DodYam05}.
 
 	\item Set $\crs \leftarrow (\group{1},\group{2},\group{T},\pairing,
 \mathsf{sd}, \gen_0,\gen_1,\gen_2,\gen_3,\gen_4,\ggen,\ggen_D,\HE,\hash,
@@ -333,7 +347,8 @@ indexed by tag.
 
       \end{enumerate}
 
-    \item[$(\sk,\regcred) \sample \IDregister(\crs,\state)$ :] Interactively
+    \item[$(\sk,\utk,\regcred) \sample \IDregister(\crs,\state)$ :]
+Interactively
 between the user and the registration authority, do:
 
       \begin{enumerate}
@@ -342,7 +357,9 @@ between the user and the registration authority, do:
 user.
 
 	\item The user samples $\sk,\utk',\utk'' \sample \Zp$, sets $S
-\leftarrow \gen_1^{\sk}$ and $T \leftarrow \gen_2^{\utk'}\cdot\gen_3^{\utk''}$,
+\leftarrow \gen_1^{\sk}$, $T \leftarrow \gen_2^{\utk'}\cdot\gen_3^{\utk''}$, and
+$\PTK \leftarrow (T,\{W_\gamma\})$ for $W_\gamma =
+\ggen_D^{1/(\utk''+\gamma)}$,
 computes $\algoproof_4 \sample \NIZKprove(\crs_4,\inst_4,\witness_4,\rand)$ for
 $\inst_4 = (\gen_1,\gen_2,\gen_3,S,T)$ and $\witness_4 = (\sk,\utk',\utk'')$,
 proving $S = \gen_1^{\sk} \wedge T = \gen_2^{\utk'}\cdot\gen_3^{\utk''}$, and
@@ -361,22 +378,23 @@ registered. The three message slots of the credential are
 $(\gen_1^{\sk},\gen_2^{\utk'},\gen_3^{\utk''})$, and the last two reach the
 registration authority bundled as the single element $T$.
 
-	\item Return $(\sk,\utk',\utk'')$ as the user's secret key, and
-$\regcred \leftarrow (S,T,\signature)$ as their registration credential.
+	\item Return $\sk$ as the user's signing key, $\utk = (\utk',\utk'')$ as
+their tracing key, and $\regcred \leftarrow (S,T,\signature)$ as their
+registration credential.
 
       \end{enumerate}
 
-    \item[$\ek \sample \IDgrant(\crs,\sk,\utk',\utk'',\regcred,\epoch)$ :]
+    \item[$(\PTK,\ek) \sample \IDgrant(\crs,\sk,\utk,\regcred,\epoch)$ :]
 Interactively between the user and an auditor, on a fresh nonce $\rand$ from the
 auditor, do:
 
       \begin{enumerate}
 
-	\item Parse $\regcred = (S,T,\signature)$.
+	\item Parse $\regcred = (S,T,\signature)$ and $\utk = (\utk',\utk'')$.
 
-	\item The user computes $\ek' \leftarrow \HE(\epoch)^{\utk'}$ and
-$W_\gamma \leftarrow \ggen_D^{1/(\utk''+\gamma)}$ for each $\gamma \in
-[0,\Max)$, and sets $\ek \leftarrow (\ek',\{W_\gamma\})$.
+	\item The user computes $\ek \leftarrow \HE(\epoch)^{\utk'}$, and
+recalls $\{W_\gamma\}$ from $\PTK$. The auditor is sent $\{W_\gamma\}$ only the
+first time it is authorised for this user; subsequent grants carry $\ek$ alone.
 
 	\item Both parties derive $t_\gamma = \hash(\{W_\gamma\},\gamma) \in
 \Zp$ and set $\widehat{W} = \prod_{\gamma=0}^{\Max-1} W_\gamma^{t_\gamma}$ and
@@ -396,24 +414,26 @@ $(S,T,\signature,\ek,\algoproof_5,\algoproof_4)$ to the auditor.
 
 	\item The auditor accepts and outputs $\ek$ if and only if
 $\algoproof_4$ verifies, $\BBSverify(\pk_{RA},(S,T),\signature) = 1$, and
-$\gen_2^{\eta}\cdot\gen_3^{\zeta} \checkcheck A\cdot T^{c}$, $\HE(\epoch)^{\eta}
-\checkcheck B\cdot\ek'^{c}$, and $\widehat{W}^{\zeta} \checkcheck
-K\cdot\widehat{V}^{c}$.
+$\gen_2^{\eta}\cdot\gen_3^{\zeta} \checkcheck A\cdot T^{c}$ and
+$\HE(\epoch)^{\eta} \checkcheck B\cdot\ek^{c}$. On a first grant to this
+auditor, it additionally checks $\widehat{W}^{\zeta} \checkcheck
+K\cdot\widehat{V}^{c}$, which is what establishes $\{W_\gamma\}$ well formed
+against the same certified $T$.
 
       \end{enumerate}
 
-    \item[$\tx \sample
-\IDsubmit(\crs,\sk,\utk',\utk'',\regcred,\epoch,\payload)$ :] On input
-$(\crs,\sk,\utk',\utk'',\regcred,\epoch,\payload)$ from the user, do:
+    \item[$\tx \sample \IDsubmit(\crs,\sk,\utk,\regcred,\epoch,\payload)$ :] On
+input $(\crs,\sk,\utk,\regcred,\epoch,\payload)$ from the user, do:
 
       \begin{enumerate}
 
-	\item Parse $\regcred = (S,T,\signature)$ and compute $\ek =
-\FE(\utk,\epoch) = (\ek',\{W_\gamma\})$.
+	\item Parse $\regcred = (S,T,\signature)$, $\utk = (\utk',\utk'')$, and
+compute $\ek =
+\FE(\utk,\epoch) = \HE(\epoch)^{\utk'}$.
 
 	\item Take a fresh, unused index $0 \leq \gamma < \Max$ from the user's
-local pool for this epoch, and compute $\Tag_\gamma \leftarrow \FT(\ek,\gamma) =
-\pairing(\ek',W_\gamma)$. Indices need not be used in order, so this step
+local pool for this epoch, and compute $\Tag_\gamma \leftarrow
+\FT(\PTK,\ek,\gamma) = \pairing(\ek,W_\gamma)$. Indices need not be used in order, so this step
 requires no coordination between concurrent submissions beyond the allocation
 itself.
 
@@ -466,13 +486,13 @@ by tagging it with an out-of-range index.
       On accepting, the validators append $\tx$ to $\state$, recording
 $\payload$ against the key $\Tag_\gamma$.
 
-    \item[$\{\payload\} \leftarrow \IDidentify(\crs,\ek,\epoch)$ :] On input
-$(\crs,\ek,\epoch)$, do:
+    \item[$\{\payload\} \leftarrow \IDidentify(\crs,\PTK,\ek,\epoch)$ :] On
+input $(\crs,\PTK,\ek,\epoch)$, do:
 
       \begin{enumerate}
 
-	\item Parse $\ek = (\ek',\{W_\gamma\})$. For each $0 \leq \gamma <
-\Max$, compute $\Tag_\gamma \leftarrow \pairing(\ek',W_\gamma)$ and retrieve
+	\item For each $0 \leq \gamma < \Max$, compute $\Tag_\gamma \leftarrow
+\pairing(\ek,W_\gamma)$, for the $\{W_\gamma\}$ carried by $\PTK$, and retrieve
 $\state[\Tag_\gamma]$ if present.
 
 	\item Return the set of retrieved payloads.
@@ -525,22 +545,26 @@ at the user's epoch key and a fresh index. The tag carries two separate proofs,
 one attesting that it was correctly derived from a properly committed tracing
 key, and one that the committed key was signed by the registration authority.
 
-The elements $\{W_\gamma\}$ do not depend on the epoch. They are therefore sent
-once, at the user's first grant, and reused for every later epoch and every
-auditor. A grant after the first carries only $\ek'$ and a constant size proof:
-since $\widehat{W}$ and $\widehat{V}$ depend only on $\{W_\gamma\}$, the third
-verification equation of $\rel_5$ need only be checked at the first grant, and
-subsequent grants drop $K$ and the vector $\{W_\gamma\}$, leaving the two
-$\group{1}$ equations against the same certified $T$. The binding of $T$ ties
-both proofs to one pair $(\utk',\utk'')$.
+The elements $\{W_\gamma\}$ do not depend on the epoch. As a component of $\PTK$
+they are therefore sent once per auditor, at that auditor's first grant, and
+reused for every later epoch. Every subsequent grant to the same auditor is
+constant size: since $\widehat{W}$ and $\widehat{V}$ depend only on
+$\{W_\gamma\}$, the third verification equation of $\rel_5$ need only be checked
+at that auditor's first grant, and later grants drop $K$ and the vector,
+leaving the two $\group{1}$ equations against the same certified $T$. Formally
+these are two relations, $\rel_5$ and its restriction $\rel_5'$ to the first two
+conjuncts, with $\inst_5$ shortened accordingly. The binding of $T$ ties both
+proofs to one pair $(\utk',\utk'')$. Nothing here is state an auditor must
+retain: $\{W_\gamma\}$ is certified public key material, and an auditor that has
+discarded it can be sent it again with the next grant.
 
 Relation $\rel_5$ is accordingly defined for $\inst_5 = (\HE, \gen_2, \gen_3,
-\ggen_D, T, \epoch, \ek', \{W_\gamma\}_{\gamma\in[0,\Max)})$ and $\witness_5 =
+\ggen_D, T, \epoch, \ek, \{W_\gamma\}_{\gamma\in[0,\Max)})$ and $\witness_5 =
 (\utk',\utk'')$, holding exactly when the following does:
 %
 \begin{gather*}
 %
-  T = \gen_2^{\utk'}\cdot\gen_3^{\utk''} \quad \wedge \quad \ek' =
+  T = \gen_2^{\utk'}\cdot\gen_3^{\utk''} \quad \wedge \quad \ek =
 \HE(\epoch)^{\utk'} \\
 %
   \wedge \quad \forall\, \gamma \in [0,\Max): \ W_\gamma^{\utk''} = \ggen_D
@@ -558,19 +582,23 @@ The coefficients $t_\gamma$ are drawn from all of $\Zp$ via $\hash$, and are
 derived from $\{W_\gamma\}$, so they are fixed only after the elements they
 check are. By the small exponents argument~\cite{EC:BelGarRab98}, if any one
 element is malformed then the batched equality holds with probability at most
-$1/p$.
+$q_{\hash}/p$ over the random oracle, where $q_{\hash}$ bounds the prover's hash
+queries. Proving $\rel_5$ also proves the second component of $\PTK$ well formed
+against the same $\utk''$ that $T$ commits to, which is what an auditor needs in
+order to rely on $\{W_\gamma\}$ when it evaluates tags.
 
 \subsubsection{Verifiable tag computation}\label{sec:tag-computation} The user
 first computes the commitment $\com =
 \gen_2^{\utk'}\cdot\gen_3^{\utk''}\cdot\gen_4^{\openinfo}$ and the tag
-$\Tag_\gamma = \FT(\ek, \gamma) = \pairing(\ek', W_\gamma)$, where the
-$W_\gamma$ are the group elements released with the epoch key. Under the
-$(\Max,n)$-mDBDHI assumption (\Cref{qmdbdhi-txid}), $\FT$ is a PRF even with
-$\{W_\gamma\}$ published, which is~\Cref{lem:txid-ft-prf}.  Note that $\utk''$
-is a hidden witness of $\rel_7$ below, so the auditor never needs it in order to
+$\Tag_\gamma = \FT(\PTK, \ek, \gamma) = \pairing(\ek, W_\gamma)$, where the
+$W_\gamma$ are the group elements carried by $\PTK$. Under the $q$-mDBDHI
+assumption (\Cref{asm:qmdbdhi-txid}), $\FT$ is a PRF with $\{W_\gamma\}$ given
+to the distinguisher, which is~\Cref{lem:txid-ft-prf}.  Note that $\utk''$ is a
+hidden witness of $\rel_7$ below, so the auditor never needs it in order to
 check a transaction.
 
-$\rel_7$ is defined for $\crs_7 \leftarrow \NIZKgen(\rel_7)$, with $\crs_7$
+$\rel_7$ is defined for $\crs_7 \leftarrow \NIZKgen(\secparam, \rel_7)$, with
+$\crs_7$
 describing a hash function $\hash \colon \{0,1\}^* \rightarrow \Zp$, used to
 derive the verifier's challenge non-interactively via the Fiat-Shamir transform,
 as seen later in the sigma protocol of~\Cref{prot:txid-tag-sigma}.  The
@@ -579,19 +607,19 @@ instance, witness, and relation are given as follows:
 \begin{equation} \begin{gathered}
 %
   \inst_7 = (\HE, \ggen_D, \gen_2, \gen_3, \gen_4, \com, \Max, \epoch,
-\Tag_\gamma), \qquad \witness_7 = (\utk', \utk'', \openinfo, \gamma), \\
+\Tag_\gamma), \qquad \witness_7 = (\utk', \utk'', \openinfo, \ek, \gamma), \\
 %
   \rel_7 = \{\ \com = \gen_2^{\utk'}\cdot\gen_3^{\utk''}\cdot\gen_4^{\openinfo}
-\ \wedge \ \ek' = \HE(\epoch)^{\utk'} \\ \wedge \ \Tag_{\gamma} =
-\pairing\big(\ek',\, \ggen_D^{1/(\utk''+\gamma)}\big) \ \wedge \ 0 \leq \gamma <
+\ \wedge \ \ek = \HE(\epoch)^{\utk'} \\ \wedge \ \Tag_{\gamma} =
+\pairing\big(\ek,\, \ggen_D^{1/(\utk''+\gamma)}\big) \ \wedge \ 0 \leq \gamma <
 \Max\ \}.
 %
 \end{gathered} \end{equation}
 %
 
 Proving $\rel_7$ directly would require an argument over a secret $\group{1}$
-element ($\ek'$) paired against a term whose $\group{2}$ exponent is also
-secret, which would be expensive in practice.
+element ($\ek$) paired against a term whose $\group{2}$ exponent is also secret,
+which would be expensive in practice.
 
 Instead, the user samples $s, r_\gamma \sample \Zp$ and publishes the randomised
 values below, the last of which is a Pedersen commitment to the transaction
@@ -599,46 +627,49 @@ index:
 %
 \begin{equation*}
 %
-  U = \HE(\epoch)^s, \quad V = \ek'^{s}, \quad \Xi = \Tag_\gamma^{\,s}, \quad
-\com_\gamma = \gen_3^{\gamma}\cdot\gen_4^{r_\gamma}.
+  U = \HE(\epoch)^s, \quad \Pi = \pairing\big(\ek^{\,s},\, \ggen_D\big), \quad X
+= \Tag_\gamma^{\,s}, \quad \com_\gamma = \gen_3^{\gamma}\cdot\gen_4^{r_\gamma}.
 %
 \end{equation*}
 %
-The commitment $\com_\gamma$ is what carries $\gamma$ between the sigma protocol
-and the range argument below, so that the two speak about the same value. Since
-$\pairing(V,\ggen_D) = \pairing(\ek',\ggen_D)^s$ and
-$\Tag_\gamma^{\utk''+\gamma} = \pairing(\ek',\ggen_D)$, we have
-$\pairing(V,\ggen_D) = \Xi^{\utk''+\gamma}$. The user then proves the equivalent
-relation $\rel_7'$, proved under the same $\crs_7$, with instance, witness, and
-relation given as follows:
+The randomised epoch key $\ek^{\,s}$ is itself a witness and is never published;
+only its image $\Pi \in \group{T}$ under the pairing with $\ggen_D$ is. This is
+deliberate, and we return to it after the protocol. The commitment $\com_\gamma$
+is what carries $\gamma$ between the sigma protocol and the range argument
+below, so that the two speak about the same value. Since $\Pi =
+\pairing(\ek,\ggen_D)^s$ and $\Tag_\gamma^{\utk''+\gamma} =
+\pairing(\ek,\ggen_D)$ when the tag is correctly formed, we have $\Pi =
+X^{\utk''+\gamma}$. The user then proves the equivalent relation $\rel_7'$,
+proved under the same $\crs_7$, with instance, witness, and relation given as
+follows:
 %
 \begin{equation} \begin{gathered}
 %
-  \inst_7' = (\inst_7, U, V, \Xi, \com_\gamma), \qquad \witness_7' =
+  \inst_7' = (\inst_7, U, \Pi, X, \com_\gamma), \qquad \witness_7' =
 (\witness_7, s, r_\gamma), \\
 %
   \rel_7' = \{\ \com = \gen_2^{\utk'}\cdot\gen_3^{\utk''}\cdot\gen_4^{\openinfo}
-\ \wedge \ U = \HE(\epoch)^s \ \wedge \ V = U^{\utk'} \\ \wedge \ \Xi =
-\Tag_\gamma^s \ \wedge \ \pairing(V,\ggen_D) = \Xi^{\utk''}\cdot\Xi^{\gamma} \\
-\wedge \ \com_\gamma = \gen_3^{\gamma}\cdot\gen_4^{r_\gamma} \ \wedge \ 0 \leq
-\gamma < \Max\ \}.
+\ \wedge \ U = \HE(\epoch)^s \ \wedge \ \Pi = \pairing(U,\ggen_D)^{\utk'} \\
+\wedge \ X = \Tag_\gamma^s \ \wedge \ \Pi = X^{\utk''}\cdot X^{\gamma} \\ \wedge
+\ \com_\gamma = \gen_3^{\gamma}\cdot\gen_4^{r_\gamma} \ \wedge \ 0 \leq \gamma <
+\Max\ \}.
 %
   \end{gathered} \end{equation}
 %
   Every equality here is now an equality of discrete logarithms in $\group{1}$
-or $\group{T}$ between public bases. The single pairing $\pairing(V,\ggen_D)$ is
+or $\group{T}$ between public bases. The single pairing $\pairing(U,\ggen_D)$ is
 computed by the verifier from public data.
 
   We prove this in two parts: a sigma protocol for the equalities of $\rel_7'$
 involving $\witness_7'$, and a separate, generic range argument that $0 \leq
 \gamma < \Max$.
 
-  \begin{protocolbox}{Tag correctness sigma protocol}{prot:txid-tag-sigma}
+  \begin{protocolbox}{Tag correctness sigma protocol}{txid-tag-sigma}
 
     \begin{description}
 
       \item[$\algoproof_7' \sample \NIZKprove(\crs_7, \inst_7', \witness_7')$ :]
-On input $\inst_7' = (\inst_7, U, V, \Xi, \com_\gamma)$ and $\witness_7' =
+On input $\inst_7' = (\inst_7, U, \Pi, X, \com_\gamma)$ and $\witness_7' =
 (\utk', \utk'', \openinfo, \gamma, s, r_\gamma)$, do:
 
 	\begin{enumerate}
@@ -649,11 +680,11 @@ On input $\inst_7' = (\inst_7, U, V, \Xi, \com_\gamma)$ and $\witness_7' =
 
 	  \item Compute $A =
 \gen_2^{\mu_1}\cdot\gen_3^{\mu_2}\cdot\gen_4^{\mu_h}$, $B =
-\HE(\epoch)^{\mu_s}$, $D = U^{\mu_1}$, $C = \Tag_\gamma^{\mu_s}$, $F =
-\Xi^{\mu_2 + \mu_\gamma}$, and $A_\gamma =
+\HE(\epoch)^{\mu_s}$, $M = \pairing(U,\ggen_D)^{\mu_1}$, $C =
+\Tag_\gamma^{\mu_s}$, $F = X^{\mu_2 + \mu_\gamma}$, and $A_\gamma =
 \gen_3^{\mu_\gamma}\cdot\gen_4^{\mu_r}$.
 
-	  \item Compute challenge $c \leftarrow \hash(\inst_7', A, B, D, C, F,
+	  \item Compute challenge $c \leftarrow \hash(\inst_7', A, B, M, C, F,
 A_\gamma)$.
 
 	  \item Compute $\theta_1 = \mu_1 + c\cdot\utk'$, $\theta_2 = \mu_2 +
@@ -661,22 +692,22 @@ c\cdot\utk''$, $\theta_h = \mu_h + c\cdot\openinfo$, $\theta_s = \mu_s + c\cdot
 s$, $\theta_\gamma = \mu_\gamma + c\cdot\gamma$, and $\theta_r = \mu_r + c\cdot
 r_\gamma$.
 
-	  \item Return $\algoproof_7' = (U, V, \Xi, \com_\gamma, A, B, D, C, F,
+	  \item Return $\algoproof_7' = (U, \Pi, X, \com_\gamma, A, B, M, C, F,
 A_\gamma, \theta_1, \theta_2, \theta_h, \theta_s, \theta_\gamma, \theta_r)$.
 
 	\end{enumerate}
 
       \item[$\{0,1\} \leftarrow \NIZKverify(\crs_7, \inst_7', \algoproof_7')$ :]
 On input $\inst_7'$ and proof $\algoproof_7'$, reject unless $U \neq
-1_{\group{1}}$ and $V \neq 1_{\group{1}}$, compute challenge $c \leftarrow
-\hash(\inst_7', A, B, D, C, F, A_\gamma)$, and return the result of the
+1_{\group{1}}$ and $\Pi \neq 1_{\group{T}}$, compute challenge $c \leftarrow
+\hash(\inst_7', A, B, M, C, F, A_\gamma)$, and return the result of the
 following checks:
       %
 	\begin{gather*} \gen_2^{\theta_1}\cdot\gen_3^{\theta_2}\cdot
 \gen_4^{\theta_h} \checkcheck A \cdot \com^c, \quad \HE(\epoch)^{\theta_s}
-\checkcheck B \cdot U^c, \quad U^{\theta_1} \checkcheck D \cdot V^c, \\
-\Tag_\gamma^{\theta_s} \checkcheck C \cdot \Xi^c, \quad \Xi^{\theta_2 +
-\theta_\gamma} \checkcheck F \cdot \pairing(V,\ggen_D)^c, \\
+\checkcheck B \cdot U^c, \quad \pairing(U,\ggen_D)^{\theta_1} \checkcheck M
+\cdot \Pi^c, \\ \Tag_\gamma^{\theta_s} \checkcheck C \cdot X^c, \quad
+X^{\theta_2 + \theta_\gamma} \checkcheck F \cdot \Pi^c, \\
 \gen_3^{\theta_\gamma}\cdot\gen_4^{\theta_r} \checkcheck A_\gamma \cdot
 \com_\gamma^{c}.  \end{gather*}
 
@@ -686,7 +717,7 @@ following checks:
 
 Three features of this protocol are worth drawing out before the proof.
 
-First, the fifth equation has $\Xi$ as its only base, so it binds the sum
+First, the fifth equation has $X$ as its only base, so it binds the sum
 $\utk'' + \gamma$ and nothing finer. That is all the pairing identity needs, and
 the two values are separated by the equations either side of it: $\theta_2$ is
 shared with the first equation, where the binding of $\com$ pins $\utk''$, and
@@ -695,17 +726,25 @@ soundness argument of~\Cref{sec:rel7-equiv} makes this precise.
 
 Second, $\theta_s$ appears in both the second and fourth equations, over bases
 in $\group{1}$ and $\group{T}$ respectively. This is what proves that the same
-blinding scalar $s$ was used for $U$ and for $\Xi$, and hence that $\Xi$ is a
+blinding scalar $s$ was used for $U$ and for $X$, and hence that $X$ is a
 blinding of the tag named in the instance rather than an unrelated $\group{T}$
 element.
 
-Third, the two non-degeneracy checks matter. If $s = 0$ then $U$, $V$, and $\Xi$
-all collapse to identities and the pairing equality says nothing; the check $U
-\neq 1_{\group{1}}$ rules this out, since $\HE(\epoch)$ generates $\group{1}$
-with overwhelming probability over the random oracle. And if $\utk'' = -\gamma$
-then a prover holding $\utk' = 0$ satisfies the pairing equality with any tag at
-all; the check $V \neq 1_{\group{1}}$ rules this out in turn. Both are used in
-the soundness argument of~\Cref{sec:txid-security}.
+Third, the randomised epoch key $\ek^{\,s}$ never appears in the proof. Only
+$\Pi = \pairing(\ek^{\,s},\ggen_D)$ does, and the third verification equation
+speaks about it through $\pairing(U,\ggen_D)$, a $\group{T}$ base the verifier
+computes for itself. Publishing $\ek^{\,s}$ as a $\group{1}$ element would give
+a verifier everything $\Pi$ gives and more, since $\Pi$ is recoverable from it
+by one pairing; withholding it is what lets the zero-knowledge argument
+of~\Cref{sec:rel7-equiv} rest on DDH in $\group{T}$ alone.
+
+Fourth, the two non-degeneracy checks matter. If $s = 0$ then $U$, $\Pi$, and
+$X$ all collapse to identities and the pairing equality says nothing; the check
+$U \neq 1_{\group{1}}$ rules this out, since $\HE(\epoch)$ generates
+$\group{1}$ with overwhelming probability over the random oracle. And if $\utk''
+= -\gamma$ then a prover holding $\utk' = 0$ satisfies the pairing equality with
+any tag at all; the check $\Pi \neq 1_{\group{T}}$ rules this out in turn. Both
+are used in the soundness argument of~\Cref{sec:txid-security}.
 
 The range check $0 \leq \gamma < \Max$ is established using a generic
 Bulletproofs range argument~\cite{SP:BBBPWM18}, run on the same commitment
@@ -724,7 +763,8 @@ relation $\rel_6$ defined below.
 Since the user is registered using a signature $\signature = (e, r, E =
 ({\gen_0}\cdot\gen_1^{\sk} \cdot \gen_2^{\utk'}\cdot\gen_3^{\utk''}\cdot
 \gen_4^r)^{1/(z+e)})$ from the BBS+ signature scheme, $\rel_6$ is defined for
-$\crs_6 \leftarrow \NIZKgen(\rel_6)$, with $\crs_6$ describing a hash function
+$\crs_6 \leftarrow \NIZKgen(\secparam, \rel_6)$, with $\crs_6$ describing a hash
+function
 $\hash \colon \{0,1\}^* \rightarrow \Zp$, used, as with $\rel_7$ above, to
 derive the verifier's challenge non-interactively via the Fiat-Shamir transform.
 The instance, witness, and relation are given as follows:
@@ -780,7 +820,7 @@ d^{-r_3}\cdot\gen_4^{r''}\ \}.
 \end{gathered} \end{equation}
 %
 
-\begin{protocolbox}{Transaction authorisation proof}{prot:txid-tx-nizk}
+\begin{protocolbox}{Transaction authorisation proof}{txid-tx-nizk}
 
   \begin{description}
 
@@ -843,11 +883,11 @@ t_2\cdot(\bar{E}/d)^c, \\ \gen_1^{\theta_\sk}\cdot d^{-\theta_{r_3}}\cdot
 in~\Cref{sec:txid-instantiation} securely realises $\idfu{\algo{trace}}$, in the
 sense of the standalone model of~\Cref{sec:txid-definitions}, in the random
 oracle model for $\HE$ and $\hash$, under the Decisional Diffie-Hellman
-assumption in $\group{1}$ (for condition (F1)), the $(\Max,n)$-mDBDHI assumption
-for $n$ the number of epochs (for condition (F2)), the $q$-Strong Diffie-Hellman
-assumption (for the BBS+ signature scheme), and the discrete logarithm
-assumption in $\group{1}$ (for Pedersen binding and for soundness of the
-Bulletproofs range argument).  \end{theorem}
+assumption in $\group{1}$ (for $\FE$), the $q$-mDBDHI assumption with $q = \Max$
+(for $\FT$), the Decisional Diffie-Hellman assumption in $\group{T}$ (for zero
+knowledge of the tag argument), the $q$-Strong Diffie-Hellman assumption (for
+the BBS+ signature scheme), and the discrete logarithm assumption in $\group{1}$
+(for Pedersen binding and for soundness of the Bulletproofs range argument).  \end{theorem}
 
 The proof is assembled in~\Cref{sec:txid-inst-sec}, from~\Cref{thm:txid-bb}
 together with the lemmas and relation equivalences of~\Cref{sec:txid-security}.

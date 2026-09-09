@@ -311,7 +311,7 @@ $\AACpresent$ proceeds as follows.
       %
     \begin{equation*}\begin{gathered}
     %
-      \signature' \sample \ATSrandomise(\signature), \\ \SPSsig' \sample
+      \signature' \sample \ATSrandomise(\Tag,\signature), \\ \SPSsig' \sample
 \SPSrandomise(\SPSsig).
         %
     \end{gathered} \end{equation*}
@@ -518,7 +518,7 @@ same tag $\Tag$, do:
 	\item Parse each $\cred_j = (\atv{j},\signature_j)$ for $j \in [1,n]$.
 
 	\item Compute $\signature \leftarrow
-\ATSaggregate(\{\signature_j\}_{j\in[1,n]})$.
+\ATSaggregate((\signature_j)_{j\in[1,n]})$.
 
 	\item Return $\aggcred \leftarrow
 (\Tag,\{\atv{j}\}_{j\in[1,n]},\signature)$.

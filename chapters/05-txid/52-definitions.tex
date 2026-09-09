@@ -25,20 +25,24 @@ auditors of its choice before any call to the ideal functionality is made.
 input security parameter $\secparam$, generates the public ledger parameters
 $\crs$ together with the initial ledger state $\state$.
 
-  \item[$(\sk,\regcred) \sample \IDregister(\crs,\state)$ :] The registration
-algorithm, run interactively between a user and the registration authority on
-input public parameters $\crs$ and state $\state$, outputs user secret key $\sk$
-and registration credential $\regcred$ to the user.
+  \item[$(\sk,\utk,\regcred) \sample \IDregister(\crs,\state)$ :] The
+registration algorithm, run interactively between a user and the registration
+authority on input public parameters $\crs$ and state $\state$, outputs user
+signing key $\sk$, tracing key $\utk$, and registration credential $\regcred$ to
+the user. The instantiation takes $\utk$ to be a tuple.
 
-  \item[$\ek \sample \IDgrant(\crs,\sk,\regcred,\epoch)$ :] The authorisation
-algorithm, run interactively between a user and an auditor on input public
-parameters $\crs$, user secret key $\sk$, registration credential $\regcred$,
-and epoch $\epoch$, outputs epoch tracing key $\ek$ to the auditor.
+  \item[$(\PTK,\ek) \sample \IDgrant(\crs,\sk,\utk,\regcred,\epoch)$ :] The
+authorisation algorithm, run interactively between a user and an auditor on
+input public parameters $\crs$, signing key $\sk$, tracing key $\utk$,
+registration credential $\regcred$, and epoch $\epoch$, outputs the user's certified public tracing key
+$\PTK$ and the epoch tracing key $\ek$ to the auditor. Only $\ek$ depends on
+$\epoch$, so an auditor authorised for several epochs of the same user receives
+$\PTK$ once.
 
-  \item[$\tx \sample \IDsubmit(\crs,\sk,\regcred,\epoch,\payload)$ :] The
-submission algorithm, on input public parameters $\crs$, user secret key $\sk$,
-registration credential $\regcred$, epoch $\epoch$, and transaction payload
-$\payload$, outputs transaction $\tx$, which the user sends to the ledger
+  \item[$\tx \sample \IDsubmit(\crs,\sk,\utk,\regcred,\epoch,\payload)$ :] The
+submission algorithm, on input public parameters $\crs$, signing key $\sk$,
+tracing key $\utk$, registration credential $\regcred$, epoch $\epoch$, and
+transaction payload $\payload$, outputs transaction $\tx$, which the user sends to the ledger
 operator.
 
   \item[$\{0,1\} \leftarrow \algo{Verify}(\crs,\state,\tx)$ :] The validation
@@ -47,10 +51,10 @@ current ledger state $\state$, and transaction $\tx$, returns $1$ if $\tx$ is to
 be appended to the ledger and $0$ otherwise. It is non-interactive: a validator
 contacts neither the sender, nor the registration authority, nor any auditor.
 
-  \item[$\{\payload\} \leftarrow \IDidentify(\crs,\ek,\epoch)$ :] The tracing
-algorithm, on input public parameters $\crs$, epoch tracing key $\ek$, and epoch
-$\epoch$, returns the set of payloads of the transactions submitted under $\ek$
-during $\epoch$.
+  \item[$\{\payload\} \leftarrow \IDidentify(\crs,\PTK,\ek,\epoch)$ :] The
+tracing algorithm, on input public parameters $\crs$, public tracing key $\PTK$,
+epoch tracing key $\ek$, and epoch $\epoch$, returns the set of payloads of the
+transactions submitted under $\ek$ during $\epoch$.
 
 \end{description}
 

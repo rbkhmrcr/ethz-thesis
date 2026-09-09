@@ -75,12 +75,12 @@ consider.
 
     \item[$\issuer{i}$ is honest.] If this is the first time $\simu$ simulates
 $\user$ for $\issuer{i}$, then as per $\Pi$'s specification,  $\simu$ will
-receive signature $\signature_i \leftarrow \AACissue(\isk{i}, \Tag, \atv{i})$,
+receive signature $\signature_i \leftarrow \ATSsign(\isk{i}, \Tag, \atv{i})$,
 and record entry $\langle \user, \Tag, \atv{i}, \signature_i \rangle$.
 Otherwise, $\issuer{i}$ will reject the credential issuance request.
 
     \item[$\issuer{i}$ is corrupt.] If the execution of $\Pi$ terminates with
-$\simu$ receiving signature $\signature_i : \AACverify(\ipk{i}, \Tag, \atv{i},
+$\simu$ receiving signature $\signature_i : \ATSverify(\ipk{i}, \Tag, \atv{i},
 \signature_i) = 1$, then $\simu$ records entry $\langle \user, \Tag, \atv{i},
 \signature_i \rangle$, and sends accept.
 
@@ -141,7 +141,7 @@ corrupt user $\user$ sends, in the real world, to an honest issuer $\issuer{i}$
 \atv{i}, \signature_i\rangle$ on success.  $\idfu{\AAC}'$ issues the credential
 exactly when $\user$ is registered and this is her first request for $\att{i}$,
 and the simulated $\issuer{i}$ returns $\signature_i \leftarrow
-\AACissue(\isk{i}, \Tag, \atv{i})$ under the same conditions, so their outputs
+\ATSsign(\isk{i}, \Tag, \atv{i})$ under the same conditions, so their outputs
 are indistinguishable.
 
     \item[Verify.] For each signature $(\vec{\atv{}} = (\atv{1}, ..., \atv{N}),

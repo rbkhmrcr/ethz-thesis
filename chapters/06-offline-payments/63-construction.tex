@@ -228,7 +228,7 @@ knowledge. \Cref{sec:offline-instantiation} instantiates each of them.
 supporting three-message vectors, obtaining $(\sk_{\algo{cb}},
 \pk_{\algo{cb}})$.
 
-	\item Run $\ck \leftarrow \ComGen(\secparam)$ to obtain a public
+	\item Run $\ck \leftarrow \ComGen(\secparam, 2)$ to obtain a public
 commitment key, with all generators derived by hashing into the group, so that
 no participant knows the discrete logarithm relations between them.
 
@@ -237,7 +237,7 @@ $(\sk_\auditor, \pk_\auditor) \leftarrow \PKEgen(\secparam)$.
 
 	\item The registration authority generates keys for a multi-message
 signature scheme supporting two-message vectors, obtaining $(\rask, \rapk)
-\leftarrow \DSgen(\secparam, 2)$.
+\leftarrow \DSgen(\secparam)$.
 
 	\item Publish all public keys and generators to every participant, and
 return $(\pk_{\algo{cb}}, \ck, \pk_\auditor, \rapk)$.
@@ -281,7 +281,8 @@ value $v_0$. Do the following:
 initiate a withdrawal of value $v_0$.
 
 	\item The secure element selects a random $s_0$, computes the pseudonym
-$\com_0 \leftarrow \com(\ck, \algo{uid}_0; s_0)$, and returns $(s_0, \com_0)$ to
+$\com_0 \leftarrow \ComCommit(\ck, \algo{uid}_0, s_0)$, and returns $(s_0,
+\com_0)$ to
 the device.
 
 	\item The device computes the request commitment $C$ to the vector
@@ -314,8 +315,8 @@ $(v_0, s_0, \com_0, \psi)$. The secure element stores the original token $\tau_0
 	\item The device produces a proof of withdrawal $\Sigma$ with $\inst =
 (\ck, \pk_{\algo{cb}}, v_0, \com_0)$, $\witness = (\algo{uid}_0, s_0, \psi)$,
 and relation as follows: \begin{equation*} \DSverify(\pk_{\algo{cb}},
-(\algo{uid}_0, v_0, s_0), \psi) = 1 \;\wedge\; \ComOpen(\ck, \algo{uid}_0, s_0,
-\com_0) = 1.  \end{equation*}
+(\algo{uid}_0, v_0, s_0), \psi) = 1 \;\wedge\; \ComOpen(\ck, \com_0, s_0) =
+\algo{uid}_0.  \end{equation*}
 
       \item Return $T_0 = (v_0, s_0, \com_0, \algo{hist}_0 = \Sigma)$.
 
@@ -330,7 +331,7 @@ pays the payee using token $(v, s_i, \com_i, \algo{hist}_i)$. Do the following:
 receive a payment of value $v$.
 
       \item The payee's secure element selects a random $s_{i+1}$, computes
-$\com_{i+1} \leftarrow \com(\ck, \algo{uid}_{i+1}; s_{i+1})$, and returns
+$\com_{i+1} \leftarrow \ComCommit(\ck, \algo{uid}_{i+1}, s_{i+1})$, and returns
 $(s_{i+1}, \com_{i+1})$ to their device.
 
       \item The payee's device sends $\com_{i+1}$ to the payer's device.
@@ -342,14 +343,15 @@ under way. The secure element locks token $\tau_i = (v, \com_i)$.
 \PKEencrypt(\pk_\auditor, \algo{uid}_i; \rho_i)$ and a proof of correctness
 $\Gamma_i$, with $\inst = (\ck, \pk_\auditor, \com_i, \ciph_i)$, $\witness =
 (\algo{uid}_i, s_i, \rho_i)$, and relation as follows: \begin{equation*}
-\ComOpen(\ck, \algo{uid}_i, s_i, \com_i) = 1 \;\wedge\; \ciph_i =
+\ComOpen(\ck, \com_i, s_i) = \algo{uid}_i \;\wedge\; \ciph_i =
 \PKEencrypt(\pk_\auditor, \algo{uid}_i; \rho_i).  \end{equation*}
 
     \item The payer's secure element and device jointly compute $\sigma_i$, a
 signature of knowledge on the message $m_i = (v, \com_i, \com_{i+1})$ for the
 relation as follows: \begin{equation*} \DSverify(\rapk, (\algo{uid}_i,
-\sk_{\algo{usr}_i}), \varphi_i) = 1 \;\wedge\; \ComOpen(\ck, \algo{uid}_i, s_i,
-\com_i) = 1.  \end{equation*} Binding $\com_{i+1}$ into $m_i$ is what fixes the
+\sk_{\algo{usr}_i}), \varphi_i) = 1 \;\wedge\; \ComOpen(\ck, \com_i, s_i) =
+\algo{uid}_i.  \end{equation*} Binding $\com_{i+1}$ into $m_i$ is what fixes
+the
 destination of the payment. This is a joint proof of knowledge in the sense
 of~\Cref{sec:joint-pok-def}: the secure element takes the role of $\algo{Prv}_0$
 and contributes knowledge of the payer's secret key, and the device takes the

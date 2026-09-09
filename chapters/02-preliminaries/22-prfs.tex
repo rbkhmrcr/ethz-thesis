@@ -9,35 +9,45 @@ defined as follows:
 %
 \begin{description}
 
-  \item[$\key \sample \PRFgen(\secparam)$ :] The key generation algorithm takes
-the security parameter as input, and outputs a key $\key$.
+  \item[$(\pp, \key) \sample \PRFgen(\secparam)$ :] The key generation algorithm
+takes the security parameter as input, and outputs public parameters $\pp$
+together with a key $\key$.
 
-  \item[$y \leftarrow \PRFeval(\key, x)$ :] The evaluation algorithm takes key
-$\key$ and input $x$ in the domain, and outputs $y$ in the range.
+  \item[$y \leftarrow \PRFeval(\pp, \key, x)$ :] The evaluation algorithm takes
+public parameters $\pp$, key $\key$, and input $x$ in the domain, and outputs
+$y$ in the range.
 
 \end{description}
 %
 We say $\PRF = (\PRFgen, \PRFeval)$ is a pseudorandom function family with
-domain $\domain$ and range $\range$ if $\PRFeval(\key, \cdot)$ is efficiently
-computable for every $\key$ output by $\PRFgen(\secparam)$, and if it satisfies
-pseudorandomness, which we define below. We use the standard syntax and security
-notions for pseudorandom functions~\cite{KatLin14}.
+domain $\domain$ and range $\range$ if $\PRFeval(\pp, \key, \cdot)$ is
+efficiently computable for every $(\pp, \key)$ output by $\PRFgen(\secparam)$,
+and if it satisfies pseudorandomness, which we define below. We use the standard
+syntax and security notions for pseudorandom functions~\cite{KatLin14}.
+
+The public parameters are carried explicitly because the algebraic
+instantiations of later chapters need them: the domain, the range, or the
+description of the function itself may depend on group elements that are common
+to every key, and those elements are public. The textbook setting is the special
+case $\pp = \varnothing$, and we suppress $\pp$ where it plays no role.
 
 \paragraph{Pseudorandomness.} Pseudorandomness requires that no efficient
-adversary, given oracle access to the function, can distinguish it from a
-function sampled uniformly at random from all functions $\domain \to \range$.
+adversary, given the public parameters and oracle access to the function, can
+distinguish it from a function sampled uniformly at random from all functions
+$\domain \to \range$.
 
 \begin{experimentbox}{Pseudorandomness}{prf}
 
   \begin{enumerate}
 
-    \item The challenger samples $b \sample \{0,1\}$. If $b = 0$, it generates
-$\key \sample \PRFgen(\secparam)$. If $b = 1$, it samples a function $R$
-uniformly at random from all functions $\domain \to \range$.
+    \item The challenger samples $b \sample \{0,1\}$ and generates $(\pp, \key)
+\sample \PRFgen(\secparam)$. If $b = 1$, it additionally samples a function $R$
+uniformly at random from all functions $\domain \to \range$. It sends $\pp$ to
+the adversary.
 
     \item The adversary is given oracle access to $\mathcal{O}_{\PRF}$, which on
-input $x \in \domain$ returns $\PRFeval(\key, x)$ if $b = 0$, and $R(x)$ if $b =
-1$.
+input $x \in \domain$ returns $\PRFeval(\pp, \key, x)$ if $b = 0$, and $R(x)$ if
+$b = 1$.
 
     \item The adversary outputs a bit $b'$.
 
@@ -59,3 +69,22 @@ The pseudorandomness advantage of $\adv$ is defined as follows:
 We say $\PRF$ is a secure pseudorandom function if this advantage is small for
 every admissible adversary $\adv$ making a polynomial number of queries to
 $\mathcal{O}_{\PRF}$.
+
+\paragraph{Public parameters and pseudorandomness.} Because $\pp$ is public, it
+is handed to the adversary in the experiment above, and pseudorandomness is
+required to hold in its presence. This is not a formality where the parameters
+are derived from long-lived secrets: a construction in which some public value
+is a deterministic function of material related to the key must still be
+pseudorandom to a distinguisher who holds that value. The tag function
+of~\Cref{chap:txid} is of exactly this shape. Its public parameter is the user's
+certified public tracing key, fixed for the lifetime of the user, and the
+security statements of that chapter are made against a distinguisher given the
+whole of it.
+
+The same point constrains what may be placed in the \emph{output} of a
+pseudorandom function. A function whose output has a component that is identical
+on every input is not pseudorandom, whatever the hardness assumption behind it,
+since a random function repeats nothing. Material that a later computation needs
+but that does not vary with the input therefore belongs in the public
+parameters, not in the output. \Cref{sec:txid-construction} makes this
+arrangement explicit for the pair of functions used there.

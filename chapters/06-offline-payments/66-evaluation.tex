@@ -50,7 +50,9 @@ as cloud services, over HTTPS.
 Withdrawal consists of local computation on the phone, an NFC exchange with the
 card to obtain $s_0$ and $\com_0$, and a single HTTPS call to the intermediary,
 which contacts the central bank on the user's behalf.
-Figure~\ref{fig:offline/withdraw-sequence} gives the message sequence.
+Figure
+% TODO
+gives the message sequence.
 
 A payment is preceded by an out of band negotiation of its terms. The payee
 displays a QR code carrying the payment terms, a BLE service identifier, and the
@@ -58,8 +60,9 @@ material for a Diffie-Hellman exchange, and advertises a BLE GATT service with a
 Notify characteristic for data sent to the payer and a Write without response
 characteristic for data received from them. The payer scans the code, completes
 the exchange and confirms the terms, after which every message is encrypted and
-CBOR encoded. Figure~\ref{fig:offline/payment-sequence} gives the message
-sequence for the payment itself.
+CBOR encoded. Figure 
+% TODO
+gives the message sequence for the payment itself.
 
 \paragraph{Interrupted payments.} A payment that stops part way leaves the two
 wallets in one of two states, and neither loses value. If the payer's card has
