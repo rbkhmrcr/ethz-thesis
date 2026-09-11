@@ -48,7 +48,7 @@ setting makes, and it should be read alongside the timings below.
 
 \paragraph{Implementation.} Our implementation builds on MP-SPDZ, a framework
 for implementing MPC with pre-processing~\cite{CCS:Keller20}. MP-SPDZ is built
-for the paradigm of sharing elements of $\Zp$, with all operations defined
+for the approach of sharing elements of $\Zp$, with all operations defined
 between elements of $\Zp$. For the protocols of this chapter, we additionally
 need operations between elements of $\group{1}$ and $\group{2}$.
 
@@ -86,7 +86,7 @@ against adaptive corruption, so the concrete schemes achieve the static analogue
 of the notion proved in \Cref{sec:tsps-security}. Third, MP-SPDZ constructs the
 output within its online phase, so the reported $\algo{OnSign}$ timings include
 the cost of $\TSPScombine$. The communication attributed to $\algo{OnSign}$ in
-\Cref{tab:tsps-comms} is nevertheless zero, because $\algo{OnSign}$ itself is
+\Cref{tab:tsps-comms} is still zero, because $\algo{OnSign}$ itself is
 local and all of the communication in that column belongs to combining.
 
 We run benchmarks on a 16-core machine running RHEL 9.0-64 with 32GB of RAM,

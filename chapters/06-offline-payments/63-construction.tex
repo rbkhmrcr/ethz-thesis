@@ -463,7 +463,7 @@ revocation. The registration authority signs the triple $(\algo{uid},
 at withdrawal, tying each token to the epoch in which it was issued. Both
 schemes therefore sign vectors one longer than in
 \Cref{sec:offline-instantiation}, and the withdrawal proof and the joint proof
-gain one exponent each; nothing else changes.  Payees enforce the policy,
+gain one exponent each. Nothing else changes.  Payees enforce the policy,
 rejecting payments carrying an epoch outside the window they accept, and the
 width of that window can be tuned to the value of the payment. An epoch can
 equally be counted in spending hops rather than in wall clock time, capping the

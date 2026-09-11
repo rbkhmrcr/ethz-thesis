@@ -479,7 +479,7 @@ $\hat{\ciph} = (e_1, e_2)$ by computing $l = e_2 / e_1^\mu$, and outputs $\psi =
 signer followed the protocol honestly, $l = k^\chi \bigl(\prod_{i=0}^{\ell-1}
 k^{\lambda_i \msg_i}\bigr) k^{\omega\iota}$. Note that the blind variant fixes
 $k = \hash_{\group{1}}(\com)$ rather than sampling it as $\PSsign$ does, since
-the signer never sees $\msg$ and both parties must agree on $k$; unforgeability
+the signer never sees $\msg$ and both parties must agree on $k$. Unforgeability
 is preserved, as $k$ is still a group element neither party
 controls~\cite{NDSS:SABMD19}.
 
@@ -622,7 +622,7 @@ token vector $(\algo{uid}_0, v, s_0)$ with Pointcheval-Sanders over committed
 inputs, learning neither $\algo{uid}_0$ nor $s_0$. The audit ciphertext is an
 ElGamal encryption of the payer's identifier under $\pk_\auditor$, which admits
 an efficient sigma protocol proving that it encrypts the value committed in the
-payer's pseudonym; that is the proof $\Gamma_i$, merged with $\sigma_i$ as
+payer's pseudonym. That is the proof $\Gamma_i$, merged with $\sigma_i$ as
 described above. The signature of knowledge $\sigma_i$ that authorises each
 payment and each deposit is Primitive~\ref{prim:bbs-joint-proof}, and the proof
 of withdrawal $\Sigma$ is produced by the device alone using

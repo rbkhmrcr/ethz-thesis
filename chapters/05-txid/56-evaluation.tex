@@ -1,59 +1,190 @@
 \section{Evaluation}\label{sec:txid-evaluation}
 
-We evaluate the concrete instantiation of \Cref{sec:txid-instantiation},
-benchmarking each relation's proof and verification cost individually before
-reporting end-to-end figures for the full protocol. Costs and sizes are reported
-separately, since the two are not interchangeable and the second matters more
-for a ledger.
+We evaluate both instantiations of \Cref{sec:txid-instantiation}, benchmarking
+each relation's proof and verification cost individually before comparing the
+whole against a deployed anonymous credential system. Costs and sizes are
+reported separately, since the two are not interchangeable and the second
+matters more for a ledger.
+
+\paragraph{Experimental setup.} We implement both instantiations in Go using the
+\texttt{gnark-crypto} library~\cite{gnark-crypto}, which provides optimised
+multi-pairing routines and assembly level curve arithmetic for both curves we
+report. All experiments were run on an Apple M2 laptop with 16GB of RAM, running
+four performance and four efficiency cores. Measurements were collected using
+Go's built-in benchmarking framework, averaged over the number of iterations
+taken to reach one second of computation, and summarised across ten repetitions
+with \texttt{benchstat}. Every reported figure carries a variation of at most
+4\% across repetitions, and every operation is single-threaded except where
+noted.
+
+As a scale for the figures that follow, on this machine one exponentiation in
+$\group{1}$ costs $62.6\,\mu\mathrm{s}$ over BN254 and $113.8\,\mu\mathrm{s}$
+over BLS12-381, and one pairing evaluation costs 0.956ms and 1.141ms
+respectively.
+
+\paragraph{Scope of the measurements.} The prototype implements all four
+relations in both instantiations, and every reported figure is a complete cost
+for the operation named. The range check on the transaction index is handled
+differently by the two, and this is the one place where care is needed in
+reading the tables. In the hash based instantiation it is compiled into the
+$\rel_7$ circuit as a bit decomposition, and is therefore already inside the
+$\rel_7$ rows of \Cref{tab:txid-snark}. In the algebraic instantiation it is a
+separate Bulletproofs argument over $\com_\gamma$, reported on its own row of
+\Cref{tab:algebraic}, and the per-transaction cost of $\rel_7'$ is the sum of
+the sigma protocol and that argument. The total rows of \Cref{tab:algebraic} are
+measured as a single end-to-end benchmark rather than summed, so they differ
+slightly from the sum of the two component rows.
+
+\paragraph{Choice of $\ell$.} We run the benchmarks with $\ell = 8$, so a user
+may submit up to $\Max = 256$ transactions in any one epoch. A user who reaches
+that cap waits for the next epoch boundary. An epoch spans $\lambda$ blocks and
+$\lambda$ is a deployment parameter, so the cap is really set by choosing
+$\lambda$ against the throughput a single user is expected to need. The
+choice of $\ell$ trades that cap against three costs that all grow with $\Max$:
+the size of $\{W_\gamma\}$, the work an auditor does to trace one epoch, and the
+range argument. A power of two is the natural choice for the third of these, for
+the reason given below.
+
+\subsection{The hash based instantiation}
+
+For the hash based instantiation of~\Cref{sec:txid-hash-instantiation},
+correctness of the two pseudorandom function evaluations is proved with
+Groth16~\cite{EC:Groth16}, and each proof is three group elements. $\rel_5$
+proves the derivation of the epoch key, and $\rel_7$ additionally proves tag
+correctness and that the transaction index lies in range, so the two are
+compiled and benchmarked as separate circuits. Verification of either requires 3
+pairing evaluations and one multi-exponentiation over the public inputs.
+\Cref{tab:txid-snark} reports the results.
+
+\begin{table}[t] \centering \caption{Hash based instantiation benchmarks. Times
+in milliseconds.} \label{tab:txid-snark}
+  %
+  \begin{tabular}{l l r r} \toprule
+    %
+    Operation & Frequency & \ \ BN254 & \ \ BLS12-381 \\
+    %
+    \midrule
+    %
+    $\rel_5$ setup & once per deployment & 75.2 & 146.2 \\
+    %
+    $\rel_5$ proof & per epoch & 10.2 & 16.6 \\
+    %
+    $\rel_5$ verification & per epoch & 1.67 & 2.90 \\
+    %
+    $\rel_5$ proof size (bytes) & per epoch & 128 & 192 \\
+    %
+    $\rel_5$ constraints & n/a & 661 & 667 \\
+    %
+    $\rel_5$ prover memory (MB) & per epoch & 14 & 18 \\
+    %
+    $\rel_5$ verifier memory (MB) & per epoch & 18 & 26 \\
+    %
+    \midrule
+    %
+    $\rel_7$ setup & once per deployment & 161.8 & 256.0 \\
+    %
+    $\rel_7$ proof & per transaction & 20.7 & 32.3 \\
+    %
+    $\rel_7$ verification & per transaction & 2.36 & 3.03 \\
+    %
+    $\rel_7$ proof size (bytes) & per transaction & 128 & 192 \\
+    %
+    $\rel_7$ constraints & n/a & 1330 & 1342 \\
+    %
+    $\rel_7$ prover memory (MB) & per transaction & 22 & 18 \\
+    %
+    $\rel_7$ verifier memory (MB) & per transaction & 22 & 26 \\
+    %
+  \bottomrule \end{tabular}
+%
+\end{table}
+
+The $\rel_7$ circuit is two MiMC permutations together with an $\ell$-bit
+decomposition of the transaction index, which is what separates its constraint
+count from that of $\rel_5$. At $\ell = 8$ the range check is eight constraints
+against the 661 and 667 that a single permutation costs over BN254 and
+BLS12-381, so it is free relative to the hashing, and the timings do not move
+measurably with $\ell$.
+
+Proof size is the striking figure: 192 bytes per transaction over BLS12-381,
+constant in $\ell$ and in the size of the circuit. Verification is also fast, at
+around 3ms. The prover pays for both, at 32.3ms per transaction, and the setup
+rows are the trusted setup that \Cref{sec:txid-hash-instantiation} gives up
+transparency to obtain.
+
+\subsection{The algebraic instantiation}
+
+\paragraph{Registration and grant proof ($\rel_4$).} The proof of knowledge of
+the openings of $\PSK$ and $\PTK$ costs the prover 1 exponentiation and 1
+two-base multi-exponentiation in $\group{1}$, and 3 $\Zp$ responses. The
+verifier costs are 3 exponentiations and 1 two-base multi-exponentiation in
+$\group{1}$. The same proof is produced at registration, on the registration
+authority's nonce, and at each grant, on $\algoproof_5 \| \rand$. As the
+credential signature is sent in the clear at a grant, the auditor additionally
+verifies it directly, at the cost of 2 pairing evaluations.
 
 \paragraph{Credential proof ($\rel_6'$).} The proof of knowledge of a signature
 from the BBS+ signature scheme ranges over the three secrets
-$(\sk,\utk',\utk'')$ certified by the credential. The prover computes $E'$, $d$,
-and $\bar{E}$, at 3 scalar multiplications in $\group{1}$ given a cached $b$,
-and the three first-message elements $t_1$, $t_2$, $t_3$, at one 3-term, one
-2-term, and one 3-term multi-exponentiation in $\group{1}$. The verifier
-evaluates 2 pairings, on public data, and 3 multi-exponentiations in
-$\group{1}$. The proof consists of 3 $\group{1}$ elements $(E',\bar{E},d)$, 3
-$\group{1}$ first-message elements, and 8 $\Zp$ responses.
+$(\sk,\utk',\utk'')$ certified by the credential. The prover computes 3 scalar
+multiplications in $\group{1}$ to randomise the signature, then 3
+multi-exponentiations in $\group{1}$, of sizes three, two and three, and sends 8
+$\Zp$ responses. The verifier evaluates 2 pairings, on public data, and 3
+multi-exponentiations in $\group{1}$. The proof consists of 3 $\group{1}$
+elements $(E',\bar{E},d)$, 3 $\group{1}$ first-message elements, and the 8
+responses.
 
 \paragraph{Epoch key proof ($\rel_5$).} The per-epoch part costs the prover 2
 exponentiations in $\group{1}$ and 2 $\Zp$ responses, and the verifier 4
-exponentiations in $\group{1}$. An auditor's first grant additionally carries
-the group elements $\{W_\gamma\}_{\gamma\in[0,\Max)}$ of $\PTK$ and the batched
+exponentiations in $\group{1}$. A user's first grant additionally carries the
+group elements $\{W_\gamma\}_{\gamma\in[0,\Max)}$ of $\PTK$ and the batched
 proof that they are well formed against the certified $\utk''$: $\Max$
 exponentiations in $\group{2}$ to form them, and two $\Max$-term
 multi-exponentiations in $\group{2}$ for $\widehat{W}$ and $\widehat{V}$ on each
-side. At $\ell = 10$ over BLS12-381 this is $\Max \cdot |\group{2}| = 1024
-\times 96 = 98$KB of compressed communication, and it is by some margin the most
-expensive single operation in the system. The elements do not depend on the
-epoch, so the cost is paid once per auditor and reused for every later epoch;
-all subsequent grants to that auditor are constant size. The user forms
-$\{W_\gamma\}$ once, at registration, and stores it. Since $\{W_\gamma\}$ is
-certified public key material rather than epoch-scoped secret material, an
-auditor need not retain it: one that has discarded it is simply sent it again
-with its next grant, at the cost above.
+side. This is $\Max \cdot |\group{2}|$ bytes of communication, 24KB at $\ell =
+8$ over BLS12-381, and it is the largest single message in the system.
+
+The vector is a public parameter carrying no secret, and it does not vary with
+the epoch. How it reaches an auditor is therefore a deployment choice. It may be
+sent at that auditor's first grant, or published once alongside $T$ for any
+auditor to fetch. Either way it is formed and proven once per user, and
+every grant after the first is constant size. Nothing here obliges an auditor to
+retain it, which is what distinguishes this cost from persistent per-user state.
 
 \paragraph{Tag proof ($\rel_7'$).} The sigma protocol
-of~\Cref{prot:txid-tag-sigma} works entirely in $\group{1}$ and $\group{T}$; no
-operation in $\group{2}$ appears, and no cost depends on $\ell$. The prover
-computes $U$ in $\group{1}$ and $\Pi$, $X$ in $\group{T}$, then $A$, $B$ in
-$\group{1}$, $M$, $C$, $F$ in $\group{T}$, and $A_\gamma$ in $\group{1}$: in
-total 4 exponentiations or small multi-exponentiations in $\group{1}$ and 5 in
-$\group{T}$, plus the single pairing $\pairing(U,\ggen_D)$ whose result is
-reused as a base. The verifier evaluates that same pairing, together with 3
-multi-exponentiations in $\group{1}$ and 4 in $\group{T}$. The $\group{T}$
-operations dominate, which is what the timings below reflect. The proof carries
-1 $\group{1}$ element ($U$), 2 $\group{T}$ elements ($\Pi$, $X$), the commitment
+of~\Cref{prot:txid-tag-sigma} costs the prover 7 exponentiations in
+$\group{1}$, 5 exponentiations in $\group{T}$, and 1 pairing evaluation, and the
+verifier 9, 5 and 1 of the same. Opening $\com_\gamma$ to the range argument
+accounts for 2 of those $\group{1}$ exponentiations on each side, and for one
+$\group{1}$ element of the proof.
+
+Only one pairing is needed on either side. Because $\Pi = \pairing(\ek^{\,s},
+\ggen_D) = \pairing(U, \ggen_D)^{\utk'}$, the randomised epoch key is never
+formed, and both parties exponentiate $\pairing(U, \ggen_D)$ rather than pairing
+a second time. Exponentiation in $\group{T}$ is then the dominant cost, at
+0.83ms over BN254 and 1.00ms over BLS12-381, which is close to the cost of a
+pairing. The five of them account for roughly three quarters of the sigma
+protocol figures in \Cref{tab:algebraic}. The proof carries 1 $\group{1}$
+element ($U$), 2 $\group{T}$ elements ($\Pi$, $X$), the commitment
 $\com_\gamma$, the six first-message elements, and 6 $\Zp$ responses. The
 randomised epoch key $\ek^{\,s}$ is not transmitted.
 
-\paragraph{Range proof.} The range check $0 \leq \gamma < \Max$ is where the
-dependence on $\ell$ enters. The prover costs $O(\ell)$ exponentiations plus the
-Bulletproofs inner product argument of $O(\ell)$ group operations, and the
-verifier cost is $O(\ell)$ exponentiations, with a proof of $2\log_2 \ell + 4$
-$\group{1}$ elements and 5 $\Zp$ values~\cite{SP:BBBPWM18}. Opening
-$\com_\gamma$ to the range argument adds a further 2 exponentiations in
-$\group{1}$ on each side and one $\group{1}$ element to the proof.
+\paragraph{Range argument.} The range check $0 \leq \gamma < \Max$ is a
+Bulletproof over $\com_\gamma$, sharing the bases $\gen_3$ and $\gen_4$ with
+that commitment so that the two arguments speak about one $\gamma$. Its inner
+product argument halves its vectors each round, so it runs over a vector of
+length $\ell$ directly whenever $\ell$ is a power of two, which is why we take
+$\ell = 8$. For other $\ell$ the vectors must be padded to $2^{\lceil \log_2
+\ell \rceil}$, and the cost is that of the padded length rather than of $\ell$.
+So $\ell = 10$ and $\ell = 16$ cost the same. The proof is $2\log_2 \ell + 4$
+elements of $\group{1}$ and 5 scalars~\cite{SP:BBBPWM18}, which is 10 group
+elements and 5 scalars at $\ell = 8$, or 640 bytes over BLS12-381.
+
+The prover's dominant group operations are the folding of the two generator
+vectors, at $2(\ell-1)$ exponentiations in $\group{1}$, together with a further
+$\ell-1$ to form the shifted generators and multi-exponentiations of total
+length $O(\ell)$ across the $\log_2 \ell$ rounds. The verifier folds the shift
+into its exponents and checks the argument as a single multi-exponentiation of
+$2\ell + 2\log_2 \ell + 4$ terms, which is 26 terms at $\ell = 8$.
 
 \paragraph{When each proof is computed.} The proof of $\rel_4$ is computed once
 at registration and once per $\IDgrant$ invocation. The $\{W_\gamma\}$
@@ -71,85 +202,147 @@ which we do not apply here.
 
 \paragraph{Cost of tracing.} Tracing one user for one epoch costs $\Max$
 pairings and $\Max$ lookups in the tag-indexed ledger, independent of the number
-of transactions on that ledger and of the number of registered users.  This is
-the comparison that motivates the construction: the revocation-based schemes
-of~\Cref{tab:txid-related} require one decryption per ledger entry, so their
-cost grows without bound as the system is used, and they expose non-targeted
-users to the auditor in the process.
+of transactions on that ledger and of the number of registered users. The
+auditor produces no proof of its own. The $\Max$ pairing evaluations are
+mutually independent, so the work parallelises directly, and we report both a
+single-threaded figure and one across all eight cores.
 
-\Cref{tab:algebraic} reports timings at $\ell = 10$.
+\Cref{tab:algebraic} reports timings at $\ell = 8$, grouped by how often each
+cost is incurred.
 
-% MEASURE: the rows below marked --- are not yet measured. The credential proof
-% and the range argument are both per-transaction, so the per-transaction total
-% is incomplete without them, and the Idemix comparison in the text depends on
-% the credential proof row in particular. The first-grant row is the one-off
-% cost of forming and batching {W_gamma}.
-\begin{table}[t] \centering \caption{Algebraic PRF instantiation benchmarks
-(BN254 / BLS12-381), at $\ell = 10$. Timings are means over $N$ runs on
-\textsc{[hardware]} using \textsc{[library]}; standard deviations were below
-\textsc{[x]}\% throughout.} \label{tab:algebraic}
+\begin{table}[t] \centering \caption{Algebraic instantiation microbenchmarks at
+$\ell = 8$, in milliseconds. Figures are means over ten repetitions, with a
+variation of at most 4\% throughout.} \label{tab:algebraic}
   %
-  \begin{tabular}{l r r} \toprule
+  \begin{tabular}{l l r r} \toprule
     %
-    Operation & \ \ BN254 & \ \ BLS12-381 \\
-    %
-    \midrule
-    %
-    \multicolumn{3}{l}{\emph{Per epoch}} \\
-    %
-    Epoch proof time (ms) & 0.08 & 0.14 \\
-    %
-    Epoch verification time (ms) & 0.13 & 0.24 \\
+    Operation & Frequency & \ \ BN254 & \ \ BLS12-381 \\
     %
     \midrule
     %
-    \multicolumn{3}{l}{\emph{Per transaction}} \\
+    $\rel_4$ proof & registration, per grant & 0.26 & 0.42 \\
     %
-    Tag proof time (ms)          & 4.29 & 5.55 \\
-    %
-    Tag verification time (ms) & 6.39 & 8.00 \\
-    %
-    Credential proof time (ms) & --- & --- \\
-    %
-    Credential verification time (ms) & --- & --- \\
-    %
-    Range proof time (ms) & --- & --- \\
-    %
-    Range verification time (ms) & --- & --- \\
+    $\rel_4$ verification & registration, per grant & 0.37 & 0.64 \\
     %
     \midrule
     %
-    Total per-transaction proof time (ms)        & --- & --- \\
+    $\rel_5$ proof & per epoch & 0.29 & 0.55 \\
     %
-    Total per-transaction verification time (ms) & --- & --- \\
+    $\rel_5$ verification & per epoch & 0.43 & 0.79 \\
     %
     \midrule
     %
-    \multicolumn{3}{l}{\emph{One-off, per user}} \\
+    $\rel_6'$ proof & per transaction & 1.46 & 2.39 \\
     %
-    First-grant proof time (ms) & --- & --- \\
+    $\rel_6'$ verification & per transaction & 2.25 & 3.07 \\
     %
-    First-grant verification time (ms) & --- & --- \\
+    \midrule
+    %
+    $\rel_7'$ sigma proof & per transaction & 5.56 & 6.93 \\
+    %
+    $\rel_7'$ sigma verification & per transaction & 5.44 & 7.01 \\
+    %
+    Range argument proof & per transaction & 5.13 & 8.11 \\
+    %
+    Range argument verification & per transaction & 0.80 & 1.22 \\
+    %
+    $\rel_7'$ total, proof & per transaction & 10.59 & 15.07 \\
+    %
+    $\rel_7'$ total, verification & per transaction & 6.33 & 8.32 \\
+    %
+    \midrule
+    %
+    $\{W_\gamma\}$ generation & once per user & 61.81 & 96.27 \\
+    %
+    $\{W_\gamma\}$ batched proof & once per user & 6.53 & 10.53 \\
+    %
+    $\{W_\gamma\}$ batched verification & once per user & 6.90 & 11.19 \\
+    %
+    \midrule
+    %
+    Trace, single-threaded & per audit & 265.1 & 313.6 \\
+    %
+    Trace, eight cores & per audit & 47.95 & 57.89 \\
     %
   \bottomrule \end{tabular}
 %
 \end{table}
 
-The tag proof, which is the component this chapter contributes, generates in a
-few milliseconds and verifies in under 10ms even without optimisation. The
-per-transaction total additionally includes the credential proof and the range
-argument, neither of which is specific to tracing: the first is a standard BBS+
-presentation and the second a standard Bulletproofs range argument, and both
-would be present in any anonymous-credential payment system of this shape. The
-right way to read the table is therefore as the cost of adding tracing on top of
-a credential presentation the system was going to perform anyway.
+Per-epoch and per-transaction costs are not additive, and we report them
+separately rather than as a single total. What a validator pays for each
+transaction is the sum of the $\rel_6'$ row and the $\rel_7'$ total row.
 
-That framing is also what makes a comparison with Idemix meaningful. Idemix, a
-widely deployed anonymous credential system over BLS12-381, requires
-approximately 4ms for signing and 3ms for verification with no tracing
-support\footnote{Implementation found at \url{https://github.com/ibm/idemix},
-commit \textsc{[commit]}.}. Those figures are credential-presentation figures,
-so the like-for-like comparison is against our credential proof row, and the tag
-and range rows are the marginal cost of tracing. Comparing our epoch-plus-tag
-subtotal against Idemix's presentation cost, as an earlier reading of this table
-would invite, would compare two different things.
+\subsection{Comparison with an anonymous credential system}
+
+To place these figures in context we benchmark Hyperledger Idemix on the same
+machine and the same curve. Idemix is a deployed anonymous credential system,
+and its Aries variant uses BBS+ over BLS12-381, so it is close in structure to
+the credential layer of \Cref{sec:txid-instantiation}. We measure it in two
+configurations: a standard signature, which offers no oversight mechanism at
+all, and one carrying pseudonymous commitments to the enrollment id and
+revocation handle, which is Idemix's auditability feature. A fresh pseudonym is
+derived per signature in both cases, as unlinkability requires.
+\Cref{tab:txid-idemix} reports the full per-transaction cost of each system.
+
+\begin{table}[t] \centering \caption{Per-transaction cost against Hyperledger
+Idemix, over BLS12-381, in milliseconds.} \label{tab:txid-idemix}
+  %
+  \begin{tabular}{l r r} \toprule
+    %
+    System & \ \ Prove & \ \ Verify \\
+    %
+    \midrule
+    %
+    Idemix, no oversight mechanism & 7.74 & 5.60 \\
+    %
+    Idemix, with audit pseudonyms & 9.11 & 7.22 \\
+    %
+    \midrule
+    %
+    This chapter, algebraic & 17.5 & 11.4 \\
+    %
+    This chapter, hash based & 34.7 & 6.10 \\
+    %
+  \bottomrule \end{tabular}
+%
+\end{table}
+
+Both of our rows are the sum of a credential proof and a tag proof, and both
+include the range check on the transaction index. The hash based row combines
+the Groth16 figures of \Cref{tab:txid-snark} with the measured $\rel_6'$ sigma
+protocol. That instantiation certifies $(\sk,\utk)$ rather than
+$(\sk,\utk',\utk'')$, so its credential proof is in fact marginally cheaper
+than the figure used here.
+
+Neither instantiation is uniformly cheaper than Idemix, and neither needs to be.
+Idemix offers no efficient tracing at all, and the configuration it does offer
+answers a different and weaker question, which the next paragraph makes precise.
+The hash based instantiation verifies faster than Idemix does \emph{with} its
+audit pseudonyms enabled, at the cost of a substantially slower prover. The
+algebraic instantiation proves in about 1.9 times and verifies in about 1.6
+times Idemix's cost with those pseudonyms enabled, and requires no trusted setup
+anywhere. Since a transaction is generated once and verified by every validator,
+it is the verification column that governs throughput, and on verification both
+instantiations stay within a small factor of a deployed credential system that
+provides no tracing at all.
+
+\paragraph{The cost of tracing, compared.} Idemix's audit mechanism answers a
+different question from ours. Given a candidate enrollment id and a signature,
+it decides whether the two match. Idemix has no notion of an epoch, so
+recovering the transactions a single user submitted over some period requires
+one such test per ledger entry in that period. We measure that test at 0.42ms.
+Tracing a user over one epoch in our scheme is instead a fixed $\Max$ pairing
+evaluations, measured at 0.31s for the algebraic instantiation, and does not
+depend on how many transactions the ledger holds. The hash based instantiation
+replaces those pairings with $\Max$ evaluations of $\HT$ and so is cheaper again
+by orders of magnitude, which makes the algebraic figure the conservative one to
+quote here. Both figures are single-threaded, and both scans parallelise in the
+same way, since every test and every pairing is independent of the others.
+
+The two approaches cost the same at roughly 750 ledger entries per epoch. At
+$10^6$ entries the Idemix approach requires around 7 minutes against our 0.31s,
+and the ratio between the two grows linearly in the number of entries. This is
+the separation of \Cref{tab:txid-related} made concrete: the revocation-based
+schemes there require one decryption per ledger entry, so their cost grows
+without bound as the system is used, and they expose non-targeted users to the
+auditor in the process. Ours does neither.

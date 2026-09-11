@@ -3,7 +3,7 @@
 A tracing scheme involves four types of participants. The ledger operator
 maintains a publicly accessible, append-only ledger that stores submitted
 transactions, and runs the transaction validators that decide, on input of the
-ledger, which transactions are valid; we assume the ledger operator is honest,
+ledger, which transactions are valid. We assume the ledger operator is honest,
 so that the ledger itself is available and correctly maintained. The
 registration authority is honest-but-curious during the protocol: it
 authenticates users and issues the credentials required to submit transactions
@@ -34,7 +34,8 @@ the user. The instantiation takes $\utk$ to be a tuple.
   \item[$(\PTK,\ek) \sample \IDgrant(\crs,\sk,\utk,\regcred,\epoch)$ :] The
 authorisation algorithm, run interactively between a user and an auditor on
 input public parameters $\crs$, signing key $\sk$, tracing key $\utk$,
-registration credential $\regcred$, and epoch $\epoch$, outputs the user's certified public tracing key
+registration credential $\regcred$, and epoch $\epoch$, outputs the user's
+certified public tracing key
 $\PTK$ and the epoch tracing key $\ek$ to the auditor. Only $\ek$ depends on
 $\epoch$, so an auditor authorised for several epochs of the same user receives
 $\PTK$ once.
@@ -42,7 +43,8 @@ $\PTK$ once.
   \item[$\tx \sample \IDsubmit(\crs,\sk,\utk,\regcred,\epoch,\payload)$ :] The
 submission algorithm, on input public parameters $\crs$, signing key $\sk$,
 tracing key $\utk$, registration credential $\regcred$, epoch $\epoch$, and
-transaction payload $\payload$, outputs transaction $\tx$, which the user sends to the ledger
+transaction payload $\payload$, outputs transaction $\tx$, which the user sends
+to the ledger
 operator.
 
   \item[$\{0,1\} \leftarrow \algo{Verify}(\crs,\state,\tx)$ :] The validation
@@ -92,22 +94,22 @@ an epoch for which they have already granted a permission.
 \paragraph{Security model.} We work in the standalone model with sequential
 composition rather than the universal composability framework. Let
 $\textsc{Exec}_{\Pi,\adv}(\secparam,\mathcal{Z})$ denote the joint output of the
-honest parties and $\adv$ in a real execution of $\Pi$ with inputs supplied by
-environment $\mathcal{Z}$, and let
+honest parties and $\adv$ in a real execution of $\Pi$, on inputs supplied by an
+environment $\mathcal{Z}$. Let
 $\textsc{Exec}_{\idfu{\algo{trace}},\simu}(\secparam,\mathcal{Z})$ denote the
-joint output of the honest parties and $\simu$ interacting with
-$\idfu{\algo{trace}}$ in the ideal world with the same environment. We say that
-$\Pi$ securely realises $\idfu{\algo{trace}}$ if for every PPT adversary $\adv$
-there exists a PPT simulator $\simu$ such that for every PPT environment
-$\mathcal{Z}$ the two distributions are computationally indistinguishable. The
-distinction from universal composability matters because our simulator extracts
-witnesses by rewinding the adversary,
+same for the ideal world, where the honest parties and $\simu$ interact with
+$\idfu{\algo{trace}}$ under that same environment. We say that
+$\Pi$ securely realises $\idfu{\algo{trace}}$ if the following holds: for every
+PPT adversary $\adv$ there is a PPT simulator $\simu$ whose ideal-world output
+no PPT environment $\mathcal{Z}$ can tell from the real one.
+
+The distinction from universal composability matters, because our simulator
+extracts witnesses by rewinding the adversary,
 via~\Cref{prot:txid-tag-sigma,prot:txid-tx-nizk} and the forking lemma, which is
-sound in the standalone setting but not in the UC setting. Straight-line
-extraction, and with it UC security, can be recovered by applying the Fischlin
-transform to both sigma protocols, or by having the prover verifiably encrypt
-its witness under a key in the CRS, at a cost in proof size that we do not pay
-here.
+sound in the standalone setting but not in the UC one. Straight-line extraction,
+and with it UC security, can be recovered two ways: apply the Fischlin transform
+to both sigma protocols, or have the prover verifiably encrypt its witness under
+a key in the CRS. Both cost proof size, and we do not pay it here.
 
 $\idfu{\algo{trace}}$ receives inputs from system participants and $\simu$,
 computes the corresponding outputs, and delivers them to the authorised parties.
@@ -191,7 +193,7 @@ else $\mathsf{origin} \leftarrow \varnothing$.
 
 	  \item Send $(\IDsubmit, \payload, \epoch, \mathsf{origin})$ to
 $\simu$, and wait for the go-ahead. (The ledger is public, so $\simu$ always
-learns the payload; if the user is corrupt, $\simu$ additionally learns the
+learns the payload. If the user is corrupt, $\simu$ additionally learns the
 origin of the transaction.)
 
 	  \item Set $\txns[(\user,\epoch_{\mathsf{cur}})] \leftarrow

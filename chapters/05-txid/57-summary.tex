@@ -24,9 +24,25 @@ capturing anonymity, non-repudiation, and permission expiration, and give an
 abstract construction from signatures, commitments, pseudorandom functions,
 one-way functions, and zero-knowledge proofs.
 
-We instantiate the construction concretely in pairing-based groups with a
-transparent setup, in which every group generator is derived by hash-to-curve
-from a public seed and no party, including the registration authority, knows a
-discrete logarithm relation among them. The BBS+ signature scheme lets the
-registration authority certify users' keys without ever learning their tracing
-key.
+We instantiate the construction in two ways. The algebraic instantiation works
+in pairing-based groups with a transparent setup, in which every group generator
+is derived by hash-to-curve from a public seed and no party, including the
+registration authority, knows a discrete logarithm relation among them. The BBS+
+signature scheme lets the registration authority certify users' keys without
+ever learning their tracing key. The hash based instantiation takes both
+pseudorandom functions to be hash functions and discharges the two PRF relations
+with a general purpose zk-SNARK. That shrinks a transaction proof to 192 bytes
+and drops the tracing-specific hardness assumptions. It costs a trusted setup
+per relation, and a markedly slower prover.
+
+We implement and benchmark both. At $\ell = 8$, so up to 256 transactions per
+user per epoch, the algebraic instantiation proves a traceable transaction in
+17.5ms and verifies it in 11.4ms over BLS12-381. The hash based instantiation
+reverses the balance, at 34.7ms to prove and 6.1ms to verify, with a proof of
+192 bytes. Tracing a user over one epoch costs a fixed 0.31s single-threaded, or
+58ms across eight cores, whatever the size of the ledger. Against Hyperledger
+Idemix on the same machine, the hash based instantiation verifies faster than
+Idemix does with its audit pseudonyms enabled, and the algebraic one stays
+within a small factor of it while needing no trusted setup. The two approaches
+to recovering a user's transactions cost the same at roughly 750 ledger entries
+per epoch, beyond which the gap grows linearly.

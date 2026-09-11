@@ -2,8 +2,8 @@
 
 %%%% proof 1 - the generic construction is secure (Theorem 1)
 
-\subsection{Proof
-of~\Cref{thm:agg-creds-construction-security}}\label{sec:agg-creds-proof-1}
+\subsection{Proof of \texorpdfstring{\Cref{thm:agg-creds-construction-security}}{the
+black box construction theorem}}\label{sec:agg-creds-proof-1}
 
 In the following, we show that the view of a real world adversary $\adv$ during
 an execution of $\Pi$ is indistinguishable from the view of an ideal world
@@ -91,8 +91,8 @@ request exactly once per user, matching the first branch, and for a dishonest
 issuer, $\idfu{\AAC}'$ accepts only when $\simu$ does, when the issuer produced
 a genuinely valid aggregate signature.  So $\idfu{\AAC}'$'s output matches
 $\Pi$'s in both cases, and this game is indistinguishable from Game 3 as long as
-$\simu$ does not abort.  Since $\user$ is honest, she always registers before
-requesting credentials, so the abort event never occurs.
+$\simu$ does not abort.  Since $\user$ is honest, they always register
+before requesting credentials, so the abort event never occurs.
 
   \paragraph{Game 5.} As Game 4, except $\idfu{\AAC}'$ executes aggregate
 requests from honest users following the description of $\idfu{\AAC}$. Since
@@ -139,7 +139,8 @@ corrupt user $\user$ sends, in the real world, to an honest issuer $\issuer{i}$
 (simulated by $\simu$), $\simu$ (acting as $\user$) sends $(\AACissue, \att{i},
 \atv{i})$ to $\idfu{\AAC}'$, and stores entry $\langle \user, \Tag, \att{i},
 \atv{i}, \signature_i\rangle$ on success.  $\idfu{\AAC}'$ issues the credential
-exactly when $\user$ is registered and this is her first request for $\att{i}$,
+exactly when $\user$ is registered and this is their first request for
+$\att{i}$,
 and the simulated $\issuer{i}$ returns $\signature_i \leftarrow
 \ATSsign(\isk{i}, \Tag, \atv{i})$ under the same conditions, so their outputs
 are indistinguishable.
@@ -265,7 +266,8 @@ of~\Cref{thm:agg-creds-construction-security}.
 
 %%%% proof 2 - tag based agg sigs are secure (Theorem 2)
 
-\subsection{Proof of~\Cref{thm:agg-creds-thm-1}}\label{sec:agg-creds-proof-2}
+\subsection{Proof of \texorpdfstring{\Cref{thm:agg-creds-thm-1}}{the tag
+based aggregate signature theorem}}\label{sec:agg-creds-proof-2}
 
 Let $\pk = \{\pk_1, ..., \pk_n\}$ be the set of challenge public keys from the
 existential unforgeability under tag based aggregation experiment.  Assume there
@@ -575,7 +577,8 @@ under tag based aggregation.
 
 %%%% proof of Theorem 3 - the concrete instantiation, corollary of Theorem 1
 
-\subsection{Proof of~\Cref{thm:agg-creds-thm-2}}\label{sec:agg-creds-proof-3}
+\subsection{Proof of \texorpdfstring{\Cref{thm:agg-creds-thm-2}}{the
+aggregate anonymous credentials theorem}}\label{sec:agg-creds-proof-3}
 
 The instantiation is an instance of the abstract construction that sets $\DS$ to
 the AGHO structure preserving signature scheme, $\ATS$ to our tag based
@@ -609,8 +612,8 @@ in the random oracle model.
 
 %%% proof 4 - extractability and simulatability of the sigma protocol proof
 
-\subsection{Proof of
-\Cref{lem:agg-creds-sigma}}\label{sec:agg-creds-proof-lemma}
+\subsection{Proof of \texorpdfstring{\Cref{lem:agg-creds-sigma}}{the sigma
+protocol lemma}}\label{sec:agg-creds-proof-lemma}
 
 \begin{proof}
 

@@ -51,8 +51,8 @@ Withdrawal consists of local computation on the phone, an NFC exchange with the
 card to obtain $s_0$ and $\com_0$, and a single HTTPS call to the intermediary,
 which contacts the central bank on the user's behalf.
 Figure
-% TODO
-gives the message sequence.
+%TODO
+ gives the message sequence.
 
 A payment is preceded by an out of band negotiation of its terms. The payee
 displays a QR code carrying the payment terms, a BLE service identifier, and the
@@ -61,14 +61,14 @@ Notify characteristic for data sent to the payer and a Write without response
 characteristic for data received from them. The payer scans the code, completes
 the exchange and confirms the terms, after which every message is encrypted and
 CBOR encoded. Figure 
-% TODO
+%TODO 
 gives the message sequence for the payment itself.
 
 \paragraph{Interrupted payments.} A payment that stops part way leaves the two
 wallets in one of two states, and neither loses value. If the payer's card has
 signed but the payee never received the payment, the card remains locked to the
 destination it signed, and the payer can retry against that same destination
-until it succeeds; the token is unspendable elsewhere in the meantime, and is
+until it succeeds. The token is unspendable elsewhere in the meantime, and is
 recovered by completing the payment rather than by any repair step. If the payee
 stored the token but the acknowledgement back to the payer was lost, the payer's
 card still holds $\com_i$ and has not deleted it, but it will sign only the
@@ -81,7 +81,7 @@ resolution is a retry over NFC or BLE.
 We benchmark on a Samsung Galaxy A34 running Android 14 and an iPhone 13 mini
 running iOS 17.6.1, both using a cryptographic library built with Go 1.21.8.
 The scheme is instantiated over the BLS12-381 pairing system, at roughly $128$
-bits of security; the construction relies only on the bilinearity of the
+bits of security. The construction relies only on the bilinearity of the
 pairing, so other pairing systems would serve. The secure element is an NXP 1ID
 white plastic card with a Smart MX D600 chip offering $400\,\mathrm{KiB}$ of
 available memory, running JCOP 4.5 with NXP's JCOPx extensions at version 1.1.4,

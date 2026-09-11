@@ -7,19 +7,19 @@ contributions are clearer when explained in context.
 We use the term transaction system to broadly capture all systems that involve
 moving value. We describe the systems as if they handle just one type of
 currency, but extensions to labelled assets are generally simple. Transaction
-systems in this chapter must satisfy three properties: balance, meaning that no
-money can be created by transactions; theft prevention, meaning that no user of
-the system can spend money belonging to another; and privacy, which we define
-formally in~\Cref{sec:txid-definitions} and which is an intrinsic property of
+systems in this chapter must satisfy three properties. Balance means that no
+money can be created by transactions. Theft prevention means that no user of the
+system can spend money belonging to another. Privacy we define formally
+in~\Cref{sec:txid-definitions}, and it is an intrinsic property of
 the transaction systems we are working with.
 
 The mechanism we give is agnostic to how the first two properties are achieved.
-It constrains only the tag attached to a transaction, never its contents, so it
+It constrains only the tag attached to a transaction, never its contents. So it
 composes with any transaction system that already provides balance and theft
-prevention: the confidential payload of a transaction in our scheme is exactly
-the transaction of the underlying system, carried through unchanged. What we add
-is a way for a designated auditor to recover which of those payloads belong to a
-given user, and only during a window that the user has agreed to.
+prevention. The confidential payload of a transaction in our scheme is just the
+transaction of the underlying system, carried through untouched. What we add is
+a way for a designated auditor to recover which of those payloads belong to a
+given user, and only during a window the user has agreed to.
 
 Confidentiality of wealth at rest is a trivial problem for cryptography, since
 it can be solved by encrypting the value. Privacy of money in motion is the open
@@ -146,7 +146,7 @@ $O(|L|)$ tag matches & no & no \\
 no \\
     %
     \cite{CCS:WKDC22,EPRINT:ACDDET19} & policy enforcement & not supported & yes
-& --- \\
+& n/a \\
     %
     \midrule
     %
@@ -163,21 +163,26 @@ transaction carries an index drawn from a bounded, epoch-local space $[0,\Max)$,
 and the only constraint is that an index is not reused within an epoch. Order is
 irrelevant, so a user may partition the space among concurrent workers and
 submit transactions in parallel and in any order, which is what the sequential
-counter of prior work forbids. The design gives users fine-grained control
-through epoch-bound tracing permissions: these let an auditor identify every
-transaction linked to a specific user within a predefined time window, and
-automatically become invalid once that epoch expires, requiring a fresh
-permission to be issued for any subsequent one. We formalise tracing as an ideal
+counter of prior work forbids. Users keep fine-grained control through
+epoch-bound tracing permissions. A permission lets an auditor identify every
+transaction a specific user made within one window, and nothing outside it. It
+expires with the epoch, and tracing the next one needs a fresh grant. We
+formalise tracing as an ideal
 functionality capturing anonymity, non-repudiation, and permission expiration,
 give a black-box construction from signatures, commitments, pseudorandom
 functions, one-way functions, and zero-knowledge proofs, and instantiate it
-concretely in pairing-based groups with a transparent setup, using the BBS+
-signature scheme to let the registration authority certify a user's keys without
-ever learning their tracing key.
+concretely in two ways. The first works in pairing-based groups with algebraic
+pseudorandom functions and tailored sigma protocols. Its setup is transparent,
+with no party sampling any group generator, and the BBS+ signature scheme lets
+the registration authority certify a user's keys without ever learning their
+tracing key. The second takes both pseudorandom functions to be hash functions
+and proves the two corresponding relations with a general purpose zk-SNARK. That
+buys constant-size transaction proofs and faster verification, and pays for them
+with a trusted setup and a slower prover.
 
 \paragraph{Layout.} \Cref{sec:txid-definitions} gives the syntax of a tracing
 scheme and formalises its security as an ideal functionality.
 \Cref{sec:txid-construction} gives a construction from generic building blocks.
-\Cref{sec:txid-instantiation} gives a concrete instantiation in pairing-based
-groups, proved secure in \Cref{sec:txid-security}.  \Cref{sec:txid-evaluation}
-evaluates the concrete instantiation, and \Cref{sec:txid-summary} concludes.
+\Cref{sec:txid-instantiation} gives the two concrete instantiations, proved
+secure in \Cref{sec:txid-security}.  \Cref{sec:txid-evaluation} evaluates both,
+and \Cref{sec:txid-summary} concludes.

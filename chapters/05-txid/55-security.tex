@@ -1,6 +1,7 @@
 \section{Security}\label{sec:txid-security}
 
-\subsection{Proof of~\Cref{thm:txid-bb}}\label{sec:txid-bb-sec}
+\subsection{Proof of \texorpdfstring{\Cref{thm:txid-bb}}{the black box
+construction theorem}}\label{sec:txid-bb-sec}
 
 We show that the view of a real world adversary $\adv$ during an execution of
 $\Pi$ is indistinguishable from the view of an ideal world simulator $\simu$
@@ -22,11 +23,11 @@ computationally indistinguishable from random for any PPT adversary. It is also
 binding, which the extraction step of (P4) relies on.
 
   \item[(P3)] $\FE$ and $\FT$ are pseudorandom functions, and remain so against
-a distinguisher holding the user's public tracing key $\PTK$. This is the
-requirement of~\Cref{sec:txid-construction}: $\PTK$ is a public parameter of
-$\FT$ rather than key material, so nothing it carries need be kept secret, and
-because it is fixed for the lifetime of the user it is deliberately kept out of
-the output of $\FE$. In the instantiation the two statements are
+a distinguisher holding the user's public tracing key $\PTK$. This is what
+\Cref{sec:txid-construction} asks for. $\PTK$ is a public parameter of $\FT$
+rather than key material, so nothing it carries need be kept secret, and because
+it is fixed for the lifetime of the user it is kept out of the output of $\FE$
+on purpose. In the instantiation the two statements are
 \Cref{lem:txid-fe-prf,lem:txid-ft-prf} respectively.
 
   \item[(P4)] The proofs and signatures of knowledge for relations $\rel_4$
@@ -34,8 +35,8 @@ through $\rel_7$ are simulation extractable in the random oracle model: a valid
 witness can be extracted from any accepted proof, and simulated proofs are
 indistinguishable from real ones. Extraction proceeds by rewinding via the
 forking lemma, which is why the security model of~\Cref{sec:txid-definitions} is
-the standalone one rather than universal composability; see the discussion there
-for how straight-line extraction would be obtained instead.
+the standalone one rather than universal composability. The discussion there
+sets out how straight-line extraction would be obtained instead.
 
   \item[(P5)] Honest users and honest auditors communicate over a secure
 (confidential) channel.
@@ -129,9 +130,9 @@ submission using $\idfu{\algo{trace}}$'s output on $\IDsubmit$ requests from
 honest users.
 
   For each honest user's $\IDsubmit$ call in epoch $\epoch$, $\simu$ checks
-whether a corrupt auditor holds a tracing permission that can trace the
-transaction back to its origin, by issuing $\IDidentify$ queries on behalf of
-every corrupt auditor with a permission for that user until it finds a match:
+whether any corrupt auditor can trace the transaction back to its origin. It
+does this by issuing $\IDidentify$ queries on behalf of every corrupt auditor
+holding a permission for that user, until it finds a match:
 
   \begin{enumerate}
 
@@ -164,11 +165,14 @@ the confidential payload to an arbitrary ciphertext, and instead of computing
 the commitment as $\com = \ComCommit(\ck, \utk, \openinfo)$ and the tag as
 $\Tag_\gamma = \FT(\PTK,\ek,\gamma)$, samples uniformly at random commitment
 $\com^{\star}$ and tag $\Tag_{\gamma}^\star$ and simulates both corresponding
-proofs. Pseudorandomness of $\FT$ is exactly what licenses this: the tags of an
-epoch are pseudorandom to an adversary holding $\PTK$ but not $\ek$, which is
-the position of every corrupt auditor here. So by (P2), (P3), and (P4), this is
-indistinguishable from submitting transactions in an execution of
-$\Pi$.
+proofs. After Game 4 the epoch keys released to corrupt auditors are uniform and
+independent across epochs, so the keys released for preceding and succeeding
+epochs carry no information about the key in use here, and $\adv$ therefore
+does not hold it. Pseudorandomness of $\FT$ licenses the substitution:
+the tags of an epoch are pseudorandom to an adversary holding $\PTK$ but not
+$\ek$, which is the position of every corrupt auditor here. So by (P2), (P3),
+and (P4), this is indistinguishable from submitting transactions in an execution
+of $\Pi$.
 
     \item[A corrupt auditor holds a valid tracing permission for the honest
 user.] $\simu$ obtains pair $(\user, \algo{TX})$, where $\user$ identifies the
@@ -176,8 +180,8 @@ honest user and $\algo{TX}$ consists of the payload that $\user$ sent with their
 $\IDsubmit$ query. $\simu$ retrieves tuple $(\sk, \utk,\signature) \leftarrow
 \regsimu[\user]$ and the substituted epoch key $\ek \leftarrow
 \permsimu[(\auditor,\user,\epoch)]$, places that payload in the transaction,
-computes the tag as $\FT(\PTK_\user,\ek,\gamma)$ so that the corrupt auditor's tracing
-succeeds, and simulates the rest of the transaction as in Game 4.
+computes the tag as $\FT(\PTK_\user,\ek,\gamma)$ so that the corrupt auditor's
+tracing succeeds, and simulates the rest of the transaction as in Game 4.
 
   \end{description}
 
@@ -233,7 +237,7 @@ only if it carries a valid tag $\Tag_{\gamma}$, meaning the proof for relation
 $\rel_6$ and the proof for relation $\rel_7$ are both valid. By (P4) we extract
 a witness from each. From $\rel_6$ we obtain a credential $\signature$ on
 $(\G(\sk), \G'(\utk))$ verifying under~\Cref{eq:rel6}, together with an opening
-of $\com$ to $\utk$; by (P1) the credential was issued by the registration
+of $\com$ to $\utk$. By (P1) the credential was issued by the registration
 authority, so $\utk$ is the tracing key of a registered user, and by the binding
 of $\com$ (P2) it is the same $\utk$ that $\rel_7$ speaks about. From $\rel_7$
 we obtain $\Tag_{\gamma} = \FT(\PTK, \ek, \gamma)$ with $\PTK = \G'(\utk)$, $\ek
@@ -253,7 +257,8 @@ of~\Cref{thm:txid-bb}.
 
 \end{proof}
 
-\subsection{Proof of~\Cref{lem:txid-fe-prf}}
+\subsection{Proof of \texorpdfstring{\Cref{lem:txid-fe-prf}}{the
+pseudorandomness lemma for the epoch function}}
 
 We show that no polynomial time adversary can distinguish $\epoch \mapsto
 \HE(\epoch)^{\utk'}$ from a random function with non-negligible advantage.
@@ -326,12 +331,14 @@ random. We then have the following advantage:
   The additive term is the event $ab = z$ isolated above, on which the
 programmed pairs stop being uniform. Nothing in the bound depends on the number
 of random oracle queries, since a fresh pair $(r_i, t_i)$ is drawn for each new
-epoch and reused thereafter, so no two epochs can collide on a programmed value
+epoch and reused from then on, so no two epochs can collide on a programmed
+value
 of $\HE$.
 
 \end{proof}
 
-\subsection{Proof of~\Cref{lem:txid-ft-prf}}
+\subsection{Proof of \texorpdfstring{\Cref{lem:txid-ft-prf}}{the
+pseudorandomness lemma for the tag function}}
 
 \begin{proof}
 
@@ -374,14 +381,14 @@ $\PTK$, and it is $\PTK$ alone that the epochs share. The two lemmas therefore
 compose without a hybrid over epochs, which is what the $\{W_\gamma\}$ being
 public parameters rather than a component of $\ek$ buys us.
 
-  We also note that the group elements $\{W_\gamma\}$ do not compromise $\utk''$
-itself: recovering $\utk''$ from them would break the $q$-SDH assumption
-(\Cref{asm:qsdh-bbs}), which we already assume for the BBS+ signature scheme. Since
-$\utk''$ is fixed once at registration and never leaves the user, and the group
-elements $\{W_\gamma\}$ given to an auditor are certified public parameters
-identical in every epoch, nothing in a grant links one epoch to another beyond
-what $\ek$ itself discloses to auditors already holding permission for that
-epoch.
+  The group elements $\{W_\gamma\}$ do not compromise $\utk''$ itself.
+Recovering
+$\utk''$ from them would break the $q$-SDH assumption (\Cref{asm:qsdh-bbs}),
+which we already assume for the BBS+ signature scheme. And $\utk''$ is fixed
+once at registration and never leaves the user, while the $\{W_\gamma\}$ given
+to an auditor are certified public parameters, identical in every epoch. So
+nothing in a grant links one epoch to another beyond what $\ek$ itself discloses
+to auditors who already hold permission for that epoch.
 
 \end{proof}
 
@@ -531,12 +538,12 @@ the two tuples below:
       This is exactly a DDH instance in $\group{T}$, so hardness of DDH in
 $\group{T}$ makes the change undetectable, and it does so whether or not the
 distinguisher holds $\ek$. An authorised auditor does hold it, so this matters.
-This is where withholding $\ek^{\,s}$ pays: were the $\group{1}$ element
-published, the simulator would have to sample it in $\group{1}$ and the argument
-would need DDH in $\group{1}$ in the presence of $\ek$, a strictly stronger
-requirement, since $\Pi$ is recoverable from $\ek^{\,s}$ by one pairing but not
-conversely. Note that $X$ needs no separate assumption, since it is a function
-of public data and of the simulator's own $s$.
+This is where withholding $\ek^{\,s}$ pays. Were the $\group{1}$ element
+published, the simulator would have to sample it in $\group{1}$, and the
+argument would need DDH in $\group{1}$ in the presence of $\ek$. That is
+strictly stronger, since $\Pi$ is recoverable from $\ek^{\,s}$ by one pairing
+but not the other way round. $X$ needs no separate assumption at all, being a
+function of public data and of the simulator's own $s$.
 
     \item[Simulating the sigma protocol.] With $(U, \Pi, X, \com_\gamma)$ fixed,
 $\simu$ runs the standard honest verifier simulator. It samples the challenge
@@ -633,7 +640,8 @@ $\vec{\pi}$ and solving each verification equation for $t_1$, $t_2$, and $t_3$.
 
 \end{proof}
 
-\subsection{Proof of~\Cref{thm:inst}}\label{sec:txid-inst-sec}
+\subsection{Proof of \texorpdfstring{\Cref{thm:inst}}{the instantiation
+theorem}}\label{sec:txid-inst-sec}
 
 \Cref{thm:txid-bb} reduces security of the scheme to five conditions on its
 building blocks. It remains to discharge each of them for the instantiation
@@ -644,10 +652,11 @@ of~\Cref{sec:txid-instantiation}, which the preceding results do as follows.
 \begin{description}
 
   \item[(P1).] $\DS$ is the BBS+ signature scheme of~\Cref{prim:bbs}, which is
-existentially unforgeable under the $q$-SDH assumption (\Cref{asm:qsdh-bbs}). The
+existentially unforgeable under the $q$-SDH assumption (\Cref{asm:qsdh-bbs}).
+The
 variant used signs group elements rather than scalars, so unforgeability
 additionally requires that the signer only sign elements accompanied by a proof
-of knowledge of their representation; $\algoproof_4$ in $\IDregister$ supplies
+of knowledge of their representation. $\algoproof_4$ in $\IDregister$ supplies
 this.
 
   \item[(P2).] $\Com$ is the Pedersen commitment scheme of~\Cref{prim:pedersen},
@@ -658,19 +667,20 @@ $(\gen_2,\gen_3,\gen_4)$ by hash-to-curve from a public seed rather than letting
 any party sample them.
 
   \item[(P3).] Pseudorandomness of $\FE$ is~\Cref{lem:txid-fe-prf}, under DDH in
-$\group{1}$ with $\HE$ modelled as a random oracle; pseudorandomness of $\FT$
+$\group{1}$ with $\HE$ modelled as a random oracle. Pseudorandomness of $\FT$
 is~\Cref{lem:txid-ft-prf}, under $q$-mDBDHI with $q = \Max$. Both statements
 hand the distinguisher the whole of $\PTK$, including $\{W_\gamma\}$, which is
 what Game 4 and Game 5 need, since every corrupt auditor holds it. The two
 lemmas compose without a hybrid over epochs, and the simulator of Game 4
 reproduces the real distribution by reusing one $\PTK_\user$ per user.
 
-  \item[(P4).] The proof systems are the sigma protocols
+  \item[(P4).] Four proof systems are in play. First, the sigma protocols
 of~\Cref{prot:txid-tag-sigma,prot:txid-tx-nizk}, Fiat-Shamir transformed with
-$\hash$ modelled as a random oracle, the Schnorr proof of representation used
-for $\rel_4$, the batched proof for the $\{W_\gamma\}$ clause of $\rel_5$, and
-the Bulletproofs range argument~\cite{SP:BBBPWM18}, whose soundness rests on
-discrete logarithm in $\group{1}$. That the rewritten relations prove what the
+$\hash$ modelled as a random oracle. Then the Schnorr proof of representation
+used for $\rel_4$, and the batched proof for the $\{W_\gamma\}$ clause of
+$\rel_5$. Last, the Bulletproofs range argument~\cite{SP:BBBPWM18}, whose
+soundness rests on discrete logarithm in $\group{1}$. That the rewritten
+relations prove what the
 original ones state is~\Cref{sec:rel7-equiv,sec:rel6-equiv}, and extraction is
 by rewinding, which is sound in the standalone model
 of~\Cref{sec:txid-definitions}.

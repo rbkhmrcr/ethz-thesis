@@ -13,7 +13,7 @@ its tag was correctly generated.
 For tracing, the user discloses their epoch tracing key to the relevant auditor,
 who locally computes every valid transaction tag for that user and epoch. This
 requires the ledger to be indexed by tag, so that the auditor pays one lookup
-per candidate tag rather than a scan; we assume throughout that the ledger
+per candidate tag rather than a scan. We assume throughout that the ledger
 operator maintains such an index, which is why tracing costs $O(\Max)$ rather
 than $O(|L|)$ for a ledger of $|L|$ transactions.
 
@@ -23,23 +23,26 @@ and tracing capabilities granted for prior epochs expire automatically.
 \paragraph{The index is unordered.} The index $\gamma \in [0,\Max)$ is the
 counterpart of the monotonically increasing counter used by prior tag-based
 schemes~\cite{CCS:KiaKohSar22,CANS:SarKiaKoh24}, and the difference between the
-two is the point of the construction. Those schemes require the counter to
-increase by exactly one per transaction and to leave no gaps, because the
-auditor recovers transactions by walking the counter upwards from zero and
-stopping at the first miss. A user must therefore serialise: the $(i+1)$-th
-transaction cannot be built until the $i$-th has been fixed. Here the auditor
+two is the point of the construction. Those schemes need the counter to increase
+by exactly one per transaction, with no gaps. Their auditor walks the counter
+upwards from zero and stops at the first miss, so a gap would hide everything
+after it. That forces the user to serialise: the $(i+1)$-th transaction cannot
+be built until the $i$-th is fixed. Here the auditor
 evaluates $\FT$ at every $\gamma \in [0,\Max)$ regardless, so gaps and
 out-of-order use are free. The only constraint is that a user must not reuse an
-index within an epoch, and that constraint is enforceable locally: a user may
+index within an epoch, and they can enforce that themselves. A user may
 partition $[0,\Max)$ among concurrent workers in advance, or draw indices from a
-local pool, and submit the resulting transactions in any order and in parallel.
-A user who instead samples $\gamma$ uniformly should note that collisions appear
-after roughly $\sqrt{\Max}$ transactions, and that a collision costs a rejected
-transaction rather than a security failure, so explicit allocation is
-preferable. Once a user has consumed all $\Max$ indices they must wait for the
-next epoch, so $\Max$ is a per-user, per-epoch rate limit, and the choice of
-$\Max$ trades that limit against the cost of tracing and the size of a first
-grant.
+local pool. Either way the resulting transactions can be submitted in any order,
+and in parallel.
+
+Sampling $\gamma$ uniformly instead is tempting but worse. Collisions start
+appearing after roughly $\sqrt{\Max}$ transactions. A collision costs a rejected
+transaction rather than a security failure, so nothing breaks, but explicit
+allocation avoids the problem for free.
+
+Once a user has consumed all $\Max$ indices they wait for the next epoch. So
+$\Max$ is a per-user, per-epoch rate limit, and choosing it trades that limit
+against the cost of tracing and the size of a first grant.
 
 \paragraph{Building blocks.} The protocol is built from five cryptographic
 primitives, each used abstractly. The registration authority certifies users'
@@ -57,13 +60,14 @@ zero-knowledge proofs of knowledge.
 
 Two requirements on these primitives are not generic, and the instantiation
 of~\Cref{sec:txid-instantiation} depends on both. First, $\DS$ and $\Com$ must
-be compatible, in the sense that $\DS$ supports signatures on committed values:
-the registration authority must be able to certify $\G(\sk)$ and $\G'(\utk)$
-without learning $\sk$ or $\utk$, and a user must later be able to prove in zero
-knowledge that a commitment $\com$ opens to the same $\utk$ that a credential
-certifies. Instantiating $\DS$ and $\Com$ independently would leave $\rel_6$
-below requiring a generic proof over the signature verification equation, which
-is exactly the expense the instantiation avoids. Second, $\FT$ is parameterised
+be compatible, meaning that $\DS$ supports signatures on committed values. Two
+things have to work. The registration authority must be able to certify
+$\G(\sk)$ and $\G'(\utk)$ without learning $\sk$ or $\utk$, and a user must
+later be able to prove in zero knowledge that a commitment $\com$ opens to the
+same $\utk$ a credential certifies. Pick $\DS$ and $\Com$ independently and
+$\rel_6$ below needs a generic proof over the signature verification equation,
+which is the one expense the instantiation is built to avoid. Second, $\FT$ is
+parameterised
 by the public tracing key, as described next.
 
 \paragraph{The public tracing key is a parameter of $\FT$.} The tag function
@@ -98,8 +102,7 @@ operator calls $\ck \leftarrow \ComGen(\secparam, 1)$ and produces four sets of
 public parameters, one for each relation.
 
 The first relation, $\rel_4$, lets a user prove knowledge of their long-term
-signing and tracing keys, giving instance, witness, and relation defined as
-follows:
+signing and tracing keys. Its instance, witness, and relation are as follows:
 %
 \begin{equation}
 %
@@ -134,10 +137,10 @@ $\PTK$ itself is well formed against that tracing key. In the instantiation the
 second of these is proved once, at an auditor's first grant, and the first once
 per epoch.
 %
-The third relation, $\rel_6$, lets a user prove possession of a valid
-registration credential, and consistency between the tracing key certified by
-that credential and the tracing key contained in a commitment, with instance,
-witness, and relation defined as follows:
+The third relation, $\rel_6$, does two jobs at once. It lets a user prove
+possession of a valid registration credential, and prove that the tracing key
+certified by that credential is the one inside a commitment. Its instance,
+witness, and relation are as follows:
 %
 \begin{equation}
 %
@@ -224,11 +227,11 @@ accepts the key once the credential verifies with $\DSverify$ and both proofs
 check out.
 
 The credential is sent to the auditor as issued, rather than randomised as it is
-at submission time. This is deliberate and costs nothing: a grant is addressed
-to a named auditor for a named user, so there is no identity left to hide from
-them, and an auditor who replays the credential elsewhere cannot produce the
-accompanying $\rel_4$ proof, which is bound to a fresh nonce and requires
-knowledge of $\sk$.
+at submission time. This is deliberate, and it costs nothing. A grant is
+addressed to a named auditor for a named user, so there is no identity left to
+hide from them. And an auditor who replays the credential elsewhere cannot
+produce the accompanying $\rel_4$ proof, which is bound to a fresh nonce and
+needs knowledge of $\sk$.
 
 \paragraph{Transaction submission.} During transaction submission, the user
 proves that the transaction tag was correctly generated from their tracing key,
@@ -278,6 +281,7 @@ tracing requires no state carried over from any earlier epoch.
 
 \begin{theorem}\label{thm:txid-bb} Assuming that $\DS$ satisfies existential
 unforgeability, $\FE$ and $\FT$ are pseudorandom against a distinguisher holding
-$\PTK$, $\G$ and $\G'$ are one way, and the zero-knowledge proof systems for $\rel_4$ through $\rel_7$
+$\PTK$, $\G$ and $\G'$ are one way, and the zero-knowledge proof systems for
+$\rel_4$ through $\rel_7$
 are zero knowledge and simulation extractable, the protocol described above
 securely realises $\idfu{\algo{trace}}$.  \end{theorem}

@@ -3,8 +3,8 @@
 %%%% proof 1 - the generic construction securely realises the ideal
 %functionality
 
-\subsection{Proof
-of~\Cref{thm:offline-construction-security}}\label{sec:offline-proof-1}
+\subsection{Proof of \texorpdfstring{\Cref{thm:offline-construction-security}}{the
+construction security theorem}}\label{sec:offline-proof-1}
 
 Let $\algo{prot}$ denote the protocol of Protocol~\ref{prot:offline}. We write
 $\algo{prot}$ rather than $\Pi$ for the protocol, as $\Pi$ already denotes the
@@ -58,8 +58,8 @@ $\idfu{\algo{op}}$ uses, and $\mathbb{C}$ for the inverse direction, so that it
 can translate between the transcripts $\adv$ sees and the state
 $\idfu{\algo{op}}$ holds. For honest parties $\simu$ never has a witness to
 prove, so every proof it produces is simulated and every commitment and audit
-ciphertext it produces is random; this is what makes its transcripts independent
-of the identities and token identifiers it does not learn. For corrupt parties
+ciphertext it produces is random. This is what makes its transcripts
+independent of the identities and token identifiers it does not learn. For corrupt parties
 $\simu$ has no witness either, so it extracts one from the proofs $\adv$
 produces: from $\Pi$ at withdrawal, in order to learn the randomness that fixes
 the token identifier and so continue the simulation, and from $\Sigma$,
@@ -105,7 +105,7 @@ then produces a simulated withdrawal transcript. In it, the request commitment
 $C$ is a uniformly random commitment, the two blind signing ciphertexts
 $(\hat{\ciph}_0, \hat{\ciph}_2)$ are random ciphertexts under a freshly
 generated key, and $\Pi$ is a simulated proof. Note that these ciphertexts are
-under the withdrawer's own key and carry the hidden messages to the signer; they
+under the withdrawer's own key and carry the hidden messages to the signer. They
 are not the audit ciphertexts of a payment, which are under $\pk_\auditor$ and
 appear first in Game 8. By (P1), (P2), and (P5), this transcript is
 computationally indistinguishable from one produced by $\algo{prot}$.
@@ -316,8 +316,8 @@ completes the proof.
 
 %%%% proof 2 - the concrete instantiation, corollary of Theorem 1
 
-\subsection{Proof
-of~\Cref{thm:offline-instantiation-security}}\label{sec:offline-proof-2}
+\subsection{Proof of \texorpdfstring{\Cref{thm:offline-instantiation-security}}{the
+instantiation security theorem}}\label{sec:offline-proof-2}
 
 The instantiation of~\Cref{sec:offline-full-inst} is an instance of the
 construction that sets the commitment scheme to Pedersen commitments in

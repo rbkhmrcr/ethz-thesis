@@ -1,14 +1,21 @@
 \section{Instantiation}\label{sec:txid-instantiation}
 
-We describe a concrete instantiation of the black-box construction in pairing
-based groups using algebraic PRFs and tailored sigma protocols, yielding a
-transparent setup. Three of the four general relations involve pairing equations
+We give two concrete instantiations of the black-box construction. The first,
+which occupies most of this section, works in pairing based groups using
+algebraic PRFs and tailored sigma protocols, and yields a transparent setup. The
+second, in~\Cref{sec:txid-hash-instantiation}, takes both pseudorandom functions
+to be ordinary hash functions and discharges the two PRF relations with a
+general purpose zk-SNARK. The two make opposite trades, and we return to the
+comparison once the first is in place.
+
+In the algebraic instantiation, three of the four general relations involve
+pairing equations
 that would result in computationally expensive proofs. We instead rewrite the
 equations to require only proofs of statements involving discrete logarithms, so
 that they can be handled by efficient sigma protocols. In each case the verifier
 still evaluates one or two pairings itself, on public data.  What the rewriting
 removes is the need to prove anything about a pairing.  $\rel_6$ and $\rel_7$
-are rewritten as $\rel_6'$ and $\rel_7'$ below; the $\group{2}$ clause of
+are rewritten as $\rel_6'$ and $\rel_7'$ below. The $\group{2}$ clause of
 $\rel_5$ is rearranged in place and then batched.
 
 The setup is transparent in the strong sense that no party, including the
@@ -68,12 +75,13 @@ $\utk'$. The epoch tracing key is then the single group element given below:
 %
 Every component of the output varies with the epoch, so $\FE$ is a pseudorandom
 function in the ordinary sense of~\Cref{sec:prelims-prfs}, which
-is~\Cref{lem:txid-fe-prf}. The group elements $\{W_\gamma\}$ that a tag
-evaluation also needs are static across epochs and sit in $\PTK$ rather than in
-$\ek$, which is the arrangement~\Cref{sec:txid-construction} asks for: had they
-been emitted by $\FE$ they would repeat in every epoch, and $\FE$ could not have
-been a pseudorandom function at all. Placing them in $\PTK$ costs nothing, since
-$\PTK$ is certified at registration and already travels with the grant message.
+is~\Cref{lem:txid-fe-prf}. A tag evaluation also needs the group elements
+$\{W_\gamma\}$, and those are static across epochs. They sit in $\PTK$ rather
+than in $\ek$, which is the arrangement~\Cref{sec:txid-construction} asks for.
+Had $\FE$ emitted them they would repeat in every epoch, and $\FE$ could not
+have been a pseudorandom function at all. Putting them in $\PTK$ costs nothing,
+since $\PTK$ is certified at registration and already travels with the grant
+message.
 We return below to why the auditor receives them rather than $\utk''$ itself.
 
 \begin{lemma}\label{lem:txid-fe-prf}
@@ -111,11 +119,11 @@ compose directly, and no multi-instance variant or hybrid over epochs is needed.
 
 This is the decisional variant of the $q$-BDHI assumption~\cite{EC:BonBoy04b},
 with the base elements shared and the $\group{1}$ element withheld. Similar
-$q$-type assumptions are the norm for constructions of this shape: a comparable
-partially oblivious PRF built on the Dodis-Yampolskiy PRF with a secret group
-element is analysed under a strong Diffie-Hellman inversion assumption of its
-own~\cite{EC:TCRSTW22}, and it is known that pairing-based constructions of this
-type cannot have both short proofs and a reduction to a simple
+$q$-type assumptions are the norm for constructions of this shape. A comparable
+partially oblivious PRF, also built on the Dodis-Yampolskiy PRF with a secret
+group element, is analysed under a strong Diffie-Hellman inversion assumption of
+its own~\cite{EC:TCRSTW22}. Pairing-based constructions of this type are in any
+case known not to admit both short proofs and a reduction to a simple
 assumption~\cite{TCC:BHKU22}.
 
 \begin{primitivebox}{The Dodis-Yampolskiy pseudorandom function}{dy-prf}
@@ -145,11 +153,15 @@ assumption~\cite{PKC:DodYam05}.
 
 We instantiate $\FT$ by fixing $X$ to the epoch tracing key $\ek$ rather than a
 fixed public generator, and the Dodis-Yampolskiy key $k$ to $\utk''$, giving
-$\FT(\PTK, \ek, \gamma) = \PRFeval((\ggen_D,\ek), \utk'', \gamma) = \pairing(\ek,
-W_\gamma)$ for the $W_\gamma$ carried by $\PTK$. Which argument is secret differs
-between the two views, and deliberately so: the Dodis-Yampolskiy analysis keys on
+$\FT(\PTK, \ek, \gamma) = \PRFeval((\ggen_D,\ek), \utk'', \gamma) =
+\pairing(\ek,
+W_\gamma)$ for the $W_\gamma$ carried by $\PTK$. Which argument is secret
+differs
+between the two views, and deliberately so: the Dodis-Yampolskiy analysis keys
+on
 $\utk''$ and treats $\ek$ as a parameter, while~\Cref{lem:txid-ft-prf} keys on
-$\ek$ and treats $\{W_\gamma\}$, and hence $\utk''$ implicitly, as public. Note which argument is the key: $\FT$ is keyed
+$\ek$ and treats $\{W_\gamma\}$, and hence $\utk''$ implicitly, as public. Note
+which argument is the key: $\FT$ is keyed
 by $\ek$, which is exactly the range of $\FE$, while $\{W_\gamma\}$ enters as a
 public parameter.
 
@@ -175,7 +187,8 @@ component of the certified $\PTK$, they are handed to every auditor a user
 authorises, and the analysis below treats them as known to the adversary
 throughout. Two colluding auditors who compare their copies learn only that they
 were granted by the same user, which each of them already knew, since
-permissions are indexed by $(\auditor,\user,\epoch)$ and an auditor is told which
+permissions are indexed by $(\auditor,\user,\epoch)$ and an auditor is told
+which
 user it is authorised to trace. What they cannot do is combine their copies with
 a tag from an epoch for which neither holds $\ek$, and that is exactly the
 statement of~\Cref{lem:txid-ft-prf}.
@@ -269,14 +282,15 @@ them. This is exactly what lets the registration authority certify a user's keys
 below without ever seeing them~\cite{SCN:AuSusMu06,EC:TesZhu23b}.
 
 Unforgeability of this variant carries a condition that the scalar-message
-version does not. An adversary who could obtain a signature on an arbitrary
-group element could request one on $M_i' = M_i \cdot \gen_i^{\delta}$ and shift
-the certified message by a quantity it knows, so the reduction to $q$-SDH
-requires that the signer only ever signs elements accompanied by a proof of
-knowledge of their representation in the bases $\gen_i$. The registration
-protocol below supplies exactly that, in the shape of $\algoproof_4$, and
-$\rel_4$ is therefore not an optional hardening step but a precondition of the
-signature scheme's security in this setting~\cite{SCN:AuSusMu06,EC:TesZhu23b}.
+version does not. An adversary able to obtain a signature on an arbitrary group
+element could ask
+for one on $M_i' = M_i \cdot \gen_i^{\delta}$, shifting the certified message by
+a quantity it knows. The reduction to $q$-SDH therefore requires the signer to
+sign only elements that come with a proof of knowledge of their representation
+in the bases $\gen_i$. The registration protocol below supplies exactly that, in
+the shape of $\algoproof_4$. So $\rel_4$ is not optional hardening. It is a
+precondition of the signature scheme's security in this
+setting~\cite{SCN:AuSusMu06,EC:TesZhu23b}.
 
 \begin{primitivebox}{The Pedersen commitment scheme}{pedersen}
 
@@ -394,7 +408,8 @@ auditor, do:
 
 	\item The user computes $\ek \leftarrow \HE(\epoch)^{\utk'}$, and
 recalls $\{W_\gamma\}$ from $\PTK$. The auditor is sent $\{W_\gamma\}$ only the
-first time it is authorised for this user; subsequent grants carry $\ek$ alone.
+first time it is authorised for this user. Every grant after that carries $\ek$
+alone.
 
 	\item Both parties derive $t_\gamma = \hash(\{W_\gamma\},\gamma) \in
 \Zp$ and set $\widehat{W} = \prod_{\gamma=0}^{\Max-1} W_\gamma^{t_\gamma}$ and
@@ -433,7 +448,8 @@ compute $\ek =
 
 	\item Take a fresh, unused index $0 \leq \gamma < \Max$ from the user's
 local pool for this epoch, and compute $\Tag_\gamma \leftarrow
-\FT(\PTK,\ek,\gamma) = \pairing(\ek,W_\gamma)$. Indices need not be used in order, so this step
+\FT(\PTK,\ek,\gamma) = \pairing(\ek,W_\gamma)$. Indices need not be used in
+order, so this step
 requires no coordination between concurrent submissions beyond the allocation
 itself.
 
@@ -527,7 +543,7 @@ relative to the other.
 This is why Step 2 of $\IDgen$ derives the generators by hash-to-curve from a
 public seed instead of having a party sample them. Had the registration
 authority generated them, as a textbook reading of $\BBSgen$ would suggest, it
-could set $\gen_3 = \gen_2^{w}$ for known $w$ and thereafter open any $\com$ to
+could set $\gen_3 = \gen_2^{w}$ for known $w$ and then open any $\com$ to
 a tracing key of its choosing, since Pedersen binding holds only against a party
 ignorant of that relation. Since the commitment must bind precisely against the
 registration authority, the relation must be unknown to it, and hash-to-curve
@@ -547,11 +563,12 @@ key, and one that the committed key was signed by the registration authority.
 
 The elements $\{W_\gamma\}$ do not depend on the epoch. As a component of $\PTK$
 they are therefore sent once per auditor, at that auditor's first grant, and
-reused for every later epoch. Every subsequent grant to the same auditor is
-constant size: since $\widehat{W}$ and $\widehat{V}$ depend only on
-$\{W_\gamma\}$, the third verification equation of $\rel_5$ need only be checked
-at that auditor's first grant, and later grants drop $K$ and the vector,
-leaving the two $\group{1}$ equations against the same certified $T$. Formally
+reused for every later epoch. Every later grant to the same auditor is constant
+size. Since $\widehat{W}$ and
+$\widehat{V}$ depend only on $\{W_\gamma\}$, the third verification equation of
+$\rel_5$ need only be checked at that auditor's first grant. Later grants drop
+$K$ and the vector, leaving the two $\group{1}$ equations against the same
+certified $T$. Formally
 these are two relations, $\rel_5$ and its restriction $\rel_5'$ to the first two
 conjuncts, with $\inst_5$ shortened accordingly. The binding of $T$ ties both
 proofs to one pair $(\utk',\utk'')$. Nothing here is state an auditor must
@@ -632,8 +649,9 @@ index:
 %
 \end{equation*}
 %
-The randomised epoch key $\ek^{\,s}$ is itself a witness and is never published;
-only its image $\Pi \in \group{T}$ under the pairing with $\ggen_D$ is. This is
+The randomised epoch key $\ek^{\,s}$ is itself a witness and is never
+published. Only its image $\Pi \in \group{T}$ under the pairing with $\ggen_D$
+is. This is
 deliberate, and we return to it after the protocol. The commitment $\com_\gamma$
 is what carries $\gamma$ between the sigma protocol and the range argument
 below, so that the two speak about the same value. Since $\Pi =
@@ -735,15 +753,15 @@ $\Pi = \pairing(\ek^{\,s},\ggen_D)$ does, and the third verification equation
 speaks about it through $\pairing(U,\ggen_D)$, a $\group{T}$ base the verifier
 computes for itself. Publishing $\ek^{\,s}$ as a $\group{1}$ element would give
 a verifier everything $\Pi$ gives and more, since $\Pi$ is recoverable from it
-by one pairing; withholding it is what lets the zero-knowledge argument
+by one pairing. Withholding it is what lets the zero-knowledge argument
 of~\Cref{sec:rel7-equiv} rest on DDH in $\group{T}$ alone.
 
 Fourth, the two non-degeneracy checks matter. If $s = 0$ then $U$, $\Pi$, and
-$X$ all collapse to identities and the pairing equality says nothing; the check
+$X$ all collapse to identities and the pairing equality says nothing. The check
 $U \neq 1_{\group{1}}$ rules this out, since $\HE(\epoch)$ generates
 $\group{1}$ with overwhelming probability over the random oracle. And if $\utk''
 = -\gamma$ then a prover holding $\utk' = 0$ satisfies the pairing equality with
-any tag at all; the check $\Pi \neq 1_{\group{T}}$ rules this out in turn. Both
+any tag at all. The check $\Pi \neq 1_{\group{T}}$ rules this out in turn. Both
 are used in the soundness argument of~\Cref{sec:txid-security}.
 
 The range check $0 \leq \gamma < \Max$ is established using a generic
@@ -879,15 +897,95 @@ t_2\cdot(\bar{E}/d)^c, \\ \gen_1^{\theta_\sk}\cdot d^{-\theta_{r_3}}\cdot
 \end{protocolbox}
 
 
-\begin{theorem}\label{thm:inst} The instantiation presented
-in~\Cref{sec:txid-instantiation} securely realises $\idfu{\algo{trace}}$, in the
+\begin{theorem}\label{thm:inst} The algebraic instantiation presented above
+securely realises $\idfu{\algo{trace}}$, in the
 sense of the standalone model of~\Cref{sec:txid-definitions}, in the random
 oracle model for $\HE$ and $\hash$, under the Decisional Diffie-Hellman
 assumption in $\group{1}$ (for $\FE$), the $q$-mDBDHI assumption with $q = \Max$
 (for $\FT$), the Decisional Diffie-Hellman assumption in $\group{T}$ (for zero
 knowledge of the tag argument), the $q$-Strong Diffie-Hellman assumption (for
 the BBS+ signature scheme), and the discrete logarithm assumption in $\group{1}$
-(for Pedersen binding and for soundness of the Bulletproofs range argument).  \end{theorem}
+(for Pedersen binding and for soundness of the Bulletproofs range argument).
+\end{theorem}
 
 The proof is assembled in~\Cref{sec:txid-inst-sec}, from~\Cref{thm:txid-bb}
 together with the lemmas and relation equivalences of~\Cref{sec:txid-security}.
+
+\subsection{An alternative instantiation from hash based
+PRFs}\label{sec:txid-hash-instantiation}
+
+Nothing in~\Cref{sec:txid-construction} requires $\FE$ or $\FT$ to be algebraic.
+The construction asks only that both be pseudorandom against a distinguisher
+holding $\PTK$, and the work done above in rewriting $\rel_6$ and $\rel_7$ into
+sigma-provable form exists solely because we wanted to avoid a general purpose
+proof system. If we accept one, both functions can be ordinary hash functions
+and the instantiation becomes far shorter to state. We describe it here, and
+benchmark it alongside the algebraic instantiation
+in~\Cref{sec:txid-evaluation}.
+
+We use independent hash functions $\hashfs$ for Fiat-Shamir challenges, $\HE$ for
+epoch key derivation, and $\HT$ for tags, and instantiate the components as
+follows:
+%
+\begin{enumerate}
+
+  \item The one-way functions are $\G(\sk) = \gen_1^{\sk}$ and $\G'(\utk) =
+\gen_2^{\utk}$, for a tracing key $\utk \in \Zp$ that is now a single scalar
+rather than a pair. The public tracing key $\PTK = \G'(\utk)$ is one group
+element and carries nothing else.
+
+  \item The pseudorandom functions are $\FE(\utk,\epoch) = \HE(\utk,\epoch)$ and
+$\FT(\PTK,\ek,\gamma) = \HT(\ek,\gamma)$, with $\HE$ and $\HT$ modelled as
+pseudorandom functions keyed by their first argument. Note that $\FT$ ignores
+$\PTK$ entirely. This is the degenerate case of the requirement
+of~\Cref{sec:txid-construction}, where the public parameter of $\FT$ is empty.
+It is also the one thing the algebraic instantiation cannot do, since evaluating
+a tag there needs the vector $\{W_\gamma\}$, and that vector has to live
+somewhere that does not vary with the epoch.
+
+  \item Registration credentials use the BBS+ signature scheme, now certifying
+the two scalars $(\sk,\utk)$ rather than three.
+
+  \item Commitments use the Pedersen commitment scheme.
+
+  \item The proof systems for $\rel_5$ and $\rel_7$ are instantiated with
+zk-SNARKs. We use Groth16~\cite{EC:Groth16}, whose proofs are three group
+elements regardless of the circuit and whose verification is 3 pairing
+evaluations and one multi-exponentiation over the public inputs.
+
+  \item The signature of knowledge systems for $\rel_4$ and $\rel_6$ are
+instantiated with sigma protocols compiled by Fiat-Shamir under $\hashfs$, exactly
+as in the algebraic instantiation.
+
+\end{enumerate}
+
+The relations are proved as~\Cref{sec:txid-construction} states them. There is
+no $\rel_7'$, no randomised $(U,\Pi,X)$, and no separate Bulletproofs argument,
+because the range check $0 \leq \gamma < \Max$ is simply a constraint of the
+$\rel_7$ circuit. The 24KB first grant disappears with $\{W_\gamma\}$: a grant
+carries one hash output and a constant-size proof. Tracing is $\Max$ evaluations
+of $\HT$ rather than $\Max$ pairings, which is cheaper by orders of magnitude.
+
+What is given up is the setup. Groth16 needs a structured reference string per
+relation, so $\crs_5$ and $\crs_7$ come from a trusted setup, and the property
+that no party samples anything, which the algebraic instantiation goes to some
+length to obtain, is lost. The prover is also substantially slower, as
+\Cref{sec:txid-evaluation} shows. Which instantiation is preferable therefore
+depends on whether a deployment can tolerate a trusted setup, and on whether it
+is proving cost or verification cost that binds.
+
+\begin{theorem}\label{thm:hash-inst} The hash based instantiation presented
+above securely realises $\idfu{\algo{trace}}$, in the sense of the standalone
+model of~\Cref{sec:txid-definitions}, in the random oracle model for $\hashfs$,
+under the $q$-Strong Diffie-Hellman assumption (for the BBS+ signature scheme),
+the discrete logarithm assumption in $\group{1}$ (for Pedersen binding), the
+knowledge soundness and zero knowledge of Groth16, and the assumption that $\HE$
+and $\HT$ are pseudorandom functions.  \end{theorem}
+
+The proof is~\Cref{thm:txid-bb} applied directly. Conditions (P1), (P2) and (P4)
+are discharged by BBS+, Pedersen, and the two proof systems, and (P3) by the
+assumption on $\HE$ and $\HT$, which needs no argument of its own here because
+$\PTK$ carries nothing that a distinguisher could use. In particular no
+assumption specific to the tracing mechanism appears: the DDH and $q$-mDBDHI
+assumptions of~\Cref{thm:inst} were artefacts of the algebraic PRFs, not of the
+construction.
