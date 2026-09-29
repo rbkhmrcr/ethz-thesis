@@ -1,53 +1,44 @@
 \section{Summary}\label{sec:offline-summary}
 
-This chapter addresses offline retail CBDC payments. These are payments
-conducted while both payer and payee are disconnected from the network, and
-settled only when tokens are eventually deposited. The central difficulty is
-that a payee has no way to verify, in real time, that the token they are
-receiving has not already been spent elsewhere. Rather than rely on prevention
-or detection alone, we combine the two. A secure element makes double spending
-expensive and impractical to mount at scale. An efficient auditing mechanism
-ensures that, should an attack succeed, the responsible party can still be
-identified and held accountable. Because the auditor names that party, the
-double spent value is settled against them rather than absorbed by the issuer or
-borne by whoever presented the second deposit, so no honest holder loses value
-and the total in the system is unchanged.
+\begin{outline}
+  \item recap: $\OP$, transferable offline payments for a CBDC; payments anonymous
+    and unlinkable; a double spender is identified once the conflicting deposits
+    reach the central bank
+  \item three insights follow
+\end{outline}
 
-The scheme keeps the institutions that an offline payment system already has,
-and constrains what each of them learns. The central bank issues and redeems
-tokens without learning what it signs at withdrawal or which withdrawal a
-deposit corresponds to. Intermediaries learn the identity of a user only when
-that user withdraws or deposits. The registration authority enrols users once
-and plays no part in payments. The auditor recovers an identity only from a
-payment that double spends a token, and the role can be distributed via
-threshold decryption. None of these participants is removed in pursuit of
-decentralisation, and none of them is trusted with the privacy of honest users.
+\begin{outline}
+  \item (1) availability does not require removing institutions
+  \item the secure element is issued by an institution and trusted for one narrow
+    job, refusing to sign a spent token twice; the phone, fully user-controlled,
+    does the heavy computation
+  \item splitting the JPOK so the secure element's share costs about an ordinary
+    signature is what makes it run on existing hardware
+  \item same split applies wherever a small trusted component vouches for a
+    statement too expensive for it to prove: hardware wallets, identity cards,
+    device attestation
+  \item the trusted component could be a TEE on the phone instead of a card;
+    construction unchanged as long as it enforces single use
+\end{outline}
 
-We claim no new primitive. The contribution is a combination of anonymous
-credentials, blind signatures, verifiable encryption, and a joint proof of
-knowledge. The joint proof splits a payment between a secure element holding the
-user's key and a mobile device doing the heavy work. What the combination buys
-is that every property an offline payment system needs holds at once, on
-hardware that exists today. These are unforgeability, theft prevention, double
-spending identification, conservation of value, non-frameability, anonymity, and
-unlinkability.
+\begin{outline}
+  \item (2) accountability defined by an event rather than a person
+  \item the auditor recovers an identity only from two conflicting deposits of one
+    token, so never touches a rule-following payment
+  \item same move as \Cref{chap:txid}, where the capability is limited to a user and
+    an epoch
+  \item the chapters share a credential layer; next step is a joint analysis, so one
+    registration supports online payments traceable under a grant and offline
+    payments traced only on double spending
+\end{outline}
 
-We demonstrate the viability of the protocol on commodity smart cards and mobile
-phones. Withdrawal and the payer side of a payment both complete in under half a
-second. The smart card itself authorises a payment in under $400\,\mathrm{ms}$.
-Even a payment chain of 32 hops verifies in under a second on the payee's side.
-Auditing adds no overhead for the payer, and a modest 10 to 20\% overhead for
-the payee.
-
-The credential infrastructure underlying this chapter is the same one used
-in~\Cref{chap:txid}: the same registration, the same BBS+ credential, and the
-same joint proof. A deployment can therefore identify transactions within an
-epoch online, and identify double spenders offline, without maintaining two
-separate sets of credentials. We give no joint security analysis of the two
-running together, and a composable treatment of that combination is future work.
-
-We focus on transferability rather than divisibility. Extending the scheme to
-support splitting and merging tokens, and to support aggregated deposits, are
-both natural directions for future work. Revocation in the offline setting
-remains the sharpest limitation, and we discuss the expiry based mitigations we
-consider practical in~\Cref{sec:offline-construction}.
+\begin{outline}
+  \item (3) every existing participant can be kept, each constrained in what it
+    learns: central bank signs without seeing what it signs, intermediaries see
+    only withdrawals and deposits, registration authority never sees a payment
+  \item what remains open is mostly practical: fixed denominations keep deposits
+    simple; aggregated deposits would reduce the number of tokens users hold, at
+    the cost of a more involved deposit proof
+  \item (old text also had: performance numbers, divisibility, revocation as the
+    sharpest limitation; decide whether to keep)
+\end{outline}

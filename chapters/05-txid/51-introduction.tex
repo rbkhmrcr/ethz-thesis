@@ -63,11 +63,13 @@ Congress, Bank Secrecy Act (1970) and Uniting and Strengthening America by
 Providing Appropriate Tools Required to Intercept and Obstruct Terrorism (USA
 PATRIOT) Act (2001)}.  Future digital fiat systems aim to improve the situation
 with users proving ownership over the money being moved while the transactions
-stay private. This is generally achieved through anonymous credentials.
+stay private, and still allow regulatory oversight under well-defined
+conditions. This is generally achieved through anonymous credentials.
 
-\subsection{Related work}\label{sec:txid-related}
 
-Prior work on regulatory oversight in privacy-preserving payment systems
+\subsection*{Related work}
+
+Prior work on regulatory oversight in privacy preserving payment systems
 typically supports either anonymity revocation or tracing.  Anonymity revocation
 lets an auditor identify the user responsible for a specific transaction.
 Tracing, by contrast, lets the auditor recover all transactions associated with
@@ -78,7 +80,7 @@ and exposes information about non-targeted users.
 Anonymity revocation is achieved through attaching a verifiable encryption or
 other hidden user identifier to each transaction, so that an auditor holding the
 corresponding secret key can selectively recover the sender's
-identity~\cite{SCN:CamHohLys06,CANS:BDET21,INDOCRYPT:CDLP22}.  Tracing a user's
+identity~\cite{SCN:CamHohLys06,EUROSP:CamLeh17,CANS:BDET21,INDOCRYPT:CDLP22}.  Tracing users'
 activity this way requires scanning and decrypting every transaction on the
 ledger, incurring overhead linear in the ledger size and exposing unrelated
 users' activity to the auditor. These protocols enable identity recovery, but
@@ -87,13 +89,15 @@ not efficient targeted tracing.
 Per-transaction tags can be derived from users' tracing keys combined with a
 monotonically increasing counter, and use zero-knowledge proofs to show the tags
 are correctly formed and bound to the transaction's
-origin~\cite{CCS:KiaKohSar22,CANS:SarKiaKoh24}.  Given the tracing secret of a
+origin~\cite{CCS:KiaKohSar22,CANS:SarKiaKoh24}. Similar techniques trace the
+lineage of assets rather than the activity of users~\cite{FC:GarGreMie16}.
+Given the tracing secret of a
 target user, an auditor identifies the corresponding transactions by recomputing
 the tags and matching them against the ledger, and the counter binding also
 stops a user later repudiating their own transactions. These systems are
 necessarily tied to users' identities.  All of these share the same limitation:
 because the counter must increase by one with each transaction and leave no
-gaps, a user's transactions must be generated sequentially, which prevents
+gaps, users' transactions must be generated sequentially, which prevents
 concurrent transaction creation and degrades performance in high-throughput
 settings.
 
@@ -112,17 +116,19 @@ enforcement of balance limits, but neither provides a mechanism for efficient
 per-user tracing across arbitrary
 transactions~\cite{CCS:WKDC22,EPRINT:ACDDET19}.
 
-\Cref{tab:txid-related} summarises the comparison. The column that matters is
-the third: the cost of recovering one user's transactions for one epoch. For
+\Cref{tab:txid-related} summarises the comparison. Time on the ledger is divided
+into epochs, consecutive periods of fixed length, and a tracing permission in
+our scheme covers one user for one epoch. The column that matters is the third:
+the cost of recovering one user's transactions for one epoch. For
 revocation-based schemes this is linear in the size of the ledger $|L|$, because
 every transaction must be decrypted before it is known whether it belongs to the
 target. For our scheme it is $\Max$ pairings and $\Max$ lookups in a ledger
 indexed by tag, where $\Max$ is the per-epoch transaction bound. At $\Max =
-2^{10}$ this is under a second, and crucially it does not grow as the ledger
+2^{10}$ this is under a second, and it does not grow as the ledger
 does, nor does it reveal anything about the transactions of any user other than
 the target.
 
-\begin{table}[t] \centering \caption{Comparison with prior approaches to
+\begin{table}[htbp] \centering \caption[Comparison with prior approaches to regulatory oversight]{Comparison with prior approaches to
 regulatory oversight. $|L|$ is the number of transactions on the ledger, $n$ the
 number of registered users, and $\Max$ the per-epoch transaction bound.}
 \label{tab:txid-related}
@@ -136,17 +142,19 @@ submission & permission \\
     %
     \midrule
     %
-    \cite{SCN:CamHohLys06,CANS:BDET21,INDOCRYPT:CDLP22} & revocation & $O(|L|)$
+    CHL06~\cite{SCN:CamHohLys06}, BDET21~\cite{CANS:BDET21}, & revocation & $O(|L|)$
 decryptions & yes & no \\
+    CDLP22~\cite{INDOCRYPT:CDLP22} & & & & \\
     %
-    \cite{CCS:KiaKohSar22,CANS:SarKiaKoh24} & tags, sequential counter &
+    KKS22~\cite{CCS:KiaKohSar22}, SKK24~\cite{CANS:SarKiaKoh24} & tags, sequential counter &
 $O(|L|)$ tag matches & no & no \\
     %
-    \cite{EPRINT:NarVasVir18} & interactive audit & $O(n)$, interactive & yes &
+    NVV18~\cite{EPRINT:NarVasVir18} & interactive audit & $O(n)$, interactive & yes &
 no \\
     %
-    \cite{CCS:WKDC22,EPRINT:ACDDET19} & policy enforcement & not supported & yes
+    WKDC22~\cite{CCS:WKDC22}, & policy enforcement & not supported & yes
 & n/a \\
+    ACDDET19~\cite{EPRINT:ACDDET19} & & & & \\
     %
     \midrule
     %
@@ -156,7 +164,15 @@ no \\
 %
 \end{table}
 
-\paragraph{Our contribution.} We introduce a tracing mechanism that eliminates
+\paragraph{Contributions.}
+\begin{outline}
+  \item two observations shaped the chapter
+  \item first: counter-based tracing (CCS:KiaKohSar22, CANS:SarKiaKoh24) makes users create transactions one after another; the auditor never needed order, only membership in a bounded set
+  \item second: the real question is not whether an auditor may trace at all, but how small its capability can be made
+  \item both lead to one design: tags from a bounded index space local to one epoch (leads into next paragraph)
+\end{outline}
+
+This chapter introduces a tracing protocol, $\ID$, that eliminates
 the need for encrypted user identifiers and for the monotonically increasing
 counters of prior tag-based schemes. In place of an ordered counter, a
 transaction carries an index drawn from a bounded, epoch-local space $[0,\Max)$,
@@ -169,20 +185,26 @@ transaction a specific user made within one window, and nothing outside it. It
 expires with the epoch, and tracing the next one needs a fresh grant. We
 formalise tracing as an ideal
 functionality capturing anonymity, non-repudiation, and permission expiration,
-give a black-box construction from signatures, commitments, pseudorandom
+give a generic construction from signatures, commitments, pseudorandom
 functions, one-way functions, and zero-knowledge proofs, and instantiate it
 concretely in two ways. The first works in pairing-based groups with algebraic
-pseudorandom functions and tailored sigma protocols. Its setup is transparent,
-with no party sampling any group generator, and the BBS+ signature scheme lets
-the registration authority certify a user's keys without ever learning their
-tracing key. The second takes both pseudorandom functions to be hash functions
-and proves the two corresponding relations with a general purpose zk-SNARK. That
-buys constant-size transaction proofs and faster verification, and pays for them
-with a trusted setup and a slower prover.
+pseudorandom functions and tailored Sigma protocols, the three-move proofs of
+knowledge of discrete logarithms made non-interactive by the Fiat-Shamir
+transform. Its setup is transparent, with no party sampling any group generator,
+and the BBS+ signature scheme lets the registration authority certify users' keys without
+ever learning their tracing keys. The second
+builds both pseudorandom functions from the MiMC permutation and proves the two
+corresponding relations with a general purpose zero-knowledge succinct
+non-interactive argument of knowledge (zk-SNARK), a proof system for arbitrary
+statements whose proofs have constant size. This gives constant-size transaction
+proofs and faster verification, at the cost of a trusted setup, whose
+parameters are generated from secrets that must be deleted, and a slower
+prover.
 
-\paragraph{Layout.} \Cref{sec:txid-definitions} gives the syntax of a tracing
-scheme and formalises its security as an ideal functionality.
+\paragraph{Layout.} The rest of the chapter is organised as follows. \Cref{sec:txid-definitions} gives the syntax of a tracing
+protocol and formalises its security as an ideal functionality.
 \Cref{sec:txid-construction} gives a construction from generic building blocks.
 \Cref{sec:txid-instantiation} gives the two concrete instantiations, proved
 secure in \Cref{sec:txid-security}.  \Cref{sec:txid-evaluation} evaluates both,
-and \Cref{sec:txid-summary} concludes.
+and \Cref{sec:txid-summary} summarises the chapter and asks where its
+insights lead.

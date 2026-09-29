@@ -1,0 +1,345 @@
+\section{Instantiations}\label{sec:prelims-inst}
+
+\begin{outline}
+  \item what this section gives: the groups, assumptions and concrete schemes the rest builds on
+  \item what is included here: the standard instantiation of a primitive from this chapter (Pedersen, ElGamal), or prior work used in more than one chapter ($\AGHO$, BBS+)
+  \item schemes used in one chapter only, variants modified for one chapter, and our own constructions are in the chapter that uses them
+\end{outline}
+
+\subsection{Groups and assumptions}\label{sec:prelims-groups}
+
+\begin{outline}
+  \item $\Zp$ for prime $p$: integers mod $p$, elements called field elements; $\Zp^* = \Zp \setminus \{0\}$
+  \item cyclic groups of prime order $p$, written multiplicatively; their elements are group elements
+  \item discrete logarithm: for generator $\gen$ and $a = \gen^x$, $x \in \Zp$ is the discrete logarithm of $a$ relative to $\gen$
+\end{outline}
+
+Most of our schemes use three such groups, $\group{1}$, $\group{2}$, and
+$\group{T}$ of prime order $p$, with generators $\gen \in \group{1}$ and $\ggen
+\in \group{2}$. The groups are equipped with an efficiently computable pairing
+$\pairing \colon \group{1} \times \group{2} \rightarrow \group{T}$. For all $a
+\in \group{1}$, $\widetilde{b} \in \group{2}$, and $x,y \in \Zp$, bilinearity
+means that the following holds:
+%
+\begin{equation*}
+%
+  \pairing(a^x,\widetilde{b}^y) = \pairing(a,\widetilde{b})^{xy}.
+%
+\end{equation*}
+%
+The pairing is non-degenerate, so $\pairing(\gen,\ggen)$ generates $\group{T}$.
+We call $\group{1}$ and $\group{2}$ the source groups and $\group{T}$ the target
+group. We work in the asymmetric, or type III, setting, in which $\group{1} \neq
+\group{2}$ and no efficiently computable homomorphism between them is known.
+Elements of $\group{2}$ carry a tilde, and field elements are usually written
+with Greek letters.
+
+Bilinearity allows relations between exponents in the source groups to be
+checked through equalities in $\group{T}$. The equality
+$\pairing(a,\ggen) = \pairing(\gen,\widetilde{b})$ shows that $a$ and
+$\widetilde{b}$ have the same discrete logarithm relative to their generators,
+without that discrete logarithm being recovered. A pairing product equation is
+an equation of the form $\prod_j \pairing(a_j, \widetilde{b}_j) = t$ for $t \in
+\group{T}$. Our constructions use such equations to verify signatures and
+algebraic relations across $\group{1}$ and $\group{2}$.
+
+\begin{outline}
+  \item we rely on hardness of discrete logarithms (\Cref{asm:dl}) and on DDH (\Cref{asm:ddh}), cite DifHel76, Boneh98
+  \item assumptions specific to one chapter are given where they are used
+\end{outline}
+
+\begin{assumptionbox}{Discrete logarithm (DL)}{dl}
+
+  The DL assumption holds in a group of prime order $p$ with generator $\gen$
+if, for $x \sample \Zp$, no PPT adversary given $\gen^x$ outputs $x$ with
+non-negligible probability.
+
+\end{assumptionbox}
+
+\begin{assumptionbox}{Decisional Diffie-Hellman (DDH)}{ddh}
+
+  The DDH assumption holds in a group of prime order $p$ with generator $\gen$
+if $(\gen^x, \gen^y, \gen^{xy})$ and $(\gen^x, \gen^y, \gen^z)$, for $x, y, z
+\sample \Zp$, are computationally indistinguishable.
+
+\end{assumptionbox}
+
+The symmetric external Diffie-Hellman (SXDH) assumption holds in a bilinear group
+if DDH holds in both $\group{1}$ and $\group{2}$.
+
+\begin{outline}
+  \item DDH cannot hold in a symmetric bilinear group ($\group{1} = \group{2}$), since the pairing decides it; so SXDH needs type III
+  \item some schemes we use are only proven in the generic group model (GGM), cite EC:Shoup97, IMA:Maurer05
+  \item GGM: adversary sees only opaque handles to group elements, computes only through oracles for the group operations and the pairing
+  \item a GGM proof rules out attacks that ignore the representation of the group; weaker than a reduction to a stated assumption
+  \item $q$-type assumptions: statement grows with a parameter $q$ (typically the number of signing queries); stronger than fixed-size ones like DDH
+\end{outline}
+
+\subsection{Sigma protocols and the Fiat-Shamir transform}\label{sec:prelims-sigma}
+
+\begin{outline}
+  \item most proof systems here are Sigma protocols made non-interactive
+  \item Sigma protocol for $\rel$: three moves, prover sends $a$, verifier sends uniform challenge $c$, prover sends response $z$, verifier checks against $(\inst, a, c)$
+  \item completeness: as for proof systems
+  \item special soundness: efficient extractor gets a witness from two accepting transcripts $(a, c, z)$, $(a, c', z')$ with $c \neq c'$
+  \item special honest-verifier zero knowledge: efficient simulator, given $\inst$ and $c$, outputs $(a, z)$ distributed as an honest run with challenge $c$ (cite C:CraDamSch94)
+\end{outline}
+
+\begin{outline}
+  \item example: Schnorr's protocol for knowledge of $x$ with $h = \gen^x$ (cite JC:Schnorr91)
+  \item prover sends $a = \gen^r$ for $r \sample \Zp$, gets $c \sample \Zp$, returns $z = r + cx$; verifier checks $\gen^z = a h^c$
+  \item same protocol proves a representation $h = \prod_i \gen_i^{x_i}$, one response per exponent; non-interactive form = Schnorr proof
+  \item several equations over the same witness: run in parallel with one shared challenge, so they hold together (e.g.\ two group elements with the same discrete logarithm)
+\end{outline}
+
+\begin{outline}
+  \item Fiat-Shamir: prover computes $c = \hash(\inst, a, \lbl)$ itself, $\hash$ a random oracle, $\lbl$ a label (cite C:FiaSha86)
+  \item quasi-unique responses: for given $a$ and $c$, no efficient prover finds two accepting responses; unique responses (stronger): response fixed by a verification equation, as in Schnorr
+  \item result: whole statement hashed + special soundness + SHVZK + quasi-unique responses gives a simulation extractable labelled proof system in the ROM (cite INDOCRYPT:FKMV12)
+  \item why hash the whole statement: a part left out can be chosen after seeing the challenge
+  \item ZK simulator programs the random oracle at $(\inst, a, \lbl)$
+  \item extractor rewinds: reruns $\adv$ from the query that fixed the challenge, answers with a fresh challenge, applies special soundness; forking lemma bounds success (cite JC:PoiSte00)
+  \item extraction from a single run without rewinding = straight-line/online, what UC needs (cite C:Fischlin05; links back to \Cref{sec:prelims-security})
+\end{outline}
+
+\subsection{The Pedersen commitment scheme}
+
+\begin{outline}
+  \item \Cref{prim:pedersen}: commits to several field elements at once with one group element (cite C:Pedersen91)
+\end{outline}
+
+\begin{primitivebox}{The Pedersen commitment scheme}{pedersen}
+
+  \begin{description}
+
+    \item[$\ck \sample \ComGen(\secparam, n)$ :] On input the security parameter
+and message vector length $n$, sample $\gen_1,\ldots,\gen_n, \hgen \sample
+\group{1}$ and return $\ck = (\gen_1,\ldots,\gen_n,\hgen)$.
+
+    \item[$\com \leftarrow \ComCommit(\ck,(m_1,\ldots,m_n),\openinfo)$ :] On
+input commitment key $\ck$, messages $(m_1,\ldots,m_n) \in \Zp^n$, and opening
+$\openinfo \in \Zp$, return $\com = \prod_{i=1}^{n} \gen_i^{m_i}\cdot
+\hgen^{\openinfo}$.
+
+    \item[$(m_1,\ldots,m_n) \leftarrow \ComOpen(\ck,\com,\openinfo)$ :] On
+input $\ck$, commitment $\com$, and opening $\openinfo = (m_1,\ldots,m_n,
+\openinfo')$, return $(m_1,\ldots,m_n)$ if $\com = \prod_{i=1}^{n}
+\gen_i^{m_i}\cdot\hgen^{\openinfo'}$, and $\bot$ otherwise.
+
+  \end{description}
+
+\end{primitivebox}
+
+The Pedersen commitment scheme is perfectly hiding, and computationally binding
+under the DL assumption~\cite{C:Pedersen91}.
+
+\subsection{The ElGamal encryption scheme}
+
+\begin{outline}
+  \item \Cref{prim:elgamal}: encrypts group elements (cite C:ElGamal84)
+\end{outline}
+
+\begin{primitivebox}{The ElGamal encryption scheme}{elgamal}
+
+  \begin{description}
+
+    \item[$(\pk, \sk) \sample \PKEgen(\secparam)$ :] Sample $\mu \sample \Zp$,
+and return $\sk = \mu$ and $\pk = \gen^{\mu}$.
+
+    \item[$\ciph \sample \PKEencrypt(\pk, M)$ :] On input $M \in \group{1}$,
+sample $\rho \sample \Zp$, and return $\ciph = (\gen^{\rho}, M \pk^{\rho})$.
+
+    \item[$M \leftarrow \PKEdecrypt(\sk, \ciph)$ :] On input $\ciph = (f_1, f_2)$,
+return $f_2 / f_1^{\mu}$.
+
+  \end{description}
+
+\end{primitivebox}
+
+\begin{outline}
+  \item ElGamal is IND-CPA under DDH in $\group{1}$ (cite C:ElGamal84)
+  \item messages are group elements: a field element $m$ is encrypted as $\gen^m$, and decryption gives back $\gen^m$, not $m$
+\end{outline}
+
+\subsection{Structure-preserving signature schemes}\label{sec:prelims-sps}
+
+\begin{outline}
+  \item SPS schemes: signatures where messages, public keys and signatures are vectors of group elements and verification only checks pairing product equations (cite C:AFGHO10, C:AGHO11)
+  \item why we want them: nothing is hashed, so they combine with efficient zero-knowledge proofs over the same groups; users prove knowledge of signatures on committed or hidden group elements
+\end{outline}
+
+An SPS scheme $\SPS$ over the bilinear groups above consists of the following
+algorithms:
+
+\begin{description}
+
+  \item[$(\pk, \sk) \sample \SPSgen(\secparam, \ell)$ :] The key generation
+algorithm, on input the security parameter and a vector length $\ell$, outputs
+public verification key $\pk$, which consists of group elements, and secret
+signing key $\sk$.
+
+  \item[$\SPSsig \sample \SPSsign(\sk, \vec{\msg})$ :] The signing algorithm
+signs message $\vec{\msg} \in \group{1}^\ell$ using secret key $\sk$, and outputs
+a signature $\SPSsig$ consisting of elements of $\group{1}$ and $\group{2}$.
+
+  \item[$\{0,1\} \leftarrow \SPSverify(\pk, \vec{\msg}, \SPSsig)$ :]
+The verification algorithm evaluates pairing product equations in $\pk$,
+$\vec{\msg}$ and $\SPSsig$, and outputs $0$ or $1$.
+
+\end{description}
+%
+Some schemes are rerandomisable: they additionally provide an algorithm
+$\SPSsig' \sample \SPSrandomise(\SPSsig)$, which, without the secret key,
+turns a signature into a new signature on the same message, distributed as a
+freshly generated one.
+
+\begin{outline}
+  \item a rerandomisable scheme cannot be strongly unforgeable: rerandomising is itself a strong forgery
+\end{outline}
+
+Correctness and EUF-CMA security are defined as for digital signature schemes,
+with messages restricted to $\group{1}^\ell$.
+
+\subsection{The $\AGHO$ SPS scheme}
+
+\begin{outline}
+  \item Abe, Groth, Haralambiev and Ohkubo: SPS signatures in type III groups have at least three group elements; they give schemes meeting this (cite C:AGHO11)
+  \item their main scheme: strongly unforgeable in the GGM; a six-element variant: strongly unforgeable under a non-interactive $q$-type assumption
+  \item we use their rerandomisable three-element scheme, $\group{1}$ and $\group{2}$ swapped so messages are in $\group{1}$, and call it $\AGHO$
+  \item secret key is only field elements; the message enters signing only through the terms $\msg_i^{-\mu_i}$ (matters for the threshold version in \Cref{chap:tsps})
+  \item point to \Cref{prim:agho}
+\end{outline}
+
+\begin{primitivebox}{The $\AGHO$ SPS scheme}{agho}
+
+  \begin{description}
+
+    \item[$(\pk, \sk) \sample \SPSgen(\secparam, \ell)$ :] Sample $\mu_1,
+\ldots, \mu_\ell, \tau \sample \Zp^*$, and output $\sk = (\mu_1, \ldots, \mu_\ell,
+\tau)$ and $\pk = (\widetilde{u}_1, \ldots, \widetilde{u}_\ell, v)$, where
+$\widetilde{u}_i = \ggen^{\mu_i}$ and $v = \gen^{\tau}$.
+
+    \item[$\SPSsig \sample \SPSsign(\sk, \vec{\msg})$ :] On input $\vec{\msg} =
+(\msg_1, \ldots, \msg_\ell) \in \group{1}^\ell$, sample $\omega \sample \Zp^*$
+and output
+      %
+      \begin{equation*}
+      %
+	\SPSsig = (\widetilde{r}, \widetilde{s}, z) = \left(\ggen^{\omega}, \
+\widetilde{r}^{\,\tau}, \ \left(\gen \prod_{i=1}^{\ell}
+\msg_i^{-\mu_i}\right)^{1/\omega}\right).
+      %
+      \end{equation*}
+
+    \item[$\SPSsig' \sample \SPSrandomise(\SPSsig)$ :] On input $\SPSsig =
+(\widetilde{r}, \widetilde{s}, z)$, sample $\omega' \sample \Zp^*$ and output
+$(\widetilde{r}^{\,\omega'}, \widetilde{s}^{\,\omega'}, z^{1/\omega'})$.
+
+    \item[$\{0,1\} \leftarrow \SPSverify(\pk, \vec{\msg}, \SPSsig)$ :] On input
+$\SPSsig = (\widetilde{r}, \widetilde{s}, z)$, output $1$ if and only if
+      %
+      \begin{equation*}
+      %
+	\pairing(v, \widetilde{r}) = \pairing(\gen, \widetilde{s}) \ \wedge\
+\pairing(z, \widetilde{r}) \prod_{i=1}^{\ell} \pairing(\msg_i, \widetilde{u}_i)
+= \pairing(\gen, \ggen).
+      %
+      \end{equation*}
+
+  \end{description}
+
+\end{primitivebox}
+
+\begin{outline}
+  \item $\AGHO$ is EUF-CMA secure in the GGM (cite C:AGHO11)
+  \item being rerandomisable, it is not strongly unforgeable
+\end{outline}
+
+\subsection{The BBS+ signature scheme}\label{sec:prelims-bbs}
+
+The BBS+ signature scheme of \Cref{prim:bbs} signs several messages at
+once~\cite{C:BonBoySha04,SCN:AuSusMu06,EPRINT:CamDriLeh16}.
+
+\begin{primitivebox}{The BBS+ signature scheme}{bbs}
+
+  \begin{description}
+
+    \item[$(\sk,\pk) \sample \BBSgen(\secparam, n, (\gen_0,\ldots,\gen_{n+1},
+\ggen))$ :] On input the security parameter, vector length $n$, and generators
+$\gen_0,\gen_1, \ldots, \gen_{n+1} \in \group{1}$, $\ggen \in \group{2}$, do the
+following:
+
+      \begin{enumerate}
+
+	\item Sample $z \sample \Zp$.
+
+	\item Return $\sk = z$, $\pk = (\gen_0, \ldots, \gen_{n+1}, \ggen,
+\ggen_Z = \ggen^z)$.
+
+      \end{enumerate}
+
+      The generators are an input rather than an output. Standard presentations
+have the signer sample them, which is sound when the signer is the only party
+relying on them. Where the same generators also key a commitment whose binding
+must hold against the signer, they are instead fixed by hashing to $\group{1}$
+from a public seed, so that no party knows a discrete logarithm relation among
+them.
+
+    \item[$\signature \sample \BBSsign(\sk,(\msg_1, \ldots, \msg_n))$ :] On
+input secret key $\sk = z$ and message $(\msg_1, \ldots, \msg_n) \in
+\group{1}^n$, do:
+
+      \begin{enumerate}
+
+	\item Sample $e,r \sample \Zp$.
+
+	\item Return $\signature = (e, r, E)$ with $E = (\gen_0 \cdot
+\prod_{i=1}^{n} \msg_i \cdot \gen_{n+1}^{r})^{1/(z+e)}$.
+
+      \end{enumerate}
+
+    \item[$\{0,1\} \leftarrow \BBSverify(\pk,(\msg_1, \ldots, \msg_n),
+\signature)$ :] On input public key $\pk$, message $(\msg_1, \ldots, \msg_n)$,
+and signature $\signature = (e,r,E)$, do:
+
+      \begin{enumerate}
+
+	\item Return $\pairing(E,\ggen_Z\cdot\ggen^{e}) \checkcheck
+\pairing(\gen_0 \cdot \prod_{i=1}^{n} \msg_i \cdot \gen_{n+1}^{r}, \ggen)$.
+
+      \end{enumerate}
+
+  \end{description}
+
+\end{primitivebox}
+
+The BBS+ signature scheme is existentially unforgeable under the $q$-strong
+Diffie-Hellman ($q$-SDH) assumption of \Cref{asm:qsdh-bbs}, a $q$-type
+assumption~\cite{EC:BonBoy04a}.
+
+\begin{assumptionbox}{$q$-Strong Diffie-Hellman ($q$-SDH)}{qsdh-bbs}
+
+  The $q$-SDH assumption holds in the type III bilinear group
+$(\group{1},\group{2},\group{T},\pairing)$ if, given $(\gen_0, \gen_0^{\theta},
+\ldots, \gen_0^{\theta^{q}}, \ggen, \ggen^{\theta})$ for $\gen_0 \in \group{1}$,
+$\ggen \in \group{2}$ and uniformly random $\theta \sample \Zp$, no PPT
+adversary can output a pair $\big(\varsigma,\,
+\gen_0^{1/(\theta+\varsigma)}\big)$ for any $\varsigma \in \Zp \setminus
+\{-\theta\}$ with non-negligible probability.
+
+\end{assumptionbox}
+
+This presentation signs group elements. To sign field elements $m_1, \ldots, m_n
+\in \Zp$, the signer signs $M_i = \gen_i^{m_i}$. Signing the group elements
+$M_i$ directly, rather than the field elements $m_i$ themselves, is useful
+because computing $\prod_i M_i$ requires no knowledge of the discrete logarithms $m_i$,
+so a signer can produce a valid signature on committed values without ever
+learning them~\cite{SCN:AuSusMu06,EC:TesZhu23b}.
+
+Unforgeability when signing group elements carries a condition that signing
+field elements does not. An adversary able to obtain a signature on an arbitrary group
+element could ask
+for one on $M_i' = M_i \cdot \gen_i^{\delta}$, shifting the certified message by
+a quantity it knows. The reduction to $q$-SDH therefore requires the signer to
+sign only elements that come with a proof of knowledge of their representation
+in the bases $\gen_i$~\cite{SCN:AuSusMu06,EC:TesZhu23b}.

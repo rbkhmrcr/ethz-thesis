@@ -7,7 +7,8 @@
 
 \newtcbtheorem[
   auto counter,
-  number within=chapter
+  number within=chapter,
+  list inside=prot
 ]{protocolbox}{Protocol}{
   colback=boxpurple!9,
   colframe=boxpurple!55,
@@ -23,7 +24,8 @@
 
 \newtcbtheorem[
   auto counter,
-  number within=chapter
+  number within=chapter,
+  list inside=prim
 ]{primitivebox}{Primitive}{
   colback=boxblue!5,
   colframe=boxblue!35,
@@ -38,7 +40,8 @@
 
 \newtcbtheorem[
   auto counter,
-  number within=chapter
+  number within=chapter,
+  list inside=asm
 ]{assumptionbox}{Assumption}{
   colback=boxberry!5,
   colframe=boxberry!35,
@@ -53,7 +56,8 @@
 
 \newtcbtheorem[
   auto counter,
-  number within=chapter
+  number within=chapter,
+  list inside=exp
 ]{experimentbox}{Experiment}{
   colback=boxgreen!5,
   colframe=boxgreen!35,
@@ -63,6 +67,7 @@
   boxrule=0.4pt,
   arc=1mm
 }{exp}
+
 
 % cleveref names for the tcolorbox theorems above.
 

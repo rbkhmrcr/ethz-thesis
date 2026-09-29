@@ -1,236 +1,180 @@
 \section{Introduction}\label{sec:tsps-introduction}
 
-\paragraph{Certifiers as participants.} Transparency logs, permissioned ledgers
-and privacy preserving payment systems each contain an entity that certifies
-state on behalf of everyone else: a log provider, an endorser, a ledger
-administrator. These entities are not artefacts of poor design that a better
-protocol would remove. They exist because something has to establish that a
-certificate was issued, that a transaction was valid, or that an account held a
-particular balance at a particular time. The question this chapter asks is how
-narrowly the capability each of them holds can be defined.
+\begin{outline}
+  \item SPS schemes sign vectors of group elements, and verification only checks
+pairing-product equations (cite C:AFGHO10, C:AGHO11)
+  \item so a signer can sign a commitment it cannot open, and the holder later
+proves statements about the committed value in zero knowledge without revealing it
+  \item contrast: an ordinary signature hashes the message first, so proving
+knowledge of a signature on a commitment needs a general-purpose proof over the
+hash; signing the group elements directly keeps the proofs algebraic and cheap
+  \item used to build blind signatures, delegatable anonymous credentials, group
+signatures, among others (cite AFRICACRYPT:FucVer10, CCS:CamDriDub17,
+RSA:CriLys19, PoPETS:MSBM23, AC:Groth06, AC:Groth07, C:LibPetYun15)
+\end{outline}
 
-Thresholdising the certifier divides the authority to certify, so that no single
-participant can produce a certification alone and no single key compromise is
-enough to forge one. Structure preservation constrains something different, the
-knowledge that accompanies that authority. Because signing acts directly on
-group elements, a certifier can sign a commitment it is unable to open, and the
-party holding the resulting signature later proves statements about the
-committed value without revealing it. Authority and knowledge are separated, and
-the institution performs its operational function without being trusted with the
-information it certifies. What remains is practicality, by which we mean
-minimising the interaction, coordination, communication and computational costs
-that the protocol imposes on its participants. It is for this reason that our
-constructions are designed so that the online phase of signing requires no
-interaction between the certifiers at all.
+\begin{outline}
+  \item many systems have an entity that certifies state for everyone else:
+transparency log provider, ledger administrator or endorser
+  \item the role can't be removed (something has to attest that a key was
+recorded, a transaction was valid, an account held a balance at a time), but the
+capability attached to it can be narrowed
+  \item threshold signatures: key shared between signers, a threshold of them
+needed to sign; no single signer certifies alone, no single key compromise
+forges a certification
+  \item why not multi-signatures: they need every signer and verifiers must know
+who signed; a threshold scheme keeps one public key and ordinary signatures, so
+verifiers don't change
+  \item SPS separates authority from knowledge: signers certify committed values
+without learning them
+  \item practicality (as in the rest of the thesis): for a threshold signer the
+cost that matters is interaction when a signature is needed; our online phase
+needs no interaction between signers once the message is known
+\end{outline}
 
-\paragraph{Structure preserving signatures.} Structure preserving signatures are
-digital signatures in which the messages, public keys, and signatures are all
-group elements, and verification consists solely of checking pairing product
-equations~\cite{C:AFGHO10,C:AGHO11,TCC:AGOT14,C:KilPanWee15,AC:Groth15,RSA:Ghadafi16}.
-Coupled with non-interactive zero knowledge proofs, structure preserving
-signatures have proved useful across a range of privacy preserving applications,
-including blind signatures, delegatable anonymous credentials, and group
-signatures, to name a
-few~\cite{AFRICACRYPT:FucVer10,CCS:CamDriDub17,RSA:CriLys19,PoPETS:MSBM23,AC:Groth06,AC:Groth07,C:LibPetYun15}.
+Ledgers are the first setting where such certifiers appear. A ledger is a shared, append-only record of state, such as
+tokens, accounts or transactions, maintained by one or more authorities. In
+ledger-based payment systems, currency is represented by a token encoding its
+owner, value, and a unique serial number, and the ledger records a hiding
+commitment to the token rather than the token
+itself~\cite{EPRINT:ACDDET19,EPRINT:TBAAGP22,CCS:KiaKohSar22,C:Pedersen91}. To
+spend a token, its owner needs a signature from a certifier showing that the
+commitment is recorded on the ledger, and later proves, via the serial number,
+that the token has not been spent before~\cite{RSA:PoiSan18,NDSS:SABMD19}. With
+an SPS scheme, the certifier signs the group elements of the
+commitment as they appear on the ledger and publishes the signatures, without
+interacting with the owner. This is more than an efficiency gain. An interactive
+issuance protocol gives the certifier a channel to each spender, which can be
+timed, logged and correlated even when the signed value stays hidden, and
+publishing signatures over ledger state removes that channel.
 
-Structure preserving signatures also find use in privacy preserving payment
-systems built over a shared ledger. Currency is represented by a token encoding
-the owner, value, and a unique serial
-number~\cite{EPRINT:ACDDET19,EPRINT:TBAAGP22,CCS:KiaKohSar22}. For privacy, the
-shared ledger records a hiding commitment to the token, generally a Pedersen
-commitment, rather than the token itself~\cite{C:Pedersen91}. To transfer
-ownership privately, the owner interacts with a certifier to obtain a blind
-Pointcheval-Sanders signature on the commitment's opening. That signature is
-later used to prove that the token being spent is recorded on the ledger, and,
-via its serial number, that it has not been spent
-before~\cite{RSA:PoiSan16,RSA:PoiSan18,NDSS:SABMD19}. Structure preserving
-signatures remove the need for this interaction: since signing acts directly on
-the group elements that make up the commitment, the certifier can sign tokens as
-they appear on the ledger and simply publish the resulting signatures.  Removing
-the interaction is a gain in more than efficiency. A blind issuance protocol
-gives the certifier a per-transfer channel to each spender, which can be timed,
-logged and correlated even when the value being signed stays hidden.  Publishing
-signatures over ledger state removes that channel altogether.
+The same applies where the ledger stores commitments to accounts, pairs of owner
+and holdings, rather than to tokens. Such accounts are the basis for periodic
+reporting, for instance proving that holdings do not exceed some threshold when
+filing taxes. A tax authority typically has no direct access to the ledger, and
+instead relies on signatures produced by the ledger's administrators. With an
+SPS scheme, the administrators sign each committed account
+together with a timestamp and publish the results, and users prove properties of
+their holdings from them without disclosing anything else. Where a ledger is
+run by several authorities, for example a central bank digital currency in which
+every transaction is endorsed before it is recorded, a threshold signature
+scheme divides the endorsement between them.
 
-A similar idea applies where the ledger stores commitments to user accounts,
-pairs (owner, holdings), rather than committed tokens. Such accounts form the
-basis for periodic reporting on user holdings, for instance proving that
-holdings do not exceed some threshold when filing taxes. Since tax authorities
-typically lack direct access to the shared ledger, they instead rely on
-signatures produced by the ledger's administrators. Structure preserving
-signatures let the administrators sign the committed accounts together with a
-timestamp and publish the result directly, without involving the user. The user
-can then use the published signature to prove properties of their holdings
-without disclosing anything beyond what is required.
-
-\paragraph{Transparency logs.} Certificate transparency (CT) and key
-transparency (KT) are the main examples of transparency logs. In both cases, a
-transparency log is an append-only, publicly verifiable record, of either
+Transparency logs are the second. Certificate transparency (CT) and key
+transparency (KT) logs are append-only, publicly verifiable records of
 certificates or keys. Each entry is sent to a log provider, signed, and appended
-to the log. In CT systems, the log server returns a Signed Certificate Timestamp
-(SCT) to the certificate provider, and in KT systems, the mapping from user
-identity to public key is what the log server signs.  Transparency logs let
-users and auditors verify that the certificates or keys they interact with carry
-legitimacy beyond the app serving them, moving trust onto the log providers
-instead. Threshold signatures narrow what any one log provider can do,
-distributing the capability across several servers. A threshold structure
-preserving signature given to the key or certificate owner would let the
-structure preserving property of the signature be used to prove, in zero
-knowledge, that a key is recorded in the log, for instance for privacy
-preserving identity verification. Since the structure preserving property lets
-the public key itself be signed directly, without first hashing it, the
-resulting zero knowledge proofs are more efficient than they would otherwise be.
+to the log. In CT the log server returns a signed certificate timestamp to the
+certificate provider, and in KT the log server signs the mapping from users'
+identities to their public keys. Transparency logs move trust from the application
+serving a key onto the log providers, and a threshold signature scheme narrows
+what any one of them can do. Signatures from a threshold SPS scheme, given to the
+owners of keys, would also let them prove, in zero knowledge, that their keys are
+recorded in the log without revealing which keys they are. Since the key is signed
+directly rather than hashed first, that proof is efficient.
 
-\paragraph{Permissioned ledgers.} A permissioned ledger is a distributed ledger
-where token issuance, transaction verification, and participation are controlled
-by one or a small number of authorities. Permissioned ledgers are of particular
-interest for platforms such as Central Bank Digital Currencies (CBDCs), as they
-offer a transparent system enabling regulatory oversight while still supporting
-transaction privacy and compliance with the monetary policy of the central bank
-in question. One way to build such a system has every transaction executed and,
-if valid, signed by an endorser before being added to the ledger. The signed
-state committed to the ledger is a commitment to the value and type of asset.
-Threshold structure preserving signatures would let trust be distributed between
-multiple endorsers via the threshold property, while the structure preserving
-property lets users perform efficient proofs of statements about their assets on
-the ledger, for example for compliance purposes.
+\paragraph{Contributions.}
+\begin{outline}
+  \item two threshold SPS schemes, built from $\AGHO$ and $\KPW$ (cite C:AGHO11,
+C:KilPanWee15); $\AGHO$ for its optimal signature size, $\KPW$ because it is
+secure under SXDH rather than in the GGM
+  \item signing key held in secret-shared form (enough shares determine it, fewer
+reveal nothing); key generation, combining and verification then done with
+general-purpose MPC, nothing new needed
+  \item the hard part is signing: evaluating it under MPC directly means the
+signers interact after the message is known
+  \item observation: in SPS the message is public group elements and (in the
+schemes we use) only gets raised to secret exponents, which each signer can do on
+its own shares; if everything else is prepared in advance, no interaction once a
+message arrives
+  \item why not remove interaction completely: that means designing a new scheme
+for the threshold setting, as existing threshold SPS schemes do, with their
+restrictions on messages or assumptions; splitting signing in two keeps existing
+SPS schemes as they are and moves the interaction off the critical path
+\end{outline}
 
-In each of these applications the certifier, endorser, log provider or ledger
-administrator is not an accident of the design. Something has to attest that a
-token is recorded, that a key is in the log, or that a transaction was
-validated, and that role is one the system genuinely requires. The question is
-how narrowly to define the capability attached to it. A threshold signature
-answers that directly. The role stays, but the ability to produce an attestation
-is separated from the ability to hold the signing key, so that no single
-certifier can act alone and none of them ever holds the key. Structure
-preserving signatures are fit for these applications only once they admit an
-efficient threshold counterpart. We give two threshold structure preserving
-signature schemes, building on two existing structure preserving signatures
-together with secure multiparty computation (MPC)
-techniques~\cite{C:AGHO11,C:KilPanWee15,C:DPSZ12,CCS:KelOrsSch16,C:GLOPS21}.  We
-select the scheme of Abe, Groth, Haralambiev, and Ohkubo for its optimal
-signature size, and that of Kiltz, Pan, and Wee for its reliance on standard
-assumptions alone~\cite{C:AGHO11,C:KilPanWee15}. Both underlying signatures let
-the threshold signers perform the majority of their computation offline, in a
-pre-processing phase before the message to be signed is known. This suits
-high-throughput applications, such as payments, that experience interspersed
-periods of low and high traffic. Since our threshold signatures require
-distributed computation over group elements rather than only field elements, we
-build on techniques that extend MPC protocols over field elements to protocols
-over group elements~\cite{NDSS:GPVRNC23}. Our schemes inherit the security
-properties of the underlying structure preserving signatures, and the cost of
-the online phase of threshold signing is comparable to that of ordinary signing.
+\begin{outline}
+  \item first contribution: decomposition of SPS signing into an offline phase
+(all interaction, before the message is known) and an online phase each signer
+runs locally
+  \item we define the property of the signing algorithm that makes this possible
+(\Cref{sec:tsps-construction}), show $\AGHO$ and $\KPW$ have it, and prove the
+threshold schemes unforgeable whenever the underlying scheme is
+  \item suits bursty traffic, e.g.\ payments: states prepared in quiet periods,
+used in busy ones
+\end{outline}
+
+\begin{outline}
+  \item second contribution: implementation; thresholdising $\KPW$ needs
+secret-shared group elements and multiplication of a shared field element with a
+shared group element
+  \item Ghosh et al.\ compute on shared group elements between two parties (cite
+NDSS:GPVRNC23); as far as we know no multiparty version is implemented
+  \item we extend MP-SPDZ with sharings of group elements and this
+multiplication (cite CCS:Keller20)
+  \item benchmark both schemes with ATLAS (honest majority: fewer than half
+corrupted) and MASCOT (dishonest majority: up to all but one corrupted) (cite
+C:GLOPS21, CCS:KelOrsSch16); ATLAS where robustness and availability matter,
+MASCOT where resilience to key compromise matters
+  \item also implement the two existing threshold SPS schemes and compare (cite
+AC:CKPSS23, PKC:MMSST24)
+\end{outline}
 
 This chapter treats unforgeability rather than privacy directly. Privacy in the
-applications above arises from composition: the certifier signs committed state,
-and the holder of the signature discloses what it chooses through a zero
-knowledge proof. The contribution of a threshold structure preserving signature
-to that story is twofold. It divides the authority to certify without giving any
-certifier access to the certified value, and, by signing ledger state rather
-than blinded requests, it removes the per user interaction that issuance would
-otherwise require.
+applications above comes from composition: the signers sign committed state, and
+the holder of a signature discloses what they choose through a zero-knowledge
+proof.
 
-\subsection{Related work}\label{sec:tsps-related}
+\subsection*{Related work}
 
-\paragraph{Structure preserving signatures.} Structure preserving signatures
-have messages, signatures, and verification keys that are all group elements.
-They were first introduced, and have since been studied extensively, with
-matching impossibility results known for signature size in the generic group
-model (GGM), from $q$-type assumptions, and from non-$q$-type
-assumptions~\cite{C:AFGHO10,C:AGHO11,AC:AbeGroOhk11}.
+\paragraph{SPS schemes.} SPS schemes were introduced by Abe et al., whose
+scheme signs messages of arbitrary length
+with signatures of seven group elements, and is secure in the standard model
+under a non-interactive assumption~\cite{C:AFGHO10}. Abe, Groth, Haralambiev, and
+Ohkubo then showed that a signature in type III groups needs at least three group
+elements, and gave matching constructions in the GGM, among them the
+rerandomisable scheme $\AGHO$ that we use~\cite{C:AGHO11}.
+SPS schemes with such short signatures cannot be proven secure from non-interactive assumptions
+by a large class of reductions~\cite{AC:AbeGroOhk11}. Kiltz, Pan, and Wee give a
+scheme with seven group elements that is secure under SXDH~\cite{C:KilPanWee15}.
+A linearly homomorphic SPS scheme, also with signatures of three group
+elements, enables further applications~\cite{C:LPJY13}. Fully structure-preserving
+signature schemes additionally have secret keys that are group elements, so
+a user can prove statements about their own key with Groth-Sahai proofs, a
+proof system for pairing-product equations, at the
+cost of signatures that grow with the square root of the message
+length~\cite{JC:AGKOT19,EC:GroSah08}.
 
-The original structure preserving signature scheme signs messages of arbitrary
-length with signatures of seven group elements, and is secure in the standard
-model under a non-interactive assumption~\cite{C:AFGHO10}. Abe, Groth,
-Haralambiev, and Ohkubo then established a lower bound of three group elements
-for signature size in type III pairing groups, those without an efficiently
-computable isomorphism between $\group{1}$ and $\group{2}$, and gave a matching
-construction secure in the GGM~\cite{C:AGHO11}. These signatures achieve strong
-unforgeability, and remain three group elements regardless of message length. A
-linearly homomorphic structure preserving signature, also of just three group
-elements, enables further applications~\cite{C:LPJY13}.
+\paragraph{Threshold SPS schemes.}
+\begin{outline}
+  \item only recently considered
+  \item Crites et al.\ (cite AC:CKPSS23): non-interactive, but signs only indexed
+Diffie-Hellman pairs, each message given with the same discrete logarithm in both
+source groups; an element that only exists in $\group{1}$ (a key or commitment
+already on a ledger) can't be signed unless its owner supplies the $\group{2}$
+element
+  \item Mitrokotsa et al.\ (cite PKC:MMSST24): non-interactive, signs arbitrary
+vectors of group elements, built from $\KPW$, SXDH, seven group elements
+  \item neither has an offline phase; the evaluation compares both with ours
+\end{outline}
 
-Fully structure preserving signatures additionally have secret keys that are
-group elements~\cite{JC:AGKOT19}. Structure preserving signatures integrate well
-with Groth-Sahai proofs of knowledge, so a group element secret key lets a user
-also prove statements about their own key~\cite{EC:GroSah08}. The cost is that
-signature length grows with the square root of the message
-length~\cite{JC:AGKOT19}.
+\paragraph{Computing on shared group elements.}
+\begin{outline}
+  \item moving a sharing of a field element into a group without interaction
+(each party raises a public generator to its share) goes back to verifiable
+secret sharing (cite FOCS:Feldman87)
+  \item Smart and Talibi Alaoui: maliciously secure computation over an elliptic
+curve group, maps multiplication triples over $\Zp$ locally into triples over the
+group (cite IMA:SmaTal19)
+  \item Aranha et al.: generalise this as linear secret sharing isomorphisms, use
+it to realise Pointcheval-Sanders in MPC (cite LC:ADEO21)
+  \item we extend to $n$ parties the approach of Ghosh et al., who share group
+elements between two parties and compute on the shares (cite NDSS:GPVRNC23)
+\end{outline}
 
-\begin{table}[t] \centering \resizebox{\textwidth}{!}{ \begin{tabular}{ c | c |
-c | c } \toprule & Assumption/model & $|\SPSsig|$ & Notable property \\ \midrule
-\cite{C:AFGHO10} & standard model, non-interactive assumption & 7 group elements
-& signs messages of arbitrary length \\ \cite{C:AGHO11} & GGM & 3 group elements
-& strong unforgeability, size-optimal in type III groups \\ \cite{C:LPJY13} & --
-& 3 group elements & linearly homomorphic \\ \cite{JC:AGKOT19} & -- & grows with
-$\sqrt{\cdot}$ of message length & fully structure preserving (group element
-secret key) \\ \cite{C:KilPanWee15} & DDH & 7 group elements & security from a
-standard, non-$q$-type assumption \\ \bottomrule \end{tabular} }
-\caption{Structure preserving signature schemes.} \label{tab:tsps-related-sps}
-\end{table}
-
-\paragraph{Threshold structure preserving signatures.} Threshold structure
-preserving signatures have only recently been considered. One non-interactive
-construction is restricted to signing indexed Diffie-Hellman tuples of the form
-$(\gen^\msg, \ggen^\msg)$~\cite{AC:CKPSS23}. This restricts the scheme to
-messages whose discrete logarithm relative to $\gen$ or $\ggen$ is known. It
-therefore rules out signing an existing public key or commitment directly.
-either the threshold signers would learn someone else's secret key, or the
-element simply could not be signed under the scheme. Another non-interactive
-threshold structure preserving signature instead is capable of signing arbitrary
-group elements, and is secure under the SXDH assumption~\cite{PKC:MMSST24}. It
-builds on the structure preserving signature of Kiltz, Pan, and Wee, and its
-signatures consist of seven group elements~\cite{PKC:MMSST24,C:KilPanWee15}.
-
-\begin{table}[t] \centering \begin{tabular}{ c | c | c | c } \toprule &
-Assumption & Message space & Built from \\ \midrule \cite{AC:CKPSS23} & PS + ROM
-& indexed Diffie-Hellman tuples $(\gen^\msg, \ggen^\msg)$ & -- \\
-\cite{PKC:MMSST24} & SXDH & arbitrary $\vec{\msg} \in \group{1}^\ell$ &
-\cite{C:KilPanWee15} \\ \Cref{sec:tsps-abe} (ours) & GGM & arbitrary $\vec{\msg}
-\in \group{1}^\ell$ & \cite{C:AGHO11} \\ \Cref{sec:tsps-kiltz} (ours) & SXDH &
-arbitrary $\vec{\msg} \in \group{1}^\ell$ & \cite{C:KilPanWee15} \\ \bottomrule
-\end{tabular} \caption{Threshold structure preserving signature schemes.
-Concrete key, signature, and communication sizes for these schemes are compared
-in \Cref{tab:tsps-comp} and \Cref{tab:tsps-comms} in
-\Cref{sec:tsps-evaluation}.} \label{tab:tsps-related-tsps}
-%
-\end{table}
-
-\paragraph{Our contribution.} We design two threshold structure preserving
-signature schemes relative to an abstract secure multiparty computation
-protocol. We specify its interfaces, and require its security as a set of stated
-properties rather than as a definitional target our schemes are proved to
-realise. These interfaces extend the standard ones over field elements to
-secret-shared group elements, which our schemes require and which existing MPC
-frameworks do not provide. Computing on shared group elements is itself well
-studied, and we claim no novelty for it. \Cref{sec:tsps-mpc} sets out what we
-take from existing work and what we
-add~\cite{FOCS:Feldman87,IMA:SmaTal19,LC:ADEO21,NDSS:GPVRNC23}. Both schemes
-are designed so that the online phase, run once the messages to be signed are
-known, requires no interaction between parties, keeping its cost comparable to
-that of ordinary, non-threshold signing. We prove the security of the threshold
-signatures relative to these properties, and show that they offer the same
-security guarantees as their non-threshold counterparts.  Finally, we benchmark
-them using two MPC frameworks that realise the required interfaces: ATLAS, which
-assumes an honest majority, and MASCOT, which assumes a dishonest
-majority~\cite{C:GLOPS21,CCS:KelOrsSch16}. Supporting them required us to extend
-MP-SPDZ with the group element interfaces our schemes need~\cite{CCS:Keller20}.
-The former suits settings where robustness and high availability are desirable,
-the latter settings where resilience to key compromise takes precedence.
-
-We also implement previously suggested threshold structure preserving signature
-schemes, so as to compare concrete efficiency. Our scheme built from the
-signature of Abe, Groth, Haralambiev, and Ohkubo yields optimally small
-threshold signatures, consisting of just three group elements~\cite{C:AGHO11}.
-
-\paragraph{Layout.} \Cref{sec:tsps-definitions} formalises the security
-properties of threshold structure preserving signatures, and introduces the MPC
-interfaces that our constructions build on. \Cref{sec:tsps-construction} gives a
-construction that thresholdises a generic structure preserving signature scheme
-using those interfaces. \Cref{sec:tsps-instantiation} instantiates it twice,
-with the signature schemes of Abe, Groth, Haralambiev, and Ohkubo and of Kiltz,
-Pan, and Wee, extending the MPC interfaces to secret-shared group elements along
-the way~\cite{C:AGHO11,C:KilPanWee15}.  Both the construction and its
-instantiations are proven secure in \Cref{sec:tsps-security}.
-\Cref{sec:tsps-evaluation} evaluates our approach, and \Cref{sec:tsps-summary}
-concludes.
+\paragraph{Layout.} The rest of the chapter is organised as follows. \Cref{sec:tsps-definitions} defines threshold SPS schemes
+and the MPC interfaces our constructions use.
+\Cref{sec:tsps-construction} gives the offline and online decomposition and the
+generic construction, and \Cref{sec:tsps-instantiation} instantiates it with
+$\AGHO$ and $\KPW$. \Cref{sec:tsps-security} proves both secure,
+\Cref{sec:tsps-evaluation} evaluates them, and \Cref{sec:tsps-summary}
+discusses what the chapter shows and where it leads.

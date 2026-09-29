@@ -1,256 +1,84 @@
 \section{Instantiation}\label{sec:tsps-instantiation}
 
-This section instantiates the construction of \Cref{sec:tsps-construction}
-twice, giving full descriptions of two threshold structure preserving signature
-schemes built from the MPC protocol of
-\Cref{sec:tsps-mpc}~\cite{C:AGHO11,C:KilPanWee15}. We first give the two
-underlying structure preserving signature schemes, then verify in each case that
-the signing algorithm admits the decomposition the construction requires, and
-give the resulting threshold scheme. Both schemes are designed with a
-non-interactive online phase in mind, with $\algo{OffSign}$ carrying essentially
-all of the interactive computation.
+\begin{outline}
+  \item we instantiate with $\AGHO$ and $\KPW$
+  \item $\AGHO$: smallest possible signatures, secret key only field elements, so
+the threshold version only needs multiplication of shared field elements
+  \item $\KPW$: standard assumption, but secret key contains group elements,
+hence sharings of group elements and $\algo{ExpGrp}$
+  \item for each: show signing is decomposable, give the threshold scheme in full
+  \item reminder: raising a public group element to a shared field element is
+each signer raising it to its own share, giving a sharing of the result
+\end{outline}
 
-\subsection{Instantiating $\SPS$}
+\subsection{Instantiating $\TSPS$ with $\AGHO$}\label{sec:tsps-abe}
 
-In this section we describe two structure preserving signatures. The first is
-optimal in terms of size, and existentially unforgeable in the generic group
-model (GGM)~\cite{C:AGHO11}. The second produces signatures with more group
-elements, but is existentially unforgeable under the DDH
-assumption~\cite{C:KilPanWee15}.
-
-\subsubsection{Optimal structure preserving signatures in the
-GGM}\label{sec:tsps-sps-ggm}
-
-Abe, Groth, Haralambiev, and Ohkubo introduced the first optimal-size structure
-preserving signature scheme for asymmetric pairings~\cite{C:AGHO11}.
-
-\begin{primitivebox}{Optimal structure preserving signatures}{sps-ggm}
-
-  \begin{description}
-
-    \item[$(\pk, \sk) \sample \SPSgen(\secparam, \ell)$ :] On input security
-parameter $\secparam$ and vector length $\ell$, do:
-
-      \begin{enumerate}
-
-	\item Sample $\vec{\mu} = (\mu_1, \ldots, \mu_\ell) \sample
-(\Zp^*)^\ell$ and $\tau \sample \Zp$.
-
-	\item Compute $\vec{\widetilde{u}} = (\widetilde{u}_1, \ldots,
-\widetilde{u}_\ell) = (\ggen^{\mu_1}, \ldots, \ggen^{\mu_\ell}) \in
-\group{2}^\ell$ and $v = \gen^{\tau} \in \group{1}$.
-
-	\item Return $\pk = (\vec{\widetilde{u}}, v)$ and $\sk = (\vec{\mu},
-\tau)$.
-
-      \end{enumerate}
-
-    \item[$\SPSsig \sample \SPSsign(\sk, \vec{\msg})$ :] On input secret key
-$\sk = (\vec{\mu}, \tau)$ and vector $\vec{\msg} = (\msg_1, \ldots, \msg_\ell)
-\in \group{1}^\ell$, do:
-
-      \begin{enumerate}
-
-	\item Sample $\rho \sample \Zp^*$.
-
-	\item Compute and return the following:
-          %
-	  \begin{equation*}
-          %
-	    \SPSsig = (\widetilde{r}, \widetilde{s}, z) = \left( \ggen^{1/\rho},
-\ \widetilde{r}^{\,\tau}, \ \left( \gen \prod_{i=1}^{\ell} \msg_i^{-\mu_i}
-\right)^{\rho} \right).
-          %
-	\end{equation*}
-
-    \end{enumerate}
-
-  \item[$\{0,1\} \leftarrow \SPSverify(\pk, \vec{\msg}, \SPSsig)$ :] On input
-signature $\SPSsig = (\widetilde{r}, \widetilde{s}, z) \in \group{2}^2 \times
-\group{1}$ and vector $\vec{\msg} \in \group{1}^\ell$, return the output of the
-following:
-      %
-    \begin{equation}\label{eq:abe-ver}
-      %
-      \pairing(v, \widetilde{r}) \checkcheck \pairing(\gen, \widetilde{s}) \
-\wedge \ \pairing(z, \widetilde{r})\prod_{i=1}^\ell\pairing(\msg_i,
-\widetilde{u}_i) \checkcheck \pairing(\gen, \ggen).
-      %
-    \end{equation}
-
-\end{description}
-
-\end{primitivebox}
-
-This signature is existentially unforgeable in the GGM~\cite{C:AGHO11}. Its
-secret key consists only of field elements. This is why the threshold scheme of
-\Cref{sec:tsps-abe} needs no computation on secret-shared group elements.  every
-share it manipulates is a share of an exponent, and the group elements of the
-signature are obtained by local lifting.
-
-\subsubsection{Structure preserving signatures under
-DDH}\label{sec:tsps-sps-kiltz}
-
-Kiltz, Pan, and Wee introduced a structure preserving signature scheme that is
-existentially unforgeable under the DDH assumption~\cite{C:KilPanWee15}. We
-write $\vec{h}^{\,\mat{A}}$, for a vector $\vec{h}$ of group elements and a
-matrix $\mat{A}$ of field elements of matching dimension, for the vector whose
-$j^{\mathrm{th}}$ entry is $\prod_{i} h_i^{a_{i,j}}$, and $\gen^{\vec{a}}$ for
-the componentwise exponentiation $(\gen^{a_1}, \gen^{a_2}, \ldots)$.
-
-\begin{primitivebox}{Structure preserving signatures under DDH}{sps-kiltz}
-
-  \begin{description}
-
-    \item[$(\pk, \sk) \sample \SPSgen(\secparam, \ell)$ :] On input security
-parameter $\secparam$ and vector length $\ell$, do:
-
-      \begin{enumerate}
-
-	\item Sample column vectors $\vec{\alpha} = (1, \alpha)^{\mathsf{T}}$
-and $\vec{\beta} = (1, \beta)^{\mathsf{T}}$, for uniformly random $\alpha, \beta
-\in \Zp$, together with uniformly random matrices $\mat{K} \in
-\Zp^{(\ell+1)\times 2}$, $\mat{\Gamma} \in \Zp^{2\times 2}$, and $\mat{\Delta}
-\in \Zp^{2\times 2}$.
-
-	\item Compute $\vec{\mu} = \mat{K}\vec{\alpha} \in \Zp^{\ell+1}$,
-$\vec{\nu} = \mat{\Gamma}\vec{\alpha}$, $\vec{\omega} =
-\mat{\Delta}\vec{\alpha}$, $\vec{\xi} = \vec{\beta}^{\mathsf{T}}\mat{\Gamma}$,
-and $\vec{\upsilon} = \vec{\beta}^{\mathsf{T}}\mat{\Delta}$, the last four in
-$\Zp^2$.
-
-	\item Compute $\vec{b} = \gen^{(1, \beta)}$, $\vec{x} =
-\gen^{\vec{\xi}}$, and $\vec{y} = \gen^{\vec{\upsilon}}$, each in $\group{1}^2$.
-
-	\item Compute $\vec{\widetilde{a}} = \ggen^{(1, \alpha)}$,
-$\vec{\widetilde{u}} = \ggen^{\vec{\mu}}$, $\vec{\widetilde{v}} =
-\ggen^{\vec{\nu}}$, and $\vec{\widetilde{w}} = \ggen^{\vec{\omega}}$.
-
-	\item Return $\sk = (\mat{K}, \vec{b}, \vec{x}, \vec{y})$ and $\pk =
-(\vec{\widetilde{a}}, \vec{\widetilde{u}}, \vec{\widetilde{v}},
-\vec{\widetilde{w}})$.
-
-      \end{enumerate}
-
-    \item[$\SPSsig \sample \SPSsign(\sk, \vec{\msg})$ :] On input secret key
-$\sk = (\mat{K}, \vec{b}, \vec{x}, \vec{y})$ and vector $\vec{\msg} = (\msg_1,
-\ldots, \msg_\ell)$, do:
-
-      \begin{enumerate}
-
-	\item Sample $\rho, \sigma \sample \Zp^*$.
-
-	\item Compute $\widetilde{q} = \ggen^{\sigma}$, $\vec{r} =
-\vec{b}^{\,\rho}$, $\vec{s} = \vec{b}^{\,\rho\sigma}$, and $\vec{z} = (\gen,
-\vec{\msg})^{\mat{K}} \cdot \left( \vec{x} \, \vec{y}^{\,\sigma}
-\right)^{\rho}$, all in $\group{1}^2$ except $\widetilde{q}$.
-
-	\item Return $\SPSsig = (\widetilde{q}, \vec{r}, \vec{s}, \vec{z})$.
-
-      \end{enumerate}
-
-    \item[$\{0,1\} \leftarrow \SPSverify(\pk, \vec{\msg}, \SPSsig)$ :] On input
-signature $\SPSsig =(\widetilde{q}, \vec{r}, \vec{s}, \vec{z}) \in
-\group{2}\times\group{1}^6$ and vector $\vec{\msg}$ of $\ell$ messages in
-$\group{1}$, return the output of the following, where $r_1$ and $s_1$ denote
-the first entries of $\vec{r}$ and $\vec{s}$:
-      %
-      \begin{equation}\label{eq:kiltz-ver}
-      %
-	\pairing(\vec{z}, \vec{\widetilde{a}}) \checkcheck \pairing((\gen,
-\vec{\msg}), \vec{\widetilde{u}})\, \pairing(\vec{r},\vec{\widetilde{v}})\,
-\pairing(\vec{s}, \vec{\widetilde{w}}) \ \wedge \ \pairing(r_1, \widetilde{q})
-\checkcheck \pairing(s_1, \ggen).
-      %
-      \end{equation}
-      %
-      Here $\pairing(\vec{h}, \vec{\widetilde{h}})$ abbreviates $\prod_j
-\pairing(h_j, \widetilde{h}_j)$.
-
-  \end{description}
-
-\end{primitivebox}
-
-Unlike the scheme of \Cref{sec:tsps-sps-ggm}, this secret key contains the group
-elements $\vec{b}, \vec{x}, \vec{y} \in \group{1}^2$, and signing raises each of
-them to a secret exponent. It is this that the threshold scheme of
-\Cref{sec:tsps-kiltz} needs $\algo{ExpGrp}$ for, and hence this that motivates
-the extension of secret sharing to group elements. Retaining the discrete
-logarithms $\beta, \vec{\xi}, \vec{\upsilon}$ in shared form instead would let
-$\algo{Mul}$ and local lifting suffice, but the signers would then hold shares
-of an object other than the secret key the underlying scheme specifies. We do
-not take this route, and note it only as a possible optimisation.
-
-\subsection{Instantiating $\TSPS$}
-
-\subsubsection{Optimal threshold structure preserving
-signatures}\label{sec:tsps-abe}
-
-We formally describe a threshold structure preserving signature scheme based on
-the structure preserving scheme of Abe, Groth, Haralambiev, and Ohkubo, built
-from the MPC protocol of \Cref{sec:tsps-mpc}~\cite{C:AGHO11}. The scheme is
-given in \Cref{prot:tsps-abe}. Its signing algorithm has the decomposition the
-construction requires. The randomness $\rho$ and every value derived from it are
-independent of the message, and the message enters only through terms of the
-form $\msg_i^{-\rho\mu_i}$, in which a public group element is raised to a
-secret-shared field element.
-
-\begin{protocolbox}{Optimal threshold structure preserving signatures}{tsps-abe}
-
-  \begin{description}
-
-    \item[$(\pk, \shr{\sk}) \sample \TSPSgen(\secparam, \ell, t, n)$ :] Key
-generation is the generic $\algo{MPC}$ evaluation of $\SPSgen$ described in
-\Cref{sec:tsps-construction}, applied to \Cref{sec:tsps-sps-ggm}: sampling
-becomes $\ell+1$ calls to $\algo{RandShare}$, and lifting to $\pk$ is local. On
-input the security parameter, vector length $\ell$, corruption threshold $t$,
-and number of signers $n$, the signers jointly compute
+\begin{outline}
+  \item $\AGHO$ recalled in the Preliminaries (cite C:AGHO11); with $\rho =
+1/\omega$ for its signing randomness, a signature on $\vec{\msg}$ is
       %
       \begin{equation*}
       %
-	\shr{\vec{\mu}} = (\shr{\mu_1}, \ldots, \shr{\mu_\ell}) \sample
-(\Zp^*)^\ell, \quad \shr{\tau} \sample \Zp, \quad \shr{v} = \gen^{\shr{\tau}},
-\quad \shr{\widetilde{u}_i} = \ggen^{\shr{\mu_i}} \ \ (i \in [\ell]),
+	(\widetilde{r}, \widetilde{s}, z) = \left(\ggen^{1/\rho}, \
+\ggen^{\tau/\rho}, \ \gen^{\rho} \prod_{i=1}^{\ell} \msg_i^{-\rho\mu_i}\right)
       %
       \end{equation*}
-      %
-      abort if any call returns $\bot$, and otherwise call $\algo{Open}$ on
-$\shr{v}$ and $(\shr{\widetilde{u}_1}, \ldots, \shr{\widetilde{u}_\ell})$ alone,
-to reconstruct and publish $\pk = (\vec{\widetilde{u}}, v)$. Each signer retains
-the secret shares $\shr{\sk} = (\shr{\mu_1}, \ldots, \shr{\mu_\ell},
-\shr{\tau})$.
+  \item decomposable with $c_0 = (\widetilde{r}, \widetilde{s})$, $c_1 =
+\gen^{\rho}$, $e_{1,i} = -\rho\mu_i$, none depending on the message
+  \item everything offline is a field element or a generator raised to one, so
+no $\algo{ExpGrp}$
+  \item the costly step is $1/\rho$: directly it's a multiplication and an
+opening, then $\tau/\rho$ one more multiplication, three rounds; multiplying
+$\tau$ by the same mask as $\rho$ in the first round gives $\tau/\rho$ once the
+mask is opened, so two rounds
+  \item result: threshold $\AGHO$, \Cref{prot:tsps-abe}
+\end{outline}
 
-    \item[$\shr{\state} \sample \algo{OffSign}(\shr{\sk})$ :] Every value here
-is independent of the message, so this phase absorbs all of the interaction that
-signing requires. On input the secret key shares, the signers jointly compute
+\begin{protocolbox}{The threshold structure-preserving signature scheme from AGHO}{tsps-abe}
+
+  \begin{description}
+
+    \item[$(\pk, \shr{\sk}) \sample \TSPSgen(\secparam, \ell, t, n)$ :] The
+signers compute
       %
       \begin{equation*}
       %
-	\shr{\rho} \sample \Zp^*, \quad \shr{1/\rho} \sample
-\algo{Inv}(\shr{\rho}), \quad \shr{\rho\mu_i} \sample \algo{Mul}(\shr{\rho},
-\shr{\mu_i}) \ \ (i \in [\ell]), \quad \shr{\tau/\rho} \sample
-\algo{Mul}(\shr{\tau}, \shr{1/\rho}),
+	\shr{\mu_1}, \ldots, \shr{\mu_\ell}, \shr{\tau} \sample
+\algo{RandShare}(), \quad \shr{v} = \gen^{\shr{\tau}}, \quad
+\shr{\widetilde{u}_i} = \ggen^{\shr{\mu_i}} \ \ (i \in [1,\ell]),
       %
       \end{equation*}
       %
-      abort if any call returns $\bot$, and otherwise each signer locally
-computes
+      and open $\pk = (\widetilde{u}_1, \ldots, \widetilde{u}_\ell, v)$. Each
+signer keeps $\shr{\sk} = (\shr{\mu_1}, \ldots, \shr{\mu_\ell}, \shr{\tau})$.
+
+    \item[$\shr{\state} \sample \TSPSoffsign(\shr{\sk})$ :] The signers sample
+$\shr{\rho}, \shr{\beta} \sample \algo{RandShare}()$, compute
       %
       \begin{equation*}
       %
-	\shr{\gen^{\rho}} = \gen^{\shr{\rho}}, \quad \shr{\widetilde{r}} =
-\ggen^{\shr{1/\rho}}, \quad \shr{\widetilde{s}} = \ggen^{\shr{\tau/\rho}},
+	\shr{\rho\beta}, \ \shr{\rho\mu_i} \ \ (i \in [1,\ell]), \
+\shr{\tau\beta} \sample \algo{Mul}
       %
       \end{equation*}
       %
-      against the relevant generators. The offline phase concludes by storing
-$\shr{\state} = (\shr{\rho\mu_1}, \ldots, \shr{\rho\mu_\ell}, \shr{\gen^{\rho}},
-\shr{\widetilde{r}}, \shr{\widetilde{s}})$, which is consumed by a single later
-invocation of $\algo{OnSign}$ and then discarded.
+      in one round, and in a second round open $\gamma = \rho\beta$, aborting if
+$\gamma = 0$. Each signer then computes locally
+      %
+      \begin{equation*}
+      %
+	\shr{1/\rho} = \gamma^{-1}\shr{\beta}, \quad \shr{\tau/\rho} =
+\gamma^{-1}\shr{\tau\beta}, \quad \shr{\widetilde{r}} = \ggen^{\shr{1/\rho}},
+\quad \shr{\widetilde{s}} = \ggen^{\shr{\tau/\rho}}, \quad \shr{\gen^{\rho}} =
+\gen^{\shr{\rho}},
+      %
+      \end{equation*}
+      %
+      and stores $\shr{\state} = (\shr{\widetilde{r}}, \shr{\widetilde{s}},
+\shr{\gen^{\rho}}, \shr{\rho\mu_1}, \ldots, \shr{\rho\mu_\ell})$.
 
-    \item[$\shr{\SPSsig} \leftarrow \algo{OnSign}(\shr{\sk}, \shr{\state},
-\vec{\msg})$ :] On input message vector $\vec{\msg}$, each signer computes,
-entirely locally,
+    \item[$\SPSsig_i \leftarrow \TSPSonsign(\sk_i, \state_i, \vec{\msg})$ :]
+Each signer computes
       %
       \begin{equation*}
       %
@@ -259,176 +87,210 @@ entirely locally,
       %
       \end{equation*}
       %
-      raising each public message element to the negation of the corresponding
-stored share and taking the product. Its signature share is $\shr{\SPSsig} =
-(\shr{\widetilde{r}}, \shr{\widetilde{s}}, \shr{z})$. No call to $\algo{MPC}$ is
-made.
+      and outputs $(\shr{\widetilde{r}}, \shr{\widetilde{s}}, \shr{z})$.
 
-    \item[$\SPSsig \leftarrow \TSPScombine(\shr{\SPSsig})$ :] On input $t+1$
-signature shares, the combining party calls $\algo{Open}$ on
-$\shr{\widetilde{r}}$, $\shr{\widetilde{s}}$, and $\shr{z}$, and returns the
-signature $\SPSsig = (\widetilde{r}, \widetilde{s}, z)$ on $(\msg_1, \ldots,
-\msg_\ell) \in \group{1}^\ell$, or $\bot$ if any call does.
+    \item[$\SPSsig \leftarrow \TSPScombine(\{\SPSsig_i\}_{i \in Q})$ :]
+Reconstruct $\widetilde{r}$, $\widetilde{s}$ and $z$ from the shares of the $t+1$
+signers in $Q$, and output $\SPSsig = (\widetilde{r}, \widetilde{s}, z)$.
 
-    \item[$\{0,1\} \leftarrow \SPSverify(\pk, \vec{\msg}, \SPSsig)$ :] On input
-signature $\SPSsig = (\widetilde{r}, \widetilde{s}, z)$, vector $(\msg_1,
-\ldots, \msg_\ell) \in \group{1}^\ell$, and public key $\pk =
-(\vec{\widetilde{u}}, v)$, do the following:
-
-      \begin{enumerate}
-
-	\item Check whether~\eqref{eq:abe-ver} holds, returning 1 if so and 0
-otherwise.
-
-      \end{enumerate}
+    \item[$\{0,1\} \leftarrow \TSPSverify(\pk, \vec{\msg}, \SPSsig)$ :] Output
+$1$ if and only if
+      %
+      \begin{equation*}
+      %
+	\pairing(v, \widetilde{r}) = \pairing(\gen, \widetilde{s}) \ \wedge\
+\pairing(z, \widetilde{r}) \prod_{i=1}^{\ell} \pairing(\msg_i, \widetilde{u}_i)
+= \pairing(\gen, \ggen).
+      %
+      \end{equation*}
 
   \end{description}
 
 \end{protocolbox}
 
-\subsubsection{Threshold structure preserving signatures from
-DDH}\label{sec:tsps-kiltz}
+\subsection{Instantiating $\TSPS$ with $\KPW$}\label{sec:tsps-kiltz}
 
-We now formally describe a threshold structure preserving signature scheme based
-on the structure preserving scheme of Kiltz, Pan, and Wee, built from the MPC
-protocol of \Cref{sec:tsps-mpc}~\cite{C:KilPanWee15}. The scheme is given in
-\Cref{prot:tsps-kiltz}. Its signing algorithm again has the required
-decomposition. Here $\rho$, $\sigma$, and the terms derived from them are
-message-independent, and the message enters only through $(\gen,
-\vec{\msg})^{\mat{K}}$, in which the public group elements of $\vec{\msg}$ are
-raised to the secret-shared entries of $\mat{K}$.
+\Cref{prim:sps-kiltz} recalls the $\KPW$ SPS scheme~\cite{C:KilPanWee15}. We write
+$k_{i,j}$ for the entry of $\mat{K}$ in row $i$ and column $j$, and
+$\mathsf{T}$ denotes transposition. For a vector of group elements $\vec{h} =
+(h_1, \ldots, h_{\ell+1})$ and a matrix $\mat{K} \in \Zp^{(\ell+1) \times 2}$,
+we write $\vec{h}^{\,\mat{K}}$ for the pair $(\prod_i h_i^{k_{i,1}}, \prod_i
+h_i^{k_{i,2}})$, and $(\gen, \vec{\msg})$ for the vector $(\gen, \msg_1, \ldots,
+\msg_\ell)$. For a vector $\vec{a}$ of field
+elements we write $\gen^{\vec{a}}$ for $(\gen^{a_1}, \gen^{a_2}, \ldots)$.
+Products of vectors are taken entry by entry, and for $\vec{h} \in \group{1}^2$
+and $\vec{\widetilde{h}} \in \group{2}^2$ we write $\pairing(\vec{h},
+\vec{\widetilde{h}}) = \pairing(h_1, \widetilde{h}_1)\pairing(h_2,
+\widetilde{h}_2)$.
 
-\begin{protocolbox}{Threshold structure preserving signatures from
-DDH}{tsps-kiltz}
+\begin{primitivebox}{The $\KPW$ SPS scheme}{sps-kiltz}
 
   \begin{description}
 
-    \item[$(\pk, \shr{\sk}) \sample \TSPSgen(\secparam, \ell, t, n)$ :] Key
-generation is the generic $\algo{MPC}$ evaluation of $\SPSgen$ described in
-\Cref{sec:tsps-construction}, applied to the equations defining the scheme of
-\Cref{sec:tsps-sps-kiltz}. Every sampling becomes a call to $\algo{RandShare}$.
-Every entry of a matrix-vector or vector-vector product below is one call to
-$\algo{Mul}$ between two secret-shared field elements, followed by a local
-addition, since the leading entry of $\vec{\alpha}$ and $\vec{\beta}$ is the
-public constant $1$. Every exponentiation of $\gen$ or $\ggen$ is local, by
-linearity preservation.  On input the security parameter, vector length $\ell$,
-corruption threshold $t$, and number of signers $n$, the signers jointly compute
-$(t+1, n)$ shares of the following, in order:
+    \item[$(\pk, \sk) \sample \SPSgen(\secparam, \ell)$ :] Sample $\alpha, \beta
+\sample \Zp$, $\mat{K} \sample \Zp^{(\ell+1)\times 2}$ and $\mat{\Gamma},
+\mat{\Delta} \sample \Zp^{2\times 2}$. Let $\vec{\alpha} = (1,
+\alpha)^{\mathsf{T}}$ and $\vec{\beta} = (1, \beta)^{\mathsf{T}}$, and compute
+$\vec{\mu} = \mat{K}\vec{\alpha}$, $\vec{\nu} = \mat{\Gamma}\vec{\alpha}$,
+$\vec{\omega} = \mat{\Delta}\vec{\alpha}$, $\vec{\xi} =
+\vec{\beta}^{\mathsf{T}}\mat{\Gamma}$, and $\vec{\upsilon} =
+\vec{\beta}^{\mathsf{T}}\mat{\Delta}$. Output
       %
       \begin{gather*}
       %
-	\shr{\vec{\alpha}} = (1, \shr{\alpha})^{\mathsf{T}}, \quad
-\shr{\vec{\beta}} = (1, \shr{\beta})^{\mathsf{T}}, \quad \shr{\mat{K}} \sample
-\Zp^{(\ell+1)\times 2}, \quad \shr{\mat{\Gamma}}, \shr{\mat{\Delta}} \sample
-\Zp^{2\times 2}; \\[4pt]
+	\sk = (\mat{K}, \vec{b}, \vec{x}, \vec{y}) = (\mat{K}, \gen^{(1,
+\beta)}, \gen^{\vec{\xi}}, \gen^{\vec{\upsilon}}), \\
       %
-	\shr{\vec{\mu}} = \shr{\mat{K}}\,\shr{\vec{\alpha}}, \quad
-\shr{\vec{\nu}} = \shr{\mat{\Gamma}}\,\shr{\vec{\alpha}}, \quad
-\shr{\vec{\omega}} = \shr{\mat{\Delta}}\,\shr{\vec{\alpha}}, \quad
-\shr{\vec{\xi}} = \shr{\vec{\beta}}^{\mathsf{T}}\shr{\mat{\Gamma}}, \quad
-\shr{\vec{\upsilon}} = \shr{\vec{\beta}}^{\mathsf{T}}\shr{\mat{\Delta}}; \\[4pt]
+	\pk = (\vec{\widetilde{a}}, \vec{\widetilde{u}}, \vec{\widetilde{v}},
+\vec{\widetilde{w}}) = (\ggen^{(1, \alpha)}, \ggen^{\vec{\mu}},
+\ggen^{\vec{\nu}}, \ggen^{\vec{\omega}}).
+      %
+      \end{gather*}
+
+    \item[$\SPSsig \sample \SPSsign(\sk, \vec{\msg})$ :] Sample $\rho, \sigma
+\sample \Zp^*$ and output $\SPSsig = (\widetilde{q}, \vec{r}, \vec{s},
+\vec{z})$, where
+      %
+      \begin{equation*}
+      %
+	\widetilde{q} = \ggen^{\sigma}, \quad \vec{r} = \vec{b}^{\,\rho},
+\quad \vec{s} = \vec{b}^{\,\rho\sigma}, \quad \vec{z} = (\gen,
+\vec{\msg})^{\mat{K}} \cdot \vec{x}^{\,\rho}\, \vec{y}^{\,\rho\sigma}.
+      %
+      \end{equation*}
+
+    \item[$\{0,1\} \leftarrow \SPSverify(\pk, \vec{\msg}, \SPSsig)$ :] Output
+$1$ if and only if
+      %
+      \begin{equation*}
+      %
+	\pairing(\vec{z}, \vec{\widetilde{a}}) = \pairing((\gen,
+\vec{\msg}), \vec{\widetilde{u}})\, \pairing(\vec{r},\vec{\widetilde{v}})\,
+\pairing(\vec{s}, \vec{\widetilde{w}}) \ \wedge \ \pairing(r_1, \widetilde{q})
+= \pairing(s_1, \ggen),
+      %
+      \end{equation*}
+      %
+      where $r_1$ and $s_1$ are the first entries of $\vec{r}$ and $\vec{s}$, and
+$\pairing((\gen, \vec{\msg}), \vec{\widetilde{u}}) = \pairing(\gen,
+\widetilde{u}_1) \prod_{i=1}^{\ell} \pairing(\msg_i, \widetilde{u}_{i+1})$.
+
+  \end{description}
+
+\end{primitivebox}
+
+\begin{outline}
+  \item $\KPW$ is EUF-CMA under SXDH (cite C:KilPanWee15)
+  \item decomposable: $c_0 = (\widetilde{q}, \vec{r}, \vec{s})$, and entry $j$ of
+$\vec{z}$ has $c_j = \gen^{k_{1,j}} x_j^{\rho} y_j^{\rho\sigma}$ and $e_{j,i} =
+k_{i+1,j}$; none depend on the message, which only enters as public $\msg_i$
+raised to shared entries of $\mat{K}$
+  \item our protocol and implementation compute $\gen^{k_{1,j}}$ in the online
+phase instead, also local
+\end{outline}
+
+Unlike $\AGHO$, the secret key contains the group elements $\vec{b}, \vec{x},
+\vec{y} \in \group{1}^2$, and the offline phase raises each of them to a shared
+exponent. These are shared group elements raised to shared field elements, which
+needs $\algo{ExpGrp}$, and so $\KPW$ needs sharings of group elements.
+The signers could instead keep the discrete logarithms $\beta, \vec{\xi},
+\vec{\upsilon}$ as shares of field elements, so that $\algo{Mul}$ and linear
+operations would suffice, but they would then no longer hold shares of the
+secret key of $\KPW$ as it is defined. We keep the key as defined.
+
+\begin{outline}
+  \item threshold $\KPW$ in \Cref{prot:tsps-kiltz}
+  \item offline phase: one multiplication, then one round of eight calls to
+$\algo{ExpGrp}_1$
+  \item first entry of $\vec{b}$ is the public $\gen$, so two of the eight could
+be local, but the implementation makes all eight
+\end{outline}
+
+\begin{protocolbox}{The threshold structure-preserving signature scheme from KPW}{tsps-kiltz}
+
+  \begin{description}
+
+    \item[$(\pk, \shr{\sk}) \sample \TSPSgen(\secparam, \ell, t, n)$ :] The
+signers sample $\shr{\alpha}$, $\shr{\beta}$ and every entry of $\shr{\mat{K}}$,
+$\shr{\mat{\Gamma}}$ and $\shr{\mat{\Delta}}$ with $\algo{RandShare}$, and
+compute $\shr{\vec{\mu}}$, $\shr{\vec{\nu}}$, $\shr{\vec{\omega}}$,
+$\shr{\vec{\xi}}$ and $\shr{\vec{\upsilon}}$ with one call to $\algo{Mul}$ per
+entry, followed by a local addition, since the first entries of $\vec{\alpha}$ and
+$\vec{\beta}$ are the public constant $1$. Each signer then
+computes locally
+      %
+      \begin{gather*}
       %
 	\shr{\vec{b}} = \gen^{(1, \shr{\beta})}, \quad \shr{\vec{x}} =
-\gen^{\shr{\vec{\xi}}}, \quad \shr{\vec{y}} = \gen^{\shr{\vec{\upsilon}}};
-\\[4pt]
+\gen^{\shr{\vec{\xi}}}, \quad \shr{\vec{y}} = \gen^{\shr{\vec{\upsilon}}}, \\
       %
 	\shr{\vec{\widetilde{a}}} = \ggen^{(1, \shr{\alpha})}, \quad
 \shr{\vec{\widetilde{u}}} = \ggen^{\shr{\vec{\mu}}}, \quad
 \shr{\vec{\widetilde{v}}} = \ggen^{\shr{\vec{\nu}}}, \quad
-\shr{\vec{\widetilde{w}}} = \ggen^{\shr{\vec{\omega}}}.
+\shr{\vec{\widetilde{w}}} = \ggen^{\shr{\vec{\omega}}},
       %
       \end{gather*}
       %
-      If any call to $\algo{MPC}$ returns $\bot$, the signers abort. Otherwise
-they call $\algo{Open}$ on $(\shr{\vec{\widetilde{a}}},
-\shr{\vec{\widetilde{u}}}, \shr{\vec{\widetilde{v}}},
-\shr{\vec{\widetilde{w}}})$ alone, to reconstruct and publish $\pk =
-(\vec{\widetilde{a}}, \vec{\widetilde{u}}, \vec{\widetilde{v}},
-\vec{\widetilde{w}})$. Each signer retains the secret shares $\shr{\sk} =
-(\shr{\mat{K}}, \shr{\vec{b}}, \shr{\vec{x}}, \shr{\vec{y}})$. All $2(\ell+1)$
-entries of $\shr{\mat{K}}$ are retained as shares of field elements, unlifted,
-since $\algo{OnSign}$ uses them as exponents.
+      and the signers open $\pk = (\vec{\widetilde{a}}, \vec{\widetilde{u}},
+\vec{\widetilde{v}}, \vec{\widetilde{w}})$. Each signer keeps $\shr{\sk} =
+(\shr{\mat{K}}, \shr{\vec{b}}, \shr{\vec{x}}, \shr{\vec{y}})$.
 
-    \item[$\shr{\state} \sample \algo{OffSign}(\shr{\sk})$ :] Every value here
-is independent of the message, so this phase absorbs all of the interaction that
-signing requires. On input the secret key shares, the signers jointly compute
+    \item[$\shr{\state} \sample \TSPSoffsign(\shr{\sk})$ :] The signers sample
+$\shr{\rho}, \shr{\sigma} \sample \algo{RandShare}()$, and compute
+      %
+      \begin{gather*}
+      %
+	\shr{\rho\sigma} \sample \algo{Mul}(\shr{\rho}, \shr{\sigma}), \\
+      %
+	\shr{\vec{r}} = \shr{\vec{b}^{\,\rho}}, \ \shr{\vec{s}} =
+\shr{\vec{b}^{\,\rho\sigma}}, \ \shr{\vec{x}^{\,\rho}}, \
+\shr{\vec{y}^{\,\rho\sigma}} \sample \algo{ExpGrp}_1,
+      %
+      \end{gather*}
+      %
+      the second line as eight calls to $\algo{ExpGrp}_1$, one per entry, in one
+round.
+      Each signer then computes locally $\shr{\widetilde{q}} =
+\ggen^{\shr{\sigma}}$ and $\shr{\vec{z}^*} = \shr{\vec{x}^{\,\rho}} \cdot
+\shr{\vec{y}^{\,\rho\sigma}}$, and stores $\shr{\state} = (\shr{\widetilde{q}},
+\shr{\vec{r}}, \shr{\vec{s}}, \shr{\vec{z}^*})$.
+
+    \item[$\SPSsig_i \leftarrow \TSPSonsign(\sk_i, \state_i, \vec{\msg})$ :]
+Each signer computes
       %
       \begin{equation*}
       %
-	\shr{\rho}, \shr{\sigma} \sample \Zp^*, \qquad \shr{\rho\sigma} \sample
-\algo{Mul}(\shr{\rho}, \shr{\sigma}),
+	\shr{\vec{z}} = \shr{\vec{z}^*} \cdot (\gen, \vec{\msg})^{\shr{\mat{K}}},
       %
       \end{equation*}
       %
-      and then, via eight calls to $\algo{ExpGrp}_1$, two for each of the four
-vectors, the sharings
+      and outputs
+$(\shr{\widetilde{q}}, \shr{\vec{r}}, \shr{\vec{s}}, \shr{\vec{z}})$.
+
+    \item[$\SPSsig \leftarrow \TSPScombine(\{\SPSsig_i\}_{i \in Q})$ :]
+Reconstruct every group element from the shares of the $t+1$ signers in $Q$, and
+output $\SPSsig = (\widetilde{q}, \vec{r}, \vec{s}, \vec{z})$.
+
+    \item[$\{0,1\} \leftarrow \TSPSverify(\pk, \vec{\msg}, \SPSsig)$ :] Output
+$1$ if and only if
       %
       \begin{equation*}
       %
-	\shr{\vec{b}^{\,\rho}}, \quad \shr{\vec{b}^{\,\rho\sigma}}, \quad
-\shr{\vec{x}^{\,\rho}}, \quad \shr{\vec{y}^{\,\rho\sigma}}.
+	\pairing(\vec{z}, \vec{\widetilde{a}}) = \pairing((\gen,
+\vec{\msg}), \vec{\widetilde{u}})\, \pairing(\vec{r},\vec{\widetilde{v}})\,
+\pairing(\vec{s}, \vec{\widetilde{w}}) \ \wedge \ \pairing(r_1, \widetilde{q})
+= \pairing(s_1, \ggen).
       %
       \end{equation*}
-      %
-      Aborting if any call returns $\bot$, each signer then locally computes
-$\shr{\ggen^{\sigma}} = \ggen^{\shr{\sigma}}$ and takes the product
-$\shr{\vec{z}^*} = \shr{\vec{x}^{\,\rho}} \cdot \shr{\vec{y}^{\,\rho\sigma}}$.
-The offline phase concludes by storing $\shr{\state} = (\shr{\ggen^{\sigma}},
-\shr{\vec{b}^{\,\rho}}, \shr{\vec{b}^{\,\rho\sigma}}, \shr{\vec{z}^*})$, which
-is consumed by a single later invocation of $\algo{OnSign}$ and then discarded.
 
-    \item[$\shr{\SPSsig} \leftarrow \algo{OnSign}(\shr{\sk}, \shr{\state},
-\vec{\msg})$ :] On input message vector $\vec{\msg}$, each signer computes,
-entirely locally,
-      %
-      \begin{equation*}
-      %
-	\shr{\vec{z}} = \left( \gen^{\shr{\kappa_{1,1}}} \prod_{i=1}^{\ell}
-\msg_i^{\shr{\kappa_{i+1,1}}}, \ \ \gen^{\shr{\kappa_{1,2}}} \prod_{i=1}^{\ell}
-\msg_i^{\shr{\kappa_{i+1,2}}} \right) \cdot \shr{\vec{z}^*},
-      %
-    \end{equation*}
-      %
-    raising the public message elements to its stored shares of the entries of
-$\mat{K}$ and multiplying the result into $\shr{\vec{z}^*}$. Its signature share
-is $\shr{\SPSsig} = (\shr{\ggen^{\sigma}}, \shr{\vec{b}^{\,\rho}},
-\shr{\vec{b}^{\,\rho\sigma}}, \shr{\vec{z}})$. No call to $\algo{MPC}$ is made.
-
-  \item[$\SPSsig \leftarrow \TSPScombine(\shr{\SPSsig})$ :] On input $t+1$
-signature shares, the combining party calls $\algo{Open}$ on
-$\shr{\widetilde{q}} = \shr{\ggen^{\sigma}}$, $\shr{\vec{r}} =
-\shr{\vec{b}^{\,\rho}}$, $\shr{\vec{s}} = \shr{\vec{b}^{\,\rho\sigma}}$, and
-$\shr{\vec{z}}$, and returns the signature $\SPSsig = (\widetilde{q}, \vec{r},
-\vec{s}, \vec{z})$ on $\vec{\msg} = (\msg_1, \ldots, \msg_\ell)$, or $\bot$ if
-any call does.
-
-  \item[$\{0,1\} \leftarrow \SPSverify(\pk, \vec{\msg}, \SPSsig)$ :] On input
-signature $\SPSsig = (\widetilde{q}, \vec{r}, \vec{s}, \vec{z})$, vector
-$(\msg_1, \ldots,\msg_\ell) \in \group{1}^\ell$, and public key $\pk
-=(\vec{\widetilde{a}}, \vec{\widetilde{u}},
-\vec{\widetilde{v}},\vec{\widetilde{w}})$, do the following:
-
-    \begin{enumerate}
-
-      \item Check whether~\eqref{eq:kiltz-ver} holds, returning 1 if so and 0
-otherwise.
-
-    \end{enumerate}
-
-\end{description}
+  \end{description}
 
 \end{protocolbox}
 
-Both schemes therefore fall within the class covered by
-\Cref{lem:tsps-construction-correctness} and
-\Cref{thm:tsps-construction-security}, giving the following.
-
-\begin{theorem}\label{thm:tsps-security} Let $\algo{MPC}$ satisfy the properties
-of \Cref{sec:tsps-mpc}. Then the threshold structure preserving signature
-schemes of \Cref{sec:tsps-abe} and \Cref{sec:tsps-kiltz} are correct, and the
-scheme of \Cref{sec:tsps-abe} is adaptive TS-UF-1 secure under the EUF-CMA
-security of the structure preserving signature scheme of
-\Cref{sec:tsps-sps-ggm}, while the scheme of \Cref{sec:tsps-kiltz} is adaptive
-TS-UF-1 secure under the EUF-CMA security of the structure preserving signature
-scheme of \Cref{sec:tsps-sps-kiltz}, in both cases with the loss stated in
-\Cref{thm:tsps-construction-security}.  \end{theorem}
+\begin{theorem}\label{thm:tsps-security} Let the MPC protocol be private and
+secure with abort against up to $t$ adaptively corrupted signers, over a linear
+$(t+1, n)$ threshold sharing. Then
+the threshold $\AGHO$ and $\KPW$ schemes are correct. The threshold $\AGHO$
+scheme is adp-TS-UF-1 secure in the GGM, and the threshold $\KPW$ scheme is
+adp-TS-UF-1 secure under SXDH, in both
+cases with the same loss as the generic construction.  \end{theorem}

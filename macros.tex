@@ -1,15 +1,49 @@
-\newenvironment{proof}{%
-  \par\noindent\textbf{Proof.}\ \small
+% tighter lists and displays
+\setlist[description]{itemsep=3pt, parsep=0pt, topsep=4pt}
+\setlist[enumerate]{itemsep=2pt, parsep=0pt, topsep=4pt}
+\setlist[itemize]{itemsep=2pt, parsep=0pt, topsep=4pt}
+\AtBeginDocument{%
+  \setlength{\abovedisplayskip}{6pt plus 2pt minus 2pt}%
+  \setlength{\belowdisplayskip}{6pt plus 2pt minus 2pt}%
+  \setlength{\abovedisplayshortskip}{3pt plus 2pt}%
+  \setlength{\belowdisplayshortskip}{3pt plus 2pt}%
+}
+\usetikzlibrary{arrows.meta}
+
+% proofs sit under "Proof of ..." headings, so no label here
+\renewenvironment{proof}{%
+  \par
 }{%
   \unskip\nobreak\hfill$\square$\par\medskip
 }
 
 \newcommand{\rebekah}[1]{\textcolor{orange}{{Rebekah}:#1}}
+% outline of a paragraph still to be written
+\newenvironment{outline}{\par\color{orange}\noindent To write:\begin{itemize}}{\end{itemize}\par}
 
 % new environments
-\newtheorem{theorem}{Theorem}
-\newtheorem{lemma}{Lemma}
-\newtheorem{definition}{Definition}
+% tables and figures share one counter
+\makeatletter
+\let\c@table\c@figure
+\makeatother
+
+% theorem bodies upright, not italic
+\theoremstyle{definition}
+\newtheorem{theorem}{Theorem}[chapter]
+% lemmas share the theorem counter; aliascnt keeps cleveref names right
+\newaliascnt{lemma}{theorem}
+\newtheorem{lemma}[lemma]{Lemma}
+\aliascntresetthe{lemma}
+\crefname{lemma}{lemma}{lemmas}
+\Crefname{lemma}{Lemma}{Lemmas}
+
+% let figures share pages with text rather than sit alone on float pages
+\renewcommand{\topfraction}{0.85}
+\renewcommand{\textfraction}{0.1}
+\renewcommand{\floatpagefraction}{0.5}
+
+% hyperref is not loaded, so only the first argument is used
+\providecommand{\texorpdfstring}[2]{#1}
 
 \input{macros-boxes}
 
@@ -55,6 +89,8 @@
 \newcommand{\SPSrandomise}{\SPS\algo{.Randomise}}
 \newcommand{\SPSverify}{\SPS\algo{.Verify}}
 \newcommand{\SPSsig}{\SPS\algo{.sig}}
+\newcommand{\AGHO}{\algo{AGHO}}
+\newcommand{\KPW}{\algo{KPW}}
 \newcommand{\mssg}{M}
 
 % tsps
@@ -62,6 +98,8 @@
 \newcommand{\TSPSgen}{\TSPS\algo{.Gen}}
 \newcommand{\TSPSsign}{\TSPS\algo{.Sign}}
 \newcommand{\TSPScombine}{\TSPS\algo{.Combine}}
+\newcommand{\TSPSoffsign}{\TSPS\algo{.OffSign}}
+\newcommand{\TSPSonsign}{\TSPS\algo{.OnSign}}
 \newcommand{\TSPSrandomise}{\TSPS\algo{.Randomise}}
 \newcommand{\TSPSverify}{\TSPS\algo{.Verify}}
 \newcommand{\TSPSsig}{\TSPS\algo{.sig}}
@@ -130,12 +168,12 @@
 
 % txid
 \newcommand{\uid}{\algo{uid}}
-\newcommand{\ID}{\algo{ID}}
+\newcommand{\ID}{\algo{TT}}
 \newcommand{\IDregister}{\ID\algo{.Register}}
 \newcommand{\IDgrant}{\ID\algo{.Grant}}
 \newcommand{\IDsubmit}{\ID\algo{.Submit}}
 \newcommand{\IDexecute}{\ID\algo{.Execute}}
-\newcommand{\IDgen}{\ID\algo{.IDGen}}
+\newcommand{\IDgen}{\ID\algo{.Gen}}
 \newcommand{\IDidentify}{\ID\algo{.Trace}}
 
 \newcommand{\IDregisterend}{\msgend{\IDregister}}
@@ -163,6 +201,20 @@
 \newcommand{\OPexecuteend}{\msgend{\OPexecute}}
 \newcommand{\OPdepositend}{\msgend{\OPdeposit}}
 \newcommand{\OPidentifyend}{\msgend{\OPidentify}}
+
+% joint proofs of knowledge
+\newcommand{\JPOK}{\algo{JPOK}}
+\newcommand{\JPOKgen}{\JPOK\algo{.Gen}}
+\newcommand{\JPOKprove}{\JPOK\algo{.Prove}}
+\newcommand{\JPOKverify}{\JPOK\algo{.Verify}}
+
+% signatures on committed inputs
+\newcommand{\SCI}{\algo{SCI}}
+\newcommand{\SCIgen}{\SCI\algo{.Gen}}
+\newcommand{\SCIrequest}{\SCI\algo{.Request}}
+\newcommand{\SCIissue}{\SCI\algo{.Issue}}
+\newcommand{\SCIunblind}{\SCI\algo{.Unblind}}
+\newcommand{\SCIverify}{\SCI\algo{.Verify}}
 
 % tagging scheme
 \newcommand{\TAG}{\algo{TAG}}
@@ -244,7 +296,6 @@
 \newcommand{\hgen}{h}
 \newcommand{\ggen}{\tilde{g}}
 \newcommand{\gggen}[1]{\tilde{#1}}
-
 \newcommand{\mat}[1]{\mathrm{#1}}
 
 \newcommand{\group}[1]{\mathbb{G}_{#1}}
@@ -253,8 +304,8 @@
 \newcommand{\idfu}[1]{\mathcal{F}_{#1}}
 
 %% hashes, owfs, prfs
-\newcommand{\hashone}{{H_1}}
-\newcommand{\hashtwo}{{H_2}}
+\newcommand{\hashone}{\hash_1}
+\newcommand{\hashtwo}{\hash_2}
 \newcommand{\G}{\mathcal{G}}
 \newcommand{\FE}{\algo{F}_{\algo{E}}}
 \newcommand{\FT}{\algo{F}_{\algo{T}}}

@@ -1,30 +1,57 @@
 \chapter{Preliminaries}\label{chap:preliminaries}
 
+\begin{outline}
+  \item what the chapter does: fix notation, then say how security is defined
+and proved
+  \item then the primitives later chapters build on: commitments, PRFs, hash
+functions, signatures, public key encryption, proof systems; standard
+definitions follow Katz and Lindell (cite KatLin14)
+  \item finally bilinear groups and our assumptions, and the instantiations
+used by more than one chapter: Sigma protocols and Fiat-Shamir, Pedersen,
+ElGamal, SPS schemes with $\AGHO$, BBS+
+\end{outline}
+
+The thesis contains numerous primitives, protocols, security definitions,
+instantiations and assumptions. To ease understanding of them, and to separate
+our contributions from the prior work we build on, we use a number of different
+coloured boxed environments. Abstract primitives are given directly in prose, and ideal functionalities are
+displayed as plain figures. Security experiments are in green boxes, assumptions
+in pink boxes, instantiations of primitives in blue boxes, and the protocols that
+are contributions of this work in purple boxes. Every box and figure is numbered and titled. Once
+experiments, assumptions, primitives and protocols have been introduced, later
+chapters refer back to them rather than restating them, and each chapter is
+otherwise as self-contained as possible.
+
+\section{Notation}\label{sec:prelims-notation}
+
+\begin{outline}
+  \item bit strings $\{0,1\}^*$, length $|x|$, $[n]$ and $[1,n]$ for $1$ to
+$n$, concatenation $x \| y$
+  \item vectors with an arrow $\vec{x}$, matrices upright capitals
+  \item $x \sample S$ uniform sampling; $y \sample \algo{A}(x)$ running a
+randomised algorithm; $\leftarrow$ for deterministic ones
+  \item $\algo{A}(x; \rho)$ when a security argument needs to name the
+randomness, so $y \sample \algo{A}(x)$ is $\algo{A}(x;\rho)$ for uniform $\rho$
+(was your paragraph in the old encryption section)
+  \item point to the notation list at the front of the thesis
+\end{outline}
+
+\section{Defining secure protocols}\label{sec:prelims-security}
+
 The contributions of this thesis include both constructions of protocols and
 constructions of their underlying primitives. We take different approaches to
-defining and proving the security of each of these.
-
-By primitives, we refer to building blocks such as commitments and signature
-schemes.  Security in this case is handled through defining experiments, a
-limited number of oracles which an adversary has access to, and then showing
-that the adversary cannot win with greater probability than some predefined
-amount. For larger protocols with many parties and interfaces, we capture all
-security goals at once inside an ideal functionality. We then construct a
-simulator to show that the view of an adversary in the real world, interacting
-with our protocol, is indistinguishable from the view when interacting with the
-ideal functionality itself. As the ideal functionality achieves all security
-properties by design, this then shows that the protocol achieves them too.
+defining and proving the security of each of these, described below after the
+notions of efficiency and negligible probability that both rely on.
 
 The definitions of the security goals that we wish to achieve are not complete
-without also defining the capabilities the adversary and the probability of
-success that we class as too large. There are two main ways of doing this: the
-concrete approach and the asymptotic approach. The concrete approach assigns
-numbers to the amount of operations that the adversary is able to execute and a
-fixed bound to the probability of success. The asymptotic approach instead
-treats security as a function parameterised by a security parameter. Then as
-this parameter grows, the resources needed to break a scheme grow faster than
-any fixed polynomial, and the probability of success of the adversary becomes
-vanishingly small.
+without defining the capabilities of the adversary and its success probability.
+There are two main ways of doing this: the concrete approach and the asymptotic
+approach. The concrete approach assigns numbers to the amount of operations that
+the adversary is able to execute and a fixed bound to the probability of
+success. The asymptotic approach instead treats security as a function
+parameterised by a security parameter. Then as this parameter grows, the
+resources needed to break a scheme grow faster than any fixed polynomial, and
+the probability of success of the adversary becomes vanishingly small.
 
 We have chosen to follow the asymptotic approach. This deserves some
 consideration, as we are explicitly aiming for concrete efficiency in the design
@@ -34,39 +61,91 @@ instantiations specifically for the efficiency benefits. However, we wish to
 separate the instantiation choices from the design and security proofs of the
 abstract constructions that we present.
 
-For asymptotic security definitions, there are a few more details we must give.
-An adversary is considered efficient if it runs in probabilistic polynomial time
-(PPT) in the security parameter. We call this parameter $\secparam$, and so the
-adversary's running time is bounded by $p(\secparam)$ for some fixed polynomial
-$p$. It may use randomness in its computation. Honest parties must also satisfy
-this definition of efficiency.
+An adversary is considered efficient if it runs in
+probabilistic polynomial time (PPT) in the security parameter. We call this
+parameter $\secparam$, and so the adversary's running time is bounded by
+$p(\secparam)$ for some fixed polynomial $p$. It may use randomness in its
+computation. Honest parties must also satisfy this definition of efficiency.
+Every algorithm takes $\secparam$ as an input, explicitly or implicitly.
 
 For the success probability of the adversary, we define small with a negligible
-function. A function $f$ from the natural numbers to non-negative real numbers
-is negligible if it is below every inverse polynomial at every point after
-reaching some value. Concretely, for every polynomial $p$, there exists $N$ such
-that $f(\secparam) < 1/p(\secparam)$ for all $\secparam > N$.  Negligible
-functions have a property of closure which carries well to their use in security
-definitions in cryptography. This is that a polynomial number of events each
-occurring with negligible probability, still occurs with negligible probability
-in total. This means an adversary repeating an attack with negligible success
-probability polynomially many times will still have a negligible probability of
-success.
+function. A function $f$ from the natural
+numbers to non-negative real numbers is negligible if it is eventually below every
+inverse polynomial. Concretely, for every
+polynomial $p$, there exists $N$ such that $f(\secparam) < 1/p(\secparam)$ for
+all $\secparam > N$. We write $\negl(\secparam)$ for an unspecified negligible
+function. Negligible functions have a property of closure which carries well to
+their use in security definitions in cryptography. This is that a polynomial
+number of events each occurring with negligible probability, still occurs with
+negligible probability in total. This means an adversary repeating an attack
+with negligible success probability polynomially many times will still have a
+negligible probability of success.
 
-\paragraph{A note on readability.} The thesis contains numerous primitives,
-protocols, security definitions, instantiations, and assumptions to keep track
-of. To ease the understanding of our contributions, and clearly separate them
-from prior work from which we build, a number of different coloured boxed
-environments are used.
+\begin{outline}
+  \item indistinguishability combines PPT and negligible
+  \item distinguisher: PPT adversary that outputs one bit
+  \item two families of distributions indexed by $\secparam$ are
+computationally indistinguishable if every distinguisher outputs $1$ with
+probabilities differing only negligibly on the two
+  \item used later by DDH, zero knowledge and real vs ideal executions
+\end{outline}
 
-Abstract primitives are given directly in prose. Security experiments are boxed
-in green, to set the formal games apart from the prose around them.  Assumptions
-are given in pink boxes, and ideal functionalities are displayed as plain
-figures. Instantiations of primitives are displayed in blue boxes, and the
-protocols that are contributions of this work are given in purple boxes. Once
-experiments, assumptions, primitives and protocols have been introduced, later
-chapters will refer back to them when needed. Protocols, explanations, and
-security analyses throughout aim to be as self contained as possible.
+\begin{outline}
+  \item primitives (commitments, signatures, \ldots): security through an
+experiment, a game between a challenger running the honest algorithms and
+$\adv$ (your old opening paragraph, first half)
+  \item oracle access: $\adv$ submits inputs of its choice, challenger answers
+using secrets $\adv$ does not see
+  \item experiment says when $\adv$ wins; advantage $\Adv$ = probability of
+winning, or distance from $1/2$ where guessing already wins half the time
+  \item property holds if every PPT $\adv$ has negligible advantage
+  \item proofs are reductions: from $\adv$ with non-negligible advantage, build
+an algorithm breaking an assumption or another primitive
+  \item many proofs go through a sequence of games, bounding the change in
+$\adv$'s success between consecutive games
+\end{outline}
+
+\begin{outline}
+  \item larger protocols with many parties and interfaces: capture all goals at
+once in an ideal functionality $\idfu{}$, subscript names the task (your old
+opening paragraph, second half)
+  \item $\idfu{}$ is a trusted party: takes inputs, computes what the task says,
+returns each party its output and nothing more
+  \item view of a party: its inputs, randomness, messages received
+  \item $\textsc{Exec}_{\Pi,\adv}(\secparam)$: joint output of honest parties
+and $\adv$ in the real execution; $\textsc{Exec}_{\idfu{},\simu}(\secparam)$:
+same in the ideal one, honest parties talk only to $\idfu{}$, $\adv$ replaced by
+simulator $\simu$ (old ch05 52-definitions ``Security model'')
+  \item $\Pi$ securely realises $\idfu{}$ if for every PPT $\adv$ there is a PPT
+$\simu$ with the two computationally indistinguishable
+  \item end: $\idfu{}$ has all properties by design, so the protocol does too
+(your old sentence)
+\end{outline}
+
+\begin{outline}
+  \item we work in the standalone model, executions composed sequentially
+  \item UC gives security under arbitrary concurrent composition: every
+environment supplies inputs and talks to the adversary throughout, so the
+simulator cannot rewind (cite FOCS:Canetti01)
+  \item why it matters: several of our simulators extract witnesses by
+rewinding (forking lemma), sound standalone but not in UC (your old ch05
+52-definitions ``Security model'' paragraph says this)
+  \item straight-line extraction would recover UC: prover encrypts its witness
+under a key in the CRS and proves it, or Fischlin instead of Fiat-Shamir (cite
+C:Fischlin05)
+  \item both cost proof size; we only pay it for the withdrawal proof of
+\Cref{chap:offline-payments}
+\end{outline}
+
+\begin{outline}
+  \item in both kinds of definition the adversary corrupts some participants
+  \item honest-but-curious (semi-honest): follows the protocol, adversary sees
+its view and combines it with the views of other corrupted participants
+  \item malicious: deviates from the protocol arbitrarily
+  \item static corruption: corrupted set fixed before the protocol starts;
+adaptive: may corrupt more during the execution, based on what it has seen
+  \item each chapter states which participants may be corrupted, and how
+\end{outline}
 
 \input{chapters/02-preliminaries/21-commitments}
 \input{chapters/02-preliminaries/22-prfs}
@@ -74,3 +153,4 @@ security analyses throughout aim to be as self contained as possible.
 \input{chapters/02-preliminaries/24-signatures}
 \input{chapters/02-preliminaries/25-encryption}
 \input{chapters/02-preliminaries/26-proofs}
+\input{chapters/02-preliminaries/27-instantiations}

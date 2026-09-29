@@ -1,42 +1,105 @@
 \section{Evaluation}\label{sec:agg-creds-evaluation}
 
-The performance of the credential system is evaluated via the instantiation over
-pairing friendly groups. The scheme is instantiated using the BLS12-381 pairing
-system. The construction relies only on the bilinearity of the pairing system,
-and so can easily be instantiated with other pairing systems.
+\begin{outline}
+  \item setup: $\AAC$ and $\ATS$ in Go, gnark-crypto v0.21.0, BLS12-381 (cite gnark-crypto); only bilinearity is used, so other pairing groups work too
+  \item baseline: Idemix, built on BBS+, same library (cite CCS:CamVan02); Idemix issues one credential on all $n$ attributes from one issuer and presents it with $k$ disclosed
+  \item machine: MacBook Air, Apple M2, 16GB RAM, all eight cores; median of 100 repetitions after ten warm-up calls
+  \item spread: interquartile range typically 2\% of the median, never above 6\%, so medians only
+\end{outline}
 
-We implement the credential system in Go using the \texttt{gnark-crypto}
-library~\cite{gnark-crypto}, which provides optimised implementations of group
-and pairing operations for BLS12-381. Benchmarks were collected on a MacBook Pro
-with an M1 Pro chip and 16GB of RAM.
+\begin{table}[htbp] \centering
+  \begin{tabular}{l l r}
+    \toprule
+    Algorithm & Party & Time (ms) \\
+    \midrule
+    $\AACgen$ & & 22.5 \\
+    $\AACregister$ & user & 0.149 \\
+                   & RA & 0.807 \\
+    $\AACissue$ & user & 0.0756 \\
+                & issuer & 2.94 \\
+    $\AACaggregate$ & user & 0.543 \\
+    $\AACpresent$ & user & 20.1 \\
+    $\AACverify$ & verifier & 31.1 \\
+    \midrule
+    $\ATSgen$ & & 0.176 \\
+    $\ATSsign$ & & 0.482 \\
+    $\ATSrandomise$ & & 0.333 \\
+    $\ATSverify$ & & 1.27 \\
+    $\ATSaggregate$ & & 0.533 \\
+    $\ATSverifyagg$ & & 18.9 \\
+    \midrule
+    Idemix present & user & 27.0 \\
+    Idemix verify & verifier & 11.9 \\
+    \bottomrule
+  \end{tabular}
+  \caption[Aggregate credentials: time of every algorithm]{Time of every
+algorithm, for $n = 128$ issuers and $k = 64$ disclosed attributes, medians.
+$\AACregister$ and $\AACissue$ are split into the computation of each party. The
+$\ATS$ rows sign and aggregate single messages under one tag, with
+$\ATSaggregate$ and $\ATSverifyagg$ over $k = 64$ signatures. The Idemix rows
+present one credential on $n = 128$ attributes.}
+  \label{tab:agg-creds-times}
+\end{table}
 
-To assess efficiency, we benchmark the cost of the presentation and verification
-algorithms while first varying the total number of attributes $n$, and then
-holding $n$ constant and varying the number of selectively revealed attributes
-$k$.  \Cref{fig:agg-creds-vary-n,fig:agg-creds-vary-k} display the results.
+\begin{table}[htbp] \centering
+  \begin{tabular}{l r}
+    \toprule
+    Object & Size (bytes) \\
+    \midrule
+    public parameters $\crs$ & 12528 \\
+    registration request & 128 \\
+    registration credential $\regcred$ & 320 \\
+    issuance request & 440 \\
+    credential $\cred$ & 192 \\
+    aggregate credential $\aggcred$ & 3224 \\
+    presentation $\algoproof$ & 10008 \\
+    \midrule
+    $\ATS$ public key $\pk$ & 96 \\
+    $\ATS$ signature $\signature$, single or aggregate & 144 \\
+    \midrule
+    Idemix presentation & 3034 \\
+    \bottomrule
+  \end{tabular}
+  \caption[Aggregate credentials: sizes]{Size of every object, for $n = 128$
+issuers and $k = 64$ disclosed attributes. The Idemix presentation is of one
+credential on $n = 128$ attributes.}
+  \label{tab:agg-creds-sizes}
+\end{table}
 
-The presentation procedure consists of two phases: setup captures the user
-preparing commitments to all $n$ attributes, which is independent of $k$, and
-proving captures the user generating proofs corresponding to the $k$ revealed
-attributes.  We report these phases separately, as they capture distinct costs:
-setup grows with $n$, while proving scales with $k$.  Verification also depends
-primarily on the number of revealed attributes.
+\begin{outline}
+  \item \Cref{tab:agg-creds-times,tab:agg-creds-sizes}: every algorithm and object at $n = 128$, $k = 64$
+  \item registration and issuance are cheap and depend on neither $n$ nor $k$
+  \item communication of registration, in words: the user sends 128 bytes, the RA 352 bytes, three messages in total
+  \item communication of issuance: the user sends 440 bytes, the issuer 224 bytes, four messages in total
+\end{outline}
 
-\begin{figure}[h] \centering
-\includegraphics[width=1\textwidth]{chapters/03-agg-creds/vary_n_big.pdf}
-\caption{Scaling of setup, proving, and verification with total attributes $n$
-varying, for fixed $k$.} \label{fig:agg-creds-vary-n} \end{figure}
+\begin{figure}[htbp] \centering
+\includegraphics[width=\textwidth]{chapters/03-agg-creds/aggcreds_times.pdf}
+\caption[Aggregate credentials: time against $n$ and $k$]{Time of $\AACgen$ against the number of issuers $n$, and of
+$\AACaggregate$, $\AACpresent$ and $\AACverify$ against the number of disclosed
+attributes $k$. Medians.} \label{fig:agg-creds-times} \end{figure}
 
-\begin{figure}[h] \centering
-\includegraphics[width=1\textwidth]{chapters/03-agg-creds/vary_k_big.pdf}
-\caption{Scaling of setup, proving, and verification with revealed attributes
-$k$ varying, for fixed $n$.} \label{fig:agg-creds-vary-k} \end{figure}
+\begin{outline}
+  \item \Cref{fig:agg-creds-times,fig:agg-creds-sizes}: aggregation, presentation and verification grow linearly in $k$ and do not depend on $n$; $n$ only affects $\AACgen$ (and the size of $\crs$)
+\end{outline}
 
-Even for $n = 128$ attributes with $k = 64$ selectively revealed, both proving
-and verification complete in under $10$ms on a laptop. Setup scales linearly
-with $n$, while proving and verification scale linearly with $k$. This contrasts
-with credential systems such as Idemix~\cite{CCS:CamVan02}, where proving and
-presentation costs depend on the total number of attributes, rather than the
-number of disclosed attributes. Overall, our evaluation demonstrates the
-practical efficiency of the system: setup and presentation costs are low enough
-for client devices, and verification remains lightweight.
+\begin{figure}[htbp] \centering
+\includegraphics[width=\textwidth]{chapters/03-agg-creds/aggcreds_sizes.pdf}
+\caption[Aggregate credentials: sizes against $n$ and $k$]{Size of $\crs$ against the number of issuers $n$, and of the aggregate
+credential and the presentation against the number of disclosed attributes
+$k$.} \label{fig:agg-creds-sizes} \end{figure}
+
+\begin{figure}[htbp] \centering
+\includegraphics[width=\textwidth]{chapters/03-agg-creds/aggcreds_idemix.pdf}
+\caption[Aggregate credentials against Idemix]{Presentation and verification time of our scheme and of Idemix. The top
+two panels vary the total number of attributes $n$ with $k = 1$ disclosed, and
+the bottom two vary the number of disclosed attributes $k$ with $n = 128$.
+Medians.}
+\label{fig:agg-creds-idemix} \end{figure}
+
+\begin{outline}
+  \item \Cref{fig:agg-creds-idemix}: Idemix proves knowledge of a signature on all $n$ attributes, so its cost grows with attributes held; ours with attributes disclosed
+  \item numbers at $n = 128$, $k = 1$: present 1.82ms vs 31.9ms for Idemix, verify 4.05ms vs 11.8ms
+  \item Idemix verifies faster once more than about 20 attributes are disclosed, but it has one issuer for all attributes, the setting this chapter avoids
+  \item close: costs are low enough for client devices
+\end{outline}

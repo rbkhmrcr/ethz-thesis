@@ -1,182 +1,191 @@
 \section{Evaluation}\label{sec:offline-evaluation}
+\suppressfloats[t]
 
-We establish the practicality of the scheme by integrating the protocol into a
-mobile wallet and benchmarking it on both iOS and Android. Of the six
-participants of~\Cref{sec:offline-definitions}, only the user's wallet is
-resource constrained, so we evaluate the mobile phone and the secure element
-that make it up. The intermediary, the central bank, the registration authority,
-and the auditor are expected to run on servers. The phone and the secure element
-take four roles across the protocol: the holder who receives funds during a
-withdrawal, the payer and the payee who exchange possession of a token during a
-payment, and the depositor who redeems it.
+\begin{outline}
+  \item only users' wallets are resource constrained, so integrate $\OP$ into a mobile wallet and measure on two phones with a smart card as secure element
+  \item every algorithm also measured separately in a server-side implementation, for the intermediary, central bank, registration authority and auditor
+\end{outline}
 
-\subsection{Implementation}
+\begin{outline}
+  \item phones: Samsung Galaxy A34 (Android 14), iPhone 13 mini (iOS 17.6.1), cryptographic library in Go
+  \item secure element: Javacard applet on an NXP smart card, Smart MX D600 chip, JCOP 4.5, NFC to the phone \cite{javacard}; why a smart card rather than emulation, TEE or platform HSM (old text had this)
+  \item applet signs only for the commitment it generated on receiving a token, and once spent only for the single destination it first signed; this enforces single use
+  \item wallet to payee over Bluetooth Low Energy, to intermediary over HTTPS; point to \Cref{fig:offline-withdraw-seq,fig:offline-pay-seq}
+  \item server side: Go, gnark-crypto 0.21.0, BLS12-381 \cite{gnark-crypto}; MacBook Air, Apple M2, 16\,GB RAM
+  \item medians of $100$ runs, $10$ warm-up calls on the server; IQR within $3\%$ of median for most operations, at most $13\%$ on phones and card, $10\%$ on server
+  \item secure element replaced by an untimed stub on the server
+  \item measure with and without the audit ciphertext, to separate cost of auditing from cost of payment
+\end{outline}
 
-\paragraph{Secure element.} The choice of secure element determines what a
-benchmark measures. We discard three options. Software emulation would ignore
-both the constrained environment of a real device and the cost of communicating
-with it. TEE based secure elements are unsuitable for the reasons given
-in~\Cref{sec:offline-construction}. The HSM based secure elements integrated
-into the Apple and Android platforms are not extensible and do not implement our
-scheme. We therefore use an external secure element, realised as a Javacard
-applet on a smart card, which protects the key and the logic together and
-supports the elliptic curve operations the protocol requires~\cite{javacard}.
+\begin{figure}[htbp] \centering \small
+\begin{tikzpicture}[x=3.2cm, y=-0.75cm,
+  msg/.style={-{Stealth[length=2mm]}, thin},
+  loc/.style={draw=gray!70, fill=white, inner sep=2pt, align=center, font=\footnotesize}]
+  \foreach \x/\n in {0/Secure element, 1/Device, 2/Intermediary, 3/Central bank} {
+    \node[font=\small, text width=2.8cm, align=center] at (\x, 0) {\n};
+    \draw[gray!60] (\x, 0.6) -- (\x, 12.8);
+  }
+  \draw[msg] (1, 1.2) -- node[above] {withdraw $v_0$} (0, 1.2);
+  \node[loc] at (0, 2.3) {$\com_0 \leftarrow \ComCommit$};
+  \draw[msg] (0, 3.4) -- node[above] {$(s_0, \com_0)$} (1, 3.4);
+  \node[loc] at (1, 4.5) {$\SCIrequest$};
+  \draw[msg] (1, 5.6) -- node[above] {$\algo{req}$} (2, 5.6);
+  \node[loc] at (2, 6.7) {lock $v_0$};
+  \draw[msg] (2, 7.8) -- node[above] {$\algo{req}$} (3, 7.8);
+  \node[loc] at (3, 8.9) {$\SCIissue$};
+  \draw[msg] (3, 10.0) -- node[above] {$\algo{resp}$} (2, 10.0);
+  \draw[msg] (2, 11.0) -- node[above] {$\algo{resp}$} (1, 11.0);
+  \node[loc] at (1, 12.1) {$\SCIunblind$, proof $\Sigma$};
+  \node[loc] at (0, 12.1) {store $\tau_0$};
+\end{tikzpicture}
+\caption[Offline payments: withdrawal]{Messages and local steps of a
+withdrawal, between the holder's secure element and device, the intermediary
+and the central bank. The device talks to the intermediary over HTTPS.}
+\label{fig:offline-withdraw-seq} \end{figure}
 
-The applet exposes two functions, receive and sign. Recall that
-the payer's card contributes a signature of knowledge over the payer's and the
-payee's commitments, $\com_i$ and $\com_{i+1}$. The card signs only triples $(v,
-\com_i, \com_{i+1})$ in which $\com_i$ is the commitment it generated when it
-received the token, and, once that token is spent, only against the single
-destination $\com_{i+1}$ it first signed. The first constraint prevents a token
-that has already been passed on from being spent again, and the second prevents
-the current token from being sent to two recipients. It is this state machine,
-rather than any property of the cryptography, that realises the single-use
-enforcement the construction attributes to the secure element. Repeated
-invocations of sign on an unchanged $\com_{i+1}$ are permitted, so that
-errors on the NFC channel, which are not uncommon, do not cost the user a
-payment. Invoking receive deletes the stored commitment and generates a
-new one, which frees the slot but destroys any token held in it, so a device
-that resets a slot to escape the single destination rule loses the token in
-doing so. A single card holds several tokens by partitioning this state into
-slots, with each message carrying a slot identifier.
+\begin{figure}[htbp] \centering \small
+\begin{tikzpicture}[x=3.2cm, y=-0.75cm,
+  msg/.style={-{Stealth[length=2mm]}, thin},
+  loc/.style={draw=gray!70, fill=white, inner sep=2pt, align=center, font=\footnotesize}]
+  \foreach \x/\n in {0/Payer's secure element, 1/Payer's device, 2/Payee's device, 3/Payee's secure element} {
+    \node[font=\small, text width=2.8cm, align=center] at (\x, 0) {\n};
+    \draw[gray!60] (\x, 0.6) -- (\x, 14.7);
+  }
+  \draw[msg] (2, 1.2) -- node[above] {receive $v$} (3, 1.2);
+  \node[loc] at (3, 2.3) {$\com_{i+1} \leftarrow \ComCommit$};
+  \draw[msg] (3, 3.4) -- node[above] {$(s_{i+1}, \com_{i+1})$} (2, 3.4);
+  \draw[msg] (2, 4.4) -- node[above] {$\com_{i+1}$} (1, 4.4);
+  \draw[msg] (1, 5.4) -- node[above] {pay $v$} (0, 5.4);
+  \node[loc] at (0, 6.5) {lock $\tau_i$};
+  \node[loc] at (1, 6.5) {$\ciph_i$, $\Gamma_i$};
+  \draw[{Stealth[length=2mm]}-{Stealth[length=2mm]}, thin] (0, 7.7) --
+    node[above] {$\JPOKprove_0$, $\JPOKprove_1$} (1, 7.7);
+  \node[loc] at (1, 8.8) {$\sigma_i$ on $(v, \com_i, \com_{i+1})$};
+  \draw[msg] (1, 9.9) -- node[above] {$p_i$} (2, 9.9);
+  \node[loc] at (2, 11.0) {verify $\algo{hist}_i$, $\Gamma_i$, $\sigma_i$};
+  \draw[msg] (2, 12.1) -- node[above] {store $\tau_{i+1}$} (3, 12.1);
+  \draw[msg] (2, 13.1) -- node[above] {acknowledge} (1, 13.1);
+  \draw[msg] (1, 14.1) -- node[above] {delete $\com_i$} (0, 14.1);
+\end{tikzpicture}
+\caption[Offline payments: payment]{Messages and local steps of a payment,
+between the payer's and the payee's devices and secure elements. The two devices
+talk over Bluetooth Low Energy, and each device talks to its secure element over
+NFC.} \label{fig:offline-pay-seq} \end{figure}
 
-\paragraph{Mobile wallet.} The wallet is an application that withdraws and
-transfers tokens, communicating with the smart card over NFC, with the payee
-over BLE, and with the intermediary and the registration authority, both exposed
-as cloud services, over HTTPS.
+\begin{outline}
+  \item point to \Cref{tab:offline-timings,fig:offline-phone-steps} for wallet steps on phones and card
+  \item withdrawal and payer side each under half a second on both phones
+  \item most of it is the card: about $230\,\mathrm{ms}$ to generate a pseudonym, $370\,\mathrm{ms}$ for its share of the transfer signature, NFC included
+  \item auditing adds $9\,\mathrm{ms}$ (Android) and $2\,\mathrm{ms}$ (iOS) to the payer's phone, under $3\%$ of payer total
+\end{outline}
 
-\subsection{Protocols}
+\begin{table}[htbp] \centering \small \begin{tabular}{l|rr|rr} \toprule &
+\multicolumn{2}{c|}{Android} & \multicolumn{2}{c}{iOS} \\
+Operation & no audit & audit & no audit & audit \\ \midrule
+Withdrawal, phone & 178 & 175 & 32 & 32 \\
+Withdrawal, smart card & 229 & 229 & 231 & 231 \\
+Payment, payer phone & 37 & 46 & 11 & 13 \\
+Payment, payer smart card & 371 & 371 & 368 & 368 \\
+Payment, payee phone, 1 hop & 80 & 82 & 33 & 33 \\
+Payment, payee smart card & 229 & 229 & 231 & 231 \\
+\bottomrule \end{tabular} \caption[Offline payments: time on the phone and card]{Median time in milliseconds of each step of the
+wallet over $100$ runs, with and without the verifiable encryption of the payer's
+identifier. Smart card figures include the NFC round
+trip. The smart card does the same work with and without auditing, and both
+columns use the same card measurements.} \label{tab:offline-timings}
+\end{table}
 
-Withdrawal consists of local computation on the phone, an NFC exchange with the
-card to obtain $s_0$ and $\com_0$, and a single HTTPS call to the intermediary,
-which contacts the central bank on the user's behalf.
-Figure
-%TODO
- gives the message sequence.
+\begin{figure}[htbp] \centering
+\includegraphics[width=0.75\textwidth]{chapters/06-offline-payments/offline-phone-steps.pdf}
+\caption[Offline payments: wallet steps on the phone and card]{Time of each wallet step at one hop, with auditing, split into the
+smart card, including NFC, and the phone. Medians over $100$ runs.}
+\label{fig:offline-phone-steps} \end{figure}
 
-A payment is preceded by an out of band negotiation of its terms. The payee
-displays a QR code carrying the payment terms, a BLE service identifier, and the
-material for a Diffie-Hellman exchange, and advertises a BLE GATT service with a
-Notify characteristic for data sent to the payer and a Write without response
-characteristic for data received from them. The payer scans the code, completes
-the exchange and confirms the terms, after which every message is encrypted and
-CBOR encoded. Figure 
-%TODO 
-gives the message sequence for the payment itself.
+\begin{outline}
+  \item point to \Cref{fig:offline-hops-times,fig:offline-hops-sizes}: growth with chain length
+  \item verification linear: each hop adds one signature of knowledge and one audit proof
+  \item $32$ hops verify in under a second on both phones: $883\,\mathrm{ms}$ Android, $577\,\mathrm{ms}$ iOS, with auditing
+  \item from four hops on, auditing costs the payee a further $10$ to $20\%$
+  \item payments grow $912$ bytes per hop with auditing, $688$ without
+\end{outline}
 
-\paragraph{Interrupted payments.} A payment that stops part way leaves the two
-wallets in one of two states, and neither loses value. If the payer's card has
-signed but the payee never received the payment, the card remains locked to the
-destination it signed, and the payer can retry against that same destination
-until it succeeds. The token is unspendable elsewhere in the meantime, and is
-recovered by completing the payment rather than by any repair step. If the payee
-stored the token but the acknowledgement back to the payer was lost, the payer's
-card still holds $\com_i$ and has not deleted it, but it will sign only the
-destination it already signed, so it cannot spend the token a second time.  The
-payee holds a token that verifies and can spend or deposit it. In both cases the
-resolution is a retry over NFC or BLE.
+\begin{figure}[htbp] \centering
+\includegraphics[width=\textwidth]{chapters/06-offline-payments/offline-hops-times.pdf}
+\caption[Offline payments: time against the number of hops]{Time against the number of hops, with and without auditing: payee
+verification on Android, iOS and the server, verification by the central bank
+at deposit, and identification by the auditor. Medians; the phones share an
+axis, as do the server payee and the central bank.}
+\label{fig:offline-hops-times} \end{figure}
 
-\subsection{Results}
+\begin{figure}[htbp] \centering
+\includegraphics[width=0.9\textwidth]{chapters/06-offline-payments/offline-hops-sizes.pdf}
+\caption[Offline payments: sizes against the number of hops]{Size in bytes of the payment $p_i$, the transcript $\algo{hist}_n$ and
+the deposit request $d_n$ against the number of hops, with and without
+auditing.} \label{fig:offline-hops-sizes} \end{figure}
 
-We benchmark on a Samsung Galaxy A34 running Android 14 and an iPhone 13 mini
-running iOS 17.6.1, both using a cryptographic library built with Go 1.21.8.
-The scheme is instantiated over the BLS12-381 pairing system, at roughly $128$
-bits of security. The construction relies only on the bilinearity of the
-pairing, so other pairing systems would serve. The secure element is an NXP 1ID
-white plastic card with a Smart MX D600 chip offering $400\,\mathrm{KiB}$ of
-available memory, running JCOP 4.5 with NXP's JCOPx extensions at version 1.1.4,
-and communicating with the phone over NFC. We benchmark the protocol both with
-and without the verifiable encryption of the payer's identifier, to separate the
-cost of auditing from the cost of the payment itself.
+\begin{outline}
+  \item point to \Cref{tab:offline-server,tab:offline-sizes,tab:offline-comms}: server time per algorithm at one hop, object sizes, communication per protocol
+  \item every server-side operation under $5\,\mathrm{ms}$; identification under $0.1\,\mathrm{ms}$
+  \item the card channel never carries more than $192$ bytes in one direction
+\end{outline}
 
-Table~\ref{tab:offline-timings} reports the cost of each operation on both
-platforms. Withdrawal and the payer side of a payment each complete in under
-half a second, of which the smart card accounts for under $400\,\mathrm{ms}$.
-Auditing adds no measurable overhead for the payer, whose audit ciphertext and
-proof are computed once regardless of how long the chain already is, and are
-folded into the transfer signature as described
-in~\Cref{sec:offline-instantiation}.
 
-Table~\ref{tab:offline-scaling} reports the payee's cost as the chain grows.
-Verification is linear in the number of hops, since each hop contributes one
-signature of knowledge and one audit proof to check, and a chain of $32$ hops
-still verifies in under a second. Auditing costs the payee a further $10$ to
-$20\%$, one additional proof per hop. The transcript $\algo{hist}_n$ grows
-linearly in the same way, as it does in the transferable ecash schemes
-of~\Cref{sec:offline-related} that identify only the double spender.
+\begin{table}[htbp] \centering \small \begin{tabular}{llrr} \toprule Algorithm &
+Party & no audit & audit \\ \midrule
+$\OPgen$ & central bank & \multicolumn{2}{c}{0.875} \\
+& registration authority & \multicolumn{2}{c}{0.175} \\
+& auditor & \multicolumn{2}{c}{0.0740} \\
+& commitment key & \multicolumn{2}{c}{0.626} \\
+$\OPregister$ & registration authority & \multicolumn{2}{c}{0.526} \\
+$\OPwithdraw$ & device, request & \multicolumn{2}{c}{1.53} \\
+& intermediary & \multicolumn{2}{c}{1.15} \\
+& central bank & \multicolumn{2}{c}{1.61} \\
+& device, unblind and $\Sigma$ & \multicolumn{2}{c}{2.83} \\
+$\OPexecute$ & payer device & 1.14 & 1.65 \\
+& payee device, 1 hop & 3.75 & 4.32 \\
+$\OPdeposit$ & device & 1.16 & 1.65 \\
+& central bank, 1 hop & 3.83 & 4.28 \\
+$\OPidentify$ & auditor & -- & 0.0778 \\
+\midrule
+$\JPOKverify$, one hop & verifier & 1.97 & 2.38 \\
+PS sign / verify & & \multicolumn{2}{c}{0.148 / 1.42} \\
+BBS+ sign / verify & & \multicolumn{2}{c}{0.280 / 1.31} \\
+ElGamal encrypt / decrypt & & \multicolumn{2}{c}{0.148 / 0.0754} \\
+Pedersen commit & & \multicolumn{2}{c}{0.175} \\
+\bottomrule \end{tabular} \caption[Offline payments: server-side time]{Median server-side time in milliseconds of each
+algorithm at one hop. Rows that do not depend on auditing are
+measured once. The secure element's part is not included.}
+\label{tab:offline-server} \end{table}
 
-Table~\ref{tab:offline-storage} reports the resources the protocol asks of the
-smart card. The applet and its per slot state fit comfortably within the card's
-memory, leaving room for a user to hold several tokens at once.
+\begin{table}[htbp] \centering \small \begin{tabular}{lrr} \toprule Object & no
+audit & audit \\ \midrule
+Public parameters $\crs$ & 1008 & 1056 \\
+$\pk_{\algo{cb}}$, $\rapk$, $\pk_\auditor$ & \multicolumn{2}{c}{480, 96, 48} \\
+Credential $\cred$ & \multicolumn{2}{c}{144} \\
+Registration request, response & \multicolumn{2}{c}{192, 112} \\
+Withdrawal request $\algo{req}$ (of which $\Pi$) & \multicolumn{2}{c}{664 (368)} \\
+Withdrawal response $\algo{resp}$ & \multicolumn{2}{c}{128} \\
+Proof of withdrawal $\Sigma$ & \multicolumn{2}{c}{432} \\
+Secure element's share of the JPOK & \multicolumn{2}{c}{192} \\
+Transfer signature $\sigma_i$ & 640 & 768 \\
+One hop of $\algo{hist}$ & 688 & 912 \\
+Payment $p_i$, 1 hop & 1176 & 1400 \\
+Deposit request $d_n$, 1 hop & 1128 & 1352 \\
+\bottomrule \end{tabular} \caption[Offline payments: sizes]{Sizes in bytes, with group elements
+compressed ($48$ bytes in $\group{1}$, $96$ bytes in $\group{2}$).}
+\label{tab:offline-sizes} \end{table}
 
-\begin{table}[t] \centering \small \begin{tabular}{l|rr|rr} \toprule &
-\multicolumn{2}{c|}{Android} & \multicolumn{2}{c}{iOS} \\ 
-%
-Operation & no audit & audit & no audit & audit \\
-%
- \midrule Withdrawal, device            & & & & \\ 
-% FILL
- Withdrawal, smart card        & & & & \\ 
-% FILL
- Payment, payer device & & & & \\ 
-% FILL 
-Payment, payer smart card     & & & & \\
- % FILL 
- Payment, payee device, 1 hop  & & & & \\ 
-% FILL 
-Deposit, device               & & & & \\ 
-% FILL
-Deposit, smart card           & & & & \\ 
-% FILL 
-\bottomrule \end{tabular} \caption{Wall clock cost in milliseconds of each
-protocol operation, with and without the verifiable encryption of the payer's
-identifier for the auditor.  Smart card figures include the NFC round trip. Each
-figure is the mean of $[\,\cdot\,]$ runs, with the standard deviation in
-parentheses.} \label{tab:offline-timings} \end{table}
-
-\begin{table}[t] \centering \small \begin{tabular}{l|rrrrrr} \toprule Hops $n$ &
-1 & 2 & 4 & 8 & 16 & 32 \\ \midrule Payee verification, no audit (ms) & & & & &
-& \\ 
-% FILL
- Payee verification, audit (ms)    & & & & & & \\
-  % FILL 
-  Transcript $|\algo{hist}_n|$ (B)  & & & & & & \\ 
-% FILL
- \bottomrule \end{tabular} \caption{Scaling of the payee's verification cost and
-of the token transcript with the number of hops the token has taken since
-withdrawal. Verification figures are for Android, and iOS follows the same
-trend. Each figure is the mean of $[\,\cdot\,]$ runs.}
-\label{tab:offline-scaling} \end{table}
-
-\begin{table}[t] \centering \small \begin{tabular}{l|r} \toprule Quantity &
-Value \\ \midrule Applet code size  & \\ 
-% FILL 
-Persistent state per slot & \\
- % FILL 
- Slots available in $400\,\mathrm{KiB}$ & \\ 
-% FILL 
-Payment message, payer to payee & \\ 
-% FILL 
-Per hop increment to $\algo{hist}$ & \\
- % FILL 
- \bottomrule \end{tabular} \caption{Storage and communication requirements on
-the smart card and the NFC and BLE channels. A slot holds the state for one
-token.} \label{tab:offline-storage} \end{table}
-
-These figures sit comfortably within the latency expected of an everyday
-payment, on hardware that is already deployed. The comparison that matters here
-is not with the ecash schemes of~\Cref{sec:offline-related}, which are not
-benchmarked on constrained hardware, but with the alternative of putting the
-whole protocol on the secure element. A smart card cannot carry the pairing
-operations that the proofs of~\Cref{sec:offline-instantiation} require, so
-without the split the scheme would not run at all. The split is what makes the
-cost on the card comparable to that of an ordinary digital signature.
-
-\paragraph{State storage requirements.} The central bank stores two lists, of
-issued and of deposited tokens. The list of deposited tokens is needed to detect
-double spending and cannot be pruned outright, though the epoch based expiry
-of~\Cref{sec:offline-construction} bounds a token's validity and so allows
-entries to be pruned once that span elapses. The list of issued tokens supports
-monetary policy and is not required by the protocol. Intermediaries store user
-accounts to determine reserve requirements, again not a protocol requirement,
-and users store the transcripts of any unspent tokens they hold.
+\begin{table}[htbp] \centering \small \resizebox{\textwidth}{!}{\begin{tabular}{lllrr} \toprule Protocol &
+Channel & Party & Bytes sent & Flights \\ \midrule
+$\OPregister$ & network & secure element, registration authority & 192, 144 & 3 \\
+& card & secure element & 144 & 1 \\
+$\OPwithdraw$ & network & device, intermediary, central bank & 664, 792, 128 & 4 \\
+& card & device, secure element & 8, 80 & 2 \\
+$\OPexecute$ & network & payer device, payee device & 1400 (1176), 48 & 3 \\
+& payer card & device, secure element & 105, 192 & 3 \\
+& payee card & device, secure element & 8, 80 & 2 \\
+$\OPdeposit$ & network & device, intermediary, central bank & 1352 (1128), 1353 (1129), 1 & 4 \\
+& card & device, secure element & 57, 192 & 2 \\
+\bottomrule \end{tabular}} \caption[Offline payments: communication]{Bytes sent by each party and message flights
+per protocol at one hop, with auditing, and without it in parentheses where it
+differs.} \label{tab:offline-comms} \end{table}

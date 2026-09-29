@@ -11,21 +11,28 @@ follows:
 the security parameter as input, and outputs a key $\key$.
 
   \item[$y \leftarrow \hasheval(\key, x)$ :] The evaluation algorithm takes key
-$\key$ and input $x \in \{0,1\}^*$, and outputs digest $y$ in the range
-$\range$.
+$\key$ and input $x \in \{0,1\}^*$, and outputs a digest $y \in \range$.
 
 \end{description}
 %
-We say $\Hash = (\hashgen, \hash)$ is a hash function family with range $\range$
-if $\hasheval(\key, \cdot)$ is efficiently computable for every $\key$ output by
-$\hashgen(\secparam)$. We use the standard syntax and security notions for hash
-functions~\cite{KatLin14}. When the key $\key$ is fixed and public, as is the
-case throughout this thesis, we write $\hash(x)$ for $\hasheval(\key, x)$.
+We say $\Hash = (\hashgen, \hasheval)$ is a hash function family if $\hasheval(\key, \cdot)$ is efficiently computable for every
+$\key$ output by $\hashgen(\secparam)$. We use the standard syntax and security
+notions for hash functions~\cite{KatLin14}. When the key $\key$ is fixed and
+public, we write $\hash(x)$ for $\hasheval(\key, x)$.
+
+\begin{outline}
+  \item the range can be any set; later sections also hash into fields and
+groups
+  \item a scheme with several hash functions writes them $\hashone, \hashtwo,
+\ldots$ and gives each its own domain separation tag (fixed string prefixed to
+every input), so they behave as independent functions
+\end{outline}
 
 \paragraph{Collision resistance.} Collision resistance requires that no
-efficient adversary can find two distinct inputs hashing to the same digest.
+efficient adversary can find two distinct inputs hashing to the same digest, as
+in \Cref{exp:hash-cr}.
 
-\begin{experimentbox}{Collision resistance}{hash-cr}
+\begin{experimentbox}{Hash functions: collision resistance}{hash-cr}
 
   \begin{enumerate}
 
@@ -49,14 +56,14 @@ The collision resistance advantage of $\adv$ is defined as follows:
 %
 \end{equation*}
 %
-We say $\Hash$ is collision resistant if this advantage is small for every
-admissible adversary $\adv$.
+We say $\Hash$ is collision resistant if this advantage is negligible for every
+PPT adversary $\adv$.
 
 \paragraph{Preimage resistance.} Preimage resistance requires that no efficient
-adversary can recover an input hashing to a given digest, even one of their own
-choosing.
+adversary, given the digest of a random input, can find any input hashing to
+it, as in \Cref{exp:hash-preimage}.
 
-\begin{experimentbox}{Preimage resistance}{hash-preimage}
+\begin{experimentbox}{Hash functions: preimage resistance}{hash-preimage}
 
   \begin{enumerate}
 
@@ -80,17 +87,30 @@ The preimage resistance advantage of $\adv$ is defined as follows:
 %
 \end{equation*}
 %
-We say $\Hash$ is preimage resistant if this advantage is small for every
-admissible adversary $\adv$. A related property is second preimage resistance,
-which requires that no efficient adversary given $x$, can find a distinct $x'$
-with $\hasheval(\key, x) = \hasheval(\key, x')$. Collision resistance implies
-second preimage resistance, so we do not use it separately.
+We say $\Hash$ is preimage resistant if this advantage is negligible for every
+PPT adversary $\adv$. A related property is second preimage resistance,
+which requires that no efficient adversary, given $x$, can find a distinct
+input $x'$ with the same digest. Collision resistance implies
+second preimage resistance.
 
-\paragraph{The random oracle model.} Our security proofs generally model a hash
+\paragraph{One-way functions.} A function $f$ is one-way if it is efficiently
+computable and, for a uniform input $x$, no PPT adversary given $f(x)$ outputs
+any $x'$ with $f(x') = f(x)$ with non-negligible probability.
+
+\begin{outline}
+  \item preimage resistance is one-wayness for a keyed family
+  \item our instantiations use exponentiation $x \mapsto \gen^x$ in a
+prime-order group as the one-way function (one-way under DL, \Cref{asm:dl})
+\end{outline}
+
+\paragraph{The random oracle model.} Beyond these properties, our security
+proofs generally model a hash
 function as a random oracle: a function sampled uniformly at random from all
 functions with the given domain and range, to which every party, including the
 adversary, has oracle access. The random oracle answers each fresh query with an
 independently and uniformly sampled output from the function's range, records
 the resulting input and output pair, and returns the same output on repeated
-queries. In security proofs, a simulator may instead choose the output assigned
-to particular queries. We refer to this as programming the random oracle.
+queries. In security proofs, a reduction or simulator answers the adversary's
+oracle queries itself, so it sees every query, and may choose the output
+assigned to particular queries. We refer to this as programming the random
+oracle. Security proven this way holds in the random oracle model (ROM).

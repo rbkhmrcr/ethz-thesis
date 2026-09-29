@@ -1,639 +1,367 @@
 \section{Instantiation}\label{sec:offline-instantiation}
 
-We now instantiate the generic construction of \Cref{sec:offline-construction}
-with concrete cryptographic building blocks. We use BBS+ signatures to build the
-anonymous credential that binds a user's pseudonym to their secret key. We use
-Pointcheval-Sanders signatures, extended to support blind signing over committed
-inputs, to let the central bank sign tokens at withdrawal without learning their
-content. Both are pairing based multi-message signature schemes.  This lets us
-build efficient sigma protocols directly over their verification equations,
-rather than relying on general purpose zero knowledge proofs. The same pair of
-schemes underlies the transaction system of~\Cref{chap:txid}, so the two
-chapters instantiate the same infrastructure.
+\begin{outline}
+  \item instantiate $\OP$: every statement proven is an equation between group elements, so every proof is a Sigma protocol
+  \item pseudonyms: Pedersen commitments (perfectly hiding, binding under DL, group elements so Schnorr proofs apply)
+  \item audit ciphertexts: ElGamal in $\group{1}$, IND-CPA under DDH; decryption gives $\gen^{\algo{uid}}$, auditor looks the identifier up
+  \item credentials: BBS+ as in \Cref{chap:txid}, so the two chapters share a credential layer; EUF-CMA; provable via a few discrete-logarithm equations, in a proof that splits so the secure element only touches $\sk$
+  \item central bank's SCI: Pointcheval-Sanders with signing on committed inputs; short, rerandomisable signatures, so the proof of withdrawal is a few group elements
+  \item all Sigma protocols via Fiat-Shamir, except the withdrawal request proof (Fischlin), the only place online extraction is needed
+\end{outline}
 
-\paragraph{Notation.} We use the notation of the preceding chapters. Groups
-$\group{1}$, $\group{2}$, and $\group{T}$ have prime order $p$. They are
-equipped with an efficiently computable pairing $\pairing \colon \group{1}
-\times \group{2} \rightarrow \group{T}$, and we work in the asymmetric setting.
-Elements of $\group{1}$ are written using lower case letters, elements of
-$\group{2}$ are distinguished using a tilde, and elements of $\Zp$ are written
-using lower case Greek letters. We use generators $\gen \in \group{1}$ and
-$\ggen \in \group{2}$, and hash functions $\hash_p$ into $\Zp$ and
-$\hash_{\group{1}}$ into $\group{1}$. Every generator used as part of a
-commitment key is obtained as $\hash_{\group{1}}$ of a fixed string, so that no
-participant knows the discrete logarithm relations among them.
+Throughout, we use hash functions $\hash_p$ into $\Zp$ and
+$\hash_{\group{1}}$ into $\group{1}$. The commitment scheme is the Pedersen
+commitment scheme with $n = 1$, with key $\ck = (\hgen_1, \hgen) \leftarrow
+\ComGen(\secparam, 1)$, so that a pseudonym is $\com = \hgen_1^{\algo{uid}}
+\hgen^{s}$. The BBS+ generators $\gen_0, \ldots, \gen_{\ell+1}$ and the
+generators $P_0, \ldots, P_\ell$ of the central bank's signing on committed
+inputs are separate from $\ck$. Every generator is obtained as
+$\hash_{\group{1}}$ of its own fixed string, so that no participant knows the
+discrete logarithm relations among them. For $\msg = (\msg_0, \ldots,
+\msg_{\ell-1}) \in \Zp^\ell$ we write $\vec{P}^{\msg\|\openinfo} =
+P_\ell^{\openinfo} \prod_{i=0}^{\ell-1} P_i^{\msg_i}$.
 
-\subsection{Joint proofs of knowledge}\label{sec:joint-pok-def}
+\subsection{Instantiating $\JPOK$ with BBS+}\label{sec:joint-proof}
 
-Each payment carries a proof that the payer holds a credential on the identifier
-committed in their pseudonym, and knows the secret key that credential is bound
-to. The secret key never leaves the secure element, and the secure element does
-not have the compute to produce the whole proof. We therefore need a proof
-system in which two provers cooperate to produce a single proof for a relation
-whose witness is split between them, with the weaker prover holding only a small
-part of it.
+A user's credential is a BBS+ signature $\varphi = (e, r, E)$ from the
+registration authority on the pair $(\algo{uid}, \sk)$, with $E = (\gen_0
+\gen_1^{\algo{uid}} \gen_2^{\sk} \gen_3^{r})^{1/(z+e)}$, where $z$ is the
+registration authority's secret key and $\ggen_Z = \ggen^{z}$ its public key.
+Every payment and deposit proves knowledge of such a credential, together with
+the opening of the payer's pseudonym, without revealing either.
 
-Such a primitive, which we call a joint proof of knowledge, is given
-in~\cite{USENIX:HesSinSor23}. We recall it here in the syntax used throughout
-this thesis. It is a proof system for a relation $\rel$ over instance $\inst$
-and witness $\witness = (\witness_0, \witness_1)$, where $\witness_0$ is held by
-prover $\algo{Prv}_0$ and $\witness_1$ by prover $\algo{Prv}_1$.
+\begin{outline}
+  \item a BBS+ signature cannot be shown directly: verification involves the signed messages, one of which is the identifier
+  \item Tessaro-Zhu rerandomisation \cite{EC:TesZhu23b}: $E$ with two fresh exponents becomes $u, w, x$
+  \item verification becomes one pairing equation on public values, $\pairing(u, \ggen_Z)\pairing(x, \ggen) = 1$, plus two discrete-logarithm equations proven by a Sigma protocol
+  \item the check $u \neq 1$ rules out the trivial solution of the pairing equation
+\end{outline}
 
-\begin{primitivebox}{Joint proof of knowledge}{jpok}
+\begin{outline}
+  \item the secure element holds only $\sk$ and cannot produce the proof alone; split between two provers following \cite{USENIX:HesSinSor23}
+  \item secure element commits $D = \gen_2^{\sk}\gen_3^{t}$, proves knowledge of the opening, hands $D$ and $t$ to the device
+  \item device proves everything else about the credential with $D$ in place of $\gen_2^{\sk}$
+  \item $t$ is disclosed, so the device learns $\gen_2^{\sk}$; $\sk$ protected only by DL hardness, which is what the JPOK definition asks for
+  \item difference from the original: there $t$ is derived from a PRF key shared between the provers so they never communicate (and $D$ is rerandomised per presentation); ours are paired at registration and talk directly, so the secure element samples $t$ fresh and sends it (old text had this in more detail)
+\end{outline}
 
-  \begin{description}
+\begin{outline}
+  \item device proves two further equations under the same challenge
+  \item opening of the payer's pseudonym: shares its response for $\algo{uid}$ with the credential equation; this shared response ties pseudonym to credential
+  \item audit ciphertext must encrypt the identifier in the pseudonym; proving it alongside with the same $\algo{uid}$ response opens the pseudonym once per hop instead of twice
+  \item the secure element's challenge hashes the signed message, so the one thing it must see is the payment's destination
+  \item \Cref{prim:bbs-joint-proof} gives the proof: Tessaro-Zhu rerandomisation plus the Hesse-Singh-Sorniotti split \cite{EC:TesZhu23b,USENIX:HesSinSor23}
+\end{outline}
 
-    \item[$\crs \sample \algo{JGen}(\secparam)$ :] The setup algorithm, on input
-security parameter $\secparam$, outputs a common reference string $\crs$.
+\begin{primitivebox}{The joint proof of knowledge of a BBS+ signature}{bbs-joint-proof}
 
-    \item[$\Pi \sample \algo{JProve}_0(\crs, \inst, \witness_0) \leftrightarrow
-\algo{JProve}_1(\crs, \inst, \witness_1)$ :] The proving protocol, run between
-$\algo{Prv}_0$ on input witness share $\witness_0$ and $\algo{Prv}_1$ on input
-witness share $\witness_1$, with $\algo{Prv}_1$ outputting proof $\Pi$.
-
-    \item[$\{0,1\} \leftarrow \algo{JVerify}(\crs, \inst, \Pi)$ :] The
-verification algorithm, on input $\crs$, instance $\inst$, and proof $\Pi$,
-returns 0 or 1.
-
-  \end{description}
-
-\end{primitivebox}
-
-A joint proof of knowledge should satisfy the following three properties, which
-are those established for the primitive in~\cite{USENIX:HesSinSor23}.
-
-\paragraph{Completeness.} If both provers follow the protocol on a witness
-$\witness = (\witness_0, \witness_1)$ with $\rel(\inst, \witness) = 1$, then
-$\algo{JVerify}(\crs, \inst, \Pi) = 1$.
-
-\paragraph{Soundness.} There is an efficient extractor that, given a proof
-accepted by $\algo{JVerify}$, outputs a witness $\witness$ for $\inst$. This
-holds when $\algo{Prv}_0$ and $\algo{Prv}_1$ are both corrupt and colluding,
-which is the case we need: a user has full control of their mobile device, and a
-user whose secure element is also compromised controls both provers.
-
-\paragraph{Zero knowledge.} There is a simulator that produces the verifier's
-view of the proving protocol without access to either witness share.
-
-We rely on this primitive in three ways that go slightly beyond the statement of
-the result we cite, and record them here.
-
-First, zero knowledge is proven in~\cite{USENIX:HesSinSor23} against a
-semi-honest verifier, on the grounds that in their protocol the verifier relays
-messages between the two provers and can therefore be caught deviating by the
-honest prover. Our payee may be arbitrarily malicious, but is not interposed
-between the payer's secure element and their device: the two provers communicate
-directly, and the payee contributes only the instance component $\com_{i+1}$
-before receiving the finished proof. The restriction is therefore not binding in
-our setting.
-
-Second, $\algo{Prv}_1$ learns $\witness_0$ only through a commitment to it,
-which it receives together with that commitment's randomness. The commitment is
-consequently not hiding, and what protects $\witness_0$ from the co-prover is
-the hardness of computing discrete logarithms rather than any property of the
-commitment scheme. This is what lets the mobile device carry out the bulk of the
-proof without ever holding the user's secret key, which is the point of the
-split: the device is under the user's full control, while the secure element is
-not.
-
-Third, the simulator of~\Cref{sec:offline-security} extracts from proofs
-produced by corrupt users. Most of these extractions serve to derive a
-contradiction, and are performed once before the reduction terminates, so
-extraction by rewinding suffices. The exception is the withdrawal proof, from
-which the simulator must extract in order to continue the simulation, on
-instances a corrupt user chooses adaptively and without bound. There we require
-the extractor to be online. This mirrors the treatment
-in~\cite{USENIX:HesSinSor23}, where online extractability is assumed only for
-the proof accompanying blind issuance. The withdrawal proof is produced by the
-mobile device and not by the secure element, so this requirement does not bear
-on what the constrained party computes.
-
-\subsection{Instantiating the joint proof of knowledge}\label{sec:joint-proof}
-
-We instantiate the joint proof of knowledge over BBS+ signatures. A BBS+
-signature lets a signer sign several messages at once. It is existentially
-unforgeable under the $q$-strong Diffie-Hellman ($q$-SDH) assumption. We use it
-exactly as described in~\Cref{sec:txid-instantiation}, and do not repeat the
-algorithms here. We first recall the standard proof of knowledge of a BBS+
-signature, then split it between two provers.
-
-\paragraph{Proof of knowledge of a BBS+ signature.}
-
-Let $\phi = (\varepsilon, s, e) \gets \BBSsign(\sk_\BBS, \msg)$. By construction
-$e = (\hgen \vec{q}^{\msg\|s})^{1/(\theta+\varepsilon)}$ for $\sk_\BBS =
-\theta$. Setting $\inst = \pk_\BBS = (\ggen, \tilde{t}, \vec{q}, \hgen)$ and
-$\witness = (\msg, \phi)$, a proof of knowledge of a BBS+ signature shows that
-$(\inst, \witness)$ satisfies the equation as follows:
-%
-\begin{equation*}
-%
-  \pairing(e, \ggen^\varepsilon \tilde{t}) = \pairing(\hgen \vec{q}^{\msg\|s},
-\ggen).
-  %
-\end{equation*}
-%
-A prover can instead select $\iota, \lambda$ at random and compute $u =
-e^{-\iota/\lambda}$, $w = (\hgen \vec{q}^{\msg\|s})^{-1/\lambda}$, and $x =
-u^\varepsilon w^\iota$. It then proves that $\inst = (\pk_\BBS, u, w, x)$ and
-$\witness = (\varepsilon, s, \iota, \lambda, \msg)$ satisfy the relation as
-follows, which is equivalent to the verification equation
-above~\cite{EC:TesZhu23b}:
-%
-\begin{align}
-%
-  \pairing(u, \tilde{t}) \pairing(x, \ggen) = 1 \ \wedge \ x = u^\varepsilon
-w^\iota \ \wedge \ \hgen^{-1} = w^\lambda \vec{q}^{\msg\|s}.  \label{eq:BBSrel}
-%
-\end{align}
-%
-A prover $\algo{Prv}$ for this relation follows a sigma protocol made non
-interactive via the Fiat-Shamir heuristic~\cite{C:FiaSha86}.
-
-Concretely, $\algo{Prv}$ selects $\alpha, \beta, \delta, \gamma_0, \ldots,
-\gamma_{\ell-1}, \gamma \in \Zp$ and computes the following:
-%
-\begin{align*}
-%
-  a &= u^\alpha w^\beta \ ; \ b = w^\delta q_\ell^\gamma \prod_{i=0}^{\ell-1}
-q_i^{\gamma_i} \ ; \ \algo{chal} = \hash_p(\inst, a, b) \\
-  %
-  \eta &= \alpha + \algo{chal} \varepsilon \ ; \ \nu = \beta + \algo{chal} \iota
-\ ; \ \xi = \delta + \algo{chal} \lambda \ ; \\
-  %
-  \pi_i &= \gamma_i + \algo{chal} \msg_i, \ \forall i \in [\ell] \ ; \ \pi =
-\gamma + \algo{chal} s.
-  %
-\end{align*}
-%
-It then outputs $\Pi = (a, b, \eta, \nu, \xi, \pi_0, \ldots, \pi_{\ell-1},
-\pi)$.  A verifier $\algo{V}$ first checks that $\pairing(u, \tilde{t})
-\pairing(x, \ggen) = 1$, computes $\algo{chal} = \hash_p(\inst, a, b)$, and
-accepts if and only if the following holds:
-%
-\begin{align*}
-%
-  a x^{\algo{chal}} &= u^\eta w^\nu \ ; \ b \hgen^{-\algo{chal}} = w^\xi
-q_\ell^\pi \prod_{i=0}^{\ell-1} q_i^{\pi_i}.
-  %
-\end{align*}
-
-\paragraph{Splitting the proof between two provers.} We now instantiate
-$\algo{JProve}_0$ and $\algo{JProve}_1$, following the approach introduced
-in~\cite{USENIX:HesSinSor23}. Here $\algo{Prv}_0$ is a lightweight device that
-knows $\msg_{\ell-1}$, and $\algo{Prv}_1$ is computationally more powerful and
-knows $(\varepsilon, s, \msg_0, \ldots, \msg_{\ell-2})$. Rather than proving
-relation~\eqref{eq:BBSrel}, $\algo{Prv}_0$ and $\algo{Prv}_1$ jointly prove the
-relation as follows:
-%
-\begin{align*}
-%
-  \com &= q_{\ell-1}^{\msg_{\ell-1}} q_\ell^\rho \ \wedge \ \pairing(u,
-\tilde{t}) \pairing(x, \ggen) = 1 \ \wedge \\
-  %
-  x &= u^\varepsilon w^\iota \ \wedge \ (\com \hgen)^{-1} = w^\lambda
-q_\ell^{s'} \prod_{i=0}^{\ell-2} q_i^{\msg_i}.
-  %
-\end{align*}
-%
-Here, $\inst = (\pk_\BBS, u, w, x, \com)$ and $\witness = (\varepsilon, s',
-\iota, \lambda, \msg, \rho)$. The protocol is given in
-Primitive~\ref{prim:bbs-joint-proof}. All $\algo{Prv}_1$ receives from
-$\algo{Prv}_0$ is the commitment $\com$, its randomness $\rho$, and a proof of
-knowledge of the opening. Since $\rho$ is disclosed, $\algo{Prv}_1$ holds
-$q_{\ell-1}^{\msg_{\ell-1}}$.  As noted in~\Cref{sec:joint-pok-def},
-$\msg_{\ell-1}$ is therefore protected from the more powerful prover by the
-hardness of computing discrete logarithms in $\group{1}$.
-
-Primitive~\ref{prim:bbs-joint-proof} is the construction
-of~\cite{USENIX:HesSinSor23}, and satisfies the completeness, soundness, and
-zero knowledge properties of~\Cref{sec:joint-pok-def} as shown there. We use it
-with one simplification that our setting permits. In the original,
-$\algo{Prv}_0$ derives $\rho$ by applying a pseudorandom function to a nonce,
-under a key shared between the two provers. That shared key resolves a tension
-we do not face. Their $\com$ must be randomised at every presentation, since an
-unrandomised commitment to $\msg_{\ell-1}$ is a static identifier for
-$\algo{Prv}_0$. Yet $\algo{Prv}_1$ must still recognise which of its stored
-witnesses the incoming $\com$ belongs to, without the two provers ever
-communicating directly. Our two provers are paired at registration and do
-communicate directly, so $\algo{Prv}_0$ samples $\rho$ afresh and sends it. The
-original construction would serve here unchanged.
-
-We apply the primitive to a relation carrying one further conjunct, the opening
-of the payer's pseudonym $c$. This is a conjunction of sigma protocols rather
-than a change to the primitive. The conjunct is discharged by $\algo{Prv}_1$
-alone and concerns no part of $\witness_0$.
-
-\begin{primitivebox}{Joint proof of knowledge of a BBS+
-signature}{bbs-joint-proof}
+  Let $\pk_\BBS = (\gen_0, \gen_1, \gen_2, \gen_3, \ggen, \ggen_Z)$, $\ck =
+(\hgen_1, \hgen)$ and $\pk_\auditor = \gen^{\mu_\auditor}$. The statement is
+$\inst = (\pk_\BBS, \ck, \pk_\auditor, \com, \ciph, m)$, with pseudonym $\com$,
+audit ciphertext $\ciph = (c_1, c_2)$ and signed message $m$.
 
   \begin{description}
 
-    \item[$\Pi \leftarrow \algo{Prv}_0(\msg_{\ell-1}, \rho) \leftrightarrow
-\algo{Prv}_1(\varepsilon, s, \msg_0, \ldots, \msg_{\ell-2})$ :] The two provers
-jointly compute $\Pi$ as follows.
+    \item[$\Phi \leftarrow \JPOKprove_0(\sk, m) \leftrightarrow
+\JPOKprove_1(\algo{uid}, \varphi, s, \rho, m)$ :] The secure element runs
+$\JPOKprove_0$ and holds $\sk$. The device runs $\JPOKprove_1$ and holds the
+credential
+$\varphi = (e, r, E)$ on $(\algo{uid}, \sk)$, the opening $(\algo{uid}, s)$ of
+$\com = \hgen_1^{\algo{uid}} \hgen^{s}$, and the randomness $\rho$ of $\ciph =
+(\gen^{\rho}, \gen^{\algo{uid}} \pk_\auditor^{\rho})$.
 
       \begin{enumerate}
 
-	\item $\algo{Prv}_0$ computes $\com = q_{\ell-1}^{\msg_{\ell-1}}
-q_\ell^\rho$ and produces a proof $\Pi_0$ that $\inst_0 = (q_{\ell-1}, q_\ell,
-\com)$ and $\witness_0 = (\msg_{\ell-1}, \rho)$ satisfy $\com =
-q_{\ell-1}^{\msg_{\ell-1}} q_\ell^\rho$: it selects random $(\gamma_{\ell-1},
-\upsilon)$, computes $c = q_{\ell-1}^{\gamma_{\ell-1}} q_\ell^\upsilon$,
-$\algo{chal}_0 = \hash_p(\inst_0, c)$, $\pi_{\ell-1} = \gamma_{\ell-1} +
-\algo{chal}_0 \msg_{\ell-1}$, and $\zeta = \upsilon + \algo{chal}_0 \rho$, and
-sends $\algo{Prv}_1$ the tuple $(\com, \rho, \Pi_0)$ with $\Pi_0 = (c,
-\pi_{\ell-1}, \zeta)$.
+	\item The secure element samples $t, \gamma_2, \upsilon \sample \Zp$ and
+computes
+          %
+          \begin{gather*}
+          %
+            D = \gen_2^{\sk} \gen_3^{t}, \quad a_0 = \gen_2^{\gamma_2}
+\gen_3^{\upsilon}, \quad \algo{chal}_0 = \hash_p(\gen_2, \gen_3, D, a_0, m), \\
+          %
+            \pi_2 = \gamma_2 + \algo{chal}_0\, \sk, \quad \zeta = \upsilon +
+\algo{chal}_0\, t.
+          %
+          \end{gather*}
+          %
+          It sends $(D, t, a_0, \pi_2, \zeta)$ to the device.
 
-	\item $\algo{Prv}_1$ computes a proof $\Pi_1$ that, for $\inst_1 =
-(\pk_\BBS, u, w, x, \com)$ and $\witness_1 = (\varepsilon, s', \iota, \lambda,
-\msg[{:}\ell-1])$ with $s' = s - \rho$, the following holds:
+	\item The device samples $\iota, \lambda \sample \Zp^*$, sets $r' = r
+- t$, and computes
           %
-	  \begin{equation} \label{eq:reljointproof}
-            %
-	    x = u^\varepsilon w^\iota \ \wedge \ (\com \hgen)^{-1} = w^\lambda
-\prod_{i=0}^{\ell-2} q_i^{\msg_i} q_\ell^{s'}.
-            %
-	  \end{equation}
+          \begin{equation*}
           %
-	  To do so, it selects random $(\alpha, \beta)$ and $(\delta, \gamma_0,
-\ldots, \gamma_{\ell-2}, \gamma)$, computes $a = u^\alpha w^\beta$ and $b =
-w^\delta q_\ell^\gamma \prod_{i=0}^{\ell-2} q_i^{\gamma_i}$, and derives the
-following:
+            u = E^{\iota/\lambda}, \quad w = (\gen_0 \gen_1^{\algo{uid}} D
+\gen_3^{r'})^{-1/\lambda}, \quad x = u^{e} w^{\iota}.
           %
-	  \begin{align*} \algo{chal}_1 &= \hash_p(\inst_1, a, b) \ ; \ \eta =
-\alpha + \algo{chal}_1 \varepsilon \ ; \ \nu = \beta + \algo{chal}_1 \iota \ ; \
-\xi = \delta + \algo{chal}_1 \lambda \ ; \\
-            %
-	    \pi_i &= \gamma_i + \algo{chal}_1 \msg_i, \ \forall i \in [\ell-1] \
-; \ \pi = \gamma + \algo{chal}_1 s'.
-            %
-	  \end{align*}
+          \end{equation*}
 
-	\item $\algo{Prv}_1$ outputs $\Pi = (\com, a, b, c, \eta, \nu, \xi,
-\pi_0, \ldots, \pi_{\ell-1}, \pi, \zeta)$.
+	\item The device samples $\alpha, \beta, \delta, \gamma_1, \gamma_3,
+\gamma_s, \gamma_\rho \sample \Zp$ and computes
+          %
+          \begin{gather*}
+          %
+            a = u^{\alpha} w^{\beta}, \quad b = w^{\delta} \gen_1^{\gamma_1}
+\gen_3^{\gamma_3}, \quad d = \hgen_1^{\gamma_1} \hgen^{\gamma_s}, \quad a_1 =
+\gen^{\gamma_\rho}, \quad a_2 = \gen^{\gamma_1} \pk_\auditor^{\gamma_\rho}, \\
+          %
+            \algo{chal}_1 = \hash_p(\inst, u, w, x, D, a_0, a, b, d, a_1, a_2),
+\\
+          %
+            \eta = \alpha + \algo{chal}_1 e, \quad \nu = \beta + \algo{chal}_1
+\iota, \quad \xi = \delta + \algo{chal}_1 \lambda, \\
+          %
+            \pi_1 = \gamma_1 + \algo{chal}_1 \algo{uid}, \quad \pi_3 =
+\gamma_3 + \algo{chal}_1 r', \\
+          %
+            \pi_s = \gamma_s + \algo{chal}_1 s, \quad
+\pi_\rho = \gamma_\rho + \algo{chal}_1 \rho.
+          %
+          \end{gather*}
+
+	\item The device outputs $\Phi = (u,\allowbreak w,\allowbreak x,\allowbreak D,\allowbreak a_0,\allowbreak \pi_2,\allowbreak \zeta,\allowbreak a,\allowbreak b,
+d,\allowbreak a_1,\allowbreak a_2,\allowbreak \eta,\allowbreak \nu,\allowbreak \xi,\allowbreak \pi_1,\allowbreak \pi_3,\allowbreak \pi_s,\allowbreak \pi_\rho)$.
 
       \end{enumerate}
 
-    \item[$\{0,1\} \leftarrow \algo{JVerify}(\inst, \Pi)$ :] On input $\inst =
-(\pk_\BBS, u, w, x, \com)$ and $\Pi$, do:
-
-      \begin{enumerate}
-
-	\item Recompute $\algo{chal}_0 = \hash_p((q_{\ell-1}, q_\ell, \com), c)$
-and $\algo{chal}_1 = \hash_p(\inst, a, b)$. The two sub-proofs carry separate
-challenges, since $\algo{Prv}_0$ commits before $\algo{Prv}_1$ has formed
-$\inst$.
-
-	\item Return the conjunction of the following three checks:
-          %
-	  \begin{align*}
-          %
-	    &\pairing(u, \tilde{t}) \pairing(x, \ggen) \checkcheck 1 \ ; \\
-            %
-	    &c \,\com^{\algo{chal}_0} \checkcheck q_{\ell-1}^{\pi_{\ell-1}}
-q_\ell^{\zeta} \ ; \\
-            %
-	    &a x^{\algo{chal}_1} \checkcheck u^\eta w^\nu \ \wedge \ b (\com
-\hgen)^{-\algo{chal}_1} \checkcheck w^\xi q_\ell^\pi \prod_{i=0}^{\ell-2}
-q_i^{\pi_i}.
-            %
-	  \end{align*}
-          %
-	  The third check is relation~\eqref{eq:reljointproof} in verified form.
-
-      \end{enumerate}
+    \item[$\{0,1\} \leftarrow \JPOKverify(\inst, \Phi)$ :] Recompute
+$\algo{chal}_0$ and $\algo{chal}_1$ as above, and output $1$ if and only if all
+of the following hold:
+      %
+      \begin{gather*}
+      %
+        u \neq 1, \quad \pairing(u, \ggen_Z) \pairing(x, \ggen) = 1, \quad a_0
+D^{\algo{chal}_0} = \gen_2^{\pi_2} \gen_3^{\zeta}, \\
+      %
+        a\, x^{\algo{chal}_1} = u^{\eta} w^{\nu}, \quad b\, (D
+\gen_0)^{-\algo{chal}_1} = w^{\xi} \gen_1^{\pi_1} \gen_3^{\pi_3}, \quad d\,
+\com^{\algo{chal}_1} = \hgen_1^{\pi_1} \hgen^{\pi_s}, \\
+      %
+        a_1 c_1^{\algo{chal}_1} = \gen^{\pi_\rho}, \quad a_2
+c_2^{\algo{chal}_1} = \gen^{\pi_1} \pk_\auditor^{\pi_\rho}.
+      %
+      \end{gather*}
 
   \end{description}
 
+  Without auditing, $\ciph$, $a_1$, $a_2$ and $\pi_\rho$ and the last two
+checks are omitted.
+
 \end{primitivebox}
 
-\paragraph{Mapping to our solution.} In our protocol, the user's secure element
-and mobile device jointly produce a proof of knowledge of the user's credential.
-The witness is split so that the secure element contributes only knowledge of
-the user's secret key, and the device supplies the rest. Concretely, they
-jointly produce $\sigma \leftarrow \NIZKprove(\crs, \inst, \witness)$, where
-$\inst = (\gen_0, \gen_1, \pk_\BBS, u, w, x, c)$ with $\pk_\BBS = (\ggen,
-\tilde{t}, q_0, q_1, q_2, \hgen)$, $\witness = (\varepsilon, \iota, \lambda, s,
-\algo{uid}, \sk, r)$, and $\rel(\inst, \witness) = 1$ is equivalent to the
-following:
-%
-\begin{align*}
-%
-  &\pairing(u, \tilde{t}) \pairing(x, \ggen) = 1 \ \wedge \ x = u^\varepsilon
-w^\iota \\ &\wedge \ \hgen^{-1} = w^\lambda q_0^{\algo{uid}} q_1^\sk q_2^s \
-\wedge \ c = \gen_0^{\algo{uid}} \gen_1^r.
-  %
-\end{align*}
-%
-That is, this is an instantiation of relation~\eqref{eq:BBSrel} with $\msg =
-(\algo{uid}, \sk)$ and $c = \gen_0^{\algo{uid}} \gen_1^r$. In this
-instantiation, $\algo{se}$ executes $\algo{Prv}_0$, outputting $\com = q_1^\sk
-q_2^\rho$, $\rho$, and proof $\Pi_0$ computed as above except that the challenge
-$\algo{chal}_0$ also hashes the message $m_i$ of Protocol~\ref{prot:offline}
-that the signature of knowledge is taken over.  This is what binds the payee's
-pseudonym to the proof, and it is the only part of the message that the secure
-element needs to see.  $\algo{dev}$ computes a proof $\Pi_1 \leftarrow
-\NIZKprove(\crs, \inst_1, \witness_1)$, for $\inst_1 = (\gen_0, \gen_1, \pk, u,
-w, x, \com, c)$, $\witness_1 = (\varepsilon, \iota, \lambda, \algo{uid}, s',
-r)$, and relation as follows:
-%
-\begin{equation*}
-%
-  x = u^\varepsilon w^\iota \ \wedge \ (\com \hgen)^{-1} = w^\lambda
-q_0^{\algo{uid}} q_2^{s'} \ \wedge \ c = \gen_0^{\algo{uid}} \gen_1^r.
-  %
-\end{equation*}
-%
+\begin{outline}
+  \item in $\OP$: $m = (v, \com_i, \com_{i+1})$ for a payment, $(v, \com_n, \algo{dep})$ for a deposit
+  \item the audit proof $\Gamma_i$ of the construction is the part of $\Phi$ concerning $\ciph$
+  \item pairing check plus the equations on $a$ and $b$ hold exactly when the device knows a valid BBS+ signature on its identifier and the key committed in $D$ \cite{EC:TesZhu23b}
+\end{outline}
 
-\paragraph{Merging the audit proof.} The audit proof $\Gamma_i$ of
-Protocol~\ref{prot:offline} proves that $\ciph_i$ encrypts the value committed
-in $c$, on witness $(\algo{uid}, r, \rho_i)$. Its first conjunct is the opening
-of $c$, which is already the third conjunct of $\Pi_1$, and both are computed by
-$\algo{dev}$ on the same witness. We therefore compute the two as one sigma
-protocol under a single challenge $\algo{chal}_1$, adding only the two
-ciphertext conjuncts and the response $\pi_{\rho}$ for the encryption
-randomness. This saves one opening of $c$ per hop, in both proving and
-verification, relative to computing $\Gamma_i$ and $\sigma_i$ independently.
+\subsection{Instantiating $\SCI$ with Pointcheval-Sanders}\label{sec:offline-token-issuance}
 
-\subsection{Instantiating the token signatures}
+\begin{outline}
+  \item instantiate SCI with Pointcheval-Sanders (signs vectors of field elements) and its signing on committed inputs as Sanders et al.\ describe it \cite{RSA:PoiSan16,RSA:PoiSan18,NDSS:SABMD19}
+  \item key generation and verification are those of the signature scheme
+\end{outline}
 
-The central bank signs each token at withdrawal, and must do so without learning
-what it is signing. We use the Pointcheval-Sanders signature scheme, which also
-signs vectors of messages, and extend it to sign committed inputs.  The
-algorithms are given in
-Primitive~\ref{prim:ps}~\cite{RSA:PoiSan16,RSA:PoiSan18}.
+We abbreviate Pointcheval-Sanders as PS, index its messages from $0$, and write $[\ell]_0 =
+\{0, \ldots, \ell-1\}$.
+
+\begin{outline}
+  \item how it works: recipient commits to the messages, encrypts each hidden one in the exponent of $k = \hash_{\group{1}}(C)$ under a fresh ElGamal key of its own, proves commitment and ciphertexts consistent; signer signs homomorphically on the ciphertexts; recipient decrypts
+  \item why $k$ is a hash of the commitment rather than sampled: both parties agree on it without the signer seeing the messages
+  \item disclosed messages (the token value) are sent in the clear
+  \item recipient key fresh per execution, so two requests cannot be linked by it
+  \item $\Pi$ uses Fischlin, not Fiat-Shamir, because online request extractability needs a non-rewinding extractor \cite{C:Fischlin05}; costs a larger proof, computed once per withdrawal by the device
+  \item point to \Cref{prim:ps}
+\end{outline}
 
 \begin{primitivebox}{The Pointcheval-Sanders signature scheme}{ps}
 
   \begin{description}
 
-    \item[$(\sk, \pk) \leftarrow \PSgen(\secparam, \ell)$ :] On input security
-parameter $\secparam$ and integer $\ell$, do the following:
+    \item[$(\sk, \pk) \leftarrow \PSgen(\secparam, \ell)$ :] Sample $\chi,
+\theta_0, \ldots, \theta_\ell \sample \Zp$, and output $\sk = (\chi, \theta_0,
+\ldots, \theta_\ell)$ and $\pk = (\tilde{x}, \tilde{y}_0, \ldots,
+\tilde{y}_{\ell-1}, \tilde{z}, \vec{P})$, where $\tilde{x} = \ggen^{\chi}$,
+$\tilde{y}_i = \ggen^{\theta_i}$, $\tilde{z} = \ggen^{\theta_\ell}$, and $\vec{P}
+= (P_0, \ldots, P_\ell)$ are the generators for committed inputs.
 
-      \begin{enumerate}
+    \item[$\psi \leftarrow \PSsign(\sk, \msg)$ :] On input $\msg \in
+\Zp^{\ell}$, sample $k \sample \group{1}$ and $\omega \sample \Zp$, and output
+$\psi = (\omega, k, l)$ with $l = k^{\chi + \sum_{i \in [\ell]_0} \theta_i
+\msg_i + \theta_\ell \omega}$.
 
-	\item Sample $(\chi, \lambda_0, \ldots, \lambda_{\ell-1}, \iota) \sample
-\Zp^{\ell+2}$.
+    \item[$\{0,1\} \leftarrow \PSverify(\pk, \msg, \psi)$ :] On input $\psi =
+(\omega, k, l)$, output $1$ if and only if $k \neq 1$ and $\pairing(k, \tilde{x}
+\prod_{i \in [\ell]_0} \tilde{y}_i^{\msg_i} \tilde{z}^{\omega}) = \pairing(l,
+\ggen)$.
 
-	\item Compute $\tilde{x} = \ggen^\chi$, $\tilde{y}_i =
-\ggen^{\lambda_i}$ for all $i \in [\ell]$, and $\tilde{z} = \ggen^\iota$.
+    \item[$(\algo{req}, \state) \sample \SCIrequest(\pk, \msg, \algo{Disc})$ :]
+On input $\msg \in \Zp^{\ell}$ and a set $\algo{Disc} \subseteq [\ell]_0$ of
+indices to disclose, let $H = [\ell]_0 \setminus \algo{Disc}$. Sample $\openinfo,
+\mu \sample \Zp$, set $B = \gen^{\mu}$, and compute
+          %
+          \begin{equation*}
+          %
+            C = P_\ell^{\openinfo} \prod_{i \in H} P_i^{\msg_i}, \quad k =
+\hash_{\group{1}}(C), \quad \hat{\ciph}_i = (\gen^{\rho_i}, k^{\msg_i}
+B^{\rho_i}) \ \text{for } i \in H,
+          %
+          \end{equation*}
+          %
+with $\rho_i \sample \Zp$. Compute $\Pi$, a proof with the Fischlin transform
+that $C = P_\ell^{\openinfo} \prod_{i \in H} P_i^{\msg_i}$ and $\hat{\ciph}_i =
+(\gen^{\rho_i}, k^{\msg_i} B^{\rho_i})$ for every $i \in H$, on witness
+$(\openinfo, (\msg_i, \rho_i)_{i \in H})$ and statement $(\algo{Disc}, \vec{P},
+\gen, B, C, k, (\hat{\ciph}_i)_{i \in H})$. Output $\algo{req} = (C, B,
+(\msg_i)_{i \in \algo{Disc}}, (\hat{\ciph}_i)_{i \in H}, \Pi)$ and $\state =
+(\msg, \mu, k)$.
 
-	\item Return $\sk = (\chi, \vec{\lambda}, \iota)$ and $\pk = (\tilde{x},
-\vec{\tilde{y}}, \tilde{z})$.
+    \item[$\algo{resp} \sample \SCIissue(\sk, \algo{req})$ :] Recompute $k =
+\hash_{\group{1}}(C)$, and output $\perp$ if $\Pi$ does not verify. Otherwise
+sample $\omega \sample \Zp$, parse $\hat{\ciph}_i = (f_{i,1}, f_{i,2})$, and
+output $\algo{resp} = (\omega, f_1, f_2)$ with
+          %
+          \begin{equation*}
+          %
+            f_1 = \prod_{i \in H} f_{i,1}^{\theta_i}, \quad f_2 = k^{\chi +
+\theta_\ell \omega + \sum_{i \in \algo{Disc}} \theta_i \msg_i} \prod_{i \in H}
+f_{i,2}^{\theta_i}.
+          %
+          \end{equation*}
 
-      \end{enumerate}
-
-    \item[$\psi \leftarrow \PSsign(\sk, \msg)$ :] On input secret key $\sk$ and
-a vector of $\ell$ messages $\msg$, do:
-
-      \begin{enumerate}
-
-	\item Sample $k \sample \group{1}$ and $\omega \sample \Zp$.
-
-	\item Compute $l = k^{\chi + \vec{\lambda} \cdot \msg + \iota\omega}$.
-
-	\item Return $\psi = (\omega, k, l)$.
-
-      \end{enumerate}
-
-    \item[$\{0,1\} \leftarrow \PSverify(\pk, \msg, \psi)$ :] On input public key
-$\pk$, vector of messages $\msg$, and signature $\psi$, return the result of the
-following:
-      %
-      \begin{equation*}
-      %
-	\pairing(k, \tilde{x} \vec{\tilde{y}}^\msg \tilde{z}^\omega) \checkcheck
-\pairing(l, \ggen).
-            %
-      \end{equation*}
-      %
+    \item[$\psi \leftarrow \SCIunblind(\state, \algo{resp})$ :] Compute $l = f_2
+/ f_1^{\mu}$, and output $\psi = (\omega, k, l)$ if $\PSverify(\pk, \msg, \psi)
+= 1$, and $\perp$ otherwise.
 
   \end{description}
 
 \end{primitivebox}
 
-The resulting signatures are existentially unforgeable under the $q$-modified
-strong Diffie-Hellman ($q$-MSDH) assumption of
-Assumption~\ref{asm:qmsdh}~\cite{RSA:PoiSan18}.
+The Pointcheval-Sanders signature scheme is existentially unforgeable under the
+$q$-modified strong Diffie-Hellman assumption, which \Cref{asm:qmsdh} states as
+Pointcheval and Sanders give it~\cite{RSA:PoiSan18}.
 
 \begin{assumptionbox}{$q$-Modified Strong Diffie-Hellman ($q$-MSDH)}{qmsdh}
 
-  The $q$-MSDH assumption holds if, given $(\gen, \gen^\chi, \ggen, \ggen^\chi,
-\ggen^{\omega_1}, \ldots, \ggen^{\omega_q}, \gen^{1/(\chi+\omega_1)}, \ldots,
-\gen^{1/(\chi+\omega_q)})$ for uniformly random $\chi, \omega_1, \ldots,
-\omega_q \sample \Zp$, no PPT adversary can output a tuple $(\omega, \gen^\nu,
-\gen^{\nu/(\chi+\omega)})$ for $\nu \neq 0$ and $\omega \notin \{\omega_1,
-\ldots, \omega_q\}$ with non-negligible probability.
+  The $q$-MSDH assumption holds if, given $(\gen^{\chi^i},
+\ggen^{\chi^i})_{i=0}^{q}$ and $(\gen^{\varsigma}, \ggen^{\varsigma},
+\ggen^{\chi\varsigma})$ for uniformly random $\chi, \varsigma \sample \Zp^*$, no
+PPT adversary can output a tuple $(c, \mathcal{P}, Q, Q^{1/(\chi+c)},
+Q^{\varsigma/\mathcal{P}(\chi)})$ with non-negligible probability, where $Q \in
+\group{1}$ is not the identity and $\mathcal{P}$ is a polynomial of degree at most
+$q$ with $\mathcal{P}(-c) \neq 0$.
 
 \end{assumptionbox}
 
-Pointcheval-Sanders signatures can also be extended to support blind signing: a
-signer can sign a committed vector without learning any information about
-it~\cite{NDSS:SABMD19}.
+\begin{outline}
+  \item the instantiation has the three SCI properties
+  \item one-more unforgeability: $q$-MSDH plus the analysis of Sanders et al.\ \cite{NDSS:SABMD19}
+  \item request hiding: commitment, ciphertexts under a fresh key and ZK proof reveal nothing about the hidden messages
+  \item online request extractability: Fischlin gives a non-rewinding extractor for $\Pi$
+  \item details in the proof of \Cref{thm:offline-instantiation-security}
+\end{outline}
 
-\paragraph{Blind signing over committed inputs.} Let $\vec{\gen} = (\gen_0,
-\ldots, \gen_\ell) \in \group{1}^{\ell+1}$ be a vector of $\ell+1$ random
-generators and $\msg = (\msg_0, \ldots, \msg_{\ell-1}) \in \Zp^\ell$ a vector of
-$\ell$ messages. Signatures over committed inputs are produced via an
-interactive protocol between a signer and a
-recipient~\cite{SCN:CamLys02,ASIACCS:LMPY16}. The signer signs a vector of
-committed messages, and only the recipient learns their content. The ciphertexts
-below are written $\hat{\ciph}$ throughout, and are encryptions under a key of
-the recipient's own, generated freshly for each execution so that two runs
-cannot be linked by their public key. They are unrelated to the audit
-ciphertexts $\ciph_i$ of Protocol~\ref{prot:offline}, which are under the
-auditor's key.
+\begin{outline}
+  \item at withdrawal the central bank signs $(\algo{uid}_0, v, s_0)$ with $\algo{Disc} = \{1\}$, so it sees only the value
+  \item request uses $\openinfo = 0$, since $s_0$ is already uniform and hides the commitment, so $C$ is exactly the request commitment of the construction
+\end{outline}
 
-The recipient selects an ElGamal secret key $\mu \sample \Zp$ with public key
-$(\gen, b = \gen^\mu)$, computes $\com = \vec{\gen}^{\msg\|r}$, $k =
-\hash_{\group{1}}(\com)$, and $\ell$ ciphertexts $\hat{\ciph}_i =
-(\gen^{\rho_i}, k^{\msg_i} b^{\rho_i})$ for $i \in [\ell]$, together with a
-proof $\Pi \leftarrow \NIZKprove(\crs, \inst, \witness)$ for $\inst =
-(\vec{\gen}, \gen, b, \com, k, (\hat{\ciph}_i)_{i \in [\ell]})$, $\witness =
-((\msg_i, \rho_i)_{i \in [\ell]}, r)$, and relation as follows:
-%
-\begin{align*}
-%
-  \com = \vec{\gen}^{\msg\|r} \ \wedge \ \hat{\ciph}_i = (\gen^{\rho_i},
-k^{\msg_i}b^{\rho_i}), \ \forall i \in [\ell].
-  %
-\end{align*}
-%
-It then sends the signer $(\com, \hat{\ciph}_0, \ldots, \hat{\ciph}_{\ell-1},
-\gen, b, \Pi)$, and no other value: neither $\msg$ nor $r$ nor any $\rho_i$
-leaves the recipient. The signer recomputes $k = \hash_{\group{1}}(\com)$,
-verifies $\Pi$ against $\com$, $k$, and $(\gen, b)$, and rejects if it does not
-hold. Otherwise, it parses each $\hat{\ciph}_i$ as $(e_{i,1}, e_{i,2})$,
-randomly selects $\omega \in \Zp$, and computes the following:
-%
-\begin{align*}
-%
-  \hat{\ciph} &= (e_1, e_2) = \Bigl(\prod_{i=0}^{\ell-1} e_{i,1}^{\lambda_i}, \
-k^\chi \prod_{i=0}^{\ell-1} e_{i,2}^{\lambda_i} k^{\omega\iota}\Bigr).
-  %
-\end{align*}
-%
-It then sends $(\omega, \hat{\ciph})$ to the recipient. The recipient decrypts
-$\hat{\ciph} = (e_1, e_2)$ by computing $l = e_2 / e_1^\mu$, and outputs $\psi =
-(\omega, k, l)$ if it is a valid Pointcheval-Sanders signature on $\msg$. If the
-signer followed the protocol honestly, $l = k^\chi \bigl(\prod_{i=0}^{\ell-1}
-k^{\lambda_i \msg_i}\bigr) k^{\omega\iota}$. Note that the blind variant fixes
-$k = \hash_{\group{1}}(\com)$ rather than sampling it as $\PSsign$ does, since
-the signer never sees $\msg$ and both parties must agree on $k$. Unforgeability
-is preserved, as $k$ is still a group element neither party
-controls~\cite{NDSS:SABMD19}.
+\begin{outline}
+  \item $\psi$ can never be shown to a payee, since verifying it needs $\algo{uid}_0$
+  \item device proves once that it holds a valid signature on the token value and on the identifier and randomness committed in its pseudonym
+  \item rerandomises $(k, l)$ to $(k^*, l^*)$, independent of the hidden messages
+  \item remaining equation by a Schnorr proof whose challenge hashes value, pseudonym and $(k^*, l^*)$, so none can be swapped later
+  \item \Cref{prot:ps-proof} gives $\Sigma$; it is the first entry of every token's history and every payee verifies it
+\end{outline}
 
-This protocol adapts readily to partially opened vectors: for $\algo{Disc}
-\subseteq [\ell]$ with $(\msg_i)_{i \in \algo{Disc}}$ revealed to the signer,
-the recipient computes $\com = \prod_{i \in [\ell]\setminus\algo{Disc}}
-\gen_i^{\msg_i}$ and a proof for $\inst = (\algo{Disc}, \vec{\gen}, \gen, b,
-\com, k, (\hat{\ciph}_i)_{i \in [\ell]\setminus\algo{Disc}})$, $\witness =
-((\msg_i, \rho_i)_{i \in [\ell]\setminus\algo{Disc}}, r)$, and relation as
-follows:
-%
-\begin{align*}
-%
-  \com &= \gen_\ell^r \prod_{i \in [\ell]\setminus\algo{Disc}} \gen_i^{\msg_i} \
-\wedge \ \hat{\ciph}_i = (\gen^{\rho_i}, k^{\msg_i} b^{\rho_i}), \ \forall i \in
-[\ell]\setminus\algo{Disc}.
-  %
-\end{align*}
-%
-It sends $\msg_i$ for $i \in \algo{Disc}$ in the clear, and the signer computes
-the following:
-%
-\begin{align*}
-%
-  \hat{\ciph} &= (e_1, e_2) = \Bigl(\prod_{i \in [\ell]\setminus\algo{Disc}}
-e_{i,1}^{\lambda_i}, \ k^\chi \prod_{i \in \algo{Disc}} k^{\msg_i \lambda_i}
-\prod_{i \in [\ell]\setminus\algo{Disc}} e_{i,2}^{\lambda_i}
-k^{\omega\iota}\Bigr).
-  %
-\end{align*}
-%
-This protocol adapts directly to the withdrawal step of
-Protocol~\ref{prot:offline}: we execute it on the vector of messages
-$(\algo{uid}_0, v, s_0)$ with $\algo{Disc} = \{1\}$ and randomness $r = 0$, so
-that the request commitment $C$ of Protocol~\ref{prot:offline} is $\com$ and the
-two ciphertexts sent are $\hat{\ciph}_0$ and $\hat{\ciph}_2$.
+\begin{protocolbox}{The proof of withdrawal}{ps-proof}
 
-\paragraph{Proof of withdrawal.} Let $\tau = (v, c = \gen_0^{\algo{uid}}
-\gen_1^s)$ be a token, and let $\pk_{\algo{PS}} = (\tilde{x}, \tilde{y}_0,
-\tilde{y}_1, \tilde{y}_2, \tilde{z})$ be the public key of the central bank
-$\algo{cb}$. Let $\psi = (\omega, k, l)$ be a Pointcheval-Sanders signature that
-verifies $1 \gets \PSverify(\pk_{\algo{PS}}, (\algo{uid}, v, s), \psi)$, so
-$\pairing(k, \tilde{x} \tilde{y}_0^{\algo{uid}} \tilde{y}_1^v \tilde{y}_2^s
-\tilde{z}^\omega) = \pairing(l, \ggen)$. To prove that $\tau$ was issued by
-$\algo{cb}$, the token's owner uses their mobile device $\algo{dev}$ to compute
-$\Sigma$ as follows.
-
-\begin{protocolbox}{Proof of withdrawal}{ps-proof}
+  Let $\pk_{\algo{PS}} = (\tilde{x}, \tilde{y}_0, \tilde{y}_1, \tilde{y}_2,
+\tilde{z}, \vec{P})$ be the central bank's public key, and $\tau = (v, \com)$ a
+token with $\com = \hgen_1^{\algo{uid}} \hgen^{s}$ and $\psi = (\omega, k, l)$ a
+Pointcheval-Sanders signature on $(\algo{uid}, v, s)$.
 
   \begin{description}
 
     \item[$\Sigma \leftarrow \algo{ProveWithdrawal}(\pk_{\algo{PS}}, \tau,
-\omega, \algo{uid}, s)$ :] On input the central bank's public key
-$\pk_{\algo{PS}}$, token $\tau = (v, c)$, and witness $(\omega, \algo{uid}, s)$
-for a Pointcheval-Sanders signature $\psi = (\omega, k, l)$ on $(\algo{uid}, v,
-s)$, do:
+\algo{uid}, s, \psi)$ :] Do the following:
 
       \begin{enumerate}
 
-	\item Select random $\iota \in \Zp$ and compute $(k^*, l^*) = (k^\iota,
-l^\iota)$.
+	\item Sample $\vartheta \sample \Zp^*$ and set $(k^*, l^*) =
+(k^{\vartheta}, l^{\vartheta})$.
 
-	\item Generate $\Delta \leftarrow \NIZKprove(\crs, \inst, \witness)$,
-with $\inst = (\gen_0, \gen_1, \tilde{x}, \tilde{y}_0, \tilde{y}_1, \tilde{y}_2,
-\tilde{z}, v, c, k^*, l^*)$, $\witness = (\omega, \algo{uid}, s)$, and relation
-as follows:
-          %
-	  \begin{align*}
-          %
-	    \pairing(l^*, \ggen) &= \pairing(k^*, \tilde{x}
-\tilde{y}_0^{\algo{uid}} \tilde{y}_1^v \tilde{y}_2^s \tilde{z}^\omega) \ \wedge
-\ c = \gen_0^{\algo{uid}} \gen_1^s.
-            %
-	  \end{align*}
-          %
+	\item Compute $\tilde{c} = \tilde{y}_0^{\algo{uid}} \tilde{y}_2^{s}
+\tilde{z}^{\omega}$.
 
-	\item Return $\Sigma = (k^*, l^*, \Delta)$.
+	\item Sample $\alpha, \beta, \delta \sample \Zp$ and compute $a =
+\hgen_1^{\alpha} \hgen^{\beta}$, $\tilde{a} = \tilde{y}_0^{\alpha}
+\tilde{y}_2^{\beta} \tilde{z}^{\delta}$, and
+          %
+          \begin{equation*}
+          %
+            \algo{chal} = \hash_p(\pk_{\algo{PS}}, \ck, v, \com, k^*, l^*,
+\tilde{c}, a, \tilde{a}).
+          %
+          \end{equation*}
+
+	\item Compute $\pi_{\algo{uid}} = \alpha + \algo{chal}\, \algo{uid}$,
+$\pi_s = \beta + \algo{chal}\, s$ and $\pi_\omega = \delta + \algo{chal}\,
+\omega$, and output $\Sigma = (k^*, l^*, \tilde{c}, a, \tilde{a},
+\pi_{\algo{uid}}, \pi_s, \pi_\omega)$.
 
       \end{enumerate}
+
+    \item[$\{0,1\} \leftarrow \algo{VerifyWithdrawal}(\pk_{\algo{PS}}, \tau,
+\Sigma)$ :] Recompute $\algo{chal}$ as above, and output $1$ if and only if
+      %
+      \begin{gather*}
+      %
+        k^* \neq 1, \quad \pairing(l^*, \ggen) = \pairing(k^*, \tilde{x}\,
+\tilde{c}\, \tilde{y}_1^{v}), \\
+      %
+        a\, \com^{\algo{chal}} = \hgen_1^{\pi_{\algo{uid}}} \hgen^{\pi_s}, \quad
+\tilde{a}\, \tilde{c}^{\algo{chal}} = \tilde{y}_0^{\pi_{\algo{uid}}}
+\tilde{y}_2^{\pi_s} \tilde{z}^{\pi_\omega}.
+      %
+      \end{gather*}
 
   \end{description}
 
 \end{protocolbox}
 
-Since $s_0$ is random and not known, $(k^*, l^*)$ leaks no information about
-$\algo{uid}_0$. To compute $\Delta$, $\algo{dev}$ first computes $\tilde{c} =
-\tilde{y}_0^{\algo{uid}} \tilde{y}_2^s \tilde{z}^\omega$. It randomly selects
-$\alpha, \beta, \delta \in \Zp$ and computes $a = \gen_0^\alpha \gen_1^\beta$,
-$\tilde{a} = \tilde{y}_0^\alpha \tilde{y}_2^\beta \tilde{z}^\delta$, and
-challenge $\gamma = \hash_p(\inst', \tilde{c}, a, \tilde{a})$. It then computes
-$\pi_{\algo{uid}} = \alpha + \gamma \algo{uid}$, $\pi_s = \beta + \gamma s$, and
-$\pi_\omega = \delta + \gamma \omega$, and sets $\Delta = (\tilde{c}, a,
-\tilde{a}, \pi_{\algo{uid}}, \pi_s, \pi_\omega)$. These are standard Schnorr
-proofs for $\inst' = (\gen_0, \gen_1, \tilde{y}_0, \tilde{y}_2, \tilde{z}, c,
-\tilde{c})$, $\witness' = (\omega, \algo{uid}, s)$, and $\rel(\inst', \witness')
-= 1$ equivalent to $c = \gen_0^{\algo{uid}} \gen_1^s \wedge \tilde{c} =
-\tilde{y}_0^{\algo{uid}} \tilde{y}_2^s \tilde{z}^\omega$.
+\subsection{Instantiating $\OP$}\label{sec:offline-full-inst}
 
-If $(\omega, k^*, l^*)$ is a valid Pointcheval-Sanders signature on
-$(\algo{uid}, v, s)$ under $\pk_{\algo{PS}}$, then $\pairing(l^*, \ggen) =
-\pairing(k^*, \tilde{x} \tilde{c} \tilde{y}_1^v)$. A verifier is given $\Sigma =
-(k^*, l^*, \Delta)$ and token $\tau = (v, c)$. It checks that $\tau$ was issued
-by $\algo{cb}$ by parsing $\Delta = (\tilde{c}, a, \tilde{a}, \pi_{\algo{uid}},
-\pi_s, \pi_\omega)$, computing $\gamma = \hash_p(\inst', \tilde{c}, a,
-\tilde{a})$, and verifying the following:
-%
-\begin{align*}
-%
-  \pairing(l^*, \ggen) &\checkcheck \pairing(k^*, \tilde{x} \tilde{c}
-\tilde{y}_1^v) \ \wedge \ c^\gamma a \checkcheck \gen_0^{\pi_{\algo{uid}}}
-\gen_1^{\pi_s} \ \wedge \ \tilde{c}^\gamma \tilde{a} \checkcheck
-\tilde{y}_0^{\pi_{\algo{uid}}} \tilde{y}_2^{\pi_s} \tilde{z}^{\pi_\omega}.
-  %
-\end{align*}
+\Cref{tab:offline-instantiation} lists the instantiation of each generic
+component of $\OP$ and the assumption it rests on. The registration authority
+issues credentials with the BBS+ signature scheme, blindly, so that the secret
+key never leaves the secure element. The central bank signs tokens on committed
+inputs, learning neither the identifier nor the serial number. The audit
+ciphertext is an ElGamal encryption of $\gen^{\algo{uid}}$ under the auditor's
+key, proven consistent with the payer's pseudonym inside the JPOK.
 
-\subsection{The instantiated protocol}\label{sec:offline-full-inst}
-
-The pieces above instantiate every generic component of
-Protocol~\ref{prot:offline}, as summarised in~\Cref{tab:offline-instantiation}.
-
-\begin{table}[t] \centering \small \begin{tabular}{l|l|l} \toprule Component &
+\begin{table}[htbp] \centering \small \begin{tabular}{l|l|l} \toprule Component &
 Instantiation & Assumption \\ \midrule Commitment scheme & Pedersen in
-$\group{1}$ & DL in $\group{1}$ \\ Credential signature & BBS+ & $q$-SDH \\
-Blind signature & Pointcheval-Sanders & $q$-MSDH \\ Public key encryption &
-ElGamal in $\group{1}$ & DDH in $\group{1}$ \\ Joint proof of knowledge &
-Primitive~\ref{prim:bbs-joint-proof} & ROM \\ Proof of withdrawal &
-Protocol~\ref{prot:ps-proof} & ROM \\ \bottomrule \end{tabular}
-\caption{Instantiation of each generic component of Protocol~\ref{prot:offline},
-with the assumption under which it is secure.  All proofs are sigma protocols
-compiled with Fiat-Shamir, so each carries the random oracle model in addition
-to the discrete logarithm assumption in $\group{1}$.}
+$\group{1}$ & DL in $\group{1}$ \\ Credential signature scheme & BBS+ & $q$-SDH \\
+SCI scheme & Pointcheval-Sanders & $q$-MSDH \\ Public key encryption scheme &
+ElGamal in $\group{1}$ & DDH in $\group{1}$ \\ JPOK &
+BBS+ joint proof & ROM \\ Proof of withdrawal &
+Schnorr proof & ROM \\ \bottomrule \end{tabular}
+\caption[Instantiation of each component of offline payments]{Instantiation of
+each generic component of $\OP$, with the assumption under which it is secure:
+the discrete logarithm (DL) assumption, DDH, $q$-SDH, $q$-MSDH, and the random
+oracle model (ROM). Every proof is a Sigma protocol, compiled with the
+Fiat-Shamir transform or, for the withdrawal request, the Fischlin transform, and
+so also relies on the DL assumption in $\group{1}$.}
 \label{tab:offline-instantiation} \end{table}
 
-A user's pseudonym is the Pedersen commitment $\com = \gen_0^{\algo{uid}}
-\gen_1^s$, which is perfectly hiding and computationally binding under the
-discrete logarithm assumption in $\group{1}$. The registration authority signs
-the pair $(\algo{uid}, \sk_{\algo{usr}})$ with BBS+, blindly, so that
-$\sk_{\algo{usr}}$ never leaves the secure element. The central bank signs the
-token vector $(\algo{uid}_0, v, s_0)$ with Pointcheval-Sanders over committed
-inputs, learning neither $\algo{uid}_0$ nor $s_0$. The audit ciphertext is an
-ElGamal encryption of the payer's identifier under $\pk_\auditor$, which admits
-an efficient sigma protocol proving that it encrypts the value committed in the
-payer's pseudonym. That is the proof $\Gamma_i$, merged with $\sigma_i$ as
-described above. The signature of knowledge $\sigma_i$ that authorises each
-payment and each deposit is Primitive~\ref{prim:bbs-joint-proof}, and the proof
-of withdrawal $\Sigma$ is produced by the device alone using
-Protocol~\ref{prot:ps-proof}.
-
-Every proof in the instantiation is a sigma protocol over discrete logarithms
-with the Fiat-Shamir heuristic applied, which is simulation extractable in the
-random oracle model~\cite{C:FiaSha86,INDOCRYPT:FKMV12}. This includes
-Primitive~\ref{prim:bbs-joint-proof}, which is a conjunction of such protocols,
-so the same argument gives simulation extractability rather than only the
-soundness established in~\cite{USENIX:HesSinSor23}. This gives the following.
+\begin{outline}
+  \item every proof is a Sigma protocol with Fiat-Shamir, so simulation extractable in the ROM \cite{C:FiaSha86,INDOCRYPT:FKMV12}
+  \item includes the JPOK, a conjunction of such protocols, giving simulation extractability rather than only the soundness shown in \cite{USENIX:HesSinSor23}
+  \item the withdrawal request proof (Fischlin) is also online extractable, as the construction requires
+  \item lead into the theorem
+\end{outline}
 
 \begin{theorem}\label{thm:offline-instantiation-security}
 %

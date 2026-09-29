@@ -1,176 +1,180 @@
 \section{Construction}\label{sec:tsps-construction}
 
-In brief, the construction proceeds as follows. The signing key of an underlying
-structure preserving signature scheme is secret-shared among $n$ signers using
-the MPC protocol of \Cref{sec:tsps-mpc}. Key generation and verification are
-then generic: key generation is a direct MPC evaluation of $\SPSgen$, and
-verification needs no protocol at all, since $\SPSverify$ takes only public
-inputs. Signing is where the construction has to work for its keep.  Naively
-evaluating $\SPSsign(\sk, \vec{\msg})$ under $\algo{MPC}$ would still force the
-signers to interact once $\vec{\msg}$ is known, since $\vec{\msg}$ would simply
-be one more input to whatever interactive calls the evaluation makes. We instead
-identify a decomposition of $\SPSsign$, satisfied by both schemes of
-\Cref{sec:tsps-instantiation}, under which every interactive call can be pushed
-into an offline phase run before $\vec{\msg}$ is known, leaving an online phase
-that each signer completes alone. This decomposition, not the use of
-$\algo{MPC}$ as such, is the technical content of this section.
+\begin{outline}
+  \item signing key of $\SPS$ shared between the $n$ signers with the MPC
+protocol of \Cref{sec:tsps-mpc}
+\end{outline}
 
-We assume throughout that the signers agree in advance on the parameters $(\ell,
-t, n)$, and that $\algo{MPC}$ is available to them.  \Cref{sec:tsps-evaluation}
-discusses two concrete realisations.
+\paragraph{Setup.} The signers agree in advance on $(\ell, t, n)$ and the
+pairing groups, and abort if any call to $\algo{MPC}$ returns $\bot$.
 
-\paragraph{Setup.} During setup, the signers fix the vector length $\ell$, the
-corruption threshold $t$, and the number of signers $n > t$, together with the
-description of the pairing groups over which the underlying structure preserving
-signature scheme is defined.
+\paragraph{Key generation and verification.}
+\begin{outline}
+  \item both generic: key generation runs $\SPSgen$ under the MPC protocol, and
+general-purpose MPC gives a distributed key generation with no trusted dealer;
+it runs once, so its cost hardly matters
+  \item verification is $\SPSverify$ unchanged, it uses no secret shares, so
+there is nothing for the MPC protocol to do
+\end{outline}
 
-\paragraph{Key generation and verification.} Both are generic. Neither depends
-on the message, and neither requires anything beyond running the corresponding
-algorithm of $\SPS$ once, under $\algo{MPC}$ in the case of key generation, and
-exactly as written in the case of verification.
+\paragraph{Why signing is not just another generic evaluation.}
+\begin{outline}
+  \item evaluating $\SPSsign(\sk, \vec{\msg})$ under MPC with the message as one
+more input puts every interactive call after the message is known
+  \item instead split signing so all interactive calls happen before the message
+is known and the online phase is local; this depends on the signing algorithm,
+which we define first
+\end{outline}
 
-Key generation produces a public key distributed exactly as one produced by
-$\SPSgen$, together with a $(t+1, n)$ sharing of the corresponding secret key.
-Every sampling step of $\SPSgen$ becomes a call to $\algo{RandShare}$, and every
-further field or group element it derives becomes a call to $\algo{Mul}$
-followed by local operations. Lifting the resulting secret shares to the group
-elements of $\pk$ is local by linearity preservation. Only $\pk$ is ever
-reconstructed. On input $(\secparam, \ell, t, n)$, the signers do the following:
+\paragraph{Decomposable signing.} A scheme $\SPS$ has decomposable signing if every
+signature $\SPSsig \sample \SPSsign(\sk, \vec{\msg})$ on $\vec{\msg} = (\msg_1,
+\ldots, \msg_\ell)$ consists of group elements $c_0$, which do not depend on the
+message, and $z_1, \ldots, z_k$ of the form
+%
+\begin{equation*}
+%
+  z_j = c_j \prod_{i=1}^{\ell} \msg_i^{e_{j,i}},
+%
+\end{equation*}
+%
+where the group elements $c_0, c_1, \ldots, c_k$ and field elements $e_{j,i}$
+are computed from $\sk$ and the signing randomness alone, using the interfaces
+of $\algo{MPC}$ and linear operations.
 
-\begin{enumerate}
+\begin{outline}
+  \item why this makes the online phase local: from sharings of $c_j$ and
+$e_{j,i}$, each signer raises the public $\msg_i$ to its shares of $e_{j,i}$ and
+multiplies by its share of $c_j$, a linear operation
+  \item not every scheme has this form: e.g.\ message inside an inverse,
+$\gen^{1/(x+\msg)}$, needs an interactive call once the message is known
+\end{outline}
 
-  \item Invoke $\algo{RandShare}$ once for each field element of $\sk$, and
-$\algo{Mul}$ for each further secret value $\SPSgen$ derives from them, to
-obtain $(t+1, n)$ shares $\shr{\sk}$ of the full secret key.
+The construction $\TSPS$, applied to an SPS scheme $\SPS$, is given in
+\Cref{prot:tsps-generic}.
 
-  \item Each signer locally lifts its shares to the group elements comprising
-$\pk$, computing $\shr{a} = \gen^{\shr{\alpha}}$ in $\group{1}$ and
-$\shr{\widetilde{a}} = \ggen^{\shr{\alpha}}$ in $\group{2}$ as required.
+\begin{protocolbox}{Threshold structure-preserving signatures}{tsps-generic}
 
-  \item Call $\algo{Open}$ in each source group to reconstruct and publish
-$\pk$. Each signer stores its share of $\shr{\sk}$, together with any shares of
-derived values that later phases will need.
+  \begin{description}
 
-\end{enumerate}
+    \item[$(\pk, \shr{\sk}) \sample \TSPSgen(\secparam, \ell, t, n)$ :] Run
+$\SPSgen(\secparam, \ell)$ under $\algo{MPC}$: every field element it samples is
+a call to $\algo{RandShare}$, and every product of secret field elements it
+derives is a call to $\algo{Mul}$. Compute the shares of the group elements of
+$\pk$ and $\sk$ locally, by raising the generators to the shares of their
+discrete logarithms. Call $\algo{Open}$ on $\pk$ only, which broadcasts each
+signer's share $\pk_i$ of it.
 
-If any call to $\algo{MPC}$ returns $\bot$, the signers abort. Verification is
-that of the underlying scheme, unchanged: on input $(\pk, \vec{\msg}, \SPSsig)$,
-the verifier returns $\SPSverify(\pk, \vec{\msg}, \SPSsig)$, so that
-$\TSPSverify = \SPSverify$. Since verification touches no secret share, there is
-nothing here for $\algo{MPC}$ to do.
+    \item[$\shr{\state} \sample \TSPSoffsign(\shr{\sk})$ :] Sample the signing
+randomness with $\algo{RandShare}$, and compute sharings of $c_0, \ldots, c_k$
+and of every $e_{j,i}$ with $\algo{Mul}$, $\algo{Inv}$, $\algo{ExpGrp}$ and
+linear operations. Store $\shr{\state} = (\shr{c_0}, \ldots, \shr{c_k},
+(\shr{e_{j,i}})_{j,i})$.
 
-\paragraph{Why signing is not just another generic evaluation.} Write
-$\SPSsign(\sk, \vec{\msg})$ as a computation on the secret key, on randomness
-sampled during signing, and on the message vector. A generic secure evaluation
-of this computation would supply $\vec{\msg}$ as an ordinary input, alongside
-$\shr{\sk}$, to whatever sequence of $\algo{Mul}$, $\algo{Inv}$, and
-$\algo{ExpGrp}$ calls $\SPSsign$ requires. Since $\vec{\msg}$ is not known until
-signing time, every one of those calls would have to happen after the message
-arrives, and every one of them is interactive. evaluating $\SPSsign$ generically
-under $\algo{MPC}$ does not, on its own, give an online phase free of
-communication. Precomputing the calls that never touch $\vec{\msg}$ is standard,
-and gives some offline/online split for essentially any MPC-based signing
-protocol. What is not standard is arranging for every single call that does
-touch $\vec{\msg}$ to be avoidable, so that the online phase contains no
-interactive call at all. That depends on the algebra of $\SPSsign$, not on
-$\algo{MPC}$, and need not hold for an arbitrary signature scheme.
+    \item[$\SPSsig_i \leftarrow \TSPSonsign(\sk_i, \state_i, \vec{\msg})$ :]
+Each signer computes $\shr{z_j} = \shr{c_j} \prod_{i=1}^{\ell}
+\msg_i^{\shr{e_{j,i}}}$ for each $j \in [1,k]$, and outputs its shares of $(c_0,
+z_1, \ldots, z_k)$. No call to $\algo{MPC}$ is made.
 
-We therefore require, of $\SPS$, that $\SPSsign(\sk, \vec{\msg})$ decomposes
-into two parts. The message-independent part consists of samplings from $\Zp$
-and of field and group operations that $\algo{MPC}$ provides. The
-message-dependent part uses only operations the signers perform locally, namely
-products of shares and exponentiation of a public group element by a
-secret-shared field element. Both schemes of \Cref{sec:tsps-instantiation}
-satisfy this. The messages of a structure preserving signature scheme are
-themselves group elements, public at signing time. The linearity preservation
-property of \Cref{sec:tsps-mpc}, applied to the message vector, is therefore
-exactly what supplies the second condition, and that is what makes the online
-phase non-interactive. \Cref{sec:tsps-instantiation} checks this decomposition
-explicitly for each of the two underlying signature schemes.
+    \item[$\SPSsig \leftarrow \TSPScombine(\{\SPSsig_i\}_{i \in Q})$ :]
+Reconstruct each group element of $\SPSsig$ from the $t+1$ shares, and output
+$\SPSsig$.
 
-\paragraph{Offline signing.} The offline phase performs, ahead of time, every
-part of signing that does not depend on the message. Because $\SPSsign$ samples
-its randomness independently of the message, and because the values derived from
-that randomness are likewise message-independent, this phase absorbs all of the
-interaction that threshold signing requires. It can be run repeatedly to build
-up a store of pre-processed material, one entry per future signature.
+    \item[$\{0,1\} \leftarrow \TSPSverify(\pk, \vec{\msg}, \SPSsig)$ :] Output
+$\SPSverify(\pk, \vec{\msg}, \SPSsig)$.
 
-On input the secret key shares, the signers first invoke $\algo{RandShare}$ to
-obtain shares of the randomness that $\SPSsign$ samples. They then invoke
-$\algo{Mul}$, $\algo{Inv}$, and $\algo{ExpGrp}_1$ as the scheme requires,
-interleaved with local liftings to the source groups and local products of
-shares. The result is a sharing of every value the signing algorithm derives
-from the secret key and that randomness.  Those components of the signature that
-do not depend on the message are complete at the end of this phase, and are
-stored as $\shr{\state}$ along with the shares the online phase consumes.  If
-any call to $\algo{MPC}$ returns $\bot$, the signers abort.
+  \end{description}
 
-Each stored entry is consumed by exactly one invocation of $\algo{OnSign}$ and
-then discarded. Reusing an entry across two messages would reuse the signing
-randomness, which is fatal for both schemes of \Cref{sec:tsps-instantiation}.
-In each case the message-dependent component of the signature is a deterministic
-function of the message and the pre-processed shares. Two signatures under the
-same entry therefore yield a relation between the message vectors and the secret
-key. The single-use requirement is reflected in the session identifiers of
-Experiment~\ref{exp:tsps-adp-ts-uf-1}. In practice the store must be maintained
-as a queue, with entries removed on consumption rather than cached.
+\end{protocolbox}
 
-\paragraph{Online signing.} Online signing takes the message vector and produces
-a signature share. By the decomposition above, the only operations needed at
-this point are products of shares and exponentiation of a public group element
-by a secret share, both of which each signer performs locally.  No signer
-communicates with any other during this phase, and its cost is comparable to
-that of an ordinary invocation of $\SPSsign$.
+\paragraph{Offline signing.} Each state is used for one message only. For both schemes we instantiate, two
+signatures under the same state give a
+relation between the two messages and the secret key, so the signers keep their
+states in a queue and delete each one once it is used. The offline phase can be
+run repeatedly during quiet periods to build up states for busy ones.
 
-On input a message vector $\vec{\msg} \in \group{1}^\ell$, each signer combines
-its share of the pre-processed material with $\vec{\msg}$. It raises the public
-group elements of $\vec{\msg}$ to its shares of the corresponding field elements
-and takes the product, producing its signature share $\shr{\SPSsig}$.  Both
-operations are local by linearity preservation, so this phase makes no call to
-$\algo{MPC}$ at all.
+\paragraph{Online signing.}
+\begin{outline}
+  \item each signer only raises the public $\msg_i$ to its shares and multiplies,
+so no signer communicates in this phase; costs about as much as one run of
+$\SPSsign$
+\end{outline}
 
-\paragraph{Combining.} Combining reconstructs the signature from the shares.  It
-is performed by whichever party is to hold the signature, and needs no
-participation from the signers beyond their having published their shares. In
-the benchmarks of \Cref{sec:tsps-evaluation} this party is one of the signers,
-which is why the reported online timings include the cost of combining.
+\paragraph{Combining.}
+\begin{outline}
+  \item done by whichever party is to hold the signature, from $t+1$ signature
+shares, with no further work by the signers; in the benchmarks every signer
+opens the signature (\Cref{tab:tsps-comms})
+\end{outline}
 
-On input $t+1$ signature shares, the combining party calls $\algo{Open}$ in each
-source group to reconstruct each group element of the signature from the
-corresponding shares, and returns $\SPSsig$. If any call returns $\bot$, it
-returns $\bot$ instead.
+\paragraph{Robustness and abort.} With an honest majority, the honest signers' shares alone are enough to combine,
+so signing is robust: it succeeds whatever the corrupted signers do. With
+additive sharing, every signer has to contribute, and corrupted signers can make
+signing abort. If the MPC protocol has identifiable abort, meaning that an abort
+also names a corrupted signer, such signers can be excluded.
 
-\paragraph{Robustness and abort.} In the honest majority setting, where $t <
-n/2$, the signature can always be reconstructed from the shares of the honest
-signers alone, so the scheme is robust. In the dishonest majority setting, where
-$t \geq n/2$, robustness is no longer guaranteed, and in the extreme case $t =
-n-1$ the sharing is additive between all $n$ signers, so every signer must
-contribute for combining to succeed. If the realisation of $\algo{MPC}$ supports
-identifiable abort, however, then so does the threshold signature scheme: a
-corrupt signer that contributes a bogus share causes an abort in which it is
-identified, and can be excluded from subsequent signing.
+\begin{outline}
+  \item what we prove: thresholdising loses nothing; if $\SPS$ can't be forged
+and the MPC reveals nothing beyond what it opens, $\TSPS$ can't be forged
+  \item only need EUF-CMA of $\SPS$, not strong unforgeability: TS-UF-1 counts a
+forgery by its message, so the reduction never has to tell two signatures on the
+same message apart; asking for more would rule out rerandomisable schemes like
+$\AGHO$
+  \item from the MPC: privacy and security with abort against up to $t$
+adaptively corrupted signers, linear $(t+1, n)$ sharing (\Cref{sec:tsps-mpc})
+  \item from $\SPS$: decomposable signing, which is what lets the online phase
+run without the MPC
+\end{outline}
 
-\begin{lemma}\label{lem:tsps-construction-correctness} Let $\SPS$ be a correct
-structure preserving signature scheme whose signing algorithm admits the
-decomposition described above, and let $\algo{MPC}$ satisfy the properties of
-\Cref{sec:tsps-mpc}. Then the threshold structure preserving signature scheme
-obtained from $\SPS$ by the construction above is correct.  \end{lemma}
+\begin{lemma}\label{lem:tsps-construction-correctness} Let $\SPS$ be a correct SPS
+scheme with decomposable signing, and let the MPC protocol be secure with abort
+over a linear $(t+1, n)$ threshold sharing. Then $\TSPS$ applied to $\SPS$ is
+correct.
+\end{lemma}
 
-\begin{theorem}\label{thm:tsps-construction-security} Let $\SPS$ be a structure
-preserving signature scheme satisfying EUF-CMA security whose signing algorithm
-admits the decomposition described above, and let $\algo{MPC}$ satisfy the
-properties of \Cref{sec:tsps-mpc}. Then, for any corruption bound $|\Cor| \leq
-t$ and any PPT adversary $\adv$ against the threshold structure preserving
-signature scheme obtained from $\SPS$ by the construction above, there is a PPT
-adversary $\advB$ such that
+\begin{theorem}\label{thm:tsps-construction-security} Let $\SPS$ be an EUF-CMA
+secure SPS scheme with decomposable signing, and let the MPC protocol be private
+and secure with abort against up to $t$ adaptively corrupted signers, over a
+linear $(t+1, n)$ threshold sharing. For every PPT adversary $\adv$ against the
+adp-TS-UF-1 security of $\TSPS$ applied to $\SPS$, there is a PPT adversary
+$\advB$ such that
   %
   \begin{equation*}
   %
-    \Adv_{\TSPS, \adv}^{\text{adp-TS-UF-1}}(\secparam) \leq \binom{n}{t} \cdot
-\Adv_{\SPS, \advB}^{\text{EUF-CMA}}(\secparam),
+    \Adv_{\TSPS, \adv}^{\text{adp-TS-UF-1}}(\secparam) \leq \binom{n}{t}
+\cdot \Adv_{\SPS, \advB}^{\text{euf-cma}}(\secparam).
   %
   \end{equation*}
   %
-so the scheme is adaptive TS-UF-1 secure whenever $n$ is polynomial in
-$\secparam$ and $t$ is constant, or whenever the loss is absorbed as described
-in \Cref{sec:tsps-proof-1}.  \end{theorem}
+\end{theorem}
+
+\begin{outline}
+  \item if $n$ is polynomial in $\secparam$ and $t$ or $n - t$ is constant, then
+$\binom{n}{t} \leq n^{\min(t, n-t)}$ is polynomial, so $\TSPS$ is adp-TS-UF-1
+secure
+  \item the factor disappears if the adversary fixes its corrupted signers in
+advance: the reduction answers honest signers lazily instead of guessing (next
+lemma)
+\end{outline}
+
+\begin{lemma}\label{lem:tsps-static} Under the conditions of
+\Cref{thm:tsps-construction-security}, with the MPC protocol secure against static
+corruption only, for every PPT adversary $\adv$ that fixes
+its corrupted signers before key generation and makes no corruption queries,
+there is a PPT adversary $\advB$ such that
+$\Adv_{\TSPS, \adv}^{\text{adp-TS-UF-1}}(\secparam) \leq
+\Adv_{\SPS, \advB}^{\text{euf-cma}}(\secparam)$, for any $n$ and $t$.
+\end{lemma}
+
+\begin{outline}
+  \item neither MPC protocol we benchmark is proven adaptively secure, so the
+implemented schemes are secure against static corruption, without loss
+  \item with an adaptively secure protocol: dishonest majority $t = n-1$ loses
+only $\binom{n}{n-1} = n$; honest majority $t \approx n/2$ loses a factor
+exponential in $n$, only covered for constant $n$
+  \item where the factor comes from: the reduction guesses, before any
+corruption, which signers the adversary will corrupt or ask for shares on its
+forgery message
+  \item removing it adaptively would need an equivocable sharing (simulator can
+later explain it as a sharing of any value) or secure erasures (honest signers
+reliably delete states); neither benchmarked protocol provides these
+\end{outline}

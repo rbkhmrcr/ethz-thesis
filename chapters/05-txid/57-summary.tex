@@ -1,48 +1,21 @@
 \section{Summary}\label{sec:txid-summary}
 
-This chapter addresses regulatory oversight in privacy-preserving transaction
-systems. Prior work typically supports either anonymity revocation, which lets
-an auditor identify the user responsible for a single transaction, or tracing,
-which lets an auditor recover every transaction associated with a given user.
-Revocation-based schemes trace a user only by decrypting every entry on the
-ledger, at a cost that grows with the ledger and that exposes non-targeted
-users. Existing tracing mechanisms avoid that cost by deriving tags from a
-monotonically increasing counter, but the counter must advance by one per
-transaction and leave no gaps, so a user's transactions cannot be created in
-parallel. This degrades performance in high-throughput settings.
+\begin{outline}
+  \item tracing in payments is often discussed as if it were a backdoor in end-to-end encrypted messaging; argue it is neither technically nor socially the same problem
+  \item a backdoor is a master capability (everything, any time, unnoticed); ours is the opposite: one user, one epoch, only after that user's grant, non-targeted users never exposed
+  \item why: a message has meaning only to sender and recipient, so any reader is an intrusion; a payment moves value in a system that already answers to regulators
+  \item realistic alternative to scoped tracing is not perfect privacy but the status quo, banks seeing everything in the clear; money is not end-to-end encryption
+\end{outline}
 
-We introduce a tracing mechanism that supports efficient tracing without
-requiring encrypted user identifiers or sequential counters. In place of an
-ordered counter, each transaction carries an index drawn from a bounded,
-epoch-local space, and the only constraint is that an index is not reused within
-an epoch. Order is irrelevant, so a user may partition the space among
-concurrent workers and submit transactions in any order and in parallel.
-Tracing costs $\Max$ pairings per user per epoch, independent of the size of the
-ledger. Auditors are granted epoch-bound permission, which expires with the
-epoch it was issued for. We formalise this through an ideal functionality
-capturing anonymity, non-repudiation, and permission expiration, and give an
-abstract construction from signatures, commitments, pseudorandom functions,
-one-way functions, and zero-knowledge proofs.
+\begin{outline}
+  \item scoping came from moving the question from who may see a transaction to how narrowly a capability can be granted
+  \item epoch-local index space (not a counter or per-user state) gives a permission a boundary in time, an owner, and a fixed cost independent of ledger size
+  \item same shape elsewhere: tax reporting over one period, a court order for one account, a compliance check for one counterparty; the design question is the smallest capability that meets the need, and whether its use is visible to the person concerned
+\end{outline}
 
-We instantiate the construction in two ways. The algebraic instantiation works
-in pairing-based groups with a transparent setup, in which every group generator
-is derived by hash-to-curve from a public seed and no party, including the
-registration authority, knows a discrete logarithm relation among them. The BBS+
-signature scheme lets the registration authority certify users' keys without
-ever learning their tracing key. The hash based instantiation takes both
-pseudorandom functions to be hash functions and discharges the two PRF relations
-with a general purpose zk-SNARK. That shrinks a transaction proof to 192 bytes
-and drops the tracing-specific hardness assumptions. It costs a trusted setup
-per relation, and a markedly slower prover.
-
-We implement and benchmark both. At $\ell = 8$, so up to 256 transactions per
-user per epoch, the algebraic instantiation proves a traceable transaction in
-17.5ms and verifies it in 11.4ms over BLS12-381. The hash based instantiation
-reverses the balance, at 34.7ms to prove and 6.1ms to verify, with a proof of
-192 bytes. Tracing a user over one epoch costs a fixed 0.31s single-threaded, or
-58ms across eight cores, whatever the size of the ledger. Against Hyperledger
-Idemix on the same machine, the hash based instantiation verifies faster than
-Idemix does with its audit pseudonyms enabled, and the algebraic one stays
-within a small factor of it while needing no trusted setup. The two approaches
-to recovering a user's transactions cost the same at roughly 750 ledger entries
-per epoch, beyond which the gap grows linearly.
+\begin{outline}
+  \item future work: grants are issued by users, so compelled disclosure relies on the legal system; a threshold auditor with the techniques of \Cref{chap:tsps} would split the authority between institutions
+  \item simulator rewinds, so the result is standalone; straight-line extraction would give a composable one at the cost of larger proofs
+  \item algebraic tags are the largest item per transaction; compressing them or publishing a different element would reduce ledger growth
+  \item a policy for choosing $\Max$ (privacy of volume against capacity) is a deployment question as much as a cryptographic one
+\end{outline}

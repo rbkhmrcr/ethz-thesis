@@ -5,14 +5,14 @@ transactions. Each user is provisioned with a long-term signing key and a
 long-term tracing key, cryptographically bound together via a credential issued
 by the registration authority. For each epoch, the user derives an epoch tracing
 key from their tracing key and the epoch identifier. Transactions submitted
-during that epoch are tagged using PRF $\FT$, evaluated on the epoch tracing key
+during that epoch are tagged using a pseudorandom function (PRF) $\FT$, evaluated on the epoch tracing key
 and an index in the range $[0,\Max)$, where $\Max$ bounds the number of
 transactions a user can submit per epoch. Each transaction carries a proof that
 its tag was correctly generated.
 
 For tracing, the user discloses their epoch tracing key to the relevant auditor,
 who locally computes every valid transaction tag for that user and epoch. This
-requires the ledger to be indexed by tag, so that the auditor pays one lookup
+requires the ledger to be indexed by tag, so that the auditor does one lookup
 per candidate tag rather than a scan. We assume throughout that the ledger
 operator maintains such an index, which is why tracing costs $O(\Max)$ rather
 than $O(|L|)$ for a ledger of $|L|$ transactions.
@@ -22,14 +22,14 @@ and tracing capabilities granted for prior epochs expire automatically.
 
 \paragraph{The index is unordered.} The index $\gamma \in [0,\Max)$ is the
 counterpart of the monotonically increasing counter used by prior tag-based
-schemes~\cite{CCS:KiaKohSar22,CANS:SarKiaKoh24}, and the difference between the
-two is the point of the construction. Those schemes need the counter to increase
+schemes, and the difference between the two is the main idea of the
+construction~\cite{CCS:KiaKohSar22,CANS:SarKiaKoh24}. Those schemes need the counter to increase
 by exactly one per transaction, with no gaps. Their auditor walks the counter
 upwards from zero and stops at the first miss, so a gap would hide everything
 after it. That forces the user to serialise: the $(i+1)$-th transaction cannot
 be built until the $i$-th is fixed. Here the auditor
 evaluates $\FT$ at every $\gamma \in [0,\Max)$ regardless, so gaps and
-out-of-order use are free. The only constraint is that a user must not reuse an
+out-of-order use cost nothing. The only constraint is that a user must not reuse an
 index within an epoch, and they can enforce that themselves. A user may
 partition $[0,\Max)$ among concurrent workers in advance, or draw indices from a
 local pool. Either way the resulting transactions can be submitted in any order,
@@ -38,7 +38,7 @@ and in parallel.
 Sampling $\gamma$ uniformly instead is tempting but worse. Collisions start
 appearing after roughly $\sqrt{\Max}$ transactions. A collision costs a rejected
 transaction rather than a security failure, so nothing breaks, but explicit
-allocation avoids the problem for free.
+allocation avoids the problem.
 
 Once a user has consumed all $\Max$ indices they wait for the next epoch. So
 $\Max$ is a per-user, per-epoch rate limit, and choosing it trades that limit
@@ -50,16 +50,26 @@ keys with a digital signature scheme $\DS$.  Users bind their tracing keys
 across several proofs using a commitment scheme $\Com$. Two pseudorandom
 functions, $\FE$ for epoch keys and $\FT$ for tags, derive epoch tracing keys
 and transaction tags from users' long-term tracing keys. These keys are also
-bound using one-way functions $\G$ and $\G'$, where $\G'$ is applied to the
-tracing key as a whole, which the instantiation takes to be a tuple. The image
-$\PTK = \G'(\utk)$ is the user's public tracing key, and doubles as a public
-parameter of $\FT$. The user
-proves that these values were derived correctly, and, where the proof must also
-authenticate a message, that the message originated from the same user, using
-zero-knowledge proofs of knowledge.
+bound using one-way functions $\G$ and $\G'$,
+where $\G'$ is applied to the tracing key as a whole, which the instantiation
+takes to be a tuple. The images $\PSK = \G(\sk)$ and $\PTK = \G'(\utk)$ are
+users' public signing and tracing keys, and the public tracing key doubles as a
+public parameter of $\FT$. Users prove that these values were derived
+correctly, and, where a proof must also authenticate a message, that the
+message came from the same user, using zero-knowledge proofs of knowledge.
 
-Two requirements on these primitives are not generic, and the instantiation
-of~\Cref{sec:txid-instantiation} depends on both. First, $\DS$ and $\Com$ must
+\begin{outline}
+  \item why each primitive is needed, in turn
+  \item PRF for tags: a tag must look random to anyone without the epoch key (unlinkability of one user's transactions) yet be recomputable by whoever holds it (auditor finds every transaction); a PRF gives exactly both, a one-way or hash function only the first
+  \item two PRFs, not one: tags directly under the long-term key would mean granting one epoch hands over every epoch; a fresh epoch key via a second PRF makes epochs independent
+  \item commitment: ties the user's several proofs to one hidden tracing key (binding: no key switching between proofs; hiding: key stays out of the transaction)
+  \item one-way functions: public image of each secret key that can be certified and checked
+  \item signature: registration authority certifies that image once, later proofs rely on it
+  \item proofs: of knowledge (simulator extracts keys) and zero knowledge (published on the ledger)
+\end{outline}
+
+Two requirements on these primitives are not generic, and the algebraic
+instantiation depends on both. First, $\DS$ and $\Com$ must
 be compatible, meaning that $\DS$ supports signatures on committed values. Two
 things have to work. The registration authority must be able to certify
 $\G(\sk)$ and $\G'(\utk)$ without learning $\sk$ or $\utk$, and a user must
@@ -76,17 +86,17 @@ takes three arguments, $\Tag_\gamma = \FT(\PTK, \ek, \gamma)$, where $\PTK =
 registration. $\PTK$ enters as a public parameter and not as key material: the
 key of $\FT$ is the epoch tracing key $\ek$, and $\PTK$ is fixed once, for the
 lifetime of the user. Correspondingly, we require pseudorandomness of both
-families to hold against a distinguisher that holds $\PTK$, in the sense
-of~\Cref{sec:prelims-prfs}, so that nothing $\PTK$ carries need be kept secret.
+families to hold against a distinguisher that holds $\PTK$, as a public
+parameter, so that nothing $\PTK$ carries need be kept secret.
 
 The distinction matters because whatever the instantiation needs in order to
 evaluate a tag, beyond the epoch key itself, must sit somewhere that does not
 vary with the epoch. Placing such material in the output of $\FE$ would make
 $\FE$ repeat a component of its output in every epoch, and no function that does
 that is pseudorandom, whatever the hardness assumption behind it. Placing it in
-$\PTK$ costs nothing, since $\PTK$ is certified at registration and already
+$\PTK$ adds no cost, since $\PTK$ is certified at registration and already
 travels with the grant message, and it leaves $\FE$ a pseudorandom function in
-the ordinary sense. \Cref{sec:txid-instantiation} is exactly this case: $\PTK$
+the ordinary sense. The algebraic instantiation is this case: $\PTK$
 carries a vector of $\Max$ group elements alongside the image of $\utk$, while
 $\ek$ is a single group element.
 
@@ -104,117 +114,119 @@ public parameters, one for each relation.
 The first relation, $\rel_4$, lets a user prove knowledge of their long-term
 signing and tracing keys. Its instance, witness, and relation are as follows:
 %
-\begin{equation}
+\begin{equation*}
 %
   \inst_4 = (\G, \G', \PSK, \PTK), \qquad \witness_4 = (\sk, \utk),
 %
-\end{equation}
+\end{equation*}
 %
-\begin{equation}\label{eq:rel4} \begin{gathered}
+\begin{equation*} \begin{gathered}
 %
   \rel_4 = \{\ \PSK = \G(\sk) \ \wedge \ \PTK = \G'(\utk)\ \}.
 %
-\end{gathered} \end{equation}
+\end{gathered} \end{equation*}
 %
 The second relation, $\rel_5$, captures correctness of epoch tracing key
 generation, with instance, witness, and relation given as follows:
 %
-\begin{equation}
+\begin{equation*}
 %
   \inst_5 = (\FE, \G', \PTK, \epoch, \ek), \qquad \witness_5 = \utk,
 %
-\end{equation}
+\end{equation*}
 %
-\begin{equation}\label{eq:rel5} \begin{gathered}
+\begin{equation*} \begin{gathered}
 %
   \rel_5 = \{\ \PTK = \G'(\utk) \ \wedge \ \ek = \FE(\utk, \epoch)\ \}.
 %
-\end{gathered} \end{equation}
+\end{gathered} \end{equation*}
 %
 Since $\PTK$ appears in $\inst_5$, the same proof establishes that the epoch key
 was derived from the tracing key whose image the credential certifies, and that
-$\PTK$ itself is well formed against that tracing key. In the instantiation the
+$\PTK$ itself is well-formed against that tracing key. In the instantiation the
 second of these is proved once, at an auditor's first grant, and the first once
 per epoch.
 %
-The third relation, $\rel_6$, does two jobs at once. It lets a user prove
+The third relation, $\rel_6$, has two purposes. It lets a user prove
 possession of a valid registration credential, and prove that the tracing key
 certified by that credential is the one inside a commitment. Its instance,
 witness, and relation are as follows:
 %
-\begin{equation}
+\begin{equation*}
 %
   \inst_6 = (\G, \G', \rapk, \ck, \com), \qquad \witness_6 = (\signature, \sk,
 \utk, \openinfo),
 %
-\end{equation}
+\end{equation*}
 %
-\begin{equation}\label{eq:rel6} \begin{gathered}
+\begin{equation*} \begin{gathered}
 %
   \rel_6 = \{\ \DSverify(\rapk, \G(\sk) \| \G'(\utk), \signature) = 1 \ \wedge \
 \ComOpen(\ck, \com, \openinfo) = \utk\ \}.
 %
-\end{gathered} \end{equation}
+\end{gathered} \end{equation*}
 %
 The fourth relation, $\rel_7$, lets a user prove that a given epoch tracing key
 and transaction tag were correctly derived from the tracing key contained in the
 same commitment, with instance, witness, and relation defined as follows:
 %
-\begin{equation}
+\begin{equation*}
 %
   \inst_7 = (\FE, \FT, \G', \ck, \com, \epoch, \Max, \Tag_\gamma), \qquad
 \witness_7 = (\utk, \openinfo, \ek, \gamma),
 %
-\end{equation}
+\end{equation*}
 %
-\begin{equation}\label{eq:rel7} \begin{gathered}
+\begin{equation*} \begin{gathered}
 %
   \rel_7 = \{\ \ComOpen(\ck, \com, \openinfo) = \utk \ \wedge \ \ek =
 \FE(\utk, \epoch) \\ \wedge \ \Tag_\gamma = \FT(\G'(\utk), \ek, \gamma) \ \wedge
 \ 0 \leq \gamma < \Max\ \}.
 %
-\end{gathered} \end{equation}
+\end{gathered} \end{equation*}
 %
-The ledger operator then publishes the following:
+The ledger operator then publishes the following, where we write
+$\ledger[\crs]$ for the public parameters recorded on the ledger, and later
+$\ledger[\Tag]$ for the entry recorded under tag $\Tag$:
 %
 \begin{equation*} \ledger[\crs] \leftarrow (\G, \G', \FE, \FT, \rapk, \ck,
 \crs_4, \crs_5, \crs_6, \crs_7, \Max).  \end{equation*}
 
-\paragraph{Why four relations.} The number of relations reflects the roles the
-ledger imposes, rather than an accumulation of unrelated design choices. Unlike
+\paragraph{Why four relations.} There are four relations because of the roles the ledger imposes, not because of
+an accumulation of unrelated design choices. Unlike
 a credential system where a single verifier checks one presentation
 interactively, transactions here are posted to a public, append-only ledger
 whose transaction validators must accept or reject each one locally and
 non-interactively, without contacting the sender, the registration authority, or
-any auditor. $\rel_4$ certifies a user's long-term keys once, at registration.
-$\rel_5$ re-derives a fresh, epoch-bound tracing capability that a user can
+any auditor. $\rel_4$ certifies users' long-term keys once, at registration.
+$\rel_5$ re-derives a fresh, epoch-bound tracing capability that users can
 later hand to an auditor. $\rel_6$ and $\rel_7$ are the two checks the
 transaction validators themselves run on every submitted transaction: that it
 originates from a registered user, and that its tag is correctly derived.
 Splitting the protocol this way is what lets validators, auditors, and users
 each act without waiting on one another.
 
-\paragraph{Registration.} During registration, the user proves knowledge of
-their long-term signing and tracing keys, and the registration authority
-certifies the corresponding public values, binding them together for future use
-without ever learning the keys themselves.
+\paragraph{Registration.} During registration, users prove knowledge of their
+long-term signing and tracing keys, and the registration authority certifies the
+corresponding public values, binding them together for future use without ever
+learning the keys themselves.
 
 The registration authority first checks that the user has not registered before,
 then sends a fresh nonce. The user generates a signing key pair and a tracing
-key, derives their corresponding public values $\PSK$ and $\PTK$, and responds
-with a zero-knowledge proof of knowledge of both secrets, bound to the nonce so
-the proof cannot be replayed, exactly as captured by $\rel_4$.
+key, derives the corresponding public values $\PSK$ and $\PTK$, and responds with a
+zero-knowledge proof of knowledge of both secrets, bound to the nonce so the
+proof cannot be replayed, as captured by $\rel_4$.
 
-If the proof verifies, the registration authority certifies the user's public
-values with $\DSsign$, records the user as registered, and returns the resulting
+If the proof verifies, the registration authority certifies the public values
+with $\DSsign$, records the user as registered, and returns the resulting
 signature. Together with the public values, this signature becomes the user's
 registration credential.
 
-\paragraph{Authorisation.} Before the start of epoch $\epoch$, an auditor
+\paragraph{Authorisation.} Authorisation happens before the start of each epoch $\epoch$. An auditor
 requests tracing authorisation from a user, identifying themselves and supplying
 a fresh nonce. In response, the user derives their epoch tracing key from their
 long-term tracing key and the epoch identifier, and proves that this derivation
-is correct, exactly as captured by $\rel_5$. Since this proof does not depend on
+is correct, as captured by $\rel_5$. Since this proof does not depend on
 the auditor, it can be generated once and reused for every authorisation granted
 during the epoch.
 
@@ -227,7 +239,7 @@ accepts the key once the credential verifies with $\DSverify$ and both proofs
 check out.
 
 The credential is sent to the auditor as issued, rather than randomised as it is
-at submission time. This is deliberate, and it costs nothing. A grant is
+at submission time. This is deliberate and has no cost. A grant is
 addressed to a named auditor for a named user, so there is no identity left to
 hide from them. And an auditor who replays the credential elsewhere cannot
 produce the accompanying $\rel_4$ proof, which is bound to a fresh nonce and
@@ -245,12 +257,12 @@ to the key itself.
 
 Two proofs accompany the transaction. The first shows that the tag and the fresh
 commitment are consistent with each other and with a single underlying tracing
-key, and that the index lies in $[0,\Max)$, exactly as captured by $\rel_7$. The
+key, and that the index lies in $[0,\Max)$, as captured by $\rel_7$. The
 second binds the whole transaction, the payload, the tag, the commitment, and
 the first proof, to a valid registration credential for that same committed key,
 as captured by $\rel_6$. Since this proof must authenticate a message rather
-than merely certify correctness, it is generated by running $\NIZKprove$ on the
-rest of the transaction as the message being signed. The user submits the
+than merely certify correctness, it is generated by running $\NIZKprove$ with
+the rest of the transaction, the message being signed, as its label. The user submits the
 resulting tuple to the ledger.
 
 The transaction validators run $\algo{Verify}$, rejecting the transaction
@@ -260,7 +272,7 @@ linkable. Otherwise, they accept the transaction once both proofs verify with
 $\NIZKverify$, one against $\rel_7$ and the other against $\rel_6$, and record
 the payload against the tag.
 
-\paragraph{The range clause is load-bearing.} The clause $0 \leq \gamma < \Max$
+\paragraph{The range clause.} The clause $0 \leq \gamma < \Max$
 in $\rel_7$ is not a formality. An auditor holding $\ek$ evaluates $\FT$ only at
 indices in $[0,\Max)$, so a user who could tag a transaction with $\gamma =
 \Max$ would obtain a transaction that no permission can ever trace, defeating
@@ -270,14 +282,16 @@ $|\txns[(\user,\epoch)]| \leq \Max$ hold in the real world and match step 3 of
 $\IDsubmit$ in $\idfu{\algo{trace}}$. Both checks must therefore be enforced by
 the validators on every transaction.
 
-\paragraph{Tracing.} Given the user's public tracing key $\PTK$ and epoch key
-$\ek$ for epoch $\epoch$, the auditor traces the transactions the user submitted
+\paragraph{Tracing.} To trace a user in epoch $\epoch$, the auditor uses the user's public tracing
+key $\PTK$ and epoch key $\ek$. It traces the transactions the user submitted
 during that epoch by computing $\Tag_\gamma = \FT(\PTK, \ek, \gamma)$ for each
 index $\gamma \in [0,\Max)$ and retrieving entry $\ledger[\Tag_\gamma]$ where
 present. Both values reach the auditor in the grant message of the epoch, so
 tracing requires no state carried over from any earlier epoch.
 
-\paragraph{Increment Epoch.} The system participants move to epoch $\epoch + 1$.
+\paragraph{Increment Epoch.} When an epoch
+ends, all participants move to epoch $\epoch + 1$, and every grant for the old
+epoch lapses.
 
 \begin{theorem}\label{thm:txid-bb} Assuming that $\DS$ satisfies existential
 unforgeability, $\FE$ and $\FT$ are pseudorandom against a distinguisher holding

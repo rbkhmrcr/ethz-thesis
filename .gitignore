@@ -13,3 +13,15 @@ ltxpng/
 # Temps
 *.*~
 *.bak
+
+# impl
+*.o
+*.d
+*.a
+*.so
+*.dylib
+*.x
+impl/tsps/relic/relic-target/
+impl/tracing/snark/gnark-bench
+impl/agg-creds/my-venv/
+__pycache__/

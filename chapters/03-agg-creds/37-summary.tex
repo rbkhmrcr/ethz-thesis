@@ -1,41 +1,25 @@
 \section{Summary}\label{sec:agg-creds-summary}
 
-This chapter addresses a gap in existing anonymous credential systems.  While
-later systems decentralise issuance, the issuers as a whole remain responsible
-for all attributes. We instead target the setting of distinct issuers without
-requiring any coordination between issuers, or indeed between the registration
-authority, issuers, and verifiers at any time. The user simply interacts with
-each as needed.
+\begin{outline}
+  \item the gap: later systems decentralise issuance, but the issuers as a whole stay responsible for all attributes; we target distinct issuers with no coordination between issuers, or between RA, issuers and verifiers
+  \item what we built: aggregate anonymous credentials, credentials from independent issuers combined by the user into one compact credential, one proof, stateless issuers
+  \item the key point: every scheme already assumes users' keys are certified; naming that party and giving it one job (binding a key to a tag) adds no trust, it learns a key and a tag and is never contacted again, and it is what lets issuers stay uncoordinated and stateless
+  \item first instance of the wider argument of the thesis (link to the intro)
+  \item ART-Sign makes it concrete: both bind a user to one tag at registration; where the tag is the key, issuers remember what they signed; where the RA signs tag and key together, they do not
+\end{outline}
 
-We achieve this through constructing an aggregate anonymous credentials system,
-in which credentials issued independently by different authorities can be
-combined by the user into a single compact credential and presented through one
-proof. Issuers do not need to maintain state across users. We take the certified
-key assumption implicit in similar constructions and make it explicit,
-introducing the registration authority as its own role, and using this role to
-achieve efficient multi-issuer anonymous credentials. This is the first instance
-of the wider argument of this thesis. The registration authority was already
-present in every scheme of this kind, as the assumption that a user's key is
-certified. Naming it did not add a trusted party. It let us give that party a
-single narrow capability, binding a key to a tag, and nothing more. The
-authority to certify attributes stays with the issuers, who never coordinate.
-The knowledge of what those attributes are stays with the user.  What the
-registration authority learns is a key and a tag, and what it can do is bind one
-to the other. The efficiency of the scheme comes from that division, not from
-removing a participant.
+\begin{outline}
+  \item optional, broader: many systems contain an unnamed role (whoever certifies a key, assigns an identifier, admits a participant); naming it with a narrow capability can remove coordination
+  \item example settings: wallets with credentials from unrelated national registries, or from employers, universities, health services
+\end{outline}
 
-We present an instantiation based on structure preserving signatures, and build
-a special purpose proof for efficiency. Even with 64 attributes disclosed, both
-proving and verification complete in under 10ms, with cost scaling in the number
-of attributes disclosed. A concrete security analysis of the scheme would be
-valuable for determining its real world security guarantees.
+\begin{outline}
+  \item instantiation from the AGHO SPS scheme and our BLS-based $\ATS$, with a special-purpose Sigma proof; headline numbers from \Cref{sec:agg-creds-evaluation} (at $n = 128$, $k = 64$: present 20.1ms, verify 31.1ms; costs scale with $k$, not $n$)
+\end{outline}
 
-We briefly outline epoch-based revocation, which would address attributes with
-natural expiry dates.  However, a more thorough consideration of revocation is
-needed before the scheme would be able to support different attribute revocation
-policies.
-
-The anonymous credential scheme as it stands uses the issuer public keys in the
-clear. As the identity of the issuers can reveal information about the user,
-recent work has focused on issuer hiding. Adding the property of issuer hiding
-to this protocol would be interesting future work.
+\begin{outline}
+  \item open directions: GGM is needed only through AGHO; a rerandomisable SPS under a standard assumption would remove it, at the cost of larger registration signatures
+  \item concrete security analysis: parameter sizes for a given number of issuers and presentations
+  \item revocation: epoch-based is sketched; revocation of a whole user through their tag and of single attributes needs policies as well as mechanisms
+  \item issuer hiding: issuer keys are used in the clear, which can reveal information about the user; hiding which issuer from an accepted set would remove the last leak
+\end{outline}

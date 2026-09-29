@@ -1,3 +1,7 @@
 [submodule "cryptobib"]
 	path = cryptobib
 	url = git@github.com:cryptobib/export.git
+[submodule "impl/tsps/mp-spdz"]
+	path = impl/tsps/mp-spdz
+	url = https://github.com/data61/MP-SPDZ
+	ignore = dirty

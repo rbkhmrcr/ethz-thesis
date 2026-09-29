@@ -1,271 +1,135 @@
 \section{Security}\label{sec:tsps-security}
 
-\subsection{Proof of the generic construction}\label{sec:tsps-proof-1}
+We prove security relative to the properties of the SPS scheme and the MPC
+protocol stated in the theorems, rather than to any concrete MPC protocol. We use
+two consequences of the linear $(t+1, n)$ sharing, for sharings of field
+elements and of group elements alike. First, any $t$ shares of a value are
+uniform and independent of it, so they may be sampled without knowing the value.
+Second, given a value $w$ and any $t$ shares of $\shr{w}$, every other share of
+$\shr{w}$ is determined and efficiently computable, since reconstruction from any
+$t+1$ shares is a fixed linear map, or a fixed product in a group. The second
+lets a reduction that does not know the signing key still produce honest
+signers' shares of the public key and of signatures, from the public key and
+from the signatures it obtains from its own oracle.
 
-The construction of \Cref{sec:tsps-construction} is described entirely in terms
-of calls to $\algo{MPC}$, over $\Zp$ and over $\group{}$, together with
-operations the signers perform locally. We therefore prove security relative to
-the properties $\algo{MPC}$ is assumed to satisfy in \Cref{sec:tsps-mpc}, rather
-than to any concrete protocol realising it. Existing MPC results provide such
-realisations, with security against either an honest or a dishonest majority, as
-discussed in \Cref{sec:tsps-evaluation}.
-
-We rely on the following properties:
-
-\begin{enumerate}
-
-  \item[(P1)] The underlying structure preserving signature scheme $\SPS$ is
-EUF-CMA secure: no PPT adversary can produce a valid signature on a message
-vector it never queried.
-
-  \item[(P2)] The secret sharing underlying $\algo{MPC}$ is a linear $(t+1,
-n)$-threshold sharing, so that any $t$ shares are uniform and independent of the
-shared value and reconstruction from any $t+1$ shares is a fixed linear map. It
-is also private in the sense of \Cref{sec:tsps-mpc}, so that the joint view of
-at most $t$ corrupted signers over any sequence of calls is produced by a
-simulator $\algo{Sim}$ from their own inputs and outputs together with the
-values disclosed by $\algo{Open}$.
-
-  \item[(P3)] The signing algorithm of $\SPS$ admits the decomposition of
-\Cref{sec:tsps-construction}, so that the message-dependent part of signing uses
-only operations the signers perform locally.
-
-\end{enumerate}
-
-We use two consequences of (P2). First, any $t$ shares of a value may be sampled
-uniformly and independently without reference to the value itself.  Second,
-given a reconstructed value $w$ together with any $t$ shares of a sharing
-$\shr{w}$, every remaining share of $\shr{w}$ is determined and efficiently
-computable, since reconstruction is a fixed linear map on any $t+1$ shares. The
-second is what allows a reduction that does not know the signing key to
-still produce honest signature shares, once it has obtained the
-corresponding signature from its own oracle.
-
-\begin{proof}[Proof of \Cref{lem:tsps-construction-correctness}]
-
-  Fix $(\pk, \shr{\sk}) \sample \TSPSgen(\secparam, \ell, t, n)$, a
-pre-processed state $\shr{\state} \sample \algo{OffSign}(\shr{\sk})$, a message
-$\vec{\msg} \in \group{1}^\ell$, and a set $Q$ of $t+1$ signers.
-
-  By construction, $\TSPSgen$ calls $\algo{Open}$ only on the group elements
-comprising $\pk$, and every value it opens is obtained by applying the steps of
-$\SPSgen$ to sharings produced by $\algo{RandShare}$ and $\algo{Mul}$.  Writing
-$\sk$ for the value reconstructed by the sharing $\shr{\sk}$, the published
-$\pk$ is therefore exactly the public key that $\SPSgen$ associates with $\sk$.
-
-  By (P3), the signature is a product of a message-independent part, computed
-during $\algo{OffSign}$ and stored in $\shr{\state}$, and a message-dependent
-part computed locally during $\algo{OnSign}$ from $\shr{\sk}$, $\shr{\state}$
-and $\vec{\msg}$. Every operation in both parts is either a call to
-$\algo{MPC}$, which by security with abort returns either the correct output or
-$\bot$, or a local operation preserved by linearity. The shares
-$\{\SPSsig_i\}_{i \in Q}$ are therefore a $(t+1, n)$ sharing of the value
-$\SPSsign(\sk, \vec{\msg}; \varrho)$, where $\varrho$ denotes the randomness
-reconstructed by the sharings that $\algo{OffSign}$ sampled. Since $|Q| = t+1$
-and reconstruction does not depend on which $t+1$ shares are used,
-$\TSPScombine$ returns that value. Correctness of $\SPS$ then gives
-$\SPSverify(\pk, \vec{\msg}, \SPSsig) = 1$.
-
-\end{proof}
-
-\begin{lemma}\label{lem:tsps-key-secrecy} Let $\algo{MPC}$ satisfy the
-properties of \Cref{sec:tsps-mpc}. Then the joint view of any set of at most $t$
-signers, over key generation and over any polynomial number of invocations of
-$\algo{OffSign}$ and $\algo{OnSign}$, is independent of the signing key $\sk$.
-\end{lemma}
+\subsection{Proof of \Cref{lem:tsps-construction-correctness}}
 
 \begin{proof}
 
-  The view consists of the corrupted signers' shares, the transcript of the
-calls to $\algo{MPC}$, the values disclosed by $\algo{Open}$, and the public
-key. By (P2) the shares of at most $t$ signers are uniform and independent of
-every value they share, including $\sk$ and each intermediate value derived from
-it. The transcript is produced by $\algo{Sim}$ from those shares and the
-disclosed values alone. It therefore suffices to check the disclosed values.
-$\TSPSgen$ opens only $\pk$. $\algo{OffSign}$ opens only the masks internal to
-$\algo{Inv}$ and $\algo{ExpGrp}$, which by \Cref{sec:tsps-mpc} are uniform and
-independent of their arguments.  $\algo{OnSign}$ opens nothing.  $\TSPScombine$
-opens the signature, which by \Cref{lem:tsps-construction-correctness} is a
-signature $\SPS$ itself produces. The view is thus a function of $\pk$, of
-signatures under $\pk$, and of values independent of $\sk$, and reveals nothing
-further about $\sk$ than an ordinary signing oracle would.
+  By security with abort, every call to $\algo{MPC}$ returns the correct output,
+and every other step is linear, so $\TSPSgen$ opens the public key of the
+reconstructed $\sk$, and by decomposable signing the shares output by $\TSPSonsign$ reconstruct
+to $\SPSsign(\sk, \vec{\msg}; \varrho)$ for the randomness $\varrho$ sampled in
+$\TSPSoffsign$, from any $t+1$ signers. Correctness of $\SPS$ gives the claim.
 
 \end{proof}
 
-\begin{lemma}\label{lem:tsps-transparency} Let $\algo{MPC}$ satisfy the
-properties of \Cref{sec:tsps-mpc}. Then a public key output by $\TSPSgen$ is
-distributed identically to one output by $\SPSgen$, and a signature output by
-$\TSPScombine$ is distributed identically to one output by $\SPSsign$ under that
-key. Verification is syntactically unchanged, $\TSPSverify = \SPSverify$, so a
-verifier cannot distinguish a threshold signature from an ordinary one, and
-needs to know neither $n$, nor $t$, nor which signers took part.  \end{lemma}
+\subsection{Proof of \Cref{thm:tsps-construction-security}}
 
 \begin{proof}
 
-  $\TSPSgen$ samples each field element of $\sk$ by a call to
-$\algo{RandShare}$, whose reconstruction is uniform on $\Zp$, and derives every
-further value by the same equations $\SPSgen$ uses. The reconstructed key is
-therefore distributed as $\SPSgen$ would produce, and $\pk$ is the corresponding
-public key. Likewise, $\algo{OffSign}$ samples the signing randomness by calls
-to $\algo{RandShare}$, so the value $\varrho$ appearing in the proof of
-\Cref{lem:tsps-construction-correctness} is distributed as $\SPSsign$ would
-sample it, and the combined signature is $\SPSsign(\sk, \vec{\msg}; \varrho)$.
-Verification is that of $\SPS$ applied unchanged.
+  Let $\adv$ be a PPT adversary against the adp-TS-UF-1 security of
+$\TSPS$ applied to $\SPS$. We build $\advB$ playing the EUF-CMA experiment of
+\Cref{exp:euf-cma} against $\SPS$.
 
-\end{proof}
+  We first describe the setup. $\advB$ receives $\pk$ from its challenger. On receiving
+$(n, t, \Cor_0)$ from $\adv$, where $\Cor_0$ is the set of signers corrupted
+from the start, it samples a set $\mathcal{K} \subseteq [1,n]$ of
+size $t$ uniformly at random, and aborts if $\Cor_0 \not\subseteq \mathcal{K}$.
+It samples key shares $\{\sk_i\}_{i \in \mathcal{K}}$ uniformly. $\advB$ does
+not know $\sk$, so it can hold at most $t$ shares, and by the first consequence these are
+distributed exactly as in a real execution. For each group element of $\pk$, it
+computes the shares of the signers in $\mathcal{K}$ from their key shares where
+that element is a generator raised to a component of $\sk$, and samples them
+uniformly otherwise, which by the first consequence is again their real distribution. It derives
+every other signer's share from $\pk$ and these $t$ shares by the second
+consequence of linear sharing, and sends $\pk$, all $n$ shares of it, and $\{\sk_i\}_{i
+\in \Cor_0}$ to $\adv$. The set $\mathcal{K}$ is a guess at the signers that $\adv$ will
+either corrupt or ask for a signature share on its forgery message.
 
-\begin{proof}[Proof of \Cref{thm:tsps-construction-security}]
+  $\advB$ answers the offline oracle as follows. On $\mathcal{O}_{\algo{Off}}(\mathsf{sid})$ with
+$\mathsf{sid}$ fresh, $\advB$ samples the shares
+$\{\state_{\mathsf{sid},i}\}_{i \in \mathcal{K}}$ uniformly, which by the first consequence is
+their real distribution, and runs $\algo{Sim}$ on the corrupted signers' inputs
+and these outputs to produce their view. If $\adv$ makes the execution abort,
+$\advB$ returns $\bot$ and marks $\mathsf{sid}$ unusable. $\advB$ never fixes the
+randomness $\varrho$ that $\shr{\state}_{\mathsf{sid}}$ shares. It fixes only $t$
+shares, which are independent of $\varrho$, and $\varrho$ is determined later by
+the signature $\advB$ obtains for that session. This is sound because each
+session is used for one message only.
 
-  Let $\adv$ be a PPT adversary against adp-TS-UF-1 security. We build $\advB$
-playing the EUF-CMA game of Experiment~\ref{exp:sps-uf-cma} against $\SPS$.
-
-  \paragraph{Setup.} $\advB$ receives $\pk$ from its own challenger and forwards
-the setup parameters to $\adv$. On receiving $(n, t, \Cor_0)$ from $\adv$, it
-samples a set $\mathcal{K} \subseteq [1,n]$ with $|\mathcal{K}| = t$ uniformly
-at random, and aborts if $\Cor_0 \not\subseteq \mathcal{K}$.  $\advB$ then
-samples key shares $\{\sk_i\}_{i \in \mathcal{K}}$ uniformly and independently,
-and sends $\pk$ and $\{\sk_i\}_{i \in \Cor_0}$ to $\adv$.
-
-  This is the one place the reduction departs from the real game, and it is
-worth being explicit about why. $\advB$ does not know $\sk$, so it cannot hold
-all $n$ shares: any $t+1$ of them would reconstruct the key its own challenger
-is protecting. It holds exactly $t$, which by (P2) it may sample uniformly, and
-which are therefore distributed exactly as in a real execution. The set
-$\mathcal{K}$ is a guess at which signers $\adv$ will either corrupt, or ask for
-a partial signature on its eventual forgery message. The guess is what the
-reduction's loss pays for, and it is also what lets the reduction handle
-adaptive corruption without equivocating a sharing after the fact.
-
-  \paragraph{Simulating the offline oracle.} On a query
-$\mathcal{O}_{\algo{Off}}(\mathsf{sid})$ with $\mathsf{sid}$ fresh, $\advB$
-samples the shares $\{\state_{\mathsf{sid},i}\}_{i \in \mathcal{K}}$ uniformly,
-which by (P2) is their real distribution, and runs $\algo{Sim}$ on the corrupted
-signers' inputs and these outputs to produce the transcript that $\adv$ sees. If
-$\adv$, acting for the corrupted signers, causes the execution to abort, $\advB$
-returns $\bot$ and marks $\mathsf{sid}$ unusable, exactly as security with abort
-permits. An aborted session yields no pre-processed state and so cannot
-contribute to a forgery. By (P2) the simulated transcript is distributed
-identically to a real one.
-
-  Note that $\advB$ never fixes the value $\varrho$ that $\shr{\state}$ shares.
-It fixes only $t$ shares of it, which are independent of $\varrho$, and the
-value is determined later, implicitly, by whichever signature $\advB$ obtains
-for that session. This is sound precisely because pre-processed state is
-single-use. Were one session consumed by two messages, both signatures would
-have to be consistent with a single $\varrho$, which $\advB$ cannot arrange,
-since its own oracle chooses fresh randomness per query.
-
-  \paragraph{Simulating the partial signing oracle.} On a query $\TSPSsigno(i,
-\mathsf{sid}, \vec{\msg})$ with $i \in \mathcal{H}$ and $\mathsf{sid}$
-initialised and unused for signing, $\advB$ proceeds in one of two ways.
-
-  If $i \in \mathcal{K}$, then $\advB$ holds $\sk_i$ and
-$\state_{\mathsf{sid},i}$, and by (P3) the online phase is a local computation
-on exactly these and $\vec{\msg}$. It runs $\algo{OnSign}$ and returns the
-result. No query to its own oracle is made.
-
-  If $i \notin \mathcal{K}$, then $\advB$ queries its own signing oracle on
-$\vec{\msg}$, obtaining $\SPSsig$, and records $\vec{\msg}$ as queried. It
-computes the $t$ shares $\{\SPSsig_j\}_{j \in \mathcal{K}}$ itself by running
-$\algo{OnSign}$ on the material it holds, and then, by the second consequence of
-(P2), derives the remaining share $\SPSsig_i$ from $\SPSsig$ and those $t$
-shares. It caches the derived shares against $\mathsf{sid}$, so that repeated
+  $\advB$ answers the online oracle as follows. On $\mathcal{O}_{\algo{On}}(i, \mathsf{sid},
+\vec{\msg})$, if $i \in \mathcal{K}$, then $\advB$ holds $\sk_i$ and
+$\state_{\mathsf{sid},i}$, and, since signing is decomposable, runs $\TSPSonsign$ itself. Otherwise, the
+first time $\mathsf{sid}$ is used, $\advB$ queries its own signing oracle on
+$\vec{\msg}$ and obtains $\SPSsig$. It computes the shares
+$\{\SPSsig_j\}_{j \in \mathcal{K}}$ by running $\TSPSonsign$ on the material it
+holds, derives every other share from $\SPSsig$ and these by the second
+consequence of linear sharing, and stores them against $\mathsf{sid}$, so that later
 queries in the same session are answered consistently. The share returned is the
-unique one consistent with a genuine execution, so $\adv$'s view is again
-identical to the real game.
+unique one consistent with a real execution.
 
-  \paragraph{Simulating corruption.} On a query $\corrupto(k)$, $\advB$ returns
-$\sk_k$ together with every $\state_{\mathsf{sid},k}$ it holds, if $k \in
-\mathcal{K}$, and aborts otherwise. It also aborts if $|\Cor|$ would exceed $t$,
-as the game requires.
+  For the corruption oracle, on $\mathcal{O}_{\algo{Cor}}(k)$, $\advB$
+returns $\sk_k$ and every $\state_{\mathsf{sid},k}$ if $k \in \mathcal{K}$, and
+aborts otherwise.
 
-  \paragraph{Analysis.} $\adv$ eventually outputs $(\vec{\msg}^*, \SPSsig^*)$,
-which $\advB$ forwards to its own challenger. Suppose $\adv$ wins, so
-$\SPSverify(\pk, \vec{\msg}^*, \SPSsig^*) = 1$, $|\Cor| \leq t$, and
-$|S(\vec{\msg}^*)| < t + 1 - |\Cor|$, that is $|S(\vec{\msg}^*)| \leq t -
-|\Cor|$. Then
-  %
-  \begin{equation*}
-  %
-    \left| \Cor \cup S(\vec{\msg}^*) \right| \leq |\Cor| + |S(\vec{\msg}^*)|
-\leq t,
-  %
-  \end{equation*}
-  %
-  so there is at least one size-$t$ subset of $[1,n]$ containing $\Cor \cup
-S(\vec{\msg}^*)$. Conditioned on $\mathcal{K}$ being such a subset, $\advB$
-never aborts on a corruption query, and never queries its own signing oracle on
-$\vec{\msg}^*$, since every honest signer that issued a partial signature on
-$\vec{\msg}^*$ lies in $\mathcal{K}$. Its output therefore satisfies the EUF-CMA
-winning condition.
-
-  By (P2), the shares $\advB$ hands out are identically distributed whichever
-$\mathcal{K}$ was chosen, so $\mathcal{K}$ is independent of $\adv$'s view and
-the conditioning does not change $\adv$'s success probability. Since
-$\mathcal{K}$ is uniform among the $\binom{n}{t}$ subsets of size $t$, the event
-has probability at least $\binom{n}{t}^{-1}$, and
-  %
-  \begin{equation*}
-  %
-    \Adv_{\TSPS, \adv}^{\text{adp-TS-UF-1}}(\secparam) \leq \binom{n}{t} \cdot
-\Adv_{\SPS, \advB}^{\text{EUF-CMA}}(\secparam),
-  %
-  \end{equation*}
-  %
-  which is negligible by (P1).
-
-  \paragraph{On the loss.} The factor $\binom{n}{t}$ is the price of two things
-at once. The first is adaptive corruption, since $\mathcal{K}$ must be fixed
-before $\adv$ chooses whom to corrupt. The second is the freedom $\adv$ has in
-choosing which honest signers issue partial signatures on its forgery message.
-It vanishes in the case that matters most in practice, $|\Cor| = t$ with the
-corrupted set fixed in advance: the winning condition then forces
-$|S(\vec{\msg}^*)| = 0$, so $\mathcal{K} = \Cor$ is determined and no guess is
-needed. Removing the loss in general would require either a sharing that can be
-equivocated after the fact, or an assumption of secure erasures, neither of
-which the realisations benchmarked in \Cref{sec:tsps-evaluation} provide.
+  Finally, $\advB$ forwards $\adv$'s output $(\vec{\msg}^*,
+\SPSsig^*)$ to its challenger. If $\adv$ wins, then $|S(\vec{\msg}^*) \cap
+\mathcal{H}| \leq t - |\Cor|$, so $|\Cor \cup S(\vec{\msg}^*)| \leq t$, and some
+set of size $t$ contains $\Cor \cup S(\vec{\msg}^*)$. If $\mathcal{K}$ is such a
+set, $\advB$ never aborts, and never queries its own oracle on $\vec{\msg}^*$,
+since every signer that issued a share on $\vec{\msg}^*$ lies in $\mathcal{K}$.
+Its output then wins the EUF-CMA experiment. The shares $\advB$ hands out are
+distributed identically whichever $\mathcal{K}$ it chose, so $\mathcal{K}$ is
+independent of $\adv$'s view, and is such a set with probability at least
+$\binom{n}{t}^{-1}$, which gives the bound.
 
 \end{proof}
 
-\subsection{Proof of the instantiations}\label{sec:tsps-proof-2}
+\subsection{Proof of \Cref{lem:tsps-static}}\label{sec:tsps-static}
 
-\begin{proof}[Proof of \Cref{thm:tsps-security}]
+\begin{proof}
 
-  It suffices to check that each of the two schemes of
-\Cref{sec:tsps-instantiation} satisfies (P1), (P2) and (P3), and to verify the
-algebra that \Cref{lem:tsps-construction-correctness} appeals to.
+  Let $\adv$ fix $\Cor_0$ before key generation and make no corruption queries.
+$\advB$ is as in the proof above, with two changes. First, it holds key shares only for the signers in $\Cor_0$. For the
+shares of $\pk$, it computes those of $\Cor_0$ as before, samples those of $t -
+|\Cor_0|$ further signers uniformly, and derives the rest from $\pk$. The key
+shares behind the sampled ones are never needed, since no further signer is
+corrupted.
 
-  For (P1), the scheme of \Cref{sec:tsps-sps-ggm} is existentially unforgeable
-in the generic group model, and the scheme of \Cref{sec:tsps-sps-kiltz} is
-existentially unforgeable under the DDH assumption in both source
-groups~\cite{C:AGHO11,C:KilPanWee15}. EUF-CMA is the weaker of the two notions
-of \Cref{sec:tsps-definitions}, since it excludes any $\vec{\msg}^*$ the
-adversary queried, whereas sUF-CMA also counts a second, different signature on
-a queried message as a forgery. Existential unforgeability of either scheme is
-therefore exactly what (P1) asks for. As \Cref{sec:tsps-definitions} notes, the
-reduction below never needs the stronger notion: it forwards a forgery on a
-message it never queried, so requiring sUF-CMA of the underlying scheme would
-restrict the constructions the theorem covers without strengthening the
-conclusion.
+Second, it answers online queries lazily. The output of every call to
+$\algo{MPC}$ is a fresh sharing, so the state shares of a session, and the
+signature shares computed from them, are independent of the key shares and of
+other sessions. In each session, $\advB$ answers a query to an honest signer with
+a uniform signature share as long as the signers of $\Cor_0$, together with the
+honest signers it has answered in that session, number at most $t$. By the first consequence of linear sharing,
+any $t$ shares of a fresh sharing are uniform, so these answers are distributed
+as in a real execution. At the first query that would make this number $t+1$,
+$\advB$ queries its own oracle on the session's message, and derives every other
+signature share from the signature and the $t$ shares already fixed.
 
-  For (P2), both threshold schemes share their secret key using the linear
-$(t+1, n)$ sharing of \Cref{sec:tsps-mpc}, which is linearity preserving and
-private against any set of at most $t$ signers by assumption.
+If $\adv$ wins, fewer than $t + 1 - |\Cor_0|$ honest signers issued shares on
+$\vec{\msg}^*$, so in no session on $\vec{\msg}^*$ does $\advB$ query its own
+oracle. $\advB$ therefore wins whenever $\adv$ does, and no guess is needed.
 
-  For (P3), the required decomposition is exhibited for each scheme alongside
-its description. In \Cref{prot:tsps-abe} the message enters only through the
-terms $\msg_i^{-\rho\mu_i}$, and in \Cref{prot:tsps-kiltz} only through $(\gen,
-\vec{\msg})^{\mat{K}}$. In both cases a public group element is raised to a
-secret-shared field element, which by the linearity preservation of
-\Cref{sec:tsps-mpc} each signer computes locally, and the remaining online
-operations are products of shares, also local. Everything else in either signing
-algorithm depends only on the secret key and on randomness sampled independently
-of the message, and so is carried out during $\algo{OffSign}$.
+\end{proof}
 
-  For correctness, we check in each case that the value reconstructed by
-$\TSPScombine$ is the signature the underlying scheme produces under the
-reconstructed key and randomness. For \Cref{prot:tsps-abe}, writing $\rho$ for
-the value shared by $\shr{\rho}$, the combining party reconstructs
+\subsection{Proof of \Cref{thm:tsps-security}}
+
+\begin{proof}
+
+  We check that each scheme is EUF-CMA secure and has decomposable signing, and
+the algebra of correctness. The MPC properties are assumed.
+
+  $\AGHO$ is existentially unforgeable in the GGM, and $\KPW$ under
+SXDH~\cite{C:AGHO11,C:KilPanWee15}.
+
+  For decomposable signing, the instantiation gives $c_0$, the $c_j$ and the $e_{j,i}$ for each
+scheme. In both, they are computed from the secret key and
+the signing randomness with $\algo{RandShare}$, $\algo{Mul}$, $\algo{Inv}$,
+$\algo{ExpGrp}_1$ and linear operations, which is what $\TSPSoffsign$ does.
+
+  For correctness of the threshold $\AGHO$ scheme, the combining party reconstructs
   %
   \begin{equation*}
   %
@@ -276,24 +140,12 @@ the value shared by $\shr{\rho}$, the combining party reconstructs
   %
   \end{equation*}
   %
-  which is exactly $\SPSsign((\vec{\mu}, \tau), \vec{\msg}; \rho)$ for the
-scheme of \Cref{sec:tsps-sps-ggm}. For \Cref{prot:tsps-kiltz}, writing $\rho$
-and $\sigma$ for the values shared by $\shr{\rho}$ and $\shr{\sigma}$, the
-combining party reconstructs $\widetilde{q} = \ggen^{\sigma}$, $\vec{r} =
-\vec{b}^{\,\rho}$, $\vec{s} = \vec{b}^{\,\rho\sigma}$, and
-  %
-  \begin{equation*}
-  %
-    \vec{z} = (\gen, \vec{\msg})^{\mat{K}} \cdot \vec{x}^{\,\rho}
-\vec{y}^{\,\rho\sigma} = (\gen, \vec{\msg})^{\mat{K}} \cdot \left( \vec{x} \,
-\vec{y}^{\,\sigma} \right)^{\rho},
-  %
-  \end{equation*}
-  %
-  which is exactly $\SPSsign((\mat{K}, \vec{b}, \vec{x}, \vec{y}), \vec{\msg};
-\rho, \sigma)$ for the scheme of \Cref{sec:tsps-sps-kiltz}. Correctness of the
-two underlying schemes then gives correctness of the two threshold schemes, and
-both fall within the scope of \Cref{thm:tsps-construction-security}, which gives
-the claim.
+  which is $\SPSsign(\sk, \vec{\msg}; \omega)$ for $\AGHO$ with $\omega = 1/\rho$.
+For the threshold $\KPW$ scheme, it reconstructs $\widetilde{q} = \ggen^{\sigma}$,
+$\vec{r} = \vec{b}^{\,\rho}$, $\vec{s} = \vec{b}^{\,\rho\sigma}$, and $\vec{z} =
+(\gen, \vec{\msg})^{\mat{K}} \cdot \vec{x}^{\,\rho} \vec{y}^{\,\rho\sigma}$,
+which is $\SPSsign(\sk, \vec{\msg}; \rho, \sigma)$ for $\KPW$. Both schemes are
+therefore instances of $\TSPS$, and the correctness lemma and the security
+theorem for $\TSPS$ give the claim.
 
 \end{proof}
