@@ -39,8 +39,8 @@ the ability of regulators and legal authorities to act against malicious
 parties, which requires participants to be identifiable and so introduces the
 requirement of registered identities. Cryptocurrencies instead replace the
 issuer with a public ledger whose validators follow the protocol for economic
-rather than institutional reasons. This is what lets them remain permissionless,
-and lets them function with participants who have no registered identities at
+rather than institutional reasons. This lets them remain permissionless,
+and function with participants who have no registered identities at
 all. They cover the entire spectrum of privacy, from pseudonymity with each
 transaction in the clear to hidden values and anonymity sets equal to the total
 number of users of the
@@ -178,8 +178,8 @@ counters of prior tag-based schemes. In place of an ordered counter, a
 transaction carries an index drawn from a bounded, epoch-local space $[0,\Max)$,
 and the only constraint is that an index is not reused within an epoch. Order is
 irrelevant, so a user may partition the space among concurrent workers and
-submit transactions in parallel and in any order, which is what the sequential
-counter of prior work forbids. Users keep fine-grained control through
+submit transactions in parallel and in any order. The sequential counter of
+prior work does not allow this. Users keep fine-grained control through
 epoch-bound tracing permissions. A permission lets an auditor identify every
 transaction a specific user made within one window, and nothing outside it. It
 expires with the epoch, and tracing the next one needs a fresh grant. We

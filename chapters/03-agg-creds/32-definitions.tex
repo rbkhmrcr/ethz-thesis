@@ -246,17 +246,20 @@ is $\algo{V}$.
 
 \paragraph{Register.} A user calls this to join the system. If the registration
 authority accepts and the user was never registered before, registration
-succeeds.
+succeeds. Users are registered only once.
 
 \paragraph{Issue.} A user calls this to obtain a credential certifying value
 $\atv{}$ of attribute $\att{}$. If the authorised issuer accepts, the user
-receives a credential usable in later presentations. $\simu$ learns the user's
-identity on every call, and additionally the attribute value on issue calls.
+receives a credential usable in later presentations. Honest issuers only
+issue to registered users, and at most one credential to each user. Without loss
+of generality, issuer $\issuer{i}$ certifies attribute $\att{i}$ only. $\simu$ learns the user's identity on
+every call, and additionally the attribute value on issue calls.
 
 \paragraph{Aggregate.} A user calls this to combine their credentials for
 attribute values $\vec{\atv{}}$ into a form usable for later presentation.
-Aggregation is local, so $\simu$ learns nothing. Success results in a random
-string $\signature$ representing the aggregate credential.
+Aggregation is local, so $\simu$ learns nothing. Unregistered users cannot
+aggregate, and registered users aggregate exactly the values they hold. Success
+results in a random string $\signature$ representing the aggregate credential.
 
 \paragraph{Present.} A user queries this to produce a presentation of
 $\vec{\atv{}}$, submitting $(\vec{\atv{}}, \signature, \msg)$, where
@@ -264,7 +267,8 @@ $\signature$ aggregates the credentials for $\vec{\atv{}}$ and $\msg$ is a fresh
 message supplied by the verifier that the resulting presentation is bound to.
 $\idfu{\AAC}$ accepts if the user previously called aggregate on $\vec{\atv{}}$,
 or otherwise if the user actually holds $\vec{\atv{}}$. This means a corrupt
-user who skips aggregate can still succeed if they hold the credentials. On
+user who skips aggregate can still succeed if they hold the credentials.
+Unregistered users cannot present. On
 acceptance, $\idfu{\AAC}$ generates a random string $\algoproof$, whose
 randomness ensures $(\vec{\atv{}}, \msg, \algoproof)$ reveals nothing about the
 user beyond $\vec{\atv{}}$.
@@ -280,8 +284,6 @@ returns its answer. Otherwise, it records the presentation as invalid and
 returns false.
 
 \begin{outline}
-  \item the remarks that used to be in brackets in the figure now need saying in the interface paragraphs above: a user is registered only once; an honest issuer only issues to registered users; unregistered users cannot aggregate or present; registered users aggregate exactly the values they hold
-  \item issue: the functionality no longer limits issuers to one credential per user, since issuers keep no state, so a user may hold several values of one attribute and chooses which to present
   \item verify: the first case (produced by a valid present call) gives completeness, the last case (recorded invalid) gives unforgeability
 \end{outline}
 
@@ -289,7 +291,7 @@ returns false.
 
       \setlist[enumerate]{ topsep=2pt, partopsep=0pt, parsep=0pt, itemsep=1pt }
 
-	{$\AACregister$.} On input register from the user, send $(register,
+	\fuinterface{\AACregister} On input register from the user, send $(register,
 user)$ to the registration authority and wait for its confirmation.  On
 receiving the confirmation, do the following:
 
@@ -307,7 +309,7 @@ go-ahead. On receiving the go-ahead, continue.
 
 	\end{enumerate}
 
-	{$\AACissue$.} On input $(\AACissue, \att{i},\atv{i})$ from the user,
+	\fuinterface{\AACissue} On input $(\AACissue, \att{i},\atv{i})$ from the user,
 with $\atv{i}$ being value of attribute $\att{i}$, send $(\AACissue, \user,
 \atv{i})$ to issuer $\issuer{i}$ associated with $\att{i}$ and wait for its
 confirmation.  On confirmation, do:
@@ -319,6 +321,8 @@ confirmation.  On confirmation, do:
 	    \begin{enumerate}
 
 	      \item If $\creds[\user] \rightarrow \bot$, then stop.
+
+	      \item If $\creds[\user][i] \neq \varnothing$, then stop.
 
 	      \item Send $(\AACissue, \user, \att{i}, \atv{i})$ to $\simu$ and
 wait for the go-ahead. On receiving it, continue.
@@ -342,7 +346,7 @@ $(\AACissueend, \user, \atv{i})$ to $\issuer{i}$.
 
 	\end{enumerate}
 
-	{$\AACaggregate$.} On input $(\AACaggregate, \vec{\atv{}})$ from the
+	\fuinterface{\AACaggregate} On input $(\AACaggregate, \vec{\atv{}})$ from the
 user, where $\vec{\atv{}} = (\atv{1}, \ldots, \atv{n})$ and $\atv{i} \in
 \{\varnothing\} \cup \{0, 1\}^*$, do:
 
@@ -366,7 +370,7 @@ user, where $\vec{\atv{}} = (\atv{1}, \ldots, \atv{n})$ and $\atv{i} \in
 
 	\end{enumerate}
 
-	{$\AACpresent$.} On input $(\AACpresent, \vec{\atv{}}, \signature,
+	\fuinterface{\AACpresent} On input $(\AACpresent, \vec{\atv{}}, \signature,
 \msg)$ from the user, where $\vec{\atv{}} = (\atv{1}, \ldots, \atv{n})$, with
 $\atv{i} = \varnothing$ if $\atv{i}$ is not disclosed, do:
 
@@ -403,7 +407,7 @@ $(\AACpresentend, \vec{\atv{}}, \msg, \allowbreak \algoproof)$ to $\simu$.
 
 	\end{enumerate}
 
-	{$\AACverify$.} On receiving message $(\AACverify, \vec{\atv{}},
+	\fuinterface{\AACverify} On receiving message $(\AACverify, \vec{\atv{}},
 \allowbreak \msg, \algoproof)$ from a verifier, do:
 
 	\begin{enumerate}

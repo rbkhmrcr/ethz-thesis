@@ -1,38 +1,41 @@
 \section{Instantiation}\label{sec:tsps-instantiation}
 
-\begin{outline}
-  \item we instantiate with $\AGHO$ and $\KPW$
-  \item $\AGHO$: smallest possible signatures, secret key only field elements, so
-the threshold version only needs multiplication of shared field elements
-  \item $\KPW$: standard assumption, but secret key contains group elements,
-hence sharings of group elements and $\algo{ExpGrp}$
-  \item for each: show signing is decomposable, give the threshold scheme in full
-  \item reminder: raising a public group element to a shared field element is
-each signer raising it to its own share, giving a sharing of the result
-\end{outline}
+This section instantiates the construction of \Cref{sec:tsps-construction}
+twice, with $\AGHO$ and $\KPW$, giving full descriptions of two threshold SPS
+schemes built from the MPC protocol of
+\Cref{sec:tsps-mpc}~\cite{C:AGHO11,C:KilPanWee15}. In each case we verify that
+the signing algorithm admits the decomposition the construction requires, and
+give the resulting threshold scheme.
+
+$\AGHO$ has the smallest possible signatures, and its secret key consists of
+field elements only, so its threshold version only needs multiplication of
+shared field elements. $\KPW$ relies on a standard assumption, but its secret
+key contains group elements, so its threshold version needs sharings of group
+elements and $\algo{ExpGrp}$. In both, the signers raise a public group element
+to a shared field element by each raising it to their own share, which gives a
+sharing of the result.
 
 \subsection{Instantiating $\TSPS$ with $\AGHO$}\label{sec:tsps-abe}
 
-\begin{outline}
-  \item $\AGHO$ recalled in the Preliminaries (cite C:AGHO11); with $\rho =
+\Cref{prim:agho} recalls the $\AGHO$ SPS scheme~\cite{C:AGHO11}. Writing $\rho =
 1/\omega$ for its signing randomness, a signature on $\vec{\msg}$ is
-      %
-      \begin{equation*}
-      %
-	(\widetilde{r}, \widetilde{s}, z) = \left(\ggen^{1/\rho}, \
-\ggen^{\tau/\rho}, \ \gen^{\rho} \prod_{i=1}^{\ell} \msg_i^{-\rho\mu_i}\right)
-      %
-      \end{equation*}
-  \item decomposable with $c_0 = (\widetilde{r}, \widetilde{s})$, $c_1 =
-\gen^{\rho}$, $e_{1,i} = -\rho\mu_i$, none depending on the message
-  \item everything offline is a field element or a generator raised to one, so
-no $\algo{ExpGrp}$
-  \item the costly step is $1/\rho$: directly it's a multiplication and an
-opening, then $\tau/\rho$ one more multiplication, three rounds; multiplying
-$\tau$ by the same mask as $\rho$ in the first round gives $\tau/\rho$ once the
-mask is opened, so two rounds
-  \item result: threshold $\AGHO$, \Cref{prot:tsps-abe}
-\end{outline}
+%
+\begin{equation*}
+%
+  (\widetilde{r}, \widetilde{s}, z) = \left(\ggen^{1/\rho}, \
+\ggen^{\tau/\rho}, \ \gen^{\rho} \prod_{i=1}^{\ell} \msg_i^{-\rho\mu_i}\right).
+%
+\end{equation*}
+%
+It has decomposable signing with $c_0 = (\widetilde{r}, \widetilde{s})$, $c_1 =
+\gen^{\rho}$ and $e_{1,i} = -\rho\mu_i$, none of which depend on the message.
+Everything the offline phase computes is a field element or a generator raised
+to one, so it needs no $\algo{ExpGrp}$. The costly step is $1/\rho$. Computed
+directly, it takes a multiplication and an opening, and $\tau/\rho$ then takes
+one more multiplication, which makes three rounds. Multiplying $\tau$ by the same
+mask as $\rho$ in the first round gives $\tau/\rho$ once the mask is opened, so
+two rounds suffice. The result is threshold $\AGHO$, given in
+\Cref{prot:tsps-abe}.
 
 \begin{protocolbox}{The threshold structure-preserving signature scheme from AGHO}{tsps-abe}
 
@@ -179,15 +182,12 @@ $\pairing((\gen, \vec{\msg}), \vec{\widetilde{u}}) = \pairing(\gen,
 
 \end{primitivebox}
 
-\begin{outline}
-  \item $\KPW$ is EUF-CMA under SXDH (cite C:KilPanWee15)
-  \item decomposable: $c_0 = (\widetilde{q}, \vec{r}, \vec{s})$, and entry $j$ of
-$\vec{z}$ has $c_j = \gen^{k_{1,j}} x_j^{\rho} y_j^{\rho\sigma}$ and $e_{j,i} =
-k_{i+1,j}$; none depend on the message, which only enters as public $\msg_i$
-raised to shared entries of $\mat{K}$
-  \item our protocol and implementation compute $\gen^{k_{1,j}}$ in the online
-phase instead, also local
-\end{outline}
+$\KPW$ is EUF-CMA secure under SXDH~\cite{C:KilPanWee15}. It has decomposable
+signing with $c_0 = (\widetilde{q}, \vec{r}, \vec{s})$, and for entry $j$ of
+$\vec{z}$, $c_j = \gen^{k_{1,j}} x_j^{\rho} y_j^{\rho\sigma}$ and $e_{j,i} =
+k_{i+1,j}$. None of these depend on the message, which only enters as the public
+$\msg_i$ raised to shared entries of $\mat{K}$. Our protocol and implementation
+compute $\gen^{k_{1,j}}$ in the online phase instead, which is also local.
 
 Unlike $\AGHO$, the secret key contains the group elements $\vec{b}, \vec{x},
 \vec{y} \in \group{1}^2$, and the offline phase raises each of them to a shared
@@ -198,13 +198,10 @@ The signers could instead keep the discrete logarithms $\beta, \vec{\xi},
 operations would suffice, but they would then no longer hold shares of the
 secret key of $\KPW$ as it is defined. We keep the key as defined.
 
-\begin{outline}
-  \item threshold $\KPW$ in \Cref{prot:tsps-kiltz}
-  \item offline phase: one multiplication, then one round of eight calls to
-$\algo{ExpGrp}_1$
-  \item first entry of $\vec{b}$ is the public $\gen$, so two of the eight could
-be local, but the implementation makes all eight
-\end{outline}
+\Cref{prot:tsps-kiltz} gives threshold $\KPW$. Its offline phase makes one
+multiplication, then one round of eight calls to $\algo{ExpGrp}_1$. The first
+entry of $\vec{b}$ is the public $\gen$, so two of the eight could be local, but
+the implementation makes all eight.
 
 \begin{protocolbox}{The threshold structure-preserving signature scheme from KPW}{tsps-kiltz}
 

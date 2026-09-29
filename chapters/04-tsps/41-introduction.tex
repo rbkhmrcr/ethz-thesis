@@ -1,16 +1,17 @@
 \section{Introduction}\label{sec:tsps-introduction}
 
+Coupled with non-interactive zero-knowledge proofs, structure-preserving
+signature schemes have proved
+useful across a range of privacy-preserving applications, including blind
+signatures, delegatable anonymous credentials, and group signatures, to name a
+few~\cite{AFRICACRYPT:FucVer10,CCS:CamDriDub17,RSA:CriLys19,PoPETS:MSBM23,AC:Groth06,AC:Groth07,C:LibPetYun15}.
+
 \begin{outline}
-  \item SPS schemes sign vectors of group elements, and verification only checks
-pairing-product equations (cite C:AFGHO10, C:AGHO11)
   \item so a signer can sign a commitment it cannot open, and the holder later
 proves statements about the committed value in zero knowledge without revealing it
   \item contrast: an ordinary signature hashes the message first, so proving
 knowledge of a signature on a commitment needs a general-purpose proof over the
 hash; signing the group elements directly keeps the proofs algebraic and cheap
-  \item used to build blind signatures, delegatable anonymous credentials, group
-signatures, among others (cite AFRICACRYPT:FucVer10, CCS:CamDriDub17,
-RSA:CriLys19, PoPETS:MSBM23, AC:Groth06, AC:Groth07, C:LibPetYun15)
 \end{outline}
 
 \begin{outline}
@@ -72,11 +73,13 @@ owners of keys, would also let them prove, in zero knowledge, that their keys ar
 recorded in the log without revealing which keys they are. Since the key is signed
 directly rather than hashed first, that proof is efficient.
 
-\paragraph{Contributions.}
+\paragraph{Contributions.} We give two threshold SPS schemes, building on two
+existing SPS schemes together with secure multiparty computation (MPC)
+techniques~\cite{C:AGHO11,C:KilPanWee15,C:DPSZ12,CCS:KelOrsSch16,C:GLOPS21}.
+We select $\AGHO$ for its optimal signature size, and $\KPW$ for its reliance
+on standard assumptions alone~\cite{C:AGHO11,C:KilPanWee15}.
+
 \begin{outline}
-  \item two threshold SPS schemes, built from $\AGHO$ and $\KPW$ (cite C:AGHO11,
-C:KilPanWee15); $\AGHO$ for its optimal signature size, $\KPW$ because it is
-secure under SXDH rather than in the GGM
   \item signing key held in secret-shared form (enough shares determine it, fewer
 reveal nothing); key generation, combining and verification then done with
 general-purpose MPC, nothing new needed
@@ -92,16 +95,17 @@ restrictions on messages or assumptions; splitting signing in two keeps existing
 SPS schemes as they are and moves the interaction off the critical path
 \end{outline}
 
-\begin{outline}
-  \item first contribution: decomposition of SPS signing into an offline phase
-(all interaction, before the message is known) and an online phase each signer
-runs locally
-  \item we define the property of the signing algorithm that makes this possible
-(\Cref{sec:tsps-construction}), show $\AGHO$ and $\KPW$ have it, and prove the
-threshold schemes unforgeable whenever the underlying scheme is
-  \item suits bursty traffic, e.g.\ payments: states prepared in quiet periods,
-used in busy ones
-\end{outline}
+Both schemes are designed so that the online phase, run once the messages to be
+signed are known, requires no interaction between parties, keeping its cost
+comparable to that of ordinary, non-threshold signing. Both underlying
+signatures let the threshold signers perform the majority of their computation
+offline, in a pre-processing phase before the message to be signed is known,
+which suits high-throughput applications, such as payments, that experience
+interspersed periods of low and high traffic. Our schemes inherit the security
+properties of the underlying SPS schemes.
+
+We define the property of the signing algorithm that makes this possible,
+decomposable signing, and show that $\AGHO$ and $\KPW$ have it.
 
 \begin{outline}
   \item second contribution: implementation; thresholdising $\KPW$ needs
@@ -109,15 +113,20 @@ secret-shared group elements and multiplication of a shared field element with a
 shared group element
   \item Ghosh et al.\ compute on shared group elements between two parties (cite
 NDSS:GPVRNC23); as far as we know no multiparty version is implemented
-  \item we extend MP-SPDZ with sharings of group elements and this
-multiplication (cite CCS:Keller20)
-  \item benchmark both schemes with ATLAS (honest majority: fewer than half
-corrupted) and MASCOT (dishonest majority: up to all but one corrupted) (cite
-C:GLOPS21, CCS:KelOrsSch16); ATLAS where robustness and availability matter,
-MASCOT where resilience to key compromise matters
-  \item also implement the two existing threshold SPS schemes and compare (cite
-AC:CKPSS23, PKC:MMSST24)
+  \item check this claim first: Dalskov et al.\ implemented threshold ECDSA for
+many parties in MP-SPDZ with shared curve points (ESORICS:DOKSS20, cited in the
+old evaluation); if so, say what is new here instead (pairing groups, a shared
+field element times a shared group element)
 \end{outline}
+
+We benchmark both schemes using two MPC frameworks: ATLAS, which assumes an
+honest majority, and MASCOT, which assumes a dishonest
+majority~\cite{C:GLOPS21,CCS:KelOrsSch16}, extending MP-SPDZ with support for
+the group-element functionalities our schemes require~\cite{CCS:Keller20}. The
+former suits settings where robustness and high availability are desirable, the
+latter settings where resilience to key compromise takes precedence. We also
+implement previously suggested threshold SPS schemes, so as to compare concrete
+efficiency~\cite{AC:CKPSS23,PKC:MMSST24}.
 
 This chapter treats unforgeability rather than privacy directly. Privacy in the
 applications above comes from composition: the signers sign committed state, and
@@ -140,22 +149,30 @@ A linearly homomorphic SPS scheme, also with signatures of three group
 elements, enables further applications~\cite{C:LPJY13}. Fully structure-preserving
 signature schemes additionally have secret keys that are group elements, so
 a user can prove statements about their own key with Groth-Sahai proofs, a
-proof system for pairing-product equations, at the
+proof system for pairing product equations, at the
 cost of signatures that grow with the square root of the message
 length~\cite{JC:AGKOT19,EC:GroSah08}.
 
-\paragraph{Threshold SPS schemes.}
+\paragraph{Threshold SPS schemes.} Threshold SPS schemes have only recently
+been considered. One non-interactive construction is restricted to signing
+indexed Diffie-Hellman tuples of the form $(\gen^\msg,
+\ggen^\msg)$~\cite{AC:CKPSS23}.
+
 \begin{outline}
-  \item only recently considered
-  \item Crites et al.\ (cite AC:CKPSS23): non-interactive, but signs only indexed
-Diffie-Hellman pairs, each message given with the same discrete logarithm in both
-source groups; an element that only exists in $\group{1}$ (a key or commitment
+  \item an element that only exists in $\group{1}$ (a key or commitment
 already on a ledger) can't be signed unless its owner supplies the $\group{2}$
 element
-  \item Mitrokotsa et al.\ (cite PKC:MMSST24): non-interactive, signs arbitrary
-vectors of group elements, built from $\KPW$, SXDH, seven group elements
-  \item neither has an offline phase; the evaluation compares both with ours
 \end{outline}
+
+Another non-interactive threshold SPS scheme instead is capable of signing
+arbitrary group elements, and is secure under the SXDH
+assumption~\cite{PKC:MMSST24}. It builds on $\KPW$, and its signatures consist
+of seven group elements~\cite{C:KilPanWee15}.
+Neither of the two schemes has an offline phase.
+
+\Cref{tab:tsps-comp} in \Cref{sec:tsps-evaluation} compares our schemes with the
+two prior threshold SPS schemes in terms of assumptions, key and signature size,
+and verification cost~\cite{AC:CKPSS23,PKC:MMSST24}.
 
 \paragraph{Computing on shared group elements.}
 \begin{outline}

@@ -55,14 +55,14 @@ not give it as an algorithm here, though the ideal functionality below exposes
 an interface for it. Throughout, we suppress the public parameters, the long-term credential, and the counterparty's inputs from the algorithm signatures,
 and name only the state that distinguishes one call from another.
 
-\begin{outline}
-  \item token after $i$ payments: $T_i = (v, s_i, \com_i, \algo{hist}_i)$, i.e.\ value,
-    randomness, pseudonym of current owner (hiding commitment to their identifier
-    with randomness $s_i$), history (transcript of withdrawal and the $i$ payments)
-  \item each payment is one hop of the token's chain
-  \item the secure element stores only $\tau_i = (v, \com_i)$; $d_n$ is the deposit
-    request after $n$ hops; the construction gives each in full
-\end{outline}
+A token after $i$ payments is $T_i = (v, s_i, \com_i, \algo{hist}_i)$. It
+consists of the value $v$, the randomness $s_i$, the pseudonym $\com_i$ of its
+current owner, and the history $\algo{hist}_i$. The pseudonym is a hiding
+commitment to the owner's identifier with randomness $s_i$, and the history is
+the transcript of the withdrawal and of the $i$ payments. Each payment is one hop
+of the token's chain. The secure element stores only $\tau_i = (v, \com_i)$, and
+$d_n$ denotes the deposit request after $n$ hops. The construction gives each of
+these in full.
 
 \begin{description}
 
@@ -97,9 +97,10 @@ double spent it.
 
 \subsection{Building blocks}\label{sec:offline-building-blocks}
 
+Besides the commitment, signature and encryption schemes of the preliminaries,
+the construction needs two primitives that are not defined there.
+
 \begin{outline}
-  \item besides the commitment, signature and encryption schemes of the
-    preliminaries, the construction needs two primitives not defined there
   \item both come from how work is divided in a wallet and at the central bank;
     introduce each with the problem it solves
 \end{outline}
@@ -164,11 +165,15 @@ view of the proving protocol without access to either witness share.
     their verifier relays between the provers and can be caught deviating; our
     payee may be malicious but is not interposed: provers talk directly, payee only
     supplies $\com_{i+1}$ and gets the finished proof, so the restriction does not bind
-  \item (2) the second prover sees $\witness_0$ only via a commitment plus its
-    randomness, so $\witness_0$ is protected by DL hardness, not by the commitment;
-    this lets the device do the bulk of the proof without holding users'
-    secret keys (devices are under users' control, secure elements are not)
+  \item (2) since the second prover also gets the commitment's randomness,
+    $\witness_0$ is protected by DL hardness, not by the commitment
 \end{outline}
+
+The second prover learns nothing about $\witness_0$ beyond a commitment to it
+and the randomness of that commitment. So the mobile device can carry
+out the bulk of the proof without ever holding users' secret keys. This is the
+reason for the split, as devices are under users' full control, while secure elements
+are not.
 
 \paragraph{Signatures on committed inputs.}\label{sec:sci-def}
 \begin{outline}
@@ -182,7 +187,8 @@ view of the proving protocol without access to either witness share.
     knowledge of it); we only need the request to hide the committed messages
 \end{outline}
 
-An SCI scheme $\SCI$ consists of the following algorithms.
+A signature scheme on committed inputs (SCI) $\SCI$ consists of the following
+algorithms.
 
 \begin{description}
 
@@ -316,18 +322,19 @@ corrupts the devices and secure elements of its choosing before they interact
 with $\idfu{\algo{op}}$.  The formal description is given
 in~\Cref{fig:ideal-func}. We summarise each interface below.
 
-\begin{outline}
-  \item state of $\idfu{\algo{op}}$: $\algo{usrs}$ users, $\algo{I}$ intermediaries,
-    $\algo{Dev}$, $\algo{SE}$ devices and secure elements, $\algo{usr} = (\algo{se},
-    \algo{dev})$; $\reg$, $\algo{cb}$, $\auditor$
-  \item $\algo{mal}$ corrupt devices and secure elements; $\algo{registered}$
-    registered users; $\algo{accounts}$ user to intermediary and balance;
-    $\algo{reserves}$ intermediary to reserves
-  \item a token is a vector $\vec{\algo{id}}$ of random identifiers, one per hop,
-    $\vec{\algo{id}}[0]$ fixed at withdrawal; $\algo{tokens}$ maps it to owner and
-    value; $\algo{deposited}$ maps $\vec{\algo{id}}[0]$ to the vectors deposited for it
-  \item all maps start empty; unset entries are $\bot$
-\end{outline}
+$\idfu{\algo{op}}$ works with the set $\algo{usrs}$ of users, the set $\algo{I}$
+of intermediaries, and the sets $\algo{Dev}$ and $\algo{SE}$ of devices and
+secure elements, where each user is a pair $\algo{usr} = (\algo{se},
+\algo{dev})$. The registration authority is $\reg$, the central bank is
+$\algo{cb}$ and the auditor is $\auditor$. The functionality keeps the set $\algo{mal}$ of
+corrupt devices and secure elements, the set $\algo{registered}$ of registered
+users, the map $\algo{accounts}$ from each user to their intermediary and
+balance, and the map $\algo{reserves}$ from each intermediary to its reserves.
+A token is a vector $\vec{\algo{id}}$ of random identifiers, one per hop, where
+$\vec{\algo{id}}[0]$ is fixed at withdrawal. The map $\algo{tokens}$ sends a
+token to its owner and value, and the map $\algo{deposited}$ sends
+$\vec{\algo{id}}[0]$ to the vectors deposited for it. All maps start empty, and
+unset entries are $\bot$.
 
 The longest common prefix of two identifier vectors is
 the longest vector that both start with: the two agree up to it, and then either
@@ -410,11 +417,11 @@ withdrawal.
 	Before any call to the offline payment interfaces, $\simu$ issues
 corruption queries:
 
-	{$\OPcorrupt$.} Upon an active corruption request $(\OPcorrupt, P)$ for
+	\fuinterface{\OPcorrupt} Upon an active corruption request $(\OPcorrupt, P)$ for
 $P \in \algo{Dev} \cup \algo{SE}$ from $\simu$ do: $\algo{mal} \gets \algo{mal}
 \cup P$.
 
-	{$\OPcreate$.} Upon receiving for the first time $(\OPcreate,
+	\fuinterface{\OPcreate} Upon receiving for the first time $(\OPcreate,
 \algo{usr}, v)$ from $\algo{Int} \in \algo{I}$ for $\algo{usr} \in \algo{usrs}$,
 send $(\OPcreate, \algo{usr}, \algo{Int}, v)$ to $\simu$ and wait for the
 go-ahead. On receiving it, do:
@@ -439,7 +446,7 @@ go-ahead. On receiving it, do:
 
 	\end{enumerate}
 
-	{$\OPregister$.} Upon receiving for the first time $(\OPregister,
+	\fuinterface{\OPregister} Upon receiving for the first time $(\OPregister,
 \algo{usr})$ from $\reg$ for $\algo{usr} \in \algo{usrs}$ that already has an
 account, send $(\OPregister, \algo{usr})$ to $\simu$ and wait for the go-ahead.
 On receiving it, do:
@@ -452,7 +459,7 @@ On receiving it, do:
 
 	\end{enumerate}
 
-	{$\OPwithdraw$.} On receiving a $(\OPwithdraw, \algo{usr} = (\algo{se},
+	\fuinterface{\OPwithdraw} On receiving a $(\OPwithdraw, \algo{usr} = (\algo{se},
 \algo{dev}), \algo{Int}, v)$ from registered user $\algo{usr}$ that has an
 account with $\algo{Int}$, send $(\OPwithdraw, \algo{usr}, \algo{Int}, v)$ to
 $\algo{Int}$ and $(\OPwithdraw, \algo{Int}, v)$ to $\algo{cb}$ and await their
@@ -504,7 +511,7 @@ to $\algo{usr}$.
 
 	\end{enumerate}
 
-	{$\OPexecute$.} On receiving $(\OPexecute, \vec{\algo{id}}, v, \algo{usr}' =
+	\fuinterface{\OPexecute} On receiving $(\OPexecute, \vec{\algo{id}}, v, \algo{usr}' =
 (\algo{se}', \algo{dev}'))$ from registered user $\algo{usr} = (\algo{se},
 \algo{dev})$ for registered user $\algo{usr}'$, send $(\OPexecute, \vec{\algo{id}},
 v)$ to $\algo{usr}'$. On receiving the response $\algo{accept}$ from
@@ -567,7 +574,7 @@ nothing.
 
 	\end{enumerate}
 
-	{$\OPdeposit$.} On receiving $(\OPdeposit, \vec{\algo{id}}, v, \algo{Int})$
+	\fuinterface{\OPdeposit} On receiving $(\OPdeposit, \vec{\algo{id}}, v, \algo{Int})$
 from registered user $\algo{usr}$ that has an account with $\algo{Int}$, send
 $(\OPdeposit, \vec{\algo{id}}, v, \algo{Int}, \algo{usr})$ to $\algo{Int}$ and
 $(\OPdeposit, v, \algo{Int})$ to $\algo{cb}$ and await their go-ahead. Then send
@@ -609,7 +616,7 @@ the go-ahead. On receiving it, do:
 
 	\end{enumerate}
 
-	{$\OPidentify$.} On receiving $(\OPidentify, \algo{id})$ from $\auditor$,
+	\fuinterface{\OPidentify} On receiving $(\OPidentify, \algo{id})$ from $\auditor$,
 send $(\OPidentify, \algo{id})$ to $\simu$ and wait for the go-ahead. On receiving
 it, do:
 

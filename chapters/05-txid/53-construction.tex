@@ -89,7 +89,7 @@ lifetime of the user. Correspondingly, we require pseudorandomness of both
 families to hold against a distinguisher that holds $\PTK$, as a public
 parameter, so that nothing $\PTK$ carries need be kept secret.
 
-The distinction matters because whatever the instantiation needs in order to
+The two are kept apart because whatever the instantiation needs in order to
 evaluate a tag, beyond the epoch key itself, must sit somewhere that does not
 vary with the epoch. Placing such material in the output of $\FE$ would make
 $\FE$ repeat a component of its output in every epoch, and no function that does
@@ -203,8 +203,40 @@ $\rel_5$ re-derives a fresh, epoch-bound tracing capability that users can
 later hand to an auditor. $\rel_6$ and $\rel_7$ are the two checks the
 transaction validators themselves run on every submitted transaction: that it
 originates from a registered user, and that its tag is correctly derived.
-Splitting the protocol this way is what lets validators, auditors, and users
-each act without waiting on one another.
+Splitting the protocol this way lets validators, auditors, and users each act
+without waiting on one another.
+
+\Cref{fig:txid-seq} shows the messages and local steps of registration, a
+grant, a transaction and tracing.
+
+\begin{figure}[htbp] \centering \small
+\begin{tikzpicture}[seq]
+  \foreach \x/\n in {0/Registration authority, 1/User, 2/Auditor, 3/Ledger} {
+    \node[seqhead] at (\x, 0) {\n};
+    \draw[seqlife] (\x, 0.9) -- (\x, 14.7);
+  }
+  \foreach \y/\n in {1.5/\IDregister, 6.9/\IDgrant, 9.9/\IDsubmit, 12/\IDidentify}
+    \node[font=\scriptsize, text=gray, anchor=east] at (-0.03, \y) {$\n$};
+  \draw[seqmsg] (0, 1.5) -- node[seqlabel] {$\rand$} (1, 1.5);
+  \node[seqloc] at (1, 2.4) {$\sk$, $\utk$, $\algoproof_4$};
+  \draw[seqmsg] (1, 3.6) -- node[seqlabel] {$\PSK$, $\PTK$, $\algoproof_4$} (0, 3.6);
+  \node[seqloc] at (0, 4.5) {check $\algoproof_4$, $\DSsign$};
+  \draw[seqmsg] (0, 5.7) -- node[seqlabel] {$\signature$} (1, 5.7);
+  \draw[seqmsg] (2, 6.9) -- node[seqlabel] {$\rand$} (1, 6.9);
+  \node[seqloc] at (1, 7.8) {$\ek \leftarrow \FE(\utk, \epoch)$, $\algoproof_5$, $\algoproof_4$};
+  \draw[seqmsg] (1, 9) -- node[seqlabel] {$\regcred$, $\ek$, $\algoproof_5$, $\algoproof_4$} (2, 9);
+  \node[seqloc] at (2.05, 9.9) {$\DSverify$, proofs};
+  \node[seqloc] at (1, 9.9) {$\Tag_\gamma$, $\com$, $\algoproof_7$, $\algoproof_6$};
+  \draw[seqmsg] (1, 11.1) -- node[seqlabel, pos=0.75] {$\tx$} (3, 11.1);
+  \node[seqloc] at (3, 12) {$\algo{Verify}$, store};
+  \node[seqloc] at (2, 12) {$\Tag_\gamma \leftarrow \FT(\PTK, \ek, \gamma)$};
+  \draw[seqmsg] (2, 13.2) -- node[seqlabel] {$\{\Tag_\gamma\}_{\gamma < \Max}$} (3, 13.2);
+  \draw[seqmsg] (3, 14.3) -- node[seqlabel] {$\{\payload\}$} (2, 14.3);
+\end{tikzpicture}
+\caption[Tracing: messages and local steps]{Messages and local steps of
+registration, a grant, a transaction and tracing, between the
+registration authority, a user, an auditor and the ledger.}
+\label{fig:txid-seq} \end{figure}
 
 \paragraph{Registration.} During registration, users prove knowledge of their
 long-term signing and tracing keys, and the registration authority certifies the
@@ -272,15 +304,14 @@ linkable. Otherwise, they accept the transaction once both proofs verify with
 $\NIZKverify$, one against $\rel_7$ and the other against $\rel_6$, and record
 the payload against the tag.
 
-\paragraph{The range clause.} The clause $0 \leq \gamma < \Max$
-in $\rel_7$ is not a formality. An auditor holding $\ek$ evaluates $\FT$ only at
-indices in $[0,\Max)$, so a user who could tag a transaction with $\gamma =
-\Max$ would obtain a transaction that no permission can ever trace, defeating
-non-repudiation. Together with the validators' tag-uniqueness check, which is
-what stops a user reusing an index, the range clause is what makes
-$|\txns[(\user,\epoch)]| \leq \Max$ hold in the real world and match step 3 of
-$\IDsubmit$ in $\idfu{\algo{trace}}$. Both checks must therefore be enforced by
-the validators on every transaction.
+The clause $0 \leq \gamma < \Max$ in $\rel_7$ is needed because an auditor
+holding $\ek$ evaluates $\FT$ only at indices in $[0,\Max)$. A user who could tag
+a transaction with $\gamma = \Max$ would obtain a transaction that no permission
+can ever trace. Together with the validators' check that tags are unique, which
+stops users reusing an index, the range clause makes $|\txns[(\user,\epoch)]|
+\leq \Max$ hold in the real world, as step 3 of $\IDsubmit$ in
+$\idfu{\algo{trace}}$ requires. The validators therefore enforce both checks on
+every transaction.
 
 \paragraph{Tracing.} To trace a user in epoch $\epoch$, the auditor uses the user's public tracing
 key $\PTK$ and epoch key $\ek$. It traces the transactions the user submitted

@@ -110,10 +110,8 @@ bank is accounting for it. This is also the one channel that remains: a
 withdrawal and a deposit of unusual value can still be matched, which is why a
 deployment should use a small set of fixed denominations.
 
-\begin{outline}
-  \item future work: aggregating deposits under value commitments, which would
-    also hide the value at deposit
-\end{outline}
+Aggregating deposits under value commitments, which would also hide the value at
+deposit, is left to future work.
 
 The second constraint is that the signature can never be shown. Verifying it
 requires the messages it was issued on, and one of those is the withdrawer's
@@ -215,13 +213,14 @@ token that transfers do not change. Two deposits of the same token agree there
 whatever they do afterwards, so a conflict cannot be hidden by paying the token
 along a different route.
 
+A second deposit of the same token is refused and credits nothing. The central
+bank keeps the conflicting requests, and the auditor names the user at the point
+where they diverge. Settlement of the double-spent value, such as compensating an
+honest holder who was paid an already-spent token, is an operation of the central
+bank rather than a step of the protocol. The consequences for the named user are
+outside the scheme.
+
 \begin{outline}
-  \item a second deposit of the same token is refused and credits nothing
-  \item the central bank keeps the conflicting requests; the auditor names the
-    user at the divergence
-  \item settlement of the double-spent value (e.g.\ compensating an honest holder
-    paid an already-spent token) is a central bank operation, not a protocol
-    step; consequences for the named user are outside the scheme
   \item no deposit is credited twice, so total value is unchanged, unlike schemes
     where the issuer absorbs the double-spent value (contrast \cite{Beer2024})
 \end{outline}
@@ -482,7 +481,7 @@ for each further pair of conflicting deposits of the same token.
 IND-CPA secure, the central bank's SCI scheme is one-more unforgeable, request
 hiding and online request extractable, the signature scheme used by the registration authority is
 existentially unforgeable, and the proofs and signatures of knowledge, including the JPOK, are
-simulation extractable, then
+zero knowledge and simulation extractable, then
 $\OP$ securely realises ideal functionality
 $\idfu{\algo{op}}$ against static corruption of devices and secure elements,
 with the registration authority, the central bank, and the intermediaries honest
@@ -540,12 +539,10 @@ tokens held by the lost device are not recoverable, since no other party holds
 the commitment randomness needed to spend them. This matches the behaviour of
 cash, and of the deployed offline systems discussed in the introduction.
 
-\begin{outline}
-  \item expiry also bounds the central bank's state
-  \item the deposited-token list detects double spending, so cannot be pruned
-    outright, but an entry can be dropped once every epoch in which that token
-    could be valid has passed
-\end{outline}
+The central bank's list of deposited tokens is needed to detect double spending
+and can never be pruned outright, though mechanisms such as logical or
+wall-clock timestamps that bound a token's validity span allow it to be pruned
+once that span elapses.
 
 We leave divisibility, aggregated deposits, and coin transparency to future
 work.

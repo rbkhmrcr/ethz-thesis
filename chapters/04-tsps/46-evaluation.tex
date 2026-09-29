@@ -1,35 +1,39 @@
 \section{Evaluation}\label{sec:tsps-evaluation}
 
-\begin{outline}
-  \item implementation on MP-SPDZ, which gives the $\Zp$ interfaces; we add
-group element sharings with authentication information and $\algo{ExpGrp}$ with
-mixed triples, over BLS12-381 with RELIC (cite CCS:Keller20, relictoolkit)
-  \item run with ATLAS (honest majority, Shamir) and MASCOT (dishonest majority,
-triples from oblivious transfer) (cite C:GLOPS21, CCS:KelOrsSch16); any protocol
-with the interfaces would do, we take one per corruption setting (robustness vs
-resilience to key compromise, as in the introduction)
-  \item caveat: MP-SPDZ's ATLAS is semi-honest only, so ATLAS timings are for
-semi-honest security (cite CCS:Keller20)
-  \item caveat: neither protocol proven adaptively secure, so implemented schemes
-are statically secure, where the proof has no loss
-  \item baselines: centralised $\AGHO$ and $\KPW$, and the two existing threshold
-SPS schemes, in Go with gnark-crypto and a trusted dealer (cite AC:CKPSS23,
-PKC:MMSST24, gnark-crypto)
-\end{outline}
+Our implementation builds on MP-SPDZ, a framework for implementing MPC with
+pre-processing~\cite{CCS:Keller20}. MP-SPDZ is built for the paradigm of sharing
+elements of $\Zp$, with all operations defined between elements of $\Zp$. For
+the protocols of this chapter, we additionally need operations between elements
+of $\group{1}$ and $\group{2}$. We benchmark both the honest-majority and
+dishonest-majority settings, using ATLAS and MASCOT respectively to realise
+multiplication of shared secrets~\cite{CCS:KelOrsSch16,C:GLOPS21}. ATLAS is
+designed to work in both the semi-honest and malicious settings, but the
+implementation available in MP-SPDZ captures only the semi-honest
+case~\cite{CCS:Keller20}.
 
-\begin{outline}
-  \item setup: $\ell = 2$ elements of $\group{1}$; ATLAS at $n = 2t+1$, MASCOT at
-$t = n-1$; tables at $n = 5$
-  \item one thread per party, all parties on one MacBook Air (Apple M2, 16~GB
-RAM), authenticated channels on that machine
-  \item each timed call starts from empty preprocessing, so offline phase and key
-generation include making their triples
-  \item median of 100 repetitions after 10 warm-up calls, party $p_0$; IQR within
-5\% of the median for all but four measurements, within 16\% for all
-  \item point to \Cref{tab:tsps-comp} (parameters) and
+We add to MP-SPDZ sharings of group elements with their authentication
+information, and $\algo{ExpGrp}$ with mixed triples. The groups are those of
+BLS12-381, implemented with RELIC~\cite{relictoolkit}. ATLAS uses Shamir sharing,
+and MASCOT makes its triples by oblivious transfer. Any MPC protocol with the
+interfaces of our schemes would do, and we take one for each corruption setting:
+ATLAS where high availability matters, and MASCOT where resilience to key compromise
+matters. The ATLAS timings are therefore for semi-honest security. As baselines,
+we implement the centralised $\AGHO$ and $\KPW$ schemes and the two existing
+threshold SPS schemes in Go with gnark-crypto, with a trusted dealer for the
+threshold schemes~\cite{AC:CKPSS23,PKC:MMSST24,gnark-crypto}.
+
+All schemes sign vectors of $\ell = 2$ elements of $\group{1}$. ATLAS runs with
+$n = 2t+1$ and MASCOT with $t = n-1$, and the tables are at $n = 5$. Each party
+runs in one thread, and all parties run on one MacBook Air with an Apple M2 and
+16~GB of RAM, over authenticated channels on that machine. Each timed call starts
+from empty preprocessing, so the times of the offline phase and of key
+generation include making their triples. We report the median of 100
+repetitions after 10 warm-up calls, for party $p_0$. In the tables, the
+interquartile range is within 5\% of the median for all but five measurements,
+and within 16\% for all.
+\Cref{tab:tsps-comp} compares the parameters of the schemes, and
 \Cref{tab:tsps-benchmarks,tab:tsps-baselines-time,tab:tsps-comms,tab:tsps-sizes}
-(times, communication, sizes)
-\end{outline}
+give their times, communication and sizes.
 
 \begin{table}[htbp] \centering \small \setlength{\tabcolsep}{3pt}
 \begin{tabular}{l l l l l}
@@ -111,16 +115,16 @@ key, one signer's key share, state share and signature share, and the signature.
 MASCOT shares carry a MAC share, which doubles them.} \label{tab:tsps-sizes}
 \end{table}
 
-\begin{outline}
-  \item online phase sends nothing in all four settings, takes 0.36--1.8~ms;
-comparable to centralised signing (0.84~ms $\AGHO$, 2.0~ms $\KPW$)
-  \item all interaction in the offline phase and key generation; MASCOT far more
-expensive than ATLAS there: threshold $\AGHO$ offline 31~ms vs 2.1~ms, over a
-megabyte per party vs half a kilobyte
-  \item batching 16 states: 8.2~ms per signature under MASCOT, 1.3~ms under ATLAS
-  \item \Cref{fig:tsps-n-times,fig:tsps-n-comm}: communication linear in $n$,
-online phase below 3~ms up to eleven parties
-\end{outline}
+The online phase sends nothing in any of the four settings, and takes between
+0.36 and 1.84~ms. This is comparable to centralised signing, which takes 0.84~ms
+for $\AGHO$ and 2.00~ms for $\KPW$. All interaction is in the offline phase and
+in key generation, and there MASCOT is far more expensive than ATLAS. The offline
+phase of threshold $\AGHO$ takes 31.0~ms with MASCOT and 2.09~ms with ATLAS, and
+sends over a megabyte per party with MASCOT and half a kilobyte with ATLAS.
+Batching 16 states brings this to 8.2~ms per signature under MASCOT and 1.3~ms
+under ATLAS. \Cref{fig:tsps-n-times,fig:tsps-n-comm} show time and communication
+against the number of parties. Communication grows linearly in $n$, and the
+online phase stays below 3~ms up to eleven parties.
 
 \begin{figure}[htbp] \centering
 \includegraphics[width=\textwidth]{chapters/04-tsps/tsps-n-times.pdf}
@@ -141,19 +145,20 @@ about a thousand times more. $\TSPSonsign$ sends nothing and is not shown.} \lab
 centralised schemes, against the number of parties $n$, at $\ell = 2$ and $t =
 n-1$, median.} \label{fig:tsps-baselines} \end{figure}
 
+The existing threshold SPS schemes have no offline phase. Each signer sends one
+partial signature of 96 or 384 bytes to the combiner. Partial signing takes
+2.14~ms for CKPSS23 and 1.26~ms for MMSST24, and the online phase of threshold
+$\AGHO$ and threshold $\KPW$ with MASCOT takes 0.72~ms and 1.84~ms.
+\Cref{fig:tsps-baselines} compares them against the number of parties. Our
+schemes move the extra cost ahead of the message, off the critical path.
+Compared with the scheme of Mitrokotsa et al., threshold $\AGHO$ has signatures
+of three group elements instead of seven, and verifies in 2.93~ms instead of
+4.18~ms, but is secure in the GGM rather than under SXDH~\cite{PKC:MMSST24}.
+
 \begin{outline}
-  \item existing threshold SPS schemes have no offline phase: each signer sends
-one partial signature (96 or 384 bytes) to the combiner; partial signing 2.1~ms
-and 1.3~ms vs 0.72~ms and 1.8~ms for our online phase with MASCOT
-(\Cref{fig:tsps-baselines})
-  \item our schemes move the extra cost ahead of the message, off the critical
-path
   \item Crites et al.\ only sign messages given in both source groups with the
 same discrete logarithm, so can't sign a commitment or public key whose discrete
 logarithm nobody knows (cite AC:CKPSS23)
-  \item vs Mitrokotsa et al.\ (cite PKC:MMSST24): threshold $\AGHO$ has three
-group elements instead of seven, verifies in 2.9~ms vs 4.2~ms, but GGM instead of
-SXDH
   \item threshold $\KPW$ has no efficiency advantage, but keys, signatures and
 verification are those of $\KPW$, so an existing $\KPW$ deployment can distribute
 its signer without changing any verifier

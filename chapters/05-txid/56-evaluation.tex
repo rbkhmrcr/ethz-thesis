@@ -1,12 +1,19 @@
 \section{Evaluation}\label{sec:txid-evaluation}
 
-\begin{outline}
-  \item setup: both instantiations in Go over BLS12-381, gnark-crypto v0.21.0 (groups, pairing), gnark v0.16.3 (Groth16 circuits) (cite gnark-crypto)
-  \item machine: MacBook Air, Apple M2, 16GB RAM
-  \item method: 10 warm-up calls, 100 timed repetitions, report the median; IQR typically within 2\% of the median, never above 7\%
-  \item headline $\ell = 8$, so $\Max = 256$ transactions per user per epoch
-  \item point to \Cref{tab:txid-protocol,tab:txid-sizes,tab:txid-relations} (every algorithm, message, relation) and \Cref{fig:txid-ell-times,fig:txid-ell-sizes} (growth with $\ell$)
-\end{outline}
+Both instantiations are implemented in Go over the BLS12-381 curve. They use
+gnark-crypto v0.21.0 for the groups and the pairing, and gnark v0.16.3 for the
+Groth16 circuits~\cite{gnark-crypto}. All measurements are taken on a MacBook
+Air with an Apple M2 and 16\,GB of RAM. Each measurement is 10 warm-up calls
+followed by 100 timed repetitions, and we report the median. The interquartile
+range is typically within 2\% of the median and at most 8\%, except for
+hash-based tracing at small $\ell$, which takes well under a millisecond and
+varies by up to 20\%.
+
+We report results at $\ell = 8$, so that each user can submit up to $\Max = 256$
+transactions per epoch. \Cref{tab:txid-protocol,tab:txid-sizes,tab:txid-relations}
+give the time of every algorithm, the size of every message and the time of
+every relation. \Cref{fig:txid-ell-times,fig:txid-ell-sizes} show how times and
+sizes grow with $\ell$.
 
 \begin{table}[htbp] \centering \small
 \caption[Tracing: time of every algorithm]{Time of each algorithm at $\ell = 8$, in milliseconds. A first grant is the first grant of a user to a given auditor, and
@@ -142,11 +149,23 @@ with $\Max = 2^\ell$ and are on a log scale.} \label{fig:txid-ell-times}
 \caption[Tracing: sizes against $\ell$]{Size against $\ell$ of the first grant message, on a log scale, and of
 a transaction.} \label{fig:txid-ell-sizes} \end{figure}
 
+A transaction takes $11.3\,\mathrm{ms}$ to prove and $6.70\,\mathrm{ms}$ to
+verify in the algebraic instantiation, and $28.3\,\mathrm{ms}$ and
+$4.44\,\mathrm{ms}$ in the hash-based one. The hash-based transaction is about a
+fifth of the size, 1\,116 bytes against 5\,160.
+
+Verification time and transaction size are nearly flat in $\ell$. Algebraic
+proving steps up just after each power of two, since the range proof pads to the
+next power of two. In the algebraic instantiation the first grant grows with
+$\Max = 2^\ell$, and in both instantiations tracing does. Tracing one user for
+one epoch never depends on the size of the ledger or the number of users. At
+$\ell = 8$ it takes $36.9\,\mathrm{ms}$ in the algebraic instantiation and
+$1.10\,\mathrm{ms}$ in the hash-based one.
+
 \begin{outline}
-  \item transaction: algebraic 11.3ms prove / 6.70ms verify; hash-based 28.3ms / 4.44ms, and a fifth of the size
   \item algebraic: the $\group{T}$ tag is the largest item on the ledger; torus compression would halve it
-  \item verification and transaction size nearly flat in $\ell$; algebraic proving steps up just after each power of two (range proof pads to next power of two), hence $\ell = 8$ as headline
-  \item first grant and tracing grow with $\Max = 2^\ell$, but tracing one user for one epoch never depends on ledger size or number of users: 36.9ms and 1.10ms at $\ell = 8$
+  \item check first: the table disagrees, as the tag is 576 bytes and the $\rel_7'$ proof 3312 bytes; the torus claim may need a citation
+  \item $\ell = 8$ as headline, since algebraic proving steps up just after it
 \end{outline}
 
 \begin{table}[htbp] \centering \small
@@ -175,8 +194,14 @@ uncompressed group elements.} \label{tab:txid-idemix}
 %
 \end{table}
 
-\begin{outline}
-  \item Idemix: Camenisch-Lysyanskaya line of credentials (cite CCS:CamVan02); run over the same library; \Cref{tab:txid-idemix} compares a transaction with an Idemix signature, with and without audit pseudonyms
-  \item Idemix audits by testing one ledger entry at a time, 0.189ms per entry on one core, and only for signers who hand over their commitment randomness
-  \item our tracing (eight cores) breaks even at about 200 entries per epoch (algebraic) and 6 (hash-based); at $10^6$ entries 37ms against 189s
-\end{outline}
+We compare against Hyperledger Idemix, an anonymous credential system in the
+Camenisch-Lysyanskaya line~\cite{CCS:CamVan02}. It runs over the same library.
+\Cref{tab:txid-idemix} compares a transaction with an Idemix signature, with and
+without audit pseudonyms.
+
+Idemix audits by testing one ledger entry at a time, at $0.189\,\mathrm{ms}$ per
+entry on one core, and only for signers who hand over their commitment
+randomness. Our tracing runs on eight cores, and breaks even with Idemix at
+about 200 entries per epoch in the algebraic instantiation and 6 in the
+hash-based one. At $10^6$ entries the algebraic instantiation takes
+$36.9\,\mathrm{ms}$ against $189\,\mathrm{s}$ for Idemix.

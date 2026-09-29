@@ -36,17 +36,17 @@ A registration authority handles registration only, binding users' keys to
 fresh tags. Every credential a user later obtains carries their tag. To present
 attributes, users aggregate the relevant credentials and prove, in zero
 knowledge, that they know the key, hold a valid aggregate credential for the
-disclosed values, and that both share a tag. The tag-based binding is what stops
+disclosed values, and that both share a tag. Binding by tag stops
 different users' credentials being pooled, and lets honest users aggregate
 alone, without contacting any issuer again.  The registration authority is not a
 new party that we add to the model. Every anonymous credential scheme already
 assumes that users' keys are certified, so that credentials cannot be issued to
 keys that users do not control. That assumption is usually left implicit, or
-discharged by the issuer itself. We instead name the role, give it exactly one
+met by the issuer itself. We instead name the role, give it exactly one
 job, and give it no other capability. It binds a key to a tag at registration
 and does nothing else. It never sees an attribute value, is never contacted
 again by the user or by any issuer, and holds no state beyond the tags it has
-assigned. Making the role explicit is what makes the scheme efficient. Because
+assigned. Making the role explicit makes the scheme efficient. Because
 every credential carries the same tag, a user can aggregate credentials from
 issuers that have never communicated, and a verifier can check the result
 without any proof that the credentials belong to the same person. The
@@ -105,10 +105,15 @@ $q$-Asymmetric Double Hidden Strong Diffie-Hellman ($q$-ADHSDH) assumption, and
 anonymity under the decisional Diffie-Hellman (DDH) assumption in the random
 oracle model~\cite{canard2011anonymous}.
 
+ART-Sign is a traceable aggregate signature scheme using randomisable tags as
+pseudonyms~\cite{SCN:HebPoi22}. It achieves a showing cost essentially
+independent of both the number of attributes and the number of issuers and
+supports traceability by a designated authority. The construction requires
+issuers to be stateful, tracking which index they use per tag.
 \begin{outline}
-  \item H\'ebant and Pointcheval: ART-Sign, aggregate signatures with randomisable tags, and multi-authority credentials from it, constant showing cost, traceability by a designated authority (cite SCN:HebPoi22); closest scheme to ours
+  \item H\'ebant and Pointcheval build multi-authority credentials from ART-Sign; closest scheme to ours
   \item their tag: square Diffie-Hellman tuple $(h, h^x, h^{x^2})$, $h$ derived from the user's identity, $x$ generated jointly with a certification authority; the tag is also the user's public key
-  \item signatures are linearly homomorphic: two signatures by one issuer under one tag and index let anyone sign any value for that index, so each issuer signs at most once per tag and index and keeps a per-user record of signed indices
+  \item why issuers are stateful: signatures are linearly homomorphic, two signatures by one issuer under one tag and index let anyone sign any value for that index, so each issuer signs at most once per tag and index and keeps a per-user record of signed indices
   \item bounded variant: replaces the record with a limit on messages per tag, which the issuer still counts, and an issuer key that grows with the limit
 \end{outline}
 
@@ -137,16 +142,12 @@ oracle model~\cite{canard2011anonymous}.
 
 \begin{outline}
   \item our scheme: same asymptotic costs as ART-Sign
-  \item issuers are stateless and need no bound on the number of attributes in advance; tags are bound to keys by the registration authority, not the keys themselves
+  \item issuers are stateless and need no bound on the number of attributes in advance: they check the registration signature and sign, and remember nothing about the user; tags are bound to keys by the registration authority, not the keys themselves
   \item both schemes are proven in the GGM, so the comparison is about issuer state and how tags are bound to users (not about assumptions)
-  \item point to \Cref{tab:agg-creds-related} for the comparison with single- and multi-issuer schemes
+  \item CL02, CL04 and BBS+ are single-issuer, so the question of issuer state does not arise there; CDHK15 issuers keep no per-user record either (cite AC:CDHK15); CL11 does not consider independent issuers (cite canard2011anonymous)
 \end{outline}
-
-\begin{outline}
-  \item issuer state, said in prose now that the table has no column for it: ART-Sign issuers must keep per-user state, a record of the indices they have signed under each tag, since two signatures on the same tag and index let anyone sign any value for that index (cite SCN:HebPoi22)
-  \item our issuers keep none: they check the registration signature and sign, and remember nothing about the user
-  \item CL02, CL04 and BBS+ are single-issuer, so the question does not arise there; CDHK15 issuers keep no per-user record either (cite AC:CDHK15); CL11 does not consider independent issuers (cite canard2011anonymous)
-\end{outline}
+\Cref{tab:agg-creds-related} compares our scheme with several single- and
+multi-issuer credential systems, reporting asymptotic complexities.
 
 \begin{table}[htbp] \centering
   \begin{tabular}{l|c|c|c|c}

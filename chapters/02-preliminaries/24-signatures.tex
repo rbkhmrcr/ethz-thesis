@@ -76,10 +76,10 @@ wins} \ ].
 We say the digital signature scheme $\DS$ is EUF-CMA secure if this advantage is
 negligible for every PPT adversary $\adv$.
 
-\begin{outline}
-  \item strong unforgeability (sUF-CMA): oracle stores the pairs $(\msg,
-\signature)$ it returns; any valid pair not returned is a forgery, so a new
-signature on a queried message (a strong forgery) also wins
-  \item every scheme in this thesis needs only EUF-CMA of the signature schemes
-it builds on (links to rerandomisable SPS in \Cref{sec:prelims-sps})
-\end{outline}
+Strong unforgeability under chosen message attack (sUF-CMA) is defined by the
+same experiment, except that the oracle stores the pairs $(\msg, \signature)$ it
+returns, and any valid pair that was not returned counts as a forgery. The
+adversary therefore also wins with a new signature on a message it has queried,
+which is called a strong forgery. Every scheme in this thesis needs only EUF-CMA
+security of the signature schemes it builds on. This allows the use of the
+rerandomisable signature schemes introduced in \Cref{sec:prelims-sps}.

@@ -19,7 +19,7 @@ every proof stays a Sigma protocol.
 The setup is transparent: no party, including the registration authority,
 samples the group generators. All of them are derived by hashing to the group
 from a public seed, so no discrete logarithm relation among them is known to
-anyone. This matters because the same generators serve both as the registration
+anyone. The same generators serve both as the registration
 authority's public key for the BBS+ signature scheme and as the key of the
 Pedersen commitment scheme. Binding of a Pedersen commitment fails against
 whoever knows such a relation, and here the commitments must bind
@@ -65,8 +65,11 @@ $\PTK$.
 \begin{outline}
   \item requirements on the tag PRF: takes the epoch key as input; correct evaluation provable by equalities of discrete logarithms
   \item Dodis-Yampolskiy has this shape: output raised to (key + input) gives back a fixed value, one equation for a Sigma protocol
-  \item recalled in \Cref{prim:dy-prf}; pseudorandom under $q$-DBDHI (cite PKC:DodYam05)
 \end{outline}
+
+The Dodis-Yampolskiy PRF is pseudorandom under the $q$-decisional bilinear
+Diffie-Hellman inversion assumption, $q$-DBDHI~\cite{PKC:DodYam05}. It is
+recalled in \Cref{prim:dy-prf}.
 
 \begin{primitivebox}{The Dodis-Yampolskiy PRF}{dy-prf}
 
@@ -90,11 +93,11 @@ return the following:
 
 \end{primitivebox}
 
-\begin{outline}
-  \item how we use DY differently from its authors: $X$ is the (secret) epoch key, and the elements $\ggen_D^{1/(k+\gamma)}$ are published as $\{W_\gamma\}$
-  \item so a tag is $\FT(\PTK,\ek,\gamma) = \pairing(\ek, W_\gamma)$, keyed by the epoch key rather than by $k$
-  \item security therefore needs a variant of the assumption: base elements published, $\group{1}$ element withheld (\Cref{asm:qmdbdhi-txid})
-\end{outline}
+We use the Dodis-Yampolskiy PRF differently from its authors. The group element
+$X$ is the epoch tracing key, which is secret, and the elements
+$\ggen_D^{1/(\utk''+\gamma)}$ are published as $\{W_\gamma\}$. A tag is
+therefore $\FT(\PTK,\ek,\gamma) = \pairing(\ek, W_\gamma)$, keyed by the epoch
+key rather than by $\utk''$. Its security rests on \Cref{asm:qmdbdhi-txid}.
 
 \begin{assumptionbox}{Decisional Bilinear Diffie-Hellman Inversion with
 published elements ($q$-mDBDHI)}{qmdbdhi-txid}
@@ -111,14 +114,14 @@ to the adversary. We use it with $q = \Max$.
 
 \end{assumptionbox}
 
-This is the decisional variant of the $q$-BDHI assumption, with the base
-elements shared and the element of $\group{1}$ withheld~\cite{EC:BonBoy04b}.
+This is a variant of the $q$-DBDHI assumption, with the base elements shared
+and the element of $\group{1}$ withheld~\cite{EC:BonBoy04b,PKC:DodYam05}.
 Similar $q$-type assumptions are the norm for constructions of this shape, and
 pairing-based constructions of this type are known not to admit both short
 proofs and a reduction to a simple assumption~\cite{EC:TCRSTW22,TCC:BHKU22}.
 
-The auditor is given the outputs $\{W_\gamma\}$ rather than the key $\utk''$,
-and this is essential. Every tag of an epoch is $Y^{1/(\utk''+\gamma)}$ for the
+The auditor is given the outputs $\{W_\gamma\}$ rather than the key $\utk''$.
+Every tag of an epoch is $Y^{1/(\utk''+\gamma)}$ for the
 same $Y = \pairing(\ek,\ggen_D)$. An auditor holding $\utk''$ could recover $Y$
 from any single tag on the ledger and compute every other tag of that user in
 that epoch without the epoch key. Since $\utk''$ never changes, one grant would
@@ -142,14 +145,26 @@ function on domain $[0,\Max)$.  \end{lemma}
 
 \subsubsection{The tracing protocol}\label{sec:txid-protocol-inst}
 
+The registration authority's key pair is for the BBS+ signature scheme. During
+registration, the user accordingly sends only the group elements $S =
+\gen_1^{\sk}$ and $T = \gen_2^{\utk'}\cdot\gen_3^{\utk''}$, together with a
+proof of knowledge of the underlying secrets, rather than the secrets
+themselves.
+
+Credentials use the BBS+ signature scheme on group elements, recalled in
+\Cref{prim:bbs}. Commitments use the Pedersen commitment scheme, recalled in
+\Cref{prim:pedersen}, with generators shared with the BBS+ signature scheme.
+Range proofs use Bulletproofs~\cite{SP:BBBPWM18}.
+
 \begin{outline}
-  \item credentials: BBS+ on group elements (\Cref{prim:bbs}); signs several committed values at once, can sign values the signer never sees, has a Sigma protocol for knowledge of a signature
-  \item users send only $S = \gen_1^{\sk}$ and the commitment $T$, so the registration authority certifies keys it never sees
+  \item BBS+: signs several committed values at once, can sign values the signer never sees, has a Sigma protocol for knowledge of a signature
   \item this form is only unforgeable if every signed element comes with a proof of knowledge of its representation, so the registration proof is a precondition, not optional hardening (cite SCN:AuSusMu06, EC:TesZhu23b)
-  \item commitments: Pedersen (\Cref{prim:pedersen}); group elements, so openings provable in a Sigma protocol; shares generators with BBS+ so the same committed key appears in both
-  \item range: Bulletproofs, no trusted setup, logarithmic in the range, keeps the setup transparent
-  \item point to \Cref{prot:txid} for the whole protocol; the two transaction proofs follow it
+  \item Pedersen: group elements, so openings provable in a Sigma protocol; shared generators so the same committed key appears in both
+  \item Bulletproofs: no trusted setup, logarithmic in the range, keeps the setup transparent
 \end{outline}
+
+The protocol instantiation is described in full in~\Cref{prot:txid}, and the two
+proofs of a transaction after it.
 
 \begin{protocolbox}{The tracing protocol}{txid}
 
@@ -333,12 +348,14 @@ random linear combination of them, with coefficients derived by hashing the
 elements themselves. Nothing here is state the auditor must keep: the elements
 are certified public key material, and can be sent again.
 
-\begin{outline}
-  \item what the tag proof must show: the tag is the user's tag for this epoch and some index in range, hiding epoch key and index
-  \item proving it directly means an argument about a secret $\group{1}$ element paired against an element with a secret exponent: expensive
-  \item instead: blind epoch key and tag with a fresh scalar, publish blinded values, prove only discrete-log equalities
-  \item index committed separately so the Sigma protocol and a standard range proof speak about the same value
-\end{outline}
+The tag proof must show that the tag is the user's tag for this epoch at some
+index in range, without revealing the epoch key or the index.
+Proving $\rel_7$ directly would require an argument over the secret group
+element $\ek$ paired against a secret-exponent term, which would be expensive in
+practice. Instead, the user blinds the epoch key and the tag with a fresh
+scalar, publishes the blinded values, and proves only equalities of discrete
+logarithms. The index is committed separately, and the Sigma protocol and a
+standard range proof both speak about that commitment.
 
 Concretely, the user samples fresh $s, r_\gamma \sample \Zp$ and publishes $U =
 \HE(\epoch)^s$, the tag blinded as $X = \Tag_\gamma^s$, the blinded epoch key
@@ -431,18 +448,22 @@ X^{\theta_2 + \theta_\gamma} \checkcheck F \cdot \Pi^c, \quad
   \item the non-degeneracy checks $U \neq 1$, $\Pi \neq 1$ are needed: otherwise blind with zero, or key and index that cancel, and any tag passes
 \end{outline}
 
-The range proof is not a formality either. An index outside $[0,\Max)$ would give
-a tag that no auditor ever evaluates, and so a transaction nobody could trace.
-Both proofs speak about the same committed index, so the value shown to be in
-range is the one the tag is computed from.
+The tag proof and the range proof are about the same committed index, so the
+index shown to be in range is the one the tag is computed from.
 
-\begin{outline}
-  \item each transaction also proves it comes from a registered user: the key committed in $\com$ is certified by a BBS+ signature of the registration authority
-  \item avoid proving anything about a pairing by randomising the signature (Camenisch-Drijvers-Lehmann, cite EPRINT:CamDriLeh16, USENIX:HesSinSor23)
-  \item randomised signature checked with one public pairing equation; rest is discrete logarithms
-  \item signature and commitment share the randomness generator, so the proof reconciles the two random exponents
-  \item the proof signs the whole transaction as its message, so no part can be changed on its own
-\end{outline}
+Each transaction carries a proof that attests it has originated from a
+registered user, following relation $\rel_6$. The zero-knowledge proof for
+$\rel_6$ on message $\msg$ is obtained by rewriting $\rel_6$ as an equivalent
+relation $\rel_6'$ that avoids proofs over bilinear
+equations~\cite{EPRINT:CamDriLeh16,USENIX:HesSinSor23}.
+
+The key committed in $\com$ is certified by a BBS+ signature of the
+registration authority. The rewriting randomises the signature, which the
+verifier checks with one pairing equation on public data, and every other
+equation is one of discrete logarithms~\cite{EPRINT:CamDriLeh16}. The signature
+and the commitment share the randomness generator, so the proof reconciles
+their two random exponents. The proof takes the whole transaction as its
+message, so no part of it can be changed on its own.
 
 Concretely, writing $b = \gen_0\cdot\gen_1^{\sk}\cdot\gen_2^{\utk'}\cdot
 \gen_3^{\utk''}\cdot\gen_4^{r}$ for the base of the credential, the user
@@ -603,9 +624,12 @@ algebraic instantiation.
 \begin{outline}
   \item why a link proof: circuits cannot take $\PTK$ or $\com$ as input; Groth16 statements are over $\Zp$, the group elements have coordinates in a different field
   \item checking them in-circuit costs hundreds of thousands of constraints; listing them as public inputs binds nothing
-  \item so split each proof, commit-and-prove style (LegoSNARK, cite CCS:CamFioQue19): circuit commits to the tracing key, small Sigma protocol shows that commitment and $\PTK$ (or $\com$) contain the same key
-  \item point to \Cref{prot:txid-link}
 \end{outline}
+
+Each proof is therefore split in the commit-and-prove style of
+LegoSNARK~\cite{CCS:CamFioQue19}. The circuit commits to the tracing key, and a
+small Sigma protocol shows that this commitment and $\PTK$, or $\com$, contain
+the same key. \Cref{prot:txid-link} gives the link proof.
 
 \begin{protocolbox}{The link proof}{txid-link}
 
@@ -639,10 +663,14 @@ $\gen_2^{s_u}\gen_3^{s_x} = A_2\com^c$.
 
 \begin{outline}
   \item binding: in a transaction the Groth16 proof and link are in the message the authorisation proof signs; at a grant the registration proof signs them with the nonce; so no moving or replaying a link
-  \item sizes: Groth16 proof with commitment 292 bytes (not 192); link adds 160 bytes at a grant, 192 in a transaction
-  \item range check is a circuit constraint, so no Bulletproofs; the 25KB first grant disappears with $\{W_\gamma\}$
-  \item tracing is $\Max$ evaluations of $\HT$ instead of $\Max$ pairings
 \end{outline}
+
+A Groth16 proof with its commitment takes 292 bytes, rather than the 192 bytes
+of three group elements. The link proof adds 160 bytes at a grant and 192 bytes
+in a transaction. The range check is a constraint of the transaction circuit, so
+there is no Bulletproofs range proof. Without the elements $\{W_\gamma\}$, the
+first grant message of 25\,280 bytes in the algebraic instantiation disappears.
+Tracing is $\Max$ evaluations of $\HT$ instead of $\Max$ pairings.
 
 What is given up is the setup. Groth16 needs a structured reference string for
 each circuit, generated from secret values, so this instantiation needs a

@@ -39,19 +39,26 @@ the opening of the payer's pseudonym, without revealing either.
 
 \begin{outline}
   \item the secure element holds only $\sk$ and cannot produce the proof alone; split between two provers following \cite{USENIX:HesSinSor23}
-  \item secure element commits $D = \gen_2^{\sk}\gen_3^{t}$, proves knowledge of the opening, hands $D$ and $t$ to the device
-  \item device proves everything else about the credential with $D$ in place of $\gen_2^{\sk}$
+  \item device proves everything else about the credential with $D = \gen_2^{\sk}\gen_3^{t}$ in place of $\gen_2^{\sk}$
   \item $t$ is disclosed, so the device learns $\gen_2^{\sk}$; $\sk$ protected only by DL hardness, which is what the JPOK definition asks for
   \item difference from the original: there $t$ is derived from a PRF key shared between the provers so they never communicate (and $D$ is rerandomised per presentation); ours are paired at registration and talk directly, so the secure element samples $t$ fresh and sends it (old text had this in more detail)
 \end{outline}
+
+Note that all the device receives from the secure element is the commitment
+$D = \gen_2^{\sk}\gen_3^{t}$, its randomness $t$, and a proof of knowledge of the
+opening, which gives the witness hiding property required of a JPOK: the more
+powerful prover never sees $\sk$.
 
 \begin{outline}
   \item device proves two further equations under the same challenge
   \item opening of the payer's pseudonym: shares its response for $\algo{uid}$ with the credential equation; this shared response ties pseudonym to credential
   \item audit ciphertext must encrypt the identifier in the pseudonym; proving it alongside with the same $\algo{uid}$ response opens the pseudonym once per hop instead of twice
   \item the secure element's challenge hashes the signed message, so the one thing it must see is the payment's destination
-  \item \Cref{prim:bbs-joint-proof} gives the proof: Tessaro-Zhu rerandomisation plus the Hesse-Singh-Sorniotti split \cite{EC:TesZhu23b,USENIX:HesSinSor23}
 \end{outline}
+
+\Cref{prim:bbs-joint-proof} gives the proof. It combines the rerandomisation of
+Tessaro and Zhu with the split of Hesse, Singh and
+Sorniotti~\cite{EC:TesZhu23b,USENIX:HesSinSor23}.
 
 \begin{primitivebox}{The joint proof of knowledge of a BBS+ signature}{bbs-joint-proof}
 
@@ -150,29 +157,36 @@ checks are omitted.
 
 \end{primitivebox}
 
+In $\OP$, the signed message is $m = (v, \com_i, \com_{i+1})$ for a payment and
+$m = (v, \com_n, \algo{dep})$ for a deposit. The audit proof $\Gamma_i$ of the
+construction is the part of $\Phi$ that concerns $\ciph$.
+
 \begin{outline}
-  \item in $\OP$: $m = (v, \com_i, \com_{i+1})$ for a payment, $(v, \com_n, \algo{dep})$ for a deposit
-  \item the audit proof $\Gamma_i$ of the construction is the part of $\Phi$ concerning $\ciph$
   \item pairing check plus the equations on $a$ and $b$ hold exactly when the device knows a valid BBS+ signature on its identifier and the key committed in $D$ \cite{EC:TesZhu23b}
 \end{outline}
 
 \subsection{Instantiating $\SCI$ with Pointcheval-Sanders}\label{sec:offline-token-issuance}
 
-\begin{outline}
-  \item instantiate SCI with Pointcheval-Sanders (signs vectors of field elements) and its signing on committed inputs as Sanders et al.\ describe it \cite{RSA:PoiSan16,RSA:PoiSan18,NDSS:SABMD19}
-  \item key generation and verification are those of the signature scheme
-\end{outline}
+We use the Pointcheval-Sanders signature scheme, which also signs vectors of
+messages, extended to sign committed inputs as Sanders et al.\ describe it. The
+algorithms are given in
+\Cref{prim:ps}~\cite{RSA:PoiSan16,RSA:PoiSan18,NDSS:SABMD19}.
 
-We abbreviate Pointcheval-Sanders as PS, index its messages from $0$, and write $[\ell]_0 =
+Key generation and verification are those of the signature scheme. We abbreviate
+Pointcheval-Sanders as PS, index its messages from $0$, and write $[\ell]_0 =
 \{0, \ldots, \ell-1\}$.
 
+To request a signature, the recipient commits to the messages, encrypts each
+hidden message in the exponent of $k = \hash_{\group{1}}(C)$ under a fresh
+ElGamal key of its own, and proves that the commitment and the ciphertexts are
+consistent. The signer signs homomorphically on the ciphertexts, and the
+recipient decrypts. Disclosed messages are sent in the clear. In $\OP$ the
+disclosed message is the token value.
+
 \begin{outline}
-  \item how it works: recipient commits to the messages, encrypts each hidden one in the exponent of $k = \hash_{\group{1}}(C)$ under a fresh ElGamal key of its own, proves commitment and ciphertexts consistent; signer signs homomorphically on the ciphertexts; recipient decrypts
   \item why $k$ is a hash of the commitment rather than sampled: both parties agree on it without the signer seeing the messages
-  \item disclosed messages (the token value) are sent in the clear
   \item recipient key fresh per execution, so two requests cannot be linked by it
   \item $\Pi$ uses Fischlin, not Fiat-Shamir, because online request extractability needs a non-rewinding extractor \cite{C:Fischlin05}; costs a larger proof, computed once per withdrawal by the device
-  \item point to \Cref{prim:ps}
 \end{outline}
 
 \begin{primitivebox}{The Pointcheval-Sanders signature scheme}{ps}
@@ -262,18 +276,30 @@ $q$ with $\mathcal{P}(-c) \neq 0$.
   \item details in the proof of \Cref{thm:offline-instantiation-security}
 \end{outline}
 
-\begin{outline}
-  \item at withdrawal the central bank signs $(\algo{uid}_0, v, s_0)$ with $\algo{Disc} = \{1\}$, so it sees only the value
-  \item request uses $\openinfo = 0$, since $s_0$ is already uniform and hides the commitment, so $C$ is exactly the request commitment of the construction
-\end{outline}
+This protocol adapts directly to the withdrawal step of \Cref{prot:offline}: we
+execute it on the vector of messages $(\algo{uid}_0, v, s_0)$ with randomness
+$\openinfo = 0$. We set $\algo{Disc} = \{1\}$, so the central bank sees only the
+value.
 
 \begin{outline}
-  \item $\psi$ can never be shown to a payee, since verifying it needs $\algo{uid}_0$
-  \item device proves once that it holds a valid signature on the token value and on the identifier and randomness committed in its pseudonym
-  \item rerandomises $(k, l)$ to $(k^*, l^*)$, independent of the hidden messages
-  \item remaining equation by a Schnorr proof whose challenge hashes value, pseudonym and $(k^*, l^*)$, so none can be swapped later
-  \item \Cref{prot:ps-proof} gives $\Sigma$; it is the first entry of every token's history and every payee verifies it
+  \item why $\openinfo = 0$: $s_0$ is already uniform and hides the commitment, so $C$ is exactly the request commitment of the construction
 \end{outline}
+
+The signature $\psi$ can never be shown to a payee, since verifying it needs
+$\algo{uid}_0$. The device instead proves once that it holds a valid signature
+on the token value and on the identifier and randomness committed in its
+pseudonym. It rerandomises $(k, l)$ to $(k^*, l^*)$ and proves the remaining
+equation by a Schnorr proof whose challenge hashes the value, the pseudonym and
+$(k^*, l^*)$. The proof of withdrawal $\Sigma$ is the first entry of every
+token's history, and every payee verifies it.
+
+\begin{outline}
+  \item why the challenge hashes value, pseudonym and $(k^*, l^*)$: none of them can be swapped later
+\end{outline}
+
+Since $s_0$ is random and not known, $(k^*, l^*)$ leaks no information about
+$\algo{uid}_0$. To prove that $\tau$ was issued by the central bank, the token's
+owner uses their mobile device to compute $\Sigma$ as follows.
 
 \begin{protocolbox}{The proof of withdrawal}{ps-proof}
 
@@ -356,12 +382,18 @@ Fiat-Shamir transform or, for the withdrawal request, the Fischlin transform, an
 so also relies on the DL assumption in $\group{1}$.}
 \label{tab:offline-instantiation} \end{table}
 
+Every proof in the instantiation is a Sigma protocol. All of them except the
+proof in the withdrawal request are compiled with the Fiat-Shamir transform, and
+are therefore simulation extractable in the random oracle
+model~\cite{C:FiaSha86,INDOCRYPT:FKMV12}.
+
 \begin{outline}
-  \item every proof is a Sigma protocol with Fiat-Shamir, so simulation extractable in the ROM \cite{C:FiaSha86,INDOCRYPT:FKMV12}
   \item includes the JPOK, a conjunction of such protocols, giving simulation extractability rather than only the soundness shown in \cite{USENIX:HesSinSor23}
-  \item the withdrawal request proof (Fischlin) is also online extractable, as the construction requires
-  \item lead into the theorem
 \end{outline}
+
+The proof in the withdrawal request is compiled with the Fischlin transform, and
+is also online extractable, as the construction requires. We obtain the
+following theorem.
 
 \begin{theorem}\label{thm:offline-instantiation-security}
 %

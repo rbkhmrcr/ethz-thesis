@@ -1,15 +1,14 @@
 \chapter{Preliminaries}\label{chap:preliminaries}
 
-\begin{outline}
-  \item what the chapter does: fix notation, then say how security is defined
-and proved
-  \item then the primitives later chapters build on: commitments, PRFs, hash
-functions, signatures, public key encryption, proof systems; standard
-definitions follow Katz and Lindell (cite KatLin14)
-  \item finally bilinear groups and our assumptions, and the instantiations
-used by more than one chapter: Sigma protocols and Fiat-Shamir, Pedersen,
-ElGamal, SPS schemes with $\AGHO$, BBS+
-\end{outline}
+This chapter fixes notation and describes how we define and prove security.
+It then introduces the primitives that later chapters build on: commitment
+schemes, pseudorandom functions, hash functions, signature schemes, public key
+encryption schemes and proof systems. Their definitions are standard and follow
+Katz and Lindell~\cite{KatLin14}. Finally, it gives bilinear groups, the
+assumptions we rely on, and the instantiations used by more than one chapter:
+Sigma protocols and the Fiat-Shamir transform, the Pedersen commitment scheme,
+the ElGamal encryption scheme, SPS schemes with $\AGHO$, and the BBS+ signature
+scheme.
 
 The thesis contains numerous primitives, protocols, security definitions,
 instantiations and assumptions. To ease understanding of them, and to separate
@@ -24,17 +23,16 @@ otherwise as self-contained as possible.
 
 \section{Notation}\label{sec:prelims-notation}
 
-\begin{outline}
-  \item bit strings $\{0,1\}^*$, length $|x|$, $[n]$ and $[1,n]$ for $1$ to
-$n$, concatenation $x \| y$
-  \item vectors with an arrow $\vec{x}$, matrices upright capitals
-  \item $x \sample S$ uniform sampling; $y \sample \algo{A}(x)$ running a
-randomised algorithm; $\leftarrow$ for deterministic ones
-  \item $\algo{A}(x; \rho)$ when a security argument needs to name the
-randomness, so $y \sample \algo{A}(x)$ is $\algo{A}(x;\rho)$ for uniform $\rho$
-(was your paragraph in the old encryption section)
-  \item point to the notation list at the front of the thesis
-\end{outline}
+We write $\{0,1\}^*$ for the set of bit strings of any length, $|x|$ for the
+length of $x$, and $x \| y$ for the concatenation of $x$ and $y$. Both $[n]$ and
+$[1,n]$ denote the set $\{1, \ldots, n\}$. Vectors carry an arrow, as in
+$\vec{x}$, and matrices are upright capitals. We write $x \sample S$ for
+sampling $x$ uniformly from a set $S$, $y \sample \algo{A}(x)$ for running a
+randomised algorithm $\algo{A}$ on input $x$, and $y \leftarrow \algo{A}(x)$ for
+running a deterministic one. Where a security argument needs to name the
+randomness, we write $\algo{A}(x; \rho)$, so that $y \sample \algo{A}(x)$ is
+$y \leftarrow \algo{A}(x; \rho)$ for uniform $\rho$. A list of the notation used
+throughout is given at the front of the thesis.
 
 \section{Defining secure protocols}\label{sec:prelims-security}
 
@@ -81,46 +79,56 @@ negligible probability in total. This means an adversary repeating an attack
 with negligible success probability polynomially many times will still have a
 negligible probability of success.
 
-\begin{outline}
-  \item indistinguishability combines PPT and negligible
-  \item distinguisher: PPT adversary that outputs one bit
-  \item two families of distributions indexed by $\secparam$ are
-computationally indistinguishable if every distinguisher outputs $1$ with
-probabilities differing only negligibly on the two
-  \item used later by DDH, zero knowledge and real vs ideal executions
-\end{outline}
+Indistinguishability combines these two notions. A distinguisher is a PPT
+adversary that outputs a single bit. Two families of distributions indexed by
+$\secparam$ are computationally indistinguishable if every distinguisher outputs
+$1$ with probabilities that differ only negligibly between the two. This notion
+is used later by the DDH assumption, by zero knowledge, and to compare real and
+ideal executions.
 
-\begin{outline}
-  \item primitives (commitments, signatures, \ldots): security through an
-experiment, a game between a challenger running the honest algorithms and
-$\adv$ (your old opening paragraph, first half)
-  \item oracle access: $\adv$ submits inputs of its choice, challenger answers
-using secrets $\adv$ does not see
-  \item experiment says when $\adv$ wins; advantage $\Adv$ = probability of
-winning, or distance from $1/2$ where guessing already wins half the time
-  \item property holds if every PPT $\adv$ has negligible advantage
-  \item proofs are reductions: from $\adv$ with non-negligible advantage, build
-an algorithm breaking an assumption or another primitive
-  \item many proofs go through a sequence of games, bounding the change in
-$\adv$'s success between consecutive games
-\end{outline}
+By primitives, we refer to building blocks such as commitments and signature
+schemes. Security in this case is handled through defining experiments, a
+limited number of oracles which an adversary has access to, and then showing
+that the adversary cannot win with greater probability than some predefined
+amount.
 
-\begin{outline}
-  \item larger protocols with many parties and interfaces: capture all goals at
-once in an ideal functionality $\idfu{}$, subscript names the task (your old
-opening paragraph, second half)
-  \item $\idfu{}$ is a trusted party: takes inputs, computes what the task says,
-returns each party its output and nothing more
-  \item view of a party: its inputs, randomness, messages received
-  \item $\textsc{Exec}_{\Pi,\adv}(\secparam)$: joint output of honest parties
-and $\adv$ in the real execution; $\textsc{Exec}_{\idfu{},\simu}(\secparam)$:
-same in the ideal one, honest parties talk only to $\idfu{}$, $\adv$ replaced by
-simulator $\simu$ (old ch05 52-definitions ``Security model'')
-  \item $\Pi$ securely realises $\idfu{}$ if for every PPT $\adv$ there is a PPT
-$\simu$ with the two computationally indistinguishable
-  \item end: $\idfu{}$ has all properties by design, so the protocol does too
-(your old sentence)
-\end{outline}
+An experiment is a game between a challenger, which runs the honest
+algorithms, and the adversary $\adv$. The adversary may be given oracle access,
+in which it submits inputs of its choice and the challenger answers them using
+secrets that $\adv$ does not see. The experiment states when $\adv$ wins. The
+advantage $\Adv$ of $\adv$ is its probability of winning, or, where guessing
+already wins half the time, the distance of that probability from $1/2$. A
+property holds if every PPT adversary has negligible advantage. Proofs are
+reductions: from an adversary with non-negligible advantage, we build an
+algorithm that breaks an assumption or another primitive. Many proofs go
+through a sequence of games, and bound the change in the success probability of
+$\adv$ between consecutive games.
+
+For larger protocols with many parties and interfaces, we capture all security
+goals at once inside an ideal functionality. The ideal functionality represents
+an incorruptible trusted party that receives the inputs of each protocol task
+and returns the prescribed outputs. We then construct a simulator to show that
+the view of an adversary in the real world, interacting with our protocol, is
+indistinguishable from the view when interacting with the ideal functionality
+itself.
+
+We have the outputs of the honest parties and~$\adv$ during an execution of a
+protocol~$\Pi$ in the real world captured in
+$\textsc{Exec}_{\Pi,\adv}(\secparam)$, and we have the outputs of the honest
+parties and~$\simu$ interacting with an ideal functionality~$\idfu{}$ in the
+ideal world captured by $\textsc{Exec}_{\idfu{},\simu}(\secparam)$. We then say
+that the protocol~$\Pi$ securely realises the ideal functionality~$\idfu{}$ if
+for every PPT adversary~$\adv$, there exists a PPT simulator~$\simu$ where
+$\textsc{Exec}_{\Pi,\adv}(\secparam)$ is computationally indistinguishable from
+$\textsc{Exec}_{\idfu{},\simu}(\secparam)$. As the ideal functionality achieves
+all security properties by design, this then shows that the protocol achieves
+them too.
+
+The subscript of $\idfu{}$ names the task it captures. Each party receives its
+own output from $\idfu{}$ and nothing more. The view of a party consists of its
+inputs, its randomness and the messages it receives. In the ideal execution,
+honest parties communicate only with $\idfu{}$, and $\simu$ takes the place of
+$\adv$.
 
 \begin{outline}
   \item we work in the standalone model, executions composed sequentially
@@ -137,15 +145,14 @@ C:Fischlin05)
 \Cref{chap:offline-payments}
 \end{outline}
 
-\begin{outline}
-  \item in both kinds of definition the adversary corrupts some participants
-  \item honest-but-curious (semi-honest): follows the protocol, adversary sees
-its view and combines it with the views of other corrupted participants
-  \item malicious: deviates from the protocol arbitrarily
-  \item static corruption: corrupted set fixed before the protocol starts;
-adaptive: may corrupt more during the execution, based on what it has seen
-  \item each chapter states which participants may be corrupted, and how
-\end{outline}
+In both kinds of definition, the adversary corrupts some participants.
+Honest-but-curious, or semi-honest, participants follow the protocol, and the
+adversary sees their views and combines them with the views of the other
+corrupted participants. Malicious participants deviate from the protocol
+arbitrarily. Under static corruption, the set of corrupted participants is fixed
+before the protocol starts. Under adaptive corruption, the adversary may corrupt
+further participants during the execution, based on what it has seen. Each
+chapter states which participants may be corrupted, and how.
 
 \input{chapters/02-preliminaries/21-commitments}
 \input{chapters/02-preliminaries/22-prfs}

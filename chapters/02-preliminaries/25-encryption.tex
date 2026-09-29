@@ -77,9 +77,7 @@ The IND-CCA advantage of $\adv$ is defined as follows:
 We say the public key encryption scheme $\PKE$ is IND-CCA secure if this
 advantage is negligible for every PPT adversary $\adv$.
 
-\begin{outline}
-  \item IND-CPA: same experiment without the oracle $\deco$
-  \item IND-CCA implies IND-CPA
-  \item ElGamal (\Cref{prim:elgamal}) is only IND-CPA, which is what
-\Cref{chap:offline-payments} needs
-\end{outline}
+Indistinguishability under chosen plaintext attack (IND-CPA) is defined by the
+same experiment without the oracle $\deco$. IND-CCA security implies IND-CPA
+security. The ElGamal encryption scheme in \Cref{prim:elgamal} is only IND-CPA
+secure, which is enough for \Cref{chap:offline-payments}.

@@ -9,42 +9,42 @@ $\idfu{\algo{trace}}$. We define a sequence of indistinguishable games that
 start with Game 0 representing the real world, and end with Game 7 representing
 the ideal world.
 
-The hypotheses of \Cref{thm:txid-bb}, together with the channels of the model,
-give the following five properties. The games below use them by name, and the
-proofs of the two instantiation theorems discharge them one by one.
+The games below use five properties, which follow from the hypotheses of
+\Cref{thm:txid-bb} and the channels of the model. The proofs of the two
+instantiation theorems show that each instantiation has them.
 
 \begin{enumerate}
 
-  \item[(P1)] The registration/credential signature scheme is EUF-CMA secure: no
-PPT adversary can produce a valid signature without querying the registration
-authority.
+  \item[(P1)] $\DS$ is EUF-CMA secure, so no PPT adversary produces a valid
+signature without querying the registration authority.
 
-  \item[(P2)] The commitment scheme $\ComCommit$ is hiding: commitments are
-computationally indistinguishable from random for any PPT adversary. It is also
-binding, which the extraction step of (P4) relies on.
+  \item[(P2)] $\Com$ is binding, and hiding, so commitments are computationally
+indistinguishable from random.
 
-  \item[(P3)] $\FE$ and $\FT$ are pseudorandom functions, and remain so against
-a distinguisher holding the user's public tracing key $\PTK$. This is what
-\Cref{sec:txid-construction} asks for. $\PTK$ is a public parameter of $\FT$
-rather than key material, so nothing it carries need be kept secret, and because
-it is fixed for the lifetime of the user it is kept out of the output of $\FE$
-on purpose. In the instantiation the two statements are
-\Cref{lem:txid-fe-prf,lem:txid-ft-prf} respectively.
+  \item[(P3)] $\FE$ and $\FT$ are pseudorandom, also against a distinguisher
+holding the user's public tracing key $\PTK$.
 
-  \item[(P4)] The proofs and signatures of knowledge for relations $\rel_4$
-through $\rel_7$ are simulation extractable in the random oracle model: a valid
-witness can be extracted from any accepted proof, and simulated proofs are
-indistinguishable from real ones. For the Sigma protocols, extraction proceeds
-by rewinding via the forking lemma, which is why the security model is the
-standalone one of \Cref{sec:prelims-security}. For the Groth16 proofs of the
-hash-based instantiation, it uses Groth16's extractor, and simulation
-extractability holds in its weak form, as the proof of \Cref{thm:hash-inst}
-explains.
+  \item[(P4)] The proofs and signatures of knowledge for $\rel_4$ to $\rel_7$ are
+simulation extractable in the random oracle model: a witness can be extracted
+from any accepted proof, and simulated proofs are indistinguishable from real
+ones.
 
   \item[(P5)] Honest users and honest auditors communicate over a secure,
 confidential channel.
 
 \end{enumerate}
+
+The extraction in (P4) relies on binding in (P2). (P3) is what
+\Cref{sec:txid-construction} asks for: $\PTK$ is a public parameter of $\FT$,
+not key material, so nothing it carries need be kept secret, and since it is
+fixed for the lifetime of the user it is kept out of the output of $\FE$. In the
+algebraic instantiation the two statements of (P3) are
+\Cref{lem:txid-fe-prf,lem:txid-ft-prf}. For the Sigma protocols, extraction
+rewinds via the forking lemma, which is why the security model is the
+standalone one of \Cref{sec:prelims-security}. For the Groth16 proofs of the
+hash-based instantiation, extraction uses Groth16's extractor, and simulation
+extractability holds in its weak form, as the proof of
+\Cref{thm:hash-inst} explains.
 
 \begin{proof}
 
@@ -322,7 +322,7 @@ for $\utk'' \sample \Zp$, so $\simu$ samples it uniformly, and its second
 component $\{W_\gamma\}$ is a function of $\utk''$ alone, which $\simu$ draws
 itself. Neither touches the challenge. As $\simu$ also plays the registration
 authority it chooses the remaining BBS+ generators and the issuing key, and can
-produce every other public value of the protocol. This is what lets the lemma be
+produce every other public value of the protocol. So the lemma can be
 stated against a distinguisher given the whole of $\PTK$, which the tag PRF
 lemma needs in order to compose with this one.
 
@@ -370,7 +370,7 @@ $\simu$ hands to $\adv$ is exactly $\{\FT(\PTK,\ek^\star,\gamma)\}_{\gamma\in
 [0,\Max)}$ under key $\ek^\star$. If the challenge is random, every entry is
 independent and uniform in $\group{T}$. As the domain $[0,\Max)$ is of
 polynomial size, indistinguishability of the whole vector from a uniform vector,
-which is what the assumption gives, is equivalent to pseudorandomness in the
+as given by the assumption, is equivalent to pseudorandomness in the
 sense of~\Cref{sec:prelims-prfs}: an adaptive distinguisher can be run on the
 vector directly. We then have the following advantage:
 %
@@ -385,8 +385,8 @@ vector directly. We then have the following advantage:
 of distinct epochs are uniform and mutually independent
 by~\Cref{lem:txid-fe-prf}, whose statement hands the distinguisher the whole of
 $\PTK$, and it is $\PTK$ alone that the epochs share. The two lemmas therefore
-compose without a hybrid over epochs. This is why the $\{W_\gamma\}$ are
-public parameters rather than a component of $\ek$.
+compose without a hybrid over epochs, and for this reason the $\{W_\gamma\}$
+are public parameters rather than a component of $\ek$.
 
   The group elements $\{W_\gamma\}$ do not compromise $\utk''$ itself.
 Recovering
@@ -616,47 +616,54 @@ $\vec{\theta}$ and solving each verification equation for $t_1$, $t_2$, and $t_3
 
 \subsection{Proof of \Cref{thm:inst}}\label{sec:txid-inst-sec}
 
-\Cref{thm:txid-bb} reduces security of the scheme to five conditions on its
-building blocks. It remains to discharge each of them for the instantiation
-of~\Cref{sec:txid-instantiation}, which the preceding results do as follows.
+\Cref{thm:txid-bb} reduces security to the properties (P1) to (P5). It remains
+to show that each building block of the algebraic instantiation has the
+property it needs.
 
 \begin{proof}
 
 \begin{description}
 
-  \item[(P1).] $\DS$ is the BBS+ signature scheme of~\Cref{prim:bbs}, which is
+  \item[(P1).] $\DS$ is the BBS+ signature scheme of~\Cref{prim:bbs},
 existentially unforgeable under the $q$-SDH assumption of \Cref{asm:qsdh-bbs}.
-The
-variant used signs group elements rather than scalars, so unforgeability
-additionally requires that the signer only sign elements accompanied by a proof
-of knowledge of their representation. $\algoproof_4$ in $\IDregister$ supplies
-this.
 
   \item[(P2).] $\Com$ is the Pedersen commitment scheme of~\Cref{prim:pedersen},
-which is perfectly hiding, and computationally binding under the discrete
-logarithm assumption in $\group{1}$. Binding holds against every party,
-including the registration authority, because Step 2 of $\IDgen$ derives
-$(\gen_2,\gen_3,\gen_4)$ by hashing to the group from a public seed rather than letting
-any party sample them.
+perfectly hiding, and computationally binding under the DL assumption in
+$\group{1}$.
 
-  \item[(P3).] Pseudorandomness of $\FE$ is~\Cref{lem:txid-fe-prf}, under DDH in
-$\group{1}$ with $\HE$ modelled as a random oracle. Pseudorandomness of $\FT$
-is~\Cref{lem:txid-ft-prf}, under $q$-mDBDHI with $q = \Max$. Both statements
-hand the distinguisher the whole of $\PTK$, including $\{W_\gamma\}$, which is
-what Game 4 and Game 5 need, since every corrupt auditor holds it. The two
-lemmas compose without a hybrid over epochs, and the simulator of Game 4
-reproduces the real distribution by reusing one $\PTK_\user$ per user.
+  \item[(P3).] $\FE$ is pseudorandom under DDH in $\group{1}$ with $\HE$ modelled
+as a random oracle, by \Cref{lem:txid-fe-prf}, and $\FT$ under $q$-mDBDHI with
+$q = \Max$, by \Cref{lem:txid-ft-prf}.
 
-  \item[(P4).] Four proof systems are in play. First, the Sigma protocols
+  \item[(P4).] The proofs are the Sigma protocols
 of~\Cref{prot:txid-tag-sigma,prot:txid-tx-nizk}, Fiat-Shamir transformed with
-$\hash$ modelled as a random oracle. Then the Schnorr proof of representation
-used for $\rel_4$, and the grant proof for $\rel_5$. Last, the Bulletproofs
-range proof system, whose soundness rests on the DL assumption in
-$\group{1}$~\cite{SP:BBBPWM18}. That the rewritten relations prove what the
-original ones state is~\Cref{sec:rel7-equiv,sec:rel6-equiv}, and extraction is
-by rewinding, which is sound in the standalone model.
+$\hash$ modelled as a random oracle, the Schnorr proof of representation for
+$\rel_4$, the grant proof for $\rel_5$, and Bulletproofs, sound under DL in
+$\group{1}$~\cite{SP:BBBPWM18}.
 
-In the instantiation, $\rel_5$ has witness $\witness_5 = (\utk',\utk'')$ and
+  \item[(P5).] Assumed of the network, as in the generic construction.
+
+\end{description}
+
+For (P1), the variant used signs group elements rather than scalars, so
+unforgeability also requires that the signer only sign elements accompanied by a
+proof of knowledge of their representation. $\algoproof_4$ in $\IDregister$
+supplies this.
+
+For (P2), binding holds against every party, including the registration
+authority, because Step 2 of $\IDgen$ derives $(\gen_2,\gen_3,\gen_4)$ by
+hashing to the group from a public seed rather than letting any party sample
+them.
+
+For (P3), both lemmas hand the distinguisher the whole of $\PTK$, including
+$\{W_\gamma\}$. Game 4 and Game 5 need this, since every corrupt auditor holds
+it. The two lemmas compose without a hybrid over epochs, and the
+simulator of Game 4 reproduces the real distribution by reusing one
+$\PTK_\user$ per user.
+
+For (P4), \Cref{sec:rel7-equiv,sec:rel6-equiv} show that the rewritten relations
+prove what the original ones state, and extraction is by rewinding, which is
+sound in the standalone model. In the instantiation, $\rel_5$ has witness $\witness_5 = (\utk',\utk'')$ and
 instance
 %
 \begin{equation*}
@@ -687,10 +694,6 @@ $q_{\hash}/p$, where $q_{\hash}$ bounds the prover's hash
 queries~\cite{EC:BelGarRab98}. Later grants to the same auditor prove only the
 first two equalities, against the same certified $T$, and the binding of $T$
 ties both proofs to one pair $(\utk',\utk'')$.
-
-  \item[(P5).] Assumed of the network, as in the generic construction.
-
-\end{description}
 
 Combining these with~\Cref{thm:txid-bb} gives~\Cref{thm:inst}.
 

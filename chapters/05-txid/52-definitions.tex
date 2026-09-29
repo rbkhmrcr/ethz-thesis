@@ -9,8 +9,8 @@ registration authority is honest-but-curious during the protocol, meaning it
 follows the protocol but tries to learn what it can from what it sees: it
 authenticates users and issues the credentials required to submit transactions
 and enable selective traceability. We additionally assume it does not bias the
-public parameters, which in our instantiations is discharged by deriving all group generators from a public seed rather than
-sampling them. Users are potentially malicious, and generate and submit
+public parameters. In our instantiations this holds because all group
+generators are derived from a public seed rather than sampled. Users are potentially malicious, and generate and submit
 confidential transactions while retaining fine-grained control over which
 auditors are authorised to trace them, and during which epochs. Auditors are
 potentially malicious, and may be granted permission to trace the transactions
@@ -21,9 +21,7 @@ fixed in the public parameters.
 We consider static corruption throughout: the simulator corrupts users and
 auditors of its choice before any call to the ideal functionality is made.
 
-\begin{outline}
-  \item name the protocol $\ID$ (tag-based tracing); introduce the algorithm list below
-\end{outline}
+A tag-based tracing protocol $\ID$ consists of the following algorithms.
 
 \begin{description}
 
@@ -98,8 +96,15 @@ one for an epoch that has already elapsed, which amounts to voluntary
 retrospective self-disclosure. What a user cannot do is refuse to be traced in
 an epoch for which they have already granted a permission.
 
+We say that the protocol~$\Pi$ securely realises the ideal
+functionality~$\idfu{\algo{trace}}$ if for every PPT adversary~$\adv$, there
+exists a PPT simulator~$\simu$ where $\textsc{Exec}_{\Pi,\adv}(\secparam)$ is
+computationally indistinguishable from
+$\textsc{Exec}_{\idfu{\algo{trace}},\simu}(\secparam)$.
+
+We work in the standalone model of \Cref{sec:prelims-security}.
+
 \begin{outline}
-  \item security model: standalone model of \Cref{sec:prelims-security}; $\Pi$ is secure if it securely realises $\idfu{\algo{trace}}$
   \item why not UC: the simulator extracts from the Sigma protocols by rewinding (forking lemma, cite JC:PoiSte00)
 \end{outline}
 
@@ -143,7 +148,7 @@ participants to the next epoch, on the schedule described above.
       $\idfu{\algo{trace}}$ keeps tables $\reg$, $\txns$ and $\perm$, the set
 $\Cor$ of corrupt participants, and the epoch $\epoch_{\mathsf{cur}} = 1$.
 
-	{$\IDregister$.} On input register from the user $\user$, send
+	\fuinterface{\IDregister} On input register from the user $\user$, send
 $(\IDregister, \user)$ to the registration authority and wait for confirmation.
 On receiving confirmation, do the following:
 
@@ -160,7 +165,7 @@ go-ahead. On receiving it, continue.
 
 	\end{enumerate}
 
-	{$\IDsubmit$.} On input $(\IDsubmit, \payload, \epoch)$ from $\user$,
+	\fuinterface{\IDsubmit} On input $(\IDsubmit, \payload, \epoch)$ from $\user$,
 do:
 
 	\begin{enumerate}
@@ -185,7 +190,7 @@ $\simu$, and wait for the go-ahead.
 
 	\end{enumerate}
 
-	{$\IDgrant$.} On input $(\IDgrant, \auditor, \epoch)$ from $\user$, send
+	\fuinterface{\IDgrant} On input $(\IDgrant, \auditor, \epoch)$ from $\user$, send
 $(\IDgrant, \user, \epoch)$ to auditor $\auditor$ and wait for confirmation. On
 receiving confirmation, do:
 
@@ -207,7 +212,7 @@ for the go-ahead. On receiving it, do:
 
 	\end{enumerate}
 
-	{$\IDidentify$.} On input $(\IDidentify, \user, \epoch)$ from auditor
+	\fuinterface{\IDidentify} On input $(\IDidentify, \user, \epoch)$ from auditor
 $\auditor$, do:
 
 	\begin{enumerate}

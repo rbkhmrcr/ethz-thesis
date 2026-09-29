@@ -4,15 +4,14 @@ A relation $\rel$ is an efficiently decidable set of pairs $(\inst, \witness)$
 of a statement and a witness, and we write $\rel(\inst, \witness) = 1$ when
 $(\inst, \witness)$ is in it, and $\lang$ for the set of such pairs.
 
-\begin{outline}
-  \item a proof system lets a prover convince a verifier that $\inst$ is true,
-i.e.\ some $\witness$ has $\rel(\inst, \witness) = 1$ (your old opening
-sentence)
-  \item soundness: verifier is not convinced of false statements
-  \item zero knowledge is separate: nothing revealed beyond the truth of the
-statement
-  \item we use non-interactive proof systems throughout
-\end{outline}
+Zero-knowledge proof systems enable provers to convince verifiers that a
+statement is true without revealing any information beyond the validity of the
+statement.
+
+A statement $\inst$ is true if there is a witness $\witness$ with
+$\rel(\inst, \witness) = 1$. Soundness requires that verifiers are not convinced
+of false statements. Zero knowledge is a separate property of a proof system,
+not part of its definition. We use non-interactive proof systems throughout.
 
 \paragraph{Syntax.} A non-interactive proof system $\NIZK$ consists of the
 following algorithms. We call it a non-interactive zero-knowledge (NIZK) proof system when it is also
@@ -184,13 +183,13 @@ wins}].
 A labelled proof system is simulation extractable if this advantage is negligible
 for every PPT adversary $\adv$.
 
-\begin{outline}
-  \item $(\inst^*, \lbl^*) \notin \Query$: $\adv$ cannot turn a simulated proof
-into one under another label or for another statement (your old
-``non-malleable across labels'')
-  \item a witness can be extracted, so a simulation extractable proof system is
-in particular a proof of knowledge
-\end{outline}
+The condition $(\inst^*, \lbl^*) \notin \Query$ makes proofs non-malleable
+across labels.
+
+It also makes them non-malleable across statements, since $\adv$ cannot turn a
+simulated proof into a proof for another statement either. Since a witness can
+be extracted, a proof system that is simulation extractable is in particular a
+proof of knowledge.
 
 Zero knowledge and simulation extractability are independent properties.  Zero
 knowledge ensures that simulated proofs are indistinguishable from honestly
@@ -203,6 +202,7 @@ simulated proofs.
 pairs $\adv$ saw proofs for, so rerandomisable proofs can still satisfy it
   \item matters for Groth16 in \Cref{chap:txid}, whose proofs can be
 rerandomised
-  \item Sigma protocols made non-interactive with Fiat-Shamir satisfy both
-(\Cref{sec:prelims-sigma})
 \end{outline}
+
+Sigma protocols made non-interactive with the Fiat-Shamir transform satisfy
+both properties, as shown in \Cref{sec:prelims-sigma}.

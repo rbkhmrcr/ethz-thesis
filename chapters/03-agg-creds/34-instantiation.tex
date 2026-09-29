@@ -11,25 +11,24 @@ to signal which groups they belong to.
 We use hash functions $\hashone \colon \{0,1\}^* \rightarrow \group{1}$ and
 $\hashtwo \colon \{0,1\}^* \rightarrow \group{1}$, and hash functions $\hash
 \colon \{0,1\}^* \rightarrow \Zp$ for the challenges of the proofs below.
+Each hash function prefixes its input with its own fixed string, its domain
+separation tag, so that they behave as independent random oracles.
+
+\subsection{Instantiating $\ATS$}\label{sec:agg-creds-tag-scheme}
+
+Our tag-based aggregate signature scheme borrows its structure from the BLS
+signature scheme of Boneh, Lynn and Shacham and its aggregate form, in which a
+signature is the hash of the message raised to the secret key and signatures on
+different messages aggregate by multiplication~\cite{JC:BonLynSha04,EC:BGLS03}.
+Each of our signatures keeps this term and adds the hash of a tag raised to a
+fresh exponent, so that only signatures under the same tag aggregate and
+signatures can be rerandomised.
+
 \begin{outline}
-  \item each hash function prefixes its input with its own fixed string (a domain separation tag), so they behave as independent random oracles
+  \item why this structure: signatures aggregate by multiplication and verify with one pairing equation, so aggregating costs one group multiplication per signature and the aggregate is as short as one signature
 \end{outline}
-
-\subsection{Instantiating $\ATS$ with the BLS signature scheme}\label{sec:agg-creds-tag-scheme}
-
-Our tag-based aggregate signature scheme extends the BLS signature scheme of
-Boneh, Lynn and Shacham, in which a signature is the hash of the message raised
-to the secret key, and its
-aggregate form, to sign pairs of messages and tags~\cite{JC:BonLynSha04,EC:BGLS03}.
-The key differences are tag restricted aggregation and ability to randomise
-signatures.
-
-\begin{outline}
-  \item why BLS: signatures are single group elements, aggregate by multiplication, verify with one pairing equation, so aggregating costs one group multiplication per signature and the aggregate is as short as one signature
-  \item the tag enters every signature through $\hashtwo(\Tag)$ and a fresh exponent: signatures under different tags cannot be combined into one that verifies, and a signature can be rerandomised without the secret key
-  \item both hash functions are random oracles; the proof embeds its challenge in the hashes of the attacked message and tag
-  \item point to \Cref{prot:ats} for the algorithms
-\end{outline}
+Both hash functions are modelled as random oracles, and the security proof
+embeds its challenge in the hashes of the attacked message and tag. Our scheme is comprised of the following algorithms:
 
 \begin{protocolbox}{The tag-based aggregate signature scheme}{ats}
 
@@ -118,9 +117,9 @@ the result of the following check:
 
   \end{description} \end{protocolbox}
 
-\begin{outline}
-  \item unforgeability rests on the two assumptions in \Cref{asm:bcdh,asm:mbcdh}
-\end{outline}
+This signature is existentially unforgeable under tag-based aggregation in the
+random oracle model under the Bilinear Computational Diffie-Hellman assumption
+and a modified variant of the same assumption.
 
   \begin{assumptionbox}{Bilinear Computational Diffie-Hellman (BCDH)}{bcdh}
 
@@ -145,11 +144,14 @@ $\pairing(\gen, \ggen)^{\gamma\varepsilon\chi}$ with non-negligible probability.
 hold, then our tag-based aggregate signature scheme is existentially unforgeable
 under tag-based aggregation in the random oracle model.  \end{theorem}
 
+The proof separates two kinds of forgery. BCDH covers a forgery on a message
+never signed under the honest key, and m-BCDH covers a signed message reused
+under a new tag.
 \begin{outline}
-  \item the proof separates two kinds of forgery: BCDH covers a forgery on a message never signed under the honest key, m-BCDH a signed message reused under a new tag
   \item neither assumption is known to imply the other, so both are needed
-  \item both hold in the GGM, the model the full credential scheme is proven in
 \end{outline}
+Both assumptions hold in the GGM, the model in which the full credential scheme
+is proven secure.
 
 \subsection{Instantiating $\AAC$ with $\AGHO$ and $\ATS$}\label{sec:agg-creds-aac-inst}
 
@@ -170,11 +172,8 @@ everything else in the protocol. This lets users prove knowledge of a valid
 registration signature with an efficient sigma protocol over discrete
 logarithms, rather than requiring a general purpose zero knowledge proof.
 
-\begin{outline}
-  \item sharpen the paragraph above: both the AGHO signature and the aggregate signature can be rerandomised, so a fresh copy is shown in the clear and checked with the ordinary pairing equations; nothing about the signatures is proven in zero knowledge
-  \item what remains is to show the shown values belong together: a few discrete logarithm equalities in $\group{1}$, one small Sigma protocol, instead of a general proof over pairing equations
-  \item the scheme is then only proven secure in the GGM, since AGHO is only proven secure there
-\end{outline}
+The credential scheme is then only proven secure in the GGM, since the $\AGHO$
+SPS scheme is only proven secure there.
 
 During registration, the registration authority signs the user's public key
 together with the group element $\tid = \hashtwo(\Tag)$, rather than $\Tag$
@@ -184,17 +183,36 @@ including the tag-based aggregate signature scheme, use the tag directly.
 
 \begin{outline}
   \item why hash rather than $\gen^\Tag$: $\tid$ then has no algebraic relation to the other exponents in the protocol
-  \item the aggregate signature uses the same element $\hashtwo(\Tag)$, so the registration and aggregate signatures share one group element, and the presentation only shows that they share it
-  \item the RA only signs pairs of this form, so users never prove knowledge of the preimage of $\tid$
 \end{outline}
+The aggregate signature uses the same element $\hashtwo(\Tag)$, so the
+registration signature and the aggregate signature share one group element, and
+the presentation only shows that they share it.
+Since the registration authority only issues signatures on well-formed
+messages, pairs $(\pk, \hashtwo(\Tag))$ for $\Tag \in \Zp$, the user does not
+need to prove knowledge of the preimage such that $\tid = \hashtwo(\Tag)$,
+which already saves a proof of a hash preimage.
 
-\begin{outline}
-  \item how presentation works (replaces the old $\rel_2$ display and the step list, now in \Cref{prot:paac}): rerandomise both signatures, raise every element that would identify them (including $\gen$ and the attribute hashes) to a fresh $\delta$
-  \item blinded elements are sent in the clear, the verifier checks the three signature equations directly on them
-  \item the Sigma protocol proves $\rel_3$: one $\delta$ used throughout, and knowledge of $\sk$
-  \item the challenge hashes every group element of the presentation and the verifier's message: nothing can be changed once the challenge is fixed, and Fiat-Shamir keeps the proof simulation extractable
-  \item under DDH in $\group{1}$ a blinded presentation reveals nothing beyond the disclosed values; leads into \Cref{lem:agg-creds-sigma}
-\end{outline}
+At presentation, users raise every element that would identify the
+rerandomised signatures to a fresh $\delta$, including $\gen$ and the attribute
+hashes. The Sigma protocol proves $\rel_3$: that one $\delta$ is used
+throughout, and knowledge of $\sk$. The challenge hashes every group element of
+the presentation and the verifier's message, so nothing can be changed once the
+challenge is fixed.
+
+In the concrete instantiation, the user randomises both signatures, to
+$(\signatureone', \signaturetwo')$ and $(\widetilde{r}', \widetilde{s}', z')$. This means that these values can be sent in the clear within
+$\algoproof$, as they reveal nothing about which original signature they came
+from. This means that the signature verification equations can be used
+directly. $\algoproof$ then captures the full presentation relation of the
+construction, with signature verification performed directly instead of proven,
+and the discrete-log equalities enforcing consistency through $\eta$. This
+allows us to build a concretely efficient proof rather than requiring
+zero-knowledge proofs over pairing equations and elements of $\group{T}$.
+
+If a user is able to produce a valid $\eta$, we can extract a witness for the
+presentation relation of the construction. Under the DDH assumption in
+$\group{1}$, the resulting presentation is simulatable: it leaks no information
+about the witness beyond the disclosed attribute values.
 
 \begin{lemma}\label{lem:agg-creds-sigma}
 
@@ -212,10 +230,10 @@ property we rely on.  The proof in Protocol~\ref{prot:paac} is a sigma protocol 
 Fiat-Shamir heuristic applied~\cite{C:FiaSha86}. This combination satisfies
 simulation extractability in the random oracle model~\cite{INDOCRYPT:FKMV12}.
 
-\begin{outline}
-  \item registration and issuance: users prove knowledge of $\sk$ with a Schnorr proof on a nonce chosen by the checker, so proofs cannot be replayed
-  \item issuers check the registration signature before signing, so they keep no record of whom they have issued to
-\end{outline}
+At registration and issuance, users prove knowledge of $\sk$ with a Schnorr
+proof on a nonce chosen by the registration authority or the issuer, so proofs
+cannot be replayed. Issuers check the registration signature before signing, so
+they keep no record of whom they have issued to.
 
 %%%% anon creds protocol
 

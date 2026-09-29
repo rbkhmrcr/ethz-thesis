@@ -1,23 +1,23 @@
 \section{Construction}\label{sec:tsps-construction}
 
-\begin{outline}
-  \item signing key of $\SPS$ shared between the $n$ signers with the MPC
-protocol of \Cref{sec:tsps-mpc}
-\end{outline}
+The signing key of an underlying SPS scheme $\SPS$ is secret-shared among the
+$n$ signers. Rather than reconstructing it, the signers use the MPC protocol of
+\Cref{sec:tsps-mpc} to jointly compute shares of every value that the signing
+algorithm derives from the key and from its own randomness.
 
 \paragraph{Setup.} The signers agree in advance on $(\ell, t, n)$ and the
 pairing groups, and abort if any call to $\algo{MPC}$ returns $\bot$.
 
-\paragraph{Key generation and verification.}
+\paragraph{Key generation and verification.} Key generation runs $\SPSgen$
+under the MPC protocol. Verification is $\SPSverify$ unchanged, since it uses no
+secret shares.
+
 \begin{outline}
-  \item both generic: key generation runs $\SPSgen$ under the MPC protocol, and
-general-purpose MPC gives a distributed key generation with no trusted dealer;
-it runs once, so its cost hardly matters
-  \item verification is $\SPSverify$ unchanged, it uses no secret shares, so
-there is nothing for the MPC protocol to do
+  \item both generic: general-purpose MPC gives a distributed key generation with
+no trusted dealer; it runs once, so its cost hardly matters
+  \item nothing for the MPC protocol to do in verification
 \end{outline}
 
-\paragraph{Why signing is not just another generic evaluation.}
 \begin{outline}
   \item evaluating $\SPSsign(\sk, \vec{\msg})$ under MPC with the message as one
 more input puts every interactive call after the message is known
@@ -92,19 +92,42 @@ relation between the two messages and the secret key, so the signers keep their
 states in a queue and delete each one once it is used. The offline phase can be
 run repeatedly during quiet periods to build up states for busy ones.
 
-\paragraph{Online signing.}
-\begin{outline}
-  \item each signer only raises the public $\msg_i$ to its shares and multiplies,
-so no signer communicates in this phase; costs about as much as one run of
-$\SPSsign$
-\end{outline}
+\paragraph{Online signing.} Online signing takes the message vector and
+produces a signature share. By decomposable signing, the only operations needed
+at this point are multiplication of shares and raising the public group elements
+of $\vec{\msg}$ to shared exponents, both of which each signer performs locally.
+No signer communicates with any other during this phase, and its cost is
+comparable to that of an ordinary invocation of $\SPSsign$.
 
-\paragraph{Combining.}
-\begin{outline}
-  \item done by whichever party is to hold the signature, from $t+1$ signature
-shares, with no further work by the signers; in the benchmarks every signer
-opens the signature (\Cref{tab:tsps-comms})
-\end{outline}
+\paragraph{Combining.} Combining reconstructs the signature from the shares. It
+is performed by whichever party is to hold the signature, and needs no
+participation from the signers beyond their having published their shares. In
+our benchmarks, every signer opens the signature, so each sends its share to all
+others. \Cref{fig:tsps-seq} shows the steps and messages of signing, from the
+offline phase to combining.
+
+\begin{figure}[htbp] \centering \small
+\begin{tikzpicture}[seq, x=2.7cm]
+  \foreach \x/\n in {0/Signer $1$, 1/\ldots, 2/Signer $n$, 3/Holder} {
+    \node[seqhead, text width=2.3cm] at (\x, 0) {\n};
+  }
+  \foreach \x in {0, 2, 3} \draw[seqlife] (\x, 0.6) -- (\x, 7.5);
+  \draw[seqlife, dotted] (1, 0.6) -- (1, 7.5);
+  \draw[{Stealth[length=1.6mm]}-{Stealth[length=1.6mm]}, thin] (0, 1.3) --
+    node[seqlabel] {$\TSPSoffsign$ under $\algo{MPC}$} (2, 1.3);
+  \node[seqloc] at (0, 2.1) {keep $\state_1$};
+  \node[seqloc] at (2, 2.1) {keep $\state_n$};
+  \draw[gray!60, dashed] (-0.4, 3.3) -- node[seqlabel, text=black] {$\vec{\msg}$ known} (3.4, 3.3);
+  \node[seqloc] at (0, 4.0) {$\SPSsig_1 \leftarrow \TSPSonsign$};
+  \node[seqloc] at (2, 4.0) {$\SPSsig_n \leftarrow \TSPSonsign$};
+  \draw[seqmsg] (2, 5.5) -- node[seqlabel] {$\SPSsig_n$} (3, 5.5);
+  \draw[seqmsg] (0, 6.4) -- node[seqlabel, pos=0.25] {$\SPSsig_1$} (3, 6.4);
+  \node[seqloc] at (3, 7.2) {$\SPSsig \leftarrow \TSPScombine$};
+\end{tikzpicture}
+\caption[Threshold SPS schemes: signing]{Steps and messages of signing. The
+signers run the offline phase together before the message is known, and each
+then signs locally. The holder combines the signature shares of any $t+1$
+signers.} \label{fig:tsps-seq} \end{figure}
 
 \paragraph{Robustness and abort.} With an honest majority, the honest signers' shares alone are enough to combine,
 so signing is robust: it succeeds whatever the corrupted signers do. With
@@ -151,10 +174,12 @@ $\advB$ such that
   \item if $n$ is polynomial in $\secparam$ and $t$ or $n - t$ is constant, then
 $\binom{n}{t} \leq n^{\min(t, n-t)}$ is polynomial, so $\TSPS$ is adp-TS-UF-1
 secure
-  \item the factor disappears if the adversary fixes its corrupted signers in
-advance: the reduction answers honest signers lazily instead of guessing (next
-lemma)
+  \item why the factor disappears below: the reduction answers honest signers
+lazily instead of guessing
 \end{outline}
+
+The factor $\binom{n}{t}$ disappears if the adversary fixes its corrupted signers
+in advance.
 
 \begin{lemma}\label{lem:tsps-static} Under the conditions of
 \Cref{thm:tsps-construction-security}, with the MPC protocol secure against static
@@ -166,8 +191,6 @@ $\Adv_{\TSPS, \adv}^{\text{adp-TS-UF-1}}(\secparam) \leq
 \end{lemma}
 
 \begin{outline}
-  \item neither MPC protocol we benchmark is proven adaptively secure, so the
-implemented schemes are secure against static corruption, without loss
   \item with an adaptively secure protocol: dishonest majority $t = n-1$ loses
 only $\binom{n}{n-1} = n$; honest majority $t \approx n/2$ loses a factor
 exponential in $n$, only covered for constant $n$

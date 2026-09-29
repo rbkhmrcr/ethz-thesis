@@ -11,22 +11,19 @@ functionality $\idfu{\AAC}$.  We define a sequence of indistinguishable games
 that start with Game 0 representing the real world, and end with Game 8
 representing the ideal world.
 
-The games use the three hypotheses of \Cref{thm:agg-creds-construction-security},
-which we label as follows so that the games can refer to them.
+The games use the three hypotheses of
+\Cref{thm:agg-creds-construction-security}, one for each building block:
 
 \begin{enumerate}
 
-  \item[(P1)] The digital signature scheme $\DS$ used by the registration
-authority is existentially unforgeable (EUF-CMA): no PPT adversary can produce a
-valid signature $\psi$ on a pair $(\pk, \Tag)$ that the registration authority
-never signed.
+  \item[(P1)] The registration authority's signature scheme $\DS$ is
+existentially unforgeable (EUF-CMA).
 
-  \item[(P2)] The tag-based aggregate signature scheme $\ATS$ is existentially
-unforgeable under tag-based aggregation, as shown in~\Cref{thm:agg-creds-thm-1}.
+  \item[(P2)] The issuers' tag-based aggregate signature scheme $\ATS$ is
+existentially unforgeable under tag-based aggregation.
 
-  \item[(P3)] The non-interactive zero-knowledge proof system used to compute
-$\algoproof$ is simulation extractable: a valid witness can be extracted from
-any accepted proof, and simulated proofs are indistinguishable from real ones.
+  \item[(P3)] The proof system for $\algoproof$ is zero knowledge and
+simulation extractable.
 
 \end{enumerate}
 
@@ -78,6 +75,7 @@ $\user$ for $\issuer{i}$, then as per $\Pi$'s specification,  $\simu$ will
 receive signature $\signature_i \leftarrow \ATSsign(\isk{i}, \Tag, \atv{i})$,
 and record entry $\langle \user, \Tag, \atv{i}, \signature_i \rangle$.
 Otherwise, $\issuer{i}$ will reject the credential issuance request.
+\rebekah{the functionality is back to one credential per user per issuer, so this now matches it. But the protocol box and 34-instantiation say issuers keep no record, and nothing in the protocol makes an honest issuer reject a second request (the paper has the same gap). Either issuers keep the set of tags they have signed for, or this case needs another argument. Same in Game 7 Issue below.}
 
     \item[$\issuer{i}$ is corrupt.] If the execution of $\Pi$ terminates with
 $\simu$ receiving a signature $\signature_i$ with $\ATSverify(\ipk{i}, \Tag,$
@@ -140,7 +138,7 @@ corrupt user $\user$ sends, in the real world, to an honest issuer $\issuer{i}$
 \atv{i})$ to $\idfu{\AAC}'$, and stores entry $\langle \user, \Tag, \att{i},
 \atv{i}, \signature_i\rangle$ on success.  $\idfu{\AAC}'$ issues the credential
 exactly when $\user$ is registered and this is their first request for
-$\att{i}$,
+$\att{i}$\rebekah{matches the functionality now, but see the note on issuer state in Game 4},
 and the simulated $\issuer{i}$ returns $\signature_i \leftarrow
 \ATSsign(\isk{i}, \Tag, \atv{i})$ under the same conditions, so their outputs
 are indistinguishable.

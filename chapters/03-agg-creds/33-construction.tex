@@ -28,7 +28,34 @@ verifier.
   \item each presentation carries the verifier's message $\msg$ as its label, so it cannot be replayed elsewhere
 \end{outline}
 
-We now present the construction in full.
+We now present the construction in full. \Cref{fig:agg-creds-seq} shows its
+messages and local steps.
+
+\begin{figure}[htbp] \centering \small
+\begin{tikzpicture}[seq]
+  \foreach \x/\n/\e in {0/RA/4.4, 1/User/13.4, 2/Issuer $i$/10.4, 3/Verifier/14.4} {
+    \node[seqhead] at (\x, 0) {\n};
+    \draw[seqlife] (\x, 0.6) -- (\x, \e);
+  }
+  \draw[seqmsg] (0, 1) -- node[seqlabel] {$\rand$} (1, 1);
+  \draw[seqmsg] (1, 2) -- node[seqlabel] {$\pk$, proof on $\rand$} (0, 2);
+  \node[seqloc] at (0, 3) {new $\Tag$, $\DSsign$};
+  \draw[seqmsg] (0, 4) -- node[seqlabel] {$\Tag$, $\psi$} (1, 4);
+  \draw[seqmsg] (1, 5) -- node[seqlabel] {$\Tag$, $\pk$, $\psi$, $\atv{i}$} (2, 5);
+  \node[seqloc] at (2, 6) {$\DSverify$};
+  \draw[seqmsg] (2, 7) -- node[seqlabel] {$\rand$} (1, 7);
+  \draw[seqmsg] (1, 8) -- node[seqlabel] {proof on $\rand$} (2, 8);
+  \node[seqloc] at (2, 9) {$\ATSsign$};
+  \draw[seqmsg] (2, 10) -- node[seqlabel] {$\signature_i$} (1, 10);
+  \draw[seqmsg] (3, 11) -- node[seqlabel] {$\msg$} (1, 11);
+  \node[seqloc] at (1, 12) {$\AACaggregate$, $\AACpresent$};
+  \draw[seqmsg] (1, 13) -- node[seqlabel] {$(\atv{i})_{i \in \ISSUERS}$, $\algoproof$} (3, 13);
+  \node[seqloc] at (3, 14) {$\AACverify$};
+\end{tikzpicture}
+\caption[Aggregate credentials: messages]{Messages and local steps of
+registration, issuance from issuer $i$, aggregation and presentation, between
+the registration authority, the user, issuer $i$ and a verifier. The proofs on
+$\rand$ prove knowledge of $\sk$.} \label{fig:agg-creds-seq} \end{figure}
 
 \paragraph{Setup.} During setup, the registration authority generates a key pair
 for the digital signature scheme and public parameters for the proofs used
@@ -121,10 +148,13 @@ following parameters:
 \end{gathered} \end{equation*}
 %
 
-\begin{outline}
-  \item say $\rel_1$ in words: user knows $\sk$ of $\pk$, an RA signature $\psi$ on $(\pk, \Tag)$, and an aggregate signature under the same $\Tag$ on the disclosed values, one per issuer in $\ISSUERS$
-  \item only the issuer set, issuer keys and disclosed values are public, so the presentation links neither to the user nor to other presentations
-\end{outline}
+The user proves that they possess a valid registration signature, an aggregate
+credential under a single tag, and the secret key corresponding to the
+registered public key for that tag, without revealing either the tag or the
+public key. The aggregate signature is on the disclosed values, one for each
+issuer in $\ISSUERS$. The statement contains only $\rapk$, the issuer set, the
+issuer public keys and the disclosed values, so the presentation links neither
+to the user nor to other presentations.
 
 \paragraph{Verification.} The verifier checks the proof with respect to the
 disclosed attributes and issuer public keys. The presentation is accepted if and
@@ -142,16 +172,19 @@ functionality~$\idfu{\AAC}$.  \end{theorem}
 \paragraph{Extensions.} The construction supports several straightforward
 extensions.
 
-\begin{outline}
-  \item binding to a verifier and session: let $\msg$ contain the verifier's identity and a fresh nonce
-  \item any subset of credentials can be presented by aggregating just that subset (aggregation is over $\ISSUERS$ only), with no further contact with issuers or the RA
-\end{outline}
+To bind each presentation to a verifier and a session, $\msg$ contains the
+verifier's identity and a fresh nonce. Users present any subset of their
+credentials by aggregating just that subset, since aggregation is over
+$\ISSUERS$ only, with no further contact with the issuers or the registration
+authority.
 
 New issuers can join the system without impacting the construction. The
 aggregation of credentials and their presentation is agnostic to the number of
 issuers.
 
-The construction as described assumes each issuer certifies a single attribute
+We present the construction with one credential per user from each issuer,
+without loss of generality, and extending it to several is straightforward. An
+issuer certifying multiple attribute types can hold a different key for each
 type. To support an issuer certifying multiple attribute types under one key,
 the issuer instead signs $(\Tag, \att{} \| \atv{})$ rather than $(\Tag,
 \atv{})$, with $\att{}$ the attribute type and $\atv{}$ the attribute value.

@@ -20,13 +20,11 @@ $\key$ output by $\hashgen(\secparam)$. We use the standard syntax and security
 notions for hash functions~\cite{KatLin14}. When the key $\key$ is fixed and
 public, we write $\hash(x)$ for $\hasheval(\key, x)$.
 
-\begin{outline}
-  \item the range can be any set; later sections also hash into fields and
-groups
-  \item a scheme with several hash functions writes them $\hashone, \hashtwo,
-\ldots$ and gives each its own domain separation tag (fixed string prefixed to
-every input), so they behave as independent functions
-\end{outline}
+The range can be any set, and later sections also hash into fields and groups.
+Schemes that use several hash functions write them $\hashone, \hashtwo, \ldots$
+and give each its own domain separation tag. A domain separation tag is a fixed
+string prefixed to every input, and distinct tags make the hash functions
+behave as independent functions.
 
 \paragraph{Collision resistance.} Collision resistance requires that no
 efficient adversary can find two distinct inputs hashing to the same digest, as
@@ -97,11 +95,10 @@ second preimage resistance.
 computable and, for a uniform input $x$, no PPT adversary given $f(x)$ outputs
 any $x'$ with $f(x') = f(x)$ with non-negligible probability.
 
-\begin{outline}
-  \item preimage resistance is one-wayness for a keyed family
-  \item our instantiations use exponentiation $x \mapsto \gen^x$ in a
-prime-order group as the one-way function (one-way under DL, \Cref{asm:dl})
-\end{outline}
+Preimage resistance is one-wayness for a keyed family of functions. Our
+instantiations use exponentiation $x \mapsto \gen^x$ in a group of prime order
+as the one-way function, which is one-way under the DL assumption in
+\Cref{asm:dl}.
 
 \paragraph{The random oracle model.} Beyond these properties, our security
 proofs generally model a hash

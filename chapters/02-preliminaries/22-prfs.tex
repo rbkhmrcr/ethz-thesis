@@ -77,8 +77,8 @@ inputs reveal nothing about the key or each other
 \end{outline}
 
 The public parameters $\pp$ are handed to the adversary in the experiment above,
-and pseudorandomness is required to hold in their presence. This matters where the parameters
-are derived from long-lived secrets: a construction in which some public value
+and pseudorandomness is required to hold in their presence. This is needed when the parameters
+are derived from long-lived secrets, since a construction in which some public value
 is a deterministic function of material related to the key must still be
 pseudorandom to a distinguisher who holds that value.
 

@@ -28,28 +28,19 @@ that the games below can refer to them.
 
 \begin{enumerate}
 
-  \item[(P1)] The commitment scheme is binding: no PPT adversary can find two
-openings of the same commitment to distinct messages.
+  \item[(P1)] The commitment scheme is binding.
 
-  \item[(P2)] The encryption scheme is IND-CPA secure: ciphertexts are
-computationally indistinguishable from random ones for any PPT adversary.
+  \item[(P2)] The encryption scheme is IND-CPA secure.
 
-  \item[(P3)] The SCI scheme of $\algo{cb}$ is one-more unforgeable: no PPT
-adversary that completes $q$ issuing sessions with the central bank outputs
-valid signatures on $q+1$ distinct messages.
+  \item[(P3)] The central bank's SCI scheme is one-more unforgeable.
 
-  \item[(P4)] The credential signature scheme used by $\reg$ is EUF-CMA secure.
+  \item[(P4)] The credential signature scheme is EUF-CMA secure.
 
-  \item[(P5)] The zero-knowledge proofs and signatures of knowledge, including
-the JPOK, are simulation extractable in the random oracle
-model: a valid witness can be extracted from any accepted proof, even by an
-extractor that has itself produced simulated proofs, and simulated proofs are
-indistinguishable from real ones.
+  \item[(P5)] The proofs and signatures of knowledge, including the JPOK, are
+zero knowledge and simulation extractable in the random oracle model.
 
-  \item[(P6)] Requests of the SCI scheme of $\algo{cb}$ are hiding and online
-extractable. Online extraction is needed only where $\simu$ extracts in order to
-continue the simulation rather than to derive a contradiction, which is the case
-for withdrawal requests alone.
+  \item[(P6)] Requests of the central bank's SCI scheme are hiding and online
+extractable.
 
 \end{enumerate}
 
@@ -67,7 +58,8 @@ produces: from the SCI request at withdrawal, in order to learn the randomness t
 the token identifier and so continue the simulation, and from $\Sigma$,
 $\sigma_i$, and $\Gamma_i$ elsewhere, in order to exhibit a forgery or a double
 opening and terminate. The first of these is why (P6) is needed and the second
-is why rewinding suffices for the rest.
+is why rewinding suffices for the rest. Online extraction is therefore needed for
+withdrawal requests alone.
 
 \begin{proof}
 
@@ -322,64 +314,71 @@ construction that sets the commitment scheme to the Pedersen commitment scheme i
 $\group{1}$, the credential signature scheme to the BBS+ signature scheme, the
 SCI scheme to the Pointcheval-Sanders signature scheme with signing on committed
 inputs, the public-key encryption scheme to the ElGamal encryption scheme in
-$\group{1}$, and the JPOK to the joint proof of \Cref{prim:bbs-joint-proof}. It therefore suffices to discharge (P1) to
-(P6).
+$\group{1}$, and the JPOK to the joint proof of \Cref{prim:bbs-joint-proof}. It
+remains to show that each building block of the instantiation has the property
+it needs.
 
 \begin{proof}
 
 \begin{description}
 
-  \item[(P1)] The commitment scheme is binding. The Pedersen commitment scheme
-is computationally binding under the DL assumption in $\group{1}$.
-The generators are derived by hashing into $\group{1}$, so no participant,
-including the central bank, knows the discrete logarithm relations that would
-break binding.
+  \item[(P1)] The Pedersen commitment scheme is binding under the DL assumption
+in $\group{1}$, with generators derived by hashing into $\group{1}$.
 
-  \item[(P2)] The encryption scheme is IND-CPA secure. The ElGamal encryption
-scheme in $\group{1}$ is
-IND-CPA secure under the DDH assumption in $\group{1}$.
+  \item[(P2)] The ElGamal encryption scheme in $\group{1}$ is IND-CPA secure
+under the DDH assumption in $\group{1}$.
 
-  \item[(P3)] The SCI scheme is one-more unforgeable. The
-Pointcheval-Sanders signature scheme is existentially unforgeable under the
-$q$-MSDH assumption, including the variant whose
-public key also contains the elements $\gen^{\theta_i}$ needed to sign committed
-messages~\cite{RSA:PoiSan18}. A reduction to it extracts the messages of each
-request online from its proof $\Pi$, using (P6), obtains a signature on them from its own
-oracle, programs the random oracle so that $k = \hash_{\group{1}}(C)$ is the
-signature's first element, and answers the request with the corresponding
-ciphertext. Fixing $k = \hash_{\group{1}}(C)$ rather than sampling it keeps
-unforgeability, since $k$ is still a group element neither party controls. Signing
-Pointcheval-Sanders signatures on committed inputs with ElGamal-encrypted requests
-is one-more unforgeable in this sense~\cite{NDSS:SABMD19}.
+  \item[(P3)] The Pointcheval-Sanders signature scheme with signing on committed
+inputs is one-more unforgeable under the $q$-MSDH
+assumption~\cite{RSA:PoiSan18,NDSS:SABMD19}.
 
-
-  \item[(P4)] The credential signature scheme is EUF-CMA secure. The BBS+
-signature scheme is existentially unforgeable under the $q$-SDH
+  \item[(P4)] The BBS+ signature scheme is EUF-CMA secure under the $q$-SDH
 assumption~\cite{SCN:AuSusMu06,EPRINT:CamDriLeh16}.
 
-  \item[(P5)] The proofs and signatures of knowledge are simulation extractable.
-Every proof in the instantiation other than $\Pi$ is a Sigma protocol over
-discrete logarithms with the Fiat-Shamir transform applied~\cite{C:FiaSha86}. In a prime order
-group, a statement, first message and challenge of such a proof admit only one
-accepting response, so the proofs are simulation
-extractable in the random oracle model~\cite{INDOCRYPT:FKMV12}. This includes
-the JPOK, which is a conjunction
-of two such protocols under separate challenges, so the same argument applies to
-each of them and hence to the whole. We rely on this rather than on the
-soundness Hesse, Singh and Sorniotti establish for the primitive, which is
-weaker~\cite{USENIX:HesSinSor23}. $\simu$ must extract from proofs produced by
-$\adv$ while itself producing simulated proofs for honest users, and plain
-soundness does not cover that. The resulting extractor yields the payer's identifier and credential from
-an accepted $\sigma_i$.
+  \item[(P5)] Every proof other than $\Pi$, including the JPOK, is a Sigma
+protocol with the Fiat-Shamir transform, and so is zero knowledge and simulation
+extractable in the random oracle model~\cite{C:FiaSha86,INDOCRYPT:FKMV12}.
 
-  \item[(P6)] Requests are hiding and online extractable. A request consists
-of the commitment $C$, the key $B$, the ciphertexts $\hat{\ciph}_i$ and the proof
-$\Pi$. At withdrawal the hidden messages include the uniform $s_0$, so $C$ is a
-uniformly random group element. The ciphertexts are under a key sampled afresh
-for the request, so by IND-CPA security of the ElGamal encryption scheme they
-can be replaced with encryptions of zero, and $\Pi$ can be replaced with a
-simulated proof by its zero knowledge. The result depends only on the disclosed
-value, which gives the request-hiding simulator.
+  \item[(P6)] Requests of the Pointcheval-Sanders signature scheme are hiding
+under the DDH assumption, and online extractable by the Fischlin
+transform~\cite{C:Fischlin05}.
+
+\end{description}
+
+Since the generators of the commitment key are derived by hashing, no
+participant, including the central bank, knows the discrete logarithm relations
+that would break binding.
+
+The Pointcheval-Sanders signature scheme is existentially unforgeable under the
+$q$-MSDH assumption, including the variant whose public key also contains the
+elements $\gen^{\theta_i}$ needed to sign committed
+messages~\cite{RSA:PoiSan18}. A reduction to it extracts the messages of each
+request online from its proof $\Pi$, using (P6), obtains a signature on them from
+its own oracle, programs the random oracle so that $k = \hash_{\group{1}}(C)$ is
+the signature's first element, and answers the request with the corresponding
+ciphertext. Fixing $k = \hash_{\group{1}}(C)$ rather than sampling it keeps
+unforgeability, since $k$ is still a group element neither party controls.
+Signing Pointcheval-Sanders signatures on committed inputs with ElGamal-encrypted
+requests is one-more unforgeable in this sense~\cite{NDSS:SABMD19}.
+
+In a prime order group, a statement, first message and challenge of a Sigma
+protocol over discrete logarithms admit only one accepting response, which is
+what gives simulation extractability~\cite{INDOCRYPT:FKMV12}. The JPOK is a
+conjunction of two such protocols under separate challenges, so the same
+argument applies to each of them and hence to the whole. We rely on this rather
+than on the soundness Hesse, Singh and Sorniotti establish for the primitive,
+which is weaker~\cite{USENIX:HesSinSor23}. $\simu$ must extract from proofs
+produced by $\adv$ while itself producing simulated proofs for honest users, and
+plain soundness does not cover that. The resulting extractor yields the payer's
+identifier and credential from an accepted $\sigma_i$.
+
+A request consists of the commitment $C$, the key $B$, the ciphertexts
+$\hat{\ciph}_i$ and the proof $\Pi$. At withdrawal the hidden messages include
+the uniform $s_0$, so $C$ is a uniformly random group element. The ciphertexts
+are under a key sampled afresh for the request, so by IND-CPA security of the
+ElGamal encryption scheme they can be replaced with encryptions of zero, and
+$\Pi$ can be replaced with a simulated proof by its zero knowledge. The result
+depends only on the disclosed value, which gives the request-hiding simulator.
 
 For extraction, the extractor for Fiat-Shamir proofs proceeds by rewinding,
 which suffices wherever $\simu$ extracts once in order to derive a
@@ -394,11 +393,9 @@ $\Pi$ alone. It is not required of $\sigma_i$ or $\Gamma_i$, so it bears on the
 mobile device during withdrawal rather than on the secure element or on any part
 of a payment.
 
-\end{description}
-
 Because $\simu$ rewinds to extract, the argument holds in the standalone model
 of \Cref{sec:prelims-security}. Extracting online everywhere, as the instantiation does for
-$\Pi$, would give a UC result at the cost of a larger proof at each hop.
+$\Pi$, would give a result in the universal composability (UC) framework at the cost of a larger proof at each hop.
 
 The instantiated protocol therefore securely realises ideal functionality
 $\idfu{\algo{op}}$ in the random oracle model.

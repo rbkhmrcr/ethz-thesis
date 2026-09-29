@@ -18,13 +18,10 @@ $\Cor$ for the set of corrupted signers and $\mathcal{H}$ for its complement.
 
 \subsection{Threshold structure-preserving signature schemes}
 
-\begin{outline}
-  \item notation: $\shr{x}$ for a sharing of $x$ between the $n$ signers, $x_i$
-for signer $i$'s share (made precise in \Cref{sec:tsps-mpc})
-  \item signing split into an offline phase (before the message is known) and an
-online phase
-  \item lead into the list of algorithms of $\TSPS$
-\end{outline}
+We write $\shr{x}$ for a sharing of $x$ between the $n$ signers, and $x_i$ for
+the share of signer $i$. \Cref{sec:tsps-mpc} makes this precise. Signing is split
+into an offline phase, run before the message is known, and an online phase. A
+threshold SPS scheme $\TSPS$ consists of the following algorithms.
 
 \begin{description}
 
@@ -62,27 +59,29 @@ $\SPSverify$.
 %
 \end{equation*}
 
-\paragraph{Unforgeability.}
+\paragraph{Unforgeability.} Threshold signatures admit a hierarchy of
+unforgeability notions~\cite{C:BCKMTZ22}. We rely on adaptive TS-UF-1 security.
+
 \begin{outline}
-  \item threshold schemes have a hierarchy of unforgeability notions (cite
-C:BCKMTZ22); we use adaptive TS-UF-1
-  \item winning condition: valid signature on $\vec{\msg}^*$ with shares from
-fewer than $t + 1 - |\Cor|$ honest signers, so these plus the corrupted key
-shares fall short of the $t+1$ needed
   \item TS-UF-0 is weaker: counts a forgery only if no honest signer signed
 $\vec{\msg}^*$; TS-UF-1 also counts forgeries on messages too few honest signers
 signed, and is our target
   \item achievable because the online phase is local: issuing a share reveals
 nothing further; and it is what a certifier needs (no signature unless
 enough honest signers agreed to that message)
-  \item three oracles: offline $\mathcal{O}_{\algo{Off}}$ runs $\TSPSoffsign$
-with $\adv$ playing the corrupted signers and returns their view (without it the
-adversary never sees any interaction, since all of it is offline); online
-$\mathcal{O}_{\algo{On}}$ returns an honest signer's share; corruption
-$\mathcal{O}_{\algo{Cor}}$
-  \item each session $\mathsf{sid}$ used for one message only, since reusing a
-state reuses the signing randomness
+  \item the offline oracle is needed: without it the adversary never sees any
+interaction, since all of it is offline
 \end{outline}
+
+The adversary has three oracles. The offline oracle $\mathcal{O}_{\algo{Off}}$
+runs $\TSPSoffsign$ with $\adv$ playing the corrupted signers, and returns their
+view. The online oracle $\mathcal{O}_{\algo{On}}$ returns the signature share of
+an honest signer, and the corruption oracle $\mathcal{O}_{\algo{Cor}}$ corrupts a
+signer. Each session $\mathsf{sid}$ is used for one message only, since reusing a
+state reuses the signing randomness. The adversary wins if it outputs a valid
+signature on a message $\vec{\msg}^*$ for which fewer than $t + 1 - |\Cor|$
+honest signers issued shares, so that these together with the key shares of the
+corrupted signers fall short of the $t+1$ needed.
 
 The advantage of a PPT adversary $\adv$ is defined as follows:
 %
@@ -139,8 +138,9 @@ $\vec{\msg}$.
 
 \end{experimentbox}
 
+Unforgeability is the only property we prove.
+
 \begin{outline}
-  \item unforgeability is the only property we prove
   \item key secrecy follows from MPC privacy: signers only open $\pk$ and
 signatures, so at most $t$ signers learn nothing about $\sk$ beyond those
   \item compatibility: $\TSPSverify = \SPSverify$ and a combined signature is an
@@ -150,33 +150,43 @@ produced by a threshold of signers
 
 \subsection{Secure multiparty computation}\label{sec:tsps-mpc}
 
+Rather than specifying how the signers jointly compute each step of signing, we
+describe our schemes as sequences of calls to a secure multiparty computation
+protocol, and assume a realisation of it. Let $\alpha \in \Zp$ be a secret value
+shared between the $n$ signers, such that any $t+1$ of them can reconstruct it
+by a pre-defined linear combination. We write $\shr{\alpha}$ for such a sharing:
+the vector $(\alpha_1, \ldots, \alpha_n)$ in which $\alpha_i$ is the share held
+by the $i^{\mathrm{th}}$ signer, and we use the same notation $\shr{a}$ for a
+sharing of a group element $a \in \group{}$. We assume this notation
+incorporates the authentication components that malicious security requires,
+which we otherwise abstract away.
+
+In practice $\group{}$ is an elliptic curve group, whose elements are coordinate
+pairs $(x_0, y_0)$ satisfying the curve equation. A group element is not shared
+by independently sharing its coordinates, as $(\shr{x_0}, \shr{y_0})$, since
+computing a group operation on such shares would require the signers to
+communicate. It is instead shared as a single unit, $\shr{a} = \shr{(x_0,
+y_0)}$, so that the linear operations below remain local.
+
+Any $t$ shares are independent of $\alpha$. We write $\group{}$ for either
+source group. The shares of a group element $a$ are themselves in $\group{}$,
+and reconstruction takes their product. The authentication information, such as
+MAC shares, means that a modified share is detected at opening. In protocol
+boxes, $\shr{x}$ also stands for the signer's own share.
+
 \begin{outline}
-  \item schemes are sequences of calls to an MPC protocol run by the $n$
-signers; we only use its interfaces and stated properties
-  \item sharing $\shr{\alpha}$ of $\alpha \in \Zp$: linear $(t+1, n)$ threshold
-sharing; signer $i$ holds $\alpha_i$, any $t+1$ shares reconstruct by a fixed
-linear combination, any $t$ are independent of $\alpha$
   \item linearity is the only property we rely on: makes additions and
 exponentiations of public group elements by shared exponents local, which is what
 makes the online phase local; any linear scheme works, so each protocol can use
 the sharing that suits its corruption setting
-  \item $\group{}$ for either source group; sharing $\shr{a}$ of $a \in
-\group{}$ defined the same way, shares in $\group{}$, reconstruction the
-product; shared as a single group element so group operations on shares stay
-local
-  \item sharings include authentication information (e.g.\ MAC shares) for
-malicious security, so a modified share is detected at opening
-  \item in protocol boxes $\shr{x}$ also stands for the signer's own share
-\end{outline}
-
-\begin{outline}
   \item honest majority ($t < n/2$): Shamir, $\alpha_i = f(i)$ for random $f$ of
 degree $t$ with $f(0) = \alpha$, reconstruct by interpolation
   \item dishonest majority (e.g.\ MASCOT): additive, $\alpha_i$ uniform with
 $\sum_i \alpha_i = \alpha$; this is $t = n-1$, so every signer takes part in
 signing
-  \item constructions stated for general $(t+1, n)$
 \end{outline}
+
+Our constructions are stated for a general $(t+1, n)$ sharing.
 
 The protocol provides the following interfaces, each run by all signers
 together. The interfaces over $\group{}$ exist once for each source group, and
@@ -212,36 +222,39 @@ given sharings $\shr{a}$, $\shr{b}$ and a public group element $d$, each signer
 obtains $\shr{a}^{\rho}\shr{b}^{\sigma}d$. In particular, raising a public group
 element to a shared exponent, $d^{\shr{\alpha}}$, gives a sharing of
 $d^{\alpha}$~\cite{FOCS:Feldman87,LC:ADEO21}. This is how the signers obtain
-shares of group elements such as $\gen^{\alpha}$ from shares of $\alpha$, and it
-is what makes our online phase local, since the messages are public group
-elements. Under malicious security, the same operations are applied to the
+shares of group elements such as $\gen^{\alpha}$ from shares of $\alpha$, and
+since the messages are public group elements, it makes our online phase local. Under malicious security, the same operations are applied to the
 authentication information.
 
+$\algo{ExpGrp}$ is the only interface that mixes the two domains. It is only
+needed when the secret key contains group elements, as in $\KPW$. For a key of
+field elements, as in $\AGHO$, $\algo{Mul}$ is enough. $\algo{ExpGrp}$ lets keys
+with group elements be used as they are, without replacing them by their
+discrete logarithms.
+
 \begin{outline}
-  \item $\algo{ExpGrp}$ is the only interface that mixes the two domains; only
-needed when the secret key contains group elements ($\KPW$); for a key of field
-elements ($\AGHO$) $\algo{Mul}$ is enough; it lets such keys be used as they are,
-without replacing them by their discrete logarithms
   \item realised as Smart and Talibi Alaoui do, Beaver-style (cite IMA:SmaTal19);
 explain Beaver multiplication: triples $(a, b, ab)$ made in preprocessing, each
 multiplication uses one triple and two openings
-  \item $\algo{ExpGrp}$ consumes a mixed triple $(\shr{\eta}, \shr{h},
-\shr{h^\eta})$, $\eta \sample \Zp$, $h \sample \group{}$; signers open $\epsilon
-= \alpha - \eta$ and $\delta = b h^{-1}$ (uniform, reveal nothing) and compute
-locally
-      %
-      \begin{equation*}
-      %
-	\shr{b^{\alpha}} = \shr{h^{\eta}} \cdot \shr{h}^{\epsilon} \cdot
-\delta^{\shr{\eta}} \cdot \delta^{\epsilon}
-      %
-      \end{equation*}
-      %
-      with the public term $\delta^{\epsilon}$ added by one designated signer
-  \item triple obtained from an ordinary $\Zp$ triple by raising a generator to
-the shares of its second and third entries; this, plus group element sharings
-and their authentication information, is what we added to MP-SPDZ
 \end{outline}
+
+$\algo{ExpGrp}$ consumes a mixed triple $(\shr{\eta}, \shr{h}, \shr{h^\eta})$
+with $\eta \sample \Zp$ and $h \sample \group{}$. The signers open $\epsilon =
+\alpha - \eta$ and $\delta = b h^{-1}$, which are uniform and reveal nothing, and
+compute locally
+%
+\begin{equation*}
+%
+  \shr{b^{\alpha}} = \shr{h^{\eta}} \cdot \shr{h}^{\epsilon} \cdot
+\delta^{\shr{\eta}} \cdot \delta^{\epsilon},
+%
+\end{equation*}
+%
+where one designated signer adds the public term $\delta^{\epsilon}$. The
+signers obtain a mixed triple from an ordinary triple over $\Zp$ by raising a
+generator to the shares of its second and third entries. This, together with
+sharings of group elements and their authentication information, is what we
+added to MP-SPDZ.
 
 The remaining interface, $\algo{Inv}$, is built from $\algo{Mul}$ and
 $\algo{Open}$: the signers sample $\shr{\beta} \sample \algo{RandShare}()$, open

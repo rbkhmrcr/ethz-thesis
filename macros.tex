@@ -9,6 +9,15 @@
   \setlength{\belowdisplayshortskip}{3pt plus 2pt}%
 }
 \usetikzlibrary{arrows.meta}
+% message sequence diagrams
+\tikzset{
+  seq/.style={x=3.2cm, y=-0.55cm},
+  seqhead/.style={font=\small, text width=2.8cm, align=center},
+  seqlife/.style={gray!60},
+  seqmsg/.style={-{Stealth[length=1.6mm]}, thin},
+  seqlabel/.style={above, font=\footnotesize, inner sep=1pt},
+  seqloc/.style={draw=gray!70, fill=white, inner sep=1.5pt, align=center, font=\footnotesize},
+}
 
 % proofs sit under "Proof of ..." headings, so no label here
 \renewenvironment{proof}{%
@@ -302,6 +311,8 @@
 \newcommand{\Zp}{\mathbb{Z}_p}
 \newcommand{\pairing}{\algo{e}}
 \newcommand{\idfu}[1]{\mathcal{F}_{#1}}
+% interface name heading an entry of an ideal functionality
+\newcommand{\fuinterface}[1]{\textbf{\boldmath$#1$.}}
 
 %% hashes, owfs, prfs
 \newcommand{\hashone}{\hash_1}
