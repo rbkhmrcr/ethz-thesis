@@ -63,10 +63,7 @@ requirements.
 
 The ideal functionality captures the properties of aggregate anonymous
 credentials: unforgeability, unlinkability, and aggregatability, meaning that
-credentials from different issuers can be combined into one.  Unforgeability
-is enforced by ensuring that only validly issued attributes can be successfully
-presented or verified. Unlinkability is achieved as the response to each query
-to the presentation interface is simply randomness.
+credentials from different issuers can be combined into one.
 
 \subsection{Aggregate tag-based signature schemes}
 
@@ -74,7 +71,7 @@ We define an aggregate tag-based signature (ATS) scheme as one that allows
 signatures computed over the same tag to be aggregated into a compact signature.
 A tag is a string that is signed together with each message, and only signatures
 under the same tag can be aggregated. With $n$ signers and a set $\ISSUERS
-\subseteq [1,n]$ of them, an aggregate tag-based signature scheme is defined by
+\subseteq [1,n]$, an aggregate tag-based signature scheme is defined by
 the following algorithms:
 
 \begin{description}
@@ -197,8 +194,9 @@ returns $\signature \gets \ATSsign(\sk_i, \Tag, \msg)$.
 
     \item The adversary outputs $(\ISSUERS \subseteq [1, n], (\pk'_i)_{i \in
 \ISSUERS}, \Tag, (\msg_i)_{i \in \ISSUERS}, \signature)$, where $\pk'_i =
-\pk_i$ for every $i \in \ISSUERS$ with $\pk_i \notin \Cor$, and $\pk'_i$ is any
-key of its choice otherwise.
+\pk_i$ for every $i \in \ISSUERS$ with $\pk_i \notin \Cor$, and otherwise the
+adversary also outputs $\sk'_i$ such that $(\sk'_i, \pk'_i)$ is a key pair of
+$\ATSgen$.
 
     \item Challenger computes $b \gets \ATSverifyagg\bigl((\pk'_i)_{i \in
 \ISSUERS}, \Tag, (\msg_i)_{i \in \ISSUERS}, \signature\bigr)$.
@@ -210,22 +208,20 @@ key of its choice otherwise.
 
 \end{experimentbox}
 
+Corrupted keys are certified: the adversary outputs the secret key of every
+corrupted key it uses. Without this, it could choose a corrupted key as the
+inverse of an honest one, and the two contributions of a message signed under
+both would cancel, so that the trivial signature verifies. There are two
+standard fixes. One is certified keys, as here, which in the credential scheme
+means that issuers prove knowledge of their secret keys when they publish their
+public keys. The other is to hash the index of the signer together with each
+message, as in unrestricted aggregate signatures~\cite{ICALP:BelNamNev07}. We use
+certified keys, which change neither the scheme nor its costs.
 
 \subsection{The ideal functionality for aggregate anonymous credentials}
 
-We define security for the aggregate anonymous credentials protocol through an
-ideal functionality as follows. We have the outputs of the honest parties
-and~$\adv$ during an execution of a protocol~$\Pi$ in the real world captured in
-$\textsc{Exec}_{\Pi,\adv}(\secparam)$, and we have the outputs of the honest
-parties and~$\simu$ interacting with~$\idfu{\AAC}$ in the ideal world captured
-by $\textsc{Exec}_{\idfu{\AAC},\simu}(\secparam)$.
-
-We then say that the protocol~$\Pi$ securely realises the ideal
-functionality~$\idfu{\AAC}$ if for every PPT adversary~$\adv$, there exists a
-PPT simulator~$\simu$ where $\textsc{Exec}_{\Pi,\adv}(\secparam)$ is
-computationally indistinguishable from
-$\textsc{Exec}_{\idfu{\AAC},\simu}(\secparam)$.
-
+We define security for the aggregate anonymous credentials protocol through the
+ideal functionality $\idfu{\AAC}$, in the sense of \Cref{sec:prelims-security}.
 $\idfu{\AAC}$ receives inputs from system participants and $\simu$, computes the
 corresponding outputs, and delivers them to the authorised parties. It exposes
 interfaces through which $\simu$ and honest participants submit inputs.  The
@@ -251,7 +247,11 @@ succeeds. Users are registered only once.
 \paragraph{Issue.} A user calls this to obtain a credential certifying value
 $\atv{}$ of attribute $\att{}$. If the authorised issuer accepts, the user
 receives a credential usable in later presentations. Honest issuers only
-issue to registered users, and at most one credential to each user. Without loss
+issue to registered users. An issuer may certify several values of its attribute
+for the same user, and a presentation discloses at most one of them. The
+functionality records every value issued, but honest issuers in the protocol
+keep no such record, and security does not depend on how many credentials a user
+holds. Without loss
 of generality, issuer $\issuer{i}$ certifies attribute $\att{i}$ only. $\simu$ learns the user's identity on
 every call, and additionally the attribute value on issue calls.
 
@@ -321,8 +321,6 @@ confirmation.  On confirmation, do:
 	    \begin{enumerate}
 
 	      \item If $\creds[\user] \rightarrow \bot$, then stop.
-
-	      \item If $\creds[\user][i] \neq \varnothing$, then stop.
 
 	      \item Send $(\AACissue, \user, \att{i}, \atv{i})$ to $\simu$ and
 wait for the go-ahead. On receiving it, continue.
@@ -433,9 +431,8 @@ stop.
 	    \begin{enumerate}
 
 	      \item If there exists a dishonest user $\user'$ with attribute
-values $\vec{\atv'{}} = (\atv'{1}, \ldots, \atv'{n})$ with $\forall \atv{i} \neq
-\varnothing$, we either have $\atv{i} = \atv'{i}$, or have $\atv{i} \neq
-\atv'{i}$ but issuer $\issuer{i}$ is dishonest, then query $\simu$ with
+such that for every $i$ with $\atv{i} \neq \varnothing$, either $\atv{i} \in
+\creds[\user'][i]$ or issuer $\issuer{i}$ is dishonest, then query $\simu$ with
 $(\AACverify, \vec{\atv{}}, \msg,\algoproof)$. On receiving the response
 $(\AACverifyend, b)$, do:
 

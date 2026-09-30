@@ -2,7 +2,7 @@
 
 %%%% proof 1 - the generic construction is secure (Theorem 1)
 
-\subsection{Proof of \Cref{thm:agg-creds-construction-security}}\label{sec:agg-creds-proof-1}
+\subsection{Proof of \Cref{thm:agg-creds-construction-security}: security of the construction}\label{sec:agg-creds-proof-1}
 
 In the following, we show that the view of a real-world adversary $\adv$ during
 an execution of the construction $\Pi$ is indistinguishable from the view of an ideal-world
@@ -35,8 +35,11 @@ simulation extractable.
 behalf of the honest parties: $\simu$ is provided with the inputs (including
 secrets) of the honest parties, and interacts with corrupt parties, through the
 adversary, in the real world, following $\Pi$'s specifications, and returns the
-corresponding output. This change is purely syntactic, so Game 1 is
-indistinguishable from Game 0 by construction.
+corresponding output. At setup, $\simu$ extracts the secret key of every corrupt
+issuer from the proof of knowledge published with its public key. Corruption is
+static, so this extraction happens once, before any other interaction. This
+change is purely syntactic, so Game 1 is indistinguishable from Game 0 by
+construction.
 
   \paragraph{Game 2.} As Game 1, except we introduce dummy functionality
 $\idfu{\AAC}'$ that forwards the inputs from the honest parties to $\simu$ and
@@ -70,12 +73,10 @@ consider.
 
   \begin{description}
 
-    \item[$\issuer{i}$ is honest.] If this is the first time $\simu$ simulates
-$\user$ for $\issuer{i}$, then as per $\Pi$'s specification,  $\simu$ will
-receive signature $\signature_i \leftarrow \ATSsign(\isk{i}, \Tag, \atv{i})$,
-and record entry $\langle \user, \Tag, \atv{i}, \signature_i \rangle$.
-Otherwise, $\issuer{i}$ will reject the credential issuance request.
-\rebekah{the functionality is back to one credential per user per issuer, so this now matches it. But the protocol box and 34-instantiation say issuers keep no record, and nothing in the protocol makes an honest issuer reject a second request (the paper has the same gap). Either issuers keep the set of tags they have signed for, or this case needs another argument. Same in Game 7 Issue below.}
+    \item[$\issuer{i}$ is honest.] As per $\Pi$'s specification, $\simu$ receives
+signature $\signature_i \leftarrow \ATSsign(\isk{i}, \Tag, \atv{i})$ and
+records entry $\langle \user, \Tag, \atv{i}, \signature_i \rangle$, and
+$\idfu{\AAC}'$ likewise adds $\atv{i}$ to $\creds[\user][i]$.
 
     \item[$\issuer{i}$ is corrupt.] If the execution of $\Pi$ terminates with
 $\simu$ receiving a signature $\signature_i$ with $\ATSverify(\ipk{i}, \Tag,$
@@ -137,9 +138,7 @@ corrupt user $\user$ sends, in the real world, to an honest issuer $\issuer{i}$
 (simulated by $\simu$), $\simu$ (acting as $\user$) sends $(\AACissue, \att{i},
 \atv{i})$ to $\idfu{\AAC}'$, and stores entry $\langle \user, \Tag, \att{i},
 \atv{i}, \signature_i\rangle$ on success.  $\idfu{\AAC}'$ issues the credential
-exactly when $\user$ is registered and this is their first request for
-$\att{i}$\rebekah{matches the functionality now, but see the note on issuer state in Game 4},
-and the simulated $\issuer{i}$ returns $\signature_i \leftarrow
+exactly when $\user$ is registered, and the simulated $\issuer{i}$ returns $\signature_i \leftarrow
 \ATSsign(\isk{i}, \Tag, \atv{i})$ under the same conditions, so their outputs
 are indistinguishable.
 
@@ -263,81 +262,103 @@ of~\Cref{thm:agg-creds-construction-security}.
 
 %%%% proof 2 - tag-based agg sigs are secure (Theorem 2)
 
-\subsection{Proof of \Cref{thm:agg-creds-thm-1}}\label{sec:agg-creds-proof-2}
+\subsection{Proof of \Cref{thm:agg-creds-thm-1}: unforgeability of $\ATS$}\label{sec:agg-creds-proof-2}
 
 Let $\pk_1, \ldots, \pk_n$ be the challenge public keys of
-Experiment~\ref{exp:ats-euf}, and suppose an adversary $\adv$ wins by outputting
-an aggregate signature $\signature^* = (\signatureone^*, \signaturetwo^*)$ on
-messages $(\msg_i^*)_{i \in \ISSUERS}$ under a tag $\Tag^*$, so that
+\Cref{exp:ats-euf}, and suppose an adversary $\adv$ wins by outputting an
+aggregate signature $\signature^* = (\signatureone^*, \signaturetwo^*)$ on
+messages $(\msg_i^*)_{i \in \ISSUERS}$ under a tag $\Tag^*$, with keys
+$(\pk'_i)_{i \in \ISSUERS}$, so that the following holds:
 %
 \begin{equation*}
   \pairing(\signaturetwo^*,\ggen) = \pairing(\hashtwo(\Tag^*), \signatureone^*)\cdot
-\prod_{i \in \ISSUERS} \pairing(\hashone(\msg_i^*), \pk_i).
+\prod_{i \in \ISSUERS} \pairing(\hashone(\msg_i^*), \pk'_i).
 \end{equation*}
 %
 Some $j \in \ISSUERS$ has an uncorrupted key $\pk_j$, and the signing oracle
-never signed $(\pk_j, \Tag^*, \msg_j^*)$. The forgery is of Type 1 if $\adv$ never
-asked for a signature on $\msg_j^*$ under $\pk_j$ with any tag, and of Type 2 if
-it did, but only under tags other than $\Tag^*$.
+never signed $(\pk_j, \Tag^*, \msg_j^*)$. The adversary may have asked for
+signatures under $\pk_j$ on $\msg_j^*$ with other tags, and on $\Tag^*$ with
+other messages.
 
 \begin{proof}
 
-  We build a reduction $\advB$ for each type. Both embed a challenge in one of
-the two random oracles, answer signing queries under $\pk_j$ from the other, and
-extract the challenge answer from the forgery. A Type 1 forgery uses a message
-never signed under $\pk_j$, so its reduction embeds in $\hashone$ and breaks
-BCDH. A Type 2 forgery reuses a signed message under a new tag, so its reduction
-embeds in $\hashtwo$ and breaks m-BCDH. We first give what the two reductions
-share, then what each does differently.
+  We build a reduction $\advB$ that breaks BCDH. It receives a challenge
+defined as follows:
+%
+\begin{equation*}
+  (\gen, x, y, z, \ggen, \widetilde{x}, \widetilde{y}, \widetilde{z}) = (\gen,
+\gen^\gamma, \gen^\omega, \gen^\chi, \ggen, \ggen^\gamma, \ggen^\omega,
+\ggen^\chi),
+\end{equation*}
+%
+and must output $\pairing(\gen, \ggen)^{\gamma\omega\chi}$.
 
-  \paragraph{Shared part.} Without loss of generality, $\adv$ corrupts every key
-but one. $\advB$ guesses $j \sample [1,n]$ and sets $\pk_j = \widetilde{x}$, the
-element $\ggen^\gamma$ of its challenge. For every $k \neq j$ it samples $\xi_k
-\sample \Zp^*$ and sets $\sk_k = \xi_k$ and $\pk_k = \ggen^{\xi_k}$. It answers a
-corruption of $\pk_k$ with $\xi_k$, and stops if $\adv$ corrupts $\pk_j$.
+  \paragraph{Keys.} Without loss of generality, $\adv$ corrupts every key but
+one. $\advB$ guesses $j \sample [1,n]$ and sets $\pk_j = \widetilde{x}$. For every
+$k \neq j$ it samples $\xi_k \sample \Zp^*$ and sets $\sk_k = \xi_k$ and $\pk_k =
+\ggen^{\xi_k}$. It answers a corruption of $\pk_k$ with $\xi_k$, and stops if
+$\adv$ corrupts $\pk_j$. For every corrupted key in the forgery, $\adv$ also
+outputs its secret key, which we write $\xi'_i$.
 
-  $\advB$ keeps lists $L_1$ and $L_2$ for $\hashone$ and $\hashtwo$. On each new
-query it samples a fresh exponent from $\Zp^*$, computes the output from it, and
-stores the input, the exponent and the output. One of the two oracles has an
-embedded branch: with probability $p$, its output is a challenge element raised
-to the exponent, and otherwise, on the honest branch, it is $\gen$ raised to the
-exponent. The other oracle always takes the honest branch. We write $\rho$ for the
-exponent of a $\hashone$ query and $\eta$ for that of a $\hashtwo$ query.
+  \paragraph{Random oracles.} $\advB$ keeps lists of the queries to $\hashone$
+and $\hashtwo$, with the exponents it used. On a new query $\msg$ to $\hashone$,
+it samples $\rho \sample \Zp^*$ and answers $y^\rho$ with probability $p$, and
+$\gen^\rho$ otherwise. We call the message embedded in the first case. On a new
+query $\Tag$ to $\hashtwo$, it samples $\eta \sample \Zp^*$ and answers
+$\gen^\eta$ with probability $p$, and $y^\eta$ otherwise. We call the tag plain
+in the first case. Every answer is uniform in $\group{1} \setminus \{1\}$.
 
-  $\advB$ answers a signing query $(\pk_i, \Tag, \msg)$ with $i \neq j$ by running
-$\ATSsign(\xi_i, \Tag, \msg)$. Queries with $i = j$ are answered as each
-reduction describes below. On receiving the forgery, $\advB$ removes the
-contributions of the corrupted keys,
+  \paragraph{Signing.} $\advB$ answers a signing query $(\pk_i, \Tag, \msg)$
+with $i \neq j$ by running $\ATSsign(\xi_i, \Tag, \msg)$. For a query under
+$\pk_j$, it samples $\phi \sample \Zp$ and proceeds as follows.
+  \begin{itemize}
+
+    \item If $\msg$ is not embedded, so that $\hashone(\msg) = \gen^\rho$, it
+returns the following signature:
+%
+\begin{equation*}
+  (\signatureone, \signaturetwo) = (\ggen^\phi, \ x^\rho\,\hashtwo(\Tag)^\phi).
+\end{equation*}
+%
+This is $\ATSsign(\gamma, \Tag, \msg)$ with randomness $\phi$, since $x^\rho =
+\hashone(\msg)^\gamma$.
+
+    \item If $\msg$ is embedded and $\Tag$ is not plain, so that $\hashone(\msg) =
+y^\rho$ and $\hashtwo(\Tag) = y^\eta$, it returns the following signature:
+%
+\begin{equation*}
+  (\signatureone, \signaturetwo) = (\ggen^\phi\,\widetilde{x}^{-\rho/\eta}, \
+y^{\eta\phi}).
+\end{equation*}
+%
+This is $\ATSsign(\gamma, \Tag, \msg)$ with randomness $\upsilon = \phi -
+\rho\gamma/\eta$, which is uniform, since $\hashone(\msg)^\gamma
+\hashtwo(\Tag)^{\upsilon} = y^{\rho\gamma + \eta\phi - \rho\gamma} =
+y^{\eta\phi}$.
+
+    \item If $\msg$ is embedded and $\Tag$ is plain, it stops.
+
+  \end{itemize}
+
+  \paragraph{Extraction.} $\advB$ stops unless $\msg^*_j$ is embedded and
+$\Tag^*$ is plain, so that $\hashone(\msg^*_j) = y^{\rho^*}$ and
+$\hashtwo(\Tag^*) = \gen^{\eta^*}$. It removes the contributions of the other
+keys as follows:
 %
 \begin{equation*}
   d = \signaturetwo^* / \prod_{i \in \ISSUERS, i \neq j}\hashone(\msg^*_i)^{\xi_i},
 \end{equation*}
 %
-so that the verification equation becomes
+with $\xi_i$ replaced by $\xi'_i$ for the corrupted keys. The verification
+equation then becomes the following:
 %
 \begin{equation*}
-  \pairing(d, \ggen) = \pairing(\hashtwo(\Tag^*), \signatureone^*) \cdot
-\pairing(\hashone(\msg^*_j), \widetilde{x}).
-\end{equation*}
-
-  \paragraph{Type 1 forgeries.} $\advB$ receives a BCDH challenge $(\gen, x, y, z,
-\ggen, \widetilde{x}, \widetilde{y}, \widetilde{z}) = (\gen, \gen^\gamma,
-\gen^\omega, \gen^\chi, \ggen, \ggen^\gamma, \ggen^\omega, \ggen^\chi)$ and must
-output $\pairing(\gen, \ggen)^{\gamma\omega\chi}$. The embedded branch is in
-$\hashone$, with $\hashone(\msg) = y^\rho$, and $\hashtwo(\Tag) = \gen^\eta$ always.
-For a signing query $(\pk_j, \Tag, \msg)$, $\advB$ stops if $\hashone(\msg)$ is
-embedded. Otherwise $\hashone(\msg) = \gen^\rho$, so $\advB$ samples $\phi \sample
-\Zp$ and returns
-%
-\begin{equation*}
-  (\signatureone, \signaturetwo) = (\ggen^\phi, x^\rho\,\hashtwo(\Tag)^\phi),
+  \pairing(d, \ggen) = \pairing(\gen^{\eta^*}, \signatureone^*) \cdot
+\pairing(y^{\rho^*}, \widetilde{x}).
 \end{equation*}
 %
-which is $\ATSsign(\gamma, \Tag, \msg)$ with randomness $\phi$, since $x^\rho =
-\hashone(\msg)^\gamma$. On the forgery, $\advB$ stops unless $\hashone(\msg^*_j) =
-y^{\rho^*}$ is embedded. Then $\hashtwo(\Tag^*) = \gen^{\eta^*}$, and pairing both
-sides of the verification equation above with $\widetilde{z}$ instead of $\ggen$
-gives
+Pairing both sides with $\widetilde{z}$ instead of $\ggen$, $\advB$ outputs the
+following:
 %
 \begin{equation*}
   X = \left(\pairing(d, \widetilde{z}) / \pairing(z^{\eta^*},
@@ -345,86 +366,47 @@ gives
 \pairing(\gen, \ggen)^{\gamma\omega\chi}.
 \end{equation*}
 
-  \paragraph{Type 2 forgeries.} $\advB$ receives an m-BCDH challenge $(\gen, y,
-\ggen, \widetilde{x}, \widetilde{y}) = (\gen, \gen^{1/\omega}, \ggen,
-\ggen^\gamma, \ggen^\omega)$ and must output $\pairing(\gen,
-\ggen)^{\gamma\omega}$. The embedded branch is now in $\hashtwo$, with
-$\hashtwo(\Tag) = y^\eta$, and $\hashone(\msg) = \gen^\rho$ always. $\advB$ no longer
-knows $\gen^\gamma$, so for a signing query $(\pk_j, \Tag, \msg)$ it stops if
-$\hashtwo(\Tag)$ is embedded, and otherwise samples $\upsilon \sample \Zp$ and
-solves the verification equation for the first component:
+  \paragraph{Success probability.} The simulation is perfect up to the
+difference between uniform elements of $\group{1}$ and of $\group{1} \setminus
+\{1\}$, at most $q_H/p$ for $q_H$ hash queries. Let $q$ bound the number of
+signing queries under $\pk_j$. $\advB$ does not stop when all of the following
+hold:
+  \begin{itemize}
+    \item the guess of $j$ is right, with probability $1/n$;
+    \item $\msg^*_j$ is embedded and no other message signed under $\pk_j$ is,
+with probability at least $p(1-p)^q$;
+    \item $\Tag^*$ is plain and no other tag signed under $\pk_j$ is, with
+probability at least $p(1-p)^q$.
+  \end{itemize}
+Every signing query under $\pk_j$ then falls into one of the first two cases. A
+query on a message other than $\msg^*_j$ is not embedded, and a query on
+$\msg^*_j$ has a tag other than $\Tag^*$, since $(\pk_j, \Tag^*, \msg^*_j)$ was
+never queried, so its tag is not plain. The events are independent of the view
+of $\adv$, so $\advB$ succeeds with probability at least $\frac{1}{n}
+(p(1-p)^q)^2$ times that of $\adv$. With $p = 1/(q+1)$ this gives the following:
 %
 \begin{equation*}
-  (\signatureone, \signaturetwo) = \left(\left(\ggen^\upsilon /
-\widetilde{x}^\rho\right)^{1/\eta}, \ \gen^\upsilon\right).
+  \Adv^{\text{BCDH}}_{\advB}(\secparam) \geq
+\frac{\Adv^{\text{EUF-TBA}}_{\ATS,\adv}(\secparam) - q_H/p}{e^2\,
+n\,(q+1)^2}.
 \end{equation*}
 %
-Then $\pairing(\hashone(\msg), \widetilde{x}) \cdot \pairing(\hashtwo(\Tag),
-\signatureone) = \pairing(\gen, \ggen)^{\rho\gamma + \upsilon - \rho\gamma} =
-\pairing(\signaturetwo, \ggen)$, so the signature verifies, and it is distributed
-as a real one since $\upsilon$ is uniform. On the forgery, $\advB$ stops unless
-$\hashtwo(\Tag^*) = y^{\eta^*}$ is embedded. Then $\hashone(\msg^*_j) =
-\gen^{\rho^*}$, and pairing with $\widetilde{y}$ instead of $\ggen$, using
-$y^\omega = \gen$, gives
-%
-\begin{equation*}
-  X = \left(\pairing(d, \widetilde{y}) / \pairing(\gen^{\eta^*},
-\signatureone^*)\right)^{1/\rho^*} = \pairing(\gen, \widetilde{x})^{\omega} =
-\pairing(\gen, \ggen)^{\gamma\omega}.
-\end{equation*}
-
-  \paragraph{Success probability.} In both reductions the simulation is perfect,
-and $\advB$ extracts, when three independent events hold. The guess of $j$ is
-right, with probability $1/n$. The oracle query behind the forgery, $\msg^*_j$ for
-Type 1 and $\Tag^*$ for Type 2, takes the embedded branch, with probability $p$.
-And each of the at most $q$ signing queries under $\pk_j$ takes the honest branch,
-with probability $(1-p)^q$ together; a Type 1 forgery's message and a Type 2
-forgery's tag are, by definition, never among them. Whenever one of these fails,
-$\advB$ stops and outputs a random guess. So $\advB$ succeeds with probability at
-least $\frac{1}{n} \cdot p(1-p)^q$ times that of $\adv$, and with $p = 1/(q+1)$
-this is at least $1/(e\,n(q+1))$, a polynomial loss. A forgery of either type
-therefore breaks BCDH or m-BCDH, and $\ATS$ is existentially unforgeable under
-tag-based aggregation.
-
-  \rebekah{Type 2 does not cover a forgery on $\Tag^*$ when $\adv$ also asked
-for a signature under $\pk_j$ on $\Tag^*$ with another message: answering that
-query needs $\hashtwo(\Tag^*)$ on the honest branch, while extraction needs it
-on the embedded one, and neither embedding in $\hashone$ nor in $\hashtwo$ covers
-both. The case needs its own reduction, or a direct proof in the GGM.}
+So $\ATS$ is existentially unforgeable under tag-based aggregation.
 
 \end{proof}
 
 %%%% proof of Theorem 3 - the concrete instantiation, corollary of Theorem 1
 
-\subsection{Proof of \Cref{lem:agg-creds-sigma}}\label{sec:agg-creds-proof-lemma}
+\subsection{Proof of \Cref{lem:agg-creds-sigma}: extraction and simulation}\label{sec:agg-creds-proof-lemma}
 
 \begin{proof}
 
-    The presentation relation of the construction, with $\DS$ set to the
-$\AGHO$ SPS scheme and $\ATS$ to our tag-based scheme, has instance, witness and
-relation
-%
-    \begin{equation*}\begin{gathered}
-%
-      \inst_2 = (\rapk, \{\atv{i}, \ipk{i}\}_{i \in \ISSUERS}), \quad \witness_2
-= (\sk, \pk, \tid, \signature, \SPSsig), \\
-%
-      \rel_2 = \{\ \pairing(v, \widetilde{r}) = \pairing(\gen, \widetilde{s}) \
-\wedge\ \pairing(z, \widetilde{r}) \cdot \pairing(\gen^\sk,
-\widetilde{u}_1)\cdot \pairing(\tid, \widetilde{u}_2) = \pairing(\gen, \ggen) \\
-      \wedge\ \pk = \gen^\sk \ \wedge\ \pairing(\signaturetwo, \ggen) =
-\pairing(\tid,
-\signatureone)\cdot\prod_{i\in\ISSUERS}\pairing(\hashone(\atv{i}), \ipk{i})\ \},
-%
-    \end{gathered}\end{equation*}
-%
-with $\rapk = (\widetilde{u}_1, \widetilde{u}_2, v)$, $\ipk{i} = \ggen^{\isk{i}}$,
-$\signature = (\signatureone, \signaturetwo)$ and $\SPSsig = (\widetilde{r},
-\widetilde{s}, z)$. Recall that $\algoproof = (\eta, \inst_3)$, with $\inst_3 = (\bar{\gen},
+    Recall the instance $\inst_2$, witness $\witness_2$ and relation $\rel_2$
+of \eqref{eq:agg-creds-proof-original}, and that $\algoproof = (\eta, \inst_3)$, with $\inst_3 = (\bar{\gen},
 \bar{v}, \pk', \{i, \atv{i}, H_i\}_{i\in\ISSUERS}, \widetilde{r}',
 \widetilde{s}', \bar{z}, \signatureone', \bar{\signaturetwo}, \bar{\tid})$.
 
-  We first show extractability. By special soundness of the Sigma protocol, which
+  \paragraph{Extraction.} By special soundness of the Sigma protocol, which
 Fiat-Shamir preserves in the random oracle model, if a user is able to produce
 a valid proof $\eta$ for relation $\rel_3$, then it
 is possible to extract the corresponding witness $\witness_3 = (\delta, \sk)$
@@ -472,10 +454,14 @@ raising the first two equalities to the power $1/\delta$, we can deduce that:
   %
   \end{gather*}
 %
-  So $(\signatureone, \bar{\signaturetwo}^{1/\delta})$ is a valid tag-based
-aggregate signature on the preimage of $\bar{\tid}^{1/\delta}$ and attributes
-$\atv{i}$, and that $(\widetilde{r}, \widetilde{s}, \bar{z}^{1/\delta})$ is a
-valid signature on pair $\pk'^{1/\delta}, \bar{\tid}^{1/\delta}$.
+  So the following hold:
+  \begin{itemize}
+    \item $(\signatureone, \bar{\signaturetwo}^{1/\delta})$ is a valid
+tag-based aggregate signature on the preimage of $\bar{\tid}^{1/\delta}$ and
+the attribute values $\atv{i}$;
+    \item $(\widetilde{r}, \widetilde{s}, \bar{z}^{1/\delta})$ is a valid
+$\AGHO$ signature on $(\pk'^{1/\delta}, \bar{\tid}^{1/\delta})$.
+  \end{itemize}
 
   To extract the preimage of $\bar{\tid}^{1/\delta}$, we use the following:
 
@@ -491,26 +477,24 @@ defined as $(\pk, \hashtwo(\Tag))$.
 
   \end{enumerate}
 
-  Notice that if $(\widetilde{r}, \widetilde{s}, \bar{z}^{1/\delta})$ is a valid
-signature on pair $(\pk'^{1/\delta}, \bar{\tid}^{1/\delta})$, then under the
-existential unforgeability of the $\AGHO$ SPS scheme, this signature
-corresponds to either a signature or a randomisation of a signature computed by
-the registration authority on the same pair.  Since the registration authority
-is trusted to sign only well-formed pairs, then this entails that
-$\bar{\tid}^{1/\delta}$ was computed by calling $\hashtwo$ on some input $\Tag
-\in \{0,1\}^*$, and that $\Tag$ corresponds to $L_2[\bar{\tid}^{1/\delta}]$.
-
-  Putting the pieces together: extracting $(\delta, \sk)$ from $\eta$ gives us
-$\Tag$ (so $\tid = \bar{\tid}^{1/\delta}$), $\sk$ (so $\pk = \gen^\sk$), the
-  $\AGHO$ signature $\SPSsig = (\widetilde{r}, \widetilde{s}, \bar{z}^{1/\delta})$ on
-$(\pk, \tid)$, and the tag-based aggregate signature $\signature =
-(\signatureone, \bar{\signaturetwo}^{1/\delta})$ on $\tid$ and the attributes
-$\atv{i}$: exactly a witness $\witness_2 = (\sk, \pk, \tid, \signature,
+  By existential unforgeability of $\AGHO$, the second signature is a
+signature computed by the registration authority, or a randomisation of one, on
+the same pair. The registration authority signs only well-formed pairs, so
+$\bar{\tid}^{1/\delta}$ is the output of a query to $\hashtwo$, and the tag is
+its entry in $L_2$. The extracted values then give the following:
+  \begin{itemize}
+    \item the tag $\Tag$, with $\tid = \bar{\tid}^{1/\delta}$;
+    \item the secret key $\sk$, with $\pk = \gen^\sk$;
+    \item the $\AGHO$ signature $\SPSsig = (\widetilde{r}, \widetilde{s},
+\bar{z}^{1/\delta})$ on $(\pk, \tid)$;
+    \item the tag-based aggregate signature $\signature = (\signatureone,
+\bar{\signaturetwo}^{1/\delta})$ on $\tid$ and the attribute values $\atv{i}$.
+  \end{itemize}
+Together these are a witness $\witness_2 = (\sk, \pk, \tid, \signature,
 \SPSsig)$ for $\rel_2$.
 
-  We now show simulatability: if DDH holds in $\group{1}$, we
-can simulate a valid presentation $\algoproof$ without access to a valid
-witness.
+  \paragraph{Simulation.} If DDH holds in $\group{1}$, we can simulate a valid
+presentation $\algoproof$ without a witness.
 
   \begin{enumerate}
 
@@ -585,7 +569,7 @@ generated presentations are computationally indistinguishable. This proves
 
 \end{proof}
 
-\subsection{Proof of \Cref{thm:agg-creds-thm-2}}\label{sec:agg-creds-proof-3}
+\subsection{Proof of \Cref{thm:agg-creds-thm-2}: security of the instantiation}\label{sec:agg-creds-proof-3}
 
 The instantiation is an instance of the construction that sets $\DS$ to the
 $\AGHO$ SPS scheme, $\ATS$ to our tag-based aggregate signature scheme, and the
@@ -599,37 +583,23 @@ proof system to the presentation proof of $\AACpresent$ and $\AACverify$.
 unforgeable under chosen message attack in the GGM~\cite{C:AGHO11}.
 
     \item[$\ATS$ is existentially unforgeable under tag-based aggregation.] This
-is \Cref{thm:agg-creds-thm-1}, under the BCDH and m-BCDH assumptions. Both hold
-in the GGM. A generic adversary obtains elements of $\group{T}$ only as
-$\pairing(\gen, \ggen)^{f}$, where $f$ is a linear combination of products of
-one exponent it holds in $\group{1}$ with one it holds in $\group{2}$. For BCDH
-these exponents are $1, \gamma, \varepsilon, \chi$ in both groups, so every $f$
-has degree at most two, and none equals $\gamma\varepsilon\chi$. For m-BCDH the
-exponents are $1$ and $1/\varepsilon$ in $\group{1}$, and $1$, $\gamma$ and
-$\varepsilon$ in $\group{2}$, so every $f$ is a combination of $1$, $\gamma$,
-$\varepsilon$, $1/\varepsilon$ and $\gamma/\varepsilon$. Multiplying by
-$\varepsilon$, the target $\gamma\varepsilon$ becomes $\gamma\varepsilon^2$,
-which is not a combination of $\varepsilon$, $\gamma\varepsilon$,
-$\varepsilon^2$, $1$ and $\gamma$. In both cases an adversary making $q$ group
-operations succeeds only if two of the polynomials it computes collide, or one
-hits the target, at a random point, which by the Schwartz-Zippel lemma happens
-with probability $O(q^2/p)$.
+is \Cref{thm:agg-creds-thm-1}, under the BCDH assumption in the random oracle
+model.
 
-    \item[The proof system is simulation extractable.] \Cref{lem:agg-creds-sigma},
-under the DDH assumption in $\group{1}$, which holds in the GGM, gives special
-soundness and honest-verifier zero knowledge of the Sigma protocol for $\rel_3$.
-Its responses are unique, and so quasi-unique, since each response is fixed by
-one verification equation, for example $\pi_1$ by $\gen^{\pi_1} = f \cdot
-\bar{\gen}^c$. The challenge hashes the whole statement together with $\msg$, so
-the Fiat-Shamir transform makes the presentation proof simulation extractable
-with $\msg$ as its label in the random oracle model~\cite{INDOCRYPT:FKMV12}. The
-simulator programs the random oracle to simulate honest users' presentations,
-and rewinds the adversary to extract from its own, as the simulator
-of the construction's proof requires.
+    \item[The proof system is simulation extractable.] Under the DDH assumption
+in $\group{1}$, \Cref{lem:agg-creds-sigma} gives special soundness and
+honest-verifier zero knowledge of the Sigma protocol for $\rel_3$. Its responses
+are unique, and so quasi-unique, since each response is fixed by one
+verification equation. The challenge hashes the whole statement together with
+$\msg$. The Fiat-Shamir transform then makes the presentation proof simulation
+extractable with $\msg$ as its label in the random oracle
+model~\cite{INDOCRYPT:FKMV12}. The simulator programs the random oracle to
+simulate honest users' presentations, and rewinds the adversary to extract from
+its own, as the simulator of the construction's proof requires.
 
   \end{description}
 
-  The instantiated protocol therefore securely realises ideal functionality
+  The instantiated protocol securely realises ideal functionality
 $\idfu{\AAC}$ in the GGM and the random oracle model.
 
 \end{proof}

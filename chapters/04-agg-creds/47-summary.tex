@@ -16,25 +16,18 @@ explicit, introducing the registration authority as its own role, and using
 this role to achieve efficient multi-issuer anonymous credentials.
 \begin{outline}
   \item the key point: giving the registration authority one job (binding a key to a tag) adds no trust, it learns a key and a tag and is never contacted again, and it is what lets issuers stay uncoordinated and stateless
-  \item first instance of the wider argument of the thesis (link to the intro)
-  \item ART-Sign makes it concrete: both bind a user to one tag at registration; where the tag is the key, issuers remember what they signed; where the RA signs tag and key together, they do not
-\end{outline}
-
-\begin{outline}
-  \item optional, broader: many systems contain an unnamed role (whoever certifies a key, assigns an identifier, admits a participant); naming it with a narrow capability can remove coordination
-  \item example settings: wallets with credentials from unrelated national registries, or from employers, universities, health services
+  \item separating the requirements on the registration authority from those on the issuers is how issuers become stateless; Mir et al.\ name the stateless case as open (cite CCS:MBGLS23)
 \end{outline}
 
 We present an instantiation based on structure-preserving signatures, and build
 a special-purpose proof for efficiency.
 The instantiation combines the $\AGHO$ SPS scheme, our tag-based aggregate
-signature scheme $\ATS$ and a Sigma protocol. With $n = 128$ issuers and $k =
+signature scheme $\ATS$, and Sigma protocol based proofs. With $n = 128$ issuers and $k =
 64$ disclosed attributes, a presentation takes 20.1\,ms to produce and
 31.1\,ms to verify, and these costs scale with $k$, not $n$.
 A concrete security analysis of the scheme would be valuable for determining
 its real-world security guarantees.
 \begin{outline}
-  \item concrete security analysis: parameter sizes for a given number of issuers and presentations
   \item open direction: GGM is needed only through AGHO; a rerandomisable SPS under a standard assumption would remove it, at the cost of larger registration signatures
 \end{outline}
 

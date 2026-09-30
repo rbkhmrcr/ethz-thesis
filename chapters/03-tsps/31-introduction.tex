@@ -1,8 +1,6 @@
 \section{Introduction}\label{sec:tsps-introduction}
 
-Coupled with non-interactive zero-knowledge proofs, structure-preserving
-signature schemes have proved
-useful across a range of privacy-preserving applications, including blind
+Structure-preserving signature schemes have proved useful across a range of privacy-preserving applications, including blind
 signatures, delegatable anonymous credentials, and group signatures, to name a
 few~\cite{AFRICACRYPT:FucVer10,CCS:CamDriDub17,RSA:CriLys19,PoPETS:MSBM23,AC:Groth06,AC:Groth07,C:LibPetYun15}.
 
@@ -29,37 +27,20 @@ verifiers don't change
   \item SPS separates authority from knowledge: signers certify committed values
 without learning them
   \item practicality (as in the rest of the thesis): for a threshold signer the
-cost that matters is interaction when a signature is needed; our online phase
-needs no interaction between signers once the message is known
+cost is interaction when a signature is needed; our online phase needs no
+interaction between signers
 \end{outline}
 
-Ledgers are the first setting where such certifiers appear. A ledger is a shared, append-only record of state, such as
-tokens, accounts or transactions, maintained by one or more authorities. In
-ledger-based payment systems, currency is represented by a token encoding its
-owner, value, and a unique serial number, and the ledger records a hiding
-commitment to the token rather than the token
-itself~\cite{EPRINT:ACDDET19,EPRINT:TBAAGP22,CCS:KiaKohSar22,C:Pedersen91}. To
-spend a token, its owner needs a signature from a certifier showing that the
-commitment is recorded on the ledger, and later proves, via the serial number,
-that the token has not been spent before~\cite{RSA:PoiSan18,NDSS:SABMD19}. With
-an SPS scheme, the certifier signs the group elements of the
-commitment as they appear on the ledger and publishes the signatures, without
-interacting with the owner. This is more than an efficiency gain. An interactive
-issuance protocol gives the certifier a channel to each spender, which can be
-timed, logged and correlated even when the signed value stays hidden, and
-publishing signatures over ledger state removes that channel.
-
-The same applies where the ledger stores commitments to accounts, pairs of owner
-and holdings, rather than to tokens. Such accounts are the basis for periodic
-reporting, for instance proving that holdings do not exceed some threshold when
-filing taxes. A tax authority typically has no direct access to the ledger, and
-instead relies on signatures produced by the ledger's administrators. With an
-SPS scheme, the administrators sign each committed account
-together with a timestamp and publish the results, and users prove properties of
-their holdings from them without disclosing anything else. Where a ledger is
-run by several authorities, for example a central bank digital currency in which
-every transaction is endorsed before it is recorded, a threshold signature
-scheme divides the endorsement between them.
+Ledgers are the first setting where such certifiers appear. A ledger records
+commitments to tokens or accounts, and to spend a token or report on an account,
+its owner needs a signature showing that the commitment is
+recorded~\cite{EPRINT:ACDDET19,EPRINT:TBAAGP22,CCS:KiaKohSar22,RSA:PoiSan18,NDSS:SABMD19}.
+With an SPS scheme, the certifier signs the committed group elements as they
+appear on the ledger and publishes the signatures, without interacting with the
+owner, and the owner later proves statements about the committed values in zero
+knowledge. Where a ledger is run by several authorities, for example a central
+bank digital currency in which every transaction is endorsed before it is
+recorded, a threshold signature scheme divides the certification between them.
 
 Transparency logs are the second. Certificate transparency (CT) and key
 transparency (KT) logs are append-only, publicly verifiable records of
@@ -84,11 +65,11 @@ on standard assumptions alone~\cite{C:AGHO11,C:KilPanWee15}.
 reveal nothing); key generation, combining and verification then done with
 general-purpose MPC, nothing new needed
   \item the hard part is signing: evaluating it under MPC directly means the
-signers interact after the message is known
+signers must interact for each signature
   \item observation: in SPS the message is public group elements and (in the
 schemes we use) only gets raised to secret exponents, which each signer can do on
-its own shares; if everything else is prepared in advance, no interaction once a
-message arrives
+its own shares; if everything else is prepared in advance, no interaction needed at
+message time
   \item why not remove interaction completely: that means designing a new scheme
 for the threshold setting, as existing threshold SPS schemes do, with their
 restrictions on messages or assumptions; splitting signing in two keeps existing
@@ -112,7 +93,7 @@ decomposable signing, and show that $\AGHO$ and $\KPW$ have it.
 secret-shared group elements and multiplication of a shared field element with a
 shared group element
   \item Ghosh et al.\ compute on shared group elements between two parties (cite
-NDSS:GPVRNC23); as far as we know no multiparty version is implemented
+NDSS:GPVRNC23); as far as we know no multiparty version had been implemented
   \item check this claim first: Dalskov et al.\ implemented threshold ECDSA for
 many parties in MP-SPDZ with shared curve points (ESORICS:DOKSS20, cited in the
 old evaluation); if so, say what is new here instead (pairing groups, a shared
@@ -122,7 +103,7 @@ field element times a shared group element)
 We benchmark both schemes using two MPC frameworks: ATLAS, which assumes an
 honest majority, and MASCOT, which assumes a dishonest
 majority~\cite{C:GLOPS21,CCS:KelOrsSch16}, extending MP-SPDZ with support for
-the group-element functionalities our schemes require~\cite{CCS:Keller20}. The
+the group element functionalities our schemes require~\cite{CCS:Keller20}. The
 former suits settings where robustness and high availability are desirable, the
 latter settings where resilience to key compromise takes precedence. We also
 implement previously suggested threshold SPS schemes, so as to compare concrete
@@ -155,20 +136,19 @@ length~\cite{JC:AGKOT19,EC:GroSah08}.
 
 \paragraph{Threshold SPS schemes.} Threshold SPS schemes have only recently
 been considered. One non-interactive construction is restricted to signing
-indexed Diffie-Hellman tuples of the form $(\gen^\msg,
+indexed Diffie-Hellman tuples, of the form $(\gen^\msg,
 \ggen^\msg)$~\cite{AC:CKPSS23}.
 
 \begin{outline}
   \item an element that only exists in $\group{1}$ (a key or commitment
-already on a ledger) can't be signed unless its owner supplies the $\group{2}$
-element
+already on a ledger) can't be signed unless its owner both knows its discrete
+logarithm and provides the corresponding element of $\group{2}$
 \end{outline}
 
 Another non-interactive threshold SPS scheme instead is capable of signing
 arbitrary group elements, and is secure under the SXDH
 assumption~\cite{PKC:MMSST24}. It builds on $\KPW$, and its signatures consist
 of seven group elements~\cite{C:KilPanWee15}.
-Neither of the two schemes has an offline phase.
 
 \Cref{tab:tsps-comp} in \Cref{sec:tsps-evaluation} compares our schemes with the
 two prior threshold SPS schemes in terms of assumptions, key and signature size,

@@ -20,13 +20,18 @@ accept credentials only from the set of issuers with published public keys. This
 prevents a malicious user from being able to impersonate an issuer to an honest
 verifier.
 
-\begin{outline}
-  \item why each building block is the one it is
-  \item RA signature: only has to stop a key and a tag it did not pair being passed off as paired; an ordinary EUF-CMA signature is enough, and nothing about its signatures needs hiding from it
-  \item issuers: a presentation should show one short object, so signatures must aggregate; ordinary aggregate signatures would let two users pool theirs; multi-signatures restrict to one message, which is wrong since issuers sign different attributes; tag-based aggregation restricts to one tag, as required, without issuers coordinating
-  \item proof system: zero knowledge so presentations reveal only the disclosed values; simulation extractable, not just sound, because the security proof simulates honest users' presentations while extracting from the adversary's, and soundness says nothing once the adversary has seen simulated proofs
-  \item each presentation carries the verifier's message $\msg$ as its label, so it cannot be replayed elsewhere
-\end{outline}
+Each building block follows from this separation of responsibilities. The
+registration authority only links a public key to a tag, so an existentially
+unforgeable signature scheme is enough. Presentations should show one short
+object, so issuers' signatures must aggregate. Ordinary aggregate signatures
+would let two users pool their credentials, and multi-signatures require every
+signer to sign the same message, while issuers sign different attributes.
+Tag-based aggregation combines only signatures under one tag, without issuers
+coordinating. The proof system must be zero knowledge, so that presentations
+reveal only the disclosed values, and simulation extractable, since the security
+proof simulates honest users' presentations while extracting from the
+adversary's. Each presentation carries the verifier's message as its label, so
+it cannot be replayed elsewhere.
 
 We now present the construction in full. \Cref{fig:agg-creds-seq} shows its
 messages and local steps.
@@ -61,14 +66,11 @@ $\rand$ prove knowledge of $\sk$.} \label{fig:agg-creds-seq} \end{figure}
 for the digital signature scheme and public parameters for the proofs used
 throughout the protocol. Each issuer independently generates a key pair for the
 aggregate tag-based signature scheme. The registration authority's public key,
-each issuer's public key, and the public parameters are published.
-
-The registration authority (RA) samples a key pair $(\rask, \rapk) \sample
-\DSgen(\secparam)$ and publishes~$\rapk$. Each of the $n$ issuers then samples
-a key pair $(\isk{i}, \ipk{i}) \sample \ATSgen(\secparam)$ for the aggregate
-tag-based signature scheme~$\ATS$ and publishes~$\ipk{i}$. The public parameters
-$\crs$ consist of $\rapk$, the issuer public keys $\ipk{1}, \ldots, \ipk{n}$,
-and the parameters of the proof system.
+each issuer's public key, and the public parameters are published. Each issuer
+publishes its public key together with a proof of knowledge of its secret key,
+and verifiers only accept issuer keys whose proof verifies. The public
+parameters $\crs$ consist of the registration authority's public key, the issuer
+public keys $\ipk{1}, \ldots, \ipk{n}$ and the parameters of the proof system.
 
 \paragraph{Registration.} During registration, the user establishes a long-term
 pseudonymous identity with the registration authority. The user proves knowledge
@@ -80,11 +82,11 @@ issued to the user, and at presentation the user proves that the same tag
 underlies both their registration signature and their aggregated credentials,
 without revealing which tag it is.
 
-The user samples $\sk \sample \Zp$, sets $\pk = \gen^{\sk}$, and sends $\pk$ to
-the RA together with a proof on a fresh $\msg$ from the RA that proves the user
-knows the corresponding secret key $\sk$.  If the proof verifies, then the RA
-assigns the user a unique tag~$\Tag$ and issues $\psi \sample \DSsign(\rask,
-(\pk, \Tag))$.
+The user samples $(\sk, \pk) \leftarrow \DSgen(\secparam)$, and sends $\pk$ to
+the registration authority together with a proof of knowledge of $\sk$ on a
+fresh message from the registration authority.
+If the proof verifies, the registration authority assigns the user a unique tag
+$\Tag$ and signs $(\pk, \Tag)$ with $\DS$, giving $\psi$.
 
 The user initialises their credential state as $(\Tag, \sk, \pk, \psi, \cred_1,
 \ldots, \cred_n)$, with $\cred_i = \varnothing$ for all $i \in [1,n]$, and
@@ -137,15 +139,15 @@ following parameters:
 %
 \end{equation*}
 %
-\begin{equation*} \begin{gathered}
+\begin{equation}\label{eq:agg-creds-proof-abstract} \begin{gathered}
 %
-  \rel_1 = \{\ \pk = \gen^{\sk} \ \wedge \
+  \rel_1 = \{\ (\sk, \pk) \leftarrow \DSgen(\secparam) \ \wedge \
 \DSverify(\rapk, (\pk, \Tag), \psi) = 1 \\
 %
   \wedge\ \ATSverifyagg((\ipk{i})_{i \in \ISSUERS}, \Tag, (\atv{i})_{i \in
 \ISSUERS}, \signature) = 1\ \}.
 %
-\end{gathered} \end{equation*}
+\end{gathered} \end{equation}
 %
 
 The user proves that they possess a valid registration signature, an aggregate
@@ -169,6 +171,9 @@ unforgeable aggregate tag-based signature scheme under tag-based aggregation,
 and the proof system is zero knowledge and simulation extractable, then the above protocol securely realises ideal
 functionality~$\idfu{\AAC}$.  \end{theorem}
 
+We prove \Cref{thm:agg-creds-construction-security} in \Cref{sec:agg-creds-proof-1}.
+
+
 \paragraph{Extensions.} The construction supports several straightforward
 extensions.
 
@@ -182,8 +187,9 @@ New issuers can join the system without impacting the construction. The
 aggregation of credentials and their presentation is agnostic to the number of
 issuers.
 
-We present the construction with one credential per user from each issuer,
-without loss of generality, and extending it to several is straightforward. An
+An issuer may issue several credentials to one user, one for each value it
+certifies, and the user discloses at most one value per issuer in a
+presentation. An
 issuer certifying multiple attribute types can hold a different key for each
 type. To support an issuer certifying multiple attribute types under one key,
 the issuer instead signs $(\Tag, \att{} \| \atv{})$ rather than $(\Tag,

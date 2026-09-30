@@ -154,6 +154,9 @@ over a linear $(t+1, n)$ threshold sharing. Then $\TSPS$ applied to $\SPS$ is
 correct.
 \end{lemma}
 
+We prove \Cref{lem:tsps-construction-correctness} in \Cref{sec:tsps-proof-correctness}.
+
+
 \begin{theorem}\label{thm:tsps-construction-security} Let $\SPS$ be an EUF-CMA
 secure SPS scheme with decomposable signing, and let the MPC protocol be private
 and secure with abort against up to $t$ adaptively corrupted signers, over a
@@ -169,6 +172,9 @@ $\advB$ such that
   \end{equation*}
   %
 \end{theorem}
+
+We prove \Cref{thm:tsps-construction-security} in \Cref{sec:tsps-proof-construction}.
+
 
 \begin{outline}
   \item if $n$ is polynomial in $\secparam$ and $t$ or $n - t$ is constant, then
@@ -189,6 +195,9 @@ there is a PPT adversary $\advB$ such that
 $\Adv_{\TSPS, \adv}^{\text{adp-TS-UF-1}}(\secparam) \leq
 \Adv_{\SPS, \advB}^{\text{euf-cma}}(\secparam)$, for any $n$ and $t$.
 \end{lemma}
+
+We prove \Cref{lem:tsps-static} in \Cref{sec:tsps-static}.
+
 
 \begin{outline}
   \item with an adaptively secure protocol: dishonest majority $t = n-1$ loses

@@ -149,10 +149,11 @@ $\SPSverify$.
 
 \end{description}
 
-\paragraph{Correctness.} A threshold SPS scheme is correct if, for all $(\ell, t, n > t)$, all $(\pk, \shr{\sk}) \sample
-\TSPSgen(\secparam, \ell, t, n)$, all $\shr{\state} \sample
-\TSPSoffsign(\shr{\sk})$, all $\vec{\msg} \in \group{1}^\ell$, and every $Q
-\subseteq [1,n]$ with $|Q| = t+1$, the following holds:
+\paragraph{Correctness.} A threshold SPS scheme is correct if the following holds
+for all $(\ell, t, n)$ with $n > t$, every $(\pk, \shr{\sk})$ output by
+$\TSPSgen(\secparam, \ell, t, n)$ and $\shr{\state}$ output by
+$\TSPSoffsign(\shr{\sk})$, every message $\vec{\msg} \in \group{1}^\ell$, and
+every set $Q \subseteq [1,n]$ of $t+1$ signers:
 %
 \begin{equation*}
 %
@@ -175,15 +176,10 @@ enough honest signers agreed to that message)
 interaction, since all of it is offline
 \end{outline}
 
-The adversary has three oracles. The offline oracle $\mathcal{O}_{\algo{Off}}$
-runs $\TSPSoffsign$ with $\adv$ playing the corrupted signers, and returns their
-view. The online oracle $\mathcal{O}_{\algo{On}}$ returns the signature share of
-an honest signer, and the corruption oracle $\mathcal{O}_{\algo{Cor}}$ corrupts a
-signer. Each session $\mathsf{sid}$ is used for one message only, since reusing a
-state reuses the signing randomness. The adversary wins if it outputs a valid
-signature on a message $\vec{\msg}^*$ for which fewer than $t + 1 - |\Cor|$
-honest signers issued shares, so that these together with the key shares of the
-corrupted signers fall short of the $t+1$ needed.
+The adversary has offline, online and corruption oracles, and each session is
+used for one message only, since reusing a state reuses the signing randomness.
+It wins if it outputs a valid signature on a message for which fewer than $t + 1
+- |\Cor|$ honest signers issued shares.
 
 The advantage of a PPT adversary $\adv$ is defined as follows:
 %
@@ -240,7 +236,8 @@ $\vec{\msg}$.
 
 \end{experimentbox}
 
-Unforgeability is the only property we prove.
+We prove adaptive TS-UF-1 security of both schemes in
+\Cref{sec:tsps-security}.
 
 \begin{outline}
   \item key secrecy follows from MPC privacy: signers only open $\pk$ and
@@ -252,9 +249,8 @@ produced by a threshold of signers
 
 \subsection{Secure multiparty computation}\label{sec:tsps-mpc}
 
-Rather than specifying how the signers jointly compute each step of signing, we
-describe our schemes as sequences of calls to a secure multiparty computation
-protocol, and assume a realisation of it. Let $\alpha \in \Zp$ be a secret value
+We describe our schemes as sequences of calls to a secure multiparty
+computation protocol. Let $\alpha \in \Zp$ be a secret value
 shared between the $n$ signers, such that any $t+1$ of them can reconstruct it
 by a pre-defined linear combination. We write $\shr{\alpha}$ for such a sharing:
 the vector $(\alpha_1, \ldots, \alpha_n)$ in which $\alpha_i$ is the share held
@@ -275,18 +271,6 @@ source group. The shares of a group element $a$ are themselves in $\group{}$,
 and reconstruction takes their product. The authentication information, such as
 MAC shares, means that a modified share is detected at opening. In protocol
 boxes, $\shr{x}$ also stands for the signer's own share.
-
-\begin{outline}
-  \item linearity is the only property we rely on: makes additions and
-exponentiations of public group elements by shared exponents local, which is what
-makes the online phase local; any linear scheme works, so each protocol can use
-the sharing that suits its corruption setting
-  \item honest majority ($t < n/2$): Shamir, $\alpha_i = f(i)$ for random $f$ of
-degree $t$ with $f(0) = \alpha$, reconstruct by interpolation
-  \item dishonest majority (e.g.\ MASCOT): additive, $\alpha_i$ uniform with
-$\sum_i \alpha_i = \alpha$; this is $t = n-1$, so every signer takes part in
-signing
-\end{outline}
 
 Our constructions are stated for a general $(t+1, n)$ sharing.
 
