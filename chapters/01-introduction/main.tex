@@ -139,22 +139,10 @@ consequential. The third point is that the alternative to auditable payments is
 not perfect privacy, but the status quo, where banks and payment providers see
 all transactions in the clear.
 
-\begin{outline}
-  \item cite loads. Suggested, in cryptobib unless marked:
-  \item backdoors and ``once a capability exists'': Abelson et al., Keys Under
-  Doormats, J. Cybersecurity 2015 (add to misc.bib); Abelson et al., The Risks
-  of Key Recovery, Key Escrow, and Trusted Third-Party Encryption, 1997 (add to
-  misc.bib); EPRINT:Rogaway15
-  \item auditing schemes that are technically different: SCN:CamHohLys06,
-  FC:GarGreMie16, CCS:WKDC22, ACNS:ChaBalCha21, AC:FKMRR23
-  \item status quo, what banks and payment providers see and must report: FATF
-  Recommendations (add to misc.bib)
-\end{outline}
-
 For both social and technical reasons, financial systems come with requirements
 that private communication does not. Payment providers are required to identify
-their customers and to report suspicious transactions. \rebekah{cite, e.g. the
-FATF Recommendations} The systems themselves must establish the validity of
+their customers and to report suspicious
+transactions~\cite{fatf2012recommendations}. The systems themselves must establish the validity of
 transactions, maintain a consistent shared state, control issuance, and prevent
 or detect double spending~\cite{C:Chaum82,C:ChaFiaNao88}. They must remain
 efficient as the number of participants grows, ideally without cost per

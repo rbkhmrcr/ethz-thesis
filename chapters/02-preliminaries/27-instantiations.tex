@@ -96,8 +96,7 @@ knowledge of $x$ with $h = \gen^x$~\cite{JC:Schnorr91}.
 The prover sends $a = \gen^r$ for $r \sample \Zp$, receives a challenge $c
 \sample \Zp$, and returns $z = r + cx$. The verifier checks $\gen^z \checkcheck
 a h^c$. The same protocol proves knowledge of a representation $h = \prod_i
-\gen_i^{x_i}$, with one response per exponent. Its non-interactive form is also called a
-Schnorr proof. Several equations over the same witness are proven by
+\gen_i^{x_i}$, with one response per exponent. Several equations over the same witness are proven by
 running the protocol for each in parallel with one shared challenge, so that
 they hold together. This shows, for example, that two group elements have the
 same discrete logarithm.

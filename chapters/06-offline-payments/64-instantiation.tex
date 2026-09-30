@@ -2,7 +2,7 @@
 
 \begin{outline}
   \item instantiate $\OP$: every statement proven is an equation between group elements, so every proof is a Sigma protocol
-  \item pseudonyms: Pedersen commitments (perfectly hiding, binding under DL, group elements so Schnorr proofs apply)
+  \item pseudonyms: Pedersen commitments (perfectly hiding, binding under DL, group elements so Sigma protocols apply)
   \item audit ciphertexts: ElGamal in $\group{1}$, IND-CPA under DDH; decryption gives $\gen^{\algo{uid}}$, auditor looks the identifier up
   \item credentials: BBS+ as in \Cref{chap:txid}, so the two chapters share a credential layer; EUF-CMA; provable via a few discrete-logarithm equations, in a proof that splits so the secure element only touches $\sk$
   \item central bank's SCI: Pointcheval-Sanders with signing on committed inputs; short, rerandomisable signatures, so the proof of withdrawal is a few group elements
@@ -289,7 +289,7 @@ The signature $\psi$ can never be shown to a payee, since verifying it needs
 $\algo{uid}_0$. The device instead proves once that it holds a valid signature
 on the token value and on the identifier and randomness committed in its
 pseudonym. It rerandomises $(k, l)$ to $(k^*, l^*)$ and proves the remaining
-equation by a Schnorr proof whose challenge hashes the value, the pseudonym and
+equation by a Sigma protocol whose challenge hashes the value, the pseudonym and
 $(k^*, l^*)$. The proof of withdrawal $\Sigma$ is the first entry of every
 token's history, and every payee verifies it.
 
@@ -373,7 +373,7 @@ $\group{1}$ & DL in $\group{1}$ \\ Credential signature scheme & BBS+ & $q$-SDH 
 SCI scheme & Pointcheval-Sanders & $q$-MSDH \\ Public key encryption scheme &
 ElGamal in $\group{1}$ & DDH in $\group{1}$ \\ JPOK &
 BBS+ joint proof & ROM \\ Proof of withdrawal &
-Schnorr proof & ROM \\ \bottomrule \end{tabular}
+Sigma protocol & ROM \\ \bottomrule \end{tabular}
 \caption[Instantiation of each component of offline payments]{Instantiation of
 each generic component of $\OP$, with the assumption under which it is secure:
 the discrete logarithm (DL) assumption, DDH, $q$-SDH, $q$-MSDH, and the random

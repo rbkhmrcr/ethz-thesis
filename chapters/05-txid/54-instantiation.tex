@@ -37,7 +37,7 @@ inverts against a scalar. Both are drawn once at registration and certified
 together in the same credential.
 
 \begin{outline}
-  \item why this epoch PRF: the epoch key must be in $\group{1}$ (the tag PRF pairs it against $\group{2}$) and its derivation must be provable with a Schnorr proof
+  \item why this epoch PRF: the epoch key must be in $\group{1}$ (the tag PRF pairs it against $\group{2}$) and its derivation must be provable with a Sigma protocol
   \item a per-epoch hash raised to a secret exponent is the simplest PRF with both properties
 \end{outline}
 
@@ -218,7 +218,7 @@ user.
 	\item The user samples $\sk,\utk',\utk'' \sample \Zp$, sets $S
 \leftarrow \gen_1^{\sk}$, $T \leftarrow \gen_2^{\utk'}\cdot\gen_3^{\utk''}$, and
 $\PTK \leftarrow (T,\{W_\gamma\})$ for $W_\gamma =
-\ggen_D^{1/(\utk''+\gamma)}$. It computes a Schnorr proof of representation
+\ggen_D^{1/(\utk''+\gamma)}$. It computes a Sigma protocol proof of representation
 $\algoproof_4$ of $(\sk,\utk',\utk'')$ with $S = \gen_1^{\sk}$ and $T =
 \gen_2^{\utk'}\cdot\gen_3^{\utk''}$, with the challenge $\hash(\gen_1,\gen_2,
 \gen_3,S,T,a,\rand)$ on its first message $a$, and sends $(S,T,\algoproof_4)$ to

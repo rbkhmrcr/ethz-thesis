@@ -230,8 +230,8 @@ property we rely on.  The proof in Protocol~\ref{prot:paac} is a sigma protocol 
 Fiat-Shamir heuristic applied~\cite{C:FiaSha86}. This combination satisfies
 simulation extractability in the random oracle model~\cite{INDOCRYPT:FKMV12}.
 
-At registration and issuance, users prove knowledge of $\sk$ with a Schnorr
-proof on a nonce chosen by the registration authority or the issuer, so proofs
+At registration and issuance, users prove knowledge of $\sk$ with a Sigma
+protocol on a nonce chosen by the registration authority or the issuer, so proofs
 cannot be replayed. Issuers check the registration signature before signing, so
 they keep no record of whom they have issued to.
 
