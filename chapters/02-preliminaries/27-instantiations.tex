@@ -251,6 +251,7 @@ Signatures on group elements are malleable. Verification depends only on the
 product of the message elements and the randomness term, so a signature on one
 tuple of group elements is also a valid signature on any other tuple with the
 same product. Unforgeability then holds only for message elements whose discrete
-logarithms are known. The reduction to $q$-SDH requires the signer to sign only
-elements that come with a proof of knowledge of their representation in the
-bases $\gen_i$~\cite{SCN:AuSusMu06,EC:TesZhu23b}.
+logarithms are known to the party requesting the signature. The reduction to
+$q$-SDH requires the signer to sign only elements that come with a proof of
+knowledge of their representation in the bases
+$\gen_i$~\cite{SCN:AuSusMu06,EC:TesZhu23b}.
