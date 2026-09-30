@@ -247,10 +247,10 @@ because computing $\prod_i M_i$ requires no knowledge of the discrete logarithms
 so a signer can produce a valid signature on committed values without ever
 learning them~\cite{SCN:AuSusMu06,EC:TesZhu23b}.
 
-Unforgeability when signing group elements carries a condition that signing
-field elements does not. An adversary able to obtain a signature on an arbitrary group
-element could ask
-for one on $M_i' = M_i \cdot \gen_i^{\delta}$, shifting the certified message by
-a quantity it knows. The reduction to $q$-SDH requires the signer to
-sign only elements that come with a proof of knowledge of their representation
-in the bases $\gen_i$~\cite{SCN:AuSusMu06,EC:TesZhu23b}.
+Signatures on group elements are malleable. Verification depends only on the
+product of the message elements and the randomness term, so a signature on one
+tuple of group elements is also a valid signature on any other tuple with the
+same product. Unforgeability then holds only for message elements whose discrete
+logarithms are known. The reduction to $q$-SDH requires the signer to sign only
+elements that come with a proof of knowledge of their representation in the
+bases $\gen_i$~\cite{SCN:AuSusMu06,EC:TesZhu23b}.
