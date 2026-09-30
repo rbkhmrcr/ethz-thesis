@@ -1,12 +1,9 @@
 \section{Instantiations}\label{sec:prelims-inst}
 
-This section gives the groups, assumptions and concrete schemes that the rest
+This section gives the setting, assumptions and concrete schemes that the rest
 of the thesis builds on. It includes the standard instantiations of primitives
-from this chapter, namely the Pedersen commitment scheme and the ElGamal
-encryption scheme, and prior work used in more than one chapter, namely the
-$\AGHO$ SPS scheme and the BBS+ signature scheme. Schemes used in only one
-chapter, variants modified for one chapter, and our own constructions are given
-in the chapter that uses them.
+from this chapter, the Pedersen commitment scheme and the ElGamal encryption
+scheme, and the BBS+ signature scheme, which is used in more than one chapter.
 
 \subsection{Groups and assumptions}\label{sec:prelims-groups}
 
@@ -16,7 +13,7 @@ cyclic groups of prime order $p$, written multiplicatively, and call their
 elements group elements. For a generator $\gen$ and $a = \gen^x$, the field
 element $x \in \Zp$ is the discrete logarithm of $a$ relative to $\gen$.
 
-Most of our schemes use three such groups, $\group{1}$, $\group{2}$, and
+We use three such groups, $\group{1}$, $\group{2}$, and
 $\group{T}$ of prime order $p$, with generators $\gen \in \group{1}$ and $\ggen
 \in \group{2}$. The groups are equipped with an efficiently computable pairing
 $\pairing \colon \group{1} \times \group{2} \rightarrow \group{T}$. For all $a
@@ -33,8 +30,7 @@ The pairing is non-degenerate, so $\pairing(\gen,\ggen)$ generates $\group{T}$.
 We call $\group{1}$ and $\group{2}$ the source groups and $\group{T}$ the target
 group. We work in the asymmetric, or type III, setting, in which $\group{1} \neq
 \group{2}$ and no efficiently computable homomorphism between them is known.
-Elements of $\group{2}$ carry a tilde, and field elements are usually written
-with Greek letters.
+Elements of $\group{2}$ carry a tilde.
 
 Bilinearity allows relations between exponents in the source groups to be
 checked through equalities in $\group{T}$. The equality
@@ -42,12 +38,10 @@ $\pairing(a,\ggen) = \pairing(\gen,\widetilde{b})$ shows that $a$ and
 $\widetilde{b}$ have the same discrete logarithm relative to their generators,
 without that discrete logarithm being recovered. A pairing product equation is
 an equation of the form $\prod_j \pairing(a_j, \widetilde{b}_j) = t$ for $t \in
-\group{T}$. Our constructions use such equations to verify signatures and
-algebraic relations across $\group{1}$ and $\group{2}$.
+\group{T}$.
 
 Our schemes rely on the DL assumption in \Cref{asm:dl} and the DDH assumption
-in \Cref{asm:ddh}~\cite{DifHel76,Boneh98}. Assumptions specific to one chapter
-are given where they are used.
+in \Cref{asm:ddh}~\cite{DifHel76,Boneh98}.
 
 \begin{assumptionbox}{Discrete logarithm (DL)}{dl}
 
@@ -66,10 +60,12 @@ if $(\gen^x, \gen^y, \gen^{xy})$ and $(\gen^x, \gen^y, \gen^z)$, for $x, y, z
 \end{assumptionbox}
 
 The symmetric external Diffie-Hellman (SXDH) assumption holds in a bilinear group
-if DDH holds in both $\group{1}$ and $\group{2}$.
+if DDH holds in both $\group{1}$ and
+$\group{2}$~\cite{EPRINT:BGMM05,EPRINT:ACHM05}.
 
-DDH cannot hold in a symmetric bilinear group, where $\group{1} = \group{2}$,
-since the pairing decides it. SXDH therefore requires the type III setting.
+DDH cannot hold in a symmetric bilinear group, with $\group{1} = \group{2}$, or
+in a source group with an efficiently computable homomorphism to the other. SXDH
+requires the type III setting.
 
 Some schemes we use are only proven secure in the generic group model
 (GGM)~\cite{EC:Shoup97,IMA:Maurer05}. In the GGM, the adversary sees only
@@ -83,22 +79,25 @@ Such assumptions are stronger than fixed-size ones such as DDH.
 \subsection{Sigma protocols and the Fiat-Shamir transform}\label{sec:prelims-sigma}
 
 Most proof systems in this thesis are Sigma protocols made non-interactive. A
-Sigma protocol for a relation $\rel$ has three moves. The prover sends a first
+Sigma protocol for a relation $\rel$, with a statement $\inst$ known to both
+parties and a witness $\witness$ known to the prover, has three moves. The prover sends a first
 message $a$, the verifier replies with a uniform challenge $c$, and the prover
 sends a response $z$. The verifier then checks $z$ against $(\inst, a, c)$.
-Completeness is defined like the correctness of proof systems. Special soundness
+Completeness is defined as the correctness of proof systems: proofs of true
+statements verify. Special soundness
 requires an efficient extractor that computes a witness from any two accepting
 transcripts $(a, c, z)$ and $(a, c', z')$ with $c \neq c'$. Special
 honest-verifier zero knowledge (SHVZK) requires an efficient simulator that,
 given $\inst$ and $c$, outputs $(a, z)$ distributed as in an honest run with
 challenge $c$~\cite{C:CraDamSch94}.
 
-Schnorr's protocol proves knowledge of $x$ with $h = \gen^x$~\cite{JC:Schnorr91}.
+The Sigma protocol for proof of knowledge of a discrete logarithm proves
+knowledge of $x$ with $h = \gen^x$~\cite{JC:Schnorr91}.
 The prover sends $a = \gen^r$ for $r \sample \Zp$, receives a challenge $c
 \sample \Zp$, and returns $z = r + cx$. The verifier checks $\gen^z \checkcheck
 a h^c$. The same protocol proves knowledge of a representation $h = \prod_i
-\gen_i^{x_i}$, with one response per exponent, and we call its non-interactive
-form a Schnorr proof. Several equations over the same witness are proven by
+\gen_i^{x_i}$, with one response per exponent. Its non-interactive form is also called a
+Schnorr proof. Several equations over the same witness are proven by
 running the protocol for each in parallel with one shared challenge, so that
 they hold together. This shows, for example, that two group elements have the
 same discrete logarithm.
@@ -108,22 +107,20 @@ computes the challenge itself as $c = \hash(\inst, a, \lbl)$, where $\hash$ is a
 random oracle and $\lbl$ a label~\cite{C:FiaSha86}. A Sigma protocol has
 quasi-unique responses if, for given $a$ and $c$, no efficient prover finds two
 distinct accepting responses. Unique responses are a stronger property: the
-response is fixed by a verification equation, as in Schnorr's protocol. If the
+response is fixed by a verification equation, as in the protocol above. If the
 whole statement is hashed, a Sigma protocol with special soundness, SHVZK and
 quasi-unique responses gives a simulation extractable labelled proof system in
 the random oracle model~\cite{INDOCRYPT:FKMV12}.
 
-\begin{outline}
-  \item why hash the whole statement: a part left out can be chosen after seeing the challenge
-  \item ZK simulator programs the random oracle at $(\inst, a, \lbl)$
-  \item extractor rewinds: reruns $\adv$ from the query that fixed the challenge, answers with a fresh challenge, applies special soundness; forking lemma bounds success (cite JC:PoiSte00)
-  \item extraction from a single run without rewinding = straight-line/online, what UC needs (cite C:Fischlin05; links back to \Cref{sec:prelims-security})
-\end{outline}
-
 \subsection{The Pedersen commitment scheme}
 
 The Pedersen commitment scheme in \Cref{prim:pedersen} commits to several field
-elements at once with a single group element~\cite{C:Pedersen91}.
+elements at once with a single group element~\cite{C:Pedersen91}. Its key
+generation algorithm additionally takes the number $n$ of field elements. It is
+perfectly hiding, and computationally binding under the DL assumption. Binding
+holds only against parties that know no discrete logarithm relation between the
+elements of $\ck$. Where a participant could otherwise choose $\ck$, our
+instantiations derive it from a public seed with a hash function.
 
 \begin{primitivebox}{The Pedersen commitment scheme}{pedersen}
 
@@ -147,13 +144,12 @@ input $\ck$, commitment $\com$, and opening $\openinfo = (m_1,\ldots,m_n,
 
 \end{primitivebox}
 
-The Pedersen commitment scheme is perfectly hiding, and computationally binding
-under the DL assumption~\cite{C:Pedersen91}.
-
 \subsection{The ElGamal encryption scheme}
 
 The ElGamal encryption scheme in \Cref{prim:elgamal} encrypts group
-elements~\cite{C:ElGamal84}.
+elements~\cite{C:ElGamal84}. In $\group{1}$, it is IND-CPA secure under the DDH
+assumption in $\group{1}$. Field elements $m$ are encrypted as $\gen^m$, and
+decryption gives back $\gen^m$ rather than $m$.
 
 \begin{primitivebox}{The ElGamal encryption scheme}{elgamal}
 
@@ -171,114 +167,6 @@ return $f_2 / f_1^{\mu}$.
   \end{description}
 
 \end{primitivebox}
-
-ElGamal in $\group{1}$ is IND-CPA secure under the DDH assumption in
-$\group{1}$~\cite{C:ElGamal84}.
-
-Messages are group elements. Field elements $m$ are encrypted as $\gen^m$, and
-decryption gives back $\gen^m$ rather than $m$.
-
-\subsection{Structure-preserving signature schemes}\label{sec:prelims-sps}
-
-Structure-preserving signature (SPS) schemes are signature schemes in which the messages,
-public keys, and signatures are all group elements, and verification consists
-solely of checking pairing product
-equations~\cite{C:AFGHO10,C:AGHO11,TCC:AGOT14,C:KilPanWee15,AC:Groth15,RSA:Ghadafi16}.
-
-\begin{outline}
-  \item why we want them: nothing is hashed, so they combine with efficient zero-knowledge proofs over the same groups; users prove knowledge of signatures on committed or hidden group elements
-\end{outline}
-
-An SPS scheme $\SPS$ over the bilinear groups above consists of the following
-algorithms:
-
-\begin{description}
-
-  \item[$(\pk, \sk) \sample \SPSgen(\secparam, \ell)$ :] The key generation
-algorithm, on input the security parameter and a vector length $\ell$, outputs
-public verification key $\pk$, which consists of group elements, and secret
-signing key $\sk$.
-
-  \item[$\SPSsig \sample \SPSsign(\sk, \vec{\msg})$ :] The signing algorithm
-signs message $\vec{\msg} \in \group{1}^\ell$ using secret key $\sk$, and outputs
-a signature $\SPSsig$ consisting of elements of $\group{1}$ and $\group{2}$.
-
-  \item[$\{0,1\} \leftarrow \SPSverify(\pk, \vec{\msg}, \SPSsig)$ :]
-The verification algorithm evaluates pairing product equations in $\pk$,
-$\vec{\msg}$ and $\SPSsig$, and outputs $0$ or $1$.
-
-\end{description}
-%
-Some schemes are rerandomisable: they additionally provide an algorithm
-$\SPSsig' \sample \SPSrandomise(\SPSsig)$, which, without the secret key,
-turns a signature into a new signature on the same message, distributed as a
-freshly generated one.
-
-A rerandomisable scheme cannot be strongly unforgeable, since rerandomising a
-signature is itself a strong forgery.
-
-Correctness and EUF-CMA security are defined as for digital signature schemes,
-with messages restricted to $\group{1}^\ell$.
-
-\subsection{The $\AGHO$ SPS scheme}
-
-Abe, Groth, Haralambiev, and Ohkubo established a lower bound of three group
-elements for signature size in type III pairing groups, and gave a matching
-construction that signs messages in both groups~\cite{C:AGHO11}. Its signatures
-remain three group elements regardless of message length, and it is strongly
-unforgeable in the GGM.
-
-They also gave a six-element variant that is strongly unforgeable under a
-non-interactive $q$-type assumption, and a separate rerandomisable three-element
-scheme for messages in one group only, which is existentially unforgeable in the
-GGM~\cite{C:AGHO11}. We use the rerandomisable scheme with $\group{1}$ and $\group{2}$ swapped, so that messages
-are in $\group{1}$, and call it $\AGHO$. It is given in \Cref{prim:agho}. Its
-secret key consists only of field elements, and the message enters signing only
-through the terms $\msg_i^{-\mu_i}$. The threshold version in \Cref{chap:tsps}
-relies on both properties.
-\rebekah{AI wording from your outline ("matters for the threshold version"): check this says what you mean.}
-
-\begin{primitivebox}{The $\AGHO$ SPS scheme}{agho}
-
-  \begin{description}
-
-    \item[$(\pk, \sk) \sample \SPSgen(\secparam, \ell)$ :] Sample $\mu_1,
-\ldots, \mu_\ell, \tau \sample \Zp^*$, and output $\sk = (\mu_1, \ldots, \mu_\ell,
-\tau)$ and $\pk = (\widetilde{u}_1, \ldots, \widetilde{u}_\ell, v)$, where
-$\widetilde{u}_i = \ggen^{\mu_i}$ and $v = \gen^{\tau}$.
-
-    \item[$\SPSsig \sample \SPSsign(\sk, \vec{\msg})$ :] On input $\vec{\msg} =
-(\msg_1, \ldots, \msg_\ell) \in \group{1}^\ell$, sample $\omega \sample \Zp^*$
-and output
-      %
-      \begin{equation*}
-      %
-	\SPSsig = (\widetilde{r}, \widetilde{s}, z) = \left(\ggen^{\omega}, \
-\widetilde{r}^{\,\tau}, \ \left(\gen \prod_{i=1}^{\ell}
-\msg_i^{-\mu_i}\right)^{1/\omega}\right).
-      %
-      \end{equation*}
-
-    \item[$\SPSsig' \sample \SPSrandomise(\SPSsig)$ :] On input $\SPSsig =
-(\widetilde{r}, \widetilde{s}, z)$, sample $\omega' \sample \Zp^*$ and output
-$(\widetilde{r}^{\,\omega'}, \widetilde{s}^{\,\omega'}, z^{1/\omega'})$.
-
-    \item[$\{0,1\} \leftarrow \SPSverify(\pk, \vec{\msg}, \SPSsig)$ :] On input
-$\SPSsig = (\widetilde{r}, \widetilde{s}, z)$, output $1$ if and only if
-      %
-      \begin{equation*}
-      %
-	\pairing(v, \widetilde{r}) = \pairing(\gen, \widetilde{s}) \ \wedge\
-\pairing(z, \widetilde{r}) \prod_{i=1}^{\ell} \pairing(\msg_i, \widetilde{u}_i)
-= \pairing(\gen, \ggen).
-      %
-      \end{equation*}
-
-  \end{description}
-
-\end{primitivebox}
-
-$\AGHO$ is existentially unforgeable in the GGM~\cite{C:AGHO11}.
 
 \subsection{The BBS+ signature scheme}\label{sec:prelims-bbs}
 
@@ -302,13 +190,6 @@ following:
 \ggen_Z = \ggen^z)$.
 
       \end{enumerate}
-
-      The generators are an input rather than an output. Standard presentations
-have the signer sample them, which is sound when the signer is the only party
-relying on them. Where the same generators also key a commitment whose binding
-must hold against the signer, they are instead fixed by hashing to $\group{1}$
-from a public seed, so that no party knows a discrete logarithm relation among
-them.
 
     \item[$\signature \sample \BBSsign(\sk,(\msg_1, \ldots, \msg_n))$ :] On
 input secret key $\sk = z$ and message $(\msg_1, \ldots, \msg_n) \in
@@ -338,6 +219,12 @@ and signature $\signature = (e,r,E)$, do:
 
 \end{primitivebox}
 
+The generators are an input rather than an output. Standard presentations have
+the signer sample them, which is sound when the signer is the only party relying
+on them. Where the same generators also key a commitment whose binding must hold
+against the signer, they are instead fixed by hashing to $\group{1}$ from a
+public seed, so that no party knows a discrete logarithm relation among them.
+
 The BBS+ signature scheme is existentially unforgeable under the $q$-strong
 Diffie-Hellman ($q$-SDH) assumption of \Cref{asm:qsdh-bbs}, a $q$-type
 assumption~\cite{EC:BonBoy04a}.
@@ -365,6 +252,6 @@ Unforgeability when signing group elements carries a condition that signing
 field elements does not. An adversary able to obtain a signature on an arbitrary group
 element could ask
 for one on $M_i' = M_i \cdot \gen_i^{\delta}$, shifting the certified message by
-a quantity it knows. The reduction to $q$-SDH therefore requires the signer to
+a quantity it knows. The reduction to $q$-SDH requires the signer to
 sign only elements that come with a proof of knowledge of their representation
 in the bases $\gen_i$~\cite{SCN:AuSusMu06,EC:TesZhu23b}.

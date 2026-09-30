@@ -1,14 +1,13 @@
 \chapter{Preliminaries}\label{chap:preliminaries}
 
 This chapter fixes notation and describes how we define and prove security.
-It then introduces the primitives that later chapters build on: commitment
-schemes, pseudorandom functions, hash functions, signature schemes, public key
-encryption schemes and proof systems. Their definitions are standard and follow
-Katz and Lindell~\cite{KatLin14}. Finally, it gives bilinear groups, the
-assumptions we rely on, and the instantiations used by more than one chapter:
-Sigma protocols and the Fiat-Shamir transform, the Pedersen commitment scheme,
-the ElGamal encryption scheme, SPS schemes with $\AGHO$, and the BBS+ signature
-scheme.
+It introduces definitions of the abstract primitives that later chapters build
+on: commitment schemes, pseudorandom functions, hash functions, signature
+schemes, public key encryption schemes and proof systems. These are standard and
+follow Katz and Lindell~\cite{KatLin14}. It then instantiates these primitives,
+defining bilinear groups, the assumptions we rely on, Sigma protocols and the
+Fiat-Shamir transform, the Pedersen commitment scheme, the ElGamal encryption
+scheme, and the BBS+ signature scheme.
 
 The thesis contains numerous primitives, protocols, security definitions,
 instantiations and assumptions. To ease understanding of them, and to separate
@@ -18,28 +17,27 @@ displayed as plain figures. Security experiments are in green boxes, assumptions
 in pink boxes, instantiations of primitives in blue boxes, and the protocols that
 are contributions of this work in purple boxes. Every box and figure is numbered and titled. Once
 experiments, assumptions, primitives and protocols have been introduced, later
-chapters refer back to them rather than restating them, and each chapter is
+chapters refer back to them rather than restating them. Each chapter aims to be
 otherwise as self-contained as possible.
 
 \section{Notation}\label{sec:prelims-notation}
 
 We write $\{0,1\}^*$ for the set of bit strings of any length, $|x|$ for the
-length of $x$, and $x \| y$ for the concatenation of $x$ and $y$. Both $[n]$ and
-$[1,n]$ denote the set $\{1, \ldots, n\}$. Vectors carry an arrow, as in
-$\vec{x}$, and matrices are upright capitals. We write $x \sample S$ for
+length of $x$, and $x \| y$ for the concatenation of $x$ and $y$. We write
+$[1,n]$ for the set $\{1, \ldots, n\}$. Vectors are denoted $\vec{x}$, and
+matrices are upright capitals. We write $x \sample S$ for
 sampling $x$ uniformly from a set $S$, $y \sample \algo{A}(x)$ for running a
 randomised algorithm $\algo{A}$ on input $x$, and $y \leftarrow \algo{A}(x)$ for
-running a deterministic one. Where a security argument needs to name the
+running a deterministic one. Where a security argument needs to specify the
 randomness, we write $\algo{A}(x; \rho)$, so that $y \sample \algo{A}(x)$ is
-$y \leftarrow \algo{A}(x; \rho)$ for uniform $\rho$. A list of the notation used
-throughout is given at the front of the thesis.
+$y \leftarrow \algo{A}(x; \rho)$ for uniform $\rho$. The notation used
+throughout is listed on page~\pageref{sec:notation}.
 
 \section{Defining secure protocols}\label{sec:prelims-security}
 
-The contributions of this thesis include both constructions of protocols and
-constructions of their underlying primitives. We take different approaches to
-defining and proving the security of each of these, described below after the
-notions of efficiency and negligible probability that both rely on.
+The contributions of this thesis include constructions of protocols and of their
+underlying primitives. We take different approaches to defining and proving the
+security of each of these, described below.
 
 The definitions of the security goals that we wish to achieve are not complete
 without defining the capabilities of the adversary and its success probability.
@@ -59,100 +57,74 @@ instantiations specifically for the efficiency benefits. However, we wish to
 separate the instantiation choices from the design and security proofs of the
 abstract constructions that we present.
 
-An adversary is considered efficient if it runs in
+We call an adversary efficient if it runs in
 probabilistic polynomial time (PPT) in the security parameter. We call this
 parameter $\secparam$, and so the adversary's running time is bounded by
-$p(\secparam)$ for some fixed polynomial $p$. It may use randomness in its
-computation. Honest parties must also satisfy this definition of efficiency.
-Every algorithm takes $\secparam$ as an input, explicitly or implicitly.
+$p(\secparam)$ for some fixed polynomial $p$. It may use randomness.
+Honest parties must also satisfy this definition of efficiency.
 
-For the success probability of the adversary, we define small with a negligible
+For the success probability of the adversary, we define a negligible
 function. A function $f$ from the natural
 numbers to non-negative real numbers is negligible if it is eventually below every
 inverse polynomial. Concretely, for every
 polynomial $p$, there exists $N$ such that $f(\secparam) < 1/p(\secparam)$ for
-all $\secparam > N$. We write $\negl(\secparam)$ for an unspecified negligible
-function. Negligible functions have a property of closure which carries well to
-their use in security definitions in cryptography. This is that a polynomial
-number of events each occurring with negligible probability, still occurs with
-negligible probability in total. This means an adversary repeating an attack
-with negligible success probability polynomially many times will still have a
-negligible probability of success.
+all $\secparam > N$. We write $\negl(\secparam)$ for a negligible
+function.
 
-Indistinguishability combines these two notions. A distinguisher is a PPT
-adversary that outputs a single bit. Two families of distributions indexed by
-$\secparam$ are computationally indistinguishable if every distinguisher outputs
-$1$ with probabilities that differ only negligibly between the two. This notion
-is used later by the DDH assumption, by zero knowledge, and to compare real and
-ideal executions.
+A distinguisher is a PPT adversary that outputs a single bit. Two families of
+distributions indexed by $\secparam$ are computationally indistinguishable if
+every distinguisher outputs $1$ with probabilities that differ only negligibly
+between the two.
 
-By primitives, we refer to building blocks such as commitments and signature
-schemes. Security in this case is handled through defining experiments, a
+\paragraph{Security of primitives.} We refer to building blocks such as
+commitments and signature schemes as
+primitives, and to the schemes constructed in each chapter as protocols.
+Security of primitives is handled through defining experiments, a
 limited number of oracles which an adversary has access to, and then showing
 that the adversary cannot win with greater probability than some predefined
 amount.
 
-An experiment is a game between a challenger, which runs the honest
-algorithms, and the adversary $\adv$. The adversary may be given oracle access,
-in which it submits inputs of its choice and the challenger answers them using
-secrets that $\adv$ does not see. The experiment states when $\adv$ wins. The
-advantage $\Adv$ of $\adv$ is its probability of winning, or, where guessing
-already wins half the time, the distance of that probability from $1/2$. A
-property holds if every PPT adversary has negligible advantage. Proofs are
+An experiment is a game between a challenger,
+which runs the honest algorithms, and the adversary $\adv$. The adversary may be
+given oracle access. The advantage $\Adv$ of $\adv$ is its probability of
+winning, or the distance of that probability from $1/2$. A property holds if every PPT adversary has negligible advantage. Proofs are
 reductions: from an adversary with non-negligible advantage, we build an
 algorithm that breaks an assumption or another primitive. Many proofs go
 through a sequence of games, and bound the change in the success probability of
 $\adv$ between consecutive games.
 
-For larger protocols with many parties and interfaces, we capture all security
+\paragraph{Security of protocols.} For larger protocols with many parties
+and interfaces, we capture all security
 goals at once inside an ideal functionality. The ideal functionality represents
 an incorruptible trusted party that receives the inputs of each protocol task
-and returns the prescribed outputs. We then construct a simulator to show that
+and returns the prescribed outputs. We construct a simulator to show that
 the view of an adversary in the real world, interacting with our protocol, is
 indistinguishable from the view when interacting with the ideal functionality
 itself.
 
-We have the outputs of the honest parties and~$\adv$ during an execution of a
-protocol~$\Pi$ in the real world captured in
-$\textsc{Exec}_{\Pi,\adv}(\secparam)$, and we have the outputs of the honest
+The outputs of the honest parties and~$\adv$ during an execution of a
+protocol~$\Pi$ in the real world are captured in
+$\textsc{Exec}_{\Pi,\adv}(\secparam)$, and the outputs of the honest
 parties and~$\simu$ interacting with an ideal functionality~$\idfu{}$ in the
-ideal world captured by $\textsc{Exec}_{\idfu{},\simu}(\secparam)$. We then say
-that the protocol~$\Pi$ securely realises the ideal functionality~$\idfu{}$ if
-for every PPT adversary~$\adv$, there exists a PPT simulator~$\simu$ where
+ideal world by $\textsc{Exec}_{\idfu{},\simu}(\secparam)$. We say the
+protocol~$\Pi$ securely realises the ideal functionality~$\idfu{}$ if for every
+PPT adversary~$\adv$, there exists a PPT simulator~$\simu$ where
 $\textsc{Exec}_{\Pi,\adv}(\secparam)$ is computationally indistinguishable from
 $\textsc{Exec}_{\idfu{},\simu}(\secparam)$. As the ideal functionality achieves
-all security properties by design, this then shows that the protocol achieves
-them too.
+all security properties by design, this shows that the protocol achieves them
+too.
 
-The subscript of $\idfu{}$ names the task it captures. Each party receives its
-own output from $\idfu{}$ and nothing more. The view of a party consists of its
-inputs, its randomness and the messages it receives. In the ideal execution,
-honest parties communicate only with $\idfu{}$, and $\simu$ takes the place of
-$\adv$.
+The view of a party consists of its inputs, its randomness and the messages it
+receives. In the ideal execution, honest parties communicate only with
+$\idfu{}$, and $\simu$ takes the place of $\adv$.
 
-\begin{outline}
-  \item we work in the standalone model, executions composed sequentially
-  \item UC gives security under arbitrary concurrent composition: every
-environment supplies inputs and talks to the adversary throughout, so the
-simulator cannot rewind (cite FOCS:Canetti01)
-  \item why it matters: several of our simulators extract witnesses by
-rewinding (forking lemma), sound standalone but not in UC (your old ch05
-52-definitions ``Security model'' paragraph says this)
-  \item straight-line extraction would recover UC: prover encrypts its witness
-under a key in the CRS and proves it, or Fischlin instead of Fiat-Shamir (cite
-C:Fischlin05)
-  \item both cost proof size; we only pay it for the withdrawal proof of
-\Cref{chap:offline-payments}
-\end{outline}
-
-In both kinds of definition, the adversary corrupts some participants.
-Honest-but-curious, or semi-honest, participants follow the protocol, and the
-adversary sees their views and combines them with the views of the other
-corrupted participants. Malicious participants deviate from the protocol
-arbitrarily. Under static corruption, the set of corrupted participants is fixed
-before the protocol starts. Under adaptive corruption, the adversary may corrupt
-further participants during the execution, based on what it has seen. Each
-chapter states which participants may be corrupted, and how.
+Honest-but-curious participants follow the protocol, and the adversary sees
+their views and combines them with the views of the other corrupted
+participants. Malicious participants deviate from the protocol arbitrarily.
+Under static corruption, the set of corrupted participants is fixed before the
+protocol starts. Under adaptive corruption, the adversary may corrupt further
+participants during the execution, based on what it has seen. Each chapter
+states which participants may be corrupted, and how.
 
 \input{chapters/02-preliminaries/21-commitments}
 \input{chapters/02-preliminaries/22-prfs}

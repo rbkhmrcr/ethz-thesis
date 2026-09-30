@@ -8,7 +8,7 @@ follows:
 \begin{description}
 
   \item[$\key \sample \hashgen(\secparam)$ :] The key generation algorithm takes
-the security parameter as input, and outputs a key $\key$.
+the security parameter as input, and outputs a key $\key \in \keyspace$.
 
   \item[$y \leftarrow \hasheval(\key, x)$ :] The evaluation algorithm takes key
 $\key$ and input $x \in \{0,1\}^*$, and outputs a digest $y \in \range$.
@@ -17,14 +17,7 @@ $\key$ and input $x \in \{0,1\}^*$, and outputs a digest $y \in \range$.
 %
 We say $\Hash = (\hashgen, \hasheval)$ is a hash function family if $\hasheval(\key, \cdot)$ is efficiently computable for every
 $\key$ output by $\hashgen(\secparam)$. We use the standard syntax and security
-notions for hash functions~\cite{KatLin14}. When the key $\key$ is fixed and
-public, we write $\hash(x)$ for $\hasheval(\key, x)$.
-
-The range can be any set, and later sections also hash into fields and groups.
-Schemes that use several hash functions write them $\hashone, \hashtwo, \ldots$
-and give each its own domain separation tag. A domain separation tag is a fixed
-string prefixed to every input, and distinct tags make the hash functions
-behave as independent functions.
+notions for hash functions~\cite{KatLin14}.
 
 \paragraph{Collision resistance.} Collision resistance requires that no
 efficient adversary can find two distinct inputs hashing to the same digest, as
@@ -90,6 +83,13 @@ PPT adversary $\adv$. A related property is second preimage resistance,
 which requires that no efficient adversary, given $x$, can find a distinct
 input $x'$ with the same digest. Collision resistance implies
 second preimage resistance.
+
+When the key $\key$ is fixed and public, we write $\hash(x)$ for
+$\hasheval(\key, x)$. The range can be any set, and later sections also hash
+into fields and groups. Schemes that use several hash functions write them
+$\hashone, \hashtwo, \ldots$ and give each its own domain separation tag. A
+domain separation tag is a fixed string prefixed to every input, and distinct
+tags make the hash functions behave as independent functions.
 
 \paragraph{One-way functions.} A function $f$ is one-way if it is efficiently
 computable and, for a uniform input $x$, no PPT adversary given $f(x)$ outputs

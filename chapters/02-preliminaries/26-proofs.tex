@@ -12,10 +12,14 @@ A statement $\inst$ is true if there is a witness $\witness$ with
 $\rel(\inst, \witness) = 1$. Soundness requires that verifiers are not convinced
 of false statements. Zero knowledge is a separate property of a proof system,
 not part of its definition. We use non-interactive proof systems throughout.
+\rebekah{cite? Katz and Lindell does not cover these. Suggested:
+STOC:BluFelMic88 (NIZK), FOCS:Sahai99 and C:DDOPS01 (simulation soundness),
+AC:Groth06 (simulation extractability)}
 
 \paragraph{Syntax.} A non-interactive proof system $\NIZK$ consists of the
 following algorithms. We call it a non-interactive zero-knowledge (NIZK) proof system when it is also
-zero knowledge, as defined below.
+zero knowledge, as defined below. We write $\NIZK$ throughout, as all of our
+constructions satisfy zero knowledge.
 
 \begin{description}
 
@@ -83,8 +87,8 @@ Lysyanskaya call a signature of knowledge, with the label as the signed
 message~\cite{C:ChaLys06}.
 
 To state these security notions, we introduce the following additional
-algorithms, for a simulator that produces proofs without a witness and an
-extractor that recovers a witness from a proof.
+algorithms: a simulator that produces proofs without a witness and an extractor
+that recovers a witness from a proof.
 
 \begin{description}
 
@@ -140,11 +144,10 @@ wins}] - \frac{1}{2} \right|.
 We say the proof system satisfies the property of zero knowledge if this
 advantage is negligible for every PPT adversary $\adv$.
 
-\paragraph{Simulation extractability.} Our security arguments need not only that
-accepting proofs are for true statements, but that a witness can be recovered
-from them, and that this remains so after the adversary has observed simulated
-proofs. Simulation extractability, defined by \Cref{exp:simext}, captures both of
-these properties.
+\paragraph{Simulation extractability.} Our security arguments need that a
+witness can be recovered from all accepting proofs, even after an adversary has
+observed simulated proofs. Simulation extractability, defined by
+\Cref{exp:simext}, captures this.
 
 \begin{experimentbox}{Proof systems: simulation extractability}{simext}
 
@@ -184,25 +187,7 @@ A labelled proof system is simulation extractable if this advantage is negligibl
 for every PPT adversary $\adv$.
 
 The condition $(\inst^*, \lbl^*) \notin \Query$ makes proofs non-malleable
-across labels.
-
-It also makes them non-malleable across statements, since $\adv$ cannot turn a
-simulated proof into a proof for another statement either. Since a witness can
-be extracted, a proof system that is simulation extractable is in particular a
-proof of knowledge.
-
-Zero knowledge and simulation extractability are independent properties.  Zero
-knowledge ensures that simulated proofs are indistinguishable from honestly
-generated ones. Simulation extractability ensures that a witness can be
-extracted from any verifying proof, even after the adversary has observed
-simulated proofs.
-
-\begin{outline}
-  \item our simulation extractability excludes only the statement and label
-pairs $\adv$ saw proofs for, so rerandomisable proofs can still satisfy it
-  \item matters for Groth16 in \Cref{chap:txid}, whose proofs can be
-rerandomised
-\end{outline}
-
-Sigma protocols made non-interactive with the Fiat-Shamir transform satisfy
-both properties, as shown in \Cref{sec:prelims-sigma}.
+across labels. It also makes them non-malleable across statements, since $\adv$
+cannot turn a simulated proof into a proof for another statement either. Since a
+witness can be extracted, simulation extractable proof systems are proofs of
+knowledge.

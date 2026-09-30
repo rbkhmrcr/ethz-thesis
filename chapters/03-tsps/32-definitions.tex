@@ -16,6 +16,108 @@ which signers to corrupt during protocol execution, subject to $|\Cor| \leq t$.
 Under static corruption, it chooses them all before key generation. We write
 $\Cor$ for the set of corrupted signers and $\mathcal{H}$ for its complement.
 
+\subsection{Structure-preserving signature schemes}\label{sec:tsps-sps}
+
+Structure-preserving signature (SPS) schemes are signature schemes in which the messages,
+public keys, and signatures are all group elements, and verification consists
+solely of checking pairing product
+equations~\cite{C:AFGHO10,C:AGHO11,TCC:AGOT14,C:KilPanWee15,AC:Groth15,RSA:Ghadafi16}.
+
+\begin{outline}
+  \item why we want them: nothing is hashed, so they combine with efficient zero-knowledge proofs over the same groups; users prove knowledge of signatures on committed or hidden group elements
+\end{outline}
+
+An SPS scheme $\SPS$ over the bilinear groups of \Cref{sec:prelims-groups}
+consists of the following
+algorithms:
+
+\begin{description}
+
+  \item[$(\pk, \sk) \sample \SPSgen(\secparam, \ell)$ :] The key generation
+algorithm, on input the security parameter and a vector length $\ell$, outputs
+public verification key $\pk$, which consists of group elements, and secret
+signing key $\sk$.
+
+  \item[$\SPSsig \sample \SPSsign(\sk, \vec{\msg})$ :] The signing algorithm
+signs a message $\vec{\msg}$ of $\ell$ group elements using secret key $\sk$, and
+outputs
+a signature $\SPSsig$ consisting of elements of $\group{1}$ and $\group{2}$.
+
+  \item[$\{0,1\} \leftarrow \SPSverify(\pk, \vec{\msg}, \SPSsig)$ :]
+The verification algorithm evaluates pairing product equations in $\pk$,
+$\vec{\msg}$ and $\SPSsig$, and outputs $0$ or $1$.
+
+\end{description}
+%
+Some schemes are rerandomisable: they additionally provide an algorithm
+$\SPSsig' \sample \SPSrandomise(\SPSsig)$, which, without the secret key,
+turns a signature into a new signature on the same message, distributed as a
+freshly generated one.
+
+A rerandomisable scheme cannot be strongly unforgeable, since rerandomising a
+signature is itself a strong forgery.
+
+Correctness and EUF-CMA security are defined as for digital signature schemes.
+Messages may be elements of either source group. The schemes we use sign
+messages in $\group{1}^\ell$.
+
+\subsection{The $\AGHO$ SPS scheme}
+
+Abe, Groth, Haralambiev, and Ohkubo established a lower bound of three group
+elements for signature size in type III pairing groups, and gave a matching
+construction that signs messages in both groups~\cite{C:AGHO11}. Its signatures
+remain three group elements regardless of message length, and it is strongly
+unforgeable in the GGM.
+
+They also gave a rerandomisable three-element scheme for messages in one group
+only, which is existentially unforgeable in the GGM~\cite{C:AGHO11}. We use this
+scheme with $\group{1}$ and $\group{2}$ swapped, so that messages are in
+$\group{1}$, and call it $\AGHO$. It is given in \Cref{prim:agho}. Its secret
+key consists only of field elements, and the message enters signing only through
+the terms $\msg_i^{-\mu_i}$. Our threshold version relies on both properties.
+
+\begin{primitivebox}{The $\AGHO$ SPS scheme}{agho}
+
+  \begin{description}
+
+    \item[$(\pk, \sk) \sample \SPSgen(\secparam, \ell)$ :] Sample $\mu_1,
+\ldots, \mu_\ell, \tau \sample \Zp^*$, and output $\sk = (\mu_1, \ldots, \mu_\ell,
+\tau)$ and $\pk = (\widetilde{u}_1, \ldots, \widetilde{u}_\ell, v)$, where
+$\widetilde{u}_i = \ggen^{\mu_i}$ and $v = \gen^{\tau}$.
+
+    \item[$\SPSsig \sample \SPSsign(\sk, \vec{\msg})$ :] On input $\vec{\msg} =
+(\msg_1, \ldots, \msg_\ell) \in \group{1}^\ell$, sample $\omega \sample \Zp^*$
+and output
+      %
+      \begin{equation*}
+      %
+	\SPSsig = (\widetilde{r}, \widetilde{s}, z) = \left(\ggen^{\omega}, \
+\widetilde{r}^{\,\tau}, \ \left(\gen \prod_{i=1}^{\ell}
+\msg_i^{-\mu_i}\right)^{1/\omega}\right).
+      %
+      \end{equation*}
+
+    \item[$\SPSsig' \sample \SPSrandomise(\SPSsig)$ :] On input $\SPSsig =
+(\widetilde{r}, \widetilde{s}, z)$, sample $\omega' \sample \Zp^*$ and output
+$(\widetilde{r}^{\,\omega'}, \widetilde{s}^{\,\omega'}, z^{1/\omega'})$.
+
+    \item[$\{0,1\} \leftarrow \SPSverify(\pk, \vec{\msg}, \SPSsig)$ :] On input
+$\SPSsig = (\widetilde{r}, \widetilde{s}, z)$, output $1$ if and only if
+      %
+      \begin{equation*}
+      %
+	\pairing(v, \widetilde{r}) = \pairing(\gen, \widetilde{s}) \ \wedge\
+\pairing(z, \widetilde{r}) \prod_{i=1}^{\ell} \pairing(\msg_i, \widetilde{u}_i)
+= \pairing(\gen, \ggen).
+      %
+      \end{equation*}
+
+  \end{description}
+
+\end{primitivebox}
+
+$\AGHO$ is existentially unforgeable in the GGM~\cite{C:AGHO11}.
+
 \subsection{Threshold structure-preserving signature schemes}
 
 We write $\shr{x}$ for a sharing of $x$ between the $n$ signers, and $x_i$ for

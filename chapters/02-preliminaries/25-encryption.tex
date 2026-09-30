@@ -13,7 +13,8 @@ algorithms:
 outputs public encryption key $\pk$ and secret decryption key $\sk$.
 
   \item[$\ciph \sample \PKEencrypt(\pk, \msg)$ : ] The encryption algorithm
-encrypts message $\msg$ using public key $\pk$, giving output ciphertext
+encrypts message $\msg \in \msgspace$ using public key $\pk$, giving output
+ciphertext
 $\ciph$.
 
   \item[$\msg \leftarrow \PKEdecrypt(\sk, \ciph)$ : ] The decryption algorithm
@@ -79,5 +80,4 @@ advantage is negligible for every PPT adversary $\adv$.
 
 Indistinguishability under chosen plaintext attack (IND-CPA) is defined by the
 same experiment without the oracle $\deco$. IND-CCA security implies IND-CPA
-security. The ElGamal encryption scheme in \Cref{prim:elgamal} is only IND-CPA
-secure, which is enough for \Cref{chap:offline-payments}.
+security.

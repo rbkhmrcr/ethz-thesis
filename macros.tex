@@ -57,7 +57,7 @@
 \input{macros-boxes}
 
 \newcommand{\algo}[1]{\mathsf{#1}}
-\newcommand{\sample}{\overset{\$}{\leftarrow}}
+\newcommand{\sample}{\mathrel{\smash{\overset{\$}{\leftarrow}}}}
 \newcommand{\secparam}{\kappa}
 \newcommand{\negl}{\mathsf{negl}}
 \newcommand{\checkcheck}{\overset{?}{=}}
@@ -72,6 +72,8 @@
 \newcommand{\com}{\algo{com}}
 \newcommand{\msg}{\algo{msg}}
 \newcommand{\key}{\algo{key}}
+\newcommand{\msgspace}{\mathcal{M}}
+\newcommand{\keyspace}{\mathcal{K}}
 
 % com sec
 \newcommand{\adv}{\mathcal{A}}

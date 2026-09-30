@@ -12,7 +12,7 @@ algorithms:
 outputs public verification key $\pk$ and secret signing key $\sk$.
 
   \item[$\signature \sample \DSsign(\sk, \msg)$ : ] The signing algorithm signs
-message $\msg$ using secret key $\sk$, giving output $\signature$.
+message $\msg \in \msgspace$ using secret key $\sk$, giving output $\signature$.
 
   \item[$\{0,1\} \leftarrow \DSverify(\pk,\msg,\signature)$ : ] The verification
 algorithm verifies signature $\signature$ on message $\msg$ using public key
@@ -77,9 +77,7 @@ We say the digital signature scheme $\DS$ is EUF-CMA secure if this advantage is
 negligible for every PPT adversary $\adv$.
 
 Strong unforgeability under chosen message attack (sUF-CMA) is defined by the
-same experiment, except that the oracle stores the pairs $(\msg, \signature)$ it
-returns, and any valid pair that was not returned counts as a forgery. The
-adversary therefore also wins with a new signature on a message it has queried,
-which is called a strong forgery. Every scheme in this thesis needs only EUF-CMA
-security of the signature schemes it builds on. This allows the use of the
-rerandomisable signature schemes introduced in \Cref{sec:prelims-sps}.
+same experiment except that the oracle stores the pairs $(\msg, \signature)$ it
+returns, and any valid pair that was not returned counts as a forgery. Every
+scheme in this thesis needs only EUF-CMA security of the signature schemes it
+builds on.
