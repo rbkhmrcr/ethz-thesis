@@ -1,47 +1,35 @@
-\chapter*{Notation}\addcontentsline{toc}{chapter}{Notation}
-
-\begin{outline}
-  \item this page lists notation used throughout; notation used in one chapter
-only is defined there
-\end{outline}
+\chapter*{Notation}\addcontentsline{toc}{chapter}{Notation}\label{sec:notation}
 
 \begin{longtable}{l p{0.7\textwidth}}
 \toprule
 Symbol & Meaning \\
 \midrule
-\multicolumn{2}{l}{General} \\*
+\multicolumn{2}{l}{\textbf{General}} \\*
 $\secparam$ & security parameter \\
 PPT & probabilistic polynomial time \\
 $\negl(\secparam)$ & a negligible function \\
 $x \sample S$ & $x$ sampled uniformly from the set $S$ \\
-$y \sample \algo{A}(x)$ & running randomised algorithm $\algo{A}$ on $x$ \\
-$y \leftarrow \algo{A}(x)$ & running deterministic algorithm $\algo{A}$ on $x$ \\
+$y \sample \algo{A}(x)$ & randomised algorithm $\algo{A}$ on $x$ \\
+$y \leftarrow \algo{A}(x)$ & deterministic algorithm $\algo{A}$ on $x$ \\
 $\algo{A}(x; \rho)$ & $\algo{A}$ run on $x$ with randomness $\rho$ \\
-$\{0,1\}^*$, $|x|$ & bit strings of any length, length of $x$ \\
-$[n]$, $[1,n]$ & the set $\{1, \ldots, n\}$ \\
+$\{0,1\}^*$ & bit strings of any length \\
+$|x|$ & length of $x$ \\
+$[1,n]$ & the set $\{1, \ldots, n\}$ \\
 $x \| y$ & concatenation \\
-$\vec{x}$, $\mat{K}$ & vector, matrix \\
+$\vec{x}$ & vector \\
+$\mat{K}$ & matrix \\
 \midrule
-\multicolumn{2}{l}{Fields and groups} \\*
+\multicolumn{2}{l}{\textbf{Fields and groups}} \\*
 $\Zp$, $\Zp^*$ & integers modulo the prime $p$, and its non-zero elements \\
 $\group{1}$, $\group{2}$, $\group{T}$ & source and target groups of prime order $p$ \\
 $\gen$, $\ggen$ & generators of $\group{1}$ and $\group{2}$ \\
-$\widetilde{b}$ & a tilde marks an element of $\group{2}$ \\
 $\pairing$ & pairing $\group{1} \times \group{2} \rightarrow \group{T}$ \\
-$\checkcheck$ & equality checked by the verifier \\
 \midrule
-\multicolumn{2}{l}{Security} \\*
-$\adv$, $\advB$ & adversary, reduction \\
+\multicolumn{2}{l}{\textbf{Security}} \\*
+$\adv$, $\advB$ & adversaries \\
 $\Adv^{\mathsf{x}}_{\algo{P},\adv}(\secparam)$ & advantage of $\adv$ against property $\mathsf{x}$ of $\algo{P}$ \\
 $\idfu{}$ & ideal functionality \\
 $\simu$ & simulator \\
 $\textsc{Exec}$ & joint output of a real or ideal execution \\
-$\hash$ & hash function, usually a random oracle \\
-\midrule
-\multicolumn{2}{l}{Primitives} \\*
-$\ck$, $\com$, $\openinfo$ & commitment key, commitment, opening \\
-$\pk$, $\sk$ & public and secret key \\
-$\crs$, $\inst$, $\witness$, $\rel$ & common reference string, statement, witness, relation \\
-$\algoproof$, $\lbl$ & proof, label \\
 \bottomrule
 \end{longtable}
