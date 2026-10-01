@@ -11,19 +11,13 @@
 
 Throughout, we use hash functions $\hash_p$ into $\Zp$ and
 $\hash_{\group{1}}$ into $\group{1}$. The commitment scheme is the Pedersen
-commitment scheme, with key $\ck = (\hgen_1, \hgen) \leftarrow
+commitment scheme, with key $\ck = (\hgen_1, \hgen) \sample
 \ComGen(\secparam)$, so that a pseudonym is $\com = \hgen_1^{\algo{uid}}
 \hgen^{s}$. The BBS+ generators $\gen_0, \ldots, \gen_{\ell+1}$ and the
 generators $P_0, \ldots, P_\ell$ of the central bank's signing on committed
 inputs are separate from $\ck$. Every generator is obtained as
 $\hash_{\group{1}}$ of its own fixed string, so that no participant knows the
-discrete logarithm relations among them. For $\msg = (\msg_0, \ldots,
-\msg_{\ell-1}) \in \Zp^\ell$ we write the following:
-%
-\begin{equation*}
-  \vec{P}^{\msg\|\openinfo} = P_\ell^{\openinfo} \prod_{i=0}^{\ell-1}
-P_i^{\msg_i}.
-\end{equation*}
+discrete logarithm relations among them.
 
 \subsection{Instantiating $\JPOK$ with BBS+}\label{sec:joint-proof}
 
@@ -85,8 +79,8 @@ audit ciphertext $\ciph = (c_1, c_2)$ and signed message $m$:
 
   \begin{description}
 
-    \item[$\Phi \leftarrow \JPOKprove_0(\sk, m) \leftrightarrow
-\JPOKprove_1(\algo{uid}, \varphi, s, \rho, m)$ :] The secure element runs
+    \item[$\Phi \sample \JPOKprove_0(\inst, \sk) \leftrightarrow
+\JPOKprove_1(\inst, (\algo{uid}, \varphi, s, \rho))$ :] The secure element runs
 $\JPOKprove_0$ and holds $\sk$. The device runs $\JPOKprove_1$ and holds the
 credential
 $\varphi = (e, r, E)$ on $(\algo{uid}, \sk)$, the opening $(\algo{uid}, s)$ of
@@ -190,8 +184,7 @@ algorithms are given in
 \Cref{prim:ps}~\cite{RSA:PoiSan16,RSA:PoiSan18,NDSS:SABMD19}.
 
 Key generation and verification are those of the signature scheme. We abbreviate
-Pointcheval-Sanders as PS, index its messages from $0$, and write $[\ell]_0 =
-\{0, \ldots, \ell-1\}$.
+Pointcheval-Sanders as PS, and index its messages from $0$.
 
 To request a signature, the recipient commits to the messages, encrypts each
 hidden message in the exponent of $k = \hash_{\group{1}}(C)$ under a fresh
@@ -210,7 +203,7 @@ disclosed message is the token value.
 
   \begin{description}
 
-    \item[$(\sk, \pk) \leftarrow \PSgen(\secparam, \ell)$ :] Sample $\chi,
+    \item[$(\sk, \pk) \sample \PSgen(\secparam, \ell)$ :] Sample $\chi,
 \theta_0, \ldots, \theta_\ell \sample \Zp$, and output $\sk = (\chi, \theta_0,
 \ldots, \theta_\ell)$ and $\pk = (\tilde{x}, \tilde{y}_0, \ldots,
 \tilde{y}_{\ell-1}, \tilde{z}, \vec{P})$, where $\vec{P}
@@ -224,7 +217,7 @@ as follows:
           %
           \end{equation*}
 
-    \item[$\psi \leftarrow \PSsign(\sk, \msg)$ :] On input $\msg \in
+    \item[$\psi \sample \PSsign(\sk, \msg)$ :] On input $\msg \in
 \Zp^{\ell}$, sample $k \sample \group{1}$ and $\omega \sample \Zp$, and output
 $\psi = (\omega, k, l)$ with $l$ as follows:
           %
@@ -264,7 +257,7 @@ that $C = P_\ell^{\openinfo} \prod_{i \in H} P_i^{\msg_i}$ and $\hat{\ciph}_i =
 $(\openinfo, (\msg_i, \rho_i)_{i \in H})$ and statement $(\algo{Disc}, \vec{P},
 \gen, B, C, k, (\hat{\ciph}_i)_{i \in H})$. Output $\algo{req} = (C, B,
 (\msg_i)_{i \in \algo{Disc}}, (\hat{\ciph}_i)_{i \in H}, \Pi)$ and $\state =
-(\msg, \mu, k)$.
+(\pk, \msg, \mu, k)$.
 
     \item[$\algo{resp} \sample \SCIissue(\sk, \algo{req})$ :] Recompute $k =
 \hash_{\group{1}}(C)$, and output $\perp$ if $\Pi$ does not verify. Otherwise
@@ -333,8 +326,8 @@ token's history, and every payee verifies it.
 \end{outline}
 
 Since $s_0$ is random and not known, $(k^*, l^*)$ leaks no information about
-$\algo{uid}_0$. To prove that $\tau$ was issued by the central bank, the token's
-owner uses their mobile device to compute $\Sigma$ as follows.
+$\algo{uid}_0$.\rebekah{$(k^*, l^*, \tilde{c})$ are part of the statement, not hidden by zero knowledge, so this needs its own argument; nothing in the proof shows that the central bank cannot link $\Sigma$ to the withdrawal it signed} To prove that $\tau$ was issued by the central bank, the token's
+owner uses their mobile device to compute $\Sigma$ as given in \Cref{prot:ps-proof}.
 
 \begin{protocolbox}{The proof of withdrawal}{ps-proof}
 
@@ -345,7 +338,7 @@ Pointcheval-Sanders signature on $(\algo{uid}, v, s)$.
 
   \begin{description}
 
-    \item[$\Sigma \leftarrow \algo{ProveWithdrawal}(\pk_{\algo{PS}}, \tau,
+    \item[$\Sigma \sample \algo{ProveWithdrawal}(\pk_{\algo{PS}}, \tau,
 \algo{uid}, s, \psi)$ :] Do the following:
 
       \begin{enumerate}
@@ -409,7 +402,7 @@ following hold:
 component of $\OP$ and the assumption it rests on. The registration authority
 issues credentials with the BBS+ signature scheme, blindly, so that the secret
 key never leaves the secure element. The central bank signs tokens on committed
-inputs, learning neither the identifier nor the serial number. The audit
+inputs, learning neither the identifier nor the randomness $s_0$. The audit
 ciphertext is an ElGamal encryption of $\gen^{\algo{uid}}$ under the auditor's
 key, proven consistent with the payer's pseudonym inside the JPOK.
 
@@ -438,7 +431,7 @@ model~\cite{C:FiaSha86,INDOCRYPT:FKMV12}.
 \end{outline}
 
 The proof in the withdrawal request is compiled with the Fischlin transform, and
-is also online extractable, as the construction requires. We obtain the
+is also online extractable, as the construction requires.\rebekah{the implementation compiles $\Pi$ with plain Fiat-Shamir, and the $368$ bytes for $\Pi$ in \Cref{tab:offline-sizes} match that, not a Fischlin proof; either change the text and the online extraction argument, or the code and the numbers} We obtain the
 following theorem.
 
 \begin{theorem}\label{thm:offline-instantiation-security}

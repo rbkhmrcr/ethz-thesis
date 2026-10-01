@@ -115,7 +115,9 @@ Withdrawal and the payer side of a payment both complete in under half a second,
 and the smart card authorises a payment in under $400\,\mathrm{ms}$.
 
 \Cref{tab:offline-timings} and \Cref{fig:offline-phone-steps} give the time of each wallet
-step on the phones and the card. Most of it is spent on the card, which takes
+step on the phones and the card.\rebekah{the text does not say where the phone and card measurements come from (when, which code version, which of the kept json or dataset files); the json files differ from the dataset files the tables use} We count hops as the signatures of knowledge a verifier
+checks, so one hop is the first payment $p_0$ after withdrawal, or a deposit
+made straight after withdrawal. Most of it is spent on the card, which takes
 about $230\,\mathrm{ms}$ to generate a pseudonym and $370\,\mathrm{ms}$ for its
 share of the transfer signature, NFC included. Auditing adds $9\,\mathrm{ms}$ on
 Android and $2\,\mathrm{ms}$ on iOS to the payer's phone, which is under $3\%$
@@ -138,15 +140,15 @@ columns use the same card measurements.} \label{tab:offline-timings}
 \end{table}
 
 \begin{figure}[htbp] \centering
-\includegraphics[width=0.75\textwidth]{chapters/06-offline-payments/offline-phone-steps.pdf}
+\includegraphics[width=\textwidth]{chapters/06-offline-payments/offline-phone-steps.pdf}
 \caption[Offline payments: wallet steps on the phone and card]{Time of each wallet step at one hop, with auditing, split into the
 smart card, including NFC, and the phone. Medians over $100$ runs.}
 \label{fig:offline-phone-steps} \end{figure}
 
 Payee verification grows linearly with the number of hops, since each hop
 contributes one signature of knowledge and one audit proof to check, and even a
-chain of 32 hops verifies in under a second. Auditing adds a 10 to 20\% overhead
-for the payee, who checks one additional proof per hop.
+chain of 32 hops verifies in under a second. Auditing adds an overhead for the
+payee, who checks one additional proof per hop.
 
 \Cref{fig:offline-hops-times,fig:offline-hops-sizes} show how time and size
 grow with the length of the chain. With auditing, the payee verifies $32$ hops in
@@ -163,7 +165,7 @@ axis, as do the server payee and the central bank.}
 \label{fig:offline-hops-times} \end{figure}
 
 \begin{figure}[htbp] \centering
-\includegraphics[width=0.9\textwidth]{chapters/06-offline-payments/offline-hops-sizes.pdf}
+\includegraphics[width=\textwidth]{chapters/06-offline-payments/offline-hops-sizes.pdf}
 \caption[Offline payments: sizes against the number of hops]{Size in bytes of the payment $p_i$, the transcript $\algo{hist}_n$ and
 the deposit request $d_n$ against the number of hops, with and without
 auditing.} \label{fig:offline-hops-sizes} \end{figure}
@@ -205,7 +207,7 @@ measured once. The secure element's part is not included.}
 
 \begin{table}[htbp] \centering \small \begin{tabular}{lrr} \toprule Object & no
 audit & audit \\ \midrule
-Public parameters $\crs$ & 1008 & 1056 \\
+Public parameters $\crs$\rebekah{the scheme has no $\crs$; this row counts the hashed generators and keys the implementation bundles as its public parameters, so rename it or drop it} & 1008 & 1056 \\
 $\pk_{\algo{cb}}$, $\rapk$, $\pk_\auditor$ & \multicolumn{2}{c}{480, 96, 48} \\
 Credential $\cred$ & \multicolumn{2}{c}{144} \\
 Registration request, response & \multicolumn{2}{c}{192, 112} \\

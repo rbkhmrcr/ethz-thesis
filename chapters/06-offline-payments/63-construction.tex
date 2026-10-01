@@ -116,7 +116,7 @@ deposit, is left to future work.
 The second constraint is that the signature can never be shown. Verifying it
 requires the messages it was issued on, and one of those is the withdrawer's
 identifier, so a payee who checked the signature directly would learn who
-withdrew the token. The device therefore proves knowledge of it instead, once,
+withdrew the token. The device proves knowledge of it instead, once,
 at withdrawal, and every subsequent payee verifies the resulting proof of
 withdrawal.
 
@@ -165,7 +165,7 @@ pseudonym for them, since producing it requires knowing the identifier the
 pseudonym commits to.
 
 That proof and the transfer signature both open the payer's pseudonym, on the
-same witness, and both are produced by the device. We therefore compile them as
+same witness, and both are produced by the device. We compile them as
 a single proof over a shared challenge, so the opening is proved once per hop
 rather than twice. We keep them as separate symbols below, because the transfer
 signature is produced jointly with the secure element and the audit proof is
@@ -253,7 +253,7 @@ instantiates each of them.
 
   \begin{description}
 
-    \item[$(\pk_{\algo{cb}}, \ck, \pk_\auditor, \rapk) \leftarrow
+    \item[$(\pk_{\algo{cb}}, \ck, \pk_\auditor, \rapk) \sample
 \OPgen(\secparam)$ :] On input security parameter $\secparam$, do:
 
       \begin{enumerate}
@@ -262,23 +262,23 @@ instantiates each of them.
 three messages, $(\sk_{\algo{cb}}, \pk_{\algo{cb}}) \sample \SCIgen(\secparam,
 3)$.
 
-	\item Run $\ck \leftarrow \ComGen(\secparam)$ to obtain a public
+	\item Run $\ck \sample \ComGen(\secparam)$ to obtain a public
 commitment key, with all generators derived by hashing into the group, so that
 no participant knows the discrete logarithm relations between them.
 
 	\item The auditor generates an asymmetric encryption key pair
-$(\sk_\auditor, \pk_\auditor) \leftarrow \PKEgen(\secparam)$.
+$(\sk_\auditor, \pk_\auditor) \sample \PKEgen(\secparam)$.
 
 	\item The registration authority generates keys for a multi-message
 signature scheme supporting vectors of two messages, obtaining $(\rask, \rapk)
-\leftarrow \DSgen(\secparam)$.
+\sample \DSgen(\secparam)$.
 
 	\item Publish all public keys and generators to every participant, and
 return $(\pk_{\algo{cb}}, \ck, \pk_\auditor, \rapk)$.
 
       \end{enumerate}
 
-    \item[$\cred \leftarrow \OPregister(\rask)$ :] When a user opens an account,
+    \item[$\cred \sample \OPregister(\rask)$ :] When a user opens an account,
 do the following:
 
       \begin{enumerate}
@@ -299,7 +299,7 @@ registration authority does not learn $\sk_{\algo{usr}}$.
 
 	\item $\algo{se}$ unblinds $\varphi$ and stores credential $\cred =
 (\algo{uid}, \varphi)$, which satisfies $\DSverify(\rapk, (\algo{uid},
-\sk_{\algo{usr}}), \varphi) = 1$.
+\sk_{\algo{usr}}), \varphi) = 1$.\rebekah{registration is blind BBS+ issuance with unblinding, but the signature syntax of the preliminaries has neither; the commitment key for $\sk_{\algo{usr}}$ is not specified; and the (P4) reduction needs $\sk_{\algo{usr}}$ extracted at every registration, which the proof does not do}
 
 	\item Pair the user's mobile device $\algo{dev}$ with $\algo{se}$, so
 that only $\algo{dev}$ can send instructions to $\algo{se}$. At pairing,
@@ -311,7 +311,7 @@ $\sk_{\algo{usr}}$.
 
       \end{enumerate}
 
-    \item[$T_0 \leftarrow \OPwithdraw(v_0)$ :] The user withdraws a token of
+    \item[$T_0 \sample \OPwithdraw(v_0)$ :] The user withdraws a token of
 value $v_0$. Do the following:
 
       \begin{enumerate}
@@ -325,8 +325,8 @@ $\com_0 \leftarrow \ComCommit(\ck, \algo{uid}_0, s_0)$, and returns $(s_0,
 the device.
 
 	\item The device requests a signature on $(\algo{uid}_0, v_0, s_0)$ that
-discloses $v_0$ alone, $(\algo{req}, \state) \sample \SCIrequest(\pk_{\algo{cb}},
-(\algo{uid}_0, v_0, s_0), \{v_0\})$, and sends $\algo{req}$ to the
+discloses $v_0$ alone, the message at index $1$, $(\algo{req}, \state) \sample
+\SCIrequest(\pk_{\algo{cb}}, (\algo{uid}_0, v_0, s_0), \{1\})$, and sends $\algo{req}$ to the
 intermediary. The commitment $C$ in $\algo{req}$ commits to the hidden messages
 under $\pk_{\algo{cb}}$, and is a different object from the pseudonym $\com_0$,
 which commits to $\algo{uid}_0$ alone under $\ck$. Nothing in $\algo{req}$
@@ -359,7 +359,7 @@ and relation as follows:
 
     \end{enumerate}
 
-  \item[$p_i \leftarrow \OPexecute(v, s_i, \com_i, \algo{hist}_i)$ :] The payer
+  \item[$p_i \sample \OPexecute(v, s_i, \com_i, \algo{hist}_i)$ :] The payer
 pays the payee using token $(v, s_i, \com_i, \algo{hist}_i)$. Do the following:
 
     \begin{enumerate}
@@ -377,14 +377,14 @@ $(s_{i+1}, \com_{i+1})$ to their device.
 under way. The secure element locks token $\tau_i = (v, \com_i)$.
 
       \item The payer's device computes the audit ciphertext $\ciph_i \leftarrow
-\PKEencrypt(\pk_\auditor, \algo{uid}_i; \rho_i)$ and a proof of correctness
+\PKEencrypt(\pk_\auditor, \gen^{\algo{uid}_i}; \rho_i)$ and a proof of correctness
 $\Gamma_i$, with $\inst = (\ck, \pk_\auditor, \com_i, \ciph_i)$, $\witness =
 (\algo{uid}_i, s_i, \rho_i)$, and relation as follows:
           %
           \begin{equation*}
           %
             \com_i = \ComCommit(\ck, \algo{uid}_i, s_i) \;\wedge\; \ciph_i =
-\PKEencrypt(\pk_\auditor, \algo{uid}_i; \rho_i).
+\PKEencrypt(\pk_\auditor, \gen^{\algo{uid}_i}; \rho_i).
           %
           \end{equation*}
 
@@ -409,7 +409,7 @@ $\JPOKprove_1$ and contributes the remaining witness.
 
     \item The payee's device verifies $\algo{hist}_i$: if $i = 0$, it checks
 $\Sigma$. Otherwise it verifies $\Sigma$ and every $(\Gamma_k, \sigma_k)_{k \in
-[i]}$.
+[i]}$.\rebekah{off by one: $\algo{hist}_i$ holds the links $k = 0, \ldots, i-1$, so the index set should be $[i]_0$ rather than $[i] = \{1, \ldots, i\}$}
 
     \item If $\Gamma_i$ and $\sigma_i$ also verify, the payee's device accepts
 and stores $T_{i+1} = (v, s_{i+1}, \com_{i+1}, \algo{hist}_{i+1} = (\com_i,
@@ -421,7 +421,7 @@ their device returns $p_i$.
 
   \end{enumerate}
 
-\item[$\{0,1\} \leftarrow \OPdeposit(\tau_n, \algo{hist}_n)$ :] The user
+\item[$\{0,1\} \sample \OPdeposit(\tau_n, \algo{hist}_n)$ :] The user
 deposits token $\tau_n = (v, \com_n)$. Do the following:
 
   \begin{enumerate}
@@ -430,7 +430,7 @@ deposits token $\tau_n = (v, \com_n)$. Do the following:
 informs the secure element to lock $\tau_n$.
 
     \item The device computes the audit ciphertext $\ciph_n \leftarrow
-\PKEencrypt(\pk_\auditor, \algo{uid}_n; \rho_n)$ and proof $\Gamma_n$, exactly
+\PKEencrypt(\pk_\auditor, \gen^{\algo{uid}_n}; \rho_n)$ and proof $\Gamma_n$, exactly
 as in $\OPexecute$.
 
     \item The device and secure element jointly compute $\sigma_n$, a signature
@@ -467,7 +467,7 @@ does:
 ciphertexts $(\ciph_k)_{k \in [n+1]}$ it carries, taking these from
 $\algo{hist}_n$ together with the depositor's own $\com_n$ and $\ciph_n$, and
 parse $d_m$ analogously into $(\com'_k)_{k \in [m+1]}$ and $(\ciph'_k)_{k \in
-[m+1]}$.
+[m+1]}$.\rebekah{off by one: $d_n$ carries $\com_0, \ldots, \com_n$, so the index set should be $[n+1]_0$ rather than $[n+1] = \{1, \ldots, n+1\}$, and likewise for $d_m$}
 
     \item Find the largest index $j$ such that $\com_k = \com'_k$ for all $k
 \leq j$. Either $\com_{j+1} \neq \com'_{j+1}$, in which case the owner at $j$
@@ -477,14 +477,13 @@ time. Both requests carry $\ciph_j$.
 
     \item Decrypt $\ciph_j$ using $\sk_\auditor$ to recover $\gen^{\algo{uid}^*}$,
 where $\algo{uid}^*$ is the identifier of the owner of $\tau_j = (v, \com_j)$.
-In our instantiation, the ElGamal encryption scheme
-encrypts an identifier as a group element, so decryption gives
+The ciphertext encrypts the identifier as a group element, so decryption gives
 $\gen^{\algo{uid}^*}$ rather than $\algo{uid}^*$. Mapping it to the user is a
 lookup against the identifiers the registration authority assigned, and is
 outside the scheme.
 
     \item Return $\algo{DS} = \{\gen^{\algo{uid}^*}\}$, extended by repeating the above
-for each further pair of conflicting deposits of the same token.
+for each further pair of conflicting deposits of the same token.\rebekah{the syntax in \Cref{sec:offline-definitions} says $\OPidentify$ outputs the identifiers of the double spenders, and $\idfu{\algo{op}}$ returns users, but this returns group elements $\gen^{\algo{uid}^*}$; align the definition or include the lookup}
 
   \end{enumerate}
 

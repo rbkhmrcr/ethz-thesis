@@ -18,7 +18,7 @@ end with Game 12 representing the ideal world. Each game changes one step of the
 previous one, and we argue that $\adv$'s view changes only negligibly between
 consecutive games. Throughout, we call a user
 corrupt if both their device and secure element are compromised. The more
-general split corruption setting follows analogously. We also simplify
+general split corruption setting follows analogously.\rebekah{split corruption is not analogous: with a corrupt device and an honest secure element the argument needs $\witness_0 = \sk$ protected against the device, which no stated JPOK property gives} We also simplify
 exposition by treating the identifiers $\algo{id}$ produced by $\idfu{\algo{op}}$
 during $\OPwithdraw$ and $\OPexecute$ as the output of $\ComCommit(\ck, \cdot,
 \cdot)$.
@@ -59,7 +59,7 @@ the token identifier and so continue the simulation, and from $\Sigma$,
 $\sigma_i$, and $\Gamma_i$ elsewhere, in order to exhibit a forgery or a double
 opening and terminate. The first of these is why (P6) is needed and the second
 is why rewinding suffices for the rest. Online extraction is therefore needed for
-withdrawal requests alone.
+withdrawal requests alone.\rebekah{Games 9 and 11 extract from every corrupt payment and deposit, including the filled-in intermediate hops, and continue the simulation rather than stop, which needs online extraction there too and undermines the rewinding argument}
 
 \begin{proof}
 
@@ -76,25 +76,26 @@ syntactic, so Game 2 is identically distributed to Game 1.
 
 \paragraph{Game 3.} As Game 2, except $\idfu{\algo{op}}$ handles $\OPcreate$
 queries from honest users. When an honest user $\algo{usr}$ initialises an
-account of value $v$ with intermediary $\algo{Int}$, $\simu$ calls
-$\idfu{\algo{op}}$ with $(\OPcreate, \algo{usr}, v)$ in place of running
-$\algo{prot}$. $\algo{prot}$ always accepts when the user has no prior account
+account of value $v$ with intermediary $\algo{Int}$, $\simu$ sends
+$(\OPcreate, \algo{usr}, v)$ to $\idfu{\algo{op}}$ on behalf of $\algo{Int}$ in
+place of running $\algo{prot}$. $\algo{prot}$ always accepts when the user has no prior account
 and $\idfu{\algo{op}}$ performs the same check, so the two are identical.
 
-\paragraph{Game 4.} As Game 3, except corrupt users may also initiate account
-creation. $\simu$ calls $\idfu{\algo{op}}$ and mirrors any abort to
-$\algo{Int}$. $\idfu{\algo{op}}$ aborts exactly when $\algo{prot}$ does, on
+\paragraph{Game 4.} As Game 3, except account creation is also handled for
+corrupt users. $\simu$ sends $(\OPcreate, \algo{usr}, v)$ to $\idfu{\algo{op}}$
+on behalf of $\algo{Int}$ and mirrors any abort to $\algo{Int}$. $\idfu{\algo{op}}$ aborts exactly when $\algo{prot}$ does, on
 attempts to register duplicate accounts, so no new distinguishing event arises.
 
 \paragraph{Game 5.} As Game 4, except $\idfu{\algo{op}}$ handles $\OPregister$
-queries: $\simu$ calls $(\OPregister,\allowbreak \algo{usr},\allowbreak \algo{se},\allowbreak \algo{dev})$
-whenever $\reg$ receives a valid registration request.  $\idfu{\algo{op}}$
+queries: $\simu$ sends $(\OPregister, \algo{usr})$ to $\idfu{\algo{op}}$ on
+behalf of $\reg$ whenever $\reg$ receives a valid registration request.  $\idfu{\algo{op}}$
 rejects only duplicate registrations, matching $\algo{prot}$, so the games are
 indistinguishable.
 
 \paragraph{Game 6.} As Game 5, except $\idfu{\algo{op}}$ handles $\OPwithdraw$
 queries from honest users. When an honest $\algo{usr}$ withdraws value $v$,
-$\simu$ calls $(\OPwithdraw, \algo{Int}, v)$ and learns $(\algo{usr}, v)$. It
+$\algo{usr}$ sends $(\OPwithdraw, \algo{usr}, \algo{Int}, v)$ to
+$\idfu{\algo{op}}$, and $\simu$ receives $(\OPwithdraw, \algo{usr}, v)$. $\simu$
 then produces a simulated withdrawal transcript, in which the request is output
 by the request-hiding simulator of the SCI scheme on the disclosed value $v$
 alone. By request hiding (P6), this transcript is computationally
@@ -105,33 +106,36 @@ queries from corrupt users. When $\algo{usr}$ submits a withdrawal, $\simu$
 extracts $\algo{uid}$ and $s$ from the request by online request
 extractability (P6), sets
 $\algo{id}$ to the token's original pseudonym $\com_0 \leftarrow \ComCommit(\ck,\allowbreak
-\algo{uid},\allowbreak s)$, and calls $(\OPwithdraw, \algo{Int}, v)$ with $\algo{id}$. Both $\idfu{\algo{op}}$ and $\algo{prot}$ reject if and only if
+\algo{uid},\allowbreak s)$, sends $(\OPwithdraw, \algo{usr}, \algo{Int}, v)$ to
+$\idfu{\algo{op}}$ on behalf of $\algo{usr}$, and gives it $\algo{id}$ when asked.
+Both $\idfu{\algo{op}}$ and $\algo{prot}$ reject if and only if
 the request commitment $C$ to $(\algo{uid}, v, s)$ is a duplicate, which would
 imply a duplicate $\algo{id}$, so the accounting checks agree and the games are
-indistinguishable.
+indistinguishable.\rebekah{$C$ commits to $(\algo{uid}, v, s)$ under the central bank's generators and $\algo{id} = \com_0$ to $\algo{uid}$ under $\ck$; a duplicate $C$ and a duplicate $\algo{id}$ are different events, and binding of $C$ is not among (P1)-(P6)}
 
 \paragraph{Game 8.} As Game 7, except $\idfu{\algo{op}}$ handles $\OPexecute$
 queries from honest payers. We first deal with the first payment after
 withdrawal, the case $i = 0$, then generalise.
 
-Case $i = 0$. $\algo{usr}$ pays $\algo{usr}'$ by calling $(\OPexecute, \algo{id}, v,
-\algo{usr}')$.
+Case $i = 0$. $\algo{usr}$ pays $\algo{usr}'$ by sending $(\OPexecute,
+\vec{\algo{id}}, v, \algo{usr}')$ to $\idfu{\algo{op}}$, with $\vec{\algo{id}} =
+(\algo{id})$.
 
 \begin{itemize}
 
-  \item If $\algo{usr}'$ is honest: $\simu$ learns $(\OPexecute, v, \algo{id},
-\algo{id}')$ from $\idfu{\algo{op}}$, and produces a simulated payment $p_0 = (v,
+  \item If $\algo{usr}'$ is honest: $\simu$ receives $(\OPexecute,
+\vec{\algo{id}'}, v)$ from $\idfu{\algo{op}}$, with $\vec{\algo{id}'} =
+(\algo{id}, \algo{id}')$, and produces a simulated payment $p_0 = (v,
 \com_0, \com_1, \ciph_0, \sigma_0, \Gamma_0, \Sigma)$, where each $\com_b$ is a
 commitment to a fresh uniform value with fresh randomness, $\ciph_0$ is a
 random ciphertext, and the proofs $(\sigma_0, \Gamma_0, \Sigma)$ are simulated,
 which is possible since the proof system is simulation extractable (P5).
 
-  \item If $\algo{usr}'$ is corrupt: $\simu$ additionally learns the identities
-of both parties. It computes $\algo{id}' \leftarrow \ComCommit(\ck, \algo{uid}',
-s')$ from
-the commitment $\com_1$ that $\algo{usr}'$ supplies in $\algo{prot}$, calls
-$\idfu{\algo{op}}$, and sets $\ciph_0 \leftarrow \PKEencrypt(\pk_\auditor,
-\algo{uid}; \rho_0)$.
+  \item If $\algo{usr}'$ is corrupt: $\simu$ sets $\algo{id}' = \com_1$, the
+commitment that $\algo{usr}'$ supplies in $\algo{prot}$, and gives it to
+$\idfu{\algo{op}}$, which returns $(\OPexecute, \vec{\algo{id}'}, v, \algo{usr},
+\algo{usr}')$ and so also names both parties. $\simu$ then sets $\ciph_0
+\leftarrow \PKEencrypt(\pk_\auditor, \gen^{\algo{uid}}; \rho_0)$.
 
 \end{itemize}
 
@@ -141,10 +145,10 @@ and $\mathbb{C}[(\algo{id}, \algo{id}')] \gets (\com_0, \com_1)$.
 Case $i > 0$. $\simu$ recovers $(\com_0, \ldots, \com_i)$ from
 $\mathbb{C}[\vec{\algo{id}}]$, produces a simulated payment $p_i$ with simulated
 proofs and random ciphertexts (or $\ciph_i \leftarrow \PKEencrypt(\pk_\auditor,
-\algo{uid}_i; \rho_i)$ if $\algo{usr}'$ is corrupt), and updates the maps as
+\gen^{\algo{uid}_i}; \rho_i)$ if $\algo{usr}'$ is corrupt), and updates the maps as
 needed. By IND-CPA security of the encryption scheme (P2) and simulation
 extractability of the proof system (P5), simulated payments are
-indistinguishable from real ones, so Game 8 is indistinguishable from Game 7.
+indistinguishable from real ones, so Game 8 is indistinguishable from Game 7.\rebekah{simulating proofs needs zero knowledge, not simulation extractability; the IND-CPA hop on the audit ciphertexts is made while the auditor still decrypts with $\sk_\auditor$ in $\OPidentify$, so the reduction cannot answer those decryptions; and the simulated $\Sigma$ must also produce $(k^*, l^*, \tilde{c})$, which are statement values and not hidden by zero knowledge}
 
 \paragraph{Game 9.} As Game 8, except $\idfu{\algo{op}}$ also processes
 $\OPexecute$ queries from corrupt payers. We show that if $\idfu{\algo{op}}$
@@ -154,10 +158,12 @@ again showing the case $i = 0$ before generalising.
 Let $p_0 = (v, \com_0, \com_1, \ciph_0, \sigma_0, \Gamma_0, \algo{hist}_0)$ be
 the payment produced by corrupt $\algo{usr}$. By (P5), $\simu$ extracts
 $(\algo{uid}, s)$ from $\Sigma$, computes $\algo{id} \leftarrow \ComCommit(\ck,\allowbreak
-\algo{uid},\allowbreak s)$, and calls $(\OPexecute, \algo{id}, v, \algo{usr}')$.
+\algo{uid},\allowbreak s)$, and sends $(\OPexecute, \vec{\algo{id}}, v,
+\algo{usr}')$ to $\idfu{\algo{op}}$ on behalf of $\algo{usr}$, with
+$\vec{\algo{id}} = (\algo{id})$.
 
 $\algo{usr}'$ honest. If $\algo{usr}'$ accepts $p_0$ but $\idfu{\algo{op}}$
-rejects, exactly one of the following holds:
+rejects, exactly one of the following holds:\rebekah{the cases are not exclusive: (d) overlaps with (a) to (c), here and in Game 11; say at least one holds}
 
 \begin{enumerate}[label=\alph*)]
 
@@ -166,7 +172,7 @@ rejects, exactly one of the following holds:
 v, s)$ from $\Sigma$. Since $\algo{cb}$ never issued $\psi$, no corresponding
 withdrawal exists, so $\psi$ together with the signatures $\simu$ extracts from
 the requests of the completed withdrawals gives one more signature than
-there were issuing sessions, contradicting (P3).
+there were issuing sessions, contradicting (P3).\rebekah{requests contain messages, not signatures; the count also omits honest users' issuing sessions and does not show the $q+1$ message vectors are distinct}
 
   \item $\algo{tokens}[\algo{id}] = \langle \algo{usr}, v^* \rangle$ with $v^* \neq
 v$: by (P5), $\simu$ extracts from $\Sigma$ a signature $\psi$ on $(\algo{uid},
@@ -186,7 +192,7 @@ it except with negligible probability. If $\algo{usr}'$ accepts $p_0$, then
 $\sigma_0$ is a valid signature of knowledge proving possession of a credential
 on $(\algo{uid}, \sk)$, and by (P5) $\simu$ extracts credential $\varphi$ and
 pair $(\algo{uid}, \sk)$. Since $\algo{uid}$ was assigned randomly by $\simu$
-and was not registered, this gives a forgery of the credential scheme (P4).
+and was not registered, this gives a forgery of the credential scheme (P4).\rebekah{if $\algo{uid}$ is the honest user's identifier, the extracted credential is on $(\algo{uid}, \sk)$ and is a forgery only if $\sk$ differs from the honest user's key; the case $\sk = \sk^*$ needs a reduction to DL that the theorem does not include}
 
   \item $\algo{usr}$ is not registered: if $\algo{usr}'$ accepts, $\sigma_0$
 verifies, and by (P5) $\simu$ extracts a credential forgery $(\varphi,
@@ -195,8 +201,7 @@ verifies, and by (P5) $\simu$ extracts a credential forgery $(\varphi,
 \end{enumerate}
 
 $\algo{usr}'$ corrupt. $\simu$ sends $\algo{accept}$ to $\idfu{\algo{op}}$ on
-$\algo{usr}'$'s behalf, provides $\algo{id}' \leftarrow \ComCommit(\ck,\allowbreak
-\algo{uid}',\allowbreak s')$ from $\com_1$, and extends the maps.
+$\algo{usr}'$'s behalf, provides $\algo{id}' = \com_1$, and extends the maps.
 
 $i > 0$. Suppose $\mathbb{R}[(\com_0, \ldots, \com_i)]$ is not yet recorded.
 $\simu$ fills in the missing intermediate payments as follows. It extracts
@@ -209,7 +214,7 @@ than nested: $\simu$ performs them sequentially, each by rewinding to the same
 transcript. The loss in success probability that rewinding causes, the forking
 loss, is then linear rather than exponential in the length of the chain, which
 the epoch cap of the construction bounds in any
-case~\cite{JC:PoiSte00}. The cases above still apply, replacing $p_0$ with $p_i$ and $\algo{id}$
+case~\cite{JC:PoiSte00}.\rebekah{epochs are an optional extension, not part of $\OP$ as proven, so the bound on the forking loss cannot rest on them} The cases above still apply, replacing $p_0$ with $p_i$ and $\algo{id}$
 with $(\algo{id}_0, \ldots, \algo{id}_i)$.  Since the probability that an honest
 $\algo{usr}'$ accepts a payment that $\idfu{\algo{op}}$ rejects is negligible
 under (P1)-(P6), this game is indistinguishable from Game 8.
@@ -252,10 +257,10 @@ values violate binding of the commitment scheme (P1).
 
   \item $\algo{tokens}[\vec{\algo{id}}] = \langle \algo{usr}^*, v \rangle$ with
 $\algo{usr}^* \neq \algo{usr}$: either binding of the commitment scheme (P1) is
-violated, or extracting $\sigma_0$ via (P5) yields a credential forgery,
+violated, or extracting $\sigma_n$ via (P5) yields a credential forgery,
 contradicting EUF-CMA of the credential signature scheme (P4).
 
-  \item $\algo{usr}$ unregistered: $\sigma_0$ verifying implies a credential
+  \item $\algo{usr}$ unregistered: $\sigma_n$ verifying implies a credential
 forgery, contradicting unforgeability of the credential signature scheme.
 
 \end{enumerate}
@@ -278,22 +283,22 @@ one-more unforgeability of the central bank's SCI scheme. This carries through t
 simulation extractability of $\sigma_{j-1}$, which is taken over the message
 $(v, \com_{j-1}, \com_j)$ and so fixes $\com_j$ as the destination of the
 payment that delivered the token. The ciphertext $\ciph_j \leftarrow
-\PKEencrypt(\pk_\auditor, \algo{uid}_j; \rho_j)$ encrypts the same value as is
+\PKEencrypt(\pk_\auditor, \gen^{\algo{uid}_j}; \rho_j)$ encrypts the same value as is
 committed in $\com_j$, as certified by proof $\Gamma_j$. Were this false, it
 would either yield two openings of $\com_j$ to distinct values,
 contradicting binding (P1), or a proof $\Gamma_j$ with no valid witness,
 contradicting simulation extractability (P5).
 
 An honest user cannot be framed. To have an honest $\algo{uid}^*$ returned, the
-adversary would need $\ciph_j$ to decrypt to $\algo{uid}^*$ while $\com_j$ is
+adversary would need $\ciph_j$ to decrypt to $\gen^{\algo{uid}^*}$ while $\com_j$ is
 the pseudonym recorded at index $j$. If $\com_j$ was generated by an honest
 payee, then producing $\Gamma_j$ requires opening it, and by (P5) $\simu$
 extracts that opening, contradicting (P1) since the honest payee's own opening
 is different, or contradicting hiding of $\com_j$ since $\algo{uid}^*$ was drawn
-at random. If $\com_j$ was instead supplied by the adversary as a commitment to
+at random.\rebekah{hiding of the commitment is used here, but the theorem and (P1) assume only binding} If $\com_j$ was instead supplied by the adversary as a commitment to
 $\algo{uid}^*$, then spending the token at index $j$ also requires $\sigma_j$, a
 signature of knowledge of a credential on $\algo{uid}^*$, from which (P5)
-extracts a forgery contradicting (P4). The same argument covers $j = 0$, where
+extracts a forgery contradicting (P4).\rebekah{as in Game 9 (c), the extracted credential is a forgery only if its $\sk$ differs from the honest user's} The same argument covers $j = 0$, where
 $\com_0$ is chosen by the withdrawer rather than by a payee.
 
 Suppose $\ciph_j$ decrypts to an unregistered user. Then $\sigma_j$ is a valid
@@ -352,7 +357,7 @@ that would break binding.
 The Pointcheval-Sanders signature scheme is existentially unforgeable under the
 $q$-MSDH assumption, including the variant whose public key also contains the
 elements $\gen^{\theta_i}$ needed to sign committed
-messages~\cite{RSA:PoiSan18}. A reduction to it extracts the messages of each
+messages~\cite{RSA:PoiSan18}.\rebekah{in the instantiation the $P_i$ are hashed generators separate from the key, so the public key contains no $\gen^{\theta_i}$; align this with \Cref{sec:offline-instantiation}} A reduction to it extracts the messages of each
 request online from its proof $\Pi$, using (P6), obtains a signature on them from
 its own oracle, programs the random oracle so that $k = \hash_{\group{1}}(C)$ is
 the signature's first element, and answers the request with the corresponding
@@ -363,9 +368,9 @@ requests is one-more unforgeable in this sense~\cite{NDSS:SABMD19}.
 
 In a prime order group, a statement, first message and challenge of a Sigma
 protocol over discrete logarithms admit only one accepting response, which is
-what gives simulation extractability~\cite{INDOCRYPT:FKMV12}. The JPOK is a
+what gives simulation extractability~\cite{INDOCRYPT:FKMV12}.\rebekah{this is false for equations with several bases, where responses are only computationally unique, under DL; the argument needs quasi-unique responses as in \Cref{sec:prelims-sigma}} The JPOK is a
 conjunction of two such protocols under separate challenges, so the same
-argument applies to each of them and hence to the whole. We rely on this rather
+argument applies to each of them and so to the whole. We rely on this rather
 than on the soundness Hesse, Singh and Sorniotti establish for the primitive,
 which is weaker~\cite{USENIX:HesSinSor23}. $\simu$ must extract from proofs
 produced by $\adv$ while itself producing simulated proofs for honest users, and

@@ -66,25 +66,25 @@ these in full.
 
 \begin{description}
 
-  \item[$(\pk_{\algo{cb}}, \ck, \pk_\auditor, \rapk) \leftarrow
+  \item[$(\pk_{\algo{cb}}, \ck, \pk_\auditor, \rapk) \sample
 \OPgen(\secparam)$ :] The setup algorithm, on input security parameter
 $\secparam$, generates the public keys of the central bank, the auditor, and the
 registration authority, together with a public commitment key $\ck$.
 
-  \item[$\cred \leftarrow \OPregister(\rask)$ :] The registration algorithm, on
+  \item[$\cred \sample \OPregister(\rask)$ :] The registration algorithm, on
 input the registration authority's secret key $\rask$, provisions the user's
 secure element and outputs long-term credential $\cred$.
 
-  \item[$T_0 \leftarrow \OPwithdraw(v_0)$ :] The withdrawal algorithm, on input
+  \item[$T_0 \sample \OPwithdraw(v_0)$ :] The withdrawal algorithm, on input
 value $v_0$, outputs token $T_0$ of that value, obtained by the user from the
 central bank through their intermediary.
 
-  \item[$p_i \leftarrow \OPexecute(v, s_i, \com_i, \algo{hist}_i)$ :] The
+  \item[$p_i \sample \OPexecute(v, s_i, \com_i, \algo{hist}_i)$ :] The
 payment algorithm, on input a token of value $v$ with randomness $s_i$,
 pseudonym $\com_i$, and history $\algo{hist}_i$, outputs payment $p_i$
 transferring the token to the payee.
 
-  \item[$\{0,1\} \leftarrow \OPdeposit(\tau_n, \algo{hist}_n)$ :] The deposit
+  \item[$\{0,1\} \sample \OPdeposit(\tau_n, \algo{hist}_n)$ :] The deposit
 algorithm, on input token $\tau_n$ and its history $\algo{hist}_n$, returns 1 if
 the token is redeemed for bank deposits and 0 otherwise.
 
@@ -120,20 +120,19 @@ Hesse, Singh and Sorniotti give such a primitive~\cite{USENIX:HesSinSor23}. We
 call it a joint proof of knowledge (JPOK), and recall it in the syntax used
 throughout this thesis. A JPOK $\JPOK$ is a proof system for a relation $\rel$
 over instance $\inst$ and witness $\witness = (\witness_0, \witness_1)$, where
-$\witness_0$ is held by the first prover and $\witness_1$ by the second.
+$\witness_0$ is held by the first prover and $\witness_1$ by the second. We
+work in the random oracle model with generators derived by hashing, so a JPOK
+has no setup algorithm and no common reference string.
 
   \begin{description}
 
-    \item[$\crs \sample \JPOKgen(\secparam)$ :] The setup algorithm, on input
-security parameter $\secparam$, outputs a common reference string $\crs$.
-
-    \item[$\Phi \sample \JPOKprove_0(\crs, \inst, \witness_0) \leftrightarrow
-\JPOKprove_1(\crs, \inst, \witness_1)$ :] The proving protocol, run between the
+    \item[$\Phi \sample \JPOKprove_0(\inst, \witness_0) \leftrightarrow
+\JPOKprove_1(\inst, \witness_1)$ :] The proving protocol, run between the
 first prover on input witness share $\witness_0$ and the second on input witness
 share $\witness_1$, with the second prover outputting proof $\Phi$.
 
-    \item[$\{0,1\} \leftarrow \JPOKverify(\crs, \inst, \Phi)$ :] The
-verification algorithm, on input $\crs$, instance $\inst$, and proof $\Phi$,
+    \item[$\{0,1\} \leftarrow \JPOKverify(\inst, \Phi)$ :] The
+verification algorithm, on input instance $\inst$ and proof $\Phi$,
 returns 0 or 1.
 
   \end{description}
@@ -145,7 +144,7 @@ Sorniotti establish for their construction~\cite{USENIX:HesSinSor23}.
 
   \item[Completeness.] If both provers follow the protocol on a witness
 $\witness = (\witness_0, \witness_1)$ with $\rel(\inst, \witness) = 1$, then
-$\JPOKverify(\crs, \inst, \Phi) = 1$.
+$\JPOKverify(\inst, \Phi) = 1$.
 
   \item[Soundness.] There is an efficient extractor that, given a proof
 accepted by $\JPOKverify$, outputs a witness $\witness$ for $\inst$. This holds
@@ -158,10 +157,12 @@ view of the proving protocol without access to either witness share.
 
 \end{description}
 
+\rebekah{the theorem and (P5) use simulation extractability of the JPOK, but this definition gives only soundness and zero knowledge; it also states no property protecting $\witness_0$ against a corrupt second prover (a corrupt device with an honest secure element), which is the case the split exists for}
+
 \begin{outline}
   \item two ways we go slightly beyond the cited result (old text had these, plus a
     third on online extraction, now in the SCI definition)
-  \item (1) \cite{USENIX:HesSinSor23} prove ZK against a semi-honest verifier, since
+  \item (1) \cite{USENIX:HesSinSor23} prove ZK against a honest but curious verifier, since
     their verifier relays between the provers and can be caught deviating; our
     payee may be malicious but is not interposed: provers talk directly, payee only
     supplies $\com_{i+1}$ and gets the finished proof, so the restriction does not bind
@@ -188,7 +189,8 @@ are not.
 \end{outline}
 
 A signature scheme on committed inputs (SCI) $\SCI$ consists of the following
-algorithms.
+algorithms. We index messages from $0$, and write $[n] = \{1, \ldots, n\}$ and
+$[n]_0 = \{0, \ldots, n-1\}$ for a positive integer $n$.
 
 \begin{description}
 
@@ -196,8 +198,8 @@ algorithms.
 algorithm outputs a key pair for messages in $\Zp^\ell$.
 
   \item[$(\algo{req}, \state) \sample \SCIrequest(\pk, \msg, \algo{Disc})$ :]
-The recipient commits to $\msg$, discloses the messages at the indices in
-$\algo{Disc}$, and outputs a request $\algo{req}$, which contains a commitment
+The recipient commits to $\msg \in \Zp^\ell$, discloses the messages at the
+indices in $\algo{Disc} \subseteq [\ell]_0$, and outputs a request $\algo{req}$, which contains a commitment
 $C$ to the hidden messages and a proof that it is well formed, together with
 private state $\state$.
 
@@ -252,7 +254,7 @@ the central bank and the intermediaries. More specifically, it must ensure:
 
   \item[Unforgeability.] An honest payee should not be tricked, during a
 payment, into accepting a token that was not issued by the central bank.
-Similarly, the honest-but-curious central bank will not declare a deposit
+Similarly, the honest but curious central bank will not declare a deposit
 successful unless it previously issued the corresponding token.
 
   \item[Theft prevention.] A malicious payer should not be able to convince an
@@ -301,14 +303,9 @@ intermediaries and the central bank collude with every other user in the system.
 We define security for the offline payment protocol through an ideal
 functionality $\idfu{\algo{op}}$, which represents an incorruptible trusted
 party that receives the inputs of each protocol task and returns the prescribed
-outputs. We have the outputs of the honest parties and $\adv$ during an
-execution of protocol $\algo{prot}$ in the real world captured in
-$\textsc{Exec}_{\algo{prot},\adv}(\secparam)$, and the outputs of the honest
-parties and $\simu$ interacting with $\idfu{\algo{op}}$ in the ideal world
-captured by $\textsc{Exec}_{\idfu{\algo{op}},\simu}(\secparam)$. Security is that
-$\algo{prot}$ securely realises $\idfu{\algo{op}}$ in the standalone model of
-\Cref{sec:prelims-security}, since our simulator extracts from some proofs by
-rewinding.
+outputs. Security is that $\OP$ securely realises $\idfu{\algo{op}}$ as defined
+in \Cref{sec:prelims-security}, in the standalone model, since our simulator
+extracts from some proofs by rewinding.
 
 $\idfu{\algo{op}}$ interacts with $\simu$ and with the system's participants.
 These are the users, who act as both payers and payees, the intermediaries, the
