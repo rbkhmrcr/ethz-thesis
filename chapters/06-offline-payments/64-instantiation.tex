@@ -18,14 +18,23 @@ generators $P_0, \ldots, P_\ell$ of the central bank's signing on committed
 inputs are separate from $\ck$. Every generator is obtained as
 $\hash_{\group{1}}$ of its own fixed string, so that no participant knows the
 discrete logarithm relations among them. For $\msg = (\msg_0, \ldots,
-\msg_{\ell-1}) \in \Zp^\ell$ we write $\vec{P}^{\msg\|\openinfo} =
-P_\ell^{\openinfo} \prod_{i=0}^{\ell-1} P_i^{\msg_i}$.
+\msg_{\ell-1}) \in \Zp^\ell$ we write the following:
+%
+\begin{equation*}
+  \vec{P}^{\msg\|\openinfo} = P_\ell^{\openinfo} \prod_{i=0}^{\ell-1}
+P_i^{\msg_i}.
+\end{equation*}
 
 \subsection{Instantiating $\JPOK$ with BBS+}\label{sec:joint-proof}
 
 A user's credential is a BBS+ signature $\varphi = (e, r, E)$ from the
-registration authority on the pair $(\algo{uid}, \sk)$, with $E = (\gen_0
-\gen_1^{\algo{uid}} \gen_2^{\sk} \gen_3^{r})^{1/(z+e)}$, where $z$ is the
+registration authority on the pair $(\algo{uid}, \sk)$, with $E$ as follows:
+%
+\begin{equation*}
+  E = (\gen_0 \gen_1^{\algo{uid}} \gen_2^{\sk} \gen_3^{r})^{1/(z+e)},
+\end{equation*}
+%
+where $z$ is the
 registration authority's secret key and $\ggen_Z = \ggen^{z}$ its public key.
 Every payment and deposit proves knowledge of such a credential, together with
 the opening of the payer's pseudonym, without revealing either.
@@ -62,10 +71,17 @@ Sorniotti~\cite{EC:TesZhu23b,USENIX:HesSinSor23}.
 
 \begin{primitivebox}{The joint proof of knowledge of a BBS+ signature}{bbs-joint-proof}
 
-  Let $\pk_\BBS = (\gen_0, \gen_1, \gen_2, \gen_3, \ggen, \ggen_Z)$, $\ck =
-(\hgen_1, \hgen)$ and $\pk_\auditor = \gen^{\mu_\auditor}$. The statement is
-$\inst = (\pk_\BBS, \ck, \pk_\auditor, \com, \ciph, m)$, with pseudonym $\com$,
-audit ciphertext $\ciph = (c_1, c_2)$ and signed message $m$.
+  The public keys and the statement are as follows, with pseudonym $\com$,
+audit ciphertext $\ciph = (c_1, c_2)$ and signed message $m$:
+  %
+  \begin{gather*}
+  %
+    \pk_\BBS = (\gen_0, \gen_1, \gen_2, \gen_3, \ggen, \ggen_Z), \quad \ck =
+(\hgen_1, \hgen), \quad \pk_\auditor = \gen^{\mu_\auditor}, \\
+  %
+    \inst = (\pk_\BBS, \ck, \pk_\auditor, \com, \ciph, m).
+  %
+  \end{gather*}
 
   \begin{description}
 
@@ -80,7 +96,7 @@ $\com = \hgen_1^{\algo{uid}} \hgen^{s}$, and the randomness $\rho$ of $\ciph =
       \begin{enumerate}
 
 	\item The secure element samples $t, \gamma_2, \upsilon \sample \Zp$ and
-computes
+computes the following:
           %
           \begin{gather*}
           %
@@ -95,7 +111,7 @@ computes
           It sends $(D, t, a_0, \pi_2, \zeta)$ to the device.
 
 	\item The device samples $\iota, \lambda \sample \Zp^*$, sets $r' = r
-- t$, and computes
+- t$, and computes the following:
           %
           \begin{equation*}
           %
@@ -105,7 +121,7 @@ computes
           \end{equation*}
 
 	\item The device samples $\alpha, \beta, \delta, \gamma_1, \gamma_3,
-\gamma_s, \gamma_\rho \sample \Zp$ and computes
+\gamma_s, \gamma_\rho \sample \Zp$ and computes the following:
           %
           \begin{gather*}
           %
@@ -133,20 +149,21 @@ d,\allowbreak a_1,\allowbreak a_2,\allowbreak \eta,\allowbreak \nu,\allowbreak \
       \end{enumerate}
 
     \item[$\{0,1\} \leftarrow \JPOKverify(\inst, \Phi)$ :] Recompute
-$\algo{chal}_0$ and $\algo{chal}_1$ as above, and output $1$ if and only if all
-of the following hold:
+$\algo{chal}_0$ and $\algo{chal}_1$ as above, and return $1$ if and only if the
+following hold:
       %
       \begin{gather*}
       %
-        u \neq 1, \quad \pairing(u, \ggen_Z) \pairing(x, \ggen) = 1, \quad a_0
-D^{\algo{chal}_0} = \gen_2^{\pi_2} \gen_3^{\zeta}, \\
+        u \neq 1, \quad \pairing(u, \ggen_Z) \cdot \pairing(x, \ggen) = 1, \quad
+\gen_2^{\pi_2} \cdot \gen_3^{\zeta} = a_0 \cdot D^{\algo{chal}_0}, \\
       %
-        a\, x^{\algo{chal}_1} = u^{\eta} w^{\nu}, \quad b\, (D
-\gen_0)^{-\algo{chal}_1} = w^{\xi} \gen_1^{\pi_1} \gen_3^{\pi_3}, \quad d\,
-\com^{\algo{chal}_1} = \hgen_1^{\pi_1} \hgen^{\pi_s}, \\
+        u^{\eta} \cdot w^{\nu} = a \cdot x^{\algo{chal}_1}, \quad w^{\xi} \cdot
+\gen_1^{\pi_1} \cdot \gen_3^{\pi_3} = b \cdot (D \cdot
+\gen_0)^{-\algo{chal}_1}, \quad \hgen_1^{\pi_1} \cdot \hgen^{\pi_s} = d \cdot
+\com^{\algo{chal}_1}, \\
       %
-        a_1 c_1^{\algo{chal}_1} = \gen^{\pi_\rho}, \quad a_2
-c_2^{\algo{chal}_1} = \gen^{\pi_1} \pk_\auditor^{\pi_\rho}.
+        \gen^{\pi_\rho} = a_1 \cdot c_1^{\algo{chal}_1}, \quad \gen^{\pi_1}
+\cdot \pk_\auditor^{\pi_\rho} = a_2 \cdot c_2^{\algo{chal}_1}.
       %
       \end{gather*}
 
@@ -196,24 +213,42 @@ disclosed message is the token value.
     \item[$(\sk, \pk) \leftarrow \PSgen(\secparam, \ell)$ :] Sample $\chi,
 \theta_0, \ldots, \theta_\ell \sample \Zp$, and output $\sk = (\chi, \theta_0,
 \ldots, \theta_\ell)$ and $\pk = (\tilde{x}, \tilde{y}_0, \ldots,
-\tilde{y}_{\ell-1}, \tilde{z}, \vec{P})$, where $\tilde{x} = \ggen^{\chi}$,
-$\tilde{y}_i = \ggen^{\theta_i}$, $\tilde{z} = \ggen^{\theta_\ell}$, and $\vec{P}
-= (P_0, \ldots, P_\ell)$ are the generators for committed inputs.
+\tilde{y}_{\ell-1}, \tilde{z}, \vec{P})$, where $\vec{P}
+= (P_0, \ldots, P_\ell)$ are the generators for committed inputs and the rest is
+as follows:
+          %
+          \begin{equation*}
+          %
+            \tilde{x} = \ggen^{\chi}, \quad \tilde{y}_i = \ggen^{\theta_i}, \quad
+\tilde{z} = \ggen^{\theta_\ell}.
+          %
+          \end{equation*}
 
     \item[$\psi \leftarrow \PSsign(\sk, \msg)$ :] On input $\msg \in
 \Zp^{\ell}$, sample $k \sample \group{1}$ and $\omega \sample \Zp$, and output
-$\psi = (\omega, k, l)$ with $l = k^{\chi + \sum_{i \in [\ell]_0} \theta_i
-\msg_i + \theta_\ell \omega}$.
+$\psi = (\omega, k, l)$ with $l$ as follows:
+          %
+          \begin{equation*}
+          %
+            l = k^{\chi + \sum_{i \in [\ell]_0} \theta_i \msg_i + \theta_\ell
+\omega}.
+          %
+          \end{equation*}
 
     \item[$\{0,1\} \leftarrow \PSverify(\pk, \msg, \psi)$ :] On input $\psi =
-(\omega, k, l)$, output $1$ if and only if $k \neq 1$ and $\pairing(k, \tilde{x}
-\prod_{i \in [\ell]_0} \tilde{y}_i^{\msg_i} \tilde{z}^{\omega}) = \pairing(l,
-\ggen)$.
+(\omega, k, l)$, return $1$ if and only if the following hold:
+          %
+          \begin{equation*}
+          %
+            k \neq 1, \quad \pairing\Big(k, \tilde{x} \cdot \prod_{i \in [\ell]_0}
+\tilde{y}_i^{\msg_i} \cdot \tilde{z}^{\omega}\Big) = \pairing(l, \ggen).
+          %
+          \end{equation*}
 
     \item[$(\algo{req}, \state) \sample \SCIrequest(\pk, \msg, \algo{Disc})$ :]
 On input $\msg \in \Zp^{\ell}$ and a set $\algo{Disc} \subseteq [\ell]_0$ of
 indices to disclose, let $H = [\ell]_0 \setminus \algo{Disc}$. Sample $\openinfo,
-\mu \sample \Zp$, set $B = \gen^{\mu}$, and compute
+\mu \sample \Zp$, set $B = \gen^{\mu}$, and compute the following:
           %
           \begin{equation*}
           %
@@ -234,7 +269,7 @@ $(\openinfo, (\msg_i, \rho_i)_{i \in H})$ and statement $(\algo{Disc}, \vec{P},
     \item[$\algo{resp} \sample \SCIissue(\sk, \algo{req})$ :] Recompute $k =
 \hash_{\group{1}}(C)$, and output $\perp$ if $\Pi$ does not verify. Otherwise
 sample $\omega \sample \Zp$, parse $\hat{\ciph}_i = (f_{i,1}, f_{i,2})$, and
-output $\algo{resp} = (\omega, f_1, f_2)$ with
+output $\algo{resp} = (\omega, f_1, f_2)$ with $f_1$ and $f_2$ as follows:
           %
           \begin{equation*}
           %
@@ -321,35 +356,46 @@ Pointcheval-Sanders signature on $(\algo{uid}, v, s)$.
 	\item Compute $\tilde{c} = \tilde{y}_0^{\algo{uid}} \tilde{y}_2^{s}
 \tilde{z}^{\omega}$.
 
-	\item Sample $\alpha, \beta, \delta \sample \Zp$ and compute $a =
-\hgen_1^{\alpha} \hgen^{\beta}$, $\tilde{a} = \tilde{y}_0^{\alpha}
-\tilde{y}_2^{\beta} \tilde{z}^{\delta}$, and
+	\item Sample $\alpha, \beta, \delta \sample \Zp$ and compute the
+following:
           %
-          \begin{equation*}
+          \begin{gather*}
+          %
+            a = \hgen_1^{\alpha} \hgen^{\beta}, \quad \tilde{a} =
+\tilde{y}_0^{\alpha} \tilde{y}_2^{\beta} \tilde{z}^{\delta}, \\
           %
             \algo{chal} = \hash_p(\pk_{\algo{PS}}, \ck, v, \com, k^*, l^*,
 \tilde{c}, a, \tilde{a}).
           %
+          \end{gather*}
+
+	\item Compute the following:
+          %
+          \begin{equation*}
+          %
+            \pi_{\algo{uid}} = \alpha + \algo{chal}\, \algo{uid}, \quad \pi_s =
+\beta + \algo{chal}\, s, \quad \pi_\omega = \delta + \algo{chal}\, \omega.
+          %
           \end{equation*}
 
-	\item Compute $\pi_{\algo{uid}} = \alpha + \algo{chal}\, \algo{uid}$,
-$\pi_s = \beta + \algo{chal}\, s$ and $\pi_\omega = \delta + \algo{chal}\,
-\omega$, and output $\Sigma = (k^*, l^*, \tilde{c}, a, \tilde{a},
+	\item Output $\Sigma = (k^*, l^*, \tilde{c}, a, \tilde{a},
 \pi_{\algo{uid}}, \pi_s, \pi_\omega)$.
 
       \end{enumerate}
 
     \item[$\{0,1\} \leftarrow \algo{VerifyWithdrawal}(\pk_{\algo{PS}}, \tau,
-\Sigma)$ :] Recompute $\algo{chal}$ as above, and output $1$ if and only if
+\Sigma)$ :] Recompute $\algo{chal}$ as above, and return $1$ if and only if the
+following hold:
       %
       \begin{gather*}
       %
-        k^* \neq 1, \quad \pairing(l^*, \ggen) = \pairing(k^*, \tilde{x}\,
-\tilde{c}\, \tilde{y}_1^{v}), \\
+        k^* \neq 1, \quad \pairing(l^*, \ggen) = \pairing(k^*, \tilde{x} \cdot
+\tilde{c} \cdot \tilde{y}_1^{v}), \\
       %
-        a\, \com^{\algo{chal}} = \hgen_1^{\pi_{\algo{uid}}} \hgen^{\pi_s}, \quad
-\tilde{a}\, \tilde{c}^{\algo{chal}} = \tilde{y}_0^{\pi_{\algo{uid}}}
-\tilde{y}_2^{\pi_s} \tilde{z}^{\pi_\omega}.
+        \hgen_1^{\pi_{\algo{uid}}} \cdot \hgen^{\pi_s} = a \cdot
+\com^{\algo{chal}}, \quad \tilde{y}_0^{\pi_{\algo{uid}}} \cdot
+\tilde{y}_2^{\pi_s} \cdot \tilde{z}^{\pi_\omega} = \tilde{a} \cdot
+\tilde{c}^{\algo{chal}}.
       %
       \end{gather*}
 
