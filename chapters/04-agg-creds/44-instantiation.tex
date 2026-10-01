@@ -70,8 +70,12 @@ and signature $\signature$, do:
 
 	\item Parse $\signature = (\signatureone, \signaturetwo)$.
 
-	\item Return $\pairing(\signaturetwo,\ggen) \checkcheck
-\pairing(\hashone(\msg), \pk) \cdot \pairing(\hashtwo(\Tag), \signatureone)$.
+	\item Return $1$ if and only if the following holds:
+	  %
+	  \begin{equation*}
+	    \pairing(\signaturetwo,\ggen) = \pairing(\hashtwo(\Tag), \signatureone)
+\cdot \pairing(\hashone(\msg), \pk).
+	  \end{equation*}
 
       \end{enumerate}
 
@@ -92,16 +96,18 @@ $i \in \ISSUERS$.
     \item[$\{0,1\} \leftarrow \ATSverifyagg((\pk_i)_{i\in \ISSUERS},
 \Tag,(\msg_i)_{i\in \ISSUERS},\signature) $ :] On input public keys
 $(\pk_i)_{i\in \ISSUERS}$, tag $\Tag$, messages $(\msg_i)_{i\in \ISSUERS}$, and
-aggregate signature $\signature$, the aggregate verification algorithm outputs
-the result of the following check:
+aggregate signature $\signature$, do:
 
       \begin{enumerate}
 
 	\item Parse $\signature = (\signatureone, \signaturetwo)$.
 
-	\item Return $\pairing(\signaturetwo, \ggen) \checkcheck \pairing
-(\hashtwo(\Tag), \signatureone) \cdot \prod_{i\in\ISSUERS}
-\pairing(\hashone(\msg_i), \pk_i)$.
+	\item Return $1$ if and only if the following holds:
+	  %
+	  \begin{equation*}
+	    \pairing(\signaturetwo, \ggen) = \pairing(\hashtwo(\Tag),
+\signatureone) \cdot \prod_{i\in\ISSUERS} \pairing(\hashone(\msg_i), \pk_i).
+	  \end{equation*}
 
       \end{enumerate}
 
@@ -163,17 +169,24 @@ The aggregate signature uses the same element $\hashtwo(\Tag)$, so the
 registration signature and the aggregate signature share one group element, and
 the presentation only shows that they share it.
 
-With the registration authority's public key $\rapk = (\widetilde{u}_1,
-\widetilde{u}_2, v)$, issuer public keys $\ipk{i} = \ggen^{\isk{i}}$, tag
-identifier $\tid = \hashtwo(\Tag)$ and signatures $\signature =
-(\signatureone, \signaturetwo)$ and $\SPSsig = (\widetilde{r},
-\widetilde{s}, z)$, the presentation relation $\rel_1$ of \eqref{eq:agg-creds-proof-abstract},
+We write the registration authority's public key, the issuer public keys, the
+tag identifier and the two signatures as follows:
+%
+\begin{gather*}
+%
+  \rapk = (\widetilde{u}_1, \widetilde{u}_2, v), \quad \ipk{i} =
+\ggen^{\isk{i}}, \quad \tid = \hashtwo(\Tag), \\ \signature = (\signatureone,
+\signaturetwo), \quad \SPSsig = (\widetilde{r}, \widetilde{s}, z).
+%
+\end{gather*}
+%
+The presentation relation $\rel_1$ of \eqref{eq:agg-creds-proof-abstract},
 with $\DS$ set to $\AGHO$ and $\ATS$ to our tag-based scheme, has instance,
 witness and relation defined as follows:
 %
 \begin{equation}\label{eq:agg-creds-proof-original}\begin{gathered}
 %
-  \inst_2 = (\rapk, \{\atv{i}, \ipk{i}\}_{i \in \ISSUERS}), \quad \witness_2
+  \inst_2 = (\rapk, \{\atv{i}, \ipk{i}\}_{i \in \ISSUERS}), \qquad \witness_2
 = (\sk, \pk, \tid, \signature, \SPSsig), \\
 %
   \rel_2 = \{\ \pairing(v, \widetilde{r}) = \pairing(\gen, \widetilde{s}) \
@@ -264,9 +277,16 @@ the RA, do:
 	\item The RA samples a fresh nonce $\rand \sample \Zp$ and sends it to
 the user.
 
-	\item The user samples $\varrho \sample \Zp$, computes $a = \gen^\varrho$,
-$c = \hash(\gen, \pk, a, \rand)$ and $\zeta = \varrho + c \cdot \sk$, and sends
-$(\pk, a, \zeta)$.
+	\item The user samples $\varrho \sample \Zp$ and computes the following:
+          %
+	  \begin{equation*}
+          %
+	    a = \gen^\varrho, \quad c = \hash(\gen, \pk, a, \rand), \quad \zeta =
+\varrho + c \cdot \sk.
+          %
+	  \end{equation*}
+
+	\item The user sends $(\pk, a, \zeta)$.
 
 	\item The RA recomputes $c$ and exits unless $\pk \neq 1$ and $\gen^\zeta
 = a \cdot \pk^c$.
@@ -325,11 +345,17 @@ from the verifier, do:
 (\Tag,\{(i, \atv{i})\}_{i \in \ISSUERS},\signature)$, and set $\tid =
 \hashtwo(\Tag)$.
 
-	\item Randomise the signatures: $(\signatureone', \signaturetwo')
-\sample \ATSrandomise(\Tag,\signature)$ and $(\widetilde{r}', \widetilde{s}',
-z') \sample \SPSrandomise(\SPSsig)$.
+	\item Randomise the signatures as follows:
+          %
+	  \begin{gather*}
+          %
+	    (\signatureone', \signaturetwo') \sample
+\ATSrandomise(\Tag,\signature), \\ (\widetilde{r}', \widetilde{s}', z')
+\sample \SPSrandomise(\SPSsig).
+          %
+	  \end{gather*}
 
-	\item Sample $\delta \sample \Zp^*$ and compute
+	\item Sample $\delta \sample \Zp^*$ and compute the following:
           %
 	  \begin{gather*}
           %
@@ -340,13 +366,13 @@ z') \sample \SPSrandomise(\SPSsig)$.
           %
 	  \end{gather*}
 
-	\item Set the statement and witness
+	\item Set the statement and witness as follows:
           %
 	  \begin{equation*}\begin{gathered}
           %
 	    \inst_3 = (\bar{\gen}, \bar{v}, \pk', \{i, \atv{i}, H_i\}_{i\in\ISSUERS},
 \widetilde{r}', \widetilde{s}', \bar{z}, \signatureone', \bar{\signaturetwo},
-\bar{\tid}), \quad \witness_3 = (\delta, \sk), \\
+\bar{\tid}), \qquad \witness_3 = (\delta, \sk), \\
           %
 	    \rel_3 = \{\ \bar{\gen} = \gen^\delta \ \wedge\ \bar{v} = v^\delta \
 \wedge\ H_i = \hashone(\atv{i})^\delta\ \ \forall i \in \ISSUERS \ \wedge\ \pk'
@@ -354,19 +380,20 @@ z') \sample \SPSrandomise(\SPSsig)$.
           %
 	\end{gathered}\end{equation*}
 
-      \item Prove $\rel_3$: sample $\alpha, \beta \sample \Zp$, compute
+      \item To prove $\rel_3$, sample $\alpha, \beta \sample \Zp$ and compute
+the commitments, the challenge and the responses as follows:
           %
-	  \begin{equation*}
+	  \begin{gather*}
           %
 	    (f, h, \{k_i\}_{i \in \ISSUERS}, w) = (\gen^\alpha, v^\alpha,
-\{\hashone(\atv{i})^\alpha\}_{i \in \ISSUERS}, \bar{\gen}^\beta),
+\{\hashone(\atv{i})^\alpha\}_{i \in \ISSUERS}, \bar{\gen}^\beta), \\
+	    c \leftarrow \hash(\gen, v, \inst_3, f, h, \{k_i\}_{i \in
+\ISSUERS}, w, \msg), \\
+	    \pi_1 = \alpha + c\delta, \quad \pi_2 = \beta + c\sk.
           %
-	  \end{equation*}
-          %
-	the challenge $c \leftarrow \hash(\gen, v, \inst_3, f, h, \{k_i\}_{i \in
-\ISSUERS}, w, \msg)$, and the responses $\pi_1 = \alpha + c\delta$ and $\pi_2 =
-\beta + c\sk$, and set $\eta = (f, h, \{k_i\}_{i \in \ISSUERS}, w, \pi_1,
-\pi_2)$.
+	  \end{gather*}
+
+      \item Set $\eta = (f, h, \{k_i\}_{i \in \ISSUERS}, w, \pi_1, \pi_2)$.
 
       \item Return $\algoproof = (\eta, \inst_3)$.
 
@@ -380,27 +407,25 @@ $\inst_3 = (\bar{\gen}, \bar{v}, \pk', \{i, \atv{i}, H_i\}_{i\in\ISSUERS},
 
     \begin{enumerate}
 
-      \item If $\bar{\gen} = 1$, return $0$.
-
       \item Compute $c \leftarrow \hash(\gen, v, \inst_3, f, h, \{k_i\}_{i \in
 \ISSUERS}, w, \msg)$.
 
-      \item Return the output of the following checks:
+      \item Return $1$ if and only if the following hold:
        %
 	\begin{gather*}
 		%
-	  \gen^{\pi_1} \checkcheck f\cdot\bar{\gen}^c, \quad v^{\pi_1}
-\checkcheck h\cdot\bar{v}^c, \quad \hashone(\atv{i})^{\pi_1} \checkcheck
-k_i\cdot H_i^c \ \ \forall i \in \ISSUERS, \quad \bar{\gen}^{\pi_2}
-\checkcheck w\cdot\pk'^c, \\
+	  \bar{\gen} \neq 1, \quad \gen^{\pi_1} = f\cdot\bar{\gen}^c, \quad v^{\pi_1}
+= h\cdot\bar{v}^c, \quad \bar{\gen}^{\pi_2} = w\cdot\pk'^c, \\
+	  \hashone(\atv{i})^{\pi_1} = k_i\cdot H_i^c \ \ \forall i \in \ISSUERS,
+\\
 		%
-	  \pairing(\bar{v}, \widetilde{r}')\checkcheck \pairing(\bar{\gen},
+	  \pairing(\bar{v}, \widetilde{r}')= \pairing(\bar{\gen},
 \widetilde{s}'), \\
 		%
-	  \pairing(\bar{\signaturetwo}, \ggen) \checkcheck \prod_{i\in
-\ISSUERS}\pairing(H_i, \ipk{i})\cdot \pairing(\bar{\tid}, \signatureone'), \\
+	  \pairing(\bar{\signaturetwo}, \ggen) = \pairing(\bar{\tid},
+\signatureone') \cdot \prod_{i\in \ISSUERS}\pairing(H_i, \ipk{i}), \\
           	%
-	  \pairing(\bar{\gen}, \ggen) \checkcheck \pairing(\bar{z},
+	  \pairing(\bar{\gen}, \ggen) = \pairing(\bar{z},
 \widetilde{r}')\cdot \pairing(\pk', \widetilde{u}_1)\cdot \pairing(\bar{\tid},
 \widetilde{u}_2).
 	%

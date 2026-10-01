@@ -127,8 +127,8 @@ follows:
 %
 \begin{gather*}
 %
-  (\sk_i, \pk_i) \gets \ATSgen(\secparam) \ ; \  \signature_i \gets
-\ATSsign(\sk_i, \Tag, \msg_i) ; \\ \signature \gets
+  (\sk_i, \pk_i) \gets \ATSgen(\secparam), \quad \signature_i \gets
+\ATSsign(\sk_i, \Tag, \msg_i), \\ \signature \gets
 \ATSaggregate((\signature_i)_{i \in \ISSUERS}).
     %
 \end{gather*}

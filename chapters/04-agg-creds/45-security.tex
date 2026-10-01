@@ -79,8 +79,8 @@ records entry $\langle \user, \Tag, \atv{i}, \signature_i \rangle$, and
 $\idfu{\AAC}'$ likewise adds $\atv{i}$ to $\creds[\user][i]$.
 
     \item[$\issuer{i}$ is corrupt.] If the execution of $\Pi$ terminates with
-$\simu$ receiving a signature $\signature_i$ with $\ATSverify(\ipk{i}, \Tag,$
-$\atv{i}, \signature_i) = 1$, then $\simu$ records entry $\langle \user, \Tag, \atv{i},
+$\simu$ receiving a signature $\signature_i$ with $\ATSverify(\ipk{i}, \Tag,
+\atv{i}, \signature_i) = 1$, then $\simu$ records entry $\langle \user, \Tag, \atv{i},
 \signature_i \rangle$, and sends accept.
 
   \end{description}
@@ -101,9 +101,9 @@ nothing, $\simu$ need not do anything, so Game 5 is indistinguishable from Game
 
   \paragraph{Game 6.} As Game 5, except $\idfu{\AAC}'$ takes charge of presentation
 requests from honest users, following the specifications of $\idfu{\AAC}$.
-Given the message $(\AACpresentend, \vec{\atv{}}, \msg,$ $\algoproof)$ from
+Given the message $(\AACpresentend, \vec{\atv{}}, \msg, \algoproof)$ from
 $\idfu{\AAC}'$ for $\vec{\atv{}} = (\atv{1}, \ldots, \atv{n})$, $\simu$ defines
-the statement $\inst_1 = (\pk,$ $(\ipk{i}, \atv{i})_{i \in \ISSUERS})$ such that $\forall i \in
+the statement $\inst_1 = (\rapk,\allowbreak \ISSUERS,\allowbreak \{\ipk{i}, \atv{i}\}_{i \in \ISSUERS})$ such that $\forall i \in
 \ISSUERS: \atv{i} \neq \varnothing$, and, using its ability to program the
 random oracle as the simulation trapdoor $\td$, outputs $\algoproof^\star
 \leftarrow \NIZKsimprove(\crs, \td, \inst_1, \msg)$, which gives
@@ -142,8 +142,8 @@ exactly when $\user$ is registered, and the simulated $\issuer{i}$ returns $\sig
 \ATSsign(\isk{i}, \Tag, \atv{i})$ under the same conditions, so their outputs
 are indistinguishable.
 
-    \item[Verify.] For each presentation $(\vec{\atv{}}, \msg, \algoproof)$, with $\vec{\atv{}} =$
-$(\atv{1}, \ldots, \atv{n})$, that a user $\user$ presents, in the real world, to an honest
+    \item[Verify.] For each presentation $(\vec{\atv{}}, \msg, \algoproof)$, with $\vec{\atv{}} =
+(\atv{1}, \ldots, \atv{n})$, that a user $\user$ presents, in the real world, to an honest
 verifier $V$, $\simu$ (simulating $V$) calls $b \leftarrow \NIZKverify(\crs,
 \inst_1, \algoproof, \msg)$.  We recall that $\atv{i} = \varnothing$ if the
 attribute value is not disclosed.
@@ -180,9 +180,9 @@ aborts, and we call this event $a_2$.
 	\item[Otherwise.] $\simu$ sends to $\idfu{\AAC}'$ the presentation request
 $(\AACpresent, \vec{\atv{}}, \signature, \msg)$.
 
-	  Either $\idfu{\AAC}'$ aborts, and $\simu$ sends request $(\AACverify,$ $V,\vec{\atv{}}, \algoproof)$ to $\idfu{\AAC}'$, or $\idfu{\AAC}'$ returns
-$(\AACpresentend,$ $\algoproof^\star)$, and $\simu$ sends request $(\AACverify,$ $V,$
-$\vec{\atv{}}, \algoproof^\star)$ to $\idfu{\AAC}'$.
+	  Either $\idfu{\AAC}'$ aborts, and $\simu$ sends request $(\AACverify,\allowbreak V,\allowbreak \vec{\atv{}},\allowbreak \algoproof)$ to $\idfu{\AAC}'$, or $\idfu{\AAC}'$ returns
+$(\AACpresentend,\allowbreak \algoproof^\star)$, and $\simu$ sends request $(\AACverify,\allowbreak V,
+\vec{\atv{}}, \algoproof^\star)$ to $\idfu{\AAC}'$.
 
       \end{description}
 
@@ -241,7 +241,7 @@ $\signature$ satisfies the following:
       \begin{equation*}
     %
 	\ATSverifyagg((\ipk{i})_{i\in \ISSUERS},\Tag,(\atv{i})_{i\in\ISSUERS},
-\signature).
+\signature) = 1.
     %
       \end{equation*}
     %
@@ -300,12 +300,13 @@ $k \neq j$ it samples $\xi_k \sample \Zp^*$ and sets $\sk_k = \xi_k$ and $\pk_k 
 $\adv$ corrupts $\pk_j$. For every corrupted key in the forgery, $\adv$ also
 outputs its secret key, which we write $\xi'_i$.
 
-  \paragraph{Random oracles.} $\advB$ keeps lists of the queries to $\hashone$
+  \paragraph{Random oracles.} Let $q$ bound the number of signing queries under
+$\pk_j$. $\advB$ keeps lists of the queries to $\hashone$
 and $\hashtwo$, with the exponents it used. On a new query $\msg$ to $\hashone$,
-it samples $\rho \sample \Zp^*$ and answers $y^\rho$ with probability $p$, and
+it samples $\rho \sample \Zp^*$ and answers $y^\rho$ with probability $1/(q+1)$, and
 $\gen^\rho$ otherwise. We call the message embedded in the first case. On a new
 query $\Tag$ to $\hashtwo$, it samples $\eta \sample \Zp^*$ and answers
-$\gen^\eta$ with probability $p$, and $y^\eta$ otherwise. We call the tag plain
+$\gen^\eta$ with probability $1/(q+1)$, and $y^\eta$ otherwise. We call the tag plain
 in the first case. Every answer is uniform in $\group{1} \setminus \{1\}$.
 
   \paragraph{Signing.} $\advB$ answers a signing query $(\pk_i, \Tag, \msg)$
@@ -332,9 +333,12 @@ y^{\eta\phi}).
 \end{equation*}
 %
 This is $\ATSsign(\gamma, \Tag, \msg)$ with randomness $\upsilon = \phi -
-\rho\gamma/\eta$, which is uniform, since $\hashone(\msg)^\gamma
-\hashtwo(\Tag)^{\upsilon} = y^{\rho\gamma + \eta\phi - \rho\gamma} =
-y^{\eta\phi}$.
+\rho\gamma/\eta$, which is uniform, since the following holds:
+%
+\begin{equation*}
+  \hashone(\msg)^\gamma \hashtwo(\Tag)^{\upsilon} = y^{\rho\gamma + \eta\phi -
+\rho\gamma} = y^{\eta\phi}.
+\end{equation*}
 
     \item If $\msg$ is embedded and $\Tag$ is plain, it stops.
 
@@ -368,22 +372,23 @@ following:
 
   \paragraph{Success probability.} The simulation is perfect up to the
 difference between uniform elements of $\group{1}$ and of $\group{1} \setminus
-\{1\}$, at most $q_H/p$ for $q_H$ hash queries. Let $q$ bound the number of
-signing queries under $\pk_j$. $\advB$ does not stop when all of the following
+\{1\}$, at most $q_H/p$ for $q_H$ hash queries.
+$\advB$ does not stop when all of the following
 hold:
   \begin{itemize}
     \item the guess of $j$ is right, with probability $1/n$;
     \item $\msg^*_j$ is embedded and no other message signed under $\pk_j$ is,
-with probability at least $p(1-p)^q$;
+with probability at least $\frac{1}{q+1}\big(1-\frac{1}{q+1}\big)^q$;
     \item $\Tag^*$ is plain and no other tag signed under $\pk_j$ is, with
-probability at least $p(1-p)^q$.
+probability at least $\frac{1}{q+1}\big(1-\frac{1}{q+1}\big)^q$.
   \end{itemize}
 Every signing query under $\pk_j$ then falls into one of the first two cases. A
 query on a message other than $\msg^*_j$ is not embedded, and a query on
 $\msg^*_j$ has a tag other than $\Tag^*$, since $(\pk_j, \Tag^*, \msg^*_j)$ was
 never queried, so its tag is not plain. The events are independent of the view
-of $\adv$, so $\advB$ succeeds with probability at least $\frac{1}{n}
-(p(1-p)^q)^2$ times that of $\adv$. With $p = 1/(q+1)$ this gives the following:
+of $\adv$, so $\advB$ succeeds with probability at least $\frac{1}{n}$ times
+the square of this bound, times that of $\adv$. Since $(1-\frac{1}{q+1})^q \geq
+1/e$, this gives the following:
 %
 \begin{equation*}
   \Adv^{\text{BCDH}}_{\advB}(\secparam) \geq
@@ -419,9 +424,17 @@ satisfying the following:
 %
   \end{equation*}
 %
-  Since $\bar{\gen} \neq 1$, we have $\delta \neq 0$, and can write $\gen =
-\bar{\gen}^{1/\delta}$, $v = \bar{v}^{1/\delta}$, and $\pk'^{1/\delta} =
-\bar{\gen}^{\sk/\delta} = \gen^\sk$.  A valid presentation satisfies the blinded
+  Since $\bar{\gen} \neq 1$, we have $\delta \neq 0$, and can write the
+following:
+%
+  \begin{equation*}
+%
+    \gen = \bar{\gen}^{1/\delta}, \quad v = \bar{v}^{1/\delta}, \quad
+\pk'^{1/\delta} = \bar{\gen}^{\sk/\delta} = \gen^\sk.
+%
+  \end{equation*}
+%
+  A valid presentation satisfies the blinded
 $\ATSverifyagg$ and $\SPSverify$ equations:
 %
   \begin{gather*}
@@ -435,31 +448,31 @@ $\ATSverifyagg$ and $\SPSverify$ equations:
 %
   \end{gather*}
 %
-  Substituting $\bar{\gen}^{1/\delta} = \gen$, $\bar{v}^{1/\delta} = v$, and
-raising the first two equalities to the power $1/\delta$, we can deduce that:
+  Substituting $\bar{\gen}^{1/\delta} = \gen$ and $\bar{v}^{1/\delta} = v$, and
+raising all three equations to the power $1/\delta$, we deduce the following:
 %
   \begin{gather*}
 %
-    \pairing(\bar{v}^{1/\delta}, \widetilde{r}) = \pairing(v, \widetilde{r}) =
-\pairing(\bar{\gen}^{1/\delta}, \widetilde{s}) = \pairing(\gen, \widetilde{s}) \
-\wedge \\
+    \pairing(\bar{v}^{1/\delta}, \widetilde{r}') = \pairing(v, \widetilde{r}') =
+\pairing(\bar{\gen}^{1/\delta}, \widetilde{s}') = \pairing(\gen, \widetilde{s}')
+\ \wedge \\
   %
-    \pairing(\bar{z}^{1/\delta}, \widetilde{r}) \cdot \pairing( \pk'^{1/\delta},
+    \pairing(\bar{z}^{1/\delta}, \widetilde{r}') \cdot \pairing( \pk'^{1/\delta},
 \widetilde{u}_1) \cdot \pairing(\bar{\tid}^{1/\delta}, \widetilde{u}_2) =
 \pairing(\bar{\gen}^{1/\delta}, \ggen)= \pairing(\gen, \ggen) \ \wedge \\
   %
     \pairing(\bar{\signaturetwo}^{1/\delta}, \ggen) =
 \pairing(\bar{\tid}^{1/\delta},
-\signatureone)\cdot\prod_{i\in\ISSUERS}\pairing(H_i^{1/\delta}, \ipk{i}).
+\signatureone')\cdot\prod_{i\in\ISSUERS}\pairing(H_i^{1/\delta}, \ipk{i}).
   %
   \end{gather*}
 %
   So the following hold:
   \begin{itemize}
-    \item $(\signatureone, \bar{\signaturetwo}^{1/\delta})$ is a valid
+    \item $(\signatureone', \bar{\signaturetwo}^{1/\delta})$ is a valid
 tag-based aggregate signature on the preimage of $\bar{\tid}^{1/\delta}$ and
 the attribute values $\atv{i}$;
-    \item $(\widetilde{r}, \widetilde{s}, \bar{z}^{1/\delta})$ is a valid
+    \item $(\widetilde{r}', \widetilde{s}', \bar{z}^{1/\delta})$ is a valid
 $\AGHO$ signature on $(\pk'^{1/\delta}, \bar{\tid}^{1/\delta})$.
   \end{itemize}
 
