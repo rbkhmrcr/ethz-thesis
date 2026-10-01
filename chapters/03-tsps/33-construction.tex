@@ -1,9 +1,11 @@
 \section{Construction}\label{sec:tsps-construction}
 
 The signing key of an underlying SPS scheme $\SPS$ is secret-shared among the
-$n$ signers. Rather than reconstructing it, the signers use the MPC protocol of
-\Cref{sec:tsps-mpc} to jointly compute shares of every value that the signing
-algorithm derives from the key and from its own randomness.
+$n$ signers. Rather than reconstructing it, the signers use the MPC protocol to
+jointly compute shares of every value that the signing
+algorithm derives from the key and from its own randomness.\rebekah{Your
+comment: ``no idea what to do here but this isn't it. would say TSPS is a
+primitive we instantiate''. Open: how to reframe this opening.}
 
 \paragraph{Setup.} The signers agree in advance on $(\ell, t, n)$ and the
 pairing groups, and abort if any call to $\algo{MPC}$ returns $\bot$.
@@ -92,7 +94,7 @@ $\algo{Mul}$, $\algo{Inv}$, $\algo{ExpGrp}$ and linear operations.
       \end{enumerate}
 
     \item[$\SPSsig_h \leftarrow \TSPSonsign(\sk_h, \state_h, \vec{\msg})$ :]
-Each signer does the following, with no call to $\algo{MPC}$:
+Each signer does the following, as a local operation:
 
       \begin{enumerate}
 
@@ -121,7 +123,8 @@ $\SPSverify(\pk, \vec{\msg}, \SPSsig)$.
 
 \paragraph{Offline signing.} Each state is used for one message only. For both schemes we instantiate, two
 signatures under the same state give a
-relation between the two messages and the secret key, so the signers keep their
+relation between the two messages and the secret key,\rebekah{Your comment:
+``?''. Open: say what the relation is, or drop the reason.} so the signers keep their
 states in a queue and delete each one once it is used. The offline phase can be
 run repeatedly during quiet periods to build up states for busy ones.
 
@@ -139,31 +142,6 @@ our benchmarks, every signer opens the signature, so each sends its share to all
 others.\rebekah{Combining is defined as non-interactive by any holder, but bad
 shares are only caught at the authenticated opening, and the benchmarks measure
 every party opening. Say how a holder combining alone detects a bad share.}
-\Cref{fig:tsps-seq} shows the steps and messages of signing, from the
-offline phase to combining.
-
-\begin{figure}[htbp] \centering \small
-\begin{tikzpicture}[seq, x=2.7cm]
-  \foreach \x/\n in {0/Signer $1$, 1/\ldots, 2/Signer $n$, 3/Holder} {
-    \node[seqhead, text width=2.3cm] at (\x, 0) {\n};
-  }
-  \foreach \x in {0, 2, 3} \draw[seqlife] (\x, 0.6) -- (\x, 7.5);
-  \draw[seqlife, dotted] (1, 0.6) -- (1, 7.5);
-  \draw[{Stealth[length=1.6mm]}-{Stealth[length=1.6mm]}, thin] (0, 1.3) --
-    node[seqlabel] {$\TSPSoffsign$ under $\algo{MPC}$} (2, 1.3);
-  \node[seqloc] at (0, 2.1) {keep $\state_1$};
-  \node[seqloc] at (2, 2.1) {keep $\state_n$};
-  \draw[gray!60, dashed] (-0.4, 3.3) -- node[seqlabel, text=black] {$\vec{\msg}$ known} (3.4, 3.3);
-  \node[seqloc] at (0, 4.0) {$\SPSsig_1 \leftarrow \TSPSonsign$};
-  \node[seqloc] at (2, 4.0) {$\SPSsig_n \leftarrow \TSPSonsign$};
-  \draw[seqmsg] (2, 5.5) -- node[seqlabel] {$\SPSsig_n$} (3, 5.5);
-  \draw[seqmsg] (0, 6.4) -- node[seqlabel, pos=0.25] {$\SPSsig_1$} (3, 6.4);
-  \node[seqloc] at (3, 7.2) {$\SPSsig \leftarrow \TSPScombine$};
-\end{tikzpicture}
-\caption[Threshold SPS schemes: signing]{Steps and messages of signing. The
-signers run the offline phase together before the message is known, and each
-then signs locally. The holder combines the signature shares of any $t+1$
-signers.} \label{fig:tsps-seq} \end{figure}
 
 \paragraph{Robustness and abort.} With an honest majority, the honest signers' shares alone are enough to combine,
 so signing is robust: it succeeds whatever the corrupted signers do. With
@@ -181,20 +159,10 @@ forgery by its message, so the reduction never has to tell two signatures on the
 same message apart; asking for more would rule out rerandomisable schemes like
 $\AGHO$
   \item from the MPC: privacy and security with abort against up to $t$
-adaptively corrupted signers, the linear $(t+1, n)$ sharing of
-\Cref{sec:tsps-mpc}
+adaptively corrupted signers, the linear $(t+1, n)$ sharing
   \item from $\SPS$: decomposable signing, which is what lets the online phase
 run without the MPC
 \end{outline}
-
-\begin{lemma}\label{lem:tsps-construction-correctness} Let $\SPS$ be a correct SPS
-scheme with decomposable signing, and let the MPC protocol be secure with abort
-over a linear $(t+1, n)$ threshold sharing. Then $\TSPS$ applied to $\SPS$ is
-correct.
-\end{lemma}
-
-We prove \Cref{lem:tsps-construction-correctness} in \Cref{sec:tsps-proof-correctness}.
-
 
 \begin{theorem}\label{thm:tsps-construction-security} Let $\SPS$ be an EUF-CMA
 secure SPS scheme with decomposable signing, and let the MPC protocol be private
@@ -218,7 +186,8 @@ We prove \Cref{thm:tsps-construction-security} in \Cref{sec:tsps-proof-construct
 \begin{outline}
   \item if $n$ is polynomial in $\secparam$ and $t$ or $n - t$ is constant, then
 $\binom{n}{t} \leq n^{\min(t, n-t)}$ is polynomial, so $\TSPS$ is adp-TS-UF-1
-secure
+secure\rebekah{Your comment: ``is that possible? where has this come from?''
+It follows from $\binom{n}{t} = \binom{n}{n-t}$; decide whether to keep it.}
   \item why the factor disappears below: the reduction answers honest signers
 lazily instead of guessing
 \end{outline}

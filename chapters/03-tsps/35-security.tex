@@ -12,29 +12,6 @@ lets a reduction that does not know the signing key still produce honest
 signers' shares of the public key and of signatures, from the public key and
 from the signatures it obtains from its own oracle.
 
-\subsection{Proof of \Cref{lem:tsps-construction-correctness}: correctness of the construction}\label{sec:tsps-proof-correctness}
-
-\begin{proof}
-
-  Recall that with decomposable signing a signature consists of $c_0$ and the
-following:
-  %
-  \begin{equation*}
-  %
-    z_j = c_j \prod_{i=1}^{\ell} \msg_i^{e_{j,i}}.
-  %
-  \end{equation*}
-
-  By security with abort, every call to $\algo{MPC}$ returns the correct output,\rebekah{Correctness
-should not appeal to security with abort, which only bounds what a corrupted signer
-can do; it should follow from correctness of the MPC protocol when everyone is honest.}
-and every other step is linear, so $\TSPSgen$ opens the public key of the
-reconstructed $\sk$, and by decomposable signing the shares output by $\TSPSonsign$ reconstruct
-to $\SPSsign(\sk, \vec{\msg}; \varrho)$ for the randomness $\varrho$ sampled in
-$\TSPSoffsign$, from any $t+1$ signers. Correctness of $\SPS$ gives the claim.
-
-\end{proof}
-
 \subsection{Proof of \Cref{thm:tsps-construction-security}: security of the construction}\label{sec:tsps-proof-construction}
 
 \begin{proof}
@@ -106,7 +83,8 @@ since every signer that issued a share on $\vec{\msg}^\star$ lies in $\mathcal{K
 Its output then wins the EUF-CMA experiment. The shares $\advB$ hands out are
 distributed identically whichever $\mathcal{K}$ it chose, so $\mathcal{K}$ is
 independent of $\adv$'s view, and is such a set with probability at least
-$\binom{n}{t}^{-1}$, which gives the bound.
+$\binom{n}{t}^{-1}$, which gives the bound.\rebekah{You marked ``which gives
+the bound'' with an arrow. Open: cut it or spell out the bound.}
 
 \end{proof}
 
@@ -121,15 +99,16 @@ shares of $\pk$, it computes those of $\Cor_0$ as before, samples those of $t -
 shares behind the sampled ones are never needed, since no further signer is
 corrupted.
 
-Second, it answers online queries lazily. The output of every call to
+Second, it answers online queries as follows. The output of every call to
 $\algo{MPC}$ is a fresh sharing, so the state shares of a session, and the
 signature shares computed from them, are independent of the key shares and of
 other sessions.\rebekah{False for $\KPW$, whose state contains the key entries
 $e_{j,i}$ of $\mat{K}$; the step needs a fresh or masked condition on the state.} In each session, $\advB$ answers a query to an honest signer with
 a uniform signature share as long as the signers of $\Cor_0$, together with the
 honest signers it has answered in that session, number at most $t$. By the first consequence of linear sharing,
-any $t$ shares of a fresh sharing are uniform, so these answers are distributed
-as in a real execution. At the first query that would make this number $t+1$,
+any $t$ shares of a fresh sharing are uniform.\rebekah{You wrote ``no'' next to
+``lazily'' and next to ``so these answers are distributed as in a real
+execution''; both removed. Check the step still argues what it needs.} At the first query that would make this number $t+1$,
 $\advB$ queries its own oracle on the session's message, and derives every other
 signature share from the signature and the $t$ shares already fixed.
 
@@ -178,8 +157,9 @@ For the threshold $\KPW$ scheme, it reconstructs the following:
   \end{equation*}
   %
   which is $\SPSsign(\sk, \vec{\msg}; \rho, \sigma)$ for $\KPW$. Both schemes are
-therefore instances of $\TSPS$, and the correctness lemma and the security
-theorem for $\TSPS$ give the claim.\rebekah{Asserted, not shown: the boxes do not
+therefore instances of $\TSPS$. Correctness follows from correctness of the SPS
+scheme and of the MPC protocol, and \Cref{thm:tsps-construction-security} gives
+security.\rebekah{Asserted, not shown: the boxes do not
 map one to one onto \Cref{prot:tsps-generic}. The state contents differ, $\algo{Inv}$
 is inlined and never used, threshold $\AGHO$ adds the mask $\beta$ and stores
 $\rho\mu_i$ rather than $e_{1,i} = -\rho\mu_i$, and $\KPW$ computes $\gen^{k_{1,j}}$

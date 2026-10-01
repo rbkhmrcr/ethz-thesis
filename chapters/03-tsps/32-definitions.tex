@@ -131,7 +131,7 @@ $\AGHO$ is existentially unforgeable in the GGM~\cite{C:AGHO11}.
 \subsection{Threshold structure-preserving signature schemes}
 
 We write $\shr{x}$ for a sharing of $x$ between the $n$ signers, and $x_i$ for
-the share of signer $i$. \Cref{sec:tsps-mpc} makes this precise. Signing is split
+the share of signer $i$. Signing is split
 into an offline phase, run before the message is known, and an online phase. A
 threshold SPS scheme $\TSPS$ consists of the following algorithms.
 
@@ -174,7 +174,7 @@ when an opened $\gamma$ is zero.}
 %
 \end{equation*}
 
-\paragraph{Unforgeability.} Threshold signatures admit a hierarchy of
+\paragraph{Unforgeability.} Threshold signatures have a hierarchy of
 unforgeability notions~\cite{C:BCKMTZ22}. We rely on adaptive TS-UF-1 security.
 
 \begin{outline}
@@ -260,7 +260,9 @@ We prove adaptive TS-UF-1 security of both schemes in
 \Cref{sec:tsps-security}.
 
 \begin{outline}
-  \item key secrecy follows from MPC privacy: signers only open $\pk$ and
+  \item key secrecy follows from MPC privacy\rebekah{Your comment on key
+secrecy: ``is this not part of unf? why is it listed?'' Decide whether to keep
+it as a separate point.}: signers only open $\pk$ and
 signatures, so at most $t$ signers learn nothing about $\sk$ beyond those
   \item compatibility: $\TSPSverify = \SPSverify$ and a combined signature is an
 ordinary signature under uniform randomness, so a verifier can't tell it was
@@ -275,7 +277,8 @@ shared between the $n$ signers, such that any $t+1$ of them can reconstruct it
 by a pre-defined linear combination. We write $\shr{\alpha}$ for such a sharing:
 the vector $(\alpha_1, \ldots, \alpha_n)$ in which $\alpha_i$ is the share held
 by the $i^{\mathrm{th}}$ signer, and we use the same notation $\shr{a}$ for a
-sharing of a group element $a \in \group{}$. We assume this notation
+sharing of a group element $a \in \group{}$, where $\group{}$ is either source
+group. We assume this notation
 incorporates the authentication components that malicious security requires,
 which we otherwise abstract away.
 
@@ -286,8 +289,7 @@ computing a group operation on such shares would require the signers to
 communicate. It is instead shared as a single unit, $\shr{a} = \shr{(x_0,
 y_0)}$, so that the linear operations below remain local.
 
-Any $t$ shares are independent of $\alpha$. We write $\group{}$ for either
-source group. The shares of a group element $a$ are themselves in $\group{}$,
+Any $t$ shares are independent of $\alpha$. The shares of a group element $a$ are themselves in $\group{}$,
 and reconstruction takes their product. The authentication information, such as
 MAC shares, means that a modified share is detected at opening. In protocol
 boxes, $\shr{\alpha}$ also stands for the signer's own share.
@@ -343,7 +345,7 @@ each signer obtains the following:
 %
 \end{equation*}
 %
-In particular, raising a public group element to a shared exponent gives a
+Raising a public group element to a shared exponent gives a
 sharing of the result~\cite{FOCS:Feldman87,LC:ADEO21}:
 %
 \begin{equation*}
@@ -352,22 +354,26 @@ sharing of the result~\cite{FOCS:Feldman87,LC:ADEO21}:
 %
 \end{equation*}
 %
-This is how the signers obtain
-shares of group elements such as $\gen^{\alpha}$ from shares of $\alpha$, and
-since the messages are public group elements, it makes our online phase local. Under malicious security, the same operations are applied to the
-authentication information.
+Since the messages are public group elements, this makes our online phase
+local. In the malicious setting, the same operations are applied to the
+authentication information.\rebekah{Your comment: ``ok? but this is breaking
+the abstraction of MPC, right?'' Open: keep the authentication information out of
+the text entirely, or say once that it is handled inside the MPC protocol.}
 
-$\algo{ExpGrp}$ is the only interface that mixes the two domains. It is only
-needed when the secret key contains group elements, as in $\KPW$. For a key of
-field elements, as in $\AGHO$, $\algo{Mul}$ is enough. $\algo{ExpGrp}$ lets keys
-with group elements be used as they are, without replacing them by their
-discrete logarithms.
+$\algo{ExpGrp}$ mixes the two domains. It is needed when the secret key
+contains group elements, as in $\KPW$. For a key of field elements, as in
+$\AGHO$, $\algo{Mul}$ is enough.\rebekah{Your comment on this paragraph: ``what,
+this doesn't even sound correct?'' Struck words removed; check the remaining
+claim.}
 
-\begin{outline}
-  \item realised as Smart and Talibi Alaoui do, Beaver-style (cite IMA:SmaTal19);
-explain Beaver multiplication: triples $(a, b, ab)$ made in preprocessing, each
-multiplication uses one triple and two openings
-\end{outline}
+$\algo{ExpGrp}$ is realised as Smart and Talibi Alaoui realise multiplication
+over an elliptic curve group, with multiplication triples made in
+preprocessing~\cite{C:Beaver91b,IMA:SmaTal19}.\rebekah{Your comment on the
+mixed triple and $\algo{Inv}$ paragraphs: ``are we not using MPC as a black box?!
+other than this, was this our idea? if so maybe put the idea here and the
+instantiation in instantiation? this too?'' Open: if the mixed triple is ours,
+keep the idea here and move the construction below to the instantiation
+section.}
 
 $\algo{ExpGrp}$ consumes a mixed triple $(\shr{\eta}, \shr{h}, \shr{h^\eta})$
 with $\eta \sample \Zp$ and $h \sample \group{}$. The signers open the
@@ -410,4 +416,7 @@ PPT simulator $\algo{Sim}$ from their own inputs and outputs and the values
 opened. Security with abort means that corrupted signers may make a call return
 $\bot$ to every honest signer, but cannot make it return a wrong output. Neither
 protocol we benchmark is proven secure against adaptive corruption, so for them
-our results hold under static corruption, for which our proof has no loss.
+our results hold under static corruption, for which our proof has no loss.\rebekah{Your
+comment: ``our proof? our protocol?'' It means the reduction of the security
+proof loses no factor under static corruption, unlike the $\binom{n}{t}$ guess
+in the adaptive case. Reword if that is unclear.}

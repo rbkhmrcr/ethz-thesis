@@ -34,7 +34,7 @@ repetitions after 10 warm-up calls, for party $p_0$. In the tables, the
 interquartile range is within 5\% of the median for all but five measurements,
 and within 16\% for all.
 \Cref{tab:tsps-comp} compares the parameters of the schemes, and
-\Cref{tab:tsps-benchmarks,tab:tsps-baselines-time,tab:tsps-comms,tab:tsps-sizes}
+\Cref{tab:tsps-benchmarks,tab:tsps-comms,tab:tsps-sizes}
 give their times, communication and sizes.
 
 \begin{table}[htbp] \centering \small \setlength{\tabcolsep}{3pt}
@@ -56,36 +56,29 @@ each message element in both source groups. ROM is the random oracle model, and
 PS the assumption of Pointcheval and Sanders~\cite{RSA:PoiSan16}.}
 \label{tab:tsps-comp} \end{table}
 
-\begin{table}[htbp] \centering \small \begin{tabular}{l l r r r r}
+\begin{table}[htbp] \centering \small \setlength{\tabcolsep}{4pt}
+\begin{tabular}{l l r r r r r}
 \toprule
- & & $\TSPSgen$ & $\TSPSoffsign$ & $\TSPSonsign$ & $\TSPScombine$ \\
+ & & Key generation & Offline & Signing & Combining & Verification \\
 \midrule
-Threshold $\AGHO$ & ATLAS & 4.73 & 2.09 & 0.36 & 2.87 \\
- & MASCOT & 20.4 & 31.0 & 0.72 & 8.46 \\
-Threshold $\KPW$ & ATLAS & 11.3 & 14.8 & 0.87 & 6.48 \\
- & MASCOT & 67.2 & 80.0 & 1.84 & 16.8 \\
+Threshold $\AGHO$ & ATLAS & 4.73 & 2.09 & 0.36 & 2.87 & 2.93 \\
+ & MASCOT & 20.4 & 31.0 & 0.72 & 8.46 & 2.93 \\
+Threshold $\KPW$ & ATLAS & 11.3 & 14.8 & 0.87 & 6.48 & 4.29 \\
+ & MASCOT & 67.2 & 80.0 & 1.84 & 16.8 & 4.29 \\
+\midrule
+$\AGHO$ & & 0.52 & & 0.84 & & 2.93 \\
+$\KPW$ & & 1.83 & & 2.00 & & 4.29 \\
+CKPSS23~\cite{AC:CKPSS23} & & 4.09 & & 2.14 & 9.51--15.9 & 3.18 \\
+MMSST24~\cite{PKC:MMSST24} & & 6.47 & & 1.26 & 0.46--0.90 & 4.18 \\
 \bottomrule
 \end{tabular}
-\caption[Threshold SPS schemes: time of every phase]{Time in ms of each phase
-for party $p_0$ at $n = 5$ and $\ell = 2$, with $t = 2$ for ATLAS and $t = 4$ for
-MASCOT. Verification is that of the underlying scheme and takes 2.93~ms for
-$\AGHO$ and 4.29~ms for $\KPW$.} \label{tab:tsps-benchmarks} \end{table}
-
-\begin{table}[htbp] \centering \small \begin{tabular}{l r r r r}
-\toprule
- & Key generation & Signing & Combining & Verification \\
-\midrule
-$\AGHO$ & 0.52 & 0.84 & & 2.93 \\
-$\KPW$ & 1.83 & 2.00 & & 4.29 \\
-CKPSS23~\cite{AC:CKPSS23} & 4.09 & 2.14 & 9.51--15.9 & 3.18 \\
-MMSST24~\cite{PKC:MMSST24} & 6.47 & 1.26 & 0.46--0.90 & 4.18 \\
-\bottomrule
-\end{tabular}
-\caption[Centralised and prior threshold schemes: time]{Time in ms of the
-centralised $\AGHO$ and $\KPW$ schemes and of the prior threshold SPS schemes at
-$n = 5$ and $\ell = 2$. For the prior schemes, key generation is by a trusted
-dealer, signing is one signer's partial signing, and combining is given for
-$t = 2$ and $t = 4$.} \label{tab:tsps-baselines-time} \end{table}
+\caption[Threshold SPS schemes: time]{Time in ms for party $p_0$ at $n = 5$ and
+$\ell = 2$, with $t = 2$ for ATLAS and $t = 4$ for MASCOT. For our schemes,
+signing is $\TSPSonsign$, and verification is that of the underlying scheme. The
+centralised $\AGHO$ and $\KPW$ schemes follow, then the prior threshold SPS
+schemes, for which key generation is by a trusted dealer, signing is one
+signer's partial signing, and combining is given for $t = 2$ and $t = 4$.}
+\label{tab:tsps-benchmarks} \end{table}
 
 \begin{table}[htbp] \centering \small \begin{tabular}{l l r r r}
 \toprule
@@ -114,8 +107,13 @@ Threshold $\KPW$ & ATLAS & 873 & 486 & 391 & 391 & 391 \\
 \end{tabular}
 \caption[Threshold SPS schemes: sizes]{Sizes in bytes at $\ell = 2$ of the public
 key, one signer's key share, state share and signature share, and the signature.
-MASCOT shares carry a MAC share, which doubles them.} \label{tab:tsps-sizes}
+MASCOT shares carry a MAC share, which doubles their size.} \label{tab:tsps-sizes}
 \end{table}
+%
+\rebekah{Your comment on this table: ``combine this too with the above table?
+hm.'' Not merged: the communication table is in kilobytes per phase and this
+one in bytes per object, so they share only the row labels. Decide whether to
+merge them.}
 
 The online phase sends nothing in any of the four settings, and takes between
 0.36 and 1.84~ms. This is comparable to centralised signing, which takes 0.84~ms
@@ -138,9 +136,10 @@ median. ATLAS runs at $n = 2t+1$ and MASCOT at $t = n-1$.}
 
 \begin{figure}[htbp] \centering
 \includegraphics[width=\textwidth]{chapters/03-tsps/tsps-n-comm.pdf}
-\caption[Threshold SPS schemes: communication against $n$]{Bytes sent by party $p_0$ against the number of parties $n$, at $\ell =
-2$, with ATLAS in the top row and MASCOT in the bottom row, since MASCOT sends
-about a thousand times more. $\TSPSonsign$ sends nothing and is not shown.} \label{fig:tsps-n-comm}
+\caption[Threshold SPS schemes: communication against $n$]{Kilobytes sent by party $p_0$ against the number of parties $n$, at $\ell =
+2$, one panel per phase, with ATLAS as solid and MASCOT as dashed lines. MASCOT
+sends about a thousand times more, so the ATLAS lines lie close to zero for key
+generation and offline signing. $\TSPSonsign$ sends nothing and is not shown.} \label{fig:tsps-n-comm}
 \end{figure}
 
 \begin{figure}[htbp] \centering
@@ -163,7 +162,7 @@ of three group elements instead of seven, and verifies in 2.93~ms instead of
   \item Crites et al.\ only sign messages given in both source groups with the
 same discrete logarithm, so can't sign a commitment or public key whose discrete
 logarithm nobody knows (cite AC:CKPSS23)
-  \item threshold $\KPW$ has no efficiency advantage, but keys, signatures and
-verification are those of $\KPW$, so an existing $\KPW$ deployment can distribute
-its signer without changing any verifier
+  \item keys, signatures and verification of threshold $\KPW$ are those of
+$\KPW$, so an existing $\KPW$ deployment can distribute its signer without
+changing any verifier
 \end{outline}

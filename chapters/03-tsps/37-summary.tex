@@ -1,6 +1,11 @@
 \section{Summary}\label{sec:tsps-summary}
 
 \begin{outline}
+  \item keep this section and the chapter very brief and concise but correct
+from the start: building blocks, then the changes, the implementation, then move
+on
+  \item be open that this is mostly an implementation contribution, plus
+splitting signing into offline and online phases and proving security still holds
   \item thresholdising an SPS scheme mostly needs only general-purpose MPC: key
 generation, combining and verification need only the MPC
 interfaces; key secrecy and compatibility with ordinary verifiers follow directly
@@ -26,7 +31,8 @@ busy ones (payments, transparency logs)
   \item link to the thesis statement: certifiers of a ledger or transparency log
 keep their role
   \item authority divided (no one certifies alone), and they certify committed
-values (authority without knowledge)
+values (authority without knowledge)\rebekah{Your comment on ``authority'':
+``nice :) but what property or authority or control I guess?'' Pick the word.}
   \item no interaction once the message is known, so dividing authority costs
 little when a signature is needed, which is what makes the role practical for an
 institution
@@ -35,13 +41,13 @@ institution
 \begin{outline}
   \item open: neither MPC protocol is adaptively secure; with one that is, the
 reduction loses $\binom{n}{t}$, large for an honest majority; removing it needs
-an equivocable sharing or secure erasures
+an equivocable sharing (one the simulator can later explain as a sharing of any
+value) or secure erasures
+  \item be very clear that the $\binom{n}{t}$ bound applies to no benchmarked
+protocol; the benchmarked ones are covered only by the static lemma
   \item if the underlying SPS scheme is strongly unforgeable, the same reduction
 gives the strong threshold analogue
   \item threshold $\KPW$ offline phase could be cheaper by computing the public
-parts locally
+parts locally\rebekah{You wrote ``don't state this?'' at the same point in the
+instantiation, where it is now removed. Drop this bullet too?}
 \end{outline}
-
-Extending our approach to other SPS schemes, and to applications such as
-ledgers and transparency logs discussed in
-\Cref{sec:tsps-introduction}, would be valuable directions for future work.

@@ -83,7 +83,8 @@ signatures let the threshold signers perform the majority of their computation
 offline, in a pre-processing phase before the message to be signed is known,
 which suits high-throughput applications, such as payments, that experience
 interspersed periods of low and high traffic. Our schemes inherit the security
-properties of the underlying SPS schemes.\rebekah{Overclaim: only adp-TS-UF-1
+properties of the underlying SPS schemes.\rebekah{Your comment on this
+paragraph: ``interesting but weak?'' Open: strengthen or cut.}\rebekah{Overclaim: only adp-TS-UF-1
 is proven, from EUF-CMA of the underlying scheme, not every property.}
 
 We define the property of the signing algorithm that makes this possible,
@@ -95,10 +96,10 @@ secret-shared group elements and multiplication of a shared field element with a
 shared group element
   \item Ghosh et al.\ compute on shared group elements between two parties (cite
 NDSS:GPVRNC23); as far as we know no multiparty version had been implemented
-  \item check this claim first: Dalskov et al.\ implemented threshold ECDSA for
-many parties in MP-SPDZ with shared curve points (ESORICS:DOKSS20, cited in the
-old evaluation); if so, say what is new here instead (pairing groups, a shared
-field element times a shared group element)
+  \item Dalskov et al.\ implemented threshold ECDSA for many parties in MP-SPDZ
+with shared curve points (ESORICS:DOKSS20, cited in the old evaluation); what is
+new here is pairing-friendly groups and a shared field element times a shared
+group element (your answer: sounds correct but check)
 \end{outline}
 
 We benchmark both schemes using two MPC frameworks: ATLAS, which assumes an
@@ -159,7 +160,8 @@ and verification cost~\cite{AC:CKPSS23,PKC:MMSST24}.
 \begin{outline}
   \item moving a sharing of a field element into a group without interaction
 (each party raises a public generator to its share) goes back to verifiable
-secret sharing (cite FOCS:Feldman87)
+secret sharing (cite FOCS:Feldman87)\rebekah{Your comment: ``um?.'' Open: keep
+the Feldman point or drop it.}
   \item Smart and Talibi Alaoui: maliciously secure computation over an elliptic
 curve group, maps multiplication triples over $\Zp$ locally into triples over the
 group (cite IMA:SmaTal19)

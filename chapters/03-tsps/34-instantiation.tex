@@ -1,9 +1,8 @@
 \section{Instantiation}\label{sec:tsps-instantiation}
 
 This section instantiates the construction of \Cref{sec:tsps-construction}
-twice, with $\AGHO$ and $\KPW$, giving full descriptions of two threshold SPS
-schemes built from the MPC protocol of
-\Cref{sec:tsps-mpc}~\cite{C:AGHO11,C:KilPanWee15}. In each case we verify that
+twice, with $\AGHO$ and $\KPW$~\cite{C:AGHO11,C:KilPanWee15}, giving full
+descriptions of two threshold SPS schemes built from the MPC protocol. In each case we verify that
 the signing algorithm admits the decomposition the construction requires, and
 give the resulting threshold scheme.
 
@@ -176,6 +175,9 @@ we write the following:
 \widetilde{f}_1)\pairing(f_2, \widetilde{f}_2).
 %
 \end{equation*}
+%
+\rebekah{Your comment on this notation: ``wow gross.'' It is more explicit now
+but the same; decide whether to simplify.}
 
 \begin{primitivebox}{The $\KPW$ SPS scheme}{sps-kiltz}
 
@@ -253,8 +255,7 @@ x_j^{\rho} y_j^{\rho\sigma}, \quad e_{j,i} = k_{i+1,j}.
 %
 \end{equation*}
 %
-None of these depend on the message, which only enters as the public
-$\msg_i$ raised to shared entries of $\mat{K}$. Our protocol and implementation
+None of these depend on the message. Our protocol and implementation
 compute $\gen^{k_{1,j}}$ in the online phase instead, which is also local.
 
 Unlike $\AGHO$, the secret key contains the group elements $\vec{b}, \vec{x},
@@ -264,12 +265,13 @@ needs $\algo{ExpGrp}$, and so $\KPW$ needs sharings of group elements.
 The signers could instead keep the discrete logarithms $\beta, \vec{\xi},
 \vec{\upsilon}$ as shares of field elements, so that $\algo{Mul}$ and linear
 operations would suffice, but they would then no longer hold shares of the
-secret key of $\KPW$ as it is defined. We keep the key as defined.
+secret key of $\KPW$ as it is defined.\rebekah{Your comments here: ``dunno
+man.'' and, on the earlier version, ``definitely don't say this like this''.
+Open: drop the discrete-logarithm alternative entirely, or keep it in one
+sentence.}
 
 \Cref{prot:tsps-kiltz} gives threshold $\KPW$. Its offline phase makes one
-multiplication, then one round of eight calls to $\algo{ExpGrp}_1$. The first
-entry of $\vec{b}$ is the public $\gen$, so two of the eight could be local, but
-the implementation makes all eight.
+multiplication, then one round of eight calls to $\algo{ExpGrp}_1$.
 
 \begin{protocolbox}{The threshold structure-preserving signature scheme from KPW}{tsps-kiltz}
 
@@ -330,12 +332,9 @@ following:
 	  %
 	    \shr{\vec{x}^{\,\rho}} \sample \algo{ExpGrp}_1(\shr{\rho},
 \shr{\vec{x}}), \quad \shr{\vec{y}^{\,\rho\sigma}} \sample
-\algo{ExpGrp}_1(\shr{\rho\sigma}, \shr{\vec{y}}),
+\algo{ExpGrp}_1(\shr{\rho\sigma}, \shr{\vec{y}}).
 	  %
 	  \end{gather*}
-	  %
-	  the last two lines as eight calls to $\algo{ExpGrp}_1$, one per entry, in
-one round.
 
 	\item Each signer computes the following locally:
 	  %
