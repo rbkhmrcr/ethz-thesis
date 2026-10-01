@@ -34,8 +34,13 @@ $\key$ to $\adv$.
 
   \end{enumerate}
 
-  $\adv$ wins the experiment if $x \neq x'$ and $\hasheval(\key, x) =
-\hasheval(\key, x')$.
+  $\adv$ wins the experiment if the following hold:
+  %
+  \begin{equation*}
+  %
+    x \neq x' \ \wedge\ \hasheval(\key, x) = \hasheval(\key, x').
+  %
+  \end{equation*}
 
 \end{experimentbox}
 

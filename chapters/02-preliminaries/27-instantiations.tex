@@ -93,9 +93,24 @@ challenge $c$~\cite{C:CraDamSch94}.
 
 The Sigma protocol for proof of knowledge of a discrete logarithm proves
 knowledge of $x$ with $h = \gen^x$~\cite{JC:Schnorr91}.
-The prover sends $a = \gen^r$ for $r \sample \Zp$, receives a challenge $c
-\sample \Zp$, and returns $z = r + cx$. The verifier checks $\gen^z \checkcheck
-a h^c$. The same protocol proves knowledge of a representation $h = \prod_i
+The prover samples $r \sample \Zp$, sends $a$, receives a challenge $c
+\sample \Zp$, and returns $z$, computed as follows:
+%
+\begin{equation*}
+%
+  a = \gen^r, \qquad z = r + cx.
+%
+\end{equation*}
+%
+The verifier accepts if and only if the following holds:
+%
+\begin{equation*}
+%
+  \gen^z = a \cdot h^c.
+%
+\end{equation*}
+%
+The same protocol proves knowledge of a representation $h = \prod_i
 \gen_i^{x_i}$, with one response per exponent. Several equations over the same witness are proven by
 running the protocol for each in parallel with one shared challenge, so that
 they hold together. This shows, for example, that two group elements have the
@@ -138,6 +153,9 @@ $\openinfo \in \Zp$, return $\com = \prod_{i=1}^{n} \gen_i^{m_i}\cdot
 input $\ck$, commitment $\com$, and opening $\openinfo = (m_1,\ldots,m_n,
 \openinfo')$, return $(m_1,\ldots,m_n)$ if $\com = \prod_{i=1}^{n}
 \gen_i^{m_i}\cdot\hgen^{\openinfo'}$, and $\bot$ otherwise.
+\rebekah{$\ComCommit$ takes $\openinfo \in \Zp$, but $\ComOpen$ parses
+$\openinfo$ as $(m_1,\ldots,m_n,\openinfo')$, so the correctness equation of
+\cref{sec:prelims-commitments} does not type check as written}
 
   \end{description}
 
@@ -185,32 +203,48 @@ following:
 
 	\item Sample $z \sample \Zp$.
 
-	\item Return $\sk = z$, $\pk = (\gen_0, \ldots, \gen_{n+1}, \ggen,
-\ggen_Z = \ggen^z)$.
+	\item Compute $\ggen_Z = \ggen^z$.
+
+	\item Return $\sk = z$ and $\pk = (\gen_0, \ldots, \gen_{n+1}, \ggen,
+\ggen_Z)$.
 
       \end{enumerate}
 
     \item[$\signature \sample \BBSsign(\sk,(\msg_1, \ldots, \msg_n))$ :] On
 input secret key $\sk = z$ and message $(\msg_1, \ldots, \msg_n) \in
-\group{1}^n$, do:
+\group{1}^n$, do the following:
 
       \begin{enumerate}
 
 	\item Sample $e,r \sample \Zp$.
 
-	\item Return $\signature = (e, r, E)$ with $E = (\gen_0 \cdot
-\prod_{i=1}^{n} \msg_i \cdot \gen_{n+1}^{r})^{1/(z+e)}$.
+	\item Compute $E$ as follows:
+	%
+	\begin{equation*}
+	%
+	  E = \Big(\gen_0 \cdot \prod_{i=1}^{n} \msg_i \cdot
+\gen_{n+1}^{r}\Big)^{1/(z+e)}.
+	%
+	\end{equation*}
+
+	\item Return $\signature = (e, r, E)$.
 
       \end{enumerate}
 
     \item[$\{0,1\} \leftarrow \BBSverify(\pk,(\msg_1, \ldots, \msg_n),
 \signature)$ :] On input public key $\pk$, message $(\msg_1, \ldots, \msg_n)$,
-and signature $\signature = (e,r,E)$, do:
+and signature $\signature = (e,r,E)$, do the following:
 
       \begin{enumerate}
 
-	\item Return $\pairing(E,\ggen_Z\cdot\ggen^{e}) \checkcheck
-\pairing(\gen_0 \cdot \prod_{i=1}^{n} \msg_i \cdot \gen_{n+1}^{r}, \ggen)$.
+	\item Return $1$ if and only if the following holds:
+	%
+	\begin{equation*}
+	%
+	  \pairing(E,\ggen_Z\cdot\ggen^{e}) = \pairing\Big(\gen_0 \cdot
+\prod_{i=1}^{n} \msg_i \cdot \gen_{n+1}^{r}, \ggen\Big).
+	%
+	\end{equation*}
 
       \end{enumerate}
 
@@ -234,7 +268,7 @@ assumption~\cite{EC:BonBoy04a}.
 $(\group{1},\group{2},\group{T},\pairing)$ if, given $(\gen_0, \gen_0^{\theta},
 \ldots, \gen_0^{\theta^{q}}, \ggen, \ggen^{\theta})$ for $\gen_0 \in \group{1}$,
 $\ggen \in \group{2}$ and uniformly random $\theta \sample \Zp$, no PPT
-adversary can output a pair $\big(\varsigma,\,
+adversary can output a pair $\big(\varsigma,
 \gen_0^{1/(\theta+\varsigma)}\big)$ for any $\varsigma \in \Zp \setminus
 \{-\theta\}$ with non-negligible probability.
 
