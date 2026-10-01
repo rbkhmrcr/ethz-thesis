@@ -113,7 +113,7 @@ witness, and relation are as follows:
 \begin{equation*} \begin{gathered}
 %
   \rel_6 = \{\ \DSverify(\rapk, \G(\sk) \| \G'(\utk), \signature) = 1 \ \wedge \
-\ComOpen(\ck, \com, \openinfo) = \utk\ \}.
+\com = \ComCommit(\ck, \utk, \openinfo)\ \}.
 %
 \end{gathered} \end{equation*}
 %
@@ -130,7 +130,7 @@ same commitment, with instance, witness, and relation defined as follows:
 %
 \begin{equation*} \begin{gathered}
 %
-  \rel_7 = \{\ \ComOpen(\ck, \com, \openinfo) = \utk \ \wedge \ \ek =
+  \rel_7 = \{\ \com = \ComCommit(\ck, \utk, \openinfo) \ \wedge \ \ek =
 \FE(\utk, \epoch) \\ \wedge \ \Tag_\gamma = \FT(\G'(\utk), \ek, \gamma) \ \wedge
 \ 0 \leq \gamma < \Max\ \}.
 %

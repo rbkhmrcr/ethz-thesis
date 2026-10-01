@@ -170,7 +170,7 @@ there were issuing sessions, contradicting (P3).
 
   \item $\algo{tokens}[\algo{id}] = \langle \algo{usr}, v^* \rangle$ with $v^* \neq
 v$: by (P5), $\simu$ extracts from $\Sigma$ a signature $\psi$ on $(\algo{uid},
-v, s)$ with $\ComOpen(\ck, \com_0, s) = \algo{uid}$. The withdrawal that
+v, s)$ with $\com_0 = \ComCommit(\ck, \algo{uid}, s)$. The withdrawal that
 recorded $\algo{id}$ was on $(\algo{uid}^*, v^*, s^*)$ with the same $\com_0$, so
 either $(\algo{uid}, s) \neq (\algo{uid}^*, s^*)$, which gives two openings of
 $\com_0$ and contradicts (P1), or $\psi$ is a signature on a message the central
@@ -247,7 +247,7 @@ extractability of the proof system (P5) gives a signature the central bank never
 issued, contradicting (P3).
 
   \item $\algo{tokens}[\vec{\algo{id}}] = \langle \algo{usr}^*, v^* \rangle$ with
-$v^* \neq v$: two valid openings of $\algo{id}_0$ under $\ComOpen$ with distinct
+$v^* \neq v$: two openings of $\algo{id}_0$ to distinct
 values violate binding of the commitment scheme (P1).
 
   \item $\algo{tokens}[\vec{\algo{id}}] = \langle \algo{usr}^*, v \rangle$ with
@@ -280,7 +280,7 @@ $(v, \com_{j-1}, \com_j)$ and so fixes $\com_j$ as the destination of the
 payment that delivered the token. The ciphertext $\ciph_j \leftarrow
 \PKEencrypt(\pk_\auditor, \algo{uid}_j; \rho_j)$ encrypts the same value as is
 committed in $\com_j$, as certified by proof $\Gamma_j$. Were this false, it
-would either yield two valid openings of $\com_j$ under $\ComOpen$,
+would either yield two openings of $\com_j$ to distinct values,
 contradicting binding (P1), or a proof $\Gamma_j$ with no valid witness,
 contradicting simulation extractability (P5).
 

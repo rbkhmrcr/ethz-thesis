@@ -146,15 +146,6 @@ sample $\gen, \hgen \sample \group{1}$ and return $\ck = (\gen, \hgen)$.
 commitment key $\ck$, message $\msg \in \Zp$, and opening $\openinfo \in \Zp$,
 return $\com = \gen^{\msg}\cdot\hgen^{\openinfo}$.
 
-    \item[$\msg \leftarrow \ComOpen(\ck,\com,\openinfo)$ :] On input $\ck$,
-commitment $\com$, and opening $\openinfo = (\msg, \openinfo')$, return $\msg$
-if $\com = \gen^{\msg}\cdot\hgen^{\openinfo'}$, and $\bot$ otherwise.
-\rebekah{$\ComCommit$ takes $\openinfo \in \Zp$, but $\ComOpen$ parses
-$\openinfo$ as $(\msg,\openinfo')$, so the correctness equation of
-\cref{sec:prelims-commitments} does not type check as written. One fix: say in
-the syntax that the opening information passed to $\ComOpen$ is the message
-together with the randomness}
-
   \end{description}
 
 \end{primitivebox}

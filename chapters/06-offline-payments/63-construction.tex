@@ -351,7 +351,7 @@ and relation as follows:
           \begin{equation*}
           %
             \SCIverify(\pk_{\algo{cb}}, (\algo{uid}_0, v_0, s_0), \psi) = 1
-\;\wedge\; \ComOpen(\ck, \com_0, s_0) = \algo{uid}_0.
+\;\wedge\; \com_0 = \ComCommit(\ck, \algo{uid}_0, s_0).
           %
           \end{equation*}
 
@@ -383,7 +383,7 @@ $\Gamma_i$, with $\inst = (\ck, \pk_\auditor, \com_i, \ciph_i)$, $\witness =
           %
           \begin{equation*}
           %
-            \ComOpen(\ck, \com_i, s_i) = \algo{uid}_i \;\wedge\; \ciph_i =
+            \com_i = \ComCommit(\ck, \algo{uid}_i, s_i) \;\wedge\; \ciph_i =
 \PKEencrypt(\pk_\auditor, \algo{uid}_i; \rho_i).
           %
           \end{equation*}
@@ -395,7 +395,7 @@ relation as follows:
           \begin{equation*}
           %
             \DSverify(\rapk, (\algo{uid}_i, \sk_{\algo{usr}_i}), \varphi_i) = 1
-\;\wedge\; \ComOpen(\ck, \com_i, s_i) = \algo{uid}_i.
+\;\wedge\; \com_i = \ComCommit(\ck, \algo{uid}_i, s_i).
           %
           \end{equation*}
           %
