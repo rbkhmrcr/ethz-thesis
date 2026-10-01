@@ -1,11 +1,13 @@
 \section{Summary}\label{sec:txid-summary}
 
 \begin{outline}
-  \item tracing in payments is often discussed as if it were a backdoor in end-to-end encrypted messaging; argue it is neither technically nor socially the same problem
-  \item a backdoor is a master capability (everything, any time, unnoticed); ours is the opposite: one user, one epoch, only after that user's grant, non-targeted users never exposed
-  \item why: a message has meaning only to sender and recipient, so any reader is an intrusion; a payment moves value in a system that already answers to regulators
-  \item realistic alternative to scoped tracing is not perfect privacy but the status quo, banks seeing everything in the clear; money is not end-to-end encryption
+  \item touch only very briefly, as the introduction already makes the argument: tracing in payments is often discussed as if it were a backdoor in end-to-end encrypted messaging, but it is neither technically nor socially the same problem
+  \item a backdoor is a master capability (everything, any time, unnoticed); here one user, one epoch, only after that user's grant, non-targeted users never exposed
+  \item a message has meaning only to sender and recipient, so any reader is an intrusion; a payment moves value in a system that already answers to regulators; the realistic alternative is the status quo, banks seeing everything in the clear
 \end{outline}
+
+\rebekah{more citations for the financial requirements (tracing obligations,
+regulators) earlier in this chapter, so the summary can refer back to them}
 
 \begin{outline}
   \item scoping came from moving the question from who may see a transaction to how narrowly a capability can be granted
@@ -19,4 +21,6 @@
   \item algebraic tags are the largest item per transaction; compressing them or publishing a different element would reduce ledger growth
   \item check first: the size table says the $\rel_7'$ proof is larger than the tag
   \item a policy for choosing $\Max$ (privacy of volume against capacity) is a deployment question as much as a cryptographic one
+  \item algebraic PRFs that fit Sigma protocols, like Dodis-Yampolskiy, seem to need $q$-type assumptions (\Cref{sec:txid-ft}); worth asking whether a different primitive avoids them, since one-way functions alone are not enough (their outputs need not look random)
+  \item a redesign of how keys are derived: a long-term key derives epoch keys, which derive tags; only the current epoch key is released to an auditor; it must not give previous or future epoch keys, or previous or future tags, and tags must not give any key; if each stage can be one way like this and still have short proofs, the generic protocol gets a clean generic instantiation
 \end{outline}

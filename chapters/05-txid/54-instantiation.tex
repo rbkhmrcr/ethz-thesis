@@ -1,33 +1,33 @@
 \section{Instantiation}\label{sec:txid-instantiation}
 
-We give two instantiations of the generic construction of $\ID$, both over the
-BLS12-381 curve. The first uses algebraic pseudorandom functions and tailored
-Sigma protocols, and needs no trusted setup. The second builds both
-pseudorandom functions from the MiMC permutation and proves the two
-pseudorandom function relations with a general-purpose zk-SNARK. The two make
-opposite trades, which we discuss once both are in place.
+We give two instantiations of the generic construction of $\ID$. The first uses
+algebraic pseudorandom functions and tailored Sigma protocols, and needs no
+trusted setup. The second builds both pseudorandom functions from the MiMC
+permutation and proves the two pseudorandom function relations with a
+general-purpose zk-SNARK. Both follow \Cref{prot:txid-generic} step by step,
+and \Cref{sec:txid-evaluation} compares the two.
 
 \subsection{Instantiating $\ID$ with algebraic PRFs}\label{sec:txid-alg-instantiation}
 
 Three of the four relations of the construction involve pairing equations,
-and proving statements about pairings is expensive. We therefore rewrite each of
-them so that the prover only shows equalities of discrete logarithms, which
-efficient Sigma protocols handle, while the verifier evaluates one or two
-pairings itself on public data. The concrete choices below are all made so that
-every proof stays a Sigma protocol.
+and proving statements about pairings is expensive. We rewrite each of them so
+that the prover only shows equalities of discrete logarithms, which efficient
+Sigma protocols handle, while the verifier evaluates one or two pairings itself
+on public data. The concrete choices below are all made so that every proof
+stays a Sigma protocol.
 
-The setup is transparent: no party, including the registration authority,
-samples the group generators. All of them are derived by hashing to the group
-from a public seed, so no discrete logarithm relation among them is known to
-anyone. The same generators serve both as the registration
-authority's public key for the BBS+ signature scheme and as the key of the
-Pedersen commitment scheme. Binding of a Pedersen commitment fails against
-whoever knows such a relation, and here the commitments must bind
-against the registration authority. Had it chosen the generators, it could open
-any commitment to a tracing key of its choice. Sharing the generators is
-otherwise safe and saves space, since both primitives rely on the same property,
-and the randomness of each signature and commitment is still sampled fresh. The
-registration authority samples only its signing key.
+\begin{outline}
+  \item why this instantiation is more complex than the construction: the derivations of \Cref{sec:txid-construction}, tracing key to epoch keys to tags, need every step to be one way, hard to invert from the epoch key back to the tracing key, and from a tag back to the epoch key
+  \item every step must also be provable with a Sigma protocol, so its inputs and outputs must be group or field elements related by equations of discrete logarithms; a hash function is one way but has no such structure
+  \item one-way functions alone are not enough, since tags and epoch keys must also look random; so both steps are algebraic PRFs
+  \item algebraic PRFs with this shape, like Dodis-Yampolskiy for the tag step, rest on $q$-type assumptions, and pairing-based constructions of this type are known not to admit both short proofs and a reduction to a simple assumption (EC:TCRSTW22, TCC:BHKU22, already cited after \Cref{asm:qmdbdhi-txid})
+  \item the rewritten relations and blinding below come from the same tension: pairing equations are not equations of discrete logarithms, so the prover proves the latter and the verifier checks the pairings
+  \item the hash-based instantiation drops the algebraic structure and pays with a general-purpose proof system
+\end{outline}
+
+The setup is transparent: all group generators are derived by hashing to the
+group from a public seed, so no party, including the registration authority,
+knows a discrete logarithm relation among them.
 
 \subsubsection{The epoch PRF}\label{sec:txid-fe}
 
@@ -41,22 +41,31 @@ together in the same credential.
   \item a per-epoch hash raised to a secret exponent is the simplest PRF with both properties
 \end{outline}
 
-The epoch PRF raises a per-epoch hash to the first component, $\FE(\utk,
-\epoch) = \HE(\epoch)^{\utk'}$, so the epoch tracing key is a single element of
-$\group{1}$. The public tracing key $\PTK$ contains a Pedersen commitment $T$ to
-the pair, and the vector of group elements $\{W_\gamma\}_{\gamma \in [0,\Max)}$,
-with $W_\gamma = \ggen_D^{1/(\utk''+\gamma)}$, that tag evaluation needs. These
-elements do not change with the epoch. If the epoch PRF output them, they would
-repeat in every epoch and its output could not be pseudorandom, so they sit in
-the certified public tracing key instead, which already travels with the grant
-message. This is the arrangement the construction asks for.
+The epoch PRF raises a per-epoch hash to the first component of the tracing
+key, so the epoch tracing key is a single element of $\group{1}$:
+%
+\begin{equation*}
+  \FE(\utk, \epoch) = \HE(\epoch)^{\utk'}.
+\end{equation*}
+%
+The public tracing key $\PTK$ contains a Pedersen commitment $T$ to the pair,
+and the vector of group elements that tag evaluation needs:
+%
+\begin{equation*}
+  T = \gen_2^{\utk'}\cdot\gen_3^{\utk''}, \qquad W_\gamma =
+\ggen_D^{1/(\utk''+\gamma)} \ \text{ for } \gamma \in [0,\Max).
+\end{equation*}
+%
+These elements do not change with the epoch. If the epoch PRF output them, they
+would repeat in every epoch and its output could not be pseudorandom, so they
+sit in the certified public tracing key instead, which already travels with the
+grant message. This is the arrangement the construction asks for.
 
 \begin{lemma}\label{lem:txid-fe-prf}
   %
   Under the DDH assumption in $\group{1}$ and modelling
-$\HE$ as a random oracle, $\FE(\utk,\epoch) = \HE(\epoch)^{\utk'}$ is a secure
-pseudorandom function, and remains so against a distinguisher given the whole of
-$\PTK$.
+$\HE$ as a random oracle, $\FE$ is a secure pseudorandom function, and remains
+so against a distinguisher given the whole of $\PTK$.
 %
 \end{lemma}
 
@@ -69,7 +78,7 @@ $\PTK$.
 
 The Dodis-Yampolskiy PRF is pseudorandom under the $q$-decisional bilinear
 Diffie-Hellman inversion assumption, $q$-DBDHI~\cite{PKC:DodYam05}. It is
-recalled in \Cref{prim:dy-prf}.
+given in \Cref{prim:dy-prf}.
 
 \begin{primitivebox}{The Dodis-Yampolskiy PRF}{dy-prf}
 
@@ -93,11 +102,16 @@ return the following:
 
 \end{primitivebox}
 
-We use the Dodis-Yampolskiy PRF differently from its authors. The group element
-$X$ is the epoch tracing key, which is secret, and the elements
-$\ggen_D^{1/(\utk''+\gamma)}$ are published as $\{W_\gamma\}$. A tag is
-therefore $\FT(\PTK,\ek,\gamma) = \pairing(\ek, W_\gamma)$, keyed by the epoch
-key rather than by $\utk''$. Its security rests on \Cref{asm:qmdbdhi-txid}.
+We use the Dodis-Yampolskiy PRF differently from its authors. The secret group
+element $X$ is the epoch tracing key, and the elements
+$\ggen_D^{1/(\utk''+\gamma)}$ are published as $\{W_\gamma\}$. So a tag is
+keyed by the epoch key rather than by $\utk''$:
+%
+\begin{equation*}
+  \FT(\PTK,\ek,\gamma) = \pairing(\ek, W_\gamma).
+\end{equation*}
+%
+Its security rests on \Cref{asm:qmdbdhi-txid}.
 
 \begin{assumptionbox}{Decisional Bilinear Diffie-Hellman Inversion with
 published elements ($q$-mDBDHI)}{qmdbdhi-txid}
@@ -127,8 +141,7 @@ from any single tag on the ledger and compute every other tag of that user in
 that epoch without the epoch key. Since $\utk''$ never changes, one grant would
 then let the auditor trace the user in every later epoch. With the elements
 $\{W_\gamma\}$ instead, the auditor still computes every tag of a granted epoch
-as $\pairing(\ek, W_\gamma)$, and the epoch key keeps the other epochs out of
-reach.
+from $\ek$, and the epoch key keeps the other epochs out of reach.
 
 The elements $\{W_\gamma\}$ are public parameters, not secrets held in trust.
 They are certified with the public tracing key and handed to every auditor a
@@ -139,22 +152,17 @@ is use them to read a tag from an epoch for which neither holds the epoch key.
 \begin{lemma}\label{lem:txid-ft-prf} Let $\ek$ be uniform in $\group{1}$ and
 unknown to the adversary, and let the public parameters
 $\{W_\gamma\}_{\gamma\in[0,\Max)}$ be given to the adversary. Under the
-$q$-mDBDHI assumption with $q = \Max$, the function
-$\FT(\PTK, \ek, \gamma) = \pairing(\ek, W_\gamma)$ is a secure pseudorandom
+$q$-mDBDHI assumption with $q = \Max$, $\FT$ is a secure pseudorandom
 function on domain $[0,\Max)$.  \end{lemma}
 
 \subsubsection{The tracing protocol}\label{sec:txid-protocol-inst}
 
-The registration authority's key pair is for the BBS+ signature scheme. During
-registration, the user accordingly sends only the group elements $S =
-\gen_1^{\sk}$ and $T = \gen_2^{\utk'}\cdot\gen_3^{\utk''}$, together with a
-proof of knowledge of the underlying secrets, rather than the secrets
-themselves.
-
 Credentials use the BBS+ signature scheme on group elements, recalled in
-\Cref{prim:bbs}. Commitments use the Pedersen commitment scheme, recalled in
-\Cref{prim:pedersen}, with generators shared with the BBS+ signature scheme.
-Range proofs use Bulletproofs~\cite{SP:BBBPWM18}.
+\Cref{prim:bbs}. During registration, the user sends only the group elements $S
+= \G(\sk)$ and $T$, together with a proof of knowledge of the underlying
+secrets, rather than the secrets themselves. Commitments use the Pedersen
+commitment scheme, recalled in \Cref{prim:pedersen}, with generators shared with
+the BBS+ signature scheme. Range proofs use Bulletproofs~\cite{SP:BBBPWM18}.
 
 \begin{outline}
   \item BBS+: signs several committed values at once, can sign values the signer never sees, has a Sigma protocol for knowledge of a signature
@@ -163,162 +171,143 @@ Range proofs use Bulletproofs~\cite{SP:BBBPWM18}.
   \item Bulletproofs: no trusted setup, logarithmic in the range, keeps the setup transparent
 \end{outline}
 
-The protocol instantiation is described in full in~\Cref{prot:txid}, and the two
-proofs of a transaction after it.
+\Cref{prot:txid} gives the protocol. Each of its algorithms is the algorithm of
+the same name in \Cref{prot:txid-generic}, with the following proofs. The proof
+for $\rel_4$ is the Sigma protocol for knowledge of a representation of $S$ and
+$T$, with its label in the Fiat-Shamir hash. The proofs for $\rel_5$, $\rel_7$
+and $\rel_6$ are the epoch key proof, the tag proof and the transaction
+authorisation proof, given after the protocol in
+\Cref{prot:txid-ek-proof,prot:txid-tag-proof,prot:txid-tx-proof}. The range
+clause of $\rel_7$ is proved with a Bulletproofs range proof on a separate
+commitment to the index.
 
-\begin{protocolbox}{The tracing protocol}{txid}
+\begin{protocolbox}{The algebraic tracing protocol}{txid}
 
   \begin{description}
 
     \item[$(\crs,\state) \sample \IDgen(\secparam)$ :] On input the security
-parameter, do the following:
+parameter, do:
 
       \begin{enumerate}
 
 	\item Fix bilinear groups $(\group{1},\group{2},\group{T},p,\pairing)$
-of prime order $p$ admitting an efficient pairing $\pairing: \group{1} \times
-\group{2} \to \group{T}$.
+of prime order $p$.
 
 	\item Fix a public seed $\mathsf{sd}$ and derive
 $\gen_0,\gen_1,\gen_2,\gen_3,\gen_4 \in \group{1}$ and $\ggen,\ggen_D \in
-\group{2}$ by hashing to the group from $\mathsf{sd}$. Fix a hash function $\HE
-: \{0,1\}^* \to \group{1}$, modelled as a random oracle, and a hash function
-$\hash : \{0,1\}^* \to \Zp$.
+\group{2}$ by hashing to the group from $\mathsf{sd}$. Fix hash functions $\HE
+: \{0,1\}^* \to \group{1}$ and $\hash : \{0,1\}^* \to \Zp$.
 
 	\item The registration authority samples $(\rask,\rapk) \sample
-\BBSgen(\secparam,3,(\gen_0,\ldots,\gen_4,\ggen))$, that is, it samples only the
-scalar $z$ and publishes $\ggen_Z = \ggen^z$.
+\BBSgen(\secparam,3,(\gen_0,\ldots,\gen_4,\ggen))$, which samples only $z
+\sample \Zp$ and sets $\ggen_Z \leftarrow \ggen^z$.
 
-	\item Set $\ck \leftarrow (\gen_2,\gen_3,\gen_4)$, reusing the
-generators of Step 2, so that $(\gen_2,\gen_3)$ commit to $(\utk',\utk'')$ and
-$\gen_4$ is the hiding generator.
+	\item Set $\ck \leftarrow (\gen_2,\gen_3,\gen_4)$ and $\Max \leftarrow
+2^{\ell}$.
 
-	\item Set $\Max \leftarrow 2^{\ell}$, $\G'(\utk) := (T,
-\{W_\gamma\}_{\gamma\in[0,\Max)})$ for $T = \gen_2^{\utk'}\cdot\gen_3^{\utk''}$
-and $W_\gamma = \ggen_D^{1/(\utk''+\gamma)}$, $\FE(\utk,\epoch) :=
-\HE(\epoch)^{\utk'}$, and $\FT(\PTK,\ek,\gamma) := \pairing(\ek, W_\gamma)$.
-
-	\item Set $\crs \leftarrow (\group{1},\group{2},\group{T},\pairing,
-\mathsf{sd}, \gen_0,\gen_1,\gen_2,\gen_3,\gen_4,\ggen,\ggen_D,\HE,\hash,
-\rapk,\ck,\Max)$ and $\state \leftarrow \varnothing$, the empty ledger,
-indexed by tag.
-
-	\item Return $(\crs,\state)$.
+	\item Return $\crs \leftarrow (\group{1},\group{2},\group{T},\pairing,
+\mathsf{sd}, \gen_0,\ldots,\gen_4,\ggen,\ggen_D,\HE,\hash, \rapk,\ck,\Max)$ and
+$\state \leftarrow \varnothing$.
 
       \end{enumerate}
 
-    \item[$(\sk,\utk,\regcred) \sample \IDregister(\crs,\state)$ :]
-Interactively between the user and the registration authority, do:
+    \item[$(\sk,\utk,\regcred) \sample \IDregister(\crs,\state)$ :] Between the
+user and the registration authority, do:
 
       \begin{enumerate}
 
 	\item The registration authority sends a fresh nonce $\rand$ to the
 user.
 
-	\item The user samples $\sk,\utk',\utk'' \sample \Zp$, sets $S
-\leftarrow \gen_1^{\sk}$, $T \leftarrow \gen_2^{\utk'}\cdot\gen_3^{\utk''}$, and
-$\PTK \leftarrow (T,\{W_\gamma\})$ for $W_\gamma =
-\ggen_D^{1/(\utk''+\gamma)}$. It computes a Sigma protocol proof of representation
-$\algoproof_4$ of $(\sk,\utk',\utk'')$ with $S = \gen_1^{\sk}$ and $T =
-\gen_2^{\utk'}\cdot\gen_3^{\utk''}$, with the challenge $\hash(\gen_1,\gen_2,
-\gen_3,S,T,a,\rand)$ on its first message $a$, and sends $(S,T,\algoproof_4)$ to
-the registration authority.
+	\item The user samples $\sk,\utk',\utk'' \sample \Zp$, and computes $S
+\leftarrow \gen_1^{\sk}$, $T \leftarrow \gen_2^{\utk'}\cdot\gen_3^{\utk''}$ and
+$W_\gamma \leftarrow \ggen_D^{1/(\utk''+\gamma)}$ for each $\gamma \in
+[0,\Max)$.
 
-	\item If $\algoproof_4$ does not verify, or the user has registered
-before, the registration authority exits.
+	\item The user computes the proof $\algoproof_4$ of knowledge of
+$(\sk,\utk',\utk'')$ with label $\rand$, and sends $(S,T,\algoproof_4)$ to the
+registration authority.
 
-	\item Else, the registration authority computes $\signature \sample
-\BBSsign(\rask,(S,T))$, that is, $\signature = (e,r,E)$ with $E =
-(\gen_0\cdot S\cdot T\cdot\gen_4^{r})^{1/(z+e)}$, and records $(S,T)$ as
-registered.
+	\item The registration authority exits if $S$ has been registered before
+or $\algoproof_4$ does not verify.
 
-	\item Return $\sk$ as the user's signing key, $\utk = (\utk',\utk'')$ as
-their tracing key, and $\regcred \leftarrow (S,T,\signature)$ as their
-registration credential.
+	\item The registration authority computes $\signature \sample
+\BBSsign(\rask,(S,T))$ and records $S$ as registered.
+
+	\item Return $\sk$ and $\utk \leftarrow (\utk',\utk'')$ to the user,
+and $\regcred \leftarrow (S,T,\signature)$ as their registration credential.
 
       \end{enumerate}
 
     \item[$(\PTK,\ek) \sample \IDgrant(\crs,\sk,\utk,\regcred,\epoch)$ :]
-Interactively between the user and an auditor, on a fresh nonce $\rand$ from the
-auditor, do:
+Between the user and an auditor, do:
 
       \begin{enumerate}
 
-	\item Parse $\regcred = (S,T,\signature)$ and $\utk = (\utk',\utk'')$.
+	\item The auditor sends a fresh nonce $\rand$ to the user.
 
-	\item The user computes $\ek \leftarrow \HE(\epoch)^{\utk'}$. The
-auditor is sent $\{W_\gamma\}$ only the first time it is authorised for this
-user. Every grant after that carries $\ek$ alone.
+	\item The user parses $\regcred = (S,T,\signature)$, and computes $\ek
+\leftarrow \HE(\epoch)^{\utk'}$ and the epoch key proof $\algoproof_5$ of
+\Cref{prot:txid-ek-proof} with label $\rand$. On the user's first grant to this
+auditor, $\algoproof_5$ also covers $\{W_\gamma\}$.
 
-	\item Both parties derive $t_\gamma = \hash(\{W_\gamma\},\gamma) \in
-\Zp$ and set $\widehat{W} = \prod_{\gamma=0}^{\Max-1} W_\gamma^{t_\gamma}$ and
-$\widehat{V} = \prod_{\gamma=0}^{\Max-1} (\ggen_D\cdot
-W_\gamma^{-\gamma})^{t_\gamma}$.
+	\item The user computes the proof $\algoproof_4$ of knowledge of
+$(\sk,\utk',\utk'')$ with label $\algoproof_5\|\rand$, and sends
+$(\regcred,\ek,\algoproof_5,\algoproof_4)$ to the auditor, together with
+$\{W_\gamma\}$ on a first grant.
 
-	\item The user samples $\alpha,\beta \sample \Zp$, computes $A =
-\gen_2^{\alpha}\cdot\gen_3^{\beta}$, $B = \HE(\epoch)^{\alpha}$, and $K =
-\widehat{W}^{\beta}$, sets $c = \hash(\inst_5,A,B,K,\rand)$ for $\inst_5 =
-(\HE,\gen_2,\gen_3,\ggen_D,T,\epoch,\ek,\{W_\gamma\})$, $\eta = \alpha +
-c\cdot\utk'$ and $\zeta = \beta + c\cdot\utk''$, and forms $\algoproof_5
-\leftarrow (A,B,K,\eta,\zeta)$. On later grants to the same auditor, $K$ and
-$\{W_\gamma\}$ are omitted.
-
-	\item The user computes a fresh $\algoproof_4$ as in registration, with
-$\algoproof_5\|\rand$ in place of $\rand$, and sends
-$(S,T,\signature,\ek,\algoproof_5,\algoproof_4)$ to the auditor.
-
-	\item The auditor accepts and outputs $\ek$ if and only if
-$\algoproof_4$ verifies, $\BBSverify(\rapk,(S,T),\signature) = 1$,
-$\gen_2^{\eta}\cdot\gen_3^{\zeta} \checkcheck A\cdot T^{c}$, and
-$\HE(\epoch)^{\eta} \checkcheck B\cdot\ek^{c}$. On a first grant to this
-auditor, it additionally checks $\widehat{W}^{\zeta} \checkcheck
-K\cdot\widehat{V}^{c}$.
+	\item The auditor outputs $\PTK = (T,\{W_\gamma\})$ and $\ek$ if
+$\BBSverify(\rapk,(S,T),\signature) = 1$ and both proofs verify, and exits
+otherwise.
 
       \end{enumerate}
 
     \item[$\tx \sample \IDsubmit(\crs,\sk,\utk,\regcred,\epoch,\payload)$ :] On
-input $(\crs,\sk,\utk,\regcred,\epoch,\payload)$ from the user, do:
+input from the user, do:
 
       \begin{enumerate}
 
-	\item Parse $\regcred = (S,T,\signature)$, $\utk = (\utk',\utk'')$, and
-compute $\ek = \HE(\epoch)^{\utk'}$.
+	\item Parse $\regcred = (S,T,\signature)$ and compute $\ek \leftarrow
+\HE(\epoch)^{\utk'}$.
 
-	\item Take a fresh, unused index $0 \leq \gamma < \Max$ from the user's
+	\item Take a fresh, unused index $\gamma \in [0,\Max)$ from the user's
 local pool for this epoch, and compute $\Tag_\gamma \leftarrow
 \pairing(\ek,W_\gamma)$.
 
-	\item Sample $\openinfo, r_\gamma \sample \Zp$ and compute $\com =
-\gen_2^{\utk'} \cdot \gen_3^{\utk''} \cdot \gen_4^{\openinfo}$ and $\com_\gamma
-= \gen_3^{\gamma}\cdot\gen_4^{r_\gamma}$.
+	\item Sample $\openinfo, r_\gamma \sample \Zp$ and compute the following:
+	  %
+	  \begin{equation*}
+	    \com \leftarrow \gen_2^{\utk'} \cdot \gen_3^{\utk''} \cdot
+\gen_4^{\openinfo}, \qquad \com_\gamma \leftarrow
+\gen_3^{\gamma}\cdot\gen_4^{r_\gamma}.
+	  \end{equation*}
 
-	\item Compute $\algoproof_7'$ with the tag correctness Sigma protocol
-below, and a Bulletproofs range proof $\algoproof_{\mathsf{rng}}$ that
-$\com_\gamma$ opens to a value in $[0,\Max)$~\cite{SP:BBBPWM18}.
+	\item Compute the tag proof $\algoproof_7'$ of
+\Cref{prot:txid-tag-proof}, and a Bulletproofs range proof
+$\algoproof_{\mathsf{rng}}$ that $\com_\gamma$ opens to a value in $[0,\Max)$.
 
-	\item Compute $\algoproof_6'$ with the transaction authorisation proof
-below, on the message $\msg =
+	\item Set $\msg \leftarrow
 \payload\|\Tag_\gamma\|\com\|\com_\gamma\|\algoproof_7'\|
-\algoproof_{\mathsf{rng}}$.
+\algoproof_{\mathsf{rng}}$, and compute the transaction authorisation proof
+$\algoproof_6'$ of \Cref{prot:txid-tx-proof} with label $\msg$.
 
-	\item Set $\tx \leftarrow (\payload,\Tag_\gamma,\com,\com_\gamma,
-\algoproof_7',\algoproof_{\mathsf{rng}},\algoproof_6')$, submit $\tx$ to the
-ledger, and return it.
+	\item Return $\tx \leftarrow (\payload,\Tag_\gamma,\com,\com_\gamma,
+\algoproof_7',\algoproof_{\mathsf{rng}},\algoproof_6')$, and submit it to the
+ledger.
 
       \end{enumerate}
 
     \item[$\{0,1\} \leftarrow \algo{Verify}(\crs,\state,\tx)$ :] Run by the
-transaction validators. Parse $\tx$ and return $1$ if and only if all of the
-following hold:
+transaction validators. Parse $\tx$, and return $1$ if the following all hold,
+and $0$ otherwise:
 
       \begin{enumerate}
 
-	\item $\Tag_\gamma$ does not appear in $\state$.
+	\item $\Tag_\gamma \notin \state$.
 
-	\item $\algoproof_7'$ verifies with the tag correctness Sigma
-protocol.
+	\item $\algoproof_7'$ verifies with the tag proof.
 
-	\item $\algoproof_{\mathsf{rng}}$ verifies for $\com_\gamma$ against the
+	\item $\algoproof_{\mathsf{rng}}$ verifies for $\com_\gamma$ and the
 range $[0,\Max)$.
 
 	\item $\algoproof_6'$ verifies with the transaction authorisation proof
@@ -326,11 +315,11 @@ on $\msg$.
 
       \end{enumerate}
 
-      On accepting, the validators append $\tx$ to $\state$, recording
-$\payload$ against the key $\Tag_\gamma$.
+      On returning $1$, the validators set $\state[\Tag_\gamma] \leftarrow
+\payload$.
 
     \item[$\{\payload\} \leftarrow \IDidentify(\crs,\PTK,\ek,\epoch)$ :] For
-each $0 \leq \gamma < \Max$, compute $\Tag_\gamma \leftarrow
+each $\gamma \in [0,\Max)$, compute $\Tag_\gamma \leftarrow
 \pairing(\ek,W_\gamma)$ and retrieve $\state[\Tag_\gamma]$ if present. Return
 the set of retrieved payloads.
 
@@ -338,97 +327,181 @@ the set of retrieved payloads.
 
 \end{protocolbox}
 
-Because the elements $\{W_\gamma\}$ do not depend on the epoch, each auditor
-receives them once, at its first grant from a user, and every later grant is
-constant size. That first grant also proves them well formed against the same
-commitment $T$ that the credential certifies, so the auditor can rely on them
-when it evaluates tags. Rather than check all $\Max$ equalities
-$W_\gamma^{\utk''} = \ggen_D\cdot W_\gamma^{-\gamma}$, the prover shows one
-random linear combination of them, with coefficients derived by hashing the
-elements themselves. Nothing here is state the auditor must keep: the elements
-are certified public key material, and can be sent again.
-
-The tag proof must show that the tag is the user's tag for this epoch at some
-index in range, without revealing the epoch key or the index.
-Proving $\rel_7$ directly would require an argument over the secret group
-element $\ek$ paired against a secret-exponent term, which would be expensive in
-practice. Instead, the user blinds the epoch key and the tag with a fresh
-scalar, publishes the blinded values, and proves only equalities of discrete
-logarithms. The index is committed separately, and the Sigma protocol and a
-standard range proof both speak about that commitment.
-
-Concretely, the user samples fresh $s, r_\gamma \sample \Zp$ and publishes $U =
-\HE(\epoch)^s$, the tag blinded as $X = \Tag_\gamma^s$, the blinded epoch key
-paired with $\ggen_D$ as $\Pi = \pairing(\ek^s, \ggen_D)$, and a commitment
-$\com_\gamma$ to the index. A correctly formed tag satisfies
-$\Tag_\gamma^{\utk''+\gamma} = \pairing(\ek,\ggen_D)$, so after blinding $\Pi =
-X^{\utk''+\gamma}$. The user therefore proves the rewritten tag relation
-$\rel_7'$, with instance $\inst_7' = (\inst_7, U, \Pi, X, \com_\gamma)$ and
-witness $\witness_7' = (\witness_7, s, r_\gamma)$:
+Because the elements $\{W_\gamma\}$ do not
+depend on the epoch, each auditor receives them once, at its first grant from a
+user, and every later grant is constant size. That first grant also proves them
+well formed against the same commitment $T$ that the credential certifies, so
+the auditor can rely on them when it evaluates tags. In the instantiation,
+$\rel_5$ has the following instance and witness:
+%
+\begin{equation*}
+  \inst_5 = (\HE, \gen_2, \gen_3, \ggen_D, T, \epoch, \ek,
+\{W_\gamma\}_{\gamma\in[0,\Max)}), \qquad \witness_5 = (\utk',\utk''),
+\end{equation*}
+%
+and holds exactly when the following does:
 %
 \begin{equation*} \begin{gathered}
-%
-  \com = \gen_2^{\utk'}\cdot\gen_3^{\utk''}\cdot\gen_4^{\openinfo} \ \wedge \ U
-= \HE(\epoch)^s \ \wedge \ \Pi = \pairing(U,\ggen_D)^{\utk'} \\ \wedge \ X =
-\Tag_\gamma^s \ \wedge \ \Pi = X^{\utk''}\cdot X^{\gamma} \ \wedge \
-\com_\gamma = \gen_3^{\gamma}\cdot\gen_4^{r_\gamma} \ \wedge \ 0 \leq \gamma <
-\Max.
-%
+  \rel_5 = \{\ T = \gen_2^{\utk'}\cdot\gen_3^{\utk''} \ \wedge \ \ek =
+\HE(\epoch)^{\utk'} \ \wedge \ \forall\, \gamma \in [0,\Max): \
+W_\gamma^{\utk''} = \ggen_D \cdot W_\gamma^{-\gamma}\ \}.
 \end{gathered} \end{equation*}
 %
-Every equality is now one of discrete logarithms, and the only pairing,
-$\pairing(U,\ggen_D)$, is computed by the verifier on public data. The rewriting
-loses nothing, provided the verifier rejects $U = 1$ and $\Pi = 1$.
+The last equation is the definition of $W_\gamma$, rearranged into an equality
+of discrete logarithms against the committed $\utk''$. Rather than check all
+$\Max$ of these equations, the prover shows one random linear combination of
+them, with coefficients derived by hashing the elements themselves. Later
+grants to the same auditor prove only the first two equations, against the same
+certified $T$. \Cref{prot:txid-ek-proof} gives the proof.
 
-\begin{lemma}\label{lem:txid-rel7} Every witness for the tag relation $\rel_7$
-gives a witness for $\rel_7'$, and, when $U \neq 1_{\group{1}}$ and $\Pi \neq
-1_{\group{T}}$, every witness for $\rel_7'$ gives a witness for $\rel_7$ with the same index. The tag correctness Sigma protocol of \Cref{prot:txid-tag-sigma}, together with a range proof
-on $\com_\gamma$, is therefore complete and special sound for $\rel_7$, and
-honest-verifier zero knowledge under the DDH assumption in $\group{1}$ against
-parties that do not hold the epoch key.
+\begin{protocolbox}{The epoch key proof}{txid-ek-proof}
+
+  \begin{description}
+
+    \item[$\algoproof_5 \sample \NIZKprove(\crs_5, \inst_5, \witness_5,
+\rand)$ :] On input $\inst_5$, $\witness_5$ and label $\rand$, do:
+
+      \begin{enumerate}
+
+	\item On a first grant, compute $t_\gamma \leftarrow
+\hash(\{W_\gamma\},\gamma)$ for each $\gamma \in [0,\Max)$, and the following:
+	  %
+	  \begin{equation*}
+	    \widehat{W} \leftarrow \prod_{\gamma=0}^{\Max-1}
+W_\gamma^{t_\gamma}, \qquad \widehat{V} \leftarrow \prod_{\gamma=0}^{\Max-1}
+(\ggen_D\cdot W_\gamma^{-\gamma})^{t_\gamma}.
+	  \end{equation*}
+
+	\item Sample $\alpha,\beta \sample \Zp$, and compute $A \leftarrow
+\gen_2^{\alpha}\cdot\gen_3^{\beta}$, $B \leftarrow \HE(\epoch)^{\alpha}$, and on
+a first grant $K \leftarrow \widehat{W}^{\beta}$.
+
+	\item Compute the challenge $c \leftarrow \hash(\inst_5,A,B,K,\rand)$,
+leaving out $K$ and $\{W_\gamma\}$ on a later grant.
+
+	\item Compute $\eta \leftarrow \alpha + c\cdot\utk'$ and $\zeta
+\leftarrow \beta + c\cdot\utk''$.
+
+	\item Return $\algoproof_5 \leftarrow (A,B,K,\eta,\zeta)$, without $K$
+on a later grant.
+
+      \end{enumerate}
+
+    \item[$\{0,1\} \leftarrow \NIZKverify(\crs_5, \inst_5, \algoproof_5,
+\rand)$ :] Compute $c$ as above, and on a first grant also $\widehat{W}$ and
+$\widehat{V}$. Return the result of the following checks, the last on a first
+grant only:
+      %
+      \begin{equation*}
+	\gen_2^{\eta}\cdot\gen_3^{\zeta} \checkcheck A\cdot T^{c}, \quad
+\HE(\epoch)^{\eta} \checkcheck B\cdot\ek^{c}, \quad \widehat{W}^{\zeta}
+\checkcheck K\cdot\widehat{V}^{c}.
+      \end{equation*}
+
+  \end{description}
+
+\end{protocolbox}
+
+The tag proof must show that the tag is the user's
+tag for this epoch at some index in range, without revealing the epoch key or
+the index. Proving $\rel_7$ directly would require an argument over the secret
+group element $\ek$ paired against a secret-exponent term, which would be
+expensive in practice. Instead, the user blinds the epoch key and the tag with a
+fresh scalar, publishes the blinded values, and proves only equalities of
+discrete logarithms. The index is committed separately, and the tag proof and
+a standard range proof both speak about that commitment, so the index shown to
+be in range is the one the tag is computed from.
+
+A correctly formed tag satisfies the following equation:
+%
+\begin{equation*}
+  \Tag_\gamma^{\utk''+\gamma} = \pairing(\ek,\ggen_D).
+\end{equation*}
+%
+The user samples fresh $s, r_\gamma \sample \Zp$, and publishes the epoch hash
+blinded by $s$ as $U$, the tag blinded by $s$ as $X$, the blinded epoch key
+paired with $\ggen_D$ as $\Pi$, and the commitment $\com_\gamma$ to the index.
+After blinding, the equation above becomes $\Pi = X^{\utk''+\gamma}$. The user
+proves the rewritten tag relation $\rel_7'$, with instance and witness as
+follows:
+%
+\begin{equation*}
+  \inst_7' = (\inst_7, U, \Pi, X, \com_\gamma), \qquad \witness_7' =
+(\utk', \utk'', \openinfo, \gamma, s, r_\gamma),
+\end{equation*}
+%
+\begin{equation*} \begin{gathered}
+  \rel_7' = \{\ \com = \gen_2^{\utk'}\cdot\gen_3^{\utk''}\cdot\gen_4^{\openinfo}
+\ \wedge \ U = \HE(\epoch)^s \ \wedge \ \Pi = \pairing(U,\ggen_D)^{\utk'} \\
+\wedge \ X = \Tag_\gamma^s \ \wedge \ \Pi = X^{\utk''}\cdot X^{\gamma} \ \wedge
+\ \com_\gamma = \gen_3^{\gamma}\cdot\gen_4^{r_\gamma} \ \wedge \ 0 \leq \gamma <
+\Max\ \}.
+\end{gathered} \end{equation*}
+%
+Every equation is now one of discrete logarithms, and the only pairing is
+computed by the verifier on public data. The rewriting loses nothing, provided
+the verifier rejects $U = 1_{\group{1}}$ and $\Pi = 1_{\group{T}}$.
+
+\begin{lemma}\label{lem:txid-rel7} Every witness for $\rel_7$ gives a witness
+for $\rel_7'$, and every witness for $\rel_7'$ with $U \neq 1_{\group{1}}$ and
+$\Pi \neq 1_{\group{T}}$ gives a witness for $\rel_7$ with the same index. The
+tag proof of \Cref{prot:txid-tag-proof}, together with a range proof on
+$\com_\gamma$, satisfies completeness, special soundness and honest-verifier
+zero knowledge for $\rel_7$, the last under the DDH assumption in $\group{1}$.
 \end{lemma}
 
-\begin{protocolbox}{The tag correctness Sigma protocol}{txid-tag-sigma}
+\begin{protocolbox}{The tag proof}{txid-tag-proof}
 
   \begin{description}
 
     \item[$\algoproof_7' \sample \NIZKprove(\crs_7, \inst_7, \witness_7)$ :]
-On input $\inst_7 = (\HE, \ggen_D, \gen_2, \gen_3, \gen_4, \com, \Max, \epoch,
-\Tag_\gamma)$ and $\witness_7 = (\utk', \utk'', \openinfo, \gamma, r_\gamma)$,
-with $\com_\gamma = \gen_3^{\gamma}\cdot\gen_4^{r_\gamma}$ as in $\IDsubmit$, do:
+On input $\inst_7$, $\witness_7$ and the opening $r_\gamma$ of $\com_\gamma$,
+do:
 
       \begin{enumerate}
 
-	\item Sample $s \sample \Zp$ and compute $U = \HE(\epoch)^s$, $\Pi =
-\pairing\big(\HE(\epoch)^{s\cdot\utk'},\, \ggen_D\big)$ and $X =
-\Tag_\gamma^{\,s}$, and set $\inst_7' = (\inst_7, U, \Pi, X, \com_\gamma)$.
+	\item Parse $\inst_7 = (\HE, \ggen_D, \gen_2, \gen_3, \gen_4, \com,
+\Max, \epoch, \Tag_\gamma)$ and $\witness_7 = (\utk', \utk'', \openinfo,
+\gamma)$.
+
+	\item Sample $s \sample \Zp$ and compute the following:
+	  %
+	  \begin{equation*}
+	    U \leftarrow \HE(\epoch)^s, \quad \Pi \leftarrow
+\pairing\big(\HE(\epoch)^{s\cdot\utk'},\, \ggen_D\big), \quad X \leftarrow
+\Tag_\gamma^{\,s}.
+	  \end{equation*}
+
+	\item Set $\inst_7' \leftarrow (\inst_7, U, \Pi, X, \com_\gamma)$.
 
 	\item Sample $\mu_1, \mu_2, \mu_h, \mu_s, \mu_\gamma, \mu_r \sample
-\Zp$, one for each of $(\utk', \utk'', \openinfo, s, \gamma, r_\gamma)$.
-
-	\item Compute $A =
-\gen_2^{\mu_1}\cdot\gen_3^{\mu_2}\cdot\gen_4^{\mu_h}$, $B =
-\HE(\epoch)^{\mu_s}$, $M = \pairing(U,\ggen_D)^{\mu_1}$, $C =
-\Tag_\gamma^{\mu_s}$, $F = X^{\mu_2 + \mu_\gamma}$, and $A_\gamma =
-\gen_3^{\mu_\gamma}\cdot\gen_4^{\mu_r}$.
+\Zp$ for the witness values $\utk', \utk'', \openinfo, s, \gamma, r_\gamma$,
+and compute the following:
+	  %
+	  \begin{gather*}
+	    A \leftarrow \gen_2^{\mu_1}\cdot\gen_3^{\mu_2}\cdot\gen_4^{\mu_h},
+\quad B \leftarrow \HE(\epoch)^{\mu_s}, \quad M \leftarrow
+\pairing(U,\ggen_D)^{\mu_1}, \\
+	    C \leftarrow \Tag_\gamma^{\mu_s}, \quad F \leftarrow X^{\mu_2 +
+\mu_\gamma}, \quad A_\gamma \leftarrow \gen_3^{\mu_\gamma}\cdot\gen_4^{\mu_r}.
+	  \end{gather*}
 
 	\item Compute the challenge $c \leftarrow \hash(\inst_7', A, B, M, C, F,
 A_\gamma)$.
 
-	\item Compute $\theta_1 = \mu_1 + c\cdot\utk'$, $\theta_2 = \mu_2 +
-c\cdot\utk''$, $\theta_h = \mu_h + c\cdot\openinfo$, $\theta_s = \mu_s + c\cdot
-s$, $\theta_\gamma = \mu_\gamma + c\cdot\gamma$, and $\theta_r = \mu_r + c\cdot
-r_\gamma$.
+	\item Compute $\theta_x \leftarrow \mu_x + c\cdot x$ for each witness
+value $x$, writing $\theta_1, \theta_2, \theta_h, \theta_s, \theta_\gamma,
+\theta_r$ in the order above.
 
-	\item Return $\algoproof_7' = (U, \Pi, X, \com_\gamma, A, B, M, C, F,
-A_\gamma, \theta_1, \theta_2, \theta_h, \theta_s, \theta_\gamma, \theta_r)$.
+	\item Return $\algoproof_7' \leftarrow (U, \Pi, X, \com_\gamma, A, B, M,
+C, F, A_\gamma, \theta_1, \theta_2, \theta_h, \theta_s, \theta_\gamma,
+\theta_r)$.
 
       \end{enumerate}
 
     \item[$\{0,1\} \leftarrow \NIZKverify(\crs_7, \inst_7, \algoproof_7')$ :]
-Reject unless $U \neq 1_{\group{1}}$ and $\Pi \neq 1_{\group{T}}$, compute $c
-\leftarrow \hash(\inst_7', A, B, M, C, F, A_\gamma)$, and return the result of
-the following checks:
+Return $0$ if $U = 1_{\group{1}}$ or $\Pi = 1_{\group{T}}$. Otherwise compute
+$c$ as above, and return the result of the following checks:
       %
       \begin{gather*} \gen_2^{\theta_1}\cdot\gen_3^{\theta_2}\cdot
 \gen_4^{\theta_h} \checkcheck A \cdot \com^c, \quad \HE(\epoch)^{\theta_s}
@@ -443,118 +516,110 @@ X^{\theta_2 + \theta_\gamma} \checkcheck F \cdot \Pi^c, \quad
 \end{protocolbox}
 
 \begin{outline}
-  \item two points from the security proofs that shape the protocol
-  \item the blinded epoch key is never published, only $\Pi$; publishing it gives a verifier strictly more; zero knowledge holds only against parties without the epoch key, which is right, since an authorised auditor should be able to trace (\Cref{sec:rel7-equiv})
-  \item the non-degeneracy checks $U \neq 1$, $\Pi \neq 1$ are needed: otherwise blind with zero, or key and index that cancel, and any tag passes
+  \item a point from the security proof that shapes the protocol: the non-degeneracy checks $U \neq 1$, $\Pi \neq 1$ are needed, otherwise blind with zero, or key and index that cancel, and any tag passes (\Cref{sec:rel7-equiv})
 \end{outline}
 
-The tag proof and the range proof are about the same committed index, so the
-index shown to be in range is the one the tag is computed from.
+Each transaction carries a
+proof that it originated from a registered user, following relation $\rel_6$.
+The key committed in $\com$ is certified by a BBS+ signature of the registration
+authority. As for the tag proof, we rewrite $\rel_6$ as an equivalent relation
+$\rel_6'$ that avoids proofs over bilinear
+equations~\cite{EPRINT:CamDriLeh16,USENIX:HesSinSor23}. The rewriting
+randomises the signature, which the verifier checks with one pairing equation on
+public data, and every other equation is one of discrete logarithms. The
+signature and the commitment share the randomness generator, so the proof
+reconciles their two random exponents.
 
-Each transaction carries a proof that attests it has originated from a
-registered user, following relation $\rel_6$. The zero-knowledge proof for
-$\rel_6$ on message $\msg$ is obtained by rewriting $\rel_6$ as an equivalent
-relation $\rel_6'$ that avoids proofs over bilinear
-equations~\cite{EPRINT:CamDriLeh16,USENIX:HesSinSor23}.
-
-The key committed in $\com$ is certified by a BBS+ signature of the
-registration authority. The rewriting randomises the signature, which the
-verifier checks with one pairing equation on public data, and every other
-equation is one of discrete logarithms~\cite{EPRINT:CamDriLeh16}. The signature
-and the commitment share the randomness generator, so the proof reconciles
-their two random exponents. The proof takes the whole transaction as its
-message, so no part of it can be changed on its own.
-
-Concretely, writing $b = \gen_0\cdot\gen_1^{\sk}\cdot\gen_2^{\utk'}\cdot
-\gen_3^{\utk''}\cdot\gen_4^{r}$ for the base of the credential, the user
-randomises the signature to $E' = E^{r_1}$, blinds the base as $d =
-b^{r_1}\cdot\gen_4^{-r_2}$, and publishes $\bar{E} = E'^{-e}\cdot
-d\cdot\gen_4^{r_2}$, which for a valid signature equals $E'^{z}$. The verifier
-checks $\pairing(E',\ggen_Z) = \pairing(\bar{E},\ggen)$ itself, and the user
-proves the rewritten relation $\rel_6'$, with instance $\inst_6' = (\pk, \com,
-E', \bar{E}, d)$ and witness $\witness_6' = (\sk, \utk', \utk'', \openinfo, e,
-r_2, r_3, r'')$ for $r_3 = 1/r_1$ and $r'' = r - r_2 r_3 - \openinfo$:
+The user writes $b$ for the base of the credential, randomises the signature
+with a fresh $r_1 \sample \Zp^*$, and blinds the base with a fresh $r_2 \sample
+\Zp$:
+%
+\begin{equation*}
+  b = \gen_0\cdot\gen_1^{\sk}\cdot\gen_2^{\utk'}\cdot\gen_3^{\utk''}\cdot
+\gen_4^{r}, \qquad E' = E^{r_1}, \qquad d = b^{r_1}\cdot\gen_4^{-r_2}, \qquad
+\bar{E} = E'^{-e}\cdot d\cdot\gen_4^{r_2}.
+\end{equation*}
+%
+For a valid signature $\bar{E} = E'^{z}$, which the verifier checks with the
+pairing equation $\pairing(E',\ggen_Z) = \pairing(\bar{E},\ggen)$. The user
+proves the rewritten relation $\rel_6'$, with $r_3 = 1/r_1$ and $r'' = r - r_2
+r_3 - \openinfo$, and instance and witness as follows:
+%
+\begin{equation*}
+  \inst_6' = (\pk, \com, E', \bar{E}, d), \qquad \witness_6' = (\sk, \utk',
+\utk'', \openinfo, e, r_2, r_3, r''),
+\end{equation*}
 %
 \begin{equation*} \begin{gathered}
-%
-  \com = \gen_2^{\utk'}\cdot\gen_3^{\utk''}\cdot\gen_4^{\openinfo}\ \wedge \
-\pairing(E', \ggen_Z) = \pairing(\bar{E}, \ggen) \ \wedge \\ \bar{E}/d =
-E'^{-e}\cdot\gen_4^{r_2} \ \wedge \ (\gen_0\cdot\com)^{-1} =
-\gen_1^{\sk}\cdot d^{-r_3}\cdot\gen_4^{r''}.
-%
+  \rel_6' = \{\ \com = \gen_2^{\utk'}\cdot\gen_3^{\utk''}\cdot\gen_4^{\openinfo}\
+\wedge \ \pairing(E', \ggen_Z) = \pairing(\bar{E}, \ggen) \\ \wedge \ \bar{E}/d
+= E'^{-e}\cdot\gen_4^{r_2} \ \wedge \ (\gen_0\cdot\com)^{-1} =
+\gen_1^{\sk}\cdot d^{-r_3}\cdot\gen_4^{r''}\ \}.
 \end{gathered} \end{equation*}
 %
 The third equation ties $\bar{E}$ to the signature's exponent $e$, and the last
 ties the blinded base to the committed tracing key, with $r''$ reconciling the
-signature's randomness with the commitment's opening.
+signature's randomness with the commitment's opening. The proof takes the whole
+transaction as its label.
 
-\begin{lemma}\label{lem:txid-rel6} Every witness for the transaction
-authorisation relation $\rel_6$ gives a witness for $\rel_6'$, and, when $E'
-\neq 1_{\group{1}}$, every witness for $\rel_6'$ gives a BBS+ signature on the
-values committed in $\com$ and on $\sk$. The transaction authorisation proof of \Cref{prot:txid-tx-nizk} is
-therefore complete, special sound and honest-verifier zero knowledge for
+\begin{lemma}\label{lem:txid-rel6} Every witness for $\rel_6$ gives a witness
+for $\rel_6'$, and every witness for $\rel_6'$ with $E' \neq 1_{\group{1}}$
+gives a BBS+ signature on the values committed in $\com$ and on $\sk$. The
+transaction authorisation proof of \Cref{prot:txid-tx-proof} satisfies
+completeness, special soundness and honest-verifier zero knowledge for
 $\rel_6$.
 \end{lemma}
 
-\begin{protocolbox}{The transaction authorisation proof}{txid-tx-nizk}
+\begin{protocolbox}{The transaction authorisation proof}{txid-tx-proof}
 
   \begin{description}
 
     \item[$\algoproof_6' \sample \NIZKprove(\crs_6, \inst_6, \witness_6,
-\msg)$ :] On input $\inst_6 = (\pk, \com)$ with $\pk = (\gen_0, \gen_1, \gen_2,
-\gen_3, \gen_4, \ggen, \ggen_Z)$, witness $\witness_6 = (\sk, \utk', \utk'',
-\openinfo, e, r, E)$, and message $\msg$, do:
+\msg)$ :] On input $\inst_6$, $\witness_6$ and label $\msg$, do:
 
       \begin{enumerate}
 
-	\item Let $b = \gen_0\cdot\gen_1^{\sk}\cdot\gen_2^{\utk'}\cdot
-\gen_3^{\utk''}\cdot\gen_4^{r}$, so that $E = b^{1/(z+e)}$. Sample $r_1 \sample
-\Zp^*$ and $r_2 \sample \Zp$, and compute $E' = E^{r_1}$, $r_3 = 1/r_1$, $d =
-b^{r_1}\cdot\gen_4^{-r_2}$, $\bar{E} = E'^{-e}\cdot d\cdot\gen_4^{r_2}$ and
-$r'' = r - r_2 r_3 - \openinfo$.
+	\item Parse $\inst_6 = (\pk, \com)$ with $\pk = (\gen_0, \gen_1, \gen_2,
+\gen_3, \gen_4, \ggen, \ggen_Z)$, and $\witness_6 = (\sk, \utk', \utk'',
+\openinfo, e, r, E)$.
 
-	\item Sample $\mu_1, \mu_2, \mu_h, \mu_e, \mu_{r_2}, \mu_\sk,
-\mu_{r_3}, \mu_{r''} \sample \Zp$, one for each of $(\utk', \utk'', \openinfo,
-e, r_2, \sk, r_3, r'')$.
+	\item Sample $r_1 \sample \Zp^*$ and $r_2 \sample \Zp$, and compute
+$E'$, $d$ and $\bar{E}$ as above, $r_3 \leftarrow 1/r_1$ and $r'' \leftarrow r -
+r_2 r_3 - \openinfo$.
 
-	\item Compute $t_1 = \gen_2^{\mu_1}\cdot\gen_3^{\mu_2}\cdot
-\gen_4^{\mu_h}$, $t_2 = E'^{-\mu_e}\cdot\gen_4^{\mu_{r_2}}$, and $t_3 =
-\gen_1^{\mu_\sk}\cdot d^{-\mu_{r_3}}\cdot \gen_4^{\mu_{r''}}$.
+	\item Sample $\mu_x \sample \Zp$ for each witness value $x$ of
+$\witness_6'$, writing $\mu_1$, $\mu_2$ and $\mu_h$ for those of $\utk'$,
+$\utk''$ and $\openinfo$, and compute the following:
+	  %
+	  \begin{equation*}
+	    t_1 \leftarrow \gen_2^{\mu_1}\cdot\gen_3^{\mu_2}\cdot
+\gen_4^{\mu_h}, \quad t_2 \leftarrow E'^{-\mu_e}\cdot\gen_4^{\mu_{r_2}}, \quad
+t_3 \leftarrow \gen_1^{\mu_\sk}\cdot d^{-\mu_{r_3}}\cdot \gen_4^{\mu_{r''}}.
+	  \end{equation*}
 
 	\item Compute the challenge $c \leftarrow \hash(\inst_6, E', \bar{E}, d,
 t_1, t_2, t_3, \msg)$.
 
-	\item Compute $\theta_x = \mu_x + c\cdot x$ for each $x \in (\utk',
-\utk'', \openinfo, e, r_2, \sk, r_3, r'')$, writing $\theta_1$, $\theta_2$ and
-$\theta_h$ for the responses to $\utk'$, $\utk''$ and $\openinfo$.
+	\item Compute $\theta_x \leftarrow \mu_x + c\cdot x$ for each witness
+value $x$, with the same subscripts, and let $\vec{\theta}$ be the vector of
+all eight responses.
 
-	\item Return $\algoproof_6' = (E', \bar{E}, d, t_1, t_2, t_3,
-\vec{\theta})$, for $\vec{\theta} = (\theta_1, \theta_2, \theta_h, \theta_e,
-\theta_{r_2}, \theta_\sk, \theta_{r_3}, \theta_{r''})$.
+	\item Return $\algoproof_6' \leftarrow (E', \bar{E}, d, t_1, t_2, t_3,
+\vec{\theta})$.
 
       \end{enumerate}
 
     \item[$\{0,1\} \leftarrow \NIZKverify(\crs_6, \inst_6, \algoproof_6',
-\msg)$ :] Do:
-
-      \begin{enumerate}
-
-	\item If $E' = 1_{\group{1}}$ or $\pairing(E', \ggen_Z) \neq
-\pairing(\bar{E}, \ggen)$, return $0$.
-
-	\item Compute the challenge $c \leftarrow \hash(\inst_6, E', \bar{E}, d,
-t_1, t_2, t_3, \msg)$.
-
-	\item Return the result of the following checks:
-          %
-	  \begin{gather*}
-\gen_2^{\theta_1}\cdot\gen_3^{\theta_2}\cdot\gen_4^{\theta_h} \checkcheck
+\msg)$ :] Return $0$ if $E' = 1_{\group{1}}$ or $\pairing(E', \ggen_Z) \neq
+\pairing(\bar{E}, \ggen)$. Otherwise compute $c$ as above, and return the result
+of the following checks:
+      %
+      \begin{gather*}
+	\gen_2^{\theta_1}\cdot\gen_3^{\theta_2}\cdot\gen_4^{\theta_h} \checkcheck
 t_1\cdot\com^c, \quad E'^{-\theta_e}\cdot\gen_4^{\theta_{r_2}} \checkcheck
 t_2\cdot(\bar{E}/d)^c, \\ \gen_1^{\theta_\sk}\cdot d^{-\theta_{r_3}}\cdot
 \gen_4^{\theta_{r''}} \checkcheck t_3\cdot\big((\gen_0\cdot\com)^{-1}\big)^{c}.
-\end{gather*}
-
-      \end{enumerate}
+      \end{gather*}
 
   \end{description}
 
@@ -567,50 +632,48 @@ assumption with $q = \Max$, the $q$-SDH assumption, and the DL assumption in
 $\group{1}$.
 \end{theorem}
 
-DDH in $\group{1}$ makes the epoch PRF pseudorandom and the tag proof zero
-knowledge, $q$-mDBDHI makes the tag PRF pseudorandom, $q$-SDH gives
-unforgeability of the credentials, and DL gives binding of the commitments and
-soundness of the range proofs.
+Under the DDH assumption in $\group{1}$ the epoch PRF is pseudorandom and the
+tag proof is zero knowledge. Under the $q$-mDBDHI assumption the tag PRF is
+pseudorandom, under the $q$-SDH assumption the credentials are unforgeable, and
+under the DL assumption the commitments are binding and the range proofs sound.
 
 \subsection{Instantiating $\ID$ with hash-based PRFs}\label{sec:txid-hash-instantiation}
 
-Nothing in the construction requires the two pseudorandom functions to be
-algebraic. The rewriting above exists only so that every proof is a Sigma
-protocol. If we accept a general-purpose proof system instead, both functions
-can be ordinary hash functions, and the instantiation becomes much shorter. We
-use independent hash functions $\hashfs$ for Fiat-Shamir challenges, $\HE$ for
-epoch keys and $\HT$ for tags, and instantiate the components as follows:
+The protocol above is instantiated with the computational efficiency of its
+proofs in mind. We now give a more straightforward instantiation, in which both
+pseudorandom functions are hash functions and the proofs about them use a
+general-purpose proof system. Its prover does more work, and
+\Cref{sec:txid-evaluation} compares the two. We use independent hash functions
+$\hashfs$ for Fiat-Shamir challenges, $\HE$ for epoch keys and $\HT$ for tags,
+and instantiate the components of \Cref{prot:txid-generic} as follows:
 %
 \begin{enumerate}
 
   \item The one-way functions are $\G(\sk) = \gen_1^{\sk}$ and $\G'(\utk) =
 \gen_2^{\utk}$, for a tracing key $\utk \in \Zp$ that is now a single scalar.
-The public tracing key is one group element and carries nothing else.
+The public tracing key is one group element.
 
   \item The pseudorandom functions are $\FE(\utk,\epoch) = \HE(\utk,\epoch)$ and
 $\FT(\PTK,\ek,\gamma) = \HT(\ek,\gamma)$. Both hash a domain separation tag,
 the key and the input with the MiMC hash function, which runs the MiMC
 permutation in Miyaguchi-Preneel mode. MiMC is designed to be cheap inside an
-arithmetic circuit, which is why it is used here~\cite{AC:AGRRT16}. The tag PRF ignores the public
-tracing key entirely, which the algebraic instantiation cannot do, since its
-tags need the elements $\{W_\gamma\}$.
+arithmetic circuit~\cite{AC:AGRRT16}.
 
-  \item Registration credentials use the BBS+ signature scheme on the two
-scalars $(\sk,\utk)$.
+  \item $\DS$ is the BBS+ signature scheme of \Cref{prim:bbs}, on the two
+scalars $\sk$ and $\utk$.
 
-  \item Commitments use the Pedersen commitment scheme with $\ck = (\gen_2,
-\gen_3)$, so that $\com = \gen_2^{\utk}\gen_3^{\openinfo}$. As before, $\gen_3$
-is also the randomness generator of the BBS+ signature scheme, and all
-generators are derived by hashing to the group.
+  \item $\Com$ is the Pedersen commitment scheme of \Cref{prim:pedersen}, with
+$\ck = (\gen_2, \gen_3)$. As before, $\gen_3$ is also the randomness generator
+of the BBS+ signature scheme, and all generators are derived by hashing to the
+group.
 
-  \item The proofs about the two pseudorandom functions use Groth16, a zk-SNARK
-whose proofs are three group elements and whose statements are arithmetic
-circuits over $\Zp$~\cite{EC:Groth16}. Each is extended with a commitment to
-part of the witness and a link proof, described below~\cite{CCS:BelSolBeg23}.
+  \item The proofs for $\rel_5$ and $\rel_7$ use a zk-SNARK, a proof system
+whose proofs are a constant number of group elements and whose statements are
+arithmetic circuits over $\Zp$. Each proof also carries a commitment to the
+tracing key in the witness, and the linking proof of \Cref{prot:txid-link}.
 
-  \item The proofs at registration and for transaction authorisation are Sigma
-protocols compiled with the Fiat-Shamir transform under $\hashfs$, as in the
-algebraic instantiation.
+  \item The proofs for $\rel_4$ and $\rel_6$ are Sigma protocols compiled with
+the Fiat-Shamir transform under $\hashfs$, as in the algebraic instantiation.
 
 \end{enumerate}
 
@@ -618,79 +681,75 @@ algebraic instantiation.
   \item MiMC assumption: not every hash function is a PRF; collision and preimage resistance say nothing about outputs looking random
   \item random oracle heuristic does not help, since we prove statements about the concrete function inside a circuit
   \item so state it as an assumption: MiMC hash of (domain separation tag, secret key, input) is a PRF of the input
-  \item heuristic: no security reduction, rests on cryptanalysis of the permutation (cite AC:AGRRT16), and the key enters as a message block, not the cipher key
+  \item MiMC was designed as a block cipher, so its cryptanalysis is of the keyed permutation (cite AC:AGRRT16); here the key enters as a message block, not the cipher key, so the assumption is heuristic and has no security reduction
 \end{outline}
 
 \begin{outline}
-  \item why a link proof: circuits cannot take $\PTK$ or $\com$ as input; Groth16 statements are over $\Zp$, the group elements have coordinates in a different field
+  \item why a linking proof: circuits cannot take $\PTK$ or $\com$ as input; zk-SNARK statements are over $\Zp$, the group elements have coordinates in a different field
   \item checking them in-circuit costs hundreds of thousands of constraints; listing them as public inputs binds nothing
 \end{outline}
 
-Each proof is therefore split in the commit-and-prove style of
-LegoSNARK~\cite{CCS:CamFioQue19}. The circuit commits to the tracing key, and a
-small Sigma protocol shows that this commitment and $\PTK$, or $\com$, contain
-the same key. \Cref{prot:txid-link} gives the link proof.
+So each zk-SNARK proof comes with a commitment and a linking proof, in the
+commit-and-prove style of LegoSNARK~\cite{CCS:CamFioQue19}. The circuit commits
+to the tracing key. A small Sigma protocol then shows that this commitment
+contains the same key as the public tracing key, at a grant, or as $\com$, in a
+transaction. \Cref{prot:txid-link} gives the linking proof.
 
-\begin{protocolbox}{The link proof}{txid-link}
+\begin{protocolbox}{The linking proof}{txid-link}
 
   \begin{description}
 
-    \item[Circuits:] The setup of each circuit also outputs a commitment key
-$(K_0, K_1) \in \group{1}^2$. A proof carries $D = K_0^{\utk}K_1^{\mu}$ for a
-fresh $\mu \sample \Zp$ and a proof of knowledge of its opening, and the
-verifier folds $D$ into the public input term of the Groth16 verification
-equation. The grant circuit proves $\ek = \HE(\utk, \epoch)$, and the
-transaction circuit proves $\Tag_\gamma = \HT(\HE(\utk, \epoch), \gamma)$ and $0
-\leq \gamma < \Max$, both for the $\utk$ committed in $D$.
+    \item[Circuits :] The grant circuit proves $\ek = \HE(\utk, \epoch)$, and
+the transaction circuit proves $\Tag_\gamma = \HT(\HE(\utk, \epoch), \gamma)$
+and $0 \leq \gamma < \Max$. The setup of each circuit also outputs a
+commitment key $(K_0, K_1) \in \group{1}^2$. Each proof carries $D =
+K_0^{\utk}\cdot K_1^{\mu}$ for a fresh $\mu \sample \Zp$, and the verifier
+checks the proof against $D$.
 
-    \item[Prove:] To link $D$ to $\com = \gen_2^{\utk}\gen_3^{\openinfo}$, the
-prover samples $b_u, b_m, b_x \sample \Zp$, computes $A_1 = K_0^{b_u}K_1^{b_m}$
-and $A_2 = \gen_2^{b_u}\gen_3^{b_x}$, sets $c = \hashfs(\crs, K_0, K_1, D, \com,
-A_1, A_2, \mathsf{ctx})$, and outputs $(A_1, A_2, s_u, s_m, s_x)$ with $s_u =
-b_u + c\utk$, $s_m = b_m + c\mu$ and $s_x = b_x + c\openinfo$. The context
-$\mathsf{ctx}$ is $(\epoch, \Tag_\gamma, \algoproof_7)$ in a transaction and
-$(\epoch, \ek, \algoproof_5, \rand)$ at a grant.
+    \item[Prove :] On input $D$, $\com = \gen_2^{\utk}\cdot\gen_3^{\openinfo}$,
+the witness $(\utk, \mu, \openinfo)$ and a context $\mathsf{ctx}$, do:
 
-    \item[Verify:] Recompute $c$ and check $K_0^{s_u}K_1^{s_m} = A_1 D^c$ and
-$\gen_2^{s_u}\gen_3^{s_x} = A_2\com^c$.
+      \begin{enumerate}
 
-    \item[Linking to $\PTK$:] At a grant, the same protocol links $D$ to $\PTK =
-\gen_2^{\utk}$, without $\openinfo$, $b_x$ and $s_x$.
+	\item Sample $b_u, b_m, b_x \sample \Zp$, and compute $A_1 \leftarrow
+K_0^{b_u}\cdot K_1^{b_m}$ and $A_2 \leftarrow \gen_2^{b_u}\cdot\gen_3^{b_x}$.
+
+	\item Compute the challenge $c \leftarrow \hashfs(\crs, K_0, K_1, D,
+\com, A_1, A_2, \mathsf{ctx})$.
+
+	\item Compute $s_u \leftarrow b_u + c\cdot\utk$, $s_m \leftarrow b_m +
+c\cdot\mu$ and $s_x \leftarrow b_x + c\cdot\openinfo$.
+
+	\item Return $(A_1, A_2, s_u, s_m, s_x)$.
+
+      \end{enumerate}
+
+      The context $\mathsf{ctx}$ is $(\epoch, \Tag_\gamma, \algoproof_7)$ in a
+transaction and $(\epoch, \ek, \algoproof_5, \rand)$ at a grant.
+
+    \item[Verify :] Compute $c$ as above, and return the result of the
+following checks:
+      %
+      \begin{equation*}
+	K_0^{s_u}\cdot K_1^{s_m} \checkcheck A_1\cdot D^c, \quad
+\gen_2^{s_u}\cdot\gen_3^{s_x} \checkcheck A_2\cdot\com^c.
+      \end{equation*}
+
+    \item[Linking to $\PTK$ :] At a grant, the same protocol links $D$ to $\PTK
+= \gen_2^{\utk}$, without $\openinfo$, $b_x$ and $s_x$.
 
   \end{description}
 
 \end{protocolbox}
 
-\begin{outline}
-  \item binding: in a transaction the Groth16 proof and link are in the message the authorisation proof signs; at a grant the registration proof signs them with the nonce; so no moving or replaying a link
-\end{outline}
-
-A Groth16 proof with its commitment takes 292 bytes, rather than the 192 bytes
-of three group elements. The link proof adds 160 bytes at a grant and 192 bytes
-in a transaction. The range check is a constraint of the transaction circuit, so
-there is no Bulletproofs range proof. Without the elements $\{W_\gamma\}$, the
-first grant message of 25\,280 bytes in the algebraic instantiation disappears.
-Tracing is $\Max$ evaluations of $\HT$ instead of $\Max$ pairings.
-
-What is given up is the setup. Groth16 needs a structured reference string for
-each circuit, generated from secret values, so this instantiation needs a
-trusted setup and loses the property that no party samples anything. The prover
-is also much slower, as the evaluation shows. Which instantiation is preferable
-therefore depends on whether a deployment can tolerate a trusted setup, and on
-whether proving or verification cost is what binds.
-
 \begin{theorem}\label{thm:hash-inst} The hash-based instantiation securely
 realises $\idfu{\algo{trace}}$ in the standalone model, in the random oracle
-model for $\hashfs$, under the $q$-SDH assumption, the DL assumption in
-$\group{1}$, the assumption that the Groth16 proof system with commitments is
-zero knowledge and weakly simulation extractable, and the assumption that the
-MiMC hash is a pseudorandom function of its input when keyed by a secret
-block.  \end{theorem}
+model for $\hashfs$, under the $q$-SDH assumption and the DL assumption in
+$\group{1}$, if the zk-SNARK with commitments is zero knowledge and simulation
+extractable, and the MiMC hash function, keyed by a secret input block, is a
+pseudorandom function.  \end{theorem}
 
 \begin{outline}
-  \item why Groth16: the hash-based PRFs have no Sigma protocol, so need a general-purpose proof system; Groth16 has the smallest proofs and cheapest verification, which validators pay for
-  \item the link proof adds only what ties the circuit's hidden key to the group elements used elsewhere
-  \item the one non-standard assumption is on Groth16: proofs are rerandomisable, so only weakly simulation extractable, which is what the model asks for
-  \item Baghery et al.\ prove weak simulation extractability for plain Groth16 (cite FC:BKSV21); does not cover the commitment extension, so the theorem assumes it
-  \item no assumption specific to $\ID$: DDH and $q$-mDBDHI came from the algebraic PRFs, not the construction
+  \item why a zk-SNARK: the hash-based PRFs have no Sigma protocol, so need a general-purpose proof system; a zk-SNARK has small proofs and cheap verification, which validators pay for
+  \item the linking proof adds only what ties the circuit's hidden key to the group elements used elsewhere
 \end{outline}

@@ -9,133 +9,120 @@ range is typically within 2\% of the median and at most 8\%, except for
 hash-based tracing at small $\ell$, which takes well under a millisecond and
 varies by up to 20\%.
 
+The algebraic instantiation is implemented as \Cref{prot:txid}. The
+hash-based instantiation uses MiMC over the scalar field of BLS12-381, and
+Groth16 as the zk-SNARK, a proof system whose proofs are three group
+elements~\cite{EC:Groth16}, with gnark's extension of Groth16 by a commitment to
+part of the witness~\cite{CCS:BelSolBeg23}.
+
 We report results at $\ell = 8$, so that each user can submit up to $\Max = 256$
-transactions per epoch. \Cref{tab:txid-protocol,tab:txid-sizes,tab:txid-relations}
-give the time of every algorithm, the size of every message and the time of
-every relation. \Cref{fig:txid-ell-times,fig:txid-ell-sizes} show how times and
-sizes grow with $\ell$.
+transactions per epoch. \Cref{tab:txid-protocol} gives the time of every
+algorithm and the size of the message it sends, and \Cref{tab:txid-relations}
+the time of every proof. \Cref{fig:txid-ell-times,fig:txid-ell-sizes} show how
+times and sizes grow with $\ell$.
 
 \begin{table}[htbp] \centering \small
-\caption[Tracing: time of every algorithm]{Time of each algorithm at $\ell = 8$, in milliseconds. A first grant is the first grant of a user to a given auditor, and
+\caption[Tracing: time and message size of every algorithm]{Time of each
+algorithm at $\ell = 8$, in milliseconds, and size of the message it sends, in
+bytes. A first grant is the first grant of a user to a given auditor, and
 carries $\{W_\gamma\}$ in the algebraic instantiation. In the hash-based
-instantiation every grant is the same.} \label{tab:txid-protocol}
+instantiation every grant is the same. Registration is three rounds and a grant
+two, in each case starting with a 32 byte nonce from the registration authority
+or the auditor. A transaction includes a 32 byte payload and its 8 byte length.}
+\label{tab:txid-protocol}
   %
-  \begin{tabular}{l l r r} \toprule
+  \begin{tabular}{l l r r r r} \toprule
     %
-    Algorithm & Party & Algebraic (ms) & Hash-based (ms) \\
+    & & \multicolumn{2}{c}{Algebraic} & \multicolumn{2}{c}{Hash-based} \\
+    \cmidrule(lr){3-4} \cmidrule(lr){5-6}
+    %
+    Algorithm & Party & ms & B & ms & B \\
     %
     \midrule
     %
-    $\IDgen$ & & 2.50 & 267 \\
+    $\IDgen$ & & 2.50 & -- & 267 & -- \\
     %
-    $\IDregister$ & user & 46.0 & 0.298 \\
+    $\IDregister$ & user & 46.0 & 288 & 0.298 & 256 \\
     %
-    $\IDregister$ & registration authority & 0.552 & 0.475 \\
+    $\IDregister$ & registration authority & 0.552 & 112 & 0.475 & 112 \\
     %
-    $\IDgrant$, first & user & 4.22 & 17.3 \\
+    $\IDgrant$, first & user & 4.22 & 25\,280 & 17.3 & 852 \\
     %
-    $\IDgrant$, first & auditor & 9.07 & 4.16 \\
+    $\IDgrant$, first & auditor & 9.07 & -- & 4.16 & -- \\
     %
-    $\IDgrant$, later & user & 0.689 & 17.3 \\
+    $\IDgrant$, later & user & 0.689 & 608 & 17.3 & 852 \\
     %
-    $\IDgrant$, later & auditor & 2.04 & 4.16 \\
+    $\IDgrant$, later & auditor & 2.04 & -- & 4.16 & -- \\
     %
-    $\IDsubmit$ & user & 11.3 & 28.3 \\
+    $\IDsubmit$ & user & 11.3 & 5\,160 & 28.3 & 1\,116 \\
     %
-    $\algo{Verify}$ & validator & 6.70 & 4.44 \\
+    $\algo{Verify}$ & validator & 6.70 & -- & 4.44 & -- \\
     %
-    $\IDidentify$, one epoch & auditor & 36.9 & 1.10 \\
+    $\IDidentify$, one epoch & auditor & 36.9 & -- & 1.10 & -- \\
     %
   \bottomrule \end{tabular}
 %
 \end{table}
 
 \begin{table}[htbp] \centering \small
-\caption[Tracing: message sizes]{Message sizes at $\ell = 8$, in bytes. A transaction includes a 32 byte
-payload and its 8 byte length. Registration is three rounds and a grant two, in
-each case starting with a 32 byte nonce from the registration authority or the
-auditor.} \label{tab:txid-sizes}
+\caption[Tracing: time of every proof]{Time of each proof at $\ell = 8$, in
+milliseconds, for the prover and the verifier.} \label{tab:txid-relations}
   %
-  \begin{tabular}{l r r} \toprule
+  \begin{tabular}{l l r r r r} \toprule
     %
-    Object & Algebraic (B) & Hash-based (B) \\
+    & & \multicolumn{2}{c}{Algebraic} & \multicolumn{2}{c}{Hash-based} \\
+    \cmidrule(lr){3-4} \cmidrule(lr){5-6}
     %
-    \midrule
-    %
-    Registration request (user) & 288 & 256 \\
-    %
-    Credential (registration authority) & 112 & 112 \\
-    %
-    $\PTK$ & 24\,624 & 48 \\
-    %
-    First grant message (user) & 25\,280 & 852 \\
-    %
-    Later grant message (user) & 608 & 852 \\
+    Proof & Frequency & prove & verify & prove & verify \\
     %
     \midrule
     %
-    Tag $\Tag_\gamma$ & 576 & 32 \\
+    $\rel_4$ & registration, grant & 0.228 & 0.381 & 0.151 & 0.303 \\
     %
-    Commitment $\com$ & 48 & 48 \\
+    $\rel_5$ & grant & 0.451 & 0.597 & 16.8 & 2.24 \\
     %
-    Proof of $\rel_6'$, or $\rel_6$ & 544 & 512 \\
+    $\rel_5$ with $\{W_\gamma\}$ & first grant & 4.00 & 7.64 & -- & -- \\
     %
-    Proof of $\rel_7'$, or $\rel_7$ with its link & 3\,312 & 292 + 192 \\
+    $\rel_6$ & transaction & 1.31 & 1.79 & 1.16 & 1.69 \\
     %
-    Range proof & 640 & -- \\
+    $\rel_7$ & transaction & 3.96 & 4.05 & 26.5 & 2.27 \\
     %
-    Transaction & 5\,160 & 1\,116 \\
+    Range proof & transaction & 4.82 & 0.809 & -- & -- \\
     %
   \bottomrule \end{tabular}
 %
 \end{table}
 
-\begin{table}[htbp] \centering \small
-\caption[Tracing: cost of each relation]{Time of each proof at $\ell = 8$, in milliseconds,
-together with the Groth16 setups and circuit sizes of the hash-based
-instantiation.} \label{tab:txid-relations}
-  %
-  \begin{tabular}{l l l r r} \toprule
-    %
-    Relation & Party & Frequency & Algebraic (ms) & Hash-based (ms) \\
-    %
-    \midrule
-    %
-    $\rel_4$ & prover & registration, grant & 0.228 & 0.151 \\
-    %
-    $\rel_4$ & verifier & registration, grant & 0.381 & 0.303 \\
-    %
-    $\rel_5$ & prover & grant & 0.451 & 16.8 \\
-    %
-    $\rel_5$ & verifier & grant & 0.597 & 2.24 \\
-    %
-    $\rel_5$ with $\{W_\gamma\}$ & prover & first grant & 4.00 & -- \\
-    %
-    $\rel_5$ with $\{W_\gamma\}$ & verifier & first grant & 7.64 & -- \\
-    %
-    $\rel_6'$, or $\rel_6$ & prover & transaction & 1.31 & 1.16 \\
-    %
-    $\rel_6'$, or $\rel_6$ & verifier & transaction & 1.79 & 1.69 \\
-    %
-    $\rel_7'$, or $\rel_7$ & prover & transaction & 3.96 & 26.5 \\
-    %
-    $\rel_7'$, or $\rel_7$ & verifier & transaction & 4.05 & 2.27 \\
-    %
-    Range proof & prover & transaction & 4.82 & -- \\
-    %
-    Range proof & verifier & transaction & 0.809 & -- \\
-    %
-    \midrule
-    %
-    $\rel_5$ setup & & deployment & -- & 95.3 \\
-    %
-    $\rel_7$ setup & & deployment & -- & 165 \\
-    %
-    $\rel_5$, $\rel_7$ constraints & & & -- & 668 and 1\,343 \\
-    %
-  \bottomrule \end{tabular}
-%
-\end{table}
+Of the 5\,160 bytes of an algebraic transaction, the tag takes 576, the
+commitment 48, the proof of $\rel_6'$ 544, the proof of $\rel_7'$ 3\,312 and the
+range proof 640. Of the 1\,116 bytes of a hash-based transaction, the tag takes
+32, the commitment 48, the proof of $\rel_6$ 512, and the proof of $\rel_7$
+with its linking proof 292 and 192. The public tracing key is 24\,624 bytes in
+the algebraic instantiation and 48 in the hash-based one.
+
+A Groth16 proof with its commitment takes 292 bytes, rather than the 192 bytes
+of three group elements. The linking proof adds 160 bytes at a grant and 192
+bytes in a transaction. The range check is a constraint of the transaction
+circuit, so there is no Bulletproofs range proof. Without the elements
+$\{W_\gamma\}$, the first grant message of 25\,280 bytes in the algebraic
+instantiation disappears. Tracing is $\Max$ evaluations of $\HT$ instead of
+$\Max$ pairings. The two circuits have 668 and 1\,343 constraints, and their
+setups take 95.3\,ms and 165\,ms.
+
+What is given up is the setup. Groth16 needs a structured reference string for
+each circuit, generated from secret values, so this instantiation needs a
+trusted setup and loses the property that no party samples anything. The prover
+is also much slower. Which instantiation is preferable depends on whether a
+deployment can tolerate a trusted setup, and on whether proving or verification
+cost is what binds.
+
+Groth16 proofs can be rerandomised, so from one proof anyone can produce
+another for the same statement. This is allowed by the simulation extractability
+of \Cref{exp:simext}, which excludes only statement and label pairs on which a
+proof was simulated, and is the notion \Cref{thm:hash-inst} assumes. Baghery et
+al.\ show that plain Groth16 is simulation extractable in this sense in the
+algebraic group model~\cite{FC:BKSV21}. Their result does not cover the
+commitment extension, which is why the theorem assumes it.
 
 \begin{figure}[htbp] \centering
 \includegraphics[width=\textwidth]{chapters/05-txid/txid-ell-times.pdf}
@@ -145,7 +132,7 @@ with $\Max = 2^\ell$ and are on a log scale.} \label{fig:txid-ell-times}
 \end{figure}
 
 \begin{figure}[htbp] \centering
-\includegraphics[width=0.75\textwidth]{chapters/05-txid/txid-ell-sizes.pdf}
+\includegraphics[width=\textwidth]{chapters/05-txid/txid-ell-sizes.pdf}
 \caption[Tracing: sizes against $\ell$]{Size against $\ell$ of the first grant message, on a log scale, and of
 a transaction.} \label{fig:txid-ell-sizes} \end{figure}
 
@@ -154,7 +141,9 @@ verify in the algebraic instantiation, and $28.3\,\mathrm{ms}$ and
 $4.44\,\mathrm{ms}$ in the hash-based one. The hash-based transaction is about a
 fifth of the size, 1\,116 bytes against 5\,160.
 
-Verification time and transaction size are nearly flat in $\ell$. Algebraic
+Verification time does not depend on $\ell$. The hash-based transaction has
+constant size, and the algebraic one grows only with the logarithmic size of the
+range proof. Algebraic
 proving steps up just after each power of two, since the range proof pads to the
 next power of two. In the algebraic instantiation the first grant grows with
 $\Max = 2^\ell$, and in both instantiations tracing does. Tracing one user for
@@ -164,7 +153,7 @@ $1.10\,\mathrm{ms}$ in the hash-based one.
 
 \begin{outline}
   \item algebraic: the $\group{T}$ tag is the largest item on the ledger; torus compression would halve it
-  \item check first: the table disagrees, as the tag is 576 bytes and the $\rel_7'$ proof 3312 bytes; the torus claim may need a citation
+  \item check first: the table disagrees, as the tag is 576 bytes and the $\rel_7'$ proof 3312 bytes; the torus claim would need a citation
   \item $\ell = 8$ as headline, since algebraic proving steps up just after it
 \end{outline}
 
@@ -194,14 +183,13 @@ uncompressed group elements.} \label{tab:txid-idemix}
 %
 \end{table}
 
-We compare against Hyperledger Idemix, an anonymous credential system in the
-Camenisch-Lysyanskaya line~\cite{CCS:CamVan02}. It runs over the same library.
+We compare against Hyperledger Idemix, which is based on Camenisch-Lysyanskaya
+anonymous credentials~\cite{CCS:CamVan02}. It runs over the same library.
 \Cref{tab:txid-idemix} compares a transaction with an Idemix signature, with and
 without audit pseudonyms.
 
 Idemix audits by testing one ledger entry at a time, at $0.189\,\mathrm{ms}$ per
-entry on one core, and only for signers who hand over their commitment
-randomness. Our tracing runs on eight cores, and breaks even with Idemix at
+entry on one core. Our tracing breaks even with Idemix at
 about 200 entries per epoch in the algebraic instantiation and 6 in the
 hash-based one. At $10^6$ entries the algebraic instantiation takes
 $36.9\,\mathrm{ms}$ against $189\,\mathrm{s}$ for Idemix.
