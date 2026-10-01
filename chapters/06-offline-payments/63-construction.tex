@@ -197,15 +197,15 @@ pseudonym commits to.
 That proof and the transfer signature both open the payer's pseudonym, on the
 same witness. The construction keeps them separate, because the device produces
 the audit proof alone and the transfer signature jointly with the secure element.
-The instantiation in \Cref{sec:joint-proof} merges them into one proof.
+In the instantiation of \Cref{sec:joint-proof}, the two are one proof.
 
 The payer's secure element and device produce the signature jointly, as a JPOK,
 in which two provers each hold part of the witness and together produce one
 proof. The secret key never leaves the secure element, and the secure element is not
 powerful enough to produce the whole proof. The secure element contributes only knowledge of the key. The device
 supplies the rest of the witness and computes the rest of the proof. This split
-makes the scheme deployable on existing hardware, and \Cref{sec:joint-proof}
-describes it.\rebekah{two provers are socially one prover though, it's just two
+makes the scheme deployable on existing hardware. We give the details in
+\Cref{sec:joint-proof}.\rebekah{two provers are socially one prover though, it's just two
 devices. I think that maybe we should skip the JPOK stuff til later?}
 
 The device is the second prover, and carries out the bulk of the proof without

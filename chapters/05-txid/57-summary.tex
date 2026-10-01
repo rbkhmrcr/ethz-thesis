@@ -18,7 +18,7 @@ regulators) earlier in this chapter, so the summary can refer back to them}
 \begin{outline}
   \item future work: grants are issued by users, so compelled disclosure relies on the legal system; a threshold auditor with the techniques of \Cref{chap:tsps} would split the authority between institutions
   \item simulator rewinds, so the result is standalone; straight-line extraction would give a composable one at the cost of larger proofs
-  \item the algebraic tag proof is the largest item per transaction; the tag itself is 576 bytes, and torus compression would halve it and reduce ledger growth
+  \item the algebraic tag proof is the largest item per transaction; the tag itself is 576 bytes
   \item a policy for choosing $\Max$ (privacy of volume against capacity) is a deployment question as much as a cryptographic one
   \item algebraic PRFs that fit Sigma protocols, like Dodis-Yampolskiy, seem to need $q$-type assumptions (\Cref{sec:txid-ft}); worth asking whether a different primitive avoids them, since one-way functions alone are not enough (their outputs need not look random)
   \item a redesign of how keys are derived: a long-term key derives epoch keys, which derive tags; only the current epoch key is released to an auditor; it must not give previous or future epoch keys, or previous or future tags, and tags must not give any key; if each stage can be one way like this and still have short proofs, the generic protocol gets a clean generic instantiation
