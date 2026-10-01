@@ -50,7 +50,7 @@ two rounds suffice. The result is threshold $\AGHO$, given in
 
   \begin{description}
 
-    \item[$(\pk, \shr{\sk}) \sample \TSPSgen(\secparam, \ell, t, n)$ :] The
+    \item[$(\shr{\sk}, \pk) \sample \TSPSgen(\secparam, \ell, t, n)$ :] The
 signers do the following:
 
       \begin{enumerate}
@@ -82,12 +82,15 @@ following:
 
 	\item Compute the following in one round:
 	  %
-	  \begin{equation*}
+	  \begin{gather*}
 	  %
-	    \shr{\rho\beta}, \ \shr{\rho\mu_i} \ \ (i \in [1,\ell]), \
-\shr{\tau\beta} \sample \algo{Mul}.
+	    \shr{\rho\beta} \sample \algo{Mul}(\shr{\rho}, \shr{\beta}), \quad
+\shr{\tau\beta} \sample \algo{Mul}(\shr{\tau}, \shr{\beta}), \\
 	  %
-	  \end{equation*}
+	    \shr{\rho\mu_i} \sample \algo{Mul}(\shr{\rho}, \shr{\mu_i}) \ \ (i
+\in [1,\ell]).
+	  %
+	  \end{gather*}
 
 	\item In a second round, open $\gamma = \rho\beta$, and abort if $\gamma
 = 0$.
@@ -152,20 +155,33 @@ $1$ if and only if the following hold:
 $k_{i,j}$ for the entry of $\mat{K}$ in row $i$ and column $j$, and
 $\mathsf{T}$ denotes transposition. For a vector of group elements $\vec{h} =
 (h_1, \ldots, h_{\ell+1})$ and a matrix $\mat{K} \in \Zp^{(\ell+1) \times 2}$,
-we write $\vec{h}^{\,\mat{K}}$ for the pair $(\prod_i h_i^{k_{i,1}}, \prod_i
-h_i^{k_{i,2}})$, and $(\gen, \vec{\msg})$ for the vector $(\gen, \msg_1, \ldots,
-\msg_\ell)$. For a vector $\vec{a}$ of field
-elements we write $\gen^{\vec{a}}$ for $(\gen^{a_1}, \gen^{a_2}, \ldots)$.
-Products of vectors are taken entry by entry, and for $\vec{h} \in \group{1}^2$
-and $\vec{\widetilde{h}} \in \group{2}^2$ we write $\pairing(\vec{h},
-\vec{\widetilde{h}}) = \pairing(h_1, \widetilde{h}_1)\pairing(h_2,
-\widetilde{h}_2)$.
+we write the following:
+%
+\begin{equation*}
+%
+  \vec{h}^{\,\mat{K}} = \left(\prod_{i=1}^{\ell+1} h_i^{k_{i,1}}, \
+\prod_{i=1}^{\ell+1} h_i^{k_{i,2}}\right).
+%
+\end{equation*}
+%
+We write $(\gen, \vec{\msg})$ for the vector $(\gen, \msg_1, \ldots,
+\msg_\ell)$, and $\gen^{\vec{a}}$ for $(\gen^{a_1}, \gen^{a_2}, \ldots)$ when
+$\vec{a}$ is a vector of field elements. Products of vectors are taken entry by
+entry. For $\vec{h} \in \group{1}^2$ and $\vec{\widetilde{h}} \in \group{2}^2$,
+we write the following:
+%
+\begin{equation*}
+%
+  \pairing(\vec{h}, \vec{\widetilde{h}}) = \pairing(h_1,
+\widetilde{h}_1)\pairing(h_2, \widetilde{h}_2).
+%
+\end{equation*}
 
 \begin{primitivebox}{The $\KPW$ SPS scheme}{sps-kiltz}
 
   \begin{description}
 
-    \item[$(\pk, \sk) \sample \SPSgen(\secparam, \ell)$ :] Sample $\alpha, \beta
+    \item[$(\sk, \pk) \sample \SPSgen(\secparam, \ell)$ :] Sample $\alpha, \beta
 \sample \Zp$, $\mat{K} \sample \Zp^{(\ell+1)\times 2}$ and $\mat{\Gamma},
 \mat{\Delta} \sample \Zp^{2\times 2}$. Let $\vec{\alpha} = (1,
 \alpha)^{\mathsf{T}}$ and $\vec{\beta} = (1, \beta)^{\mathsf{T}}$, and compute
@@ -259,7 +275,7 @@ the implementation makes all eight.
 
   \begin{description}
 
-    \item[$(\pk, \shr{\sk}) \sample \TSPSgen(\secparam, \ell, t, n)$ :] The
+    \item[$(\shr{\sk}, \pk) \sample \TSPSgen(\secparam, \ell, t, n)$ :] The
 signers do the following:
 
       \begin{enumerate}
@@ -308,13 +324,17 @@ following:
 	  %
 	    \shr{\rho\sigma} \sample \algo{Mul}(\shr{\rho}, \shr{\sigma}), \\
 	  %
-	    \shr{\vec{r}} = \shr{\vec{b}^{\,\rho}}, \ \shr{\vec{s}} =
-\shr{\vec{b}^{\,\rho\sigma}}, \ \shr{\vec{x}^{\,\rho}}, \
-\shr{\vec{y}^{\,\rho\sigma}} \sample \algo{ExpGrp}_1,
+	    \shr{\vec{r}} \sample \algo{ExpGrp}_1(\shr{\rho}, \shr{\vec{b}}),
+\quad \shr{\vec{s}} \sample \algo{ExpGrp}_1(\shr{\rho\sigma}, \shr{\vec{b}}),
+\\
+	  %
+	    \shr{\vec{x}^{\,\rho}} \sample \algo{ExpGrp}_1(\shr{\rho},
+\shr{\vec{x}}), \quad \shr{\vec{y}^{\,\rho\sigma}} \sample
+\algo{ExpGrp}_1(\shr{\rho\sigma}, \shr{\vec{y}}),
 	  %
 	  \end{gather*}
 	  %
-	  the second line as eight calls to $\algo{ExpGrp}_1$, one per entry, in
+	  the last two lines as eight calls to $\algo{ExpGrp}_1$, one per entry, in
 one round.
 
 	\item Each signer computes the following locally:
@@ -376,7 +396,10 @@ $(t+1, n)$ threshold sharing. Then
 the threshold $\AGHO$ and $\KPW$ schemes are correct. The threshold $\AGHO$
 scheme is adp-TS-UF-1 secure in the GGM, and the threshold $\KPW$ scheme is
 adp-TS-UF-1 secure under SXDH, in both
-cases with the same loss as the generic construction.  \end{theorem}
+cases with the same loss as the generic construction.\rebekah{The GGM
+conclusion for threshold $\AGHO$ needs the reduction to be generic. The theorem
+assumes an adaptively secure MPC protocol, while the benchmarked protocols are
+only covered by the static \Cref{lem:tsps-static}.}\end{theorem}
 
 We prove \Cref{thm:tsps-security} in \Cref{sec:tsps-proof-instantiation}.
 

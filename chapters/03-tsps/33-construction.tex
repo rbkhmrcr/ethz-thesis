@@ -39,7 +39,10 @@ message, and $z_1, \ldots, z_k$ of the following form:
 %
 where the group elements $c_0, c_1, \ldots, c_k$ and field elements $e_{j,i}$
 are computed from $\sk$ and the signing randomness alone, using the interfaces
-of $\algo{MPC}$ and linear operations.
+of $\algo{MPC}$ and linear operations.\rebekah{Defining this through the MPC
+interfaces makes it vacuous, since any function can be computed with them. It
+should be a property of $\SPS$ itself. The definition also allows $c_j$ and
+$e_{j,i}$ to be linear in $\sk$, as in $\KPW$ where $e_{j,i}$ are key entries.}
 
 \begin{outline}
   \item why this makes the online phase local: from sharings of $c_j$ and
@@ -56,7 +59,7 @@ The construction $\TSPS$, applied to an SPS scheme $\SPS$, is given in
 
   \begin{description}
 
-    \item[$(\pk, \shr{\sk}) \sample \TSPSgen(\secparam, \ell, t, n)$ :] The
+    \item[$(\shr{\sk}, \pk) \sample \TSPSgen(\secparam, \ell, t, n)$ :] The
 signers do the following:
 
       \begin{enumerate}
@@ -133,7 +136,10 @@ comparable to that of an ordinary invocation of $\SPSsign$.
 is performed by whichever party is to hold the signature, and needs no
 participation from the signers beyond their having published their shares. In
 our benchmarks, every signer opens the signature, so each sends its share to all
-others. \Cref{fig:tsps-seq} shows the steps and messages of signing, from the
+others.\rebekah{Combining is defined as non-interactive by any holder, but bad
+shares are only caught at the authenticated opening, and the benchmarks measure
+every party opening. Say how a holder combining alone detects a bad share.}
+\Cref{fig:tsps-seq} shows the steps and messages of signing, from the
 offline phase to combining.
 
 \begin{figure}[htbp] \centering \small
@@ -163,7 +169,9 @@ signers.} \label{fig:tsps-seq} \end{figure}
 so signing is robust: it succeeds whatever the corrupted signers do. With
 additive sharing, every signer has to contribute, and corrupted signers can make
 signing abort. If the MPC protocol has identifiable abort, meaning that an abort
-also names a corrupted signer, such signers can be excluded.
+also names a corrupted signer, such signers can be excluded.\rebekah{Robust
+overstates it: the offline MPC can abort even with an honest majority, and
+$\TSPScombine$ has to detect bad shares for the honest shares to be enough.}
 
 \begin{outline}
   \item what we prove: thresholdising loses nothing; if $\SPS$ can't be forged
@@ -173,7 +181,8 @@ forgery by its message, so the reduction never has to tell two signatures on the
 same message apart; asking for more would rule out rerandomisable schemes like
 $\AGHO$
   \item from the MPC: privacy and security with abort against up to $t$
-adaptively corrupted signers, linear $(t+1, n)$ sharing (\Cref{sec:tsps-mpc})
+adaptively corrupted signers, the linear $(t+1, n)$ sharing of
+\Cref{sec:tsps-mpc}
   \item from $\SPS$: decomposable signing, which is what lets the online phase
 run without the MPC
 \end{outline}
@@ -196,8 +205,8 @@ $\advB$ such that the following holds:
   %
   \begin{equation*}
   %
-    \Adv_{\TSPS, \adv}^{\text{adp-TS-UF-1}}(\secparam) \leq \binom{n}{t}
-\cdot \Adv_{\SPS, \advB}^{\text{euf-cma}}(\secparam).
+    \Adv_{\TSPS, \adv}^{\mathsf{adp\text{-}TS\text{-}UF\text{-}1}}(\secparam) \leq \binom{n}{t}
+\cdot \Adv_{\SPS, \advB}^{\mathsf{euf\text{-}cma}}(\secparam).
   %
   \end{equation*}
   %
@@ -226,8 +235,8 @@ $t$:
   %
   \begin{equation*}
   %
-    \Adv_{\TSPS, \adv}^{\text{adp-TS-UF-1}}(\secparam) \leq
-\Adv_{\SPS, \advB}^{\text{euf-cma}}(\secparam).
+    \Adv_{\TSPS, \adv}^{\mathsf{adp\text{-}TS\text{-}UF\text{-}1}}(\secparam) \leq
+\Adv_{\SPS, \advB}^{\mathsf{euf\text{-}cma}}(\secparam).
   %
   \end{equation*}
   %

@@ -7,8 +7,8 @@ the protocols of this chapter, we additionally need operations between elements
 of $\group{1}$ and $\group{2}$. We benchmark both the honest-majority and
 dishonest-majority settings, using ATLAS and MASCOT respectively to realise
 multiplication of shared secrets~\cite{CCS:KelOrsSch16,C:GLOPS21}. ATLAS is
-designed to work in both the semi-honest and malicious settings, but the
-implementation available in MP-SPDZ captures only the semi-honest
+designed to work in both the honest but curious and malicious settings, but the
+implementation available in MP-SPDZ captures only the honest but curious
 case~\cite{CCS:Keller20}.
 
 We add to MP-SPDZ sharings of group elements with their authentication
@@ -17,7 +17,9 @@ BLS12-381, implemented with RELIC~\cite{relictoolkit}. ATLAS uses Shamir sharing
 and MASCOT makes its triples by oblivious transfer. Any MPC protocol with the
 interfaces of our schemes would do, and we take one for each corruption setting:
 ATLAS where high availability matters, and MASCOT where resilience to key compromise
-matters. The ATLAS timings are therefore for semi-honest security. As baselines,
+matters. The ATLAS timings are for honest but curious security.\rebekah{No
+theorem covers the ATLAS rows: the theorems assume malicious security with abort.
+Scope these rows explicitly.} As baselines,
 we implement the centralised $\AGHO$ and $\KPW$ schemes and the two existing
 threshold SPS schemes in Go with gnark-crypto, with a trusted dealer for the
 threshold schemes~\cite{AC:CKPSS23,PKC:MMSST24,gnark-crypto}.
@@ -124,7 +126,9 @@ sends over a megabyte per party with MASCOT and half a kilobyte with ATLAS.
 Batching 16 states brings this to 8.2~ms per signature under MASCOT and 1.3~ms
 under ATLAS. \Cref{fig:tsps-n-times,fig:tsps-n-comm} show time and communication
 against the number of parties. Communication grows linearly in $n$, and the
-online phase stays below 3~ms up to eleven parties.
+online phase stays below 3~ms up to eleven parties.\rebekah{The batching numbers
+and the claim about eleven parties are in no table; add them or point to where
+they come from.}
 
 \begin{figure}[htbp] \centering
 \includegraphics[width=\textwidth]{chapters/03-tsps/tsps-n-times.pdf}

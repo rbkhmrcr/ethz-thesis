@@ -83,7 +83,8 @@ signatures let the threshold signers perform the majority of their computation
 offline, in a pre-processing phase before the message to be signed is known,
 which suits high-throughput applications, such as payments, that experience
 interspersed periods of low and high traffic. Our schemes inherit the security
-properties of the underlying SPS schemes.
+properties of the underlying SPS schemes.\rebekah{Overclaim: only adp-TS-UF-1
+is proven, from EUF-CMA of the underlying scheme, not every property.}
 
 We define the property of the signing algorithm that makes this possible,
 decomposable signing, and show that $\AGHO$ and $\KPW$ have it.

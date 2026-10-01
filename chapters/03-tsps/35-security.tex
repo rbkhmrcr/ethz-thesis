@@ -25,7 +25,9 @@ following:
   %
   \end{equation*}
 
-  By security with abort, every call to $\algo{MPC}$ returns the correct output,
+  By security with abort, every call to $\algo{MPC}$ returns the correct output,\rebekah{Correctness
+should not appeal to security with abort, which only bounds what a corrupted signer
+can do; it should follow from correctness of the MPC protocol when everyone is honest.}
 and every other step is linear, so $\TSPSgen$ opens the public key of the
 reconstructed $\sk$, and by decomposable signing the shares output by $\TSPSonsign$ reconstruct
 to $\SPSsign(\sk, \vec{\msg}; \varrho)$ for the randomness $\varrho$ sampled in
@@ -44,7 +46,7 @@ hold:
   %
   \begin{equation*}
   %
-    \SPSverify(\pk, \vec{\msg}^*, \SPSsig^*) = 1, \quad |S(\vec{\msg}^*) \cap
+    \SPSverify(\pk, \vec{\msg}^\star, \SPSsig^\star) = 1, \quad |S(\vec{\msg}^\star) \cap
 \mathcal{H}| < t + 1 - |\Cor|.
   %
   \end{equation*}
@@ -68,7 +70,12 @@ either corrupt or ask for a signature share on its forgery message.
 $\mathsf{sid}$ fresh, $\advB$ samples the shares
 $\{\state_{\mathsf{sid},i}\}_{i \in \mathcal{K}}$ uniformly, which by the first consequence is
 their real distribution, and runs $\algo{Sim}$ on the corrupted signers' inputs
-and these outputs to produce their view. If $\adv$ makes the execution abort,
+and these outputs to produce their view.\rebekah{Two gaps. State shares are not
+independent of key shares for $\KPW$: the $e_{j,i}$ are key entries and $\vec{z}^*$
+depends on $\mat{K}$, so sampling them uniformly needs a fresh or masked
+condition. $\algo{Sim}$ also needs the values opened, such as $\gamma$ in
+threshold $\AGHO$, and the theorem lacks the hypothesis that opened values are
+independent of $\sk$.} If $\adv$ makes the execution abort,
 $\advB$ returns $\bot$ and marks $\mathsf{sid}$ unusable. $\advB$ never fixes the
 randomness $\varrho$ that $\shr{\state}_{\mathsf{sid}}$ shares. It fixes only $t$
 shares, which are independent of $\varrho$, and $\varrho$ is determined later by
@@ -90,12 +97,12 @@ unique one consistent with a real execution.
 returns $\sk_k$ and every $\state_{\mathsf{sid},k}$ if $k \in \mathcal{K}$, and
 aborts otherwise.
 
-  Finally, $\advB$ forwards $\adv$'s output $(\vec{\msg}^*,
-\SPSsig^*)$ to its challenger. If $\adv$ wins, then $|S(\vec{\msg}^*) \cap
-\mathcal{H}| \leq t - |\Cor|$, so $|\Cor \cup S(\vec{\msg}^*)| \leq t$, and some
-set of size $t$ contains $\Cor \cup S(\vec{\msg}^*)$. If $\mathcal{K}$ is such a
-set, $\advB$ never aborts, and never queries its own oracle on $\vec{\msg}^*$,
-since every signer that issued a share on $\vec{\msg}^*$ lies in $\mathcal{K}$.
+  Finally, $\advB$ forwards $\adv$'s output $(\vec{\msg}^\star,
+\SPSsig^\star)$ to its challenger. If $\adv$ wins, then $|S(\vec{\msg}^\star) \cap
+\mathcal{H}| \leq t - |\Cor|$, so $|\Cor \cup S(\vec{\msg}^\star)| \leq t$, and some
+set of size $t$ contains $\Cor \cup S(\vec{\msg}^\star)$. If $\mathcal{K}$ is such a
+set, $\advB$ never aborts, and never queries its own oracle on $\vec{\msg}^\star$,
+since every signer that issued a share on $\vec{\msg}^\star$ lies in $\mathcal{K}$.
 Its output then wins the EUF-CMA experiment. The shares $\advB$ hands out are
 distributed identically whichever $\mathcal{K}$ it chose, so $\mathcal{K}$ is
 independent of $\adv$'s view, and is such a set with probability at least
@@ -117,7 +124,8 @@ corrupted.
 Second, it answers online queries lazily. The output of every call to
 $\algo{MPC}$ is a fresh sharing, so the state shares of a session, and the
 signature shares computed from them, are independent of the key shares and of
-other sessions. In each session, $\advB$ answers a query to an honest signer with
+other sessions.\rebekah{False for $\KPW$, whose state contains the key entries
+$e_{j,i}$ of $\mat{K}$; the step needs a fresh or masked condition on the state.} In each session, $\advB$ answers a query to an honest signer with
 a uniform signature share as long as the signers of $\Cor_0$, together with the
 honest signers it has answered in that session, number at most $t$. By the first consequence of linear sharing,
 any $t$ shares of a fresh sharing are uniform, so these answers are distributed
@@ -126,7 +134,7 @@ $\advB$ queries its own oracle on the session's message, and derives every other
 signature share from the signature and the $t$ shares already fixed.
 
 If $\adv$ wins, fewer than $t + 1 - |\Cor_0|$ honest signers issued shares on
-$\vec{\msg}^*$, so in no session on $\vec{\msg}^*$ does $\advB$ query its own
+$\vec{\msg}^\star$, so in no session on $\vec{\msg}^\star$ does $\advB$ query its own
 oracle. $\advB$ therefore wins whenever $\adv$ does, and no guess is needed.
 
 \end{proof}
@@ -171,6 +179,10 @@ For the threshold $\KPW$ scheme, it reconstructs the following:
   %
   which is $\SPSsign(\sk, \vec{\msg}; \rho, \sigma)$ for $\KPW$. Both schemes are
 therefore instances of $\TSPS$, and the correctness lemma and the security
-theorem for $\TSPS$ give the claim.
+theorem for $\TSPS$ give the claim.\rebekah{Asserted, not shown: the boxes do not
+map one to one onto \Cref{prot:tsps-generic}. The state contents differ, $\algo{Inv}$
+is inlined and never used, threshold $\AGHO$ adds the mask $\beta$ and stores
+$\rho\mu_i$ rather than $e_{1,i} = -\rho\mu_i$, and $\KPW$ computes $\gen^{k_{1,j}}$
+online.}
 
 \end{proof}
