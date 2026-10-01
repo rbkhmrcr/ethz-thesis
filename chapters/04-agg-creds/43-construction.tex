@@ -82,7 +82,7 @@ issued to the user, and at presentation the user proves that the same tag
 underlies both their registration signature and their aggregated credentials,
 without revealing which tag it is.
 
-The user samples $(\sk, \pk) \leftarrow \DSgen(\secparam)$, and sends $\pk$ to
+The user samples $(\sk, \pk) \sample \DSgen(\secparam)$, and sends $\pk$ to
 the registration authority together with a proof of knowledge of $\sk$ on a
 fresh message from the registration authority.
 If the proof verifies, the registration authority assigns the user a unique tag
@@ -100,7 +100,7 @@ signature on that attribute.
 On input $(\Tag, \pk, \psi, \atv{i})$ from the user, the issuer checks that
 $\psi$ verifies, and rejects if it does not.  Otherwise, the user next proves
 knowledge of $\sk$.  If this succeeds and the user holds attribute value
-$\atv{i}$, the issuer sends back $\signature_i \leftarrow \ATSsign(\isk{i},
+$\atv{i}$, the issuer sends back $\signature_i \sample \ATSsign(\isk{i},
 \Tag, \atv{i})$. The user sets $\cred_i = (\atv{i}, \signature_i)$.
 
 \paragraph{Aggregation.} Before presenting credentials, the user aggregates the
@@ -139,9 +139,11 @@ following parameters:
 %
 \end{equation*}
 %
+The relation is the following:
+%
 \begin{equation}\label{eq:agg-creds-proof-abstract} \begin{gathered}
 %
-  \rel_1 = \{\ (\sk, \pk) \leftarrow \DSgen(\secparam) \ \wedge \
+  \rel_1 = \{\ (\sk, \pk) \sample \DSgen(\secparam) \ \wedge \
 \DSverify(\rapk, (\pk, \Tag), \psi) = 1 \\
 %
   \wedge\ \ATSverifyagg((\ipk{i})_{i \in \ISSUERS}, \Tag, (\atv{i})_{i \in
@@ -149,6 +151,7 @@ following parameters:
 %
 \end{gathered} \end{equation}
 %
+\rebekah{$\rel_1$ states the randomised $\DSgen$ as a relation condition. Generically there is no equation linking $\sk$ and $\pk$, and the instantiation checks $\pk = \gen^\sk$, so the generic construction needs a key relation for the user's keys.}
 
 The user proves that they possess a valid registration signature, an aggregate
 credential under a single tag, and the secret key corresponding to the

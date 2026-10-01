@@ -53,7 +53,7 @@ Now, when an honest user $\user$ calls $\idfu{\AAC}'$ to register, $\simu$
 learns the user's identity. Given this information, $\simu$ retrieves the
 corresponding key pair $(\sk,\pk)$ and contacts the registration authority to
 register $\user$. $\simu$ receives a unique tag $\Tag$ and a signature $\psi
-\leftarrow \DSsign(\rask, (\pk, \Tag))$ and stores entry $\langle \user, \Tag,
+\sample \DSsign(\rask, (\pk, \Tag))$ and stores entry $\langle \user, \Tag,
 \pk, \psi\rangle $.
 
   Since the registration authority and $\idfu{\AAC}'$ both register each user
@@ -74,7 +74,7 @@ consider.
   \begin{description}
 
     \item[$\issuer{i}$ is honest.] As per $\Pi$'s specification, $\simu$ receives
-signature $\signature_i \leftarrow \ATSsign(\isk{i}, \Tag, \atv{i})$ and
+signature $\signature_i \sample \ATSsign(\isk{i}, \Tag, \atv{i})$ and
 records entry $\langle \user, \Tag, \atv{i}, \signature_i \rangle$, and
 $\idfu{\AAC}'$ likewise adds $\atv{i}$ to $\creds[\user][i]$.
 
@@ -88,7 +88,7 @@ $\simu$ receiving a signature $\signature_i$ with $\ATSverify(\ipk{i}, \Tag,
   In both cases, $\idfu{\AAC}'$ follows $\simu$: an honest issuer accepts every
 request from a registered user, matching the first branch, and for a dishonest
 issuer, $\idfu{\AAC}'$ accepts only when $\simu$ does, when the issuer produced
-a genuinely valid aggregate signature.  So $\idfu{\AAC}'$'s output matches
+a genuinely valid single $\ATS$ signature.  So $\idfu{\AAC}'$'s output matches
 $\Pi$'s in both cases, and this game is indistinguishable from Game 3 as long as
 $\simu$ does not abort.  Since $\user$ is honest, they always register
 before requesting credentials, so the abort event never occurs.
@@ -106,7 +106,7 @@ $\idfu{\AAC}'$ for $\vec{\atv{}} = (\atv{1}, \ldots, \atv{n})$, $\simu$ defines
 the statement $\inst_1 = (\rapk,\allowbreak \ISSUERS,\allowbreak \{\ipk{i}, \atv{i}\}_{i \in \ISSUERS})$ such that $\forall i \in
 \ISSUERS: \atv{i} \neq \varnothing$, and, using its ability to program the
 random oracle as the simulation trapdoor $\td$, outputs $\algoproof^\star
-\leftarrow \NIZKsimprove(\crs, \td, \inst_1, \msg)$, which gives
+\sample \NIZKsimprove(\crs, \td, \inst_1, \msg)$, which gives
 $\NIZKverify(\crs, \inst_1, \algoproof^\star, \msg) = 1$. By (P3), this
 simulated proof is indistinguishable from a real one, so Game 6 is
 indistinguishable from Game 5.
@@ -138,7 +138,7 @@ corrupt user $\user$ sends, in the real world, to an honest issuer $\issuer{i}$
 (simulated by $\simu$), $\simu$ (acting as $\user$) sends $(\AACissue, \att{i},
 \atv{i})$ to $\idfu{\AAC}'$, and stores entry $\langle \user, \Tag, \att{i},
 \atv{i}, \signature_i\rangle$ on success.  $\idfu{\AAC}'$ issues the credential
-exactly when $\user$ is registered, and the simulated $\issuer{i}$ returns $\signature_i \leftarrow
+exactly when $\user$ is registered, and the simulated $\issuer{i}$ returns $\signature_i \sample
 \ATSsign(\isk{i}, \Tag, \atv{i})$ under the same conditions, so their outputs
 are indistinguishable.
 
@@ -148,8 +148,8 @@ verifier $V$, $\simu$ (simulating $V$) calls $b \leftarrow \NIZKverify(\crs,
 \inst_1, \algoproof, \msg)$.  We recall that $\atv{i} = \varnothing$ if the
 attribute value is not disclosed.
 
-      If $b  = 0$,  $\simu$ sends $(\msg, \vec{\atv{}} = (\atv{1}, ...,
-\atv{n}), \algoproof)$ to $\idfu{\AAC}'$, which returns $(\AACverifyend,
+      If $b  = 0$,  $\simu$ sends $(\AACverify, \vec{\atv{}}, \msg,
+\algoproof)$ to $\idfu{\AAC}'$, which returns $(\AACverifyend,
 b^\star)$.  Two scenarios present themselves. Either there exists a dishonest
 user with attribute values $\vec{\atv'{}} = (\atv'{1}, ..., \atv'{n})$, $\forall
 \atv{i} \neq \varnothing$, we either have $\atv{i} = \atv'{i}$, or have $\atv{i}
@@ -157,12 +157,16 @@ user with attribute values $\vec{\atv'{}} = (\atv'{1}, ..., \atv'{n})$, $\forall
 \varnothing$, issuers $\issuer{i}$ and users holding attribute values $\atv{i}$
 are honest.
 
+      \rebekah{In scenario two $\idfu{\AAC}'$ records the presentation as invalid and returns $0$, not $1$, so this case analysis is wrong. Scenario one is where a real $0$ has to be matched.}
+
       In case of scenario one, the output of $\idfu{\AAC}'$ is defined by
 $\simu$, which instructs $\idfu{\AAC}'$ to return $\AACverifyend$ with $0$.  In case
 of scenario two, $\idfu{\AAC}'$ returns $\AACverifyend$ with $1$.  However, thanks
 to the correctness of protocol $\Pi$ this scenario never occurs.  Given a proof
 that was computed honestly,  $\NIZKverify$ will never output $0$, so the output
 of $\idfu{\AAC}'$ matches that of $\Pi$.
+
+      \rebekah{$\simu$ keeps no map between the string $\algoproof$ of $\idfu{\AAC}'$ and its simulated proof $\algoproof^\star$: a replayed honest presentation is in $\Query$ and cannot be extracted from, and the Otherwise branch verifies $\simu$'s own proof rather than the presented one.}
 
       If $b = 1$, then by (P3), $\simu$ can extract the witness $\witness_1 =
 (\Tag, \sk, \pk, \psi, \signature)$. They then execute the following steps:
@@ -180,9 +184,9 @@ aborts, and we call this event $a_2$.
 	\item[Otherwise.] $\simu$ sends to $\idfu{\AAC}'$ the presentation request
 $(\AACpresent, \vec{\atv{}}, \signature, \msg)$.
 
-	  Either $\idfu{\AAC}'$ aborts, and $\simu$ sends request $(\AACverify,\allowbreak V,\allowbreak \vec{\atv{}},\allowbreak \algoproof)$ to $\idfu{\AAC}'$, or $\idfu{\AAC}'$ returns
-$(\AACpresentend,\allowbreak \algoproof^\star)$, and $\simu$ sends request $(\AACverify,\allowbreak V,
-\vec{\atv{}}, \algoproof^\star)$ to $\idfu{\AAC}'$.
+	  Either $\idfu{\AAC}'$ aborts, and $\simu$ sends request $(\AACverify,\allowbreak \vec{\atv{}},\allowbreak \msg,\allowbreak \algoproof)$ to $\idfu{\AAC}'$, or $\idfu{\AAC}'$ returns
+$(\AACpresentend,\allowbreak \algoproof^\star)$, and $\simu$ sends request $(\AACverify,\allowbreak
+\vec{\atv{}}, \msg, \algoproof^\star)$ to $\idfu{\AAC}'$.
 
       \end{description}
 
@@ -210,14 +214,14 @@ $\issuer{j}$ is dishonest.
   Case one implies that $\simu$ issued credentials for $\user$ for the relevant
 attributes, and so did $\idfu{\AAC}'$.  During the $\AACpresent$ call,
 $\idfu{\AAC}'$ will not abort and will return $(\AACpresentend,
-\algoproof^\star)$, and the subsequent call $(\AACverify, V, \vec{\atv{}},
+\algoproof^\star)$, and the subsequent call $(\AACverify, \vec{\atv{}}, \msg,
 \algoproof^\star)$ will result in $\idfu{\AAC}'$ returning $(\AACverifyend, 1)$.
 This matches the output of the verification in the real world.
 
   Case two implies that $\user$ is in possession of a credential that was issued
 by a dishonest issuer and never recorded by either $\simu$ or $\idfu{\AAC}'$.
 In this case,  $\idfu{\AAC}'$ aborts during $\AACpresent$, and when $\simu$
-calls $\idfu{\AAC}'$ with  $(\AACverify, V, \vec{\atv{}}, \algoproof)$, the
+calls $\idfu{\AAC}'$ with  $(\AACverify, \vec{\atv{}}, \msg, \algoproof)$, the
 output of $\idfu{\AAC}'$ is dictated by $\simu$.  $\simu$ sets this output to
 $1$ to match the output of the verification in the real world.
 
@@ -231,6 +235,7 @@ occur. We now show that the probability of these events occurring is negligible.
 = (\Tag, \sk, \pk, \psi, \signature)$.  This means that $\user$ has knowledge of
 a valid $\psi$ such that $1 \leftarrow \DSverify(\rapk, (\pk, \Tag), \psi)$ with
 no corresponding entry, contradicting (P1).
+\rebekah{This reduces to EUF-CMA of the registration authority's signature, but the model lets the registration authority collude with corrupt parties, which gives the adversary $\rask$. The proof treats the registration authority as honest.}
 
     \item[$a_2$.] Occurs if $\exists j \in [1, n]$ such that $\atv{j} \neq
 \varnothing$ and $\issuer{j}$ is honest, and there is no recorded entry $\langle
@@ -250,6 +255,7 @@ $j \in \ISSUERS$.  Given that there is no recorded entry $\langle \star, \Tag,
 \atv{j}, \star \rangle$, this implies that the honest issuer $\issuer{j}$ never
 issued a signature $\signature_j$ for pair $(\Tag, \atv{j})$, contradicting
 (P2).
+\rebekah{The reduction does not say how the EUF-TBA challenge key is embedded among the honest issuers or where the corrupt issuers' keys for the forgery come from. No event covers an extracted $(\Tag, \pk)$ that belongs to an honest user, although corrupt issuers learn honest users' tags.}
 
   \end{description}
 
@@ -344,7 +350,7 @@ This is $\ATSsign(\gamma, \Tag, \msg)$ with randomness $\upsilon = \phi -
 
   \end{itemize}
 
-  \paragraph{Extraction.} $\advB$ stops unless $\msg^*_j$ is embedded and
+  \paragraph{Extraction.} \rebekah{If $\adv$ never queried $\hashone(\msg^*_j)$ or $\hashtwo(\Tag^*)$, $\advB$ has to query them itself before this step, so that they are embedded or plain as needed.} $\advB$ stops unless $\msg^*_j$ is embedded and
 $\Tag^*$ is plain, so that $\hashone(\msg^*_j) = y^{\rho^*}$ and
 $\hashtwo(\Tag^*) = \gen^{\eta^*}$. It removes the contributions of the other
 keys as follows:
@@ -498,9 +504,9 @@ its entry in $L_2$. The extracted values then give the following:
   \begin{itemize}
     \item the tag $\Tag$, with $\tid = \bar{\tid}^{1/\delta}$;
     \item the secret key $\sk$, with $\pk = \gen^\sk$;
-    \item the $\AGHO$ signature $\SPSsig = (\widetilde{r}, \widetilde{s},
+    \item the $\AGHO$ signature $\SPSsig = (\widetilde{r}', \widetilde{s}',
 \bar{z}^{1/\delta})$ on $(\pk, \tid)$;
-    \item the tag-based aggregate signature $\signature = (\signatureone,
+    \item the tag-based aggregate signature $\signature = (\signatureone',
 \bar{\signaturetwo}^{1/\delta})$ on $\tid$ and the attribute values $\atv{i}$.
   \end{itemize}
 Together these are a witness $\witness_2 = (\sk, \pk, \tid, \signature,
@@ -513,6 +519,7 @@ presentation $\algoproof$ without a witness.
 
     \item Randomly select $\alpha, \beta, \kappa, \delta, \nu, \{\eta_i\}_{i\in
 \ISSUERS},  \iota \in \Zp^*$, and set the following:
+\rebekah{Several symbols are reused here with another meaning: $\alpha$, $\beta$, $\delta$ (the prover's randomness and blinding exponent), $\eta_i$ (next to the proof $\eta$ and $\eta^*$ of the $\ATS$ proof) and $z$ (the $\AGHO$ element and the BCDH challenge).}
 %
       \begin{equation*}
 %
@@ -526,6 +533,7 @@ presentation $\algoproof$ without a witness.
 infeasible to distinguish between $(\bar{\gen}, \bar{v}, \bar{z},
 \bar{\signaturetwo}, \bar{\tid})$ as above and those generated following the
 protocol description.
+\rebekah{$\bar{z}$ and $\bar{\signaturetwo}$ are fixed by the pairing equations given the other values, so they are not independently indistinguishable; $\pk'$ and $H_i$ are left out, and the hybrid argument is missing.}
 
     \item We define the randomised signature elements as follows:
 %
@@ -601,7 +609,9 @@ model.
 
     \item[The proof system is simulation extractable.] Under the DDH assumption
 in $\group{1}$, \Cref{lem:agg-creds-sigma} gives special soundness and
-honest-verifier zero knowledge of the Sigma protocol for $\rel_3$. Its responses
+honest-verifier zero knowledge of the Sigma protocol for $\rel_3$ of
+\eqref{eq:agg-creds-proof-rel}.
+\rebekah{The lemma states extraction and simulation, not special soundness and HVZK for $\rel_3$. Simulation extractability as defined in \Cref{sec:prelims-nizks} does not hold if $\AGHO$ is forged, and the step from a proof for $\inst_3$ to (P3) for $\rel_1$ is missing.} Its responses
 are unique, and so quasi-unique, since each response is fixed by one
 verification equation. The challenge hashes the whole statement together with
 $\msg$. The Fiat-Shamir transform then makes the presentation proof simulation
@@ -609,6 +619,7 @@ extractable with $\msg$ as its label in the random oracle
 model~\cite{INDOCRYPT:FKMV12}. The simulator programs the random oracle to
 simulate honest users' presentations, and rewinds the adversary to extract from
 its own, as the simulator of the construction's proof requires.
+\rebekah{The simulator rewinds once for every presentation of the adversary; the expected running time of this is not argued.}
 
   \end{description}
 

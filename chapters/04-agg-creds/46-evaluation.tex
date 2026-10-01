@@ -69,7 +69,7 @@ $\ATS$ rows sign and aggregate single messages under one tag, with
 $\ATSaggregate$ and $\ATSverifyagg$ over $k = 64$ signatures, and a single and
 an aggregate $\ATS$ signature have the same size. The Idemix rows present one
 credential on $n = 128$ attributes.}
-  \label{tab:agg-creds-times}\label{tab:agg-creds-sizes}
+  \label{tab:agg-creds-times}
 \end{table}
 
 \Cref{tab:agg-creds-times} gives the time of each algorithm and the size of
@@ -110,6 +110,7 @@ and $k = 1$, presentation takes 1.82\,ms against 31.9\,ms for Idemix, and
 verification 4.05\,ms against 11.8\,ms. At $n = 128$, Idemix verifies faster
 once more than about 20 attributes are disclosed, but it is in the single-issuer
 setting.
+\rebekah{At $n = 128$, Idemix presentation is also faster beyond about $k = 85$ disclosed attributes; say so here.}
 \begin{outline}
   \item close: costs are low enough for client devices
 \end{outline}

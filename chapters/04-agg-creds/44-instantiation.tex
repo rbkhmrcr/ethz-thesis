@@ -18,7 +18,7 @@ same tag aggregate, and signatures can be rerandomised. Signatures aggregate by
 multiplication and verify with one pairing equation, so an aggregate is as short
 as one signature.
 Both hash functions are modelled as random oracles, and the security proof
-embeds its challenge in the hashes of the attacked message and tag. Our scheme is comprised of the following algorithms:
+embeds its challenge in the hashes of the attacked message and tag. Our scheme, given in \Cref{prot:ats}, is comprised of the following algorithms:
 
 \begin{protocolbox}{The tag-based aggregate signature scheme}{ats}
 
@@ -115,7 +115,7 @@ aggregate signature $\signature$, do:
 
 This signature is existentially unforgeable under tag-based aggregation in the
 random oracle model under the Bilinear Computational Diffie-Hellman
-assumption.
+assumption of \Cref{asm:bcdh}.
 
   \begin{assumptionbox}{Bilinear Computational Diffie-Hellman (BCDH)}{bcdh}
 
@@ -132,38 +132,25 @@ under tag-based aggregation in the random oracle model.  \end{theorem}
 
 We prove \Cref{thm:agg-creds-thm-1} in \Cref{sec:agg-creds-proof-2}.
 
-
-The credential scheme as a whole is proven in the GGM only because the
-registration signature is. The tag-based signature scheme needs no generic group
-argument.
-
 \subsection{Instantiating $\AAC$ with $\AGHO$ and $\ATS$}\label{sec:agg-creds-aac-inst}
 
 \paragraph{Overview.} In this instantiation, each user has a pair of secret and
 public keys $(\sk, \pk = \gen^\sk)$. The digital signature $\DS$ uses the AGHO
-structure-preserving signature scheme~\cite{C:AGHO11}. Every user is assigned a
+structure-preserving signature scheme of \Cref{prim:agho}~\cite{C:AGHO11}. Every user is assigned a
 unique tag $\Tag \in \Zp$. Since structure-preserving signatures sign vectors
 of group elements rather than scalars, we take $\tid = \hashtwo(\Tag)$ and it is
 the pair $(\pk, \tid)$ that the registration authority signs, with $\pk$ the
 user's public key.  Every other computation in the protocol uses $\Tag$
-directly. The aggregate tag-based signature $\ATS$ is instantiated with our
-construction. The protocol instantiation is described in full in
-Protocol~\ref{prot:paac}.
+directly. Hashing the tag also lets us extract $\Tag$ from $\tid$ by
+programming the random oracle. The aggregate tag-based signature $\ATS$ is
+instantiated with our construction. The protocol instantiation is described in
+full in \Cref{prot:paac}.
 
 \paragraph{The AGHO structure-preserving signature scheme.} The registration authority's key pair is for the structure-preserving signature
 scheme, since messages and signatures consist of elements of the same group as
 everything else in the protocol. This lets users prove knowledge of a valid
 registration signature with an efficient Sigma protocol over discrete
 logarithms, rather than requiring a general purpose zero knowledge proof.
-
-The credential scheme is then only proven secure in the GGM, since the $\AGHO$
-SPS scheme is only proven secure there.
-
-During registration, the registration authority signs the user's public key
-together with the group element $\tid = \hashtwo(\Tag)$, rather than $\Tag$
-itself. This serves the same purpose as above, and lets us extract $\Tag$ from
-$\tid$ by programming the random oracle. All other computations in the protocol,
-including the tag-based aggregate signature scheme, use the tag directly.
 
 The aggregate signature uses the same element $\hashtwo(\Tag)$, so the
 registration signature and the aggregate signature share one group element, and
@@ -227,6 +214,7 @@ or elements of $\group{T}$.
   A witness for $\rel_2$ can be extracted from any presentation that
 verifies. If the DDH assumption holds in
 $\group{1}$, presentations can be simulated without a witness.
+\rebekah{The proof also extracts $\Tag$, while the generic proof needs a witness for $\rel_1$, and extraction uses EUF-CMA of $\AGHO$ and programming of $\hashtwo$, which the lemma does not state. Extraction by rewinding works for an adversary's presentation, not for any given presentation.}
 
 \end{lemma}
 
@@ -260,14 +248,15 @@ $\AGHO$ SPS scheme, with $\rapk = (\widetilde{u}_1, \widetilde{u}_2, v)$.
 	\item For each issuer $i \in [1,n]$, sample $(\isk{i},\ipk{i}) \sample
 \ATSgen(\secparam)$, so $\ipk{i} = \ggen^{\isk{i}}$, and publish $\ipk{i}$
 with a proof of knowledge of $\isk{i}$.
+\rebekah{$\AACgen$ samples the issuer keys centrally, while the construction says each issuer generates its own. The issuer proof of knowledge is not specified, and the Go $\AACgen$ and the size of $\crs$ do not include it.}
 
 	\item Return $\crs \leftarrow
 (\gen,\ggen,\hashone,\hashtwo,\hash,\rapk,\{\ipk{i}\}_i)$.
 
       \end{enumerate}
 
-    \item[$(\sk,\regcred) \sample \AACregister(\crs)$ :] Between the user and
-the RA, do:
+    \item[$(\sk,\regcred) \sample \AACregister(\crs,\rask)$ :] Between the user
+and the RA, on input $\rask$ to the RA, do:
 
       \begin{enumerate}
 
@@ -290,6 +279,7 @@ the user.
 
 	\item The RA recomputes $c$ and exits unless $\pk \neq 1$ and $\gen^\zeta
 = a \cdot \pk^c$.
+\rebekah{The box does not check that $\pk$ has not been registered before, which the construction assumes and the code does. The hash $\hash$ is used for this proof, the issuance proof and the presentation proof, and needs a domain separation tag for each.}
 
 	\item Otherwise, the RA samples a fresh $\Tag \sample \Zp$ it has not
 assigned before, sets $\tid \leftarrow \hashtwo(\Tag)$, and computes $\SPSsig
@@ -300,7 +290,7 @@ user.
 
       \end{enumerate}
 
-    \item[$\cred \sample \AACissue(\crs,\isk{},\regcred,\att{})$ :] Between
+    \item[$\cred \sample \AACissue(\crs,\isk{i},\sk,\regcred,\atv{i})$ :] Between
 the user, on input $(\sk, \regcred)$, and issuer $i$, on input $\isk{i}$, for
 the user's value $\atv{i}$ of attribute $\att{i}$, do:
 
@@ -399,11 +389,12 @@ the commitments, the challenge and the responses as follows:
 
     \end{enumerate}
 
-  \item[$\{0,1\} \leftarrow \AACverify(\crs,\msg,\algoproof)$ :] On input
-$(\msg,\algoproof)$ from a verifier, parse $\algoproof = (\eta, \inst_3)$ with
-$\inst_3 = (\bar{\gen}, \bar{v}, \pk', \{i, \atv{i}, H_i\}_{i\in\ISSUERS},
-\widetilde{r}', \widetilde{s}', \bar{z}, \signatureone', \bar{\signaturetwo},
-\bar{\tid})$ and $\eta = (f, h, \{k_i\}_{i \in \ISSUERS}, w, \pi_1, \pi_2)$, and do:
+  \item[$\{0,1\} \leftarrow \AACverify(\crs,\{\atv{i}\}_{i \in
+\ISSUERS},\msg,\algoproof)$ :] On input $(\{\atv{i}\}_{i \in
+\ISSUERS},\msg,\algoproof)$ from a verifier, parse $\algoproof = (\eta,
+\inst_3)$ with $\inst_3 = (\bar{\gen}, \bar{v}, \pk', \{i, \atv{i},
+H_i\}_{i\in\ISSUERS}, \widetilde{r}', \widetilde{s}', \bar{z},
+\signatureone', \bar{\signaturetwo}, \bar{\tid})$ for the input values, and $\eta = (f, h, \{k_i\}_{i \in \ISSUERS}, w, \pi_1, \pi_2)$, and do:
 
     \begin{enumerate}
 
@@ -431,6 +422,7 @@ $\inst_3 = (\bar{\gen}, \bar{v}, \pk', \{i, \atv{i}, H_i\}_{i\in\ISSUERS},
 	%
 	\end{gather*}
         %
+	\rebekah{The code checks more non-degeneracies here than the box, which only checks $\bar{\gen} \neq 1$.}
     \end{enumerate}
 
 \end{description}

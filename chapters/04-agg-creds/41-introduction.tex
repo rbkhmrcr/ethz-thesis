@@ -176,7 +176,7 @@ Issuer state \\ \midrule
     CDHK15~\cite{AC:CDHK15} & $n$-BSDH, $J$-RootDH, \ldots & Yes & $O(K)$ & $O(K)$ & None \\
     HP22~\cite{SCN:HebPoi22} & GGM & Yes & $O(1)$ & $O(k)$ & Per tag \\
     MBGLS23~\cite{CCS:MBGLS23} & Interactive or GGM & Yes & $O(1)$ & $O(k)$ & Per tag \\
-    Our scheme & GGM & Yes & $O(1)$ & $O(k)$ & None \\
+    Our scheme & BCDH, DDH, ROM, GGM & Yes & $O(1)$ & $O(k)$ & None \\
 \bottomrule
   \end{tabular}
   \caption[Comparison with existing anonymous credential schemes]{Comparison with
@@ -184,7 +184,7 @@ existing single and multi-issuer anonymous credential schemes. $n$ is the total
 number of attributes a scheme supports, $k$ the number of attributes disclosed in
 a presentation, $K$ the number of issuers in a presentation, and $|$cred$|$ the
 size of the credentials needed for a presentation. The assumptions of the other
-schemes are those of the cited papers, and ours are in the random oracle model.
+schemes are those of the cited papers.
 Issuer state is what an issuer has to remember about each user: for HP22 and
 MBGLS23, which tags it has signed for (or, for MBGLS23, attributes and issuer
 keys fixed in advance).} \label{tab:agg-creds-related} \end{table}
