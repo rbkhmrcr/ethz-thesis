@@ -10,8 +10,7 @@ Fiat-Shamir transform, the Pedersen commitment scheme, the ElGamal encryption
 scheme, and the BBS+ signature scheme.
 
 The thesis contains numerous primitives, protocols, security definitions,
-instantiations and assumptions. To ease understanding of them, and to separate
-our contributions from the prior work we build on, we use a number of different
+instantiations and assumptions. To ease understanding of them, we use a number of different
 coloured boxed environments. Abstract primitives are given directly in prose, and ideal functionalities are
 displayed as plain figures. Security experiments are in green boxes, assumptions
 in pink boxes, instantiations of primitives in blue boxes, and the protocols that
@@ -88,7 +87,7 @@ amount.
 
 An experiment is a game between a challenger,
 which runs the honest algorithms, and the adversary $\adv$. The adversary may be
-given oracle access. The advantage $\Adv$ of $\adv$ is its probability of
+given oracle access, in which it submits inputs and the challenger responds. The advantage $\Adv$ of $\adv$ is its probability of
 winning, or the distance of that probability from $1/2$. A property holds if every PPT adversary has negligible advantage. Proofs are
 reductions: from an adversary with non-negligible advantage, we build an
 algorithm that breaks an assumption or another primitive. Many proofs go

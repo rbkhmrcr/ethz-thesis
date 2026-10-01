@@ -92,7 +92,8 @@ given $\inst$ and $c$, outputs $(a, z)$ distributed as in an honest run with
 challenge $c$~\cite{C:CraDamSch94}.
 
 The Sigma protocol for proof of knowledge of a discrete logarithm proves
-knowledge of $x$ with $h = \gen^x$~\cite{JC:Schnorr91}.
+knowledge of $x$ with $h = \gen^x$~\cite{JC:Schnorr91}. Sigma protocols for
+discrete logarithms are also called Schnorr proofs.
 The prover samples $r \sample \Zp$, sends $a$, receives a challenge $c
 \sample \Zp$, and returns $z$, computed as follows:
 %
@@ -139,8 +140,8 @@ challenge, answers it with a fresh challenge, and extracts the witness from the
 two accepting transcripts by special soundness, by the forking
 lemma~\cite{JC:PoiSte00}. So the extractor depends on the adversary, and
 extraction loses a polynomial factor in the number of hash queries. This is why
-the security proofs of later chapters are in the standalone model of
-\Cref{sec:prelims-security}, where rewinding is allowed. Online extraction,
+the security proofs of later chapters are in a model where rewinding is
+allowed. Online extraction,
 as given by the transform of Fischlin, avoids rewinding at the cost of larger
 proofs~\cite{C:Fischlin05}.
 
@@ -308,4 +309,6 @@ This variant is malleable: a signature on one tuple of group elements is also a
 signature on any other tuple with the same product. It is unforgeable only if
 the signer signs elements that come with a proof of knowledge of their
 representation in the bases $\gen_1, \ldots, \gen_n$, from which the reduction
-to $q$-SDH extracts the field elements~\cite{SCN:AuSusMu06,EC:TesZhu23b}.
+to $q$-SDH extracts the field elements~\cite{SCN:AuSusMu06,EC:TesZhu23b}.\rebekah{you wrote
+``non-malleability? should be a named, defined property; this is much more
+appropriate here'': name and define the property instead of ``malleable''}

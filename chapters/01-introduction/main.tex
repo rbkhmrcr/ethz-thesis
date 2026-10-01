@@ -8,13 +8,13 @@ indistinguishable from random.\rebekah{IND-CPA/CCA only make ciphertexts of two 
 confidential messages, regardless of the content of those messages, and
 independently of the power of, language spoken by, or any other attributes of
 the communicating parties. Modern cryptography has enabled encrypted
-communications that even truly powerful entities cannot read.
+communication that even truly powerful entities cannot read.
 
-The communicating parties themselves are not assumed to be as powerful as the
-entities trying to break the system - encryption demands relatively little
+The communicating parties are not assumed to be as powerful as the
+entities trying to break the system---encryption demands relatively little
 computational power of the users while keeping the adversary's computational
-task infeasible. This asymmetry of necessary computational power between users
-and attacking entities is well noted, and lies at the foundation of modern
+task infeasible. This asymmetry of computational power between users
+and attacking entities\rebekah{your note struck ``necessary'' here and rewrote it in the margin; where should it go?} is well noted, and lies at the foundation of modern
 cryptography itself~\cite{DifHel76}.
 
 However, protecting the content of a message says nothing about who is
@@ -33,10 +33,10 @@ learn sensitive information while performing otherwise legitimate functions.
 These new participants of the systems then raise the question of how the
 protocols should treat them.
 
-These powerful entities are consequently often modelled as adversaries.
+These entities are often modelled as adversaries.
 Protocol designers have understandably been active in designing systems that
-take power away from powerful, centralised entities. Anything that such an
-entity learns is a step away from the ideal world.
+take power away from centralised entities. Anything that such an
+entity learns is considered a step away from the ideal world.
 
 \paragraph{Centralisation, responsibility and trust.} In attempting to remove
 trust from centralised institutions, protocols may instead transfer computation,
@@ -139,6 +139,16 @@ consequential. The third point is that the alternative to auditable payments is
 not perfect privacy, but the status quo, where banks and payment providers see
 all transactions in the clear.
 
+\begin{outline}
+  \item fourth point, structural: the internet and messaging apps are
+  decentralised (anyone can run a server, no permission needed to talk); money
+  is issued by central banks, held by regulated intermediaries and settled
+  through few institutions, set by law rather than protocol design
+  \item choosing which systems to build is a moral as well as a technical choice
+  \item here the choice is between auditing that cryptography constrains and
+  auditing that nothing constrains
+\end{outline}
+
 For both social and technical reasons, financial systems come with requirements
 that private communication does not. Payment providers are required to identify
 their customers and to report suspicious
@@ -169,6 +179,11 @@ relied upon to perform an operational function without being trusted with users'
 private information. Each chapter states which participants may deviate from the
 protocol, and for which property.
 
+\begin{outline}
+  \item name the corruption model of institutions here: honest but curious for
+  privacy, honest for availability and correct operation
+\end{outline}
+
 \paragraph{The thesis.} This thesis argues that practical privacy is achieved
 not by assuming away existing infrastructure, but by modelling its participants
 and responsibilities accurately, and cryptographically constraining what each
@@ -184,6 +199,11 @@ structure-preserving signatures, we construct threshold certification schemes
 that require no interaction during the online signing phase, making them
 suitable for efficient transaction authorisation or other multi-certifier
 settings.
+
+\begin{outline}
+  \item introduce the concept in a few sentences: what threshold certification
+  is, what structure-preserving signatures are and why they are needed here
+\end{outline}
 
 We then consider aggregate anonymous credentials. Existing credential models do
 not always reflect the way that authority is divided in practice. Users may
@@ -203,7 +223,7 @@ with a particular user. These capabilities are related but distinct, and
 granting one need not grant the other. The question behind this work was not
 whether an auditor should exist, but whether its capability can be scoped like
 any other permission: to one user, for one period, and only once granted. We
-develop a transaction identification protocol that supports concurrent
+develop a transaction identification mechanism that supports concurrent
 transaction creation without requiring the auditor to maintain persistent
 per-user state. Auditing is restricted to a specified epoch, limiting both the
 scope and duration of the information disclosed to an auditor.
