@@ -1,1 +1,42 @@
 \chapter{Conclusion}\label{chap:conclusion}
+
+\begin{outline}
+  \item restate the thesis: practical privacy comes from modelling the participants and responsibilities that systems already have, and constraining with cryptography what each one can learn and do, not from removing them
+  \item each chapter starts from a role that exists in practice: certifiers (\Cref{chap:tsps}), issuers and the registration authority (\Cref{chap:agg-creds}), auditors (\Cref{chap:txid}), the central bank, intermediaries and secure elements (\Cref{chap:offline-payments})
+\end{outline}
+
+\begin{outline}
+  \item throughline: authority without knowledge; institutions perform a function without being trusted with users' private information
+  \item threshold SPS: certifiers sign committed values and no one certifies alone
+  \item aggregate credentials: the registration authority binds a key to a tag and learns nothing else; issuers stay independent and stateless
+  \item tracing: the auditor computes tags for one user and one epoch, and learns nothing about anyone else
+  \item offline payments: the secure element enforces single use without seeing payments; the auditor learns an identity only from a double spend
+\end{outline}
+
+\begin{outline}
+  \item throughline: scoped capabilities rather than all-or-nothing access
+  \item a capability is defined by its owner, its period and its trigger: one user and one epoch in \Cref{chap:txid}, one double-spending event in \Cref{chap:offline-payments}, a disclosed subset of attributes in \Cref{chap:agg-creds}
+  \item the design question in each case: what is the smallest capability that meets the need, and is its use visible to the person concerned
+  \item link back to the financial privacy argument of \Cref{chap:introduction}: money is not end-to-end encryption, and the realistic alternative is the status quo, banks seeing everything
+\end{outline}
+
+\begin{outline}
+  \item throughline: practicality as a design constraint
+  \item interaction moved out of the critical path: offline signing phase in \Cref{chap:tsps}, no issuer coordination in \Cref{chap:agg-creds}, concurrent submission without counters in \Cref{chap:txid}, payments with no network in \Cref{chap:offline-payments}
+  \item costs that do not grow with the system: presentation in $k$ not $n$, tracing in $\Max$ not the size of the ledger, secure element work about one signature
+  \item every construction implemented and measured; headline numbers per chapter
+\end{outline}
+
+\begin{outline}
+  \item throughline: generic constructions with tailored instantiations
+  \item each chapter gives a generic protocol from standard primitives, then an instantiation built for Sigma protocols and pairing equations; the cost is often stronger assumptions (GGM through AGHO, $q$-type assumptions for BBS+ and Dodis-Yampolskiy)
+  \item open: instantiations under standard assumptions with comparable efficiency
+\end{outline}
+
+\begin{outline}
+  \item open questions across chapters
+  \item composability: proofs are standalone because extraction rewinds; straight-line extraction would give composable results at the cost of larger proofs
+  \item the chapters share a credential layer (registration authority, BBS+ or SPS credentials); a joint analysis of one system combining credentials, tracing and offline payments
+  \item threshold auditors and certifiers: the techniques of \Cref{chap:tsps} could split the auditor of \Cref{chap:txid} and \Cref{chap:offline-payments} between institutions
+  \item deployment questions that are not only cryptographic: choosing $\Max$, revocation policies, who may compel a grant
+\end{outline}
