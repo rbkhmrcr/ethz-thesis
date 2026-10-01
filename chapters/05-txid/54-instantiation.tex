@@ -15,6 +15,7 @@ that the prover only shows equalities of discrete logarithms, which efficient
 Sigma protocols handle, while the verifier evaluates one or two pairings itself
 on public data. The concrete choices below are all made so that every proof
 stays a Sigma protocol.
+\rebekah{p.84: a long pen stroke runs from ``rewrite each of them so that the prover'' to ``every proof'', and ``which efficient Sigma protocols handle'' is underlined. Strike the rest of this paragraph (the outline below says the same), or only reword that phrase?}
 
 \begin{outline}
   \item why this instantiation is more complex than the construction: the derivations of \Cref{sec:txid-construction}, tracing key to epoch keys to tags, need every step to be one way, hard to invert from the epoch key back to the tracing key, and from a tag back to the epoch key
@@ -102,9 +103,8 @@ return the following:
 
 \end{primitivebox}
 
-We use the Dodis-Yampolskiy PRF differently from its authors. The secret group
-element $P$ is the epoch tracing key, and the elements
-$\ggen_D^{1/(\utk''+\gamma)}$ are published as $\{W_\gamma\}$. So a tag is
+Here the secret group element $P$ is the epoch tracing key, and the elements
+$\ggen_D^{1/(\utk''+\gamma)}$ are published as $\{W_\gamma\}$. A tag is
 keyed by the epoch key rather than by $\utk''$:
 %
 \begin{equation*}
@@ -340,10 +340,10 @@ $\rel_5$ has the following instance and witness:
 %
 \begin{equation*}
   \inst_5 = (\HE, \gen_2, \gen_3, \ggen_D, T, \epoch, \ek,
-\{W_\gamma\}_{\gamma\in[0,\Max)}), \qquad \witness_5 = (\utk',\utk''),
+\{W_\gamma\}_{\gamma\in[0,\Max)}), \qquad \witness_5 = (\utk',\utk'').
 \end{equation*}
 %
-and holds exactly when the following does:
+The relation is the following:
 %
 \begin{equation*} \begin{gathered}
   \rel_5 = \{\ T = \gen_2^{\utk'}\cdot\gen_3^{\utk''} \ \wedge \ \ek =
@@ -420,7 +420,8 @@ expensive in practice. Instead, the user blinds the epoch key and the tag with a
 fresh scalar, publishes the blinded values, and proves only equalities of
 discrete logarithms. The index is committed separately, and the tag proof and
 a standard range proof both speak about that commitment, so the index shown to
-be in range is the one the tag is computed from.
+be in range is the one the tag is computed from, as \Cref{lem:txid-rel7}
+shows.
 
 A correctly formed tag satisfies the following equation:
 %
@@ -431,8 +432,13 @@ A correctly formed tag satisfies the following equation:
 The user samples fresh $s, r_\gamma \sample \Zp$, and publishes the epoch hash
 blinded by $s$ as $U$, the tag blinded by $s$ as $X$, the blinded epoch key
 paired with $\ggen_D$ as $\Pi$, and the commitment $\com_\gamma$ to the index.
-After blinding, the equation above becomes $\Pi = X^{\utk''+\gamma}$. The user
-proves the rewritten tag relation $\rel_7'$, with instance and witness as
+After blinding, the equation above becomes the following:
+%
+\begin{equation*}
+  \Pi = X^{\utk''+\gamma}.
+\end{equation*}
+%
+The user proves the rewritten tag relation $\rel_7'$, with instance and witness as
 follows:
 %
 \begin{equation*}
@@ -552,8 +558,13 @@ with a fresh $r_1 \sample \Zp^*$, and blinds the base with a fresh $r_2 \sample
 \end{equation*}
 %
 For a valid signature $\bar{E} = E'^{z}$, which the verifier checks with the
-pairing equation $\pairing(E',\ggen_Z) = \pairing(\bar{E},\ggen)$. The user
-also sets the following:
+following pairing equation:
+%
+\begin{equation*}
+  \pairing(E',\ggen_Z) = \pairing(\bar{E},\ggen).
+\end{equation*}
+%
+The user also sets the following:
 %
 \begin{equation*}
   r_3 = 1/r_1, \qquad r'' = r - r_2 r_3 - \openinfo.
@@ -701,6 +712,7 @@ the Fiat-Shamir transform under $\hashfs$, as in the algebraic instantiation.
   \item random oracle heuristic does not help, since we prove statements about the concrete function inside a circuit
   \item so state it as an assumption: MiMC hash of (domain separation tag, secret key, input) is a PRF of the input
   \item MiMC was designed as a block cipher, so its cryptanalysis is of the keyed permutation (cite AC:AGRRT16); here the key enters as a message block, not the cipher key, so the assumption is heuristic and has no security reduction
+  \item open question (p.91): why does the key enter as a message block and not as the cipher key? what is the cipher key then? because tracing would then be decryption?
 \end{outline}
 
 \begin{outline}

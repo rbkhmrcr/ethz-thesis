@@ -418,10 +418,7 @@ cases, which gives the following bound:
 \Adv^{q\text{-}\mathsf{mdbdhi}}_{\simu}(\secparam).
   \end{equation*}
 
-  The lemma is applied once per user, not once per epoch. By
-\Cref{lem:txid-fe-prf}, the epoch keys of distinct epochs are uniform and
-independent, even given $\PTK$, and $\PTK$ is the only value the epochs share.
-So the two lemmas compose without a hybrid over epochs.\rebekah{this is wrong:
+  \rebekah{removed the claim that the lemma is applied once per user and composes with \Cref{lem:txid-fe-prf} without a hybrid over epochs (p.97 ``wat''); it is wrong:
 the challenge has one hidden $P$, so it covers one epoch key; with several
 epochs and the same $\{W_\gamma\}$ a hybrid over epochs is needed}
 
@@ -465,9 +462,14 @@ follows:
 \pairing(\ek^{\,s},\ggen_D) = \Pi.
   \end{equation*}
   %
-  For the tag equation, $\Tag_\gamma = \pairing(\ek,
-\ggen_D^{1/(\utk''+\gamma)})$ gives $\Tag_\gamma^{\utk''+\gamma} =
-\pairing(\ek,\ggen_D)$, and the following holds:
+  For the tag equation, the definition of the tag gives the following:
+  %
+  \begin{equation*}
+    \Tag_\gamma = \pairing\big(\ek, \ggen_D^{1/(\utk''+\gamma)}\big), \qquad
+\Tag_\gamma^{\utk''+\gamma} = \pairing(\ek,\ggen_D).
+  \end{equation*}
+  %
+  So the following holds:
   %
   \begin{equation*}
     X^{\utk''}\cdot X^{\gamma} = \big(\Tag_\gamma^{\utk''+\gamma}\big)^{s} =
@@ -519,15 +521,11 @@ equation of $\rel_7$:
     \Tag_\gamma = \pairing(\ek,\ggen_D)^{1/(\utk''+\gamma)} =
 \pairing\big(\ek,\, \ggen_D^{1/(\utk''+\gamma)}\big).
   \end{equation*}
-  %
-  The first non-degeneracy check excludes $s = 0$, and the second excludes
-$\utk'' = -\gamma$.
 
   \paragraph{Honest-verifier zero knowledge.} We give a simulator $\simu$ whose
 output $(U, \Pi, X,\allowbreak \com_\gamma,\allowbreak \algoproof_7')$ is computationally
 indistinguishable from an honest proof, under the DDH assumption in $\group{1}$,
-for every distinguisher that does not hold $\ek$. An authorised auditor holds
-$\ek$ and can trace the transaction, as intended.
+for every distinguisher that does not hold $\ek$.
 
   $\simu$ samples $s, r_\gamma \sample \Zp$ and $Q \sample \group{1}$, fixes an
 arbitrary $\gamma^\star \in [0,\Max)$, and computes the following:
@@ -541,9 +539,14 @@ arbitrary $\gamma^\star \in [0,\Max)$, and computes the following:
   In an honest proof, $\Pi$ and $X$ are the same expressions with $Q =
 \ek^{\,s}$. So the only difference is that $Q$ is uniform instead of $\ek^{\,s}$,
 and a distinguisher between the two gives a DDH distinguisher in $\group{1}$.
-Given a challenge $(\gen, \gen^a, \gen^b, Q)$, the reduction programs $\HE(\epoch) =
-\gen$, sets $\ek = \gen^a$ and $U = \gen^b$, and computes $\Pi$ and $X$ from $Q$ as above.
-It computes the other public values that depend on $\utk'$, which are $\PTK$
+Given a challenge $(\gen, \gen^a, \gen^b, Q)$, the reduction programs the random
+oracle and sets the following:
+  %
+  \begin{equation*}
+    \HE(\epoch) = \gen, \qquad \ek = \gen^a, \qquad U = \gen^b.
+  \end{equation*}
+  %
+  It computes $\Pi$ and $X$ from $Q$ as above, and it computes the other public values that depend on $\utk'$, which are $\PTK$
 and the epoch keys of other epochs, from $\gen^a$, by programming $\gen_2$ and $\HE$
 at other epochs to known powers of $\gen$. If $Q = \gen^{ab}$, this is an honest
 proof, and if $Q$ is uniform, it is the simulated one.\rebekah{this simulator

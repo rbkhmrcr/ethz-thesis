@@ -16,14 +16,6 @@ who locally computes every valid transaction tag for that user and epoch.
 When the system moves to a new epoch, users derive a fresh epoch tracing key,
 and tracing capabilities granted for prior epochs expire automatically.
 
-\paragraph{The index is unordered.} The index $\gamma \in [0,\Max)$ replaces
-the monotonically increasing counter of prior tag-based
-schemes~\cite{CCS:KiaKohSar22,CANS:SarKiaKoh24}. The auditor evaluates $\FT$ at
-every index in $[0,\Max)$, so gaps and out-of-order use cost nothing, and users
-can create and submit transactions in parallel. The only constraint is that a
-user does not reuse an index within an epoch. So $\Max$ is also a per-user,
-per-epoch rate limit.
-
 \paragraph{Building blocks.} The protocol is built from five cryptographic
 primitives. The registration authority certifies users'
 keys with a digital signature scheme $\DS$.  Users bind their tracing keys
