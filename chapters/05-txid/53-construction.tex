@@ -169,12 +169,7 @@ registration credential.
 requests tracing authorisation from a user, identifying themselves and supplying
 a fresh nonce. In response, the user derives their epoch tracing key from their
 long-term tracing key and the epoch identifier, and proves that this derivation
-is correct, as captured by $\rel_5$. Since this proof does not depend on
-the auditor, it can be generated once and reused for every authorisation granted
-during the epoch.\rebekah{the protocol box and the code (Prove5 in
-impl/tracing/algebraic) put the auditor's nonce into the $\rel_5$ proof, so it
-is not reused. Either drop this sentence, or drop the nonce from the $\rel_5$
-proof, since $\algoproof_4$ already binds $\algoproof_5\|\rand$}
+is correct, as captured by $\rel_5$.
 
 To authorise this particular auditor, the user binds the epoch key proof and the
 auditor's nonce together with a second zero-knowledge proof of knowledge of
@@ -344,8 +339,8 @@ ledger.
     \item[$\{0,1\} \leftarrow \algo{Verify}(\crs,\state,\tx)$ :] Run by the
 transaction validators. Parse $\tx =
 (\payload,\Tag_\gamma,\com,\algoproof_7,\algoproof_6)$, set $\msg \leftarrow
-\payload\|\Tag_\gamma\|\com\|\algoproof_7$, and return $1$ if the following all
-hold, and $0$ otherwise:
+\payload\|\Tag_\gamma\|\com\|\algoproof_7$, and return $1$ if and only if the
+following hold:
       %
       \begin{gather*}
 	\Tag_\gamma \notin \state, \\

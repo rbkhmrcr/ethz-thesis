@@ -298,8 +298,8 @@ ledger.
       \end{enumerate}
 
     \item[$\{0,1\} \leftarrow \algo{Verify}(\crs,\state,\tx)$ :] Run by the
-transaction validators. Parse $\tx$, and return $1$ if the following all hold,
-and $0$ otherwise:
+transaction validators. Parse $\tx$, and return $1$ if and only if the
+following hold:
 
       \begin{enumerate}
 
@@ -389,13 +389,13 @@ on a later grant.
 
     \item[$\{0,1\} \leftarrow \NIZKverify(\crs_5, \inst_5, \algoproof_5,
 \rand)$ :] Compute $c$ as above, and on a first grant also $\widehat{W}$ and
-$\widehat{V}$. Return the result of the following checks, the last on a first
-grant only:
+$\widehat{V}$. Return $1$ if and only if the following hold, the last on a
+first grant only:
       %
       \begin{equation*}
-	\gen_2^{\eta}\cdot\gen_3^{\zeta} \checkcheck A\cdot T^{c}, \quad
-\HE(\epoch)^{\eta} \checkcheck B\cdot\ek^{c}, \quad \widehat{W}^{\zeta}
-\checkcheck K\cdot\widehat{V}^{c}.
+	\gen_2^{\eta}\cdot\gen_3^{\zeta} = A\cdot T^{c}, \quad
+\HE(\epoch)^{\eta} = B\cdot\ek^{c}, \quad \widehat{W}^{\zeta}
+= K\cdot\widehat{V}^{c}.
       \end{equation*}
 
   \end{description}
@@ -500,15 +500,15 @@ C, F, A_\gamma, \theta_1, \theta_2, \theta_h, \theta_s, \theta_\gamma,
       \end{enumerate}
 
     \item[$\{0,1\} \leftarrow \NIZKverify(\crs_7, \inst_7, \algoproof_7')$ :]
-Return $0$ if $U = 1_{\group{1}}$ or $\Pi = 1_{\group{T}}$. Otherwise compute
-$c$ as above, and return the result of the following checks:
+Compute $c$ as above, and return $1$ if and only if the following hold:
       %
-      \begin{gather*} \gen_2^{\theta_1}\cdot\gen_3^{\theta_2}\cdot
-\gen_4^{\theta_h} \checkcheck A \cdot \com^c, \quad \HE(\epoch)^{\theta_s}
-\checkcheck B \cdot U^c, \quad \pairing(U,\ggen_D)^{\theta_1} \checkcheck M
-\cdot \Pi^c, \\ \Tag_\gamma^{\theta_s} \checkcheck C \cdot X^c, \quad
-X^{\theta_2 + \theta_\gamma} \checkcheck F \cdot \Pi^c, \quad
-\gen_3^{\theta_\gamma}\cdot\gen_4^{\theta_r} \checkcheck A_\gamma \cdot
+      \begin{gather*} U \neq 1_{\group{1}}, \quad \Pi \neq 1_{\group{T}}, \\
+\gen_2^{\theta_1}\cdot\gen_3^{\theta_2}\cdot
+\gen_4^{\theta_h} = A \cdot \com^c, \quad \HE(\epoch)^{\theta_s}
+= B \cdot U^c, \quad \pairing(U,\ggen_D)^{\theta_1} = M
+\cdot \Pi^c, \\ \Tag_\gamma^{\theta_s} = C \cdot X^c, \quad
+X^{\theta_2 + \theta_\gamma} = F \cdot \Pi^c, \quad
+\gen_3^{\theta_\gamma}\cdot\gen_4^{\theta_r} = A_\gamma \cdot
 \com_\gamma^{c}.  \end{gather*}
 
   \end{description}
@@ -610,15 +610,16 @@ all eight responses.
       \end{enumerate}
 
     \item[$\{0,1\} \leftarrow \NIZKverify(\crs_6, \inst_6, \algoproof_6',
-\msg)$ :] Return $0$ if $E' = 1_{\group{1}}$ or $\pairing(E', \ggen_Z) \neq
-\pairing(\bar{E}, \ggen)$. Otherwise compute $c$ as above, and return the result
-of the following checks:
+\msg)$ :] Compute $c$ as above, and return $1$ if and only if the following
+hold:
       %
       \begin{gather*}
-	\gen_2^{\theta_1}\cdot\gen_3^{\theta_2}\cdot\gen_4^{\theta_h} \checkcheck
-t_1\cdot\com^c, \quad E'^{-\theta_e}\cdot\gen_4^{\theta_{r_2}} \checkcheck
+	E' \neq 1_{\group{1}}, \quad \pairing(E', \ggen_Z) = \pairing(\bar{E},
+\ggen), \\
+	\gen_2^{\theta_1}\cdot\gen_3^{\theta_2}\cdot\gen_4^{\theta_h} =
+t_1\cdot\com^c, \quad E'^{-\theta_e}\cdot\gen_4^{\theta_{r_2}} =
 t_2\cdot(\bar{E}/d)^c, \\ \gen_1^{\theta_\sk}\cdot d^{-\theta_{r_3}}\cdot
-\gen_4^{\theta_{r''}} \checkcheck t_3\cdot\big((\gen_0\cdot\com)^{-1}\big)^{c}.
+\gen_4^{\theta_{r''}} = t_3\cdot\big((\gen_0\cdot\com)^{-1}\big)^{c}.
       \end{gather*}
 
   \end{description}
@@ -727,12 +728,12 @@ c\cdot\mu$ and $s_x \leftarrow b_x + c\cdot\openinfo$.
       The context $\mathsf{ctx}$ is $(\epoch, \Tag_\gamma, \algoproof_7)$ in a
 transaction and $(\epoch, \ek, \algoproof_5, \rand)$ at a grant.
 
-    \item[Verify :] Compute $c$ as above, and return the result of the
-following checks:
+    \item[Verify :] Compute $c$ as above, and return $1$ if and only if the
+following hold:
       %
       \begin{equation*}
-	K_0^{s_u}\cdot K_1^{s_m} \checkcheck A_1\cdot D^c, \quad
-\gen_2^{s_u}\cdot\gen_3^{s_x} \checkcheck A_2\cdot\com^c.
+	K_0^{s_u}\cdot K_1^{s_m} = A_1\cdot D^c, \quad
+\gen_2^{s_u}\cdot\gen_3^{s_x} = A_2\cdot\com^c.
       \end{equation*}
 
     \item[Linking to $\PTK$ :] At a grant, the same protocol links $D$ to $\PTK

@@ -420,7 +420,7 @@ Recall the tag relation and its rewritten form:
 %
 \begin{equation*} \begin{gathered}
   \rel_7 = \{\ \com = \gen_2^{\utk'}\cdot\gen_3^{\utk''}\cdot\gen_4^{\openinfo}
-\ \wedge \ \ek = \HE(\epoch)^{\utk'} \ \wedge \ \Tag_\gamma =
+\ \wedge \ \ek = \HE(\epoch)^{\utk'} \\ \wedge \ \Tag_\gamma =
 \pairing\big(\ek,\ggen_D^{1/(\utk''+\gamma)}\big) \ \wedge \ 0 \leq \gamma <
 \Max\ \}, \\
   \rel_7' = \{\ \com = \gen_2^{\utk'}\cdot\gen_3^{\utk''}\cdot\gen_4^{\openinfo}
@@ -505,7 +505,7 @@ equation of $\rel_7$:
 $\utk'' = -\gamma$.
 
   \paragraph{Honest-verifier zero knowledge.} We give a simulator $\simu$ whose
-output $(U, \Pi, X, \com_\gamma, \algoproof_7')$ is computationally
+output $(U, \Pi, X,\allowbreak \com_\gamma,\allowbreak \algoproof_7')$ is computationally
 indistinguishable from an honest proof, under the DDH assumption in $\group{1}$,
 for every distinguisher that does not hold $\ek$. An authorised auditor holds
 $\ek$ and can trace the transaction, as intended.
@@ -563,7 +563,8 @@ proof, the forking lemma rewinds the prover and reprograms the random oracle at
 the challenge, which gives two accepting transcripts with the same first message
 and distinct challenges, and the argument above applies. For zero knowledge,
 $\simu$ samples $c$, computes $(A, B, M, C, F, A_\gamma)$ as above, and programs
-the random oracle so that $\hash(\inst_7', A, B, M, C, F, A_\gamma) = c$. This
+the random oracle to return $c$ on $(\inst_7',\allowbreak A, B, M, C, F,
+A_\gamma)$. This
 is indistinguishable from an honest random oracle unless the adversary has
 queried that point before, which happens with negligible probability, since $A$
 contains a fresh uniform group element. So the non-interactive proof is
