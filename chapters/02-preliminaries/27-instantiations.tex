@@ -128,38 +128,47 @@ the random oracle model~\cite{INDOCRYPT:FKMV12}.
 
 \subsection{The Pedersen commitment scheme}
 
-The Pedersen commitment scheme in \Cref{prim:pedersen} commits to several field
-elements at once with a single group element~\cite{C:Pedersen91}. Its key
-generation algorithm additionally takes the number $n$ of field elements. It is
-perfectly hiding, and computationally binding under the DL assumption. Binding
-holds only against parties that know no discrete logarithm relation between the
-elements of $\ck$. Where a participant could otherwise choose $\ck$, our
-instantiations derive it from a public seed with a hash function.
+The Pedersen commitment scheme in \Cref{prim:pedersen} commits to a field
+element with a single group element~\cite{C:Pedersen91}. It is perfectly hiding,
+and computationally binding under the DL assumption. Binding holds only against
+parties that know no discrete logarithm relation between the elements of $\ck$.
+Where a participant could otherwise choose $\ck$, our instantiations derive it
+from a public seed with a hash function.
 
 \begin{primitivebox}{The Pedersen commitment scheme}{pedersen}
 
   \begin{description}
 
-    \item[$\ck \sample \ComGen(\secparam, n)$ :] On input the security parameter
-and message vector length $n$, sample $\gen_1,\ldots,\gen_n, \hgen \sample
-\group{1}$ and return $\ck = (\gen_1,\ldots,\gen_n,\hgen)$.
+    \item[$\ck \sample \ComGen(\secparam)$ :] On input the security parameter,
+sample $\gen, \hgen \sample \group{1}$ and return $\ck = (\gen, \hgen)$.
 
-    \item[$\com \leftarrow \ComCommit(\ck,(m_1,\ldots,m_n),\openinfo)$ :] On
-input commitment key $\ck$, messages $(m_1,\ldots,m_n) \in \Zp^n$, and opening
-$\openinfo \in \Zp$, return $\com = \prod_{i=1}^{n} \gen_i^{m_i}\cdot
-\hgen^{\openinfo}$.
+    \item[$\com \leftarrow \ComCommit(\ck,\msg,\openinfo)$ :] On input
+commitment key $\ck$, message $\msg \in \Zp$, and opening $\openinfo \in \Zp$,
+return $\com = \gen^{\msg}\cdot\hgen^{\openinfo}$.
 
-    \item[$(m_1,\ldots,m_n) \leftarrow \ComOpen(\ck,\com,\openinfo)$ :] On
-input $\ck$, commitment $\com$, and opening $\openinfo = (m_1,\ldots,m_n,
-\openinfo')$, return $(m_1,\ldots,m_n)$ if $\com = \prod_{i=1}^{n}
-\gen_i^{m_i}\cdot\hgen^{\openinfo'}$, and $\bot$ otherwise.
+    \item[$\msg \leftarrow \ComOpen(\ck,\com,\openinfo)$ :] On input $\ck$,
+commitment $\com$, and opening $\openinfo = (\msg, \openinfo')$, return $\msg$
+if $\com = \gen^{\msg}\cdot\hgen^{\openinfo'}$, and $\bot$ otherwise.
 \rebekah{$\ComCommit$ takes $\openinfo \in \Zp$, but $\ComOpen$ parses
-$\openinfo$ as $(m_1,\ldots,m_n,\openinfo')$, so the correctness equation of
-\cref{sec:prelims-commitments} does not type check as written}
+$\openinfo$ as $(\msg,\openinfo')$, so the correctness equation of
+\cref{sec:prelims-commitments} does not type check as written. One fix: say in
+the syntax that the opening information passed to $\ComOpen$ is the message
+together with the randomness}
 
   \end{description}
 
 \end{primitivebox}
+
+The scheme extends to vectors of $n$ field elements with one generator per
+element. The key is $\ck = (\gen_1, \ldots, \gen_n, \hgen) \sample
+\ComGen(\secparam, n)$, and a commitment to $(\msg_1, \ldots, \msg_n)$ is the
+following:
+%
+\begin{equation*}
+  \com = \prod_{i=1}^{n} \gen_i^{\msg_i} \cdot \hgen^{\openinfo}.
+\end{equation*}
+%
+It is perfectly hiding and binding under the DL assumption in the same way.
 
 \subsection{The ElGamal encryption scheme}
 

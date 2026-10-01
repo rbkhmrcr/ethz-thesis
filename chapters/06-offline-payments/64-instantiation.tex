@@ -11,8 +11,8 @@
 
 Throughout, we use hash functions $\hash_p$ into $\Zp$ and
 $\hash_{\group{1}}$ into $\group{1}$. The commitment scheme is the Pedersen
-commitment scheme with $n = 1$, with key $\ck = (\hgen_1, \hgen) \leftarrow
-\ComGen(\secparam, 1)$, so that a pseudonym is $\com = \hgen_1^{\algo{uid}}
+commitment scheme, with key $\ck = (\hgen_1, \hgen) \leftarrow
+\ComGen(\secparam)$, so that a pseudonym is $\com = \hgen_1^{\algo{uid}}
 \hgen^{s}$. The BBS+ generators $\gen_0, \ldots, \gen_{\ell+1}$ and the
 generators $P_0, \ldots, P_\ell$ of the central bank's signing on committed
 inputs are separate from $\ck$. Every generator is obtained as

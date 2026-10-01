@@ -161,8 +161,9 @@ Credentials use the BBS+ signature scheme on group elements, recalled in
 \Cref{prim:bbs}. During registration, the user sends only the group elements $S
 = \G(\sk)$ and $T$, together with a proof of knowledge of the underlying
 secrets, rather than the secrets themselves. Commitments use the Pedersen
-commitment scheme, recalled in \Cref{prim:pedersen}, with generators shared with
-the BBS+ signature scheme. Range proofs use Bulletproofs~\cite{SP:BBBPWM18}.
+commitment scheme, recalled in \Cref{prim:pedersen}, in its form for vectors of
+two field elements, so that one commitment holds both components of $\utk$. Its
+generators are shared with the BBS+ signature scheme. Range proofs use Bulletproofs~\cite{SP:BBBPWM18}.
 
 \begin{outline}
   \item BBS+: signs several committed values at once, can sign values the signer never sees, has a Sigma protocol for knowledge of a signature
