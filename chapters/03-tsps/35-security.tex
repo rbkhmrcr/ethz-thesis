@@ -1,7 +1,7 @@
 \section{Security}\label{sec:tsps-security}
 
 We prove security relative to the properties of the SPS scheme and the MPC
-protocol stated in the theorems, rather than to any concrete MPC protocol. We use
+protocol stated in the theorems, and not to any concrete MPC protocol. We use
 two consequences of the linear $(t+1, n)$ sharing, for sharings of field
 elements and of group elements alike. First, any $t$ shares of a value are
 uniform and independent of it, so they may be sampled without knowing the value.
@@ -123,7 +123,7 @@ oracle. $\advB$ therefore wins whenever $\adv$ does, and no guess is needed.
 \begin{proof}
 
   We check that each scheme is EUF-CMA secure and has decomposable signing, and
-the algebra of correctness. The MPC properties are assumed.
+check the algebra of correctness. The MPC properties are assumed.
 
   $\AGHO$ is existentially unforgeable in the GGM, and $\KPW$ under
 SXDH~\cite{C:AGHO11,C:KilPanWee15}.

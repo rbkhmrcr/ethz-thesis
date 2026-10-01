@@ -85,10 +85,10 @@ $\simu$ receiving a signature $\signature_i$ with $\ATSverify(\ipk{i}, \Tag,
 
   \end{description}
 
-  In both cases, $\idfu{\AAC}'$ follows $\simu$: an honest issuer accepts every
+  In both cases, $\idfu{\AAC}'$ follows $\simu$. An honest issuer accepts every
 request from a registered user, matching the first branch, and for a dishonest
-issuer, $\idfu{\AAC}'$ accepts only when $\simu$ does, when the issuer produced
-a genuinely valid single $\ATS$ signature.  So $\idfu{\AAC}'$'s output matches
+issuer, $\idfu{\AAC}'$ accepts only when $\simu$ does, which is when the issuer
+produced a valid single $\ATS$ signature.  So $\idfu{\AAC}'$'s output matches
 $\prot$'s in both cases, and this game is indistinguishable from Game 3 as long as
 $\simu$ does not abort.  Since $\user$ is honest, they always register
 before requesting credentials, so the abort event never occurs.

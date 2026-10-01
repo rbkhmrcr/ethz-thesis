@@ -145,8 +145,8 @@ holder proves knowledge of the rest of the signature with $D$ in place of
 $\gen_1^{\msg_1}$, using the proof of knowledge of a BBS+ signature of
 Camenisch, Drijvers and Lehmann~\cite{EPRINT:CamDriLeh16}.
 
-The joint proof used in $\OP$ is their proof with additions for $\OP$, not a
-proof of knowledge of a BBS+ signature alone. It differs from
+The joint proof used in $\OP$ extends their proof with what $\OP$ needs beyond
+a proof of knowledge of a BBS+ signature. It differs from
 \Cref{prim:hss-joint-proof} in five ways.
 
 First, the secure element plays the card and the mobile device the holder. The
@@ -163,10 +163,10 @@ no part in producing the proof.
   \item difference from the original: there $t$ is derived from a PRF key shared between the provers so they never communicate (and $D$ is rerandomised per presentation); ours are paired at registration and talk directly, so the secure element samples $t$ fresh and sends it (old text had this in more detail)
 \end{outline}
 
-Note that all the device receives from the secure element is the commitment
+All the device receives from the secure element is the commitment
 $D = \gen_2^{\sk}\gen_3^{t}$, its randomness $t$, and a proof of knowledge of the
-opening, which gives the witness hiding property required of a JPOK: the more
-powerful prover never sees $\sk$.
+opening, so the more powerful prover never sees $\sk$. This gives the
+first-prover privacy required of a JPOK.
 
 Third, the device shows the credential with the rerandomisation of Tessaro and
 Zhu in place of the proof of Camenisch, Drijvers and
@@ -300,7 +300,7 @@ following hold:
 In $\OP$, the signed message is $m = (v, \com_i, \com_{i+1})$ for a payment and
 $m = (v, \com_n, \algo{dep})$ for a deposit. The audit proof $\Gamma_i$ of the
 construction is the part of $\Phi$ that concerns $\ciph$. In the variant of
-$\OP$ without auditing there is no audit ciphertext: the statement has no
+$\OP$ without auditing there is no audit ciphertext, so the statement has no
 $\ciph$, the device does not compute $a_1$, $a_2$ and $\pi_\rho$, and
 $\JPOKverify$ does not check the last two equations.
 
@@ -444,7 +444,7 @@ The central bank's SCI scheme, given in \Cref{prot:offline-sci}, follows
 \Cref{prim:coconut} with the following changes. It signs with the variant of
 \Cref{prim:ps}, so the signer adds $\theta_\ell \omega$ to the exponent of $k$
 for a fresh $\omega$ and returns $\omega$ with the signature. The messages with
-indices in $\algo{Disc}$ are disclosed: they are sent in the clear, and the
+indices in $\algo{Disc}$ are disclosed. They are sent in the clear, and the
 signer adds them to the exponent of $k$ directly. In $\OP$ the disclosed message
 is the token value. The commitment randomness $\openinfo$ is under its own
 generator $P_\ell$ rather than $\gen$, and the recipient checks the unblinded

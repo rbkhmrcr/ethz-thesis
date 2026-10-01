@@ -82,7 +82,7 @@ and the smart card authorises a payment in under $400\,\mathrm{ms}$.
 \Cref{tab:offline-timings} gives the time of each wallet
 step on the phones and the card.\rebekah{the text does not say where the phone and card measurements come from (when, which code version, which of the kept json or dataset files); the json files differ from the dataset files the tables use} We count hops as the signatures of knowledge a verifier
 checks, so one hop is the first payment $p_0$ after withdrawal, or a deposit
-made straight after withdrawal. Most of it is spent on the card, which takes
+made straight after withdrawal. Most of the time is spent on the card, which takes
 about $230\,\mathrm{ms}$ to generate a pseudonym and $370\,\mathrm{ms}$ for its
 share of the transfer signature, NFC included. Auditing adds $9\,\mathrm{ms}$ on
 Android and $2\,\mathrm{ms}$ on iOS to the payer's phone, which is under $3\%$
@@ -106,7 +106,7 @@ columns use the same card measurements.} \label{tab:offline-timings}
 
 
 Payee verification grows linearly with the number of hops, since each hop
-contributes one signature of knowledge and one audit proof to check, and even a
+contributes one signature of knowledge and one audit proof to check. Even a
 chain of 32 hops verifies in under a second. Auditing adds an overhead for the
 payee, who checks one additional proof per hop.
 

@@ -18,7 +18,7 @@ instantiation theorems show that each instantiation has them.
   \item[(P1)] $\DS$ is EUF-CMA secure, so no PPT adversary produces a valid
 signature without querying the registration authority.
 
-  \item[(P2)] $\Com$ is binding, and hiding, so commitments are computationally
+  \item[(P2)] $\Com$ is binding and hiding, so commitments are computationally
 indistinguishable from random.\rebekah{hiding in the Katz-Lindell sense of
 \Cref{sec:prelims-commitments} says commitments to two messages are indistinguishable, not
 that a commitment is indistinguishable from random, yet Game 5 samples $\com$
@@ -37,9 +37,10 @@ confidential channel.
 \end{enumerate}
 
 The extraction in (P4) relies on binding in (P2). (P3) is what
-\Cref{sec:txid-construction} asks for: $\PTK$ is a public parameter of $\FT$,
-not key material, so nothing it carries need be kept secret, and since it is
-fixed for the lifetime of the user it is kept out of the output of $\FE$.
+\Cref{sec:txid-construction} asks for. The public tracing key $\PTK$ is a public
+parameter of $\FT$ and not key material, so none of it needs to be kept secret,
+and since it is fixed for the lifetime of the user it is kept out of the output
+of $\FE$.
 
 \begin{proof}
 
@@ -115,10 +116,10 @@ the following:
   \end{equation*}
   %
   The user's public tracing key $\PTK_\user$ is sampled once per user, at
-registration, and is reused in every grant for that user. Reusing it is not an
-optimisation but a requirement: $\PTK$ is certified once and is by construction
-identical across epochs, so a simulator that drew a fresh one per grant would be
-trivially distinguishable by a corrupt auditor holding grants for two epochs.
+registration, and is reused in every grant for that user. This is required, since
+$\PTK$ is certified once and is identical across epochs by construction. A
+simulator that drew a fresh one per grant would be trivially distinguishable by a
+corrupt auditor holding grants for two epochs.
 
   When such a user submits a transaction, $\simu$ computes the tag as
 $\FT(\PTK_\user,\ek,\gamma)$ under this substituted key, so that the corrupt
@@ -174,11 +175,11 @@ $\Tag_\gamma = \FT(\PTK,\ek,\gamma)$, it samples a commitment $\com^{\star}$ and
 a tag $\Tag_{\gamma}^\star$ uniformly at random, and simulates both
 corresponding proofs. After Game 4 the epoch keys released to corrupt auditors
 are uniform and independent across epochs, so the keys released for preceding
-and succeeding epochs carry no information about the key in use here, and
-$\adv$ does not hold it. Pseudorandomness of $\FT$ licenses the substitution:
-the tags of an epoch are pseudorandom to an adversary holding $\PTK$ but not
-$\ek$, which is the position of every corrupt auditor here. So by (P2), (P3),
-and (P4), this is indistinguishable from submitting transactions in an execution
+and succeeding epochs give no information about the key in use here, and
+$\adv$ does not hold it. Pseudorandomness of $\FT$ allows the substitution,
+since the tags of an epoch are pseudorandom to an adversary holding $\PTK$ but
+not $\ek$, and every corrupt auditor here holds $\PTK$ but not $\ek$. By (P2),
+(P3) and (P4), this is indistinguishable from submitting transactions in an execution
 of $\prot$.\rebekah{a user may grant this epoch later, or retrospectively, to a
 corrupt auditor, and the simulator then has to hand over an $\ek$ matching the
 random tags it already published, which it cannot; either forbid such grants in
@@ -245,17 +246,17 @@ granted authorisation. We show each event is negligible.
 epoch for which they did not grant tracing permissions to any corrupt auditor
 are generated at random.
 
-  Event $E_2$ occurs only with negligible probability, and the argument is the
-heart of non-repudiation, so we give it in full. A transaction $\tx$ from a
+  Event $E_2$ occurs only with negligible probability. This is the main
+argument for non-repudiation, so we give it in full. A transaction $\tx$ from a
 corrupt user is recorded in $\txnssimu$ and forwarded to $\idfu{\algo{trace}}$
-only if it carries a valid tag $\Tag_{\gamma}$, meaning the proof for relation
+only if it has a valid tag $\Tag_{\gamma}$, meaning the proof for relation
 $\rel_6$ and the proof for relation $\rel_7$ are both valid. By (P4) we extract
 a witness from each. From $\rel_6$ we obtain a credential $\signature$ on
 $(\G(\sk), \G'(\utk))$ verifying under the transaction authorisation relation,
 together with an opening of $\com$ to $\utk$. By (P1) the credential was issued
 by the registration authority, so $\utk$ is the tracing key of a registered
-user, and by the binding of $\com$ (P2) it is the same $\utk$ that $\rel_7$
-speaks about. From $\rel_7$ we obtain the following, which is the tag relation:
+user, and by the binding of $\com$ (P2) it is the same $\utk$ as in
+$\rel_7$. From $\rel_7$ we obtain the following, which is the tag relation:
   %
   \begin{equation*}
     \Tag_{\gamma} = \FT(\PTK, \ek, \gamma), \quad \PTK = \G'(\utk), \quad \ek
@@ -263,15 +264,15 @@ speaks about. From $\rel_7$ we obtain the following, which is the tag relation:
   \end{equation*}
   %
   Chaining these, every transaction the validators accept from a corrupt user
-carries a tag lying in the following set, for that user's own certified $\utk$:
+has a tag in the following set, for that user's own certified $\utk$:
   %
   \begin{equation*}
     \{\FT(\G'(\utk),\FE(\utk,\epoch),\gamma)\}_{\gamma \in [0,\Max)}.
   \end{equation*}
   %
-  This is exactly the set an authorised auditor enumerates. So a corrupt user
-cannot place a transaction on the ledger that a permitted auditor will miss.
-What remains is that an honest auditor with the right permission might have
+  An authorised auditor enumerates exactly this set, so a corrupt user cannot
+place a transaction on the ledger that a permitted auditor will miss. It remains
+possible that an honest auditor with the right permission might have
 accepted a bogus epoch key $\ek^\star$ at grant time, which by (P4) and (P1)
 occurs only with negligible probability. So Game 7, which is the ideal world, is
 indistinguishable from Game 6. This concludes the proof of~\Cref{thm:txid-bb}.
@@ -546,9 +547,9 @@ oracle and sets the following:
     \HE(\epoch) = \gen, \qquad \ek = \gen^a, \qquad U = \gen^b.
   \end{equation*}
   %
-  It computes $\Pi$ and $X$ from $Q$ as above, and it computes the other public values that depend on $\utk'$, which are $\PTK$
-and the epoch keys of other epochs, from $\gen^a$, by programming $\gen_2$ and $\HE$
-at other epochs to known powers of $\gen$. If $Q = \gen^{ab}$, this is an honest
+  It computes $\Pi$ and $X$ from $Q$ as above. It computes $\PTK$ and the epoch
+keys of other epochs, which also depend on $\utk'$, from $\gen^a$ by programming
+$\gen_2$ and $\HE$ at other epochs to known powers of $\gen$. If $Q = \gen^{ab}$, this is an honest
 proof, and if $Q$ is uniform, it is the simulated one.\rebekah{this simulator
 uses $W_\gamma$, so it needs the index $\gamma$, which is part of the witness.
 That is fine where the lemma is used, since the simulator of Game 4 assigns the
@@ -697,7 +698,7 @@ knowledge of their representation. $\algoproof_4$ in $\IDregister$ supplies this
 perfectly hiding, and computationally binding under the DL assumption in
 $\group{1}$. Binding holds against every party, including the registration
 authority, because $\IDgen$ derives $\gen_2$, $\gen_3$ and $\gen_4$ by hashing to
-the group from a public seed, rather than letting any party sample them.
+the group from a public seed and does not let any party sample them.
 
   \item[(P3).] $\FE$ is pseudorandom under the DDH assumption in $\group{1}$,
 with $\HE$ modelled as a random oracle, by \Cref{lem:txid-fe-prf}, and $\FT$ is

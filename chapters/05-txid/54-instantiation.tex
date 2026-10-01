@@ -26,7 +26,7 @@ stays a Sigma protocol.
   \item the hash-based instantiation drops the algebraic structure and pays with a general-purpose proof system
 \end{outline}
 
-The setup is transparent: all group generators are derived by hashing to the
+The setup is transparent. All group generators are derived by hashing to the
 group from a public seed, so no party, including the registration authority,
 knows a discrete logarithm relation among them.
 
@@ -59,8 +59,8 @@ and the vector of group elements that tag evaluation needs:
 %
 These elements do not change with the epoch. If the epoch PRF output them, they
 would repeat in every epoch and its output could not be pseudorandom, so they
-sit in the certified public tracing key instead, which already travels with the
-grant message. This is the arrangement the construction asks for.
+are part of the certified public tracing key instead, which is already sent in
+the grant message. This is what the construction asks for.
 
 \begin{lemma}\label{lem:txid-fe-prf}
   %
@@ -105,7 +105,7 @@ return the following:
 
 Here the secret group element $P$ is the epoch tracing key, and the elements
 $\ggen_D^{1/(\utk''+\gamma)}$ are published as $\{W_\gamma\}$. A tag is
-keyed by the epoch key rather than by $\utk''$:
+keyed by the epoch key and not by $\utk''$:
 %
 \begin{equation*}
   \FT(\PTK,\ek,\gamma) = \pairing(\ek, W_\gamma).
@@ -134,7 +134,7 @@ Similar $q$-type assumptions are the norm for constructions of this shape, and
 pairing-based constructions of this type are known not to admit both short
 proofs and a reduction to a simple assumption~\cite{EC:TCRSTW22,TCC:BHKU22}.
 
-The auditor is given the outputs $\{W_\gamma\}$ rather than the key $\utk''$.
+The auditor is given the outputs $\{W_\gamma\}$ and not the key $\utk''$.
 Every tag of an epoch is $Y^{1/(\utk''+\gamma)}$ for the
 same $Y = \pairing(\ek,\ggen_D)$. An auditor holding $\utk''$ could recover $Y$
 from any single tag on the ledger and compute every other tag of that user in
@@ -148,8 +148,8 @@ They are certified with the public tracing key and handed to every auditor a
 user authorises.\rebekah{the registration authority signs only $(S,T)$, so
 $\{W_\gamma\}$ is not certified; it is proved well formed against $T$ in the
 first grant} Two colluding auditors who compare their copies learn only that
-the same user granted them both, which they already knew. What they cannot do
-is use them to read a tag from an epoch for which neither holds the epoch key.
+the same user granted them both, which they already knew. They cannot use them
+to read a tag from an epoch for which neither holds the epoch key.
 
 \begin{lemma}\label{lem:txid-ft-prf} Let $\ek$ be uniform in $\group{1}$ and
 unknown to the adversary, and let the public parameters
@@ -352,9 +352,8 @@ W_\gamma^{\utk''} = \ggen_D \cdot W_\gamma^{-\gamma}\ \}.
 \end{gathered} \end{equation*}
 %
 The last equation is the definition of $W_\gamma$, rearranged into an equality
-of discrete logarithms against the committed $\utk''$. Rather than check all
-$\Max$ of these equations, the prover shows one random linear combination of
-them, with coefficients derived by hashing the elements themselves. Later
+of discrete logarithms against the committed $\utk''$. Instead of all $\Max$
+of these equations, the prover proves one random linear combination of them, with coefficients derived by hashing the elements themselves. Later
 grants to the same auditor prove only the first two equations, against the same
 certified $T$. \Cref{prot:txid-ek-proof} gives the proof.
 
@@ -419,7 +418,7 @@ group element $\ek$ paired against a secret-exponent term, which would be
 expensive in practice. Instead, the user blinds the epoch key and the tag with a
 fresh scalar, publishes the blinded values, and proves only equalities of
 discrete logarithms. The index is committed separately, and the tag proof and
-a standard range proof both speak about that commitment, so the index shown to
+a standard range proof both refer to that commitment, so the index shown to
 be in range is the one the tag is computed from, as \Cref{lem:txid-rel7}
 shows.
 
@@ -536,7 +535,7 @@ X^{\theta_2 + \theta_\gamma} = F \cdot \Pi^c, \quad
   \item a point from the security proof that shapes the protocol: the non-degeneracy checks $U \neq 1$, $\Pi \neq 1$ are needed, otherwise blind with zero, or key and index that cancel, and any tag passes (\Cref{sec:rel7-equiv})
 \end{outline}
 
-Each transaction carries a
+Each transaction comes with a
 proof that it originated from a registered user, following relation $\rel_6$.
 The key committed in $\com$ is certified by a BBS+ signature of the registration
 authority. As for the tag proof, we rewrite $\rel_6$ as an equivalent relation
@@ -697,9 +696,9 @@ $\ck = (\gen_2, \gen_3)$. Here $\gen_3$ is also the randomness generator of
 the BBS+ signature scheme, as $\gen_4$ is in the algebraic instantiation, and all
 generators are derived by hashing to the group.
 
-  \item The proofs for $\rel_5$ and $\rel_7$ use a zk-SNARK, a proof system
-whose proofs are a constant number of group elements and whose statements are
-arithmetic circuits over $\Zp$. Each proof also carries a commitment to the
+  \item The proofs for $\rel_5$ and $\rel_7$ use a zk-SNARK. Its proofs
+are a constant number of group elements and its statements are arithmetic
+circuits over $\Zp$. Each proof also comes with a commitment to the
 tracing key in the witness, and the linking proof of \Cref{prot:txid-link}.
 
   \item The proofs for $\rel_4$ and $\rel_6$ are Sigma protocols compiled with

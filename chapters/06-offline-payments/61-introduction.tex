@@ -18,9 +18,9 @@ The difficulty is that the payee cannot check, at the time of the payment,
 whether the token they are receiving has already been spent. Without that,
 double spending is trivial. Responses divide into prevention and deterrence. A
 wallet application can delete a token as soon as it is sent, but an attacker who
-tampers with the application bypasses the restriction. A secure element, a small
-tamper-resistant chip such as a smart card that stores keys and runs a fixed
-program, enforces the same rule in hardware, and is much harder to subvert. Deterrence instead
+tampers with the application bypasses the restriction. A secure element is a
+small tamper-resistant chip, such as a smart card, that stores keys and runs a
+fixed program. It enforces the same rule in hardware, and is much harder to subvert. Deterrence instead
 identifies the double spender once the conflict is detected at deposit, and relies
 on the consequences of being identified.
 
@@ -45,7 +45,7 @@ payment that double spends a token.
 \paragraph{Contributions.} We give a transferable offline payment scheme for this setting. Users obtain a
 long-term credential once, then pay one another offline by extending a chain of
 anonymous signatures over a token. Each payment carries a verifiable encryption
-of the payer's identifier under the auditor's key, that is, an encryption
+of the payer's identifier under the auditor's key. This is an encryption
 together with a proof that it encrypts the identifier the payment is made under. The cryptography this
 requires is too heavy for an off-the-shelf secure element, so we split each
 payment in two. The secure element holds the signing key and enforces that a

@@ -38,7 +38,7 @@ Each user's wallet consists of a mobile device and a secure element.
 We assume the registration authority, the central bank, and the intermediaries
 are honest but curious: they follow the protocol, but may collude with other
 participants to learn information about offline payments.  The registration
-authority is additionally trusted to assign each user a unique identifier, to
+authority is also trusted to assign each user a unique identifier, to
 generate a correctly formed credential that will be accepted by all other
 participants, and to issue that credential only following well-established KYC
 processes.
@@ -105,7 +105,7 @@ double spent it.
 \subsection{Building blocks}\label{sec:offline-building-blocks}
 
 Besides the commitment, signature and encryption schemes of the preliminaries,
-the construction needs two primitives that are not defined there: joint proofs
+the construction needs two primitives that are not defined there, joint proofs
 of knowledge and signatures on committed inputs.
 
 \paragraph{Joint proofs of knowledge.}\label{sec:joint-pok-def} A joint proof
@@ -138,7 +138,7 @@ $0$ or $1$.
 \rebekah{the verifier here receives only $\Phi$; in the protocol of Hesse, Singh and Sorniotti (Section 4, Figure 3) the verifier relays the messages between card and holder, and the two provers share a PRF key, neither of which this syntax has; check}
 
 Hesse, Singh and Sorniotti establish completeness, soundness and zero knowledge
-for their construction (Theorem 4.1)~\cite{USENIX:HesSinSor23}. We state them
+for their construction in their Theorem 4.1~\cite{USENIX:HesSinSor23}. We state them
 as follows.
 
 \paragraph{Completeness.} A JPOK is complete if, for every statement $\inst$
@@ -167,7 +167,7 @@ prover that are both corrupt and collude.
 
 \paragraph{First-prover privacy.} A JPOK protects the first prover's witness
 share against a corrupt second prover if no adversary that plays the second
-prover can recover $\witness_0$, which \Cref{exp:jpok-privacy} captures for a
+prover can recover $\witness_0$. \Cref{exp:jpok-privacy} captures this for a
 PPT instance generator $\algo{G}$ for $\rel$.
 
 \begin{experimentbox}{Joint proofs of knowledge: first-prover privacy}{jpok-privacy}
@@ -211,8 +211,8 @@ for every PPT adversary $\adv$.
 
 \paragraph{Signatures on committed inputs.}\label{sec:sci-def} A signature
 scheme on committed inputs (SCI) lets a recipient obtain a signature on a vector
-of messages from a signer who sees only some of the messages, the others being
-committed.
+of messages from a signer who sees only some of the messages and a commitment
+to the others.
 
 \paragraph{Syntax.} A signature scheme on committed inputs $\SCI$ consists of
 the following algorithms. We index messages from $0$, and write $[n] = \{1,
@@ -409,7 +409,7 @@ We define security of an offline payment scheme through an ideal functionality
 that represents a trusted third party which executes the operations of the
 payment system on behalf of system participants in a way that perfectly meets
 the system requirements. The properties this functionality captures are stated
-informally below and formalised in the ideal functionality.
+informally below and formalised in~\Cref{sec:ideal-func}.
 
 An offline payment system must protect against forgery, token theft, and double
 spending, must conserve value, and must preserve the privacy of users against
@@ -495,7 +495,7 @@ that $\prot$ securely realises $\idfu{\algo{op}}$ if for every PPT
 adversary $\adv$ there exists a PPT simulator $\simu$ such that
 $\textsc{Exec}_{\prot,\adv}(\secparam)$ is computationally
 indistinguishable from $\textsc{Exec}_{\idfu{\algo{op}},\simu}(\secparam)$. This
-is a standalone simulation based definition rather than a universally composable
+is a standalone simulation-based definition rather than a universally composable
 one, and the distinction matters: our simulator extracts from some proofs by
 rewinding the adversary, which a universally composable simulator may not do. We
 return to this point in~\Cref{sec:offline-security}.
@@ -546,7 +546,7 @@ $\vec{\algo{id}}[0]$ to the vectors deposited for it. All maps start empty, and
 unset entries are $\bot$.
 
 The longest common prefix of two identifier vectors is
-the longest vector that both start with: the two agree up to it, and then either
+the longest vector that both start with. The two agree up to it, and then either
 differ in the next entry or one of them ends. In $\OPexecute$, a corrupt payee
 may accept a token the payer does not own, but then nothing is recorded, so the
 payee cannot pass the token on.
@@ -559,14 +559,14 @@ initial value, and each user may hold only one account in the system. The
 registration authority then enrols a user who already holds an account, and a
 user can be registered only once.
 
-The withdrawal interface is called by an intermediary on behalf of one of its users,
+An intermediary calls the withdrawal interface on behalf of one of its users,
 indicating the value to withdraw. If the user's account and the intermediary's
 reserves hold enough value, the user obtains a token identified by a fresh
 random number, ready for use in subsequent offline payments. This identifier is
-kept hidden from the intermediary and the central bank, to ensure a withdrawal
+kept hidden from the intermediary and the central bank, so that a withdrawal
 cannot later be linked to a deposit. It is chosen by $\simu$ whenever the user's
-secure element is corrupt, since it is the secure element that generates it in
-the protocol.  $\simu$ learns it whenever either the device or the secure
+secure element is corrupt, since the secure element generates it in the
+protocol.  $\simu$ learns it whenever either the device or the secure
 element is corrupt, since the device sees it too, and otherwise learns only the
 user's identity and the withdrawn value, reflecting that the intermediary and
 the central bank are honest but curious.

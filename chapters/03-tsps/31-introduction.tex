@@ -52,7 +52,7 @@ serving a key onto the log providers, and a threshold signature scheme narrows
 what any one of them can do. Signatures from a threshold SPS scheme, given to the
 owners of keys, would also let them prove, in zero knowledge, that their keys are
 recorded in the log without revealing which keys they are. Since the key is signed
-directly rather than hashed first, that proof is efficient.
+directly, without hashing it first, that proof is efficient.
 
 \paragraph{Contributions.} We give two threshold SPS schemes, building on two
 existing SPS schemes together with secure multiparty computation (MPC)
@@ -80,14 +80,14 @@ Both schemes are designed so that the online phase, run once the messages to be
 signed are known, requires no interaction between parties, keeping its cost
 comparable to that of ordinary, non-threshold signing. Both underlying
 signatures let the threshold signers perform the majority of their computation
-offline, in a pre-processing phase before the message to be signed is known,
+offline, in a preprocessing phase before the message to be signed is known,
 which suits high-throughput applications, such as payments, that experience
 interspersed periods of low and high traffic. Our schemes inherit the security
 properties of the underlying SPS schemes.\rebekah{Your comment on this
 paragraph: ``interesting but weak?'' Open: strengthen or cut.}\rebekah{Overclaim: only adp-TS-UF-1
 is proven, from EUF-CMA of the underlying scheme, not every property.}
 
-We define the property of the signing algorithm that makes this possible,
+We call the property of the signing algorithm that makes this possible
 decomposable signing, and show that $\AGHO$ and $\KPW$ have it.
 
 \begin{outline}
@@ -111,10 +111,10 @@ latter settings where resilience to key compromise takes precedence. We also
 implement previously suggested threshold SPS schemes, so as to compare concrete
 efficiency~\cite{AC:CKPSS23,PKC:MMSST24}.
 
-This chapter treats unforgeability rather than privacy directly. Privacy in the
-applications above comes from composition: the signers sign committed state, and
-the holder of a signature discloses what they choose through a zero-knowledge
-proof.
+This chapter is about unforgeability and does not treat privacy directly. In
+the applications above, privacy comes from composition. The signers sign
+committed state, and the holder of a signature discloses what they choose through
+a zero-knowledge proof.
 
 \subsection*{Related work}
 
@@ -130,10 +130,9 @@ by a large class of reductions~\cite{AC:AbeGroOhk11}. Kiltz, Pan, and Wee give a
 scheme with seven group elements that is secure under SXDH~\cite{C:KilPanWee15}.
 A linearly homomorphic SPS scheme, also with signatures of three group
 elements, enables further applications~\cite{C:LPJY13}. Fully structure-preserving
-signature schemes additionally have secret keys that are group elements, so
-a user can prove statements about their own key with Groth-Sahai proofs, a
-proof system for pairing product equations, at the
-cost of signatures that grow with the square root of the message
+signature schemes also have secret keys that are group elements, so
+a user can prove statements about their own key with Groth-Sahai proofs, but
+their signatures grow with the square root of the message
 length~\cite{JC:AGKOT19,EC:GroSah08}.
 
 \paragraph{Threshold SPS schemes.} Threshold SPS schemes have only recently
@@ -177,4 +176,4 @@ and the MPC interfaces our constructions use.
 generic construction, and \Cref{sec:tsps-instantiation} instantiates it with
 $\AGHO$ and $\KPW$. \Cref{sec:tsps-security} proves both secure,
 \Cref{sec:tsps-evaluation} evaluates them, and \Cref{sec:tsps-summary}
-discusses what the chapter shows and where it leads.
+concludes.

@@ -26,8 +26,8 @@ efficiently computable for every $(\pp, \key)$ output by $\PRFgen(\secparam)$,
 and if it satisfies pseudorandomness, which we define below. We use the standard
 syntax and security notions for pseudorandom functions~\cite{KatLin14}.
 
-The public parameters are carried explicitly because the algebraic
-instantiations of later chapters need them: the domain, the range, or the
+We include the public parameters explicitly because the algebraic
+instantiations of later chapters need them. The domain, the range, or the
 description of the function itself may depend on values that are common to every
 key, and those values are public. The textbook setting is the special
 case of empty $\pp$, and we suppress $\pp$ where it plays no role.
@@ -42,7 +42,7 @@ $\domain \to \range$. \Cref{exp:prf} gives the experiment.
   \begin{enumerate}
 
     \item The challenger samples $b \sample \{0,1\}$ and generates $(\pp, \key)
-\sample \PRFgen(\secparam)$. If $b = 1$, it additionally samples a function $R$
+\sample \PRFgen(\secparam)$. If $b = 1$, it also samples a function $R$
 uniformly at random from all functions $\domain \to \range$. It sends $\pp$ to
 the adversary.
 

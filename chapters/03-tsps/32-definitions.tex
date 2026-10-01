@@ -50,7 +50,7 @@ $\vec{\msg}$ and $\SPSsig$, and outputs $0$ or $1$.
 
 \end{description}
 %
-Some schemes are rerandomisable: they additionally provide an algorithm
+Some schemes are rerandomisable: they also provide an algorithm
 $\SPSsig' \sample \SPSrandomise(\SPSsig)$, which, without the secret key,
 turns a signature into a new signature on the same message, distributed as a
 freshly generated one.
@@ -126,8 +126,6 @@ following hold:
 
 \end{primitivebox}
 
-$\AGHO$ is existentially unforgeable in the GGM~\cite{C:AGHO11}.
-
 \subsection{Threshold structure-preserving signature schemes}
 
 We write $\shr{x}$ for a sharing of $x$ between the $n$ signers, and $x_i$ for
@@ -201,7 +199,7 @@ The advantage of a PPT adversary $\adv$ is defined as follows:
 %
 \end{equation*}
 %
-in \Cref{exp:tsps-adp-ts-uf-1}. A threshold SPS scheme is adaptive TS-UF-1 secure if this advantage is negligible for
+with the experiment in \Cref{exp:tsps-adp-ts-uf-1}. A threshold SPS scheme is adaptive TS-UF-1 secure if this advantage is negligible for
 every PPT adversary $\adv$.
 
 \begin{experimentbox}{Threshold structure-preserving signature schemes: adp-TS-UF-1}{tsps-adp-ts-uf-1}
@@ -366,8 +364,8 @@ $\AGHO$, $\algo{Mul}$ is enough.\rebekah{Your comment on this paragraph: ``what,
 this doesn't even sound correct?'' Struck words removed; check the remaining
 claim.}
 
-$\algo{ExpGrp}$ is realised as Smart and Talibi Alaoui realise multiplication
-over an elliptic curve group, with multiplication triples made in
+We realise $\algo{ExpGrp}$ in the same way as Smart and Talibi Alaoui realise
+multiplication over an elliptic curve group, using multiplication triples made in
 preprocessing~\cite{C:Beaver91b,IMA:SmaTal19}.\rebekah{Your comment on the
 mixed triple and $\algo{Inv}$ paragraphs: ``are we not using MPC as a black box?!
 other than this, was this our idea? if so maybe put the idea here and the
@@ -396,12 +394,12 @@ They then compute the following locally:
 %
 where one designated signer adds the public term $\delta^{\epsilon}$. The
 signers obtain a mixed triple from an ordinary triple over $\Zp$ by raising a
-generator to the shares of its second and third entries. This, together with
-sharings of group elements and their authentication information, is what we
-added to MP-SPDZ.
+generator to the shares of its second and third entries. We added this to
+MP-SPDZ, together with sharings of group elements and their authentication
+information.
 
 The remaining interface, $\algo{Inv}$, is built from $\algo{Mul}$ and
-$\algo{Open}$: the signers sample $\shr{\beta} \sample \algo{RandShare}()$, open
+$\algo{Open}$. The signers sample $\shr{\beta} \sample \algo{RandShare}()$, open
 $\gamma = \alpha\beta$, which is uniform and so reveals nothing, and take
 $\shr{\alpha^{-1}} = \gamma^{-1}\shr{\beta}$. Where a scheme samples from
 $\Zp^*$, the signers sample from $\Zp$ and abort if an opened $\gamma$ is zero,

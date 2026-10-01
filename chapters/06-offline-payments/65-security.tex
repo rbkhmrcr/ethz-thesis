@@ -54,9 +54,9 @@ can translate between transcripts $\adv$ sees and state $\idfu{\algo{op}}$
 holds. For honest parties $\simu$ never has a witness, so every proof it
 produces is simulated and every commitment and audit ciphertext random. This makes its transcripts
 independent of the identities and token identifiers it does not learn. For corrupt parties
-$\simu$ extracts witnesses from the proofs $\adv$ produces: from the SCI request at withdrawal, in order to learn the randomness that fixes
+$\simu$ extracts witnesses from the proofs $\adv$ produces. It extracts from the SCI request at withdrawal to learn the randomness that fixes
 the token identifier and so continue the simulation, and from $\Sigma$,
-$\sigma_i$, and $\Gamma_i$ elsewhere, in order to exhibit a forgery or a double
+$\sigma_i$ and $\Gamma_i$ elsewhere to exhibit a forgery or a double
 opening and terminate.\rebekah{you asked whether this is online then; the text read: ``The first of these is why (P6) is needed and the second is why rewinding suffices for the rest. Online extraction is therefore needed for withdrawal requests alone.''}\rebekah{Games 9 and 11 extract from every corrupt payment and deposit, including the filled-in intermediate hops, and continue the simulation rather than stop, which needs online extraction there too and undermines the rewinding argument}
 
 \begin{proof}
@@ -208,9 +208,9 @@ $j$ using (P5), calls $\OPexecute$ for each, and extends the maps until $j = i -
 1$. These extractions are on instances already fixed by the transcript $p_i$
 that $\algo{usr}$ has sent. A corrupt user cannot make a later instance depend
 on the extraction of an earlier one, so the extractions are independent rather
-than nested: $\simu$ performs them sequentially, each by rewinding to the same
-transcript. The loss in success probability that rewinding causes, the forking
-loss, is then linear rather than exponential in the length of the chain, which
+than nested. $\simu$ performs them sequentially, each by rewinding to the same
+transcript. The loss in success probability that rewinding causes, called the
+forking loss, is then linear rather than exponential in the length of the chain, which
 the epoch cap of the construction bounds in any
 case~\cite{JC:PoiSte00}.\rebekah{epochs are an optional extension, not part of $\OP$ as proven, so the bound on the forking loss cannot rest on them} The cases above still apply, replacing $p_0$ with $p_i$ and $\algo{id}$
 with $(\algo{id}_0, \ldots, \algo{id}_i)$.  Since the probability that an honest
@@ -223,8 +223,8 @@ $\mathbb{C}[\vec{\algo{id}}]$ and produces a simulated deposit $(\tau_n,\allowbr
 \sigma_n,\allowbreak \Gamma_n,\allowbreak \algo{hist}_n)$ with simulated proofs and random
 ciphertexts. $\idfu{\algo{op}}$ rejects a deposit only when the token does not
 belong to $\algo{usr}$ or has been previously deposited. An honest user never
-deposits a token they do not own, so the only case requiring argument is double
-spend detection.
+deposits a token they do not own, so the only case requiring argument is double-spending
+detection.
 
 Each $\algo{id}_i$ is determined by $\com_i$ via $\algo{id}_i \leftarrow \ComCommit(\ck,
 \algo{uid}_i, s_i)$, so the mapping $\algo{id}_i \leftrightarrow \com_i$ is
@@ -367,7 +367,7 @@ sense~\cite{NDSS:SABMD19}.
 
 \paragraph{Simulation extractability.} In a prime order group, a statement,
 first message and challenge of a Sigma protocol over discrete logarithms admit
-only one accepting response, which is what gives simulation
+only one accepting response, and this gives simulation
 extractability~\cite{INDOCRYPT:FKMV12}.\rebekah{you asked ``do we?'': not in general; this is false for equations with several bases, where responses are only computationally unique, under DL; the argument needs quasi-unique responses as in \Cref{sec:prelims-sigma}} The JPOK is a
 conjunction of two such protocols under separate challenges, so the same
 argument applies to each of them and so to the whole.
@@ -388,7 +388,7 @@ replaced with encryptions of zero, and $\algoproof_{\algo{req}}$ can be replaced
 with a simulated proof by its zero knowledge. The result depends only on the
 disclosed value, which gives the request-hiding simulator.
 
-\paragraph{Extraction from requests.} For extraction, the extractor for
+\paragraph{Extraction from requests.} The extractor for
 Fiat-Shamir proofs proceeds by rewinding, which suffices wherever $\simu$
 extracts once in order to derive a contradiction~\cite{INDOCRYPT:FKMV12}.\rebekah{Fischlin, only if confirmed necessary (the code uses plain Fiat-Shamir); the rest of this paragraph read: In Game 7, however, $\simu$ must extract from requests in order to continue the simulation. It does so on requests a corrupt user chooses adaptively and without bound, and the cost of rewinding compounds across such extractions. Hesse, Singh and Sorniotti make the same requirement of the proof accompanying blind issuance~\cite{USENIX:HesSinSor23}. The instantiation compiles $\algoproof_{\algo{req}}$ with the Fischlin transform, which gives an online extractor in the random oracle model~\cite{C:Fischlin05}. This applies to $\algoproof_{\algo{req}}$ alone. It is not required of $\sigma_i$ or $\Gamma_i$, so it bears on the mobile device during withdrawal rather than on the secure element or on any part of a payment.}
 

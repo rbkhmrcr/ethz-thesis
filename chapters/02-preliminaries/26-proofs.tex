@@ -1,8 +1,8 @@
 \section{Proof systems}\label{sec:prelims-nizks}
 
 A relation $\rel$ is an efficiently decidable set of pairs $(\inst, \witness)$
-of a statement and a witness, and we write $\rel(\inst, \witness) = 1$ when
-$(\inst, \witness)$ is in it, and $\lang$ for the set of statements $\inst$
+of a statement and a witness. We write $\rel(\inst, \witness) = 1$ when
+$(\inst, \witness)$ is in $\rel$, and $\lang$ for the set of statements $\inst$
 for which some witness $\witness$ has $\rel(\inst, \witness) = 1$.
 
 Zero-knowledge proof systems enable provers to convince verifiers that a
@@ -74,10 +74,10 @@ labelled proof system extends the syntax as follows:
 \begin{description}
 
   \item[$\algoproof \sample \NIZKprove(\crs, \inst, \witness, \lbl)$ :] The
-proving algorithm additionally takes a label $\lbl \in \{0,1\}^*$.
+proving algorithm also takes a label $\lbl \in \{0,1\}^*$.
 
   \item[$\{0, 1\} \leftarrow \NIZKverify(\crs, \inst, \algoproof, \lbl)$ :] The
-verification algorithm additionally takes the label $\lbl$, and accepts only
+verification algorithm also takes the label $\lbl$, and accepts only
 proofs produced under that label.
 
 \end{description}
@@ -146,8 +146,8 @@ wins}] - \frac{1}{2} \right|.
 We say the proof system satisfies the property of zero knowledge if this
 advantage is negligible for every PPT adversary $\adv$.
 
-\paragraph{Simulation extractability.} Our security arguments need that a
-witness can be recovered from all accepting proofs, even after an adversary has
+\paragraph{Simulation extractability.} Our security arguments need a
+witness to be recoverable from all accepting proofs, even after an adversary has
 observed simulated proofs. Simulation extractability, defined by
 \Cref{exp:simext}, captures this.
 
@@ -194,7 +194,7 @@ A labelled proof system is simulation extractable if this advantage is negligibl
 for every PPT adversary $\adv$.
 
 The condition $(\inst^*, \lbl^*) \notin \Query$ makes proofs non-malleable
-across labels. It also makes them non-malleable across statements, since $\adv$
-cannot turn a simulated proof into a proof for another statement either. Since a
+across labels. It also makes them non-malleable across statements, as $\adv$
+cannot turn a simulated proof into a proof for another statement. As a
 witness can be extracted, simulation extractable proof systems are proofs of
 knowledge.

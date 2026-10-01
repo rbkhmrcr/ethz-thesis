@@ -14,10 +14,10 @@ in~\Cref{sec:txid-definitions}, and it is an intrinsic property of
 the transaction systems we are working with.
 
 The mechanism we give is agnostic to how the first two properties are achieved.
-It constrains only the tag attached to a transaction, never its contents. So it
+It constrains only the tag attached to a transaction and not its contents, so it
 composes with any transaction system that already provides balance and theft
 prevention. The confidential payload of a transaction in our scheme is just the
-transaction of the underlying system, carried through untouched. What we add is
+transaction of the underlying system, left unchanged. We add
 a way for a designated auditor to recover which of those payloads belong to a
 given user, and only during a window the user has agreed to.
 
@@ -30,13 +30,13 @@ relevant state, political, legal, and economic structures.
 %Office Survey of 1910-1915, but significant portions of that are lost due to
 %WWII bombings of the National Archives.)
 
-The technical distinction that matters for us is not fiat versus non-fiat money,
-but the treatment of identity. Fiat money is issued by an entity such as a
+For us, the main technical distinction between fiat and non-fiat money is the
+treatment of identity. Fiat money is issued by an entity such as a
 central bank, whose backing gives the currency its value and so centralises
 issuance by design\footnote{Fiat is Latin for `let it be done'.}. Behaviour in
 such systems is enforced not by protocol-level incentive compatibility but by
 the ability of regulators and legal authorities to act against malicious
-parties, which requires participants to be identifiable and so introduces the
+parties. This requires participants to be identifiable, and so introduces the
 requirement of registered identities. Cryptocurrencies instead replace the
 issuer with a public ledger whose validators follow the protocol for economic
 rather than institutional reasons. This lets them remain permissionless,
@@ -45,7 +45,7 @@ all. They cover the entire spectrum of privacy, from pseudonymity with each
 transaction in the clear to hidden values and anonymity sets equal to the total
 number of users of the
 system~\cite{bitcoin,ethereum,EPRINT:Noether15,SP:BCGGMT14}. Stable coins sit
-between the two: cryptocurrencies with completely centralised issuance, backed
+between the two. They are cryptocurrencies with completely centralised issuance, backed
 by fiat assets in an unofficial capacity and issued by private companies. By
 trading volume and usage, stable coins are the largest digital assets backed by
 fiat, larger than central bank digital currencies
@@ -70,7 +70,7 @@ conditions. This is generally achieved through anonymous credentials.
 
 \subsection*{Related work}
 
-Prior work on regulatory oversight in privacy preserving payment systems
+Prior work on regulatory oversight in privacy-preserving payment systems
 typically supports either anonymity revocation or tracing.  Anonymity revocation
 lets an auditor identify the user responsible for a specific transaction.
 Tracing, by contrast, lets the auditor recover all transactions associated with
@@ -119,15 +119,14 @@ transactions~\cite{CCS:WKDC22,EPRINT:ACDDET19}.
 
 \Cref{tab:txid-related} summarises the comparison. Time on the ledger is divided
 into epochs, consecutive periods of fixed length, and a tracing permission in
-our scheme covers one user for one epoch. The column that matters is the third:
+our scheme covers one user for one epoch. The third column gives
 the cost of recovering one user's transactions for one epoch. For
 revocation-based schemes this is linear in the size of the ledger $|L|$, because
 every transaction must be decrypted before it is known whether it belongs to the
 target. For our scheme it is $\Max$ tag computations and $\Max$ lookups, where $\Max$
 is the per-epoch transaction bound. At $\Max =
-2^{10}$ this is under a second, and it does not grow as the ledger
-does, nor does it reveal anything about the transactions of any user other than
-the target.
+2^{10}$ this takes under a second. It does not grow with the ledger, and it
+reveals nothing about the transactions of users other than the target.
 
 \begin{table}[htbp] \centering \caption[Comparison with prior approaches to regulatory oversight]{Comparison with prior approaches to
 regulatory oversight. $|L|$ is the number of transactions on the ledger, $n$ the
@@ -173,8 +172,8 @@ no \\
 
 This chapter introduces a tracing protocol, $\ID$, that eliminates
 the need for encrypted user identifiers and for the monotonically increasing
-counters of prior tag-based schemes. In place of an ordered counter, a
-transaction carries an index drawn from a bounded, epoch-local space $[0,\Max)$,
+counters of prior tag-based schemes. Instead of an ordered counter, each
+transaction has an index drawn from a bounded, epoch-local space $[0,\Max)$,
 and the only constraint is that an index is not reused within an epoch. Order is
 irrelevant, so a user may partition the space among concurrent workers and
 submit transactions in parallel and in any order. The sequential counter of
@@ -187,18 +186,17 @@ functionality capturing anonymity, non-repudiation, and permission expiration,
 give a generic construction from signatures, commitments, pseudorandom
 functions, one-way functions, and zero-knowledge proofs, and instantiate it
 concretely in two ways. The first works in pairing-based groups with algebraic
-pseudorandom functions and tailored Sigma protocols, the three-move proofs of
-knowledge of discrete logarithms made non-interactive by the Fiat-Shamir
-transform. Its setup is transparent, with no party sampling any group generator,
+pseudorandom functions and Sigma protocols made non-interactive by the
+Fiat-Shamir transform. Its setup is transparent, so no party samples any group
+generator,
 and the BBS+ signature scheme lets the registration authority certify users' keys without
 ever learning their tracing keys. The second
 builds both pseudorandom functions from the MiMC permutation and proves the two
-corresponding relations with a general purpose zero-knowledge succinct
-non-interactive argument of knowledge (zk-SNARK), a proof system for arbitrary
-statements whose proofs have constant size. This gives constant-size transaction
-proofs and faster verification, at the cost of a trusted setup, whose
-parameters are generated from secrets that must be deleted, and a slower
-prover.
+corresponding relations with a general-purpose zero-knowledge succinct
+non-interactive argument of knowledge (zk-SNARK). This gives constant-size
+transaction proofs and faster verification, at the cost of a slower prover and a
+trusted setup, whose parameters are generated from secrets that must be
+deleted.
 
 \paragraph{Layout.} The rest of the chapter is organised as follows. \Cref{sec:txid-definitions} gives the syntax of a tracing
 protocol and formalises its security as an ideal functionality.

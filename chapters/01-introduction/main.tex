@@ -220,9 +220,9 @@ We next consider accountability in transaction systems that protect user
 privacy. Financial systems may require both the ability to investigate a
 particular transaction and the ability to identify the transactions associated
 with a particular user. These capabilities are related but distinct, and
-granting one need not grant the other. The question behind this work was not
-whether an auditor should exist, but whether its capability can be scoped like
-any other permission: to one user, for one period, and only once granted. We
+granting one need not grant the other. We take the auditor's existence as given
+and ask whether its capability can be scoped like any other permission, to one
+user and one period, and only once it has been granted. We
 develop a transaction identification mechanism that supports concurrent
 transaction creation without requiring the auditor to maintain persistent
 per-user state. Auditing is restricted to a specified epoch, limiting both the

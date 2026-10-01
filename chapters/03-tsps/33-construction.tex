@@ -1,8 +1,8 @@
 \section{Construction}\label{sec:tsps-construction}
 
 The signing key of an underlying SPS scheme $\SPS$ is secret-shared among the
-$n$ signers. Rather than reconstructing it, the signers use the MPC protocol to
-jointly compute shares of every value that the signing
+$n$ signers. The signers never reconstruct it, and instead use the MPC protocol
+to jointly compute shares of every value that the signing
 algorithm derives from the key and from its own randomness.\rebekah{Your
 comment: ``no idea what to do here but this isn't it. would say TSPS is a
 primitive we instantiate''. Open: how to reframe this opening.}
@@ -144,7 +144,7 @@ shares are only caught at the authenticated opening, and the benchmarks measure
 every party opening. Say how a holder combining alone detects a bad share.}
 
 \paragraph{Robustness and abort.} With an honest majority, the honest signers' shares alone are enough to combine,
-so signing is robust: it succeeds whatever the corrupted signers do. With
+so signing is robust and succeeds whatever the corrupted signers do. With
 additive sharing, every signer has to contribute, and corrupted signers can make
 signing abort. If the MPC protocol has identifiable abort, meaning that an abort
 also names a corrupted signer, such signers can be excluded.\rebekah{Robust

@@ -20,7 +20,7 @@ accept credentials only from the set of issuers with published public keys. This
 prevents a malicious user from being able to impersonate an issuer to an honest
 verifier.
 
-Each building block follows from this separation of responsibilities. The
+The choice of building blocks follows from this separation of responsibilities. The
 registration authority only links a public key to a tag, so an existentially
 unforgeable signature scheme is enough. Presentations should show one short
 object, so issuers' signatures must aggregate. Ordinary aggregate signatures
@@ -30,7 +30,7 @@ Tag-based aggregation combines only signatures under one tag, without issuers
 coordinating. The proof system must be zero knowledge, so that presentations
 reveal only the disclosed values, and simulation extractable, since the security
 proof simulates honest users' presentations while extracting from the
-adversary's. Each presentation carries the verifier's message as its label, so
+adversary's. Each presentation uses the verifier's message as its label, so
 it cannot be replayed elsewhere.
 
 We now present the construction in full. \Cref{fig:agg-creds-seq} shows its
@@ -181,10 +181,9 @@ We prove \Cref{thm:agg-creds-construction-security} in \Cref{sec:agg-creds-proof
 extensions.
 
 To bind each presentation to a verifier and a session, $\msg$ contains the
-verifier's identity and a fresh nonce. Users present any subset of their
-credentials by aggregating just that subset, since aggregation is over
-$\ISSUERS$ only, with no further contact with the issuers or the registration
-authority.
+verifier's identity and a fresh nonce. Aggregation is over $\ISSUERS$ only, so
+users can present any subset of their credentials by aggregating just that
+subset, with no further contact with the issuers or the registration authority.
 
 New issuers can join the system without impacting the construction. The
 aggregation of credentials and their presentation is agnostic to the number of
@@ -202,7 +201,7 @@ The construction extends to epoch-based revocation. The registration authority
 signs triple $(\pk, \Tag, \epoch)$ rather than pair $(\pk, \Tag)$, where
 $\epoch$ identifies the current epoch, and issuers sign $(\Tag, \epoch \|
 \atv{})$ rather than $(\Tag, \atv{})$, tying each attribute credential to that
-epoch. At presentation, users additionally prove that their registration
+epoch. At presentation, users also prove that their registration
 signature and aggregate signatures all correspond to the current epoch.
 
 We leave the study of accumulator-based revocation and the revocation of

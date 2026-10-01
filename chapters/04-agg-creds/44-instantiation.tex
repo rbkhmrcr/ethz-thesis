@@ -1,7 +1,7 @@
 \section{Instantiation}\label{sec:agg-creds-instantiation}
 
 \paragraph{Notation.} We use the bilinear groups and conventions of
-\Cref{sec:prelims-groups}. As a reminder, elements of $\group{2}$ carry a tilde.
+\Cref{sec:prelims-groups}. As a reminder, elements of $\group{2}$ are written with a tilde.
 
 We use hash functions $\hashone \colon \{0,1\}^* \rightarrow \group{1}$ and
 $\hashtwo \colon \{0,1\}^* \rightarrow \group{1}$, and a hash function $\hash
@@ -18,7 +18,7 @@ same tag aggregate, and signatures can be rerandomised. Signatures aggregate by
 multiplication and verify with one pairing equation, so an aggregate is as short
 as one signature.
 Both hash functions are modelled as random oracles, and the security proof
-embeds its challenge in the hashes of the attacked message and tag. Our scheme, given in \Cref{prot:ats}, is comprised of the following algorithms:
+embeds its challenge in the hashes of the attacked message and tag. Our scheme, given in \Cref{prot:ats}, consists of the following algorithms:
 
 \begin{protocolbox}{The tag-based aggregate signature scheme}{ats}
 
@@ -138,9 +138,9 @@ We prove \Cref{thm:agg-creds-thm-1} in \Cref{sec:agg-creds-proof-2}.
 public keys $(\sk, \pk = \gen^\sk)$. The digital signature $\DS$ is instantiated using the AGHO
 structure-preserving signature scheme of \Cref{prim:agho}~\cite{C:AGHO11}. Every user is assigned a
 unique tag $\Tag \in \Zp$. Since structure-preserving signatures sign vectors
-of group elements rather than scalars, we take $\tid = \hashtwo(\Tag)$ and it is
-the pair $(\pk, \tid)$ that the registration authority signs, with $\pk$ the
-user's public key.  Every other computation in the protocol uses $\Tag$
+of group elements and not field elements, we take $\tid = \hashtwo(\Tag)$, and
+the registration authority signs the pair $(\pk, \tid)$, with $\pk$ the user's
+public key.  Every other computation in the protocol uses $\Tag$
 directly. Hashing the tag also lets us extract $\Tag$ from $\tid$ by
 programming the random oracle. The aggregate tag-based signature $\ATS$ is
 instantiated with our construction. The protocol instantiation is described in
@@ -153,7 +153,7 @@ on a scalar tag would work, and if not, say why here.}
 scheme, since messages and signatures consist of elements of the same group as
 everything else in the protocol. This lets users prove knowledge of a valid
 registration signature with an efficient Sigma protocol over discrete
-logarithms, rather than requiring a general purpose zero knowledge proof.
+logarithms, without a general-purpose zero-knowledge proof.
 
 The aggregate signature uses the same element $\hashtwo(\Tag)$, so the
 registration signature and the aggregate signature share one group element, and

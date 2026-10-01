@@ -258,10 +258,10 @@ x_j^{\rho} y_j^{\rho\sigma}, \quad e_{j,i} = k_{i+1,j}.
 None of these depend on the message. Our protocol and implementation
 compute $\gen^{k_{1,j}}$ in the online phase instead, which is also local.
 
-Unlike $\AGHO$, the secret key contains the group elements $\vec{b}, \vec{x},
+Unlike in $\AGHO$, the secret key contains the group elements $\vec{b}, \vec{x},
 \vec{y} \in \group{1}^2$, and the offline phase raises each of them to a shared
-exponent. These are shared group elements raised to shared field elements, which
-needs $\algo{ExpGrp}$, and so $\KPW$ needs sharings of group elements.
+exponent. Raising a shared group element to a shared field element needs
+$\algo{ExpGrp}$, so $\KPW$ needs sharings of group elements.
 The signers could instead keep the discrete logarithms $\beta, \vec{\xi},
 \vec{\upsilon}$ as shares of field elements, so that $\algo{Mul}$ and linear
 operations would suffice, but they would then no longer hold shares of the

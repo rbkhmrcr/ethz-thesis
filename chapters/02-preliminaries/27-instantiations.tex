@@ -30,7 +30,7 @@ The pairing is non-degenerate, so $\pairing(\gen,\ggen)$ generates $\group{T}$.
 We call $\group{1}$ and $\group{2}$ the source groups and $\group{T}$ the target
 group. We work in the asymmetric, or type III, setting, in which $\group{1} \neq
 \group{2}$ and no efficiently computable homomorphism between them is known.
-Elements of $\group{2}$ carry a tilde.
+We write elements of $\group{2}$ with a tilde.
 
 Bilinearity allows relations between exponents in the source groups to be
 checked through equalities in $\group{T}$. The equality
@@ -72,7 +72,7 @@ Some schemes we use are only proven secure in the generic group model
 opaque handles to group elements, and computes on them only through oracles for
 the group operations and the pairing. A proof in the GGM rules out attacks that
 ignore the representation of the group, but gives a weaker guarantee than a
-reduction to a stated assumption. Some assumptions are $q$-type: their
+reduction to a stated assumption. Some assumptions are $q$-type, meaning their
 statement grows with a parameter $q$, typically the number of signing queries.
 Such assumptions give the adversary more to work with than fixed-size ones, and are stronger than the fixed-size assumptions they generalise.
 
@@ -83,8 +83,8 @@ Sigma protocol for a relation $\rel$, with a statement $\inst$ known to both
 parties and a witness $\witness$ known to the prover, has three moves. The prover sends a first
 message $a$, the verifier replies with a uniform challenge $c$, and the prover
 sends a response $z$. The verifier then checks $z$ against $(\inst, a, c)$.
-Completeness is defined as the correctness of proof systems: proofs of true
-statements verify. Special soundness
+Completeness is defined like the correctness of proof systems, and requires that
+proofs of true statements verify. Special soundness
 requires an efficient extractor that computes a witness from any two accepting
 transcripts $(a, c, z)$ and $(a, c', z')$ with $c \neq c'$. Special
 honest-verifier zero knowledge (SHVZK) requires an efficient simulator that,
@@ -114,8 +114,8 @@ The verifier accepts if and only if the following holds:
 The same protocol proves knowledge of a representation $h = \prod_i
 \gen_i^{x_i}$, with one response per exponent. Several equations over the same witness are proven by
 running the protocol for each in parallel with one shared challenge, so that
-they hold together. This shows, for example, that two group elements have the
-same discrete logarithm.
+they hold together. In this way we can show, for example, that two group
+elements have the same discrete logarithm.
 
 The Fiat-Shamir transform makes a Sigma protocol non-interactive. The prover
 computes the challenge itself as $c = \hash(\inst, a, \lbl)$, where $\hash$ is a
@@ -137,10 +137,10 @@ verification equations for the first message, and programs the random oracle at
 the hashed point to return that challenge. The extractor $\NIZKextract$ is not
 straight-line. It rewinds the prover to the hash query that fixed the
 challenge, answers it with a fresh challenge, and extracts the witness from the
-two accepting transcripts by special soundness, by the forking
-lemma~\cite{JC:PoiSte00}. So the extractor depends on the adversary, and
-extraction loses a polynomial factor in the number of hash queries. This is why
-the security proofs of later chapters are in a model where rewinding is
+two accepting transcripts by special soundness. This relies on the forking
+lemma~\cite{JC:PoiSte00}. The extractor then depends on the adversary, and
+extraction loses a polynomial factor in the number of hash queries. For this
+reason, the security proofs of later chapters are in a model where rewinding is
 allowed. Online extraction,
 as given by the transform of Fischlin, avoids rewinding at the cost of larger
 proofs~\cite{C:Fischlin05}.
@@ -271,9 +271,9 @@ and signature $\signature = (e,r,E)$, do the following:
 
 \end{primitivebox}
 
-The generators are an input rather than an output. Standard presentations have
+The generators are an input to key generation. Standard presentations have
 the signer sample them, which is sound when the signer is the only party relying
-on them. Where the same generators also key a commitment whose binding must hold
+on them. Where the same generators are also the key of a commitment whose binding must hold
 against the signer, they are instead fixed by hashing to $\group{1}$ from a
 public seed, so that no party knows a discrete logarithm relation among them.
 
@@ -294,7 +294,7 @@ adversary can output a pair $\big(\varsigma,
 \end{assumptionbox}
 
 The signer only needs the product $\prod_i \gen_i^{\msg_i}$, not the field
-elements themselves. So a signer can also sign group elements $M_1, \ldots,
+elements themselves. This means a signer can also sign group elements $M_1, \ldots,
 M_k$ given by a user, using their product in place of $\prod_i
 \gen_i^{\msg_i}$, and produce a signature on committed values without ever
 learning them~\cite{SCN:AuSusMu06,EC:TesZhu23b}. Verification is then the
@@ -305,7 +305,7 @@ following:
 \prod_{i=1}^{k} M_i \cdot \gen_{n+1}^{r}, \ggen\Big).
 \end{equation*}
 %
-This variant is malleable: a signature on one tuple of group elements is also a
+This variant is malleable, as a signature on one tuple of group elements is also a
 signature on any other tuple with the same product. It is unforgeable only if
 the signer signs elements that come with a proof of knowledge of their
 representation in the bases $\gen_1, \ldots, \gen_n$, from which the reduction

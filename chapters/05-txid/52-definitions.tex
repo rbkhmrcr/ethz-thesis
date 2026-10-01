@@ -5,12 +5,12 @@ maintains a publicly accessible, append-only ledger that stores submitted
 transactions, and runs the transaction validators that decide, on input of the
 ledger, which transactions are valid. We assume the ledger operator is honest,
 so that the ledger itself is available and correctly maintained. The
-registration authority is honest but curious during the protocol, meaning it
-follows the protocol but tries to learn what it can from what it sees: it
-authenticates users and issues the credentials required to submit transactions
-and enable selective traceability. We additionally assume it does not bias the
-public parameters. In our instantiations this holds because all group
-generators are derived from a public seed rather than sampled. Users are potentially malicious, and generate and submit
+registration authority authenticates users and issues the credentials required
+to submit transactions and enable selective traceability. It is honest but
+curious during the protocol, so it follows the protocol but tries to learn what
+it can from what it sees. We also assume it does not bias the public
+parameters, which holds in our instantiations because all group generators are
+derived from a public seed and not sampled. Users are potentially malicious, and generate and submit
 confidential transactions while retaining fine-grained control over which
 auditors are authorised to trace them, and during which epochs. Auditors are
 potentially malicious, and may be granted permission to trace the transactions
@@ -54,7 +54,7 @@ operator.
   \item[$\{0,1\} \leftarrow \algo{Verify}(\crs,\state,\tx)$ :] The validation
 algorithm, run by the transaction validators on input public parameters $\crs$,
 current ledger state $\state$, and transaction $\tx$, returns $1$ if $\tx$ is to
-be appended to the ledger and $0$ otherwise. It is non-interactive: a validator
+be appended to the ledger and $0$ otherwise. It is non-interactive, so a validator
 contacts neither the sender, nor the registration authority, nor any auditor.
 
   \item[$\{\payload\} \leftarrow \IDidentify(\crs,\PTK,\ek,\epoch)$ :] The
@@ -82,18 +82,17 @@ ensuring that tracing permissions are automatically revoked at the end of the
 epoch for which they were granted, so an auditor retains no tracing capability
 beyond it.
 
-There are two things this functionality does not capture.
-First, it models unlinkability of a transaction to its originator, not
-confidentiality of the transaction payload: the ledger is public, so
-$\idfu{\algo{trace}}$ hands every submitted payload to the simulator $\simu$ on
-every
-$\IDsubmit$ call, and what it withholds is the identity of the submitting user.
+The functionality does not capture two things. First, it models unlinkability
+of a transaction to its originator and not confidentiality of the transaction
+payload. The ledger is public, so $\idfu{\algo{trace}}$ hands every submitted
+payload to the simulator $\simu$ on every $\IDsubmit$ call and withholds only
+the identity of the submitting user.
 Confidentiality of the payload is inherited from the underlying transaction
 system and is orthogonal to what we prove here. Second, $\IDgrant$ places no
 constraint on $\epoch$ relative to $\epoch_{\mathsf{cur}}$. A user may grant a
 permission for a future epoch, which is the intended usage, and may also grant
 one for an epoch that has already elapsed, which amounts to voluntary
-retrospective self-disclosure. What a user cannot do is refuse to be traced in
+retrospective self-disclosure. A user cannot refuse to be traced in
 an epoch for which they have already granted a permission.
 
 Secure realisation of $\idfu{\algo{trace}}$ by a protocol is defined as in
@@ -103,7 +102,7 @@ Secure realisation of $\idfu{\algo{trace}}$ by a protocol is defined as in
 $\idfu{\algo{trace}}$ receives inputs from system participants and $\simu$,
 computes the corresponding outputs, and delivers them to the authorised parties.
 It exposes interfaces through which $\simu$ and honest participants submit
-inputs, and additionally maintains a current epoch counter that advances by one
+inputs, and also maintains a current epoch counter that advances by one
 whenever the system moves to the next epoch. The formal description is given
 in~\Cref{fig:ftxid}, and we summarise it here.
 
@@ -120,7 +119,7 @@ $\Max$ transactions per epoch, each for the current epoch. Each
 successful call records the payload together with the identity of the user and
 the epoch. Since the ledger is public, $\simu$ learns the payload of every call,
 and it also learns who submitted it when that user is corrupt. The functionality subsumes
-$\algo{Verify}$: a call that passes its checks corresponds to a transaction that
+$\algo{Verify}$, as a call that passes its checks corresponds to a transaction that
 the validators accept.
 
 To make their transactions traceable, users call $\IDgrant$ to authorise an auditor to trace
@@ -133,7 +132,7 @@ instead that a grant covers one epoch only, or clear $\perm$ in Increment Epoch}
 Auditors call $\IDidentify$ to obtain the payloads of
 the transactions a user submitted in an epoch, and succeed only with a
 permission for that user and epoch. They then receive every such transaction,
-which is non-repudiation. $\simu$ also learns the traced payloads when the
+which gives non-repudiation. $\simu$ also learns the traced payloads when the
 auditor is corrupt. Finally, the ledger operator calls Increment Epoch to move all
 participants to the next epoch, on the schedule described above.
 

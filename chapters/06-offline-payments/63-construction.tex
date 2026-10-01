@@ -97,11 +97,11 @@ secure element even during enrolment. Each user's mobile device is then paired
 with their secure element.\rebekah{concise?}
 
 The two checks serve different purposes. Requiring a fresh identifier
-ensures that an identifier recovered at audit name one enrolled user rather than a role
+means that an identifier recovered at audit names one enrolled user rather than a role
 several people share. Requiring the secure element to prove knowledge of the key
 binds the credential to hardware the enrolling user actually holds, so
 that a payment authorised under that credential can be attributed to them.
-Pairing the device with the secure element is needed at payment time: the
+Pairing the device with the secure element is needed at payment time. The
 two can communicate directly, so the secure element
 can pass the device values it would otherwise have to derive from a shared key.
 
@@ -119,10 +119,10 @@ token belongs to, or it could later match a withdrawal to a deposit. The request
 discloses the value and hides the identifier and the randomness, and
 the central bank signs on committed inputs. The value is disclosed because the central
 bank is accounting for it. One-more unforgeability of the SCI scheme stops users
-minting tokens: every token needs a signature the central bank issued, and each
-issuance debits one withdrawal. Request hiding keeps the central bank from
-learning whose token it signs. This is also the one channel that remains: a
-withdrawal and a deposit of unusual value can still be matched, which is why a
+minting tokens, since every token needs a signature the central bank issued, and
+each issuance debits one withdrawal. Request hiding keeps the central bank from
+learning whose token it signs. The disclosed value is the only channel that
+remains. A withdrawal and a deposit of unusual value can still be matched, so a
 deployment should use a small set of fixed denominations.
 
 Aggregating deposits under value commitments, which would also hide the value at
@@ -194,7 +194,7 @@ the payer is. Anything the auditor will need must already be in the transcript,
 sealed. The payer's device encrypts its own identifier and proves that
 the ciphertext matches the pseudonym it is spending under.  This proof
 stops a double spender sealing someone else's identity in place of their own. It
-is also what protects an honest payee from a malicious payer who chooses their
+also protects an honest payee from a malicious payer who chooses their
 pseudonym for them, since producing it requires knowing the identifier the
 pseudonym commits to.
 
@@ -215,13 +215,13 @@ makes the scheme deployable on existing hardware, and is described in the
 instantiation.\rebekah{two provers are socially one prover though, it's just two
 devices. I think that maybe we should skip the JPOK stuff til later?}
 
-The device, the second prover, learns nothing about the secret key, the first
-prover's share $\witness_0$, beyond a commitment to it and the randomness of
-that commitment. So the mobile device can carry out the bulk of the proof
-without ever holding users' secret keys. This is the reason for the split, as
-devices are under users' full control, while secure elements are not.
+The device is the second prover. It learns nothing about the first prover's
+share $\witness_0$, which is the secret key, beyond a commitment to it and the
+randomness of that commitment. The mobile device can then carry out the bulk of
+the proof without ever holding users' secret keys, which matters because users
+have full control of their devices but not of their secure elements.
 
-The JPOK must be sound when both provers are corrupt and colluding: a user has
+The JPOK must be sound when both provers are corrupt and colluding, since a user has
 full control of their mobile device, and a user whose secure element is also
 compromised controls both provers.
 
@@ -249,7 +249,7 @@ instantiation, \Cref{sec:joint-proof}; here for now}
 
 The payee verifies every link in the chain before accepting. This is the cost of operating offline: the transcript grows
 by one link per transfer, and verification grows with it.
-The evaluation measures both.
+\Cref{sec:offline-evaluation} measures both.
 
 A payment that stops part way loses no value. If the payer's secure element has
 signed but the payee never received the payment, the secure element stays locked
@@ -265,7 +265,7 @@ through their intermediary. The central bank verifies the chain, checks whether
 it has seen a deposit of the same token before, and credits the account if it
 has not.
 
-A deposit carries the depositor's own audit ciphertext and proof, exactly as a
+A deposit includes the depositor's own audit ciphertext and proof, exactly as a
 payment does, and its signature of knowledge is taken over a fixed deposit
 marker in place of a payee pseudonym. The ciphertext lets the
 auditor name a user who both deposits a token and pays it onward, or who
@@ -274,7 +274,7 @@ earlier than the other. Using a marker distinct from any pseudonym stops
 a deposit signature being replayed as a payment.
 
 The check is against the token's original pseudonym, the one fixed at
-withdrawal. We compare this one because it is the only part of a
+withdrawal. We compare against it because it is the only part of a
 token that transfers do not change. Two deposits of the same token agree there
 whatever they do afterwards, so a conflict cannot be hidden by paying the token
 along a different route.
@@ -476,7 +476,7 @@ relation as follows:
           \end{equation*}
           %
           Binding $\com_{i+1}$ into $m_i$ fixes
-the destination of the payment. This is a JPOK: the secure element runs $\JPOKprove_0$ and
+the destination of the payment. This is a JPOK, in which the secure element runs $\JPOKprove_0$ and
 contributes knowledge of the payer's secret key, and the device runs
 $\JPOKprove_1$ and contributes the remaining witness.
 
@@ -503,7 +503,7 @@ deposits token $\tau_n = (v, \com_n)$. Do the following:
   \begin{enumerate}
 
     \item The user instructs their device to deposit $\tau_n$. The device
-informs the secure element to lock $\tau_n$.
+instructs the secure element to lock $\tau_n$.
 
     \item The device computes the audit ciphertext $\ciph_n \leftarrow
 \PKEencrypt(\pk_\auditor, \gen^{\algo{uid}_n}; \rho_n)$ and proof $\Gamma_n$, exactly
@@ -540,7 +540,7 @@ does:
   \begin{enumerate}
 
     \item Parse $d_n$ into the pseudonyms $(\com_k)_{k \in [n+1]}$ and
-ciphertexts $(\ciph_k)_{k \in [n+1]}$ it carries, taking these from
+ciphertexts $(\ciph_k)_{k \in [n+1]}$ it contains, taking these from
 $\algo{hist}_n$ together with the depositor's own $\com_n$ and $\ciph_n$, and
 parse $d_{n'}$ analogously into $(\com'_k)_{k \in [n'+1]}$ and $(\ciph'_k)_{k \in
 [n'+1]}$.\rebekah{off by one: $d_n$ carries $\com_0, \ldots, \com_n$, so the index set should be $[n+1]_0$ rather than $[n+1] = \{1, \ldots, n+1\}$, and likewise for $d_{n'}$}
@@ -603,8 +603,8 @@ width of that window can be tuned to the value of the payment. An epoch can
 equally be counted in spending hops rather than in wall-clock time, capping the
 length of a chain that will be accepted at deposit.
 
-This is the form revocation
-takes offline: a payee who has been offline since before a payer was revoked has
+Expiry is the form revocation
+takes offline. A payee who has been offline since before a payer was revoked has
 no verified real-time information with which to reject that payer, so the
 guarantee is expressed as a bound on how long a credential remains usable rather
 than as an instruction delivered to payees.
@@ -645,10 +645,9 @@ tokens held by the lost device are not recoverable, since no other party holds
 the commitment randomness needed to spend them. This matches the behaviour of
 cash, and of the deployed offline systems discussed in the introduction.
 
-The central bank's list of deposited tokens is needed to detect double spending
-and can never be pruned outright, though mechanisms such as logical or
-wall-clock timestamps that bound a token's validity span allow it to be pruned
-once that span elapses.
+The central bank needs its list of deposited tokens to detect double spending,
+so it cannot simply discard it. Logical or wall-clock timestamps that bound a
+token's validity span let it prune entries once that span has elapsed.
 
 We leave divisibility, aggregated deposits, and coin transparency to future
 work.
