@@ -25,13 +25,15 @@ previously been deposited.
 Intermediaries maintain users' bank deposit accounts and mediate the interaction
 of users with the central bank. They also onboard users into the system, opening
 accounts for them and helping them obtain long-term credentials from the
-registration authority. The registration authority issues these long-term
-credentials, which users subsequently use to authorise and authenticate
-payments. The auditor is authorised to trace a fraudulent offline payment, such
-as one that double spends a token, to its originator.
+registration authority.
 
-We instantiate users' wallets with a mobile device and a secure element each,
-which together let users perform offline payments securely and accountably.
+The registration authority issues these long-term credentials, which users
+subsequently use to authorise and authenticate payments.
+
+The auditor is authorised to trace a fraudulent offline payment, such as one
+that double spends a token, to its originator.
+
+Each user's wallet consists of a mobile device and a secure element.
 
 We assume the registration authority, the central bank, and the intermediaries
 are honest but curious: they follow the protocol, but may collude with other
@@ -39,14 +41,19 @@ participants to learn information about offline payments.  The registration
 authority is additionally trusted to assign each user a unique identifier, to
 generate a correctly formed credential that will be accepted by all other
 participants, and to issue that credential only following well-established KYC
-processes. Users may be arbitrarily malicious: they may collude to forge tokens,
-double spend them, or steal the tokens of honest users, and may collude with
-other participants to undermine the privacy of honest users. Users have full
-control of their mobile devices, but we assume they cannot easily tamper with
-their secure elements. The auditor is fully trusted to inspect only fraudulent
-payments and to deanonymise only misbehaving users. We consider static
-corruption throughout: the adversary fixes the set of corrupt participants
-before any protocol interaction takes place.
+processes.
+
+Users may be arbitrarily malicious: they may collude to forge tokens, double
+spend them, or steal the tokens of honest users, and may collude with other
+participants to undermine the privacy of honest users. Users have full control
+of their mobile devices, but we assume they cannot easily tamper with their
+secure elements.
+
+The auditor is fully trusted to inspect only fraudulent payments and to
+deanonymise only misbehaving users.
+
+We consider static corruption throughout: the adversary fixes the set of
+corrupt participants before any protocol interaction takes place.
 
 An offline payment scheme is defined by the following algorithms. We call the
 scheme $\OP$, for offline payments, and prefix its algorithms with it. Account
@@ -98,145 +105,303 @@ double spent it.
 \subsection{Building blocks}\label{sec:offline-building-blocks}
 
 Besides the commitment, signature and encryption schemes of the preliminaries,
-the construction needs two primitives that are not defined there.
+the construction needs two primitives that are not defined there: joint proofs
+of knowledge and signatures on committed inputs.
 
-\begin{outline}
-  \item both come from how work is divided in a wallet and at the central bank;
-    introduce each with the problem it solves
-\end{outline}
+\paragraph{Joint proofs of knowledge.}\label{sec:joint-pok-def} A joint proof
+of knowledge (JPOK) lets two provers, each holding part of a witness, together
+produce one proof of knowledge of the whole witness. Hesse, Singh and Sorniotti
+give such a primitive for BBS+ signatures~\cite{USENIX:HesSinSor23}, and we
+recall it in the syntax used throughout this thesis.
 
-\paragraph{Joint proofs of knowledge.}\label{sec:joint-pok-def}
-\begin{outline}
-  \item payments authorised jointly by secure element and mobile device
-  \item each payment proves the payer holds a credential on the identifier in their
-    pseudonym and knows the secret key it is bound to
-  \item the key never leaves the secure element, which cannot compute the whole proof
-  \item so: two provers, witness split between them, weaker prover holds a small part
-  \item why not an ordinary proof system (one prover holds the whole witness) or
-    generic two-party computation (too much for the secure element)
-\end{outline}
-
-Hesse, Singh and Sorniotti give such a primitive~\cite{USENIX:HesSinSor23}. We
-call it a joint proof of knowledge (JPOK), and recall it in the syntax used
-throughout this thesis. A JPOK $\JPOK$ is a proof system for a relation $\rel$
-over instance $\inst$ and witness $\witness = (\witness_0, \witness_1)$, where
+\paragraph{Syntax.} A JPOK $\JPOK$ is a proof system for a relation $\rel$ over
+statement $\inst$ and witness $\witness = (\witness_0, \witness_1)$, where
 $\witness_0$ is held by the first prover and $\witness_1$ by the second. We
 work in the random oracle model with generators derived by hashing, so a JPOK
-has no setup algorithm and no common reference string.
+has no setup algorithm and no common reference string. A JPOK consists of the
+following protocol and algorithm:
 
   \begin{description}
 
     \item[$\Phi \sample \JPOKprove_0(\inst, \witness_0) \leftrightarrow
 \JPOKprove_1(\inst, \witness_1)$ :] The proving protocol, run between the
-first prover on input witness share $\witness_0$ and the second on input witness
-share $\witness_1$, with the second prover outputting proof $\Phi$.
+first prover on input statement $\inst$ and witness share $\witness_0$ and the
+second prover on input statement $\inst$ and witness share $\witness_1$, gives
+output proof $\Phi$ to the second prover.
 
     \item[$\{0,1\} \leftarrow \JPOKverify(\inst, \Phi)$ :] The
-verification algorithm, on input instance $\inst$ and proof $\Phi$,
-returns 0 or 1.
+verification algorithm, on input statement $\inst$ and proof $\Phi$, outputs
+$0$ or $1$.
 
   \end{description}
 
-A JPOK should satisfy the following three properties, which Hesse, Singh and
-Sorniotti establish for their construction~\cite{USENIX:HesSinSor23}.
+\rebekah{the verifier here receives only $\Phi$; in the protocol of Hesse, Singh and Sorniotti (Section 4, Figure 3) the verifier relays the messages between card and holder, and the two provers share a PRF key, neither of which this syntax has; check}
 
-\begin{description}
+Hesse, Singh and Sorniotti establish completeness, soundness and zero knowledge
+for their construction (Theorem 4.1)~\cite{USENIX:HesSinSor23}. We state them
+as follows.
 
-  \item[Completeness.] If both provers follow the protocol on a witness
-$\witness = (\witness_0, \witness_1)$ with $\rel(\inst, \witness) = 1$, then
-$\JPOKverify(\inst, \Phi) = 1$.
+\paragraph{Completeness.} A JPOK is complete if, for every statement $\inst$
+and witness $(\witness_0, \witness_1)$ with $\rel(\inst, (\witness_0,
+\witness_1)) = 1$ and every $\Phi \sample \JPOKprove_0(\inst, \witness_0)
+\leftrightarrow \JPOKprove_1(\inst, \witness_1)$, the following holds:
+%
+\begin{equation*}
+%
+  \JPOKverify(\inst, \Phi) = 1.
+%
+\end{equation*}
 
-  \item[Soundness.] There is an efficient extractor that, given a proof
-accepted by $\JPOKverify$, outputs a witness $\witness$ for $\inst$. This holds
-when both provers are corrupt and colluding, which is the case we need: a user
-has full control of their mobile device, and a user whose secure element is also
-compromised controls both provers.
+\paragraph{Zero knowledge.} A JPOK is zero knowledge if it satisfies
+\Cref{exp:zk}, where the oracle $\simoracle$, on input $(\inst, (\witness_0,
+\witness_1))$ with $\rel(\inst, (\witness_0, \witness_1)) = 1$, runs the
+proving protocol between two honest provers and returns $\Phi$ if $b = 0$, and
+returns a simulated proof if $b = 1$.
 
-  \item[Zero knowledge.] There is a simulator that produces the verifier's
-view of the proving protocol without access to either witness share.
+\paragraph{Simulation extractability.} A JPOK is simulation extractable if it
+satisfies \Cref{exp:simext} with verification algorithm $\JPOKverify$. The
+adversary there produces the proof alone, so this covers a first and a second
+prover that are both corrupt and collude.
 
-\end{description}
+\rebekah{differences from the paper: Hesse, Singh and Sorniotti prove zero knowledge only against a semi-honest verifier who sees the whole three-party transcript, and soundness as an extractor against colluding card and holder with an honest verifier, not simulation extractability; the theorem and (P5) use simulation extractability, which the instantiation section claims for the compiled Sigma protocol}
 
-\rebekah{the theorem and (P5) use simulation extractability of the JPOK, but this definition gives only soundness and zero knowledge; it also states no property protecting $\witness_0$ against a corrupt second prover (a corrupt device with an honest secure element), which is the case the split exists for}
+\paragraph{First-prover privacy.} A JPOK protects the first prover's witness
+share against a corrupt second prover if no adversary that plays the second
+prover can recover $\witness_0$, which \Cref{exp:jpok-privacy} captures for a
+PPT instance generator $\algo{G}$ for $\rel$.
 
-\begin{outline}
-  \item two ways we go slightly beyond the cited result (old text had these, plus a
-    third on online extraction, now in the SCI definition)
-  \item (1) \cite{USENIX:HesSinSor23} prove ZK against a honest but curious verifier, since
-    their verifier relays between the provers and can be caught deviating; our
-    payee may be malicious but is not interposed: provers talk directly, payee only
-    supplies $\com_{i+1}$ and gets the finished proof, so the restriction does not bind
-  \item (2) since the second prover also gets the commitment's randomness,
-    $\witness_0$ is protected by DL hardness, not by the commitment
-\end{outline}
+\begin{experimentbox}{Joint proofs of knowledge: first-prover privacy}{jpok-privacy}
 
-The second prover learns nothing about $\witness_0$ beyond a commitment to it
-and the randomness of that commitment. So the mobile device can carry
-out the bulk of the proof without ever holding users' secret keys. This is the
-reason for the split, as devices are under users' full control, while secure elements
-are not.
+  \rebekah{drafted from the claim that the second prover learns nothing about $\witness_0$ beyond a commitment and its randomness; Hesse, Singh and Sorniotti (Section 4, Theorem 4.1) define no such property; check whether the security proof needs it, and how to fix $\algo{G}$}
 
-\paragraph{Signatures on committed inputs.}\label{sec:sci-def}
-\begin{outline}
-  \item the central bank signs each token at withdrawal without learning whose it
-    is (else it could match withdrawal to deposit), but must see the value
-    (accounting)
-  \item so: recipient commits to the messages, discloses some, gets a signature on
-    all; call it a signature scheme on committed inputs (SCI)
-  \item why not blind signatures: they ask for more than needed; blindness hides the
-    signature when later shown, but ours are never shown (payees check a proof of
-    knowledge of it); we only need the request to hide the committed messages
-\end{outline}
+  \begin{enumerate}
 
-A signature scheme on committed inputs (SCI) $\SCI$ consists of the following
-algorithms. We index messages from $0$, and write $[n] = \{1, \ldots, n\}$ and
-$[n]_0 = \{0, \ldots, n-1\}$ for a positive integer $n$.
+    \item The challenger samples $(\inst, (\witness_0, \witness_1)) \sample
+\algo{G}(\secparam)$ with $\rel(\inst, (\witness_0, \witness_1)) = 1$ and sends
+$(\inst, \witness_1)$ to $\adv$.
+
+    \item The adversary is given oracle access to $\mathcal{O}_{\JPOKprove_0}$,
+which on input a statement $\inst'$ runs $\JPOKprove_0(\inst', \witness_0)$
+with $\adv$ in the role of the second prover.
+
+    \item The adversary outputs $\witness_0^\star$.
+
+  \end{enumerate}
+
+  $\adv$ wins the experiment if the following holds:
+  %
+  \begin{equation*}
+  %
+    \rel(\inst, (\witness_0^\star, \witness_1)) = 1.
+  %
+  \end{equation*}
+
+\end{experimentbox}
+
+The advantage of $\adv$ is defined as follows:
+%
+\begin{equation*}
+%
+  \Adv^{\mathsf{priv}}_{\JPOK, \adv}(\secparam) = \Pr[\adv\text{ wins}].
+%
+\end{equation*}
+%
+We say the JPOK satisfies first-prover privacy if this advantage is negligible
+for every PPT adversary $\adv$.
+
+\paragraph{Signatures on committed inputs.}\label{sec:sci-def} A signature
+scheme on committed inputs (SCI) lets a recipient obtain a signature on a vector
+of messages from a signer who sees only some of the messages, the others being
+committed.
+
+\paragraph{Syntax.} A signature scheme on committed inputs $\SCI$ consists of
+the following algorithms. We index messages from $0$, and write $[n] = \{1,
+\ldots, n\}$ and $[n]_0 = \{0, \ldots, n-1\}$ for a positive integer $n$.
 
 \begin{description}
 
   \item[$(\sk, \pk) \sample \SCIgen(\secparam, \ell)$ :] The key generation
-algorithm outputs a key pair for messages in $\Zp^\ell$.
+algorithm, on input security parameter $\secparam$ and vector length $\ell$,
+outputs secret signing key $\sk$ and public verification key $\pk$ for messages
+in $\Zp^\ell$.
 
   \item[$(\algo{req}, \state) \sample \SCIrequest(\pk, \msg, \algo{Disc})$ :]
-The recipient commits to $\msg \in \Zp^\ell$, discloses the messages at the
-indices in $\algo{Disc} \subseteq [\ell]_0$, and outputs a request $\algo{req}$, which contains a commitment
-$C$ to the hidden messages and a proof that it is well formed, together with
-private state $\state$.
+The request algorithm, run by the recipient on input public key $\pk$, message
+vector $\msg \in \Zp^\ell$ and set $\algo{Disc} \subseteq [\ell]_0$ of disclosed
+indices, outputs request $\algo{req}$ and private state $\state$. The request
+contains the disclosed messages $(\msg_i)_{i \in \algo{Disc}}$, a commitment $C$
+to the other messages, and a proof $\algoproof_{\algo{req}}$ that $C$ is well
+formed.
 
-  \item[$\algo{resp} \sample \SCIissue(\sk, \algo{req})$ :] The signer checks
-the request and outputs a response, or $\perp$.
+  \item[$\algo{resp} \sample \SCIissue(\sk, \algo{req})$ :] The issuing
+algorithm, run by the signer on input secret key $\sk$ and request
+$\algo{req}$, outputs response $\algo{resp}$ if $\algoproof_{\algo{req}}$
+verifies and $\perp$ otherwise.
 
   \item[$\signature \leftarrow \SCIunblind(\state, \algo{resp})$ :] The
-recipient recovers a signature on $\msg$.
+unblinding algorithm, run by the recipient on input private state $\state$ and
+response $\algo{resp}$, outputs signature $\signature$ on $\msg$.
 
   \item[$\{0,1\} \leftarrow \SCIverify(\pk, \msg, \signature)$ :] The
-verification algorithm returns 0 or 1.
+verification algorithm, on input public key $\pk$, message vector $\msg$ and
+signature $\signature$, outputs $0$ or $1$.
 
 \end{description}
 
-An SCI scheme should satisfy correctness, meaning that an honestly requested and
-issued signature verifies, and the following three properties.
+\rebekah{disclosed subsets: \Cref{chap:agg-creds} writes a disclosed set as an index set $\ISSUERS \subseteq [1,n]$ with values $(\atv{i})_{i \in \ISSUERS}$, but there it is a set of issuers, and $\algo{Disc}$ is also used in \Cref{prot:offline-sci}; wording now matches (set of disclosed indices, disclosed values indexed by it); renaming $\algo{Disc}$ (for example to $\mathcal{D}$, and $[\ell]_0$ to match $[1,n]$) needs the instantiation section changed too; decide}
 
-\begin{description}
+We write $\rel_{\algo{req}}$ for the relation that $\algoproof_{\algo{req}}$
+proves. Its statement is $\pk$ together with the request without the proof, and
+its witness is the hidden messages $(\msg_i)_{i \in [\ell]_0 \setminus
+\algo{Disc}}$ together with the randomness of $C$.
 
-  \item[One-more unforgeability.] No PPT adversary that completes $q$ issuing
-sessions with the signer outputs valid signatures on $q+1$ distinct message
-vectors. This stops users minting tokens: every token needs a signature
-the central bank issued, and each issuance debits one withdrawal.
+\paragraph{Correctness.} An SCI scheme is correct if, for every key pair $(\sk,
+\pk)$ generated by $\SCIgen(\secparam, \ell)$, every $\msg \in \Zp^\ell$, every
+$\algo{Disc} \subseteq [\ell]_0$ and every $(\algo{req}, \state)$ generated by
+$\SCIrequest(\pk, \msg, \algo{Disc})$, the following holds:
+%
+\begin{equation*}
+%
+  \SCIverify(\pk, \msg, \SCIunblind(\state, \SCIissue(\sk, \algo{req}))) = 1.
+%
+\end{equation*}
 
-  \item[Request hiding.] There is a simulator that, given only the disclosed
-messages, outputs requests computationally indistinguishable from real ones.
-This keeps the central bank from learning whose token it signs.
+\paragraph{One-more unforgeability.} One-more unforgeability, defined by
+\Cref{exp:sci-omuf}, requires that an adversary who completes $q$ issuing
+sessions cannot output valid signatures on $q+1$ distinct message vectors.
 
-  \item[Online request extractability.] There is an extractor that, given any
-request the signer accepts, outputs the hidden messages without rewinding the
-recipient. Our security proof needs this because the simulator must learn the
-contents of every token a corrupt user withdraws in order to continue the
-simulation, and these requests come adaptively and without bound. Rewinding at
-each one would compound across requests, so an extractor that rewinds is not
-enough here, although it is enough everywhere else in the proof.
+\begin{experimentbox}{Signatures on committed inputs: one-more unforgeability}{sci-omuf}
 
-\end{description}
+  \rebekah{drafted from Coconut, Section III-B (unforgeability, stated informally), Pointcheval and Sanders, signing committed values (RSA 2016, Section 6.1, and RSA 2018, Remark 13), and the one-more notion for blind signatures of Pointcheval and Stern; none of them gives it as an experiment for committed inputs; check}
+
+  \begin{enumerate}
+
+    \item The challenger generates $(\sk, \pk) \sample \SCIgen(\secparam, \ell)$
+and sends $\pk$ to $\adv$. It sets $q \leftarrow 0$.
+
+    \item The adversary is given oracle access to $\mathcal{O}_{\SCIissue}$,
+which on input a request $\algo{req}$ returns $\algo{resp} \sample
+\SCIissue(\sk, \algo{req})$, and sets $q \leftarrow q + 1$ if $\algo{resp} \neq
+\perp$.
+
+    \item The adversary outputs $(\msg^\star_j, \signature^\star_j)_{j \in
+[q+1]}$.
+
+  \end{enumerate}
+
+  $\adv$ wins the experiment if the following hold:
+  %
+  \begin{equation*}
+  %
+    \forall j \in [q+1] : \SCIverify(\pk, \msg^\star_j, \signature^\star_j) = 1
+\ \wedge\ \forall j \neq j' : \msg^\star_j \neq \msg^\star_{j'}.
+  %
+  \end{equation*}
+
+\end{experimentbox}
+
+The advantage of $\adv$ is defined as follows:
+%
+\begin{equation*}
+%
+  \Adv^{\mathsf{omuf}}_{\SCI, \adv}(\secparam) = \Pr[\adv\text{ wins}].
+%
+\end{equation*}
+%
+We say the SCI scheme is one-more unforgeable if this advantage is negligible
+for every PPT adversary $\adv$.
+
+\paragraph{Request hiding.} Request hiding, defined by \Cref{exp:sci-hiding},
+requires that a request reveal nothing beyond its disclosed messages, even to
+the signer. It uses a simulator $\SCIsimrequest$ that, on input public
+key $\pk$, disclosed messages $(\msg_i)_{i \in \algo{Disc}}$ and set
+$\algo{Disc}$, outputs a request without access to the other messages. In the
+random oracle model it may program the random oracle, as the proof simulator of
+\Cref{sec:prelims-nizks} does.
+
+\begin{experimentbox}{Signatures on committed inputs: request hiding}{sci-hiding}
+
+  \rebekah{drafted from Coconut, Section III-B (blindness, stated informally), written with a simulator because the security proof replaces honest users' requests by simulated ones; the signer's key is generated honestly here, which is enough only for an honest but curious signer; check}
+
+  \begin{enumerate}
+
+    \item The challenger samples $b \sample \{0,1\}$, generates $(\sk, \pk)
+\sample \SCIgen(\secparam, \ell)$, and sends $(\sk, \pk)$ to $\adv$.
+
+    \item The adversary is given oracle access to $\mathcal{O}_{\SCIrequest}$,
+which on input $(\msg, \algo{Disc})$ with $\msg \in \Zp^\ell$ and $\algo{Disc}
+\subseteq [\ell]_0$ returns $\algo{req}$, where $(\algo{req}, \state) \sample
+\SCIrequest(\pk, \msg, \algo{Disc})$ if $b = 0$, and $\algo{req} \sample
+\SCIsimrequest(\pk, (\msg_i)_{i \in \algo{Disc}}, \algo{Disc})$ if $b
+= 1$.
+
+    \item The adversary outputs a bit $b'$.
+
+  \end{enumerate}
+
+  $\adv$ wins the experiment if $b' = b$.
+
+\end{experimentbox}
+
+The advantage of $\adv$ is defined as follows:
+%
+\begin{equation*}
+%
+  \Adv^{\mathsf{hiding}}_{\SCI, \adv}(\secparam) = \left| \Pr[\adv\text{
+wins}] - \frac{1}{2} \right|.
+%
+\end{equation*}
+%
+We say the SCI scheme is request hiding if this advantage is negligible for
+every PPT adversary $\adv$.
+
+\paragraph{Online request extractability.} Online request extractability,
+defined by \Cref{exp:sci-ext}, requires an extractor $\SCIextract$ that,
+given a request the signer accepts and the random oracle queries the recipient
+made, outputs a witness for $\rel_{\algo{req}}$ without rewinding the
+recipient.\rebekah{(P6): only if confirmed necessary; the code uses plain Fiat-Shamir, not Fischlin. Online request extractability is probably unused by the construction proof, and may be needed only for the instantiation; kept for now}
+
+\begin{experimentbox}{Signatures on committed inputs: online request extractability}{sci-ext}
+
+  \rebekah{drafted from the online extractability of the Fischlin transform (CRYPTO 2005, Section 2), applied to $\algoproof_{\algo{req}}$; none of the SCI papers above defines it; check}
+
+  \begin{enumerate}
+
+    \item The challenger generates $(\sk, \pk) \sample \SCIgen(\secparam, \ell)$
+and sends $\pk$ to $\adv$.
+
+    \item The adversary is given oracle access to $\mathcal{O}_{\SCIissue}$,
+which on input a request $\algo{req}$ returns $\algo{resp} \sample
+\SCIissue(\sk, \algo{req})$. If $\algo{resp} \neq \perp$, the challenger
+computes $\witness \leftarrow \SCIextract(\pk, \algo{req}, \Query_\hash)$,
+where $\Query_\hash$ is the list of the adversary's random oracle queries so
+far, and stores $(\algo{req}, \witness)$ in the set $\mathcal{E}$.
+
+    \item The adversary halts.
+
+  \end{enumerate}
+
+  $\adv$ wins the experiment if the following holds:
+  %
+  \begin{equation*}
+  %
+    \exists (\algo{req}, \witness) \in \mathcal{E} : \rel_{\algo{req}}((\pk,
+\algo{req}), \witness) \neq 1.
+  %
+  \end{equation*}
+
+\end{experimentbox}
+
+The advantage of $\adv$ is defined as follows:
+%
+\begin{equation*}
+%
+  \Adv^{\mathsf{ext}}_{\SCI, \adv}(\secparam) = \Pr[\adv\text{ wins}].
+%
+\end{equation*}
+%
+We say the SCI scheme is online request extractable if this advantage is
+negligible for every PPT adversary $\adv$.
 
 \subsection{Security goals}
 
@@ -284,8 +449,9 @@ previous payments beyond what is unavoidably revealed. What is unavoidably
 revealed is that the payee of the last payment is the payer of the current one,
 together with a growing list of random values fixed throughout the token's
 lifetime. We assume the payer and the payee know each other, and that this
-knowledge is not derived from the payment transcript. The same holds for
-deposits and withdrawals. The intermediary of a withdrawing or depositing user
+knowledge is not derived from the payment transcript.
+
+The same holds for deposits and withdrawals. The intermediary of a withdrawing or depositing user
 knows their identity, but the history of a deposited token leaks nothing about
 the honest users involved in payments preceding the deposit, beyond that same
 list of random values and the intermediary that identifies the depositor for
@@ -298,26 +464,72 @@ intermediaries and the central bank collude with every other user in the system.
 
 \end{description}
 
+\begin{outline}
+  \item proposed shorter list, for you to decide (no property dropped):
+  \item unforgeability and theft prevention merge: a payee or the central bank
+    accepts only a token issued by the central bank and owned by the party
+    spending it
+  \item double-spending detection, identification and non-frameability merge:
+    double spending is detected at deposit, and the auditor names the double
+    spender and never an honest user
+  \item conservation of value stays as it is
+  \item user anonymity keeps only the payment part: a payment reveals nothing
+    about earlier honest owners beyond the random values of the token and that
+    the last payee is the current payer
+  \item token unlinkability absorbs the withdrawal and deposit part of user
+    anonymity: the intermediary knows who withdraws and who deposits, and nobody
+    can link the two beyond the value
+\end{outline}
+
 \subsection{The ideal functionality for offline payments}\label{sec:ideal-func}
 
 We define security for the offline payment protocol through an ideal
 functionality $\idfu{\algo{op}}$, which represents an incorruptible trusted
 party that receives the inputs of each protocol task and returns the prescribed
-outputs. Security is that $\OP$ securely realises $\idfu{\algo{op}}$ as defined
-in \Cref{sec:prelims-security}, in the standalone model, since our simulator
-extracts from some proofs by rewinding.
+outputs. We have the outputs of the honest parties and $\adv$ during an
+execution of protocol $\prot$ in the real world captured in
+$\textsc{Exec}_{\prot,\adv}(\secparam)$, and the outputs of the honest
+parties and $\simu$ interacting with $\idfu{\algo{op}}$ in the ideal world
+captured by $\textsc{Exec}_{\idfu{\algo{op}},\simu}(\secparam)$. We then say
+that $\prot$ securely realises $\idfu{\algo{op}}$ if for every PPT
+adversary $\adv$ there exists a PPT simulator $\simu$ such that
+$\textsc{Exec}_{\prot,\adv}(\secparam)$ is computationally
+indistinguishable from $\textsc{Exec}_{\idfu{\algo{op}},\simu}(\secparam)$. This
+is a standalone simulation based definition rather than a universally composable
+one, and the distinction matters: our simulator extracts from some proofs by
+rewinding the adversary, which a universally composable simulator may not do. We
+return to this point in~\Cref{sec:offline-security}.
 
 $\idfu{\algo{op}}$ interacts with $\simu$ and with the system's participants.
 These are the users, who act as both payers and payees, the intermediaries, the
 registration authority, the central bank, and the auditor. Each user is
 represented as a pair consisting of a mobile device and a secure element, so
 that an individual holding multiple bank accounts is modelled as multiple such
-users, one per account.  The registration authority, the central bank, and the
-intermediaries are honest but curious, so $\simu$ learns their inputs and
-outputs by default. We consider a static corruption model, in which $\simu$
-corrupts the devices and secure elements of its choosing before they interact
-with $\idfu{\algo{op}}$.  The formal description is given
-in~\Cref{fig:ideal-func}. We summarise each interface below.
+users, one per account.
+
+The registration authority, the central bank, and the intermediaries are honest
+but curious, so $\simu$ learns their inputs and outputs by default. We consider
+a static corruption model, in which $\simu$ corrupts the devices and secure
+elements of its choosing before they interact with $\idfu{\algo{op}}$.
+
+The formal description is given in~\Cref{fig:ideal-func}. We summarise each
+interface below.
+
+\begin{outline}
+  \item proposed shortening of this description, for you to decide (every
+    property still met by the figure):
+  \item state the participants and the honest but curious and static corruption
+    assumptions once, in the participants paragraph of the definitions, and
+    only point to them here
+  \item merge the paragraph on sets and maps with the longest common prefix
+    paragraph; the sentence on a corrupt payee accepting an invalid token is
+    also in the payments paragraph, keep one
+  \item per interface, one sentence on what it checks and one on what $\simu$
+    learns
+  \item the last paragraph (each goal to a behaviour of the functionality) and
+    the informal list of goals say the same thing twice; keep the list short and
+    let this paragraph carry the mapping
+\end{outline}
 
 $\idfu{\algo{op}}$ works with the set $\algo{usrs}$ of users, the set $\algo{I}$
 of intermediaries, and the sets $\algo{Dev}$ and $\algo{SE}$ of devices and
@@ -402,6 +614,7 @@ honest user is only ever written into $\algo{tokens}$ as the owner of a token
 they were actually paid. Conservation of value is the pairing of the debits in
 $\OPwithdraw$ with the credits in $\OPdeposit$, both of the same $v$, with no
 interface that alters $\algo{accounts}$ or $\algo{reserves}$ otherwise.
+
 Anonymity and unlinkability are what $\simu$ does not receive: on a withdrawal
 by an honest user it learns the user and the value but not $\algo{id}$, and on the
 matching deposit it learns $\vec{\algo{id}}$ but has no way to associate it with that

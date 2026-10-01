@@ -5,12 +5,10 @@
 
 \subsection{Proof of \Cref{thm:offline-construction-security}: security of the construction}\label{sec:offline-proof-1}
 
-Let $\algo{prot}$ denote $\OP$. We write
-$\algo{prot}$ rather than $\Pi$ for the protocol, as $\Pi$ already denotes the
-proof in a withdrawal request. Let $\adv$ be a real world adversary and let $\simu$ be an
+Let $\prot$ denote $\OP$. Let $\adv$ be a real world adversary and let $\simu$ be an
 ideal world simulator that interacts with system participants through ideal
 functionality $\idfu{\algo{op}}$. We show that
-$\textsc{Exec}_{\algo{prot},\adv}(\secparam)$ is computationally
+$\textsc{Exec}_{\prot,\adv}(\secparam)$ is computationally
 indistinguishable from $\textsc{Exec}_{\idfu{\algo{op}},\simu}(\secparam)$, in
 the standalone sense. We define a sequence of
 indistinguishable games that start with Game 0 representing the real world, and
@@ -36,60 +34,60 @@ that the games below can refer to them.
 
   \item[(P4)] The credential signature scheme is EUF-CMA secure.
 
-  \item[(P5)] The proofs and signatures of knowledge, including the JPOK, are
-zero knowledge and simulation extractable in the random oracle model.
+  \item[(P5)] The proofs and signatures of knowledge, including the JPOK,
+satisfy zero knowledge and simulation extractability in the random oracle
+model.
 
   \item[(P6)] Requests of the central bank's SCI scheme are hiding and online
 extractable.
 
 \end{enumerate}
 
-Before giving the games we describe $\simu$ in one place. $\simu$ runs $\algo{prot}$ internally on behalf of every honest party,
-and relays between $\adv$ and $\idfu{\algo{op}}$. It maintains two maps,
+\rebekah{you asked whether (P3) and (P6) should be together, since both are properties of the SCI scheme; merging them renumbers every reference in the games and in the proof of \Cref{thm:offline-instantiation-security}, so left separate until (P6) is settled}
+
+Before giving the games we describe $\simu$ briefly. $\simu$ runs $\prot$
+internally on behalf of every honest party, and relays between $\adv$ and
+$\idfu{\algo{op}}$. It maintains two maps,
 $\mathbb{R}$ from sequences of pseudonyms to the token identifiers
-$\idfu{\algo{op}}$ uses, and $\mathbb{C}$ for the inverse direction, so that it
-can translate between the transcripts $\adv$ sees and the state
-$\idfu{\algo{op}}$ holds. For honest parties $\simu$ never has a witness to
-prove, so every proof it produces is simulated and every commitment and audit
-ciphertext it produces is random. This makes its transcripts
+$\idfu{\algo{op}}$ uses, and $\mathbb{C}$ for the reverse direction, so that it
+can translate between transcripts $\adv$ sees and state $\idfu{\algo{op}}$
+holds. For honest parties $\simu$ never has a witness, so every proof it
+produces is simulated and every commitment and audit ciphertext random. This makes its transcripts
 independent of the identities and token identifiers it does not learn. For corrupt parties
-$\simu$ has no witness either, so it extracts one from the proofs $\adv$
-produces: from the SCI request at withdrawal, in order to learn the randomness that fixes
+$\simu$ extracts witnesses from the proofs $\adv$ produces: from the SCI request at withdrawal, in order to learn the randomness that fixes
 the token identifier and so continue the simulation, and from $\Sigma$,
 $\sigma_i$, and $\Gamma_i$ elsewhere, in order to exhibit a forgery or a double
-opening and terminate. The first of these is why (P6) is needed and the second
-is why rewinding suffices for the rest. Online extraction is therefore needed for
-withdrawal requests alone.\rebekah{Games 9 and 11 extract from every corrupt payment and deposit, including the filled-in intermediate hops, and continue the simulation rather than stop, which needs online extraction there too and undermines the rewinding argument}
+opening and terminate.\rebekah{you asked whether this is online then; the text read: ``The first of these is why (P6) is needed and the second is why rewinding suffices for the rest. Online extraction is therefore needed for withdrawal requests alone.''}\rebekah{Games 9 and 11 extract from every corrupt payment and deposit, including the filled-in intermediate hops, and continue the simulation rather than stop, which needs online extraction there too and undermines the rewinding argument}
 
 \begin{proof}
 
-\paragraph{Game 0.} The real world execution of $\algo{prot}$.
+\paragraph{Game 0.} The real world execution of $\prot$.
 
-\paragraph{Game 1.} As Game 0, except $\simu$ runs $\algo{prot}$ internally on
+\paragraph{Game 1.} As Game 0, except $\simu$ runs $\prot$ internally on
 behalf of all honest parties, forwarding inputs and distributing outputs. This
-change is purely syntactic, so Game 1 is identically distributed to Game 0.
+change is syntactic, so Game 1 is identically distributed to Game 0.
 
 \paragraph{Game 2.} As Game 1, except $\simu$ introduces a dummy
 $\idfu{\algo{op}}$ as a communication relay between honest parties, who now
-communicate via $\idfu{\algo{op}}$ rather than directly. This change is again
+communicate via $\idfu{\algo{op}}$ rather than directly. This change is
 syntactic, so Game 2 is identically distributed to Game 1.
 
 \paragraph{Game 3.} As Game 2, except $\idfu{\algo{op}}$ handles $\OPcreate$
 queries from honest users. When an honest user $\algo{usr}$ initialises an
 account of value $v$ with intermediary $\algo{Int}$, $\simu$ sends
 $(\OPcreate, \algo{usr}, v)$ to $\idfu{\algo{op}}$ on behalf of $\algo{Int}$ in
-place of running $\algo{prot}$. $\algo{prot}$ always accepts when the user has no prior account
+place of running $\prot$. $\prot$ always accepts when the user has no prior account
 and $\idfu{\algo{op}}$ performs the same check, so the two are identical.
 
 \paragraph{Game 4.} As Game 3, except account creation is also handled for
 corrupt users. $\simu$ sends $(\OPcreate, \algo{usr}, v)$ to $\idfu{\algo{op}}$
-on behalf of $\algo{Int}$ and mirrors any abort to $\algo{Int}$. $\idfu{\algo{op}}$ aborts exactly when $\algo{prot}$ does, on
+on behalf of $\algo{Int}$ and mirrors any abort to $\algo{Int}$. $\idfu{\algo{op}}$ aborts exactly when $\prot$ does, on
 attempts to register duplicate accounts, so no new distinguishing event arises.
 
 \paragraph{Game 5.} As Game 4, except $\idfu{\algo{op}}$ handles $\OPregister$
 queries: $\simu$ sends $(\OPregister, \algo{usr})$ to $\idfu{\algo{op}}$ on
 behalf of $\reg$ whenever $\reg$ receives a valid registration request.  $\idfu{\algo{op}}$
-rejects only duplicate registrations, matching $\algo{prot}$, so the games are
+rejects only duplicate registrations, matching $\prot$, so the games are
 indistinguishable.
 
 \paragraph{Game 6.} As Game 5, except $\idfu{\algo{op}}$ handles $\OPwithdraw$
@@ -99,7 +97,7 @@ $\idfu{\algo{op}}$, and $\simu$ receives $(\OPwithdraw, \algo{usr}, v)$. $\simu$
 then produces a simulated withdrawal transcript, in which the request is output
 by the request-hiding simulator of the SCI scheme on the disclosed value $v$
 alone. By request hiding (P6), this transcript is computationally
-indistinguishable from one produced by $\algo{prot}$.
+indistinguishable from one produced by $\prot$.
 
 \paragraph{Game 7.} As Game 6, except $\idfu{\algo{op}}$ handles $\OPwithdraw$
 queries from corrupt users. When $\algo{usr}$ submits a withdrawal, $\simu$
@@ -108,10 +106,10 @@ extractability (P6), sets
 $\algo{id}$ to the token's original pseudonym $\com_0 \leftarrow \ComCommit(\ck,\allowbreak
 \algo{uid},\allowbreak s)$, sends $(\OPwithdraw, \algo{usr}, \algo{Int}, v)$ to
 $\idfu{\algo{op}}$ on behalf of $\algo{usr}$, and gives it $\algo{id}$ when asked.
-Both $\idfu{\algo{op}}$ and $\algo{prot}$ reject if and only if
+Both $\idfu{\algo{op}}$ and $\prot$ reject if and only if
 the request commitment $C$ to $(\algo{uid}, v, s)$ is a duplicate, which would
 imply a duplicate $\algo{id}$, so the accounting checks agree and the games are
-indistinguishable.\rebekah{$C$ commits to $(\algo{uid}, v, s)$ under the central bank's generators and $\algo{id} = \com_0$ to $\algo{uid}$ under $\ck$; a duplicate $C$ and a duplicate $\algo{id}$ are different events, and binding of $C$ is not among (P1)-(P6)}
+indistinguishable.\rebekah{$C$ commits to $(\algo{uid}, v, s)$ under the central bank's generators and $\algo{id} = \com_0$ to $\algo{uid}$ under $\ck$; a duplicate $C$ and a duplicate $\algo{id}$ are different events, and binding of $C$ is not among (P1)-(P6)}\rebekah{(P6): you noted several times (Games 6 and 7, Game 9, the end of the proof) that you do not see where (P6) is used. Games 6 and 7 cite it, for request hiding and for extraction at withdrawal, and Game 9 lists it in ``under (P1)-(P6)'', but no step needs online extraction once rewinding is allowed; probably unused by this proof, maybe needed for the instantiation; not deleted yet}
 
 \paragraph{Game 8.} As Game 7, except $\idfu{\algo{op}}$ handles $\OPexecute$
 queries from honest payers. We first deal with the first payment after
@@ -132,7 +130,7 @@ random ciphertext, and the proofs $(\sigma_0, \Gamma_0, \Sigma)$ are simulated,
 which is possible since the proof system is simulation extractable (P5).
 
   \item If $\algo{usr}'$ is corrupt: $\simu$ sets $\algo{id}' = \com_1$, the
-commitment that $\algo{usr}'$ supplies in $\algo{prot}$, and gives it to
+commitment that $\algo{usr}'$ supplies in $\prot$, and gives it to
 $\idfu{\algo{op}}$, which returns $(\OPexecute, \vec{\algo{id}'}, v, \algo{usr},
 \algo{usr}')$ and so also names both parties. $\simu$ then sets $\ciph_0
 \leftarrow \PKEencrypt(\pk_\auditor, \gen^{\algo{uid}}; \rho_0)$.
@@ -150,9 +148,9 @@ needed. By IND-CPA security of the encryption scheme (P2) and simulation
 extractability of the proof system (P5), simulated payments are
 indistinguishable from real ones, so Game 8 is indistinguishable from Game 7.\rebekah{simulating proofs needs zero knowledge, not simulation extractability; the IND-CPA hop on the audit ciphertexts is made while the auditor still decrypts with $\sk_\auditor$ in $\OPidentify$, so the reduction cannot answer those decryptions; and the simulated $\Sigma$ must also produce $(k^*, l^*, \tilde{c})$, which are statement values and not hidden by zero knowledge}
 
-\paragraph{Game 9.} As Game 8, except $\idfu{\algo{op}}$ also processes
+\paragraph{Game 9.}\rebekah{could this proof be shortened?} As Game 8, except $\idfu{\algo{op}}$ also processes
 $\OPexecute$ queries from corrupt payers. We show that if $\idfu{\algo{op}}$
-rejects a payment, an honest $\algo{usr}'$ in $\algo{prot}$ also rejects it,
+rejects a payment, an honest $\algo{usr}'$ in $\prot$ also rejects it,
 again showing the case $i = 0$ before generalising.
 
 Let $p_0 = (v, \com_0, \com_1, \ciph_0, \sigma_0, \Gamma_0, \algo{hist}_0)$ be
@@ -274,9 +272,9 @@ altered, so Game 11 is indistinguishable from Game 10.
 \paragraph{Game 12.} As Game 11, except $\idfu{\algo{op}}$ handles $\OPidentify$
 queries. The auditor calls $(\OPidentify, \algo{id})$ and expects the set of double
 spenders $\algo{DS}$. We show that the outputs of $\idfu{\algo{op}}$ and
-$\algo{prot}$ agree except with negligible probability.
+$\prot$ agree except with negligible probability.
 
-In $\algo{prot}$, the double spender at index $j$ is identified by decrypting
+In $\prot$, the double spender at index $j$ is identified by decrypting
 $\ciph_j$, where $j$ is the last index at which the two deposit chains agree.
 Game 11 fixes the commitment $\com_j$, by binding of the commitment scheme and
 one-more unforgeability of the central bank's SCI scheme. This carries through the chain via
@@ -317,11 +315,11 @@ completes the proof.
 The instantiation is an instance of the
 construction that sets the commitment scheme to the Pedersen commitment scheme in
 $\group{1}$, the credential signature scheme to the BBS+ signature scheme, the
-SCI scheme to the Pointcheval-Sanders signature scheme with signing on committed
-inputs, the public-key encryption scheme to the ElGamal encryption scheme in
-$\group{1}$, and the JPOK to the joint proof of \Cref{prim:bbs-joint-proof}. It
-remains to show that each building block of the instantiation has the property
-it needs.
+SCI scheme to the Pointcheval-Sanders signature scheme with the signing on
+committed inputs of \Cref{prot:offline-sci}, the public-key encryption scheme to
+the ElGamal encryption scheme in $\group{1}$, and the JPOK to the joint proof of
+\Cref{prot:bbs-joint-proof}. It remains to show that each building block of the
+instantiation has the property it needs.
 
 \begin{proof}
 
@@ -340,67 +338,62 @@ assumption~\cite{RSA:PoiSan18,NDSS:SABMD19}.
   \item[(P4)] The BBS+ signature scheme is EUF-CMA secure under the $q$-SDH
 assumption~\cite{SCN:AuSusMu06,EPRINT:CamDriLeh16}.
 
-  \item[(P5)] Every proof other than $\Pi$, including the JPOK, is a Sigma
-protocol with the Fiat-Shamir transform, and so is zero knowledge and simulation
-extractable in the random oracle model~\cite{C:FiaSha86,INDOCRYPT:FKMV12}.
+  \item[(P5)] Every proof, including the JPOK and the withdrawal request proof
+$\algoproof_{\algo{req}}$, is a Sigma protocol with the Fiat-Shamir transform,
+and so is zero knowledge and simulation extractable in the random oracle
+model~\cite{C:FiaSha86,INDOCRYPT:FKMV12}.
 
   \item[(P6)] Requests of the Pointcheval-Sanders signature scheme are hiding
-under the DDH assumption, and online extractable by the Fischlin
-transform~\cite{C:Fischlin05}.
+under the DDH assumption.\rebekah{Fischlin, only if confirmed necessary (the code uses plain Fiat-Shamir): the text also said requests are online extractable by the Fischlin transform~\cite{C:Fischlin05}. Without it, this item covers only the hiding half of (P6). You did not implement Fischlin, so decide when to address it in the thesis}
 
 \end{description}
 
-Since the generators of the commitment key are derived by hashing, no
-participant, including the central bank, knows the discrete logarithm relations
-that would break binding.
+\paragraph{Commitments.} Since the generators of the commitment key are derived
+by hashing, no participant, including the central bank, knows the discrete
+logarithm relations that would break binding.
 
-The Pointcheval-Sanders signature scheme is existentially unforgeable under the
-$q$-MSDH assumption, including the variant whose public key also contains the
-elements $\gen^{\theta_i}$ needed to sign committed
-messages~\cite{RSA:PoiSan18}.\rebekah{in the instantiation the $P_i$ are hashed generators separate from the key, so the public key contains no $\gen^{\theta_i}$; align this with \Cref{sec:offline-instantiation}} A reduction to it extracts the messages of each
-request online from its proof $\Pi$, using (P6), obtains a signature on them from
-its own oracle, programs the random oracle so that $k = \hash_{\group{1}}(C)$ is
-the signature's first element, and answers the request with the corresponding
-ciphertext. Fixing $k = \hash_{\group{1}}(C)$ rather than sampling it keeps
-unforgeability, since $k$ is still a group element neither party controls.
-Signing Pointcheval-Sanders signatures on committed inputs with ElGamal-encrypted
-requests is one-more unforgeable in this sense~\cite{NDSS:SABMD19}.
+\paragraph{Signing on committed inputs.} The Pointcheval-Sanders signature
+scheme is existentially unforgeable under the $q$-MSDH assumption, including
+the variant whose public key also contains the elements $\gen^{\theta_i}$
+needed to sign committed messages~\cite{RSA:PoiSan18}.\rebekah{in the instantiation the $P_i$ are hashed generators separate from the key, so the public key contains no $\gen^{\theta_i}$; align this with \Cref{sec:offline-instantiation}} A reduction to it extracts the messages of each
+request online from its proof $\algoproof_{\algo{req}}$, using (P6), obtains a
+signature on them from its own oracle, programs the random oracle so that $k =
+\hash_{\group{1}}(C)$ is the signature's first element, and answers the request
+with the corresponding ciphertext. Fixing $k = \hash_{\group{1}}(C)$ rather than
+sampling it keeps unforgeability, since $k$ is still a group element neither
+party controls. Signing Pointcheval-Sanders signatures on committed inputs with
+ElGamal-encrypted requests is one-more unforgeable in this
+sense~\cite{NDSS:SABMD19}.
 
-In a prime order group, a statement, first message and challenge of a Sigma
-protocol over discrete logarithms admit only one accepting response, which is
-what gives simulation extractability~\cite{INDOCRYPT:FKMV12}.\rebekah{this is false for equations with several bases, where responses are only computationally unique, under DL; the argument needs quasi-unique responses as in \Cref{sec:prelims-sigma}} The JPOK is a
+\paragraph{Simulation extractability.} In a prime order group, a statement,
+first message and challenge of a Sigma protocol over discrete logarithms admit
+only one accepting response, which is what gives simulation
+extractability~\cite{INDOCRYPT:FKMV12}.\rebekah{you asked ``do we?'': not in general; this is false for equations with several bases, where responses are only computationally unique, under DL; the argument needs quasi-unique responses as in \Cref{sec:prelims-sigma}} The JPOK is a
 conjunction of two such protocols under separate challenges, so the same
-argument applies to each of them and so to the whole. We rely on this rather
-than on the soundness Hesse, Singh and Sorniotti establish for the primitive,
-which is weaker~\cite{USENIX:HesSinSor23}. $\simu$ must extract from proofs
-produced by $\adv$ while itself producing simulated proofs for honest users, and
-plain soundness does not cover that. The resulting extractor yields the payer's
-identifier and credential from an accepted $\sigma_i$.
+argument applies to each of them and so to the whole.
 
-A request consists of the commitment $C$, the key $B$, the ciphertexts
-$\hat{\ciph}_i$ and the proof $\Pi$. At withdrawal the hidden messages include
-the uniform $s_0$, so $C$ is a uniformly random group element. The ciphertexts
-are under a key sampled afresh for the request, so by IND-CPA security of the
-ElGamal encryption scheme they can be replaced with encryptions of zero, and
-$\Pi$ can be replaced with a simulated proof by its zero knowledge. The result
-depends only on the disclosed value, which gives the request-hiding simulator.
+We rely on this rather than on the soundness Hesse, Singh and Sorniotti
+establish for the primitive, which is weaker~\cite{USENIX:HesSinSor23}.
+$\simu$ must extract from proofs produced by $\adv$ while itself producing
+simulated proofs for honest users, and plain soundness does not cover that. The
+resulting extractor yields the payer's identifier and credential from an
+accepted $\sigma_i$.
 
-For extraction, the extractor for Fiat-Shamir proofs proceeds by rewinding,
-which suffices wherever $\simu$ extracts once in order to derive a
-contradiction~\cite{INDOCRYPT:FKMV12}. In Game 7, however, $\simu$ must extract
-from requests in order to continue the simulation. It does so on requests a
-corrupt user chooses adaptively and without bound, and the cost of rewinding
-compounds across such extractions. Hesse, Singh and Sorniotti make the same
-requirement of the proof accompanying blind issuance~\cite{USENIX:HesSinSor23}.
-The instantiation compiles $\Pi$ with the Fischlin transform, which gives an
-online extractor in the random oracle model~\cite{C:Fischlin05}. This applies to
-$\Pi$ alone. It is not required of $\sigma_i$ or $\Gamma_i$, so it bears on the
-mobile device during withdrawal rather than on the secure element or on any part
-of a payment.
+\paragraph{Request hiding.}\rebekah{you asked whether this and the next paragraph are all about (P6): yes, request hiding is the first half of (P6) and extraction from requests the second} A request consists of the commitment $C$, the key $B$,
+the ciphertexts $\hat{\ciph}_i$ and the proof $\algoproof_{\algo{req}}$. At
+withdrawal the hidden messages include the uniform $s_0$, so $C$ is a uniformly
+random group element. The ciphertexts are under a key sampled afresh for the
+request, so by IND-CPA security of the ElGamal encryption scheme they can be
+replaced with encryptions of zero, and $\algoproof_{\algo{req}}$ can be replaced
+with a simulated proof by its zero knowledge. The result depends only on the
+disclosed value, which gives the request-hiding simulator.
 
-Because $\simu$ rewinds to extract, the argument holds in the standalone model
-of \Cref{sec:prelims-security}. Extracting online everywhere, as the instantiation does for
-$\Pi$, would give a result in the universal composability (UC) framework at the cost of a larger proof at each hop.
+\paragraph{Extraction from requests.} For extraction, the extractor for
+Fiat-Shamir proofs proceeds by rewinding, which suffices wherever $\simu$
+extracts once in order to derive a contradiction~\cite{INDOCRYPT:FKMV12}.\rebekah{Fischlin, only if confirmed necessary (the code uses plain Fiat-Shamir); the rest of this paragraph read: In Game 7, however, $\simu$ must extract from requests in order to continue the simulation. It does so on requests a corrupt user chooses adaptively and without bound, and the cost of rewinding compounds across such extractions. Hesse, Singh and Sorniotti make the same requirement of the proof accompanying blind issuance~\cite{USENIX:HesSinSor23}. The instantiation compiles $\algoproof_{\algo{req}}$ with the Fischlin transform, which gives an online extractor in the random oracle model~\cite{C:Fischlin05}. This applies to $\algoproof_{\algo{req}}$ alone. It is not required of $\sigma_i$ or $\Gamma_i$, so it bears on the mobile device during withdrawal rather than on the secure element or on any part of a payment.}
+
+\paragraph{Model.} Because $\simu$ rewinds to extract, the argument holds in the
+standalone model of \Cref{sec:prelims-security}.\rebekah{you wrote ``hm?'' at the next sentence, which read: Extracting online everywhere, as the instantiation does for $\algoproof_{\algo{req}}$, would give a result in the universal composability (UC) framework at the cost of a larger proof at each hop. Moved here with the Fischlin text; it could also be cut}
 
 The instantiated protocol therefore securely realises ideal functionality
 $\idfu{\algo{op}}$ in the random oracle model.

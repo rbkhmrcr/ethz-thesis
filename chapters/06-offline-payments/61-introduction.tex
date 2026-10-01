@@ -2,7 +2,7 @@
 
 An offline payment is one made while both the payer and the payee are
 disconnected from the network, and settled only once the token that changed
-hands is eventually deposited. Offline operation matters for availability and
+hands is eventually deposited.\rebekah{this opening sentence reads oddly, rewrite} Offline operation matters for availability and
 for accessibility. A payment instrument that stops working during a blackout, or
 in a place with poor network coverage, is not a replacement for cash.
 
@@ -15,7 +15,7 @@ to a national population, protect the privacy of its users, and support payments
 made offline~\cite{cbdctracker}.
 
 The difficulty is that the payee cannot check, at the time of the payment,
-whether the token they are receiving has already been spent. Without that check,
+whether the token they are receiving has already been spent. Without that,
 double spending is trivial. Responses divide into prevention and deterrence. A
 wallet application can delete a token as soon as it is sent, but an attacker who
 tampers with the application bypasses the restriction. A secure element, a small
@@ -52,13 +52,15 @@ payment in two. The secure element holds the signing key and enforces that a
 token is used once. Users' mobile devices perform the rest.
 
 \begin{outline}
-  \item the insight behind the design: the only thing that must be trusted to stop
-    double spending is a rule (use each token once), and a rule is cheap to enforce
+  \item the insight behind the design: to stop double spending, the rule (use
+    each token once) is cheap to enforce
   \item so everything protecting users' privacy can run on hardware users control,
-    as long as the secret the rule depends on never leaves the secure element
+    as long as the secret never leaves the secure element
 \end{outline}
 
 \subsection*{Related work}
+
+\rebekah{introduction and related work a little long, maybe compress, in particular the CBDC offline payments paragraph}
 
 \paragraph{Original ecash.} Ecash has been studied for several decades,
 beginning with Chaum's solutions, which focus on the privacy of users and on
@@ -100,9 +102,8 @@ and to the fact that physical cash does not satisfy it either.
 
 The bounded anonymity model keeps transactions anonymous as long as each user
 interacts with a given merchant no more than a fixed number of times. Beyond
-this, the user becomes identifiable~\cite{SCN:CamHohLys06}. We instead let the
-conditions under which anonymity is revoked be defined outside of the protocol
-itself.
+this, the user becomes identifiable~\cite{SCN:CamHohLys06}. We define the anonymity
+revocation conditions outside of the protocol.
 
 \paragraph{Offchain settlement.} Payment channels such as the Lightning network
 and Teechain provide offchain payments rather than offline
@@ -216,7 +217,7 @@ alone is identified, absorbed means the issuer covers the double-spent value,
 and prevented means double spending is stopped rather than resolved after the
 fact. The hardware column records the hardware assumption the scheme places on
 users' wallets, where OTR denotes one-time readable memory. Entries marked --
-are not addressed by the cited work.} \label{tab:offline-related-comparison}
+are not addressed by the cited work.\rebekah{check OPERA (PB17) for transferability and divisibility, the -- entries}} \label{tab:offline-related-comparison}
 \end{table}
 
 Our contribution is a transferable, privacy-preserving offline payment scheme. The contribution is not a new primitive but a combination, and

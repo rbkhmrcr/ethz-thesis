@@ -3,7 +3,7 @@
 \subsection{Proof of \Cref{thm:txid-bb}: security of the construction}\label{sec:txid-bb-sec}
 
 We show that the view of a real world adversary $\adv$ during an execution of
-$\Pi$ is indistinguishable from the view of an ideal world simulator $\simu$
+$\prot$ is indistinguishable from the view of an ideal world simulator $\simu$
 that interacts with system participants through ideal functionality
 $\idfu{\algo{trace}}$. We define a sequence of indistinguishable games that
 start with Game 0 representing the real world, and end with Game 7 representing
@@ -57,29 +57,29 @@ permissions and epoch keys.
 
   \end{enumerate}
 
-  \paragraph{Game 0.} The real execution of protocol $\Pi$.
+  \paragraph{Game 0.} The real execution of $\prot$.
 
   \paragraph{Game 1.} As Game 0, except $\simu$ simulates the ledger
 operator, the registration authority, and the honest users and auditors, by
-following $\Pi$'s instructions. Game 1 is indistinguishable
+following $\prot$'s instructions. Game 1 is indistinguishable
 from Game 0 by construction.
 
   \paragraph{Game 2.} As Game 1, except during registration $\simu$ simulates
 the registration authority's output directly from $\idfu{\algo{trace}}$'s
-$\IDregister$ calls, rather than executing $\Pi$. For each honest user's
+$\IDregister$ calls, rather than executing $\prot$. For each honest user's
 $\IDregister$ request, $\simu$ selects random $(\sk, \utk)$, simulates an
-execution of $\Pi$, and stores $\regsimu[\user] = (\sk, \utk, \signature)$.
+execution of $\prot$, and stores $\regsimu[\user] = (\sk, \utk, \signature)$.
 
   For a valid registration request from a corrupt user, $\simu$ issues
 $\IDregister$ to $\idfu{\algo{trace}}$ on the user's behalf and returns its
 output.  If $\idfu{\algo{trace}}$ registers the user, $\simu$ extracts $(\sk,
 \utk)$ using the extractability of the proof (P4), computes $\signature$
-following $\Pi$, sends it to $\user$, and records $\regsimu[\user] = (\sk, \utk,
+following $\prot$, sends it to $\user$, and records $\regsimu[\user] = (\sk, \utk,
 \signature)$.
 
   The two games diverge only if $\idfu{\algo{trace}}$'s decision on some
-$\IDregister$ call differs from $\Pi$'s. The correctness of $\Pi$ rules out
-$\idfu{\algo{trace}}$ accepting where $\Pi$ rejects, and the registration
+$\IDregister$ call differs from $\prot$'s. The correctness of $\prot$ rules out
+$\idfu{\algo{trace}}$ accepting where $\prot$ rejects, and the registration
 authority's tracking of past requests rules out the reverse, since only a double
 registration could cause it, and that never succeeds. So Game 2 is
 indistinguishable from Game 1.
@@ -96,7 +96,7 @@ information. By (P5), this is indistinguishable from a real execution.
   For an authorisation request from a corrupt auditor $\auditor$ to honest user
 $\user$, $\simu$ forwards it to $\user$, who calls $\IDgrant$. If
 $\idfu{\algo{trace}}$ accepts, $\simu$ retrieves $(\sk, \utk, \signature)
-\leftarrow \regsimu[\user]$, simulates $\user$'s response following $\Pi$, and
+\leftarrow \regsimu[\user]$, simulates $\user$'s response following $\prot$, and
 sets $\permsimu[(\auditor,\user,\epoch)] \leftarrow \FE(\utk, \epoch)$.
 
   This simulated response is indistinguishable from a real one, so Game 3 is
@@ -179,7 +179,7 @@ $\adv$ does not hold it. Pseudorandomness of $\FT$ licenses the substitution:
 the tags of an epoch are pseudorandom to an adversary holding $\PTK$ but not
 $\ek$, which is the position of every corrupt auditor here. So by (P2), (P3),
 and (P4), this is indistinguishable from submitting transactions in an execution
-of $\Pi$.\rebekah{a user may grant this epoch later, or retrospectively, to a
+of $\prot$.\rebekah{a user may grant this epoch later, or retrospectively, to a
 corrupt auditor, and the simulator then has to hand over an $\ek$ matching the
 random tags it already published, which it cannot; either forbid such grants in
 $\idfu{\algo{trace}}$ or change the simulation}
@@ -215,7 +215,7 @@ argument from the one-wayness of $\G$, $\G'$ or from extraction is missing} If $
 transaction in $\txns[(\user,\epoch)]$.
 
   This game is indistinguishable from Game 5 unless $\idfu{\algo{trace}}$
-rejects a transaction that $\Pi$ deems valid, which happens only in one of two
+rejects a transaction that $\prot$ deems valid, which happens only in one of two
 cases:
 
   \begin{description}
@@ -225,13 +225,13 @@ entry in $\regsimu$ corresponds to a successful $\IDregister$ call to
 $\idfu{\algo{trace}}$.
 
     \item[$\user$ already submitted $\Max$ transactions in the current epoch.]
-By (P4) and the determinism of $\FT$, $\Pi$ will not accept a transaction from
+By (P4) and the determinism of $\FT$, $\prot$ will not accept a transaction from
 $\user$ in this case as the tag will already appear in the ledger.
 
   \end{description}
 
   \paragraph{Game 7.} As Game 6, except $\simu$ stops the game if the output of
-the $\IDidentify$ interface differs from that of protocol $\Pi$'s tracing
+the $\IDidentify$ interface differs from that of $\prot$'s tracing
 functionality.
 
   $\simu$ stops if one of two events occurs. Event $E_1$ is a coalition of

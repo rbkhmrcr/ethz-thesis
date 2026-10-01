@@ -5,7 +5,7 @@
 \subsection{Proof of \Cref{thm:agg-creds-construction-security}: security of the construction}\label{sec:agg-creds-proof-1}
 
 In the following, we show that the view of a real-world adversary $\adv$ during
-an execution of the construction $\Pi$ is indistinguishable from the view of an ideal-world
+an execution of $\prot$ is indistinguishable from the view of an ideal-world
 simulator $\simu$ that interacts with system participants through ideal
 functionality $\idfu{\AAC}$.  We define a sequence of indistinguishable games
 that start with Game 0 representing the real world, and end with Game 8
@@ -29,12 +29,12 @@ simulation extractable.
 
 \begin{proof}
 
-  \paragraph{Game 0.} This is the execution of protocol $\Pi$.
+  \paragraph{Game 0.} This is the execution of $\prot$.
 
-  \paragraph{Game 1.} As Game 0, except $\simu$ executes protocol $\Pi$ on
+  \paragraph{Game 1.} As Game 0, except $\simu$ executes $\prot$ on
 behalf of the honest parties: $\simu$ is provided with the inputs (including
 secrets) of the honest parties, and interacts with corrupt parties, through the
-adversary, in the real world, following $\Pi$'s specifications, and returns the
+adversary, in the real world, following $\prot$'s specifications, and returns the
 corresponding output. At setup, $\simu$ extracts the secret key of every corrupt
 issuer from the proof of knowledge published with its public key. Corruption is
 static, so this extraction happens once, before any other interaction. This
@@ -68,17 +68,17 @@ triple $(\user, \att{i}, \atv{i})$.  To simulate the corresponding credential
 issuance for $\user$ in the real world, $\simu$ retrieves $(\sk, \pk)$ and
 $(\Tag, \psi)$.  If the pair $(\Tag, \psi)$ for $\user$ does not exist, meaning
 $\user$ did not call register before, then $\simu$ aborts. Otherwise, it
-honestly executes $\Pi$ with issuer $\issuer{i}$.  There are two cases to
+honestly executes $\prot$ with issuer $\issuer{i}$.  There are two cases to
 consider.
 
   \begin{description}
 
-    \item[$\issuer{i}$ is honest.] As per $\Pi$'s specification, $\simu$ receives
+    \item[$\issuer{i}$ is honest.] As per $\prot$'s specification, $\simu$ receives
 signature $\signature_i \sample \ATSsign(\isk{i}, \Tag, \atv{i})$ and
 records entry $\langle \user, \Tag, \atv{i}, \signature_i \rangle$, and
 $\idfu{\AAC}'$ likewise adds $\atv{i}$ to $\creds[\user][i]$.
 
-    \item[$\issuer{i}$ is corrupt.] If the execution of $\Pi$ terminates with
+    \item[$\issuer{i}$ is corrupt.] If the execution of $\prot$ terminates with
 $\simu$ receiving a signature $\signature_i$ with $\ATSverify(\ipk{i}, \Tag,
 \atv{i}, \signature_i) = 1$, then $\simu$ records entry $\langle \user, \Tag, \atv{i},
 \signature_i \rangle$, and sends accept.
@@ -89,7 +89,7 @@ $\simu$ receiving a signature $\signature_i$ with $\ATSverify(\ipk{i}, \Tag,
 request from a registered user, matching the first branch, and for a dishonest
 issuer, $\idfu{\AAC}'$ accepts only when $\simu$ does, when the issuer produced
 a genuinely valid single $\ATS$ signature.  So $\idfu{\AAC}'$'s output matches
-$\Pi$'s in both cases, and this game is indistinguishable from Game 3 as long as
+$\prot$'s in both cases, and this game is indistinguishable from Game 3 as long as
 $\simu$ does not abort.  Since $\user$ is honest, they always register
 before requesting credentials, so the abort event never occurs.
 
@@ -162,9 +162,9 @@ are honest.
       In case of scenario one, the output of $\idfu{\AAC}'$ is defined by
 $\simu$, which instructs $\idfu{\AAC}'$ to return $\AACverifyend$ with $0$.  In case
 of scenario two, $\idfu{\AAC}'$ returns $\AACverifyend$ with $1$.  However, thanks
-to the correctness of protocol $\Pi$ this scenario never occurs.  Given a proof
+to the correctness of $\prot$ this scenario never occurs.  Given a proof
 that was computed honestly,  $\NIZKverify$ will never output $0$, so the output
-of $\idfu{\AAC}'$ matches that of $\Pi$.
+of $\idfu{\AAC}'$ matches that of $\prot$.
 
       \rebekah{$\simu$ keeps no map between the string $\algoproof$ of $\idfu{\AAC}'$ and its simulated proof $\algoproof^\star$: a replayed honest presentation is in $\Query$ and cannot be extracted from, and the Otherwise branch verifies $\simu$'s own proof rather than the presented one.}
 

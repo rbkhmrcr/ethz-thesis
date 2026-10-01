@@ -1,63 +1,28 @@
 \section{Evaluation}\label{sec:offline-evaluation}
 \suppressfloats[t]
 
-We establish the practicality of the scheme by integrating the protocol into a
-mobile wallet and benchmarking its performance on both iOS and Android. We focus
-our evaluation on mobile phones and secure elements, to establish whether
-they can implement the protocol efficiently given their hardware and storage
-limitations.
+We evaluate whether mobile phones and a secure element can run the protocol
+within their hardware and storage limitations, and measure every algorithm
+separately in a server-side implementation, for the intermediary, the central
+bank, the registration authority and the auditor. We benchmark two versions of
+the protocol, with and without the verifiable encryption of the payer's
+identifier for the auditor, to show the overhead auditing imposes.
 
-We also measure every algorithm separately in a server-side implementation, for
-the intermediary, the central bank, the registration authority and the auditor.
-
-We implement the protocol on a Samsung Galaxy A34 running Android 14 and an
-iPhone 13 mini running iOS 17.6.1, both running a crypto library built with Go
-1.21.8\rebekah{confirm Go 1.21.8 for the phone library; it's from the old text and the repo has no record of it}. We benchmark two versions of the protocol, with and without the
-verifiable encryption of the payer's identifier for the auditor, to clearly show
-the overhead auditing imposes. The smart card is an NXP 1ID white plastic card
-with a Smart MX D600 chip and 400\,KiB of available memory, running JCOP 4.5 OS
-with NXP's JCOPx extensions at version 1.1.4. Card and phone communicate over
-near-field communication (NFC).
-
-A fundamental aspect of a realistic benchmark is the choice of secure element.
-We consider four options: software emulation of the secure element in the wallet
-app, a TEE-based secure element in the mobile platform, a secure element in a
-hardware security module (HSM) of the mobile platform, and an external secure element. We discard
-software emulation, since it would present unrealistically good performance by
-ignoring both the resource-constrained environment of a real secure element and
-the communication overhead of talking to one. We discard TEE-based secure
-elements as insufficiently secure, given their wider attack surface and history
-of compromise~\cite{TEEsBad}. We discard HSM-based secure elements because those
-integrated into Apple and Android platforms do not implement our scheme and are
-not extensible. We therefore adopt an external secure element, implemented on
-smart cards. We use Javacard, a Java-based framework for smart cards, in which
-the protocol running on the secure element is implemented as an applet, a small
-application supported by a subset of the Java runtime~\cite{javacard}.
-
-Recall that, with the smart card's help, the payer produces a signature of
-knowledge over two commitments, the payer's $\com_i$ and the payee's
-$\com_{i+1}$. To prevent double spending, the smart card is programmed to sign
-only $(v, \com_i, \com_{i+1})$ triples such that $\com_i$ is the commitment the
-card generated when it received the token, and to sign against only a single
-destination commitment $\com_{i+1}$ for that token once it is spent. The first
-constraint ensures the card signs off payments only for the token last received,
-avoiding re-spending of past ones. The second ensures the current token can be
-transferred to only one recipient.
-
-Withdrawal starts with the holder scanning their card to obtain values $s_0$ and
-$\com_0$, using these to generate a withdrawal request and issuing it to the
-REST endpoint of their intermediary over HTTPS. The full message sequence is
-given in \Cref{fig:offline-withdraw-seq}. Before the offline payment protocol
-can start, payer and payee negotiate the terms of the payment and set up a
-Bluetooth Low Energy channel. The full message sequence is given in
-\Cref{fig:offline-pay-seq}.
+The phone and smart card measurements come from the original implementation of
+the scheme.\rebekah{cite the original implementation; it is not cited anywhere
+yet} It runs the wallet on a Samsung Galaxy A34 with Android 14 and an iPhone 13
+mini with iOS 17.6.1, both with a crypto library built with Go
+1.21.8\rebekah{confirm Go 1.21.8 for the phone library; it's from the old text and the repo has no record of it},
+and the secure element as a Javacard applet~\cite{javacard} on an NXP smart card
+running JCOP 4.5, which the phone reaches over near-field communication (NFC).
+\Cref{fig:offline-withdraw-seq,fig:offline-pay-seq} give the message sequences
+of a withdrawal and a payment.
 
 The server-side implementation is written in Go with gnark-crypto 0.21.0 over
 the BLS12-381 curve, and runs on a MacBook Air with an Apple M2 and 16\,GB of
-RAM~\cite{gnark-crypto}. On the server the secure element is replaced by a stub,
-which is not timed. We report medians of $100$ runs, after $10$ warm-up calls on
-the server. The interquartile range is within $3\%$ of the median for most
-operations, and at most $13\%$ on the phones and the card and $10\%$ on the
+RAM~\cite{gnark-crypto}. We report medians of $100$ runs, after $10$ warm-up
+calls on the server. The interquartile range is within $3\%$ of the median for
+most operations, and at most $13\%$ on the phones and the card and $10\%$ on the
 server.
 
 \begin{figure}[htbp] \centering \small
@@ -85,26 +50,26 @@ and the central bank. The device talks to the intermediary over HTTPS.}
 \label{fig:offline-withdraw-seq} \end{figure}
 
 \begin{figure}[htbp] \centering \small
-\begin{tikzpicture}[seq]
-  \foreach \x/\n/\e in {0/Payer's\\secure element/12.4, 1/Payer's\\device/12.4, 2/Payee's\\device/11.4, 3/Payee's\\secure element/10.4} {
+\begin{tikzpicture}[seq, y=-0.5cm]
+  \foreach \x/\n/\e in {0/Payer's\\secure element/9.9, 1/Payer's\\device/9.9, 2/Payee's\\device/9.3, 3/Payee's\\secure element/8.7} {
     \node[seqhead, anchor=south] at (\x, 0.5) {\n};
     \draw[seqlife] (\x, 0.6) -- (\x, \e);
   }
   \draw[seqmsg] (2, 1) -- node[seqlabel] {receive $v$} (3, 1);
-  \node[seqloc] at (3, 2) {$\com_{i+1} \leftarrow \ComCommit$};
-  \draw[seqmsg] (3, 3) -- node[seqlabel] {$(s_{i+1}, \com_{i+1})$} (2, 3);
-  \draw[seqmsg] (2, 4) -- node[seqlabel] {$\com_{i+1}$} (1, 4);
-  \node[seqloc] (l) at (0, 5) {lock $\tau_i$};
-  \draw[seqmsg] (1, 5) -- node[seqlabel] {pay $v$} (l);
-  \node[seqloc] at (1, 6) {$\ciph_i$, $\Gamma_i$};
-  \draw[seqmsg, {Stealth[length=1.6mm]}-{Stealth[length=1.6mm]}] (0, 7) --
-    node[seqlabel] {$\JPOKprove_0$, $\JPOKprove_1$} (1, 7);
-  \node[seqloc] at (1, 8) {$\sigma_i$ on $(v, \com_i, \com_{i+1})$};
-  \node[seqloc] (v) at (2, 9) {verify $\algo{hist}_i$, $\Gamma_i$, $\sigma_i$};
-  \draw[seqmsg] (1, 9) -- node[seqlabel] {$p_i$} (v);
-  \draw[seqmsg] (2, 10) -- node[seqlabel] {store $\tau_{i+1}$} (3, 10);
-  \draw[seqmsg] (2, 11) -- node[seqlabel] {acknowledge} (1, 11);
-  \draw[seqmsg] (1, 12) -- node[seqlabel] {delete $\com_i$} (0, 12);
+  \node[seqloc] at (3, 1.7) {$\com_{i+1} \leftarrow \ComCommit$};
+  \draw[seqmsg] (3, 2.7) -- node[seqlabel] {$(s_{i+1}, \com_{i+1})$} (2, 2.7);
+  \draw[seqmsg] (2, 3.3) -- node[seqlabel] {$\com_{i+1}$} (1, 3.3);
+  \node[seqloc] (l) at (0, 3.9) {lock $\tau_i$};
+  \draw[seqmsg] (1, 3.9) -- node[seqlabel] {pay $v$} (l);
+  \node[seqloc] at (1, 4.6) {$\ciph_i$, $\Gamma_i$};
+  \draw[seqmsg, {Stealth[length=1.6mm]}-{Stealth[length=1.6mm]}] (0, 5.6) --
+    node[seqlabel] {$\JPOKprove_0$, $\JPOKprove_1$} (1, 5.6);
+  \node[seqloc] at (1, 6.3) {$\sigma_i$ on $(v, \com_i, \com_{i+1})$};
+  \node[seqloc] (v) at (2, 7.3) {verify $\algo{hist}_i$, $\Gamma_i$, $\sigma_i$};
+  \draw[seqmsg] (1, 7.3) -- node[seqlabel] {$p_i$} (v);
+  \draw[seqmsg] (2, 8.3) -- node[seqlabel] {store $\tau_{i+1}$} (3, 8.3);
+  \draw[seqmsg] (2, 8.9) -- node[seqlabel] {acknowledge} (1, 8.9);
+  \draw[seqmsg] (1, 9.5) -- node[seqlabel] {delete $\com_i$} (0, 9.5);
 \end{tikzpicture}
 \caption[Offline payments: payment]{Messages and local steps of a payment,
 between the payer's and the payee's devices and secure elements. The two devices
@@ -114,7 +79,7 @@ NFC.} \label{fig:offline-pay-seq} \end{figure}
 Withdrawal and the payer side of a payment both complete in under half a second,
 and the smart card authorises a payment in under $400\,\mathrm{ms}$.
 
-\Cref{tab:offline-timings} and \Cref{fig:offline-phone-steps} give the time of each wallet
+\Cref{tab:offline-timings} gives the time of each wallet
 step on the phones and the card.\rebekah{the text does not say where the phone and card measurements come from (when, which code version, which of the kept json or dataset files); the json files differ from the dataset files the tables use} We count hops as the signatures of knowledge a verifier
 checks, so one hop is the first payment $p_0$ after withdrawal, or a deposit
 made straight after withdrawal. Most of it is spent on the card, which takes
@@ -139,11 +104,6 @@ trip. The smart card does the same work with and without auditing, and both
 columns use the same card measurements.} \label{tab:offline-timings}
 \end{table}
 
-\begin{figure}[htbp] \centering
-\includegraphics[width=\textwidth]{chapters/06-offline-payments/offline-phone-steps.pdf}
-\caption[Offline payments: wallet steps on the phone and card]{Time of each wallet step at one hop, with auditing, split into the
-smart card, including NFC, and the phone. Medians over $100$ runs.}
-\label{fig:offline-phone-steps} \end{figure}
 
 Payee verification grows linearly with the number of hops, since each hop
 contributes one signature of knowledge and one audit proof to check, and even a
@@ -171,60 +131,73 @@ the deposit request $d_n$ against the number of hops, with and without
 auditing.} \label{fig:offline-hops-sizes} \end{figure}
 
 \Cref{tab:offline-server} gives the server-side time of each algorithm at one
-hop, \Cref{tab:offline-sizes} the sizes of the objects involved, and
-\Cref{tab:offline-comms} the communication of each protocol. Every server-side
+hop and the size of the key, message or proof it produces, and
+\Cref{tab:offline-comms} the bytes each party sends in each protocol. Every server-side
 operation takes under $5\,\mathrm{ms}$, and identification under
 $0.1\,\mathrm{ms}$. The card channel never carries more than $192$ bytes in one
 direction.
 
 
-\begin{table}[htbp] \centering \small \begin{tabular}{llrr} \toprule Algorithm &
-Party & no audit & audit \\ \midrule
-$\OPgen$ & central bank & \multicolumn{2}{c}{0.875} \\
-& registration authority & \multicolumn{2}{c}{0.175} \\
-& auditor & \multicolumn{2}{c}{0.0740} \\
-& commitment key & \multicolumn{2}{c}{0.626} \\
-$\OPregister$ & registration authority & \multicolumn{2}{c}{0.526} \\
-$\OPwithdraw$ & device, request & \multicolumn{2}{c}{1.53} \\
-& intermediary & \multicolumn{2}{c}{1.15} \\
-& central bank & \multicolumn{2}{c}{1.61} \\
-& device, unblind and $\Sigma$ & \multicolumn{2}{c}{2.83} \\
-$\OPexecute$ & payer device & 1.14 & 1.65 \\
-& payee device, 1 hop & 3.75 & 4.32 \\
-$\OPdeposit$ & device & 1.16 & 1.65 \\
-& central bank, 1 hop & 3.83 & 4.28 \\
-$\OPidentify$ & auditor & -- & 0.0778 \\
-\midrule
-$\JPOKverify$, one hop & verifier & 1.97 & 2.38 \\
-PS sign / verify & & \multicolumn{2}{c}{0.148 / 1.42} \\
-BBS+ sign / verify & & \multicolumn{2}{c}{0.280 / 1.31} \\
-ElGamal encrypt / decrypt & & \multicolumn{2}{c}{0.148 / 0.0754} \\
-Pedersen commit & & \multicolumn{2}{c}{0.175} \\
-\bottomrule \end{tabular} \caption[Offline payments: server-side time]{Median server-side time in milliseconds of each
-algorithm at one hop. Rows that do not depend on auditing are
-measured once. The secure element's part is not included.}
-\label{tab:offline-server} \end{table}
-
-\begin{table}[htbp] \centering \small \begin{tabular}{lrr} \toprule Object & no
-audit & audit \\ \midrule
-Public parameters $\crs$\rebekah{the scheme has no $\crs$; this row counts the hashed generators and keys the implementation bundles as its public parameters, so rename it or drop it} & 1008 & 1056 \\
-$\pk_{\algo{cb}}$, $\rapk$, $\pk_\auditor$ & \multicolumn{2}{c}{480, 96, 48} \\
-Credential $\cred$ & \multicolumn{2}{c}{144} \\
-Registration request, response & \multicolumn{2}{c}{192, 112} \\
-Withdrawal request $\algo{req}$ (of which $\Pi$) & \multicolumn{2}{c}{664 (368)} \\
-Withdrawal response $\algo{resp}$ & \multicolumn{2}{c}{128} \\
-Proof of withdrawal $\Sigma$ & \multicolumn{2}{c}{432} \\
-Secure element's share of the JPOK & \multicolumn{2}{c}{192} \\
-Transfer signature $\sigma_i$ & 640 & 768 \\
-One hop of $\algo{hist}$ & 688 & 912 \\
-Payment $p_i$, 1 hop & 1176 & 1400 \\
-Deposit request $d_n$, 1 hop & 1128 & 1352 \\
-\bottomrule \end{tabular} \caption[Offline payments: sizes]{Sizes in bytes, with group elements
-compressed ($48$ bytes in $\group{1}$, $96$ bytes in $\group{2}$).}
-\label{tab:offline-sizes} \end{table}
+\begin{table}[htbp] \centering \small
+\caption[Offline payments: server-side time and size]{Median server-side time
+of each algorithm at one hop, in milliseconds, and size of the key, message or
+proof it produces, in bytes, with group elements compressed ($48$ bytes in
+$\group{1}$, $96$ bytes in $\group{2}$). Rows that do not depend on auditing are
+measured once and repeated in both columns. The secure element's part is not
+included. The last rows give the sizes of objects no single algorithm sends.\rebekah{the scheme has no $\crs$; the public parameters row counts the hashed generators and keys the implementation bundles as its public parameters, so rename it or drop it}}
+\label{tab:offline-server} \label{tab:offline-sizes}
+  %
+  \begin{tabular}{l l r r r r} \toprule
+    %
+    & & \multicolumn{2}{c}{No audit} & \multicolumn{2}{c}{Audit} \\
+    \cmidrule(lr){3-4} \cmidrule(lr){5-6}
+    %
+    Algorithm & Party & ms & B & ms & B \\
+    %
+    \midrule
+    %
+    $\OPgen$ & central bank, $\pk_{\algo{cb}}$ & 0.875 & 480 & 0.875 & 480 \\
+    & registration authority, $\rapk$ & 0.175 & 96 & 0.175 & 96 \\
+    & auditor, $\pk_\auditor$ & 0.0740 & 48 & 0.0740 & 48 \\
+    & commitment key & 0.626 & -- & 0.626 & -- \\
+    & public parameters & -- & 1008 & -- & 1056 \\
+    $\OPregister$ & secure element, request & -- & 192 & -- & 192 \\
+    & registration authority, response & 0.526 & 112 & 0.526 & 112 \\
+    $\OPwithdraw$ & device, request $\algo{req}$ & 1.53 & 664 & 1.53 & 664 \\
+    & intermediary & 1.15 & -- & 1.15 & -- \\
+    & central bank, response $\algo{resp}$ & 1.61 & 128 & 1.61 & 128 \\
+    & device, unblind and $\Sigma$ & 2.83 & 432 & 2.83 & 432 \\
+    $\OPexecute$ & payer device, payment $p_i$ & 1.14 & 1176 & 1.65 & 1400 \\
+    & payee device, 1 hop & 3.75 & -- & 4.32 & -- \\
+    $\OPdeposit$ & device, request $d_n$ & 1.16 & 1128 & 1.65 & 1352 \\
+    & central bank, 1 hop & 3.83 & -- & 4.28 & -- \\
+    $\OPidentify$ & auditor & -- & -- & 0.0778 & -- \\
+    %
+    \midrule
+    %
+    $\JPOKverify$, one hop & verifier & 1.97 & -- & 2.38 & -- \\
+    PS sign & & 0.148 & -- & 0.148 & -- \\
+    PS verify & & 1.42 & -- & 1.42 & -- \\
+    BBS+ sign & & 0.280 & -- & 0.280 & -- \\
+    BBS+ verify & & 1.31 & -- & 1.31 & -- \\
+    ElGamal encrypt & & 0.148 & -- & 0.148 & -- \\
+    ElGamal decrypt & & 0.0754 & -- & 0.0754 & -- \\
+    Pedersen commit & & 0.175 & -- & 0.175 & -- \\
+    %
+    \midrule
+    %
+    \multicolumn{2}{l}{Credential $\cred$} & -- & 144 & -- & 144 \\
+    \multicolumn{2}{l}{Withdrawal request proof $\algoproof_{\algo{req}}$, in $\algo{req}$} & -- & 368 & -- & 368 \\
+    \multicolumn{2}{l}{Secure element's share of the JPOK} & -- & 192 & -- & 192 \\
+    \multicolumn{2}{l}{Transfer signature $\sigma_i$} & -- & 640 & -- & 768 \\
+    \multicolumn{2}{l}{One hop of $\algo{hist}$} & -- & 688 & -- & 912 \\
+    %
+  \bottomrule \end{tabular}
+%
+\end{table}
 
 \begin{table}[htbp] \centering \small \resizebox{\textwidth}{!}{\begin{tabular}{lllrr} \toprule Protocol &
-Channel & Party & Bytes sent & Flights \\ \midrule
+Channel & Party & Bytes sent & Messages \\ \midrule
 $\OPregister$ & network & secure element, registration authority & 192, 144 & 3 \\
 & card & secure element & 144 & 1 \\
 $\OPwithdraw$ & network & device, intermediary, central bank & 664, 792, 128 & 4 \\
@@ -234,6 +207,6 @@ $\OPexecute$ & network & payer device, payee device & 1400 (1176), 48 & 3 \\
 & payee card & device, secure element & 8, 80 & 2 \\
 $\OPdeposit$ & network & device, intermediary, central bank & 1352 (1128), 1353 (1129), 1 & 4 \\
 & card & device, secure element & 57, 192 & 2 \\
-\bottomrule \end{tabular}} \caption[Offline payments: communication]{Bytes sent by each party and message flights
-per protocol at one hop, with auditing, and without it in parentheses where it
-differs.} \label{tab:offline-comms} \end{table}
+\bottomrule \end{tabular}} \caption[Offline payments: communication]{Bytes sent by each party and number of
+messages exchanged per protocol at one hop, with auditing, and without it in
+parentheses where it differs.} \label{tab:offline-comms} \end{table}
