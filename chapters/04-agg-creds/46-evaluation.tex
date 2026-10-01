@@ -111,6 +111,11 @@ verification 4.05\,ms against 11.8\,ms. At $n = 128$, Idemix verifies faster
 once more than about 20 attributes are disclosed, but it is in the single-issuer
 setting.
 \rebekah{At $n = 128$, Idemix presentation is also faster beyond about $k = 85$ disclosed attributes; say so here.}
+\rebekah{Comments: ``Idemix O(n-k) for presentation'', ``Idemix fixed k? figure
+it out'', and ``what about implementing HP?''. Idemix proves knowledge of the
+$n - k$ hidden attributes, so at fixed $n$ its presentation cost falls as $k$
+grows; say this in the text, not only in the note above. Decide whether to
+implement HP22 as a second baseline, or say why it is not.}
 \begin{outline}
   \item close: costs are low enough for client devices
 \end{outline}

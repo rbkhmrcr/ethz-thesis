@@ -1,5 +1,6 @@
 \section{Summary}\label{sec:agg-creds-summary}
 
+\rebekah{Comment on the first two sentences: ``not really clear.''}
 This chapter addresses a gap in existing anonymous credential systems. While
 later systems decentralise issuance, the issuers as a whole remain responsible
 for all attributes. We instead target the setting of distinct issuers without
@@ -24,13 +25,16 @@ a special-purpose proof for efficiency.
 The instantiation combines the $\AGHO$ SPS scheme, our tag-based aggregate
 signature scheme $\ATS$, and Sigma protocol based proofs. With $n = 128$ issuers and $k =
 64$ disclosed attributes, a presentation takes 20.1\,ms to produce and
-31.1\,ms to verify, and these costs scale with $k$, not $n$.
+31.1\,ms to verify.
 A concrete security analysis of the scheme would be valuable for determining
 its real-world security guarantees.
 \begin{outline}
   \item open direction: GGM is needed only through AGHO; a rerandomisable SPS under a standard assumption would remove it, at the cost of larger registration signatures
 \end{outline}
 
+\rebekah{Comment on the revocation and issuer hiding paragraphs: ``should we
+put the extensions in here instead though?'' Decide whether the Extensions
+paragraph of \Cref{sec:agg-creds-construction} moves here.}
 We briefly outline epoch-based revocation, which would address attributes with
 natural expiry dates. However, a more thorough consideration of revocation is
 needed before the scheme would be able to support different attribute

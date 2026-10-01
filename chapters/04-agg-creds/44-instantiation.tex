@@ -135,7 +135,7 @@ We prove \Cref{thm:agg-creds-thm-1} in \Cref{sec:agg-creds-proof-2}.
 \subsection{Instantiating $\AAC$ with $\AGHO$ and $\ATS$}\label{sec:agg-creds-aac-inst}
 
 \paragraph{Overview.} In this instantiation, each user has a pair of secret and
-public keys $(\sk, \pk = \gen^\sk)$. The digital signature $\DS$ uses the AGHO
+public keys $(\sk, \pk = \gen^\sk)$. The digital signature $\DS$ is instantiated using the AGHO
 structure-preserving signature scheme of \Cref{prim:agho}~\cite{C:AGHO11}. Every user is assigned a
 unique tag $\Tag \in \Zp$. Since structure-preserving signatures sign vectors
 of group elements rather than scalars, we take $\tid = \hashtwo(\Tag)$ and it is
@@ -145,6 +145,9 @@ directly. Hashing the tag also lets us extract $\Tag$ from $\tid$ by
 programming the random oracle. The aggregate tag-based signature $\ATS$ is
 instantiated with our construction. The protocol instantiation is described in
 full in \Cref{prot:paac}.
+\rebekah{Comment: ``would a DL version be possible if tag was a scalar?''
+Decide whether a version with only a discrete-logarithm registration signature
+on a scalar tag would work, and if not, say why here.}
 
 \paragraph{The AGHO structure-preserving signature scheme.} The registration authority's key pair is for the structure-preserving signature
 scheme, since messages and signatures consist of elements of the same group as
@@ -155,6 +158,9 @@ logarithms, rather than requiring a general purpose zero knowledge proof.
 The aggregate signature uses the same element $\hashtwo(\Tag)$, so the
 registration signature and the aggregate signature share one group element, and
 the presentation only shows that they share it.
+\rebekah{Comment: ``which is? easy proofs? group elements? why can't tag be a
+group element, why both''. Say directly why the tag is not just a group element
+and why both $\Tag$ and $\tid$ are needed.}
 
 We write the registration authority's public key, the issuer public keys, the
 tag identifier and the two signatures as follows:

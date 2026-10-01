@@ -6,6 +6,10 @@ values. The two main security properties are unlinkability, so two presentations
 of the same user cannot be tied to one another, and unforgeability, so a user
 can only successfully attest to having attribute values that they truly
 possess~\cite{EC:CamLys01}.
+\begin{outline}
+  \item comment: ``define attributes?'' and ``very quick into security properties?'': say what an attribute is (a value about the user that an issuer certifies) before the security properties
+  \item then lead more slowly into unlinkability and unforgeability
+\end{outline}
 
 Early anonymous credential schemes assume a single issuer certifying all
 attributes, creating a single entity responsible for all issuance, and able to
@@ -70,6 +74,14 @@ verification complexity grow linearly with the number of attribute values
 signed~\cite{C:CamLys04}. An extension supports a constrained form of
 aggregation, but only in settings where all values are known ahead of
 time~\cite{FC:LeeLeeYun13}.
+\rebekah{Comments: ``not sure about assumption relevance'' at sRSA and LRSW,
+``don't think we should drop assumptions like this, what's the idea? is that
+the efficient schemes have bad assumptions'' at $n$-BSDH and $J$-RootDH, and,
+on an older printout, ``CDHK15: lots of unnamed assumptions''. The point about
+assumptions is now made once, after Comparison. Decide: take the assumption
+names out of the related-work prose here and in the CDHK15 and CL11
+paragraphs, leaving them in the table only, or keep them and give CDHK15's full
+list instead of ``\ldots''.}
 
 Credentials built on the BBS+ signature scheme support selective disclosure,
 where a user reveals some of their attribute values and hides the rest, in a
@@ -134,7 +146,9 @@ on a new interactive assumption.
 \paragraph{Other multi-authority credentials.} Other multi-authority
 credentials are in different settings. Threshold issuance without interactive
 setup lets uncoordinated issuers jointly certify one
-credential~\cite{EPRINT:GGPR25}, while here each issuer certifies its own
+credential~\cite{EPRINT:GGPR25}\rebekah{``don't cite eprint'': cryptobib has
+no published version of GGPR25 (only ePrint 2025/2042); check whether it has
+appeared since, else keep the ePrint key}, while here each issuer certifies its own
 attributes. Independent authorities can also each sign a user's global
 identity, with one proof per credential~\cite{anada2019decentralized}.
 Credentials can be derived from existing identity documents with zk-SNARKs,
@@ -153,6 +167,11 @@ issuers keep no record, and presentations prove knowledge of the registration
 signature instead. Separating what is required of the registration authority
 from what is required of the issuers is what lets our issuers be stateless.
 ART-Sign offers traceability, which our scheme does not.
+\rebekah{Comments on the Comparison bullets: ``really compress, 3 sentences in
+total?'', and on the bullets after it ``last bullet is useful, others should be
+mostly covered by comparison higher up. just one sentence here about ART, one
+about the others.'' Cut this paragraph to one sentence on ART-Sign, and the next
+paragraph to one sentence on the other schemes, keeping the assumptions point.}
 
 \Cref{tab:agg-creds-related} compares our scheme with several single- and
 multi-issuer credential systems, reporting asymptotic complexities. In the
