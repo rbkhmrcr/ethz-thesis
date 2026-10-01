@@ -81,13 +81,21 @@ the terms $\msg_i^{-\mu_i}$. Our threshold version relies on both properties.
   \begin{description}
 
     \item[$(\pk, \sk) \sample \SPSgen(\secparam, \ell)$ :] Sample $\mu_1,
-\ldots, \mu_\ell, \tau \sample \Zp^*$, and output $\sk = (\mu_1, \ldots, \mu_\ell,
-\tau)$ and $\pk = (\widetilde{u}_1, \ldots, \widetilde{u}_\ell, v)$, where
-$\widetilde{u}_i = \ggen^{\mu_i}$ and $v = \gen^{\tau}$.
+\ldots, \mu_\ell, \tau \sample \Zp^*$, and return the following:
+      %
+      \begin{gather*}
+      %
+	\sk = (\mu_1, \ldots, \mu_\ell, \tau), \quad \pk = (\widetilde{u}_1,
+\ldots, \widetilde{u}_\ell, v), \\
+      %
+	\widetilde{u}_i = \ggen^{\mu_i} \ \text{ for } i \in [1,\ell], \quad v =
+\gen^{\tau}.
+      %
+      \end{gather*}
 
     \item[$\SPSsig \sample \SPSsign(\sk, \vec{\msg})$ :] On input $\vec{\msg} =
 (\msg_1, \ldots, \msg_\ell) \in \group{1}^\ell$, sample $\omega \sample \Zp^*$
-and output
+and return the following:
       %
       \begin{equation*}
       %
@@ -98,16 +106,17 @@ and output
       \end{equation*}
 
     \item[$\SPSsig' \sample \SPSrandomise(\SPSsig)$ :] On input $\SPSsig =
-(\widetilde{r}, \widetilde{s}, z)$, sample $\omega' \sample \Zp^*$ and output
+(\widetilde{r}, \widetilde{s}, z)$, sample $\omega' \sample \Zp^*$ and return
 $(\widetilde{r}^{\,\omega'}, \widetilde{s}^{\,\omega'}, z^{1/\omega'})$.
 
     \item[$\{0,1\} \leftarrow \SPSverify(\pk, \vec{\msg}, \SPSsig)$ :] On input
-$\SPSsig = (\widetilde{r}, \widetilde{s}, z)$, output $1$ if and only if
+$\SPSsig = (\widetilde{r}, \widetilde{s}, z)$, return $1$ if and only if the
+following hold:
       %
       \begin{equation*}
       %
-	\pairing(v, \widetilde{r}) = \pairing(\gen, \widetilde{s}) \ \wedge\
-\pairing(z, \widetilde{r}) \prod_{i=1}^{\ell} \pairing(\msg_i, \widetilde{u}_i)
+	\pairing(v, \widetilde{r}) = \pairing(\gen, \widetilde{s}), \quad
+\pairing(z, \widetilde{r}) \cdot \prod_{i=1}^{\ell} \pairing(\msg_i, \widetilde{u}_i)
 = \pairing(\gen, \ggen).
       %
       \end{equation*}
@@ -302,8 +311,16 @@ sharing of a group element.
 
 Linear operations are not interfaces, since they need no interaction. Given
 sharings $\shr{\alpha}$, $\shr{\beta}$ and public $\rho, \sigma, \tau \in \Zp$,
-each signer applies the combination to its own shares to obtain $\shr{\rho\alpha
-+ \sigma\beta + \tau} = \rho\shr{\alpha} + \sigma\shr{\beta} + \tau$. In a group,
+each signer applies the combination to its own shares to obtain the following:
+%
+\begin{equation*}
+%
+  \shr{\rho\alpha + \sigma\beta + \tau} = \rho\shr{\alpha} + \sigma\shr{\beta} +
+\tau.
+%
+\end{equation*}
+%
+In a group,
 given sharings $\shr{a}$, $\shr{b}$ and a public group element $d$, each signer
 obtains $\shr{a}^{\rho}\shr{b}^{\sigma}d$. In particular, raising a public group
 element to a shared exponent, $d^{\shr{\alpha}}$, gives a sharing of
@@ -327,7 +344,7 @@ multiplication uses one triple and two openings
 $\algo{ExpGrp}$ consumes a mixed triple $(\shr{\eta}, \shr{h}, \shr{h^\eta})$
 with $\eta \sample \Zp$ and $h \sample \group{}$. The signers open $\epsilon =
 \alpha - \eta$ and $\delta = b h^{-1}$, which are uniform and reveal nothing, and
-compute locally
+compute the following locally:
 %
 \begin{equation*}
 %

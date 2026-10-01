@@ -18,7 +18,8 @@ sharing of the result.
 \subsection{Instantiating $\TSPS$ with $\AGHO$}\label{sec:tsps-abe}
 
 \Cref{prim:agho} recalls the $\AGHO$ SPS scheme~\cite{C:AGHO11}. Writing $\rho =
-1/\omega$ for its signing randomness, a signature on $\vec{\msg}$ is
+1/\omega$ for its signing randomness, a signature on $\vec{\msg}$ is as
+follows:
 %
 \begin{equation*}
 %
@@ -27,8 +28,16 @@ sharing of the result.
 %
 \end{equation*}
 %
-It has decomposable signing with $c_0 = (\widetilde{r}, \widetilde{s})$, $c_1 =
-\gen^{\rho}$ and $e_{1,i} = -\rho\mu_i$, none of which depend on the message.
+It has decomposable signing with $c_0$, $c_1$ and $e_{1,i}$ as follows:
+%
+\begin{equation*}
+%
+  c_0 = (\widetilde{r}, \widetilde{s}), \quad c_1 = \gen^{\rho}, \quad e_{1,i}
+= -\rho\mu_i,
+%
+\end{equation*}
+%
+none of which depend on the message.
 Everything the offline phase computes is a field element or a generator raised
 to one, so it needs no $\algo{ExpGrp}$. The costly step is $1/\rho$. Computed
 directly, it takes a multiplication and an opening, and $\tau/\rho$ then takes
@@ -42,67 +51,93 @@ two rounds suffice. The result is threshold $\AGHO$, given in
   \begin{description}
 
     \item[$(\pk, \shr{\sk}) \sample \TSPSgen(\secparam, \ell, t, n)$ :] The
-signers compute
-      %
-      \begin{equation*}
-      %
-	\shr{\mu_1}, \ldots, \shr{\mu_\ell}, \shr{\tau} \sample
-\algo{RandShare}(), \quad \shr{v} = \gen^{\shr{\tau}}, \quad
-\shr{\widetilde{u}_i} = \ggen^{\shr{\mu_i}} \ \ (i \in [1,\ell]),
-      %
-      \end{equation*}
-      %
-      and open $\pk = (\widetilde{u}_1, \ldots, \widetilde{u}_\ell, v)$. Each
-signer keeps $\shr{\sk} = (\shr{\mu_1}, \ldots, \shr{\mu_\ell}, \shr{\tau})$.
+signers do the following:
 
-    \item[$\shr{\state} \sample \TSPSoffsign(\shr{\sk})$ :] The signers sample
-$\shr{\rho}, \shr{\beta} \sample \algo{RandShare}()$, compute
-      %
-      \begin{equation*}
-      %
-	\shr{\rho\beta}, \ \shr{\rho\mu_i} \ \ (i \in [1,\ell]), \
-\shr{\tau\beta} \sample \algo{Mul}
-      %
-      \end{equation*}
-      %
-      in one round, and in a second round open $\gamma = \rho\beta$, aborting if
-$\gamma = 0$. Each signer then computes locally
-      %
-      \begin{equation*}
-      %
-	\shr{1/\rho} = \gamma^{-1}\shr{\beta}, \quad \shr{\tau/\rho} =
-\gamma^{-1}\shr{\tau\beta}, \quad \shr{\widetilde{r}} = \ggen^{\shr{1/\rho}},
-\quad \shr{\widetilde{s}} = \ggen^{\shr{\tau/\rho}}, \quad \shr{\gen^{\rho}} =
-\gen^{\shr{\rho}},
-      %
-      \end{equation*}
-      %
-      and stores $\shr{\state} = (\shr{\widetilde{r}}, \shr{\widetilde{s}},
+      \begin{enumerate}
+
+	\item Sample $\shr{\mu_1}, \ldots, \shr{\mu_\ell}, \shr{\tau} \sample
+\algo{RandShare}()$.
+
+	\item Compute the following:
+	  %
+	  \begin{equation*}
+	  %
+	    \shr{v} = \gen^{\shr{\tau}}, \quad \shr{\widetilde{u}_i} = \ggen^{\shr{\mu_i}} \ \ (i \in [1,\ell]).
+	  %
+	  \end{equation*}
+
+	\item Open $\pk = (\widetilde{u}_1, \ldots, \widetilde{u}_\ell, v)$.
+
+	\item Each signer keeps $\shr{\sk} = (\shr{\mu_1}, \ldots,
+\shr{\mu_\ell}, \shr{\tau})$.
+
+      \end{enumerate}
+
+    \item[$\shr{\state} \sample \TSPSoffsign(\shr{\sk})$ :] The signers do the
+following:
+
+      \begin{enumerate}
+
+	\item Sample $\shr{\rho}, \shr{\beta} \sample \algo{RandShare}()$.
+
+	\item Compute the following in one round:
+	  %
+	  \begin{equation*}
+	  %
+	    \shr{\rho\beta}, \ \shr{\rho\mu_i} \ \ (i \in [1,\ell]), \
+\shr{\tau\beta} \sample \algo{Mul}.
+	  %
+	  \end{equation*}
+
+	\item In a second round, open $\gamma = \rho\beta$, and abort if $\gamma
+= 0$.
+
+	\item Each signer computes the following locally:
+	  %
+	  \begin{gather*}
+	  %
+	    \shr{1/\rho} = \gamma^{-1}\shr{\beta}, \quad \shr{\tau/\rho} =
+\gamma^{-1}\shr{\tau\beta}, \\
+	  %
+	    \shr{\widetilde{r}} = \ggen^{\shr{1/\rho}}, \quad \shr{\widetilde{s}}
+= \ggen^{\shr{\tau/\rho}}, \quad \shr{\gen^{\rho}} = \gen^{\shr{\rho}}.
+	  %
+	  \end{gather*}
+
+	\item Store $\shr{\state} = (\shr{\widetilde{r}}, \shr{\widetilde{s}},
 \shr{\gen^{\rho}}, \shr{\rho\mu_1}, \ldots, \shr{\rho\mu_\ell})$.
 
+      \end{enumerate}
+
     \item[$\SPSsig_i \leftarrow \TSPSonsign(\sk_i, \state_i, \vec{\msg})$ :]
-Each signer computes
-      %
-      \begin{equation*}
-      %
-	\shr{z} = \shr{\gen^{\rho}} \cdot \prod_{i=1}^\ell
-\msg_i^{-\shr{\rho\mu_i}},
-      %
-      \end{equation*}
-      %
-      and outputs $(\shr{\widetilde{r}}, \shr{\widetilde{s}}, \shr{z})$.
+Each signer does the following:
+
+      \begin{enumerate}
+
+	\item Compute the following:
+	  %
+	  \begin{equation*}
+	  %
+	    \shr{z} = \shr{\gen^{\rho}} \cdot \prod_{i=1}^\ell
+\msg_i^{-\shr{\rho\mu_i}}.
+	  %
+	  \end{equation*}
+
+	\item Return $(\shr{\widetilde{r}}, \shr{\widetilde{s}}, \shr{z})$.
+
+      \end{enumerate}
 
     \item[$\SPSsig \leftarrow \TSPScombine(\{\SPSsig_i\}_{i \in Q})$ :]
 Reconstruct $\widetilde{r}$, $\widetilde{s}$ and $z$ from the shares of the $t+1$
-signers in $Q$, and output $\SPSsig = (\widetilde{r}, \widetilde{s}, z)$.
+signers in $Q$, and return $\SPSsig = (\widetilde{r}, \widetilde{s}, z)$.
 
-    \item[$\{0,1\} \leftarrow \TSPSverify(\pk, \vec{\msg}, \SPSsig)$ :] Output
-$1$ if and only if
+    \item[$\{0,1\} \leftarrow \TSPSverify(\pk, \vec{\msg}, \SPSsig)$ :] Return
+$1$ if and only if the following hold:
       %
       \begin{equation*}
       %
-	\pairing(v, \widetilde{r}) = \pairing(\gen, \widetilde{s}) \ \wedge\
-\pairing(z, \widetilde{r}) \prod_{i=1}^{\ell} \pairing(\msg_i, \widetilde{u}_i)
+	\pairing(v, \widetilde{r}) = \pairing(\gen, \widetilde{s}), \quad
+\pairing(z, \widetilde{r}) \cdot \prod_{i=1}^{\ell} \pairing(\msg_i, \widetilde{u}_i)
 = \pairing(\gen, \ggen).
       %
       \end{equation*}
@@ -134,10 +169,19 @@ and $\vec{\widetilde{h}} \in \group{2}^2$ we write $\pairing(\vec{h},
 \sample \Zp$, $\mat{K} \sample \Zp^{(\ell+1)\times 2}$ and $\mat{\Gamma},
 \mat{\Delta} \sample \Zp^{2\times 2}$. Let $\vec{\alpha} = (1,
 \alpha)^{\mathsf{T}}$ and $\vec{\beta} = (1, \beta)^{\mathsf{T}}$, and compute
-$\vec{\mu} = \mat{K}\vec{\alpha}$, $\vec{\nu} = \mat{\Gamma}\vec{\alpha}$,
-$\vec{\omega} = \mat{\Delta}\vec{\alpha}$, $\vec{\xi} =
-\vec{\beta}^{\mathsf{T}}\mat{\Gamma}$, and $\vec{\upsilon} =
-\vec{\beta}^{\mathsf{T}}\mat{\Delta}$. Output
+the following:
+      %
+      \begin{gather*}
+      %
+	\vec{\mu} = \mat{K}\vec{\alpha}, \quad \vec{\nu} =
+\mat{\Gamma}\vec{\alpha}, \quad \vec{\omega} = \mat{\Delta}\vec{\alpha}, \\
+      %
+	\vec{\xi} = \vec{\beta}^{\mathsf{T}}\mat{\Gamma}, \quad \vec{\upsilon} =
+\vec{\beta}^{\mathsf{T}}\mat{\Delta}.
+      %
+      \end{gather*}
+      %
+      Return the following:
       %
       \begin{gather*}
       %
@@ -151,8 +195,8 @@ $\vec{\omega} = \mat{\Delta}\vec{\alpha}$, $\vec{\xi} =
       \end{gather*}
 
     \item[$\SPSsig \sample \SPSsign(\sk, \vec{\msg})$ :] Sample $\rho, \sigma
-\sample \Zp^*$ and output $\SPSsig = (\widetilde{q}, \vec{r}, \vec{s},
-\vec{z})$, where
+\sample \Zp^*$ and return $\SPSsig = (\widetilde{q}, \vec{r}, \vec{s},
+\vec{z})$, computed as follows:
       %
       \begin{equation*}
       %
@@ -162,14 +206,14 @@ $\vec{\omega} = \mat{\Delta}\vec{\alpha}$, $\vec{\xi} =
       %
       \end{equation*}
 
-    \item[$\{0,1\} \leftarrow \SPSverify(\pk, \vec{\msg}, \SPSsig)$ :] Output
-$1$ if and only if
+    \item[$\{0,1\} \leftarrow \SPSverify(\pk, \vec{\msg}, \SPSsig)$ :] Return
+$1$ if and only if the following hold:
       %
       \begin{equation*}
       %
 	\pairing(\vec{z}, \vec{\widetilde{a}}) = \pairing((\gen,
-\vec{\msg}), \vec{\widetilde{u}})\, \pairing(\vec{r},\vec{\widetilde{v}})\,
-\pairing(\vec{s}, \vec{\widetilde{w}}) \ \wedge \ \pairing(r_1, \widetilde{q})
+\vec{\msg}), \vec{\widetilde{u}}) \cdot \pairing(\vec{r},\vec{\widetilde{v}}) \cdot
+\pairing(\vec{s}, \vec{\widetilde{w}}), \quad \pairing(r_1, \widetilde{q})
 = \pairing(s_1, \ggen),
       %
       \end{equation*}
@@ -183,9 +227,17 @@ $\pairing((\gen, \vec{\msg}), \vec{\widetilde{u}}) = \pairing(\gen,
 \end{primitivebox}
 
 $\KPW$ is EUF-CMA secure under SXDH~\cite{C:KilPanWee15}. It has decomposable
-signing with $c_0 = (\widetilde{q}, \vec{r}, \vec{s})$, and for entry $j$ of
-$\vec{z}$, $c_j = \gen^{k_{1,j}} x_j^{\rho} y_j^{\rho\sigma}$ and $e_{j,i} =
-k_{i+1,j}$. None of these depend on the message, which only enters as the public
+signing with $c_0$ and, for entry $j$ of $\vec{z}$, $c_j$ and $e_{j,i}$ as
+follows:
+%
+\begin{equation*}
+%
+  c_0 = (\widetilde{q}, \vec{r}, \vec{s}), \quad c_j = \gen^{k_{1,j}}
+x_j^{\rho} y_j^{\rho\sigma}, \quad e_{j,i} = k_{i+1,j}.
+%
+\end{equation*}
+%
+None of these depend on the message, which only enters as the public
 $\msg_i$ raised to shared entries of $\mat{K}$. Our protocol and implementation
 compute $\gen^{k_{1,j}}$ in the online phase instead, which is also local.
 
@@ -208,74 +260,108 @@ the implementation makes all eight.
   \begin{description}
 
     \item[$(\pk, \shr{\sk}) \sample \TSPSgen(\secparam, \ell, t, n)$ :] The
-signers sample $\shr{\alpha}$, $\shr{\beta}$ and every entry of $\shr{\mat{K}}$,
-$\shr{\mat{\Gamma}}$ and $\shr{\mat{\Delta}}$ with $\algo{RandShare}$, and
-compute $\shr{\vec{\mu}}$, $\shr{\vec{\nu}}$, $\shr{\vec{\omega}}$,
+signers do the following:
+
+      \begin{enumerate}
+
+	\item Sample $\shr{\alpha}$, $\shr{\beta}$ and every entry of
+$\shr{\mat{K}}$, $\shr{\mat{\Gamma}}$ and $\shr{\mat{\Delta}}$ with
+$\algo{RandShare}$.
+
+	\item Compute $\shr{\vec{\mu}}$, $\shr{\vec{\nu}}$, $\shr{\vec{\omega}}$,
 $\shr{\vec{\xi}}$ and $\shr{\vec{\upsilon}}$ with one call to $\algo{Mul}$ per
 entry, followed by a local addition, since the first entries of $\vec{\alpha}$ and
-$\vec{\beta}$ are the public constant $1$. Each signer then
-computes locally
-      %
-      \begin{gather*}
-      %
-	\shr{\vec{b}} = \gen^{(1, \shr{\beta})}, \quad \shr{\vec{x}} =
+$\vec{\beta}$ are the public constant $1$.
+
+	\item Each signer computes the following locally:
+	  %
+	  \begin{gather*}
+	  %
+	    \shr{\vec{b}} = \gen^{(1, \shr{\beta})}, \quad \shr{\vec{x}} =
 \gen^{\shr{\vec{\xi}}}, \quad \shr{\vec{y}} = \gen^{\shr{\vec{\upsilon}}}, \\
-      %
-	\shr{\vec{\widetilde{a}}} = \ggen^{(1, \shr{\alpha})}, \quad
+	  %
+	    \shr{\vec{\widetilde{a}}} = \ggen^{(1, \shr{\alpha})}, \quad
 \shr{\vec{\widetilde{u}}} = \ggen^{\shr{\vec{\mu}}}, \quad
 \shr{\vec{\widetilde{v}}} = \ggen^{\shr{\vec{\nu}}}, \quad
-\shr{\vec{\widetilde{w}}} = \ggen^{\shr{\vec{\omega}}},
-      %
-      \end{gather*}
-      %
-      and the signers open $\pk = (\vec{\widetilde{a}}, \vec{\widetilde{u}},
-\vec{\widetilde{v}}, \vec{\widetilde{w}})$. Each signer keeps $\shr{\sk} =
-(\shr{\mat{K}}, \shr{\vec{b}}, \shr{\vec{x}}, \shr{\vec{y}})$.
+\shr{\vec{\widetilde{w}}} = \ggen^{\shr{\vec{\omega}}}.
+	  %
+	  \end{gather*}
 
-    \item[$\shr{\state} \sample \TSPSoffsign(\shr{\sk})$ :] The signers sample
-$\shr{\rho}, \shr{\sigma} \sample \algo{RandShare}()$, and compute
-      %
-      \begin{gather*}
-      %
-	\shr{\rho\sigma} \sample \algo{Mul}(\shr{\rho}, \shr{\sigma}), \\
-      %
-	\shr{\vec{r}} = \shr{\vec{b}^{\,\rho}}, \ \shr{\vec{s}} =
+	\item Open $\pk = (\vec{\widetilde{a}}, \vec{\widetilde{u}},
+\vec{\widetilde{v}}, \vec{\widetilde{w}})$.
+
+	\item Each signer keeps $\shr{\sk} = (\shr{\mat{K}}, \shr{\vec{b}},
+\shr{\vec{x}}, \shr{\vec{y}})$.
+
+      \end{enumerate}
+
+    \item[$\shr{\state} \sample \TSPSoffsign(\shr{\sk})$ :] The signers do the
+following:
+
+      \begin{enumerate}
+
+	\item Sample $\shr{\rho}, \shr{\sigma} \sample \algo{RandShare}()$.
+
+	\item Compute the following:
+	  %
+	  \begin{gather*}
+	  %
+	    \shr{\rho\sigma} \sample \algo{Mul}(\shr{\rho}, \shr{\sigma}), \\
+	  %
+	    \shr{\vec{r}} = \shr{\vec{b}^{\,\rho}}, \ \shr{\vec{s}} =
 \shr{\vec{b}^{\,\rho\sigma}}, \ \shr{\vec{x}^{\,\rho}}, \
 \shr{\vec{y}^{\,\rho\sigma}} \sample \algo{ExpGrp}_1,
-      %
-      \end{gather*}
-      %
-      the second line as eight calls to $\algo{ExpGrp}_1$, one per entry, in one
-round.
-      Each signer then computes locally $\shr{\widetilde{q}} =
-\ggen^{\shr{\sigma}}$ and $\shr{\vec{z}^*} = \shr{\vec{x}^{\,\rho}} \cdot
-\shr{\vec{y}^{\,\rho\sigma}}$, and stores $\shr{\state} = (\shr{\widetilde{q}},
-\shr{\vec{r}}, \shr{\vec{s}}, \shr{\vec{z}^*})$.
+	  %
+	  \end{gather*}
+	  %
+	  the second line as eight calls to $\algo{ExpGrp}_1$, one per entry, in
+one round.
+
+	\item Each signer computes the following locally:
+	  %
+	  \begin{equation*}
+	  %
+	    \shr{\widetilde{q}} = \ggen^{\shr{\sigma}}, \quad \shr{\vec{z}^*} =
+\shr{\vec{x}^{\,\rho}} \cdot \shr{\vec{y}^{\,\rho\sigma}}.
+	  %
+	  \end{equation*}
+
+	\item Store $\shr{\state} = (\shr{\widetilde{q}}, \shr{\vec{r}},
+\shr{\vec{s}}, \shr{\vec{z}^*})$.
+
+      \end{enumerate}
 
     \item[$\SPSsig_i \leftarrow \TSPSonsign(\sk_i, \state_i, \vec{\msg})$ :]
-Each signer computes
-      %
-      \begin{equation*}
-      %
-	\shr{\vec{z}} = \shr{\vec{z}^*} \cdot (\gen, \vec{\msg})^{\shr{\mat{K}}},
-      %
-      \end{equation*}
-      %
-      and outputs
-$(\shr{\widetilde{q}}, \shr{\vec{r}}, \shr{\vec{s}}, \shr{\vec{z}})$.
+Each signer does the following:
+
+      \begin{enumerate}
+
+	\item Compute the following:
+	  %
+	  \begin{equation*}
+	  %
+	    \shr{\vec{z}} = \shr{\vec{z}^*} \cdot (\gen,
+\vec{\msg})^{\shr{\mat{K}}}.
+	  %
+	  \end{equation*}
+
+	\item Return $(\shr{\widetilde{q}}, \shr{\vec{r}}, \shr{\vec{s}},
+\shr{\vec{z}})$.
+
+      \end{enumerate}
 
     \item[$\SPSsig \leftarrow \TSPScombine(\{\SPSsig_i\}_{i \in Q})$ :]
 Reconstruct every group element from the shares of the $t+1$ signers in $Q$, and
-output $\SPSsig = (\widetilde{q}, \vec{r}, \vec{s}, \vec{z})$.
+return $\SPSsig = (\widetilde{q}, \vec{r}, \vec{s}, \vec{z})$.
 
-    \item[$\{0,1\} \leftarrow \TSPSverify(\pk, \vec{\msg}, \SPSsig)$ :] Output
-$1$ if and only if
+    \item[$\{0,1\} \leftarrow \TSPSverify(\pk, \vec{\msg}, \SPSsig)$ :] Return
+$1$ if and only if the following hold:
       %
       \begin{equation*}
       %
 	\pairing(\vec{z}, \vec{\widetilde{a}}) = \pairing((\gen,
-\vec{\msg}), \vec{\widetilde{u}})\, \pairing(\vec{r},\vec{\widetilde{v}})\,
-\pairing(\vec{s}, \vec{\widetilde{w}}) \ \wedge \ \pairing(r_1, \widetilde{q})
+\vec{\msg}), \vec{\widetilde{u}}) \cdot \pairing(\vec{r},\vec{\widetilde{v}}) \cdot
+\pairing(\vec{s}, \vec{\widetilde{w}}), \quad \pairing(r_1, \widetilde{q})
 = \pairing(s_1, \ggen).
       %
       \end{equation*}

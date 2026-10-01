@@ -29,7 +29,7 @@ which we define first
 \paragraph{Decomposable signing.} A scheme $\SPS$ has decomposable signing if every
 signature $\SPSsig \sample \SPSsign(\sk, \vec{\msg})$ on $\vec{\msg} = (\msg_1,
 \ldots, \msg_\ell)$ consists of group elements $c_0$, which do not depend on the
-message, and $z_1, \ldots, z_k$ of the form
+message, and $z_1, \ldots, z_k$ of the following form:
 %
 \begin{equation*}
 %
@@ -56,30 +56,60 @@ The construction $\TSPS$, applied to an SPS scheme $\SPS$, is given in
 
   \begin{description}
 
-    \item[$(\pk, \shr{\sk}) \sample \TSPSgen(\secparam, \ell, t, n)$ :] Run
-$\SPSgen(\secparam, \ell)$ under $\algo{MPC}$: every field element it samples is
-a call to $\algo{RandShare}$, and every product of secret field elements it
-derives is a call to $\algo{Mul}$. Compute the shares of the group elements of
-$\pk$ and $\sk$ locally, by raising the generators to the shares of their
-discrete logarithms. Call $\algo{Open}$ on $\pk$ only, which broadcasts each
-signer's share $\pk_i$ of it.
+    \item[$(\pk, \shr{\sk}) \sample \TSPSgen(\secparam, \ell, t, n)$ :] The
+signers do the following:
 
-    \item[$\shr{\state} \sample \TSPSoffsign(\shr{\sk})$ :] Sample the signing
-randomness with $\algo{RandShare}$, and compute sharings of $c_0, \ldots, c_k$
-and of every $e_{j,i}$ with $\algo{Mul}$, $\algo{Inv}$, $\algo{ExpGrp}$ and
-linear operations. Store $\shr{\state} = (\shr{c_0}, \ldots, \shr{c_k},
+      \begin{enumerate}
+
+	\item Run $\SPSgen(\secparam, \ell)$ under $\algo{MPC}$: every field
+element it samples is a call to $\algo{RandShare}$, and every product of secret
+field elements it derives is a call to $\algo{Mul}$.
+
+	\item Compute the shares of the group elements of $\pk$ and $\sk$
+locally, by raising the generators to the shares of their discrete logarithms.
+
+	\item Call $\algo{Open}$ on $\pk$ only, which broadcasts each signer's
+share $\pk_i$ of it.
+
+      \end{enumerate}
+
+    \item[$\shr{\state} \sample \TSPSoffsign(\shr{\sk})$ :] The signers do the
+following:
+
+      \begin{enumerate}
+
+	\item Sample the signing randomness with $\algo{RandShare}$.
+
+	\item Compute sharings of $c_0, \ldots, c_k$ and of every $e_{j,i}$ with
+$\algo{Mul}$, $\algo{Inv}$, $\algo{ExpGrp}$ and linear operations.
+
+	\item Store $\shr{\state} = (\shr{c_0}, \ldots, \shr{c_k},
 (\shr{e_{j,i}})_{j,i})$.
 
+      \end{enumerate}
+
     \item[$\SPSsig_i \leftarrow \TSPSonsign(\sk_i, \state_i, \vec{\msg})$ :]
-Each signer computes $\shr{z_j} = \shr{c_j} \prod_{i=1}^{\ell}
-\msg_i^{\shr{e_{j,i}}}$ for each $j \in [1,k]$, and outputs its shares of $(c_0,
-z_1, \ldots, z_k)$. No call to $\algo{MPC}$ is made.
+Each signer does the following, with no call to $\algo{MPC}$:
+
+      \begin{enumerate}
+
+	\item Compute the following for each $j \in [1,k]$:
+	  %
+	  \begin{equation*}
+	  %
+	    \shr{z_j} = \shr{c_j} \prod_{i=1}^{\ell} \msg_i^{\shr{e_{j,i}}}.
+	  %
+	  \end{equation*}
+
+	\item Return its shares of $(c_0, z_1, \ldots, z_k)$.
+
+      \end{enumerate}
 
     \item[$\SPSsig \leftarrow \TSPScombine(\{\SPSsig_i\}_{i \in Q})$ :]
-Reconstruct each group element of $\SPSsig$ from the $t+1$ shares, and output
+Reconstruct each group element of $\SPSsig$ from the $t+1$ shares, and return
 $\SPSsig$.
 
-    \item[$\{0,1\} \leftarrow \TSPSverify(\pk, \vec{\msg}, \SPSsig)$ :] Output
+    \item[$\{0,1\} \leftarrow \TSPSverify(\pk, \vec{\msg}, \SPSsig)$ :] Return
 $\SPSverify(\pk, \vec{\msg}, \SPSsig)$.
 
   \end{description}
@@ -162,7 +192,7 @@ secure SPS scheme with decomposable signing, and let the MPC protocol be private
 and secure with abort against up to $t$ adaptively corrupted signers, over a
 linear $(t+1, n)$ threshold sharing. For every PPT adversary $\adv$ against the
 adp-TS-UF-1 security of $\TSPS$ applied to $\SPS$, there is a PPT adversary
-$\advB$ such that
+$\advB$ such that the following holds:
   %
   \begin{equation*}
   %
@@ -191,9 +221,16 @@ in advance.
 \Cref{thm:tsps-construction-security}, with the MPC protocol secure against static
 corruption only, for every PPT adversary $\adv$ that fixes
 its corrupted signers before key generation and makes no corruption queries,
-there is a PPT adversary $\advB$ such that
-$\Adv_{\TSPS, \adv}^{\text{adp-TS-UF-1}}(\secparam) \leq
-\Adv_{\SPS, \advB}^{\text{euf-cma}}(\secparam)$, for any $n$ and $t$.
+there is a PPT adversary $\advB$ such that the following holds for any $n$ and
+$t$:
+  %
+  \begin{equation*}
+  %
+    \Adv_{\TSPS, \adv}^{\text{adp-TS-UF-1}}(\secparam) \leq
+\Adv_{\SPS, \advB}^{\text{euf-cma}}(\secparam).
+  %
+  \end{equation*}
+  %
 \end{lemma}
 
 We prove \Cref{lem:tsps-static} in \Cref{sec:tsps-static}.

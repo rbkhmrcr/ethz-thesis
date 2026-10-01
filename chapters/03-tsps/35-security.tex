@@ -12,9 +12,18 @@ lets a reduction that does not know the signing key still produce honest
 signers' shares of the public key and of signatures, from the public key and
 from the signatures it obtains from its own oracle.
 
-\subsection{Proof of \Cref{lem:tsps-construction-correctness}}\label{sec:tsps-proof-correctness}
+\subsection{Proof of \Cref{lem:tsps-construction-correctness}: correctness of the construction}\label{sec:tsps-proof-correctness}
 
 \begin{proof}
+
+  Recall that with decomposable signing a signature consists of $c_0$ and the
+following:
+  %
+  \begin{equation*}
+  %
+    z_j = c_j \prod_{i=1}^{\ell} \msg_i^{e_{j,i}}.
+  %
+  \end{equation*}
 
   By security with abort, every call to $\algo{MPC}$ returns the correct output,
 and every other step is linear, so $\TSPSgen$ opens the public key of the
@@ -24,13 +33,21 @@ $\TSPSoffsign$, from any $t+1$ signers. Correctness of $\SPS$ gives the claim.
 
 \end{proof}
 
-\subsection{Proof of \Cref{thm:tsps-construction-security}}\label{sec:tsps-proof-construction}
+\subsection{Proof of \Cref{thm:tsps-construction-security}: security of the construction}\label{sec:tsps-proof-construction}
 
 \begin{proof}
 
   Let $\adv$ be a PPT adversary against the adp-TS-UF-1 security of
 $\TSPS$ applied to $\SPS$. We build $\advB$ playing the EUF-CMA experiment of
-\Cref{exp:euf-cma} against $\SPS$.
+\Cref{exp:euf-cma} against $\SPS$. Recall that $\adv$ wins if the following
+hold:
+  %
+  \begin{equation*}
+  %
+    \SPSverify(\pk, \vec{\msg}^*, \SPSsig^*) = 1, \quad |S(\vec{\msg}^*) \cap
+\mathcal{H}| < t + 1 - |\Cor|.
+  %
+  \end{equation*}
 
   We first describe the setup. $\advB$ receives $\pk$ from its challenger. On receiving
 $(n, t, \Cor_0)$ from $\adv$, where $\Cor_0$ is the set of signers corrupted
@@ -86,7 +103,7 @@ $\binom{n}{t}^{-1}$, which gives the bound.
 
 \end{proof}
 
-\subsection{Proof of \Cref{lem:tsps-static}}\label{sec:tsps-static}
+\subsection{Proof of \Cref{lem:tsps-static}: security under static corruption}\label{sec:tsps-static}
 
 \begin{proof}
 
@@ -114,7 +131,7 @@ oracle. $\advB$ therefore wins whenever $\adv$ does, and no guess is needed.
 
 \end{proof}
 
-\subsection{Proof of \Cref{thm:tsps-security}}\label{sec:tsps-proof-instantiation}
+\subsection{Proof of \Cref{thm:tsps-security}: correctness and security of the instantiations}\label{sec:tsps-proof-instantiation}
 
 \begin{proof}
 
@@ -130,21 +147,29 @@ the signing randomness with $\algo{RandShare}$, $\algo{Mul}$, $\algo{Inv}$,
 $\algo{ExpGrp}_1$ and linear operations, as in $\TSPSoffsign$.
 
   For correctness of the threshold $\AGHO$ scheme, the combining party reconstructs
+the following:
   %
   \begin{equation*}
   %
-    \widetilde{r} = \ggen^{1/\rho}, \qquad \widetilde{s} = \ggen^{\tau/\rho} =
-\widetilde{r}^{\,\tau}, \qquad z = \gen^{\rho} \prod_{i=1}^{\ell}
+    \widetilde{r} = \ggen^{1/\rho}, \quad \widetilde{s} = \ggen^{\tau/\rho} =
+\widetilde{r}^{\,\tau}, \quad z = \gen^{\rho} \prod_{i=1}^{\ell}
 \msg_i^{-\rho\mu_i} = \left( \gen \prod_{i=1}^{\ell} \msg_i^{-\mu_i}
 \right)^{\rho},
   %
   \end{equation*}
   %
   which is $\SPSsign(\sk, \vec{\msg}; \omega)$ for $\AGHO$ with $\omega = 1/\rho$.
-For the threshold $\KPW$ scheme, it reconstructs $\widetilde{q} = \ggen^{\sigma}$,
-$\vec{r} = \vec{b}^{\,\rho}$, $\vec{s} = \vec{b}^{\,\rho\sigma}$, and $\vec{z} =
-(\gen, \vec{\msg})^{\mat{K}} \cdot \vec{x}^{\,\rho} \vec{y}^{\,\rho\sigma}$,
-which is $\SPSsign(\sk, \vec{\msg}; \rho, \sigma)$ for $\KPW$. Both schemes are
+For the threshold $\KPW$ scheme, it reconstructs the following:
+  %
+  \begin{equation*}
+  %
+    \widetilde{q} = \ggen^{\sigma}, \quad \vec{r} = \vec{b}^{\,\rho}, \quad
+\vec{s} = \vec{b}^{\,\rho\sigma}, \quad \vec{z} = (\gen, \vec{\msg})^{\mat{K}}
+\cdot \vec{x}^{\,\rho} \vec{y}^{\,\rho\sigma},
+  %
+  \end{equation*}
+  %
+  which is $\SPSsign(\sk, \vec{\msg}; \rho, \sigma)$ for $\KPW$. Both schemes are
 therefore instances of $\TSPS$, and the correctness lemma and the security
 theorem for $\TSPS$ give the claim.
 
