@@ -55,20 +55,20 @@ hold:
 $(n, t, \Cor_0)$ from $\adv$, where $\Cor_0$ is the set of signers corrupted
 from the start, it samples a set $\mathcal{K} \subseteq [1,n]$ of
 size $t$ uniformly at random, and aborts if $\Cor_0 \not\subseteq \mathcal{K}$.
-It samples key shares $\{\sk_i\}_{i \in \mathcal{K}}$ uniformly. $\advB$ does
+It samples key shares $\{\sk_h\}_{h \in \mathcal{K}}$ uniformly. $\advB$ does
 not know $\sk$, so it can hold at most $t$ shares, and by the first consequence these are
 distributed exactly as in a real execution. For each group element of $\pk$, it
 computes the shares of the signers in $\mathcal{K}$ from their key shares where
 that element is a generator raised to a component of $\sk$, and samples them
 uniformly otherwise, which by the first consequence is again their real distribution. It derives
 every other signer's share from $\pk$ and these $t$ shares by the second
-consequence of linear sharing, and sends $\pk$, all $n$ shares of it, and $\{\sk_i\}_{i
+consequence of linear sharing, and sends $\pk$, all $n$ shares of it, and $\{\sk_h\}_{h
 \in \Cor_0}$ to $\adv$. The set $\mathcal{K}$ is a guess at the signers that $\adv$ will
 either corrupt or ask for a signature share on its forgery message.
 
   $\advB$ answers the offline oracle as follows. On $\mathcal{O}_{\algo{Off}}(\mathsf{sid})$ with
 $\mathsf{sid}$ fresh, $\advB$ samples the shares
-$\{\state_{\mathsf{sid},i}\}_{i \in \mathcal{K}}$ uniformly, which by the first consequence is
+$\{\state_{\mathsf{sid},h}\}_{h \in \mathcal{K}}$ uniformly, which by the first consequence is
 their real distribution, and runs $\algo{Sim}$ on the corrupted signers' inputs
 and these outputs to produce their view.\rebekah{Two gaps. State shares are not
 independent of key shares for $\KPW$: the $e_{j,i}$ are key entries and $\vec{z}^*$
@@ -82,12 +82,12 @@ shares, which are independent of $\varrho$, and $\varrho$ is determined later by
 the signature $\advB$ obtains for that session. This is sound because each
 session is used for one message only.
 
-  $\advB$ answers the online oracle as follows. On $\mathcal{O}_{\algo{On}}(i, \mathsf{sid},
-\vec{\msg})$, if $i \in \mathcal{K}$, then $\advB$ holds $\sk_i$ and
-$\state_{\mathsf{sid},i}$, and, since signing is decomposable, runs $\TSPSonsign$ itself. Otherwise, the
+  $\advB$ answers the online oracle as follows. On $\mathcal{O}_{\algo{On}}(h, \mathsf{sid},
+\vec{\msg})$, if $h \in \mathcal{K}$, then $\advB$ holds $\sk_h$ and
+$\state_{\mathsf{sid},h}$, and, since signing is decomposable, runs $\TSPSonsign$ itself. Otherwise, the
 first time $\mathsf{sid}$ is used, $\advB$ queries its own signing oracle on
 $\vec{\msg}$ and obtains $\SPSsig$. It computes the shares
-$\{\SPSsig_j\}_{j \in \mathcal{K}}$ by running $\TSPSonsign$ on the material it
+$\{\SPSsig_k\}_{k \in \mathcal{K}}$ by running $\TSPSonsign$ on the material it
 holds, derives every other share from $\SPSsig$ and these by the second
 consequence of linear sharing, and stores them against $\mathsf{sid}$, so that later
 queries in the same session are answered consistently. The share returned is the

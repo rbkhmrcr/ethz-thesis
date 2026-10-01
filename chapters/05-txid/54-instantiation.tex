@@ -85,16 +85,16 @@ given in \Cref{prim:dy-prf}.
   \begin{description}
 
     \item[$(\pp,\key) \sample \PRFgen(\secparam)$ :] On input the security
-parameter, sample a generator $\ggen_D \sample \group{2}$ and a group element $X
-\sample \group{1}$, and return $\pp = (\ggen_D, X)$ and $\key = k \sample \Zp$.
+parameter, sample a generator $\ggen_D \sample \group{2}$ and a group element $P
+\sample \group{1}$, and return $\pp = (\ggen_D, P)$ and $\key = k \sample \Zp$.
 
     \item[$y \leftarrow \PRFeval(\pp, \key, x)$ :] On input public parameters
-$\pp = (\ggen_D, X)$, key $\key = k$, and input $x \in \Zp \setminus \{-k\}$,
+$\pp = (\ggen_D, P)$, key $\key = k$, and input $x \in \Zp \setminus \{-k\}$,
 return the following:
       %
       \begin{equation*}
       %
-	y = \pairing\big(X, \ggen_D^{1/(k+x)}\big).
+	y = \pairing\big(P, \ggen_D^{1/(k+x)}\big).
       %
       \end{equation*}
 
@@ -103,7 +103,7 @@ return the following:
 \end{primitivebox}
 
 We use the Dodis-Yampolskiy PRF differently from its authors. The secret group
-element $X$ is the epoch tracing key, and the elements
+element $P$ is the epoch tracing key, and the elements
 $\ggen_D^{1/(\utk''+\gamma)}$ are published as $\{W_\gamma\}$. So a tag is
 keyed by the epoch key rather than by $\utk''$:
 %
@@ -119,11 +119,11 @@ published elements ($q$-mDBDHI)}{qmdbdhi-txid}
   Let $(\group{1},\group{2},\group{T},\pairing)$ be a type III bilinear group of
 prime order $p$ with generators $\gen \in \group{1}$ and $\ggen_D \in
 \group{2}$. The $q$-mDBDHI assumption holds if, given $(\gen, \ggen_D,
-\{\ggen_D^{1/(x+\gamma)}\}_{\gamma\in[0,q)})$ for uniformly random $x \sample
-\Zp$ and $A \sample \group{1}$, no PPT adversary can distinguish
-$\{\pairing(A, \ggen_D^{1/(x+\gamma)})\}_{\gamma\in[0,q)}$ from
+\{\ggen_D^{1/(k+\gamma)}\}_{\gamma\in[0,q)})$ for uniformly random $k \sample
+\Zp$ and $P \sample \group{1}$, no PPT adversary can distinguish
+$\{\pairing(P, \ggen_D^{1/(k+\gamma)})\}_{\gamma\in[0,q)}$ from
 $\{\Delta_{\gamma}\}_{\gamma \in [0,q)}$ for uniformly random $\Delta_{\gamma}
-\sample \group{T}$ with non-negligible advantage. Neither $A$ nor $x$ is given
+\sample \group{T}$ with non-negligible advantage. Neither $P$ nor $k$ is given
 to the adversary. We use it with $q = \Max$.
 
 \end{assumptionbox}
@@ -371,15 +371,15 @@ certified $T$. \Cref{prot:txid-ek-proof} gives the proof.
 [0,\Max)$:
 	  %
 	  \begin{equation*}
-	    t_\gamma \leftarrow \hash(\{W_\gamma\},\gamma).
+	    \lambda_\gamma \leftarrow \hash(\{W_\gamma\},\gamma).
 	  \end{equation*}
 	  %
 	  Then compute the following:
 	  %
 	  \begin{equation*}
 	    \widehat{W} \leftarrow \prod_{\gamma=0}^{\Max-1}
-W_\gamma^{t_\gamma}, \qquad \widehat{V} \leftarrow \prod_{\gamma=0}^{\Max-1}
-(\ggen_D\cdot W_\gamma^{-\gamma})^{t_\gamma}.
+W_\gamma^{\lambda_\gamma}, \qquad \widehat{V} \leftarrow \prod_{\gamma=0}^{\Max-1}
+(\ggen_D\cdot W_\gamma^{-\gamma})^{\lambda_\gamma}.
 	  \end{equation*}
 
 	\item Sample $\alpha,\beta \sample \Zp$, and compute $A \leftarrow

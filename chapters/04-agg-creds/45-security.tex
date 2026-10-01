@@ -517,15 +517,15 @@ presentation $\algoproof$ without a witness.
 
   \begin{enumerate}
 
-    \item Randomly select $\alpha, \beta, \kappa, \delta, \nu, \{\eta_i\}_{i\in
+    \item Randomly select $\theta, \mu, \tau, \varphi, \nu, \{\epsilon_i\}_{i\in
 \ISSUERS},  \iota \in \Zp^*$, and set the following:
-\rebekah{Several symbols are reused here with another meaning: $\alpha$, $\beta$, $\delta$ (the prover's randomness and blinding exponent), $\eta_i$ (next to the proof $\eta$ and $\eta^*$ of the $\ATS$ proof) and $z$ (the $\AGHO$ element and the BCDH challenge).}
+
 %
       \begin{equation*}
 %
-	\bar{\gen} = \gen^\alpha, \quad \bar{v} = \gen^\beta, \quad \bar{z} =
-\gen^\kappa, \quad \bar{\signaturetwo} = \gen^\delta, \quad \bar{\tid} =
-\gen^\nu, \quad H_i = \gen^{\eta_i}, \quad \pk' = \gen^\iota.
+	\bar{\gen} = \gen^\theta, \quad \bar{v} = \gen^\mu, \quad \bar{z} =
+\gen^\tau, \quad \bar{\signaturetwo} = \gen^\varphi, \quad \bar{\tid} =
+\gen^\nu, \quad H_i = \gen^{\epsilon_i}, \quad \pk' = \gen^\iota.
 %
       \end{equation*}
 %
@@ -540,9 +540,9 @@ protocol description.
       \begin{equation*}
 %
 	\widetilde{r}' =
-(\ggen^\alpha\widetilde{u}_1^{-\iota}\widetilde{u}_2^{-\nu})^{1/\kappa}, \quad
-\widetilde{s}' = \widetilde{r}'^{\beta/\alpha}, \quad \signatureone' =
-(\ggen^{\delta}\textstyle\prod_{i \in \ISSUERS}\ipk{i}^{-\eta_i})^{1/\nu}.
+(\ggen^\theta\widetilde{u}_1^{-\iota}\widetilde{u}_2^{-\nu})^{1/\tau}, \quad
+\widetilde{s}' = \widetilde{r}'^{\mu/\theta}, \quad \signatureone' =
+(\ggen^{\varphi}\textstyle\prod_{i \in \ISSUERS}\ipk{i}^{-\epsilon_i})^{1/\nu}.
 %
       \end{equation*}
 %

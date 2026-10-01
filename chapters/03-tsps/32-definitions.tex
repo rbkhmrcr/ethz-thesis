@@ -139,18 +139,18 @@ threshold SPS scheme $\TSPS$ consists of the following algorithms.
 
   \item[{$(\shr{\sk}, \pk) \sample \TSPSgen(\secparam, \ell, t, n)$ :}] Run
 jointly by the signers. On input the message length $\ell$, the corruption bound
-$t$, and the number of signers $n > t$, gives each signer $i$ a share $\sk_i$
+$t$, and the number of signers $n > t$, gives each signer $h$ a share $\sk_h$
 of the secret key and outputs a public key $\pk$.
 
   \item[{$\shr{\state} \sample \TSPSoffsign(\shr{\sk})$ :}] Run jointly by the
-signers before the message is known. Gives each signer $i$ a share $\state_i$ of
+signers before the message is known. Gives each signer $h$ a share $\state_h$ of
 the state for one future signature.
 
-  \item[{$\SPSsig_i \leftarrow \TSPSonsign(\sk_i, \state_i, \vec{\msg})$ :}] Run
-locally by signer $i$ on a message $\vec{\msg} \in \group{1}^\ell$. Outputs a
-signature share $\SPSsig_i$.
+  \item[{$\SPSsig_h \leftarrow \TSPSonsign(\sk_h, \state_h, \vec{\msg})$ :}] Run
+locally by signer $h$ on a message $\vec{\msg} \in \group{1}^\ell$. Outputs a
+signature share $\SPSsig_h$.
 
-  \item[{$\SPSsig \leftarrow \TSPScombine(\{\SPSsig_i\}_{i \in Q})$ :}] On input
+  \item[{$\SPSsig \leftarrow \TSPScombine(\{\SPSsig_h\}_{h \in Q})$ :}] On input
 signature shares from a set $Q$ of $t+1$ signers, outputs a signature
 $\SPSsig$, without interaction.
 
@@ -170,7 +170,7 @@ when an opened $\gamma$ is zero.}
 \begin{equation*}
 %
   \SPSverify\left(\pk, \vec{\msg}, \TSPScombine\left(\left\{
-\TSPSonsign(\sk_i, \state_i, \vec{\msg}) \right\}_{i \in Q}\right)\right) = 1.
+\TSPSonsign(\sk_h, \state_h, \vec{\msg}) \right\}_{h \in Q}\right)\right) = 1.
 %
 \end{equation*}
 
@@ -290,7 +290,7 @@ Any $t$ shares are independent of $\alpha$. We write $\group{}$ for either
 source group. The shares of a group element $a$ are themselves in $\group{}$,
 and reconstruction takes their product. The authentication information, such as
 MAC shares, means that a modified share is detected at opening. In protocol
-boxes, $\shr{x}$ also stands for the signer's own share.
+boxes, $\shr{\alpha}$ also stands for the signer's own share.
 
 Our constructions are stated for a general $(t+1, n)$ sharing.
 
@@ -306,8 +306,8 @@ uniform $\alpha \sample \Zp$ that no signer learns.
     \item[$\shr{\gamma} \sample \algo{Mul}(\shr{\alpha}, \shr{\beta})$ :] Outputs
 a sharing of $\gamma = \alpha\beta$.
 
-    \item[$\shr{\gamma} \sample \algo{Inv}(\shr{\alpha})$ :] On input a sharing
-of $\alpha \neq 0$, outputs a sharing of $\gamma = \alpha^{-1}$.
+    \item[$\shr{\alpha^{-1}} \sample \algo{Inv}(\shr{\alpha})$ :] On input a sharing
+of $\alpha \neq 0$, outputs a sharing of $\alpha^{-1}$.
 
     \item[$\shr{c} \sample \algo{ExpGrp}(\shr{\alpha}, \shr{b})$ :] On input a
 sharing of $\alpha \in \Zp$ and a sharing of $b \in \group{}$, outputs a sharing
@@ -321,25 +321,25 @@ sharing of a group element.
 
 
 Linear operations are not interfaces, since they need no interaction. Given
-sharings $\shr{\alpha}$, $\shr{\beta}$ and public $\rho, \sigma, \tau \in \Zp$,
+sharings $\shr{\alpha}$, $\shr{\beta}$ and public $\phi, \psi, \theta \in \Zp$,
 each signer applies the combination to its own shares to obtain the following:
 %
 \begin{equation*}
 %
-  \shr{\rho\alpha + \sigma\beta + \tau} = \rho\shr{\alpha} + \sigma\shr{\beta} +
-\tau.
+  \shr{\phi\alpha + \psi\beta + \theta} = \phi\shr{\alpha} + \psi\shr{\beta} +
+\theta.
 %
 \end{equation*}
 %
 \rebekah{Under additive sharing, as in MASCOT, every signer adding the public
-$\tau$ gives $n\tau$. Only one designated signer should add it, as for
+$\theta$ gives $n\theta$. Only one designated signer should add it, as for
 $\algo{ExpGrp}$ below.}
 In a group, given sharings $\shr{a}$, $\shr{b}$ and a public group element $d$,
 each signer obtains the following:
 %
 \begin{equation*}
 %
-  \shr{a^{\rho}b^{\sigma}d} = \shr{a}^{\rho}\shr{b}^{\sigma}d.
+  \shr{a^{\phi}b^{\psi}d} = \shr{a}^{\phi}\shr{b}^{\psi}d.
 %
 \end{equation*}
 %

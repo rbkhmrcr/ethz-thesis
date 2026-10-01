@@ -234,18 +234,18 @@ $\user$ in this case as the tag will already appear in the ledger.
 the $\IDidentify$ interface differs from that of protocol $\Pi$'s tracing
 functionality.
 
-  $\simu$ stops if one of two events occurs. Event $e_1$ is a coalition of
+  $\simu$ stops if one of two events occurs. Event $E_1$ is a coalition of
 corrupt auditors and users tracing a transaction submitted by an honest user
 during an epoch even though the user did not grant permissions to any corrupt
-auditor for that epoch. Event $e_2$ is an honest auditor failing to trace a
+auditor for that epoch. Event $E_2$ is an honest auditor failing to trace a
 transaction of a corrupt user submitted during an epoch despite holding the
 granted authorisation. We show each event is negligible.
 
-  Event $e_1$ does not occur, since the transactions of honest users during an
+  Event $E_1$ does not occur, since the transactions of honest users during an
 epoch for which they did not grant tracing permissions to any corrupt auditor
 are generated at random.
 
-  Event $e_2$ occurs only with negligible probability, and the argument is the
+  Event $E_2$ occurs only with negligible probability, and the argument is the
 heart of non-repudiation, so we give it in full. A transaction $\tx$ from a
 corrupt user is recorded in $\txnssimu$ and forwarded to $\idfu{\algo{trace}}$
 only if it carries a valid tag $\Tag_{\gamma}$, meaning the proof for relation
@@ -297,8 +297,8 @@ non-negligible advantage.
 with advantage $\Adv^{\mathsf{prf}}_{\FE,\adv}(\secparam)$. We construct an
 adversary $\simu$ against DDH in $\group{1}$.
 
-  $\simu$ receives a DDH challenge $(\gen, \gen^a, \gen^b, Z)$, where either $Z =
-\gen^{ab}$ or $Z$ is uniform in $\group{1}$. It does the following:
+  $\simu$ receives a DDH challenge $(\gen, \gen^a, \gen^b, Q)$, where either $Q =
+\gen^{ab}$ or $Q$ is uniform in $\group{1}$. It does the following:
 
   \begin{enumerate}
 
@@ -308,7 +308,7 @@ adversary $\simu$ against DDH in $\group{1}$.
 \Zp$, store them, and set $\HE(\epoch_{i}) = (\gen^a)^{r_i}\cdot\gen^{t_i} =
 \gen^{a r_i + t_i}$.
 
-    \item On a PRF query on $\epoch_i$, return $Z^{r_i}\cdot(\gen^{b})^{t_i}$,
+    \item On a PRF query on $\epoch_i$, return $Q^{r_i}\cdot(\gen^{b})^{t_i}$,
 for the pair $(r_i, t_i)$ stored for $\epoch_i$.
 
     \item Output the bit $\adv$ outputs.
@@ -318,30 +318,30 @@ for the pair $(r_i, t_i)$ stored for $\epoch_i$.
   Since $(r_i, t_i)$ is drawn once per epoch and reused, both oracles answer
 repeated queries consistently. We consider the two cases of the challenge.
 
-  If $Z = \gen^{ab}$, the response on $\epoch_i$ is the following, so $\simu$
+  If $Q = \gen^{ab}$, the response on $\epoch_i$ is the following, so $\simu$
 answers exactly as $\FE$ with key $b$:
   %
   \begin{equation*}
-    Z^{r_i}\cdot(\gen^{b})^{t_i} = \gen^{a b r_i + b t_i} = \HE(\epoch_i)^{b}.
+    Q^{r_i}\cdot(\gen^{b})^{t_i} = \gen^{a b r_i + b t_i} = \HE(\epoch_i)^{b}.
   \end{equation*}
 
-  If $Z = \gen^{z}$ for uniform $z$, the random oracle answer and the response
+  If $Q = \gen^{\omega}$ for uniform $\omega$, the random oracle answer and the response
 on $\epoch_i$ are the following pair:
   %
   \begin{equation*}
-    (\gen^{a r_i + t_i}, \ \gen^{z r_i + b t_i}).
+    (\gen^{a r_i + t_i}, \ \gen^{\omega r_i + b t_i}).
   \end{equation*}
   %
   Its exponents are the image of the uniform vector $(r_i,t_i)$ under the
-matrix $\left(\begin{smallmatrix} a & 1 \\ z & b\end{smallmatrix}\right)$, which
-is invertible whenever $ab \neq z$. So each pair is uniform in $\group{1}^2$,
+matrix $\left(\begin{smallmatrix} a & 1 \\ \omega & b\end{smallmatrix}\right)$, which
+is invertible whenever $ab \neq \omega$. So each pair is uniform in $\group{1}^2$,
 and, as the $(r_i,t_i)$ are drawn independently, the pairs are mutually
 independent. The view of $\adv$ is that of a random function, except on the
-event $ab = z$, which has probability $1/p$.
+event $ab = \omega$, which has probability $1/p$.
 
   The term $\gen^{t_i}$ is needed. Re-randomising with $r_i$ alone would give
-the response $\gen^{z r_i} = \HE(\epoch_i)^{z/a}$, which is again $\FE$, under
-key $z/a$ rather than $b$, so the two cases would be identically distributed.
+the response $\gen^{\omega r_i} = \HE(\epoch_i)^{\omega/a}$, which is again $\FE$, under
+key $\omega/a$ rather than $b$, so the two cases would be identically distributed.
 
   It remains to give $\adv$ the public tracing key.\rebekah{$T$ is not uniform
 given $\{W_\gamma\}$, since $\{W_\gamma\}$ fixes $\utk''$ and then $T$ fixes
@@ -354,7 +354,7 @@ authority, it chooses the remaining BBS+ generators and the issuing key, and
 produces every other public value of the protocol.
 
   So $\simu$ wins the DDH experiment whenever $\adv$ wins, up to the event $ab =
-z$, which gives the following bound:
+\omega$, which gives the following bound:
   %
   \begin{equation*}
     \Adv^{\mathsf{prf}}_{\FE,\adv}(\secparam) \leq
@@ -386,19 +386,19 @@ against $q$-mDBDHI with $q = \Max$.
   $\simu$ receives the following $q$-mDBDHI challenge:
   %
   \begin{equation*}
-    \Big(\gen, \ \ggen_D, \ \{\ggen_D^{1/(x+\gamma)}\}_{\gamma\in[0,\Max)}, \
+    \Big(\gen, \ \ggen_D, \ \{\ggen_D^{1/(k+\gamma)}\}_{\gamma\in[0,\Max)}, \
 \{\Delta_{\gamma}\}_{\gamma\in[0,\Max)}\Big).
   \end{equation*}
   %
-  Either $\Delta_{\gamma} = \pairing(A, \ggen_D^{1/(x+\gamma)})$ for every
-$\gamma$ and a hidden $A \sample \group{1}$, or every $\Delta_{\gamma} \sample
+  Either $\Delta_{\gamma} = \pairing(P, \ggen_D^{1/(k+\gamma)})$ for every
+$\gamma$ and a hidden $P \sample \group{1}$, or every $\Delta_{\gamma} \sample
 \group{T}$ is uniform and independent. $\simu$ does the following:
 
   \begin{enumerate}
 
-    \item Give $\adv$ the elements $\ggen_D^{1/(x+\gamma)}$ as the public
-parameters $W_\gamma$, implicitly setting $\utk''^\star = x$ and $\ek^\star =
-A$.
+    \item Give $\adv$ the elements $\ggen_D^{1/(k+\gamma)}$ as the public
+parameters $W_\gamma$, implicitly setting $\utk''^\star = k$ and $\ek^\star =
+P$.
 
     \item On a PRF query on $\gamma \in [0,\Max)$, return $\Delta_\gamma$.
 
@@ -422,7 +422,7 @@ cases, which gives the following bound:
 \Cref{lem:txid-fe-prf}, the epoch keys of distinct epochs are uniform and
 independent, even given $\PTK$, and $\PTK$ is the only value the epochs share.
 So the two lemmas compose without a hybrid over epochs.\rebekah{this is wrong:
-the challenge has one hidden $A$, so it covers one epoch key; with several
+the challenge has one hidden $P$, so it covers one epoch key; with several
 epochs and the same $\{W_\gamma\}$ a hybrid over epochs is needed}
 
   Finally, $\{W_\gamma\}$ does not reveal $\utk''$, since recovering $\utk''$
@@ -541,10 +541,10 @@ arbitrary $\gamma^\star \in [0,\Max)$, and computes the following:
   In an honest proof, $\Pi$ and $X$ are the same expressions with $Q =
 \ek^{\,s}$. So the only difference is that $Q$ is uniform instead of $\ek^{\,s}$,
 and a distinguisher between the two gives a DDH distinguisher in $\group{1}$.
-Given a challenge $(\gen, A, B, Q)$, the reduction programs $\HE(\epoch) =
-\gen$, sets $\ek = A$ and $U = B$, and computes $\Pi$ and $X$ from $Q$ as above.
+Given a challenge $(\gen, \gen^a, \gen^b, Q)$, the reduction programs $\HE(\epoch) =
+\gen$, sets $\ek = \gen^a$ and $U = \gen^b$, and computes $\Pi$ and $X$ from $Q$ as above.
 It computes the other public values that depend on $\utk'$, which are $\PTK$
-and the epoch keys of other epochs, from $A$, by programming $\gen_2$ and $\HE$
+and the epoch keys of other epochs, from $\gen^a$, by programming $\gen_2$ and $\HE$
 at other epochs to known powers of $\gen$. If $Q = \gen^{ab}$, this is an honest
 proof, and if $Q$ is uniform, it is the simulated one.\rebekah{this simulator
 uses $W_\gamma$, so it needs the index $\gamma$, which is part of the witness.
@@ -713,7 +713,7 @@ together with Bulletproofs, which are sound under the DL assumption in
 $\group{1}$~\cite{SP:BBBPWM18}. By \Cref{lem:txid-rel7,lem:txid-rel6}, the
 proofs for $\rel_7'$ and $\rel_6'$ prove $\rel_7$ and $\rel_6$. Extraction is
 by rewinding, which is sound in the standalone model. For the epoch key proof,
-the coefficients $t_\gamma$ are drawn from all of $\Zp$ by $\hash$ and derived
+the coefficients $\lambda_\gamma$ are drawn from all of $\Zp$ by $\hash$ and derived
 from $\{W_\gamma\}$, so they are fixed only after the elements they check. By
 the small exponents argument, if any element is malformed, the batched equation
 holds with probability at most $q_{\hash}/p$, where $q_{\hash}$ bounds the

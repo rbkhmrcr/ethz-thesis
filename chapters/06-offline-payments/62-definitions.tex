@@ -88,8 +88,8 @@ transferring the token to the payee.
 algorithm, on input token $\tau_n$ and its history $\algo{hist}_n$, returns 1 if
 the token is redeemed for bank deposits and 0 otherwise.
 
-  \item[$\algo{DS} \leftarrow \OPidentify(d_n, d_m)$ :] The identification
-algorithm, on input two conflicting deposit requests $d_n$ and $d_m$ for the
+  \item[$\algo{DS} \leftarrow \OPidentify(d_n, d_{n'})$ :] The identification
+algorithm, on input two conflicting deposit requests $d_n$ and $d_{n'}$ for the
 same original token, outputs the set $\algo{DS}$ of identifiers of the users who
 double spent it.
 

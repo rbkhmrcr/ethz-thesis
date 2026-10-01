@@ -72,7 +72,7 @@ field elements it derives is a call to $\algo{Mul}$.
 locally, by raising the generators to the shares of their discrete logarithms.
 
 	\item Call $\algo{Open}$ on $\pk$ only, which broadcasts each signer's
-share $\pk_i$ of it.
+share $\pk_h$ of it.
 
       \end{enumerate}
 
@@ -91,7 +91,7 @@ $\algo{Mul}$, $\algo{Inv}$, $\algo{ExpGrp}$ and linear operations.
 
       \end{enumerate}
 
-    \item[$\SPSsig_i \leftarrow \TSPSonsign(\sk_i, \state_i, \vec{\msg})$ :]
+    \item[$\SPSsig_h \leftarrow \TSPSonsign(\sk_h, \state_h, \vec{\msg})$ :]
 Each signer does the following, with no call to $\algo{MPC}$:
 
       \begin{enumerate}
@@ -108,7 +108,7 @@ Each signer does the following, with no call to $\algo{MPC}$:
 
       \end{enumerate}
 
-    \item[$\SPSsig \leftarrow \TSPScombine(\{\SPSsig_i\}_{i \in Q})$ :]
+    \item[$\SPSsig \leftarrow \TSPScombine(\{\SPSsig_h\}_{h \in Q})$ :]
 Reconstruct each group element of $\SPSsig$ from the $t+1$ shares, and return
 $\SPSsig$.
 

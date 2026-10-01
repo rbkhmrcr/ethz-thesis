@@ -457,8 +457,8 @@ notification.
 
   \end{enumerate}
 
-\item[$\algo{DS} \leftarrow \OPidentify(d_n, d_m)$ :] On input two conflicting
-deposit requests $d_n$ and $d_m$ involving the same original token, the auditor
+\item[$\algo{DS} \leftarrow \OPidentify(d_n, d_{n'})$ :] On input two conflicting
+deposit requests $d_n$ and $d_{n'}$ involving the same original token, the auditor
 does:
 
   \begin{enumerate}
@@ -466,8 +466,8 @@ does:
     \item Parse $d_n$ into the pseudonyms $(\com_k)_{k \in [n+1]}$ and
 ciphertexts $(\ciph_k)_{k \in [n+1]}$ it carries, taking these from
 $\algo{hist}_n$ together with the depositor's own $\com_n$ and $\ciph_n$, and
-parse $d_m$ analogously into $(\com'_k)_{k \in [m+1]}$ and $(\ciph'_k)_{k \in
-[m+1]}$.\rebekah{off by one: $d_n$ carries $\com_0, \ldots, \com_n$, so the index set should be $[n+1]_0$ rather than $[n+1] = \{1, \ldots, n+1\}$, and likewise for $d_m$}
+parse $d_{n'}$ analogously into $(\com'_k)_{k \in [n'+1]}$ and $(\ciph'_k)_{k \in
+[n'+1]}$.\rebekah{off by one: $d_n$ carries $\com_0, \ldots, \com_n$, so the index set should be $[n+1]_0$ rather than $[n+1] = \{1, \ldots, n+1\}$, and likewise for $d_{n'}$}
 
     \item Find the largest index $j$ such that $\com_k = \com'_k$ for all $k
 \leq j$. Either $\com_{j+1} \neq \com'_{j+1}$, in which case the owner at $j$

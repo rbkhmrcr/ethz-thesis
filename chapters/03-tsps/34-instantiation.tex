@@ -112,7 +112,7 @@ following:
 
       \end{enumerate}
 
-    \item[$\SPSsig_i \leftarrow \TSPSonsign(\sk_i, \state_i, \vec{\msg})$ :]
+    \item[$\SPSsig_h \leftarrow \TSPSonsign(\sk_h, \state_h, \vec{\msg})$ :]
 Each signer does the following:
 
       \begin{enumerate}
@@ -130,7 +130,7 @@ Each signer does the following:
 
       \end{enumerate}
 
-    \item[$\SPSsig \leftarrow \TSPScombine(\{\SPSsig_i\}_{i \in Q})$ :]
+    \item[$\SPSsig \leftarrow \TSPScombine(\{\SPSsig_h\}_{h \in Q})$ :]
 Reconstruct $\widetilde{r}$, $\widetilde{s}$ and $z$ from the shares of the $t+1$
 signers in $Q$, and return $\SPSsig = (\widetilde{r}, \widetilde{s}, z)$.
 
@@ -153,27 +153,27 @@ $1$ if and only if the following hold:
 
 \Cref{prim:sps-kiltz} recalls the $\KPW$ SPS scheme~\cite{C:KilPanWee15}. We write
 $k_{i,j}$ for the entry of $\mat{K}$ in row $i$ and column $j$, and
-$\mathsf{T}$ denotes transposition. For a vector of group elements $\vec{h} =
-(h_1, \ldots, h_{\ell+1})$ and a matrix $\mat{K} \in \Zp^{(\ell+1) \times 2}$,
+$\mathsf{T}$ denotes transposition. For a vector of group elements $\vec{f} =
+(f_1, \ldots, f_{\ell+1})$ and a matrix $\mat{K} \in \Zp^{(\ell+1) \times 2}$,
 we write the following:
 %
 \begin{equation*}
 %
-  \vec{h}^{\,\mat{K}} = \left(\prod_{i=1}^{\ell+1} h_i^{k_{i,1}}, \
-\prod_{i=1}^{\ell+1} h_i^{k_{i,2}}\right).
+  \vec{f}^{\,\mat{K}} = \left(\prod_{i=1}^{\ell+1} f_i^{k_{i,1}}, \
+\prod_{i=1}^{\ell+1} f_i^{k_{i,2}}\right).
 %
 \end{equation*}
 %
 We write $(\gen, \vec{\msg})$ for the vector $(\gen, \msg_1, \ldots,
-\msg_\ell)$, and $\gen^{\vec{a}}$ for $(\gen^{a_1}, \gen^{a_2}, \ldots)$ when
-$\vec{a}$ is a vector of field elements. Products of vectors are taken entry by
-entry. For $\vec{h} \in \group{1}^2$ and $\vec{\widetilde{h}} \in \group{2}^2$,
+\msg_\ell)$, and $\gen^{\vec{\theta}}$ for $(\gen^{\theta_1}, \gen^{\theta_2}, \ldots)$ when
+$\vec{\theta}$ is a vector of field elements. Products of vectors are taken entry by
+entry. For $\vec{f} \in \group{1}^2$ and $\vec{\widetilde{f}} \in \group{2}^2$,
 we write the following:
 %
 \begin{equation*}
 %
-  \pairing(\vec{h}, \vec{\widetilde{h}}) = \pairing(h_1,
-\widetilde{h}_1)\pairing(h_2, \widetilde{h}_2).
+  \pairing(\vec{f}, \vec{\widetilde{f}}) = \pairing(f_1,
+\widetilde{f}_1)\pairing(f_2, \widetilde{f}_2).
 %
 \end{equation*}
 
@@ -351,7 +351,7 @@ one round.
 
       \end{enumerate}
 
-    \item[$\SPSsig_i \leftarrow \TSPSonsign(\sk_i, \state_i, \vec{\msg})$ :]
+    \item[$\SPSsig_h \leftarrow \TSPSonsign(\sk_h, \state_h, \vec{\msg})$ :]
 Each signer does the following:
 
       \begin{enumerate}
@@ -370,7 +370,7 @@ Each signer does the following:
 
       \end{enumerate}
 
-    \item[$\SPSsig \leftarrow \TSPScombine(\{\SPSsig_i\}_{i \in Q})$ :]
+    \item[$\SPSsig \leftarrow \TSPScombine(\{\SPSsig_h\}_{h \in Q})$ :]
 Reconstruct every group element from the shares of the $t+1$ signers in $Q$, and
 return $\SPSsig = (\widetilde{q}, \vec{r}, \vec{s}, \vec{z})$.
 
