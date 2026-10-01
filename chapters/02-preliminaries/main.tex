@@ -22,6 +22,8 @@ otherwise as self-contained as possible.
 
 \section{Notation}\label{sec:prelims-notation}
 
+\rebekah{this section repeats the notation page almost line by line; keep one, or keep only what the page does not say}
+
 We write $\{0,1\}^*$ for the set of bit strings of any length, $|x|$ for the
 length of $x$, and $x \| y$ for the concatenation of $x$ and $y$. We write
 $[1,n]$ for the set $\{1, \ldots, n\}$. Vectors are denoted $\vec{x}$, and
@@ -97,7 +99,10 @@ $\adv$ between consecutive games.
 and interfaces, we capture all security
 goals at once inside an ideal functionality. The ideal functionality represents
 an incorruptible trusted party that receives the inputs of each protocol task
-and returns the prescribed outputs. We construct a simulator to show that
+and returns the prescribed outputs. The view of a party consists of its inputs,
+its randomness and the messages it receives. In the ideal execution, honest
+parties communicate only with $\idfu{}$, and $\simu$ takes the place of $\adv$.
+We construct a simulator to show that
 the view of an adversary in the real world, interacting with our protocol, is
 indistinguishable from the view when interacting with the ideal functionality
 itself.
@@ -114,9 +119,6 @@ $\textsc{Exec}_{\idfu{},\simu}(\secparam)$. As the ideal functionality achieves
 all security properties by design, this shows that the protocol achieves them
 too.
 
-The view of a party consists of its inputs, its randomness and the messages it
-receives. In the ideal execution, honest parties communicate only with
-$\idfu{}$, and $\simu$ takes the place of $\adv$.
 
 Honest-but-curious participants follow the protocol, and the adversary sees
 their views and combines them with the views of the other corrupted
