@@ -24,7 +24,7 @@ $\msg$.
 \end{description}
 
 Public key encryption schemes satisfy correctness and indistinguishability. We
-define correctness and indistinguishability under chosen plaintext attack
+define correctness and indistinguishability under chosen-plaintext attack
 below. We use the standard syntax and security notions for public key
 encryption~\cite{KatLin14}.
 
@@ -38,8 +38,8 @@ the following holds:
 %
 \end{equation*}
 %
-\paragraph{IND-CPA security.} We define indistinguishability under chosen
-plaintext attack (IND-CPA) security using \Cref{exp:ind-cpa}.
+\paragraph{IND-CPA security.} We define indistinguishability under
+chosen-plaintext attack (IND-CPA) security using \Cref{exp:ind-cpa}.
 
 \begin{experimentbox}{Public key encryption schemes: IND-CPA}{ind-cpa}
 
@@ -74,6 +74,6 @@ The IND-CPA advantage of $\adv$ is defined as follows:
 We say the public key encryption scheme $\PKE$ is IND-CPA secure if this
 advantage is negligible for every PPT adversary $\adv$.
 
-Indistinguishability under chosen ciphertext attack (IND-CCA) is defined by the
+Indistinguishability under chosen-ciphertext attack (IND-CCA) is defined by the
 same experiment, with the adversary also given an oracle that decrypts any
 ciphertext other than $\ciph^\star$. IND-CCA security implies IND-CPA security.

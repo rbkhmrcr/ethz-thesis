@@ -28,9 +28,13 @@ issuers worldwide, each relevant to only some users, that coordination is
 impractical, and between issuers with no relationship to one another it may be
 impossible.
 
-\paragraph{Contributions.} We give an aggregate anonymous credential scheme for
-this setting: credentials from independent, uncoordinated issuers combine into
-one compact credential, provable in one proof.
+\paragraph{Contributions.} In contrast to classical anonymous credential
+schemes, we explicitly consider a decentralised setting in which each attribute
+is certified by a distinct issuer. We give an aggregate anonymous credential
+scheme for this setting: credentials from independent, uncoordinated issuers
+combine into one compact credential, provable in one proof. Aggregation is
+performed locally by the user without interaction between issuers. The scheme
+supports selective disclosure of attribute values.
 
 The key observation behind the scheme is that a credential rests on a chain of
 links: from a user's secret key to their public key, from the public key to a
@@ -38,31 +42,28 @@ tag, and from the tag to the credentials issued under it. Each link can be
 established by a different party. Users show that they know their secret key. A
 registration authority, which certifies users' keys in any case, links each
 public key to a tag. Issuers then sign attributes under the tag, and their
-signatures do not involve the key. At presentation, all three links are checked
-together, so a verifier sees that the chain is unbroken without learning the key
-or the tag. Separating the requirements on the registration authority from those
-on the issuers also lets issuers be stateless. Each user has one tag, so issuers
-need not remember whom they have signed for.
+signatures do not involve the key. At presentation, the verifier checks all three
+links together, and so sees that the chain is unbroken without learning the key
+or the tag.
 
-A registration authority handles registration only, binding users' keys to
-fresh tags. Every credential a user later obtains is issued under their tag. To present
+The registration authority handles registration only, binding users' keys to
+fresh tags. It sees no attribute values and is not involved after registration.
+Every credential a user later obtains is issued under their tag. To present
 attributes, users aggregate the relevant credentials and prove, in zero
 knowledge, that they know the key, hold a valid aggregate credential for the
-disclosed values, and that both share a tag. Binding by tag stops different
-users' credentials being pooled, and lets honest users aggregate alone, without
-contacting any issuer again. The registration authority is not a new party that
-we add to the model. Every anonymous credential scheme already assumes that
-users' keys are certified, so that credentials cannot be issued to keys that
-users do not control. That assumption is usually left implicit, or met by the
-issuer itself.
+disclosed values, and that both share a tag. This is a single proof whose cost
+grows only with the number of disclosed attributes. Binding by tag stops
+different users' credentials being pooled, and lets honest users aggregate
+credentials from issuers that have never communicated, without contacting any
+issuer again. Separating the requirements on the registration authority from
+those on the issuers also lets issuers be stateless. Each user has one tag, so
+issuers need not remember whom they have signed for.
 
-Here we name the role. It binds a key to a tag at registration and does
-nothing else. It sees no attribute values and is not involved after
-registration. Because all of a user's credentials are issued under the same tag, users can
-aggregate credentials from issuers that have never communicated. Presentations
-still prove that the registration signature and the aggregate credential share
-a tag, in a single proof whose cost grows only with the number of disclosed
-attributes.
+The registration authority is not a new party that we add to the model. Every
+anonymous credential scheme already assumes that users' keys are certified, so
+that credentials cannot be issued to keys that users do not control. That
+assumption is usually left implicit, or met by the issuer itself. Here we name
+the role.
 
 \subsection*{Related work}
 
@@ -164,8 +165,7 @@ registration. The difference is what the tag is. In ART-Sign the tag is the
 user's public key, whose validity is proven again at every showing. Ours is a
 separate value that the registration authority signs together with the key, so
 issuers keep no record, and presentations prove knowledge of the registration
-signature instead. Separating what is required of the registration authority
-from what is required of the issuers lets our issuers be stateless.
+signature instead.
 ART-Sign offers traceability, which our scheme does not.
 \rebekah{Comments on the Comparison bullets: ``really compress, 3 sentences in
 total?'', and on the bullets after it ``last bullet is useful, others should be
@@ -207,13 +207,6 @@ schemes are those of the cited papers.
 Issuer state is what an issuer has to remember about each user. For HP22 this
 is which tags it has signed for, and for MBGLS23 either the same or the
 attributes and issuer keys fixed in advance.} \label{tab:agg-creds-related} \end{table}
-
-In contrast to classical anonymous credential
-schemes, we explicitly consider a decentralised setting in which each attribute
-is certified by a distinct issuer, and credentials issued by different
-authorities are combined into one single compact credential.  Aggregation is
-performed locally by the user without interaction between issuers. The scheme
-supports selective disclosure of attribute values.
 
 \paragraph{Layout.} The rest of the chapter is organised as follows. \Cref{sec:agg-creds-definitions} states the problem and
 formalises it as an ideal functionality.  \Cref{sec:agg-creds-construction}

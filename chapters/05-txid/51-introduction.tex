@@ -124,8 +124,8 @@ the cost of recovering one user's transactions for one epoch. For
 revocation-based schemes this is linear in the size of the ledger $|L|$, because
 every transaction must be decrypted before it is known whether it belongs to the
 target. For our scheme it is $\Max$ tag computations and $\Max$ lookups, where $\Max$
-is the per-epoch transaction bound. At $\Max =
-2^{10}$ this takes under a second. It does not grow with the ledger, and it
+is the per-epoch transaction bound. At $\Max = 2^{10}$ this takes 141\,ms in
+the algebraic instantiation and 4.24\,ms in the hash-based one. It does not grow with the ledger, and it
 reveals nothing about the transactions of users other than the target.
 
 \begin{table}[htbp] \centering \caption[Comparison with prior approaches to regulatory oversight]{Comparison with prior approaches to
@@ -142,7 +142,7 @@ submission & permission \\
     %
     \midrule
     %
-    \parbox[t]{2.4cm}{\raggedright CHL06~\cite{SCN:CamHohLys06}, BDET21~\cite{CANS:BDET21}, CDLP22~\cite{INDOCRYPT:CDLP22}} & revocation & $O(|L|)$
+    \parbox[t]{2.4cm}{\raggedright CHL06~\cite{SCN:CamHohLys06}, CL17~\cite{EUROSP:CamLeh17}, BDET21~\cite{CANS:BDET21}, CDLP22~\cite{INDOCRYPT:CDLP22}} & revocation & $O(|L|)$
 decryptions & yes & no \\
     %
     \parbox[t]{2.4cm}{\raggedright KKS22~\cite{CCS:KiaKohSar22}, SKK24~\cite{CANS:SarKiaKoh24}} & tags, sequential counter &

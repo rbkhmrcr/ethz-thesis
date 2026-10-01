@@ -35,8 +35,8 @@ following holds:
 \end{equation*}
 %
 
-\paragraph{Unforgeability.} We define existential unforgeability under chosen
-message attack (EUF-CMA) using \Cref{exp:euf-cma}.
+\paragraph{Unforgeability.} We define existential unforgeability under
+chosen-message attack (EUF-CMA) using \Cref{exp:euf-cma}.
 
 \begin{experimentbox}{Digital signature schemes: EUF-CMA}{euf-cma}
 
@@ -76,7 +76,7 @@ wins}].
 We say the digital signature scheme $\DS$ is EUF-CMA secure if this advantage is
 negligible for every PPT adversary $\adv$.
 
-Strong unforgeability under chosen message attack (sUF-CMA) is defined by the
+Strong unforgeability under chosen-message attack (sUF-CMA) is defined by the
 same experiment except that the oracle stores the pairs $(\msg, \signature)$ it
 returns, and any valid pair that was not returned counts as a forgery. Every
 scheme in this thesis needs only EUF-CMA security of the signature schemes it

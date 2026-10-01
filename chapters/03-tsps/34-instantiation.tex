@@ -165,7 +165,7 @@ we write the following:
 %
 We write $(\gen, \vec{\msg})$ for the vector $(\gen, \msg_1, \ldots,
 \msg_\ell)$, and $\gen^{\vec{\theta}}$ for $(\gen^{\theta_1}, \gen^{\theta_2}, \ldots)$ when
-$\vec{\theta}$ is a vector of field elements. Products of vectors are taken entry by
+$\vec{\theta}$ is a vector of field elements. We take products of vectors entry by
 entry. For $\vec{f} \in \group{1}^2$ and $\vec{\widetilde{f}} \in \group{2}^2$,
 we write the following:
 %
@@ -258,11 +258,9 @@ x_j^{\rho} y_j^{\rho\sigma}, \quad e_{j,i} = k_{i+1,j}.
 None of these depend on the message. Our protocol and implementation
 compute $\gen^{k_{1,j}}$ in the online phase instead, which is also local.
 
-Unlike in $\AGHO$, the secret key contains the group elements $\vec{b}, \vec{x},
-\vec{y} \in \group{1}^2$, and the offline phase raises each of them to a shared
-exponent. Raising a shared group element to a shared field element needs
-$\algo{ExpGrp}$, so $\KPW$ needs sharings of group elements.
-The signers could instead keep the discrete logarithms $\beta, \vec{\xi},
+The group elements of the secret key are $\vec{b}, \vec{x}, \vec{y} \in
+\group{1}^2$, and the offline phase raises each of them to a shared exponent
+with $\algo{ExpGrp}_1$. The signers could instead keep the discrete logarithms $\beta, \vec{\xi},
 \vec{\upsilon}$ as shares of field elements, so that $\algo{Mul}$ and linear
 operations would suffice, but they would then no longer hold shares of the
 secret key of $\KPW$ as it is defined.\rebekah{Your comments here: ``dunno

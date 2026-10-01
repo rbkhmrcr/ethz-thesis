@@ -115,8 +115,8 @@ give such a primitive for BBS+ signatures~\cite{USENIX:HesSinSor23}, and we
 recall it in the syntax used throughout this thesis.
 
 \paragraph{Syntax.} A JPOK $\JPOK$ is a proof system for a relation $\rel$ over
-statement $\inst$ and witness $\witness = (\witness_0, \witness_1)$, where
-$\witness_0$ is held by the first prover and $\witness_1$ by the second. We
+statement $\inst$ and witness $\witness = (\witness_0, \witness_1)$, where the first
+prover holds $\witness_0$ and the second prover holds $\witness_1$. We
 work in the random oracle model with generators derived by hashing, so a JPOK
 has no setup algorithm and no common reference string. A JPOK consists of the
 following protocol and algorithm:
@@ -137,9 +137,10 @@ $0$ or $1$.
 
 \rebekah{the verifier here receives only $\Phi$; in the protocol of Hesse, Singh and Sorniotti (Section 4, Figure 3) the verifier relays the messages between card and holder, and the two provers share a PRF key, neither of which this syntax has; check}
 
-Hesse, Singh and Sorniotti establish completeness, soundness and zero knowledge
-for their construction in their Theorem 4.1~\cite{USENIX:HesSinSor23}. We state them
-as follows.
+Hesse, Singh and Sorniotti prove completeness, soundness and zero knowledge for
+their construction in their Theorem 4.1~\cite{USENIX:HesSinSor23}. We require
+completeness, zero knowledge, simulation extractability and first-prover
+privacy, defined as follows.
 
 \paragraph{Completeness.} A JPOK is complete if, for every statement $\inst$
 and witness $(\witness_0, \witness_1)$ with $\rel(\inst, (\witness_0,
@@ -500,17 +501,13 @@ one, and the distinction matters: our simulator extracts from some proofs by
 rewinding the adversary, which a universally composable simulator may not do. We
 return to this point in~\Cref{sec:offline-security}.
 
-$\idfu{\algo{op}}$ interacts with $\simu$ and with the system's participants.
-These are the users, who act as both payers and payees, the intermediaries, the
-registration authority, the central bank, and the auditor. Each user is
+$\idfu{\algo{op}}$ interacts with $\simu$ and with the participants described at
+the start of this section, under the trust assumptions given there. Each user is
 represented as a pair consisting of a mobile device and a secure element, so
 that an individual holding multiple bank accounts is modelled as multiple such
-users, one per account.
-
-The registration authority, the central bank, and the intermediaries are honest
-but curious, so $\simu$ learns their inputs and outputs by default. We consider
-a static corruption model, in which $\simu$ corrupts the devices and secure
-elements of its choosing before they interact with $\idfu{\algo{op}}$.
+users, one per account. $\simu$ learns the inputs and outputs of the honest but
+curious participants by default, and corrupts devices and secure elements only
+before they interact with $\idfu{\algo{op}}$.
 
 The formal description is given in~\Cref{fig:ideal-func}. We summarise each
 interface below.
@@ -547,9 +544,7 @@ unset entries are $\bot$.
 
 The longest common prefix of two identifier vectors is
 the longest vector that both start with. The two agree up to it, and then either
-differ in the next entry or one of them ends. In $\OPexecute$, a corrupt payee
-may accept a token the payer does not own, but then nothing is recorded, so the
-payee cannot pass the token on.
+differ in the next entry or one of them ends.
 
 $\simu$ uses the corruption interface to compromise users' mobile devices or
 secure elements. We assume that corrupting the secure element also corrupts the

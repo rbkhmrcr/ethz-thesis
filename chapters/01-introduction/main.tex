@@ -91,20 +91,17 @@ Designing these parties out of systems is often not possible. Issuers,
 validators and auditors exist because systems need them, and removing them from
 protocols does not remove that need. Their functions are then either taken on by
 users, who bear the computational costs, or moved outside the protocols, where
-nothing limits what these parties learn. Privacy does not automatically follow from decentralisation, nor does it
-automatically disappear when corporations or public institutions participate in
-a protocol. What matters is the information made available to each participant.
-Protocol models should reflect the roles that exist in practice. Issuers,
-auditors, validators and service providers can be represented explicitly rather
-than removed in pursuit of decentralisation.
-
-Privacy-focused systems are often discussed as if the choice is between
-decentralised privacy and centralised surveillance. This thesis challenges that
-binary. Powerful institutions can perform useful protocol functions while
-cryptography limits both the information available to them and the capabilities
-they receive. Allowing institutions to perform this work may reduce the
-computation, storage, time and specialist knowledge required of individual
-users.
+nothing limits what these parties learn. Privacy-focused systems are often
+discussed as if the choice is between decentralised privacy and centralised
+surveillance. This thesis challenges that binary. Privacy does not automatically
+follow from decentralisation, nor does it automatically disappear when
+corporations or public institutions participate in a protocol. What matters is
+the information made available to each participant. Powerful institutions can
+perform useful protocol functions while cryptography limits both the information
+available to them and the capabilities they receive. Allowing institutions to
+perform this work may reduce the computation, storage, time and specialist
+knowledge required of individual users. Protocol models should reflect the roles
+that exist in practice.
 
 Systems deployed today to protect user privacy already involve service
 providers, issuers, auditors, validators and other accountable entities with
@@ -173,7 +170,7 @@ analysis of each property of a system. For availability and correct operation,
 we assume that institutions perform their prescribed roles. For privacy, the
 same institution need not be trusted to keep information available to it
 confidential. It may retain and combine this information, share it with other
-participants, and attempt to learn anything it can. Privacy is assessed against
+participants, and attempt to learn anything it can. We assess privacy against
 the strongest information it can derive in this setting. The institution may be
 relied upon to perform an operational function without being trusted with users'
 private information. Each chapter states which participants may deviate from the
@@ -231,7 +228,7 @@ scope and duration of the information disclosed to an auditor.
 Finally, we study privacy in offline payments. Offline operation improves
 availability and accessibility, but changes how double spending must be handled.
 We develop an offline payment scheme with two defences against double spending.
-The first is prevention: computation is divided between a mobile device and a
+The first is prevention: we divide computation between a mobile device and a
 secure element, and the secure element does not allow the same value to be spent
 twice. The second is detection: if a secure element is broken and double
 spending occurs, information identifying the double spender can be recovered.

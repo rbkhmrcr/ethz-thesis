@@ -1,15 +1,15 @@
 \section{Evaluation}\label{sec:txid-evaluation}
 
-Both instantiations are implemented in Go over the BLS12-381 curve. They use
+We implement both instantiations in Go over the BLS12-381 curve. They use
 gnark-crypto v0.21.0 for the groups and the pairing, and gnark v0.16.3 for the
-Groth16 circuits~\cite{gnark-crypto}. All measurements are taken on a MacBook
+Groth16 circuits~\cite{gnark-crypto}. We take all measurements on a MacBook
 Air with an Apple M2 and 16\,GB of RAM. Each measurement is 10 warm-up calls
 followed by 100 timed repetitions, and we report the median. The interquartile
 range is typically within 2\% of the median and at most 8\%, except for
 hash-based tracing at small $\ell$, which takes well under a millisecond and
 varies by up to 20\%.
 
-The algebraic instantiation is implemented as \Cref{prot:txid}. The
+We implement the algebraic instantiation as \Cref{prot:txid}. The
 hash-based instantiation uses MiMC over the scalar field of BLS12-381 and
 Groth16 as the zk-SNARK~\cite{EC:Groth16}, with gnark's extension of Groth16 by
 a commitment to part of the witness~\cite{CCS:BelSolBeg23}. A Groth16 proof is
@@ -117,9 +117,10 @@ deployment can tolerate a trusted setup, and on whether proving or verification
 cost matters more.
 
 Groth16 proofs can be rerandomised, so from one proof anyone can produce
-another for the same statement. This is allowed by the simulation extractability
-of \Cref{exp:simext}, which excludes only statement and label pairs on which a
-proof was simulated, and is the notion \Cref{thm:hash-inst} assumes. Baghery et
+another for the same statement. The simulation extractability of
+\Cref{exp:simext} allows this, since it excludes only statement and label pairs
+on which a proof was simulated, and it is the notion \Cref{thm:hash-inst}
+assumes. Baghery et
 al.\ show that plain Groth16 is simulation extractable in this sense in the
 algebraic group model~\cite{FC:BKSV21}. Their result does not cover the
 commitment extension, so the theorem assumes it.
@@ -155,8 +156,7 @@ $\ell = 8$ it takes $36.9\,\mathrm{ms}$ in the algebraic instantiation and
 $1.10\,\mathrm{ms}$ in the hash-based one.
 
 \begin{outline}
-  \item algebraic: the $\group{T}$ tag is the largest item on the ledger; torus compression would halve it
-  \item check first: the table disagrees, as the tag is 576 bytes and the $\rel_7'$ proof 3312 bytes; the torus claim would need a citation
+  \item algebraic: the tag proof ($\rel_7'$, 3312 bytes) is the largest item on the ledger; the $\group{T}$ tag is 576 bytes, and torus compression would halve it
   \item $\ell = 8$ as headline, since algebraic proving steps up just after it
 \end{outline}
 

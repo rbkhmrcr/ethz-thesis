@@ -3,7 +3,7 @@
 This section gives the setting, assumptions and concrete schemes that the rest
 of the thesis builds on. It includes the standard instantiations of primitives
 from this chapter, the Pedersen commitment scheme and the ElGamal encryption
-scheme, and the BBS+ signature scheme, which is used in more than one chapter.
+scheme, and the BBS+ signature scheme, which more than one chapter uses.
 
 \subsection{Groups and assumptions}\label{sec:prelims-groups}
 
@@ -74,7 +74,7 @@ the group operations and the pairing. A proof in the GGM rules out attacks that
 ignore the representation of the group, but gives a weaker guarantee than a
 reduction to a stated assumption. Some assumptions are $q$-type, meaning their
 statement grows with a parameter $q$, typically the number of signing queries.
-Such assumptions give the adversary more to work with than fixed-size ones, and are stronger than the fixed-size assumptions they generalise.
+Such assumptions are stronger than the fixed-size assumptions they generalise.
 
 \subsection{Sigma protocols and the Fiat-Shamir transform}\label{sec:prelims-sigma}
 
@@ -112,7 +112,7 @@ The verifier accepts if and only if the following holds:
 \end{equation*}
 %
 The same protocol proves knowledge of a representation $h = \prod_i
-\gen_i^{x_i}$, with one response per exponent. Several equations over the same witness are proven by
+\gen_i^{x_i}$, with one response per exponent. We prove several equations over the same witness by
 running the protocol for each in parallel with one shared challenge, so that
 they hold together. In this way we can show, for example, that two group
 elements have the same discrete logarithm.
@@ -184,7 +184,7 @@ It is perfectly hiding and binding under the DL assumption in the same way.
 
 The ElGamal encryption scheme in \Cref{prim:elgamal} encrypts group
 elements~\cite{C:ElGamal84}. In $\group{1}$, it is IND-CPA secure under the DDH
-assumption in $\group{1}$. Field elements $m$ are encrypted as $\gen^m$, and
+assumption in $\group{1}$. We encrypt field elements $m$ as $\gen^m$, and
 decryption gives back $\gen^m$ rather than $m$.
 
 \begin{primitivebox}{The ElGamal encryption scheme}{elgamal}

@@ -18,8 +18,8 @@ running JCOP 4.5, which the phone reaches over near-field communication (NFC).
 \Cref{fig:offline-withdraw-seq,fig:offline-pay-seq} give the message sequences
 of a withdrawal and a payment.
 
-The server-side implementation is written in Go with gnark-crypto 0.21.0 over
-the BLS12-381 curve, and runs on a MacBook Air with an Apple M2 and 16\,GB of
+We wrote the server-side implementation in Go with gnark-crypto 0.21.0 over
+the BLS12-381 curve, and run it on a MacBook Air with an Apple M2 and 16\,GB of
 RAM~\cite{gnark-crypto}. We report medians of $100$ runs, after $10$ warm-up
 calls on the server. The interquartile range is within $3\%$ of the median for
 most operations, and at most $13\%$ on the phones and the card and $10\%$ on the
@@ -80,9 +80,7 @@ Withdrawal and the payer side of a payment both complete in under half a second,
 and the smart card authorises a payment in under $400\,\mathrm{ms}$.
 
 \Cref{tab:offline-timings} gives the time of each wallet
-step on the phones and the card.\rebekah{the text does not say where the phone and card measurements come from (when, which code version, which of the kept json or dataset files); the json files differ from the dataset files the tables use} We count hops as the signatures of knowledge a verifier
-checks, so one hop is the first payment $p_0$ after withdrawal, or a deposit
-made straight after withdrawal. Most of the time is spent on the card, which takes
+step on the phones and the card.\rebekah{the text does not say where the phone and card measurements come from (when, which code version, which of the kept json or dataset files); the json files differ from the dataset files the tables use} The card takes most of the time,
 about $230\,\mathrm{ms}$ to generate a pseudonym and $370\,\mathrm{ms}$ for its
 share of the transfer signature, NFC included. Auditing adds $9\,\mathrm{ms}$ on
 Android and $2\,\mathrm{ms}$ on iOS to the payer's phone, which is under $3\%$
@@ -104,11 +102,13 @@ trip. The smart card does the same work with and without auditing, and both
 columns use the same card measurements.} \label{tab:offline-timings}
 \end{table}
 
-
-Payee verification grows linearly with the number of hops, since each hop
-contributes one signature of knowledge and one audit proof to check. Even a
-chain of 32 hops verifies in under a second. Auditing adds an overhead for the
-payee, who checks one additional proof per hop.
+We count hops as the signatures of knowledge a verifier checks, so one hop is
+the first payment $p_0$ after withdrawal, or a deposit made straight after
+withdrawal. Payee verification grows linearly with the number of hops, since
+each hop contributes one joint proof to check, which includes the audit
+equations when auditing. Even a chain of 32 hops verifies in under a second.
+Auditing adds an overhead for the payee, who checks the two audit equations in
+every hop's joint proof.
 
 \Cref{fig:offline-hops-times,fig:offline-hops-sizes} show how time and size
 grow with the length of the chain. With auditing, the payee verifies $32$ hops in
@@ -142,9 +142,9 @@ direction.
 \caption[Offline payments: server-side time and size]{Median server-side time
 of each algorithm at one hop, in milliseconds, and size of the key, message or
 proof it produces, in bytes, with group elements compressed ($48$ bytes in
-$\group{1}$, $96$ bytes in $\group{2}$). Rows that do not depend on auditing are
-measured once and repeated in both columns. The secure element's part is not
-included. The last rows give the sizes of objects no single algorithm sends.\rebekah{the scheme has no $\crs$; the public parameters row counts the hashed generators and keys the implementation bundles as its public parameters, so rename it or drop it}}
+$\group{1}$, $96$ bytes in $\group{2}$). We measure rows that do not depend on auditing
+once and repeat them in both columns. The times do not include the secure
+element's part. The last rows give the sizes of objects no single algorithm sends.\rebekah{the scheme has no $\crs$; the public parameters row counts the hashed generators and keys the implementation bundles as its public parameters, so rename it or drop it}}
 \label{tab:offline-server} \label{tab:offline-sizes}
   %
   \begin{tabular}{l l r r r r} \toprule

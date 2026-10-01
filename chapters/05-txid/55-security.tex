@@ -115,8 +115,8 @@ the following:
     \permsimu[(\auditor,\user,\epoch)] \leftarrow \ek.
   \end{equation*}
   %
-  The user's public tracing key $\PTK_\user$ is sampled once per user, at
-registration, and is reused in every grant for that user. This is required, since
+  $\simu$ samples the user's public tracing key $\PTK_\user$ once per user, at
+registration, and reuses it in every grant for that user. This is required, since
 $\PTK$ is certified once and is identical across epochs by construction. A
 simulator that drew a fresh one per grant would be trivially distinguishable by a
 corrupt auditor holding grants for two epochs.
@@ -242,9 +242,9 @@ auditor for that epoch. Event $E_2$ is an honest auditor failing to trace a
 transaction of a corrupt user submitted during an epoch despite holding the
 granted authorisation. We show each event is negligible.
 
-  Event $E_1$ does not occur, since the transactions of honest users during an
-epoch for which they did not grant tracing permissions to any corrupt auditor
-are generated at random.
+  Event $E_1$ does not occur, since $\simu$ generates at random the transactions
+of honest users during an epoch for which they did not grant tracing
+permissions to any corrupt auditor.
 
   Event $E_2$ occurs only with negligible probability. This is the main
 argument for non-repudiation, so we give it in full. A transaction $\tx$ from a
@@ -673,8 +673,8 @@ the simulator knows as it plays the registration authority. So $(E', \bar{E}, d)
 $\signature$. The simulator samples these three values in the same way, and
 simulates the Sigma protocol of the transaction authorisation proof as for the
 tag proof, by sampling $c$ and $\vec{\theta}$ and solving each verification
-equation for $t_1$, $t_2$, and $t_3$. The Fiat-Shamir transform is handled as
-in \Cref{sec:rel7-equiv}.
+equation for $t_1$, $t_2$, and $t_3$. It handles the Fiat-Shamir transform as in
+\Cref{sec:rel7-equiv}.
 
 \end{proof}
 
@@ -768,12 +768,12 @@ knowledge soundness of the zk-SNARK with commitments extracts $(\utk, \mu,
 an opening $(\utk^\star, \mu^\star, \openinfo^\star)$ of $D$ and $\com$. If
 $\utk \neq \utk^\star$, these are two openings of $D$, which give $\log_{K_0}
 K_1$, which no party knows after an honest setup. Binding of $\com$ then ties
-$\utk^\star$ to the certified key. Grants are handled in the same way, with the
+$\utk^\star$ to the certified key. The same argument covers grants, with the
 public tracing key in place of $\com$. Hiding is unaffected, since $D$ is a
 uniform element of $\group{1}$, fresh for each proof, and the linking proof is
 zero knowledge.
 
-  Simulation extractability is needed in the sense of \Cref{exp:simext}, which
+  We need simulation extractability in the sense of \Cref{exp:simext}, which
 excludes only statement and label pairs on which a proof was simulated. The
 zk-SNARK has no label of its own. Its label is bound instead by the linking
 proof, whose Fiat-Shamir context contains the zk-SNARK proof, and by the

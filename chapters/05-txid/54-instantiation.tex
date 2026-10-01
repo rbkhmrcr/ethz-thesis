@@ -10,12 +10,7 @@ and \Cref{sec:txid-evaluation} compares the two.
 \subsection{Instantiating $\ID$ with algebraic PRFs}\label{sec:txid-alg-instantiation}
 
 Three of the four relations of the construction involve pairing equations,
-and proving statements about pairings is expensive. We rewrite each of them so
-that the prover only shows equalities of discrete logarithms, which efficient
-Sigma protocols handle, while the verifier evaluates one or two pairings itself
-on public data. The concrete choices below are all made so that every proof
-stays a Sigma protocol.
-\rebekah{p.84: a long pen stroke runs from ``rewrite each of them so that the prover'' to ``every proof'', and ``which efficient Sigma protocols handle'' is underlined. Strike the rest of this paragraph (the outline below says the same), or only reword that phrase?}
+and proving statements about pairings is expensive.
 
 \begin{outline}
   \item why this instantiation is more complex than the construction: the derivations of \Cref{sec:txid-construction}, tracing key to epoch keys to tags, need every step to be one way, hard to invert from the epoch key back to the tracing key, and from a tag back to the epoch key
@@ -26,7 +21,7 @@ stays a Sigma protocol.
   \item the hash-based instantiation drops the algebraic structure and pays with a general-purpose proof system
 \end{outline}
 
-The setup is transparent. All group generators are derived by hashing to the
+The setup is transparent. We derive all group generators by hashing to the
 group from a public seed, so no party, including the registration authority,
 knows a discrete logarithm relation among them.
 
@@ -34,8 +29,8 @@ knows a discrete logarithm relation among them.
 
 A user's tracing key is a pair of field elements $\utk = (\utk', \utk'')$. The
 first component keys the epoch PRF, and the second keys the tag PRF below, which
-inverts against a scalar. Both are drawn once at registration and certified
-together in the same credential.
+inverts against a scalar. The user draws both once at registration, and the
+registration authority certifies them together in the same credential.
 
 \begin{outline}
   \item why this epoch PRF: the epoch key must be in $\group{1}$ (the tag PRF pairs it against $\group{2}$) and its derivation must be provable with a Sigma protocol
@@ -59,8 +54,10 @@ and the vector of group elements that tag evaluation needs:
 %
 These elements do not change with the epoch. If the epoch PRF output them, they
 would repeat in every epoch and its output could not be pseudorandom, so they
-are part of the certified public tracing key instead, which is already sent in
-the grant message. This is what the construction asks for.
+are part of the public tracing key instead, which is already sent in the grant
+message. The registration authority signs only $(S,T)$, so the elements
+$\{W_\gamma\}$ are not certified. The user proves them well formed against the
+certified $T$ at the first grant to each auditor, in the epoch key proof.
 
 \begin{lemma}\label{lem:txid-fe-prf}
   %
@@ -78,8 +75,8 @@ so against a distinguisher given the whole of $\PTK$.
 \end{outline}
 
 The Dodis-Yampolskiy PRF is pseudorandom under the $q$-decisional bilinear
-Diffie-Hellman inversion assumption, $q$-DBDHI~\cite{PKC:DodYam05}. It is
-given in \Cref{prim:dy-prf}.
+Diffie-Hellman inversion assumption, $q$-DBDHI~\cite{PKC:DodYam05}.
+\Cref{prim:dy-prf} recalls it.
 
 \begin{primitivebox}{The Dodis-Yampolskiy PRF}{dy-prf}
 
@@ -134,7 +131,7 @@ Similar $q$-type assumptions are the norm for constructions of this shape, and
 pairing-based constructions of this type are known not to admit both short
 proofs and a reduction to a simple assumption~\cite{EC:TCRSTW22,TCC:BHKU22}.
 
-The auditor is given the outputs $\{W_\gamma\}$ and not the key $\utk''$.
+The auditor gets the outputs $\{W_\gamma\}$ and not the key $\utk''$.
 Every tag of an epoch is $Y^{1/(\utk''+\gamma)}$ for the
 same $Y = \pairing(\ek,\ggen_D)$. An auditor holding $\utk''$ could recover $Y$
 from any single tag on the ledger and compute every other tag of that user in
@@ -144,11 +141,8 @@ $\{W_\gamma\}$ instead, the auditor still computes every tag of a granted epoch
 from $\ek$, and the epoch key keeps the other epochs out of reach.
 
 The elements $\{W_\gamma\}$ are public parameters, not secrets held in trust.
-They are certified with the public tracing key and handed to every auditor a
-user authorises.\rebekah{the registration authority signs only $(S,T)$, so
-$\{W_\gamma\}$ is not certified; it is proved well formed against $T$ in the
-first grant} Two colluding auditors who compare their copies learn only that
-the same user granted them both, which they already knew. They cannot use them
+The user hands them to every auditor they authorise. Two colluding auditors who
+compare their copies learn only that the same user granted them both, which they already knew. They cannot use them
 to read a tag from an epoch for which neither holds the epoch key.
 
 \begin{lemma}\label{lem:txid-ft-prf} Let $\ek$ be uniform in $\group{1}$ and
@@ -181,9 +175,9 @@ for $\rel_4$ is the Sigma protocol for knowledge of a representation of $S$ and
 $T$, with its label in the Fiat-Shamir hash. The proofs for $\rel_5$, $\rel_7$
 and $\rel_6$ are the epoch key proof, the tag proof and the transaction
 authorisation proof, given after the protocol in
-\Cref{prot:txid-ek-proof,prot:txid-tag-proof,prot:txid-tx-proof}. The range
-clause of $\rel_7$ is proved with a Bulletproofs range proof on a separate
-commitment to the index.
+\Cref{prot:txid-ek-proof,prot:txid-tag-proof,prot:txid-tx-proof}. The user
+proves the range clause of $\rel_7$ with a Bulletproofs range proof on a
+separate commitment to the index.
 
 \begin{protocolbox}{The algebraic tracing protocol}{txid}
 
@@ -537,8 +531,8 @@ X^{\theta_2 + \theta_\gamma} = F \cdot \Pi^c, \quad
 
 Each transaction comes with a
 proof that it originated from a registered user, following relation $\rel_6$.
-The key committed in $\com$ is certified by a BBS+ signature of the registration
-authority. As for the tag proof, we rewrite $\rel_6$ as an equivalent relation
+The registration authority certifies the key committed in $\com$ with a BBS+
+signature. As for the tag proof, we rewrite $\rel_6$ as an equivalent relation
 $\rel_6'$ that avoids proofs over bilinear
 equations~\cite{EPRINT:CamDriLeh16,USENIX:HesSinSor23}. The rewriting
 randomises the signature, which the verifier checks with one pairing equation on
@@ -666,8 +660,8 @@ under the DL assumption the commitments are binding and the range proofs sound.
 
 \subsection{Instantiating $\ID$ with hash-based PRFs}\label{sec:txid-hash-instantiation}
 
-The protocol above is instantiated with the computational efficiency of its
-proofs in mind. We now give a more straightforward instantiation, in which both
+We designed the protocol above with the computational efficiency of its proofs
+in mind. We now give a more straightforward instantiation, in which both
 pseudorandom functions are hash functions and the proofs about them use a
 general-purpose proof system. Its prover does more work, and
 \Cref{sec:txid-evaluation} compares the two. We use independent hash functions
@@ -693,8 +687,8 @@ $\G(\sk) = \gen_1^{\sk}$ and $\PTK = \gen_2^{\utk}$, without learning them.
 
   \item $\Com$ is the Pedersen commitment scheme of \Cref{prim:pedersen}, with
 $\ck = (\gen_2, \gen_3)$. Here $\gen_3$ is also the randomness generator of
-the BBS+ signature scheme, as $\gen_4$ is in the algebraic instantiation, and all
-generators are derived by hashing to the group.
+the BBS+ signature scheme, as $\gen_4$ is in the algebraic instantiation, and we
+derive all generators by hashing to the group.
 
   \item The proofs for $\rel_5$ and $\rel_7$ use a zk-SNARK. Its proofs
 are a constant number of group elements and its statements are arithmetic

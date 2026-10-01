@@ -58,6 +58,34 @@ token is used once. Users' mobile devices perform the rest.
     as long as the secret never leaves the secure element
 \end{outline}
 
+We do not give a new primitive. Our contribution is a combination of existing
+ones, and consists of the following.
+
+\begin{itemize}
+
+  \item A syntax for offline payment schemes and a simulation-based security
+definition for them, given as a single ideal functionality that captures
+unforgeability, theft prevention, double-spending identification,
+non-frameability, anonymity, unlinkability, and conservation of value at once.
+
+  \item A construction that splits the cost of authorising a payment between a
+lightweight secure element and a more powerful mobile device, so that the secure
+element need only perform operations comparable in cost to producing an ordinary
+digital signature. Anonymous credentials, signatures on committed inputs, and zero-knowledge proofs of knowledge hide the identities of payers and payees from the central
+bank and from the intermediaries, and a verifiable encryption under an auditor's
+key allows double spenders to be identified without compromising the privacy of
+honest users.
+
+  \item An instantiation from the BBS+ and Pointcheval-Sanders signature schemes
+over pairing-friendly groups, with a proof that it securely realises the ideal
+functionality.
+
+  \item An implementation on commodity hardware, integrated into a mobile wallet
+on iOS and Android and a Javacard applet on a smart card, and benchmarked end to
+end.
+
+\end{itemize}
+
 \subsection*{Related work}
 
 \rebekah{introduction and related work a little long, maybe compress, in particular the CBDC offline payments paragraph}
@@ -219,34 +247,6 @@ fact. The hardware column records the hardware assumption the scheme places on
 users' wallets, where OTR denotes one-time readable memory. Entries marked --
 are not addressed by the cited work.\rebekah{check OPERA (PB17) for transferability and divisibility, the -- entries}} \label{tab:offline-related-comparison}
 \end{table}
-
-Our contribution is a transferable, privacy-preserving offline payment scheme. The contribution is not a new primitive but a combination, and
-consists of the following.
-
-\begin{itemize}
-
-  \item A syntax for offline payment schemes and a simulation-based security
-definition for them, given as a single ideal functionality that captures
-unforgeability, theft prevention, double-spending identification,
-non-frameability, anonymity, unlinkability, and conservation of value at once.
-
-  \item A construction that splits the cost of authorising a payment between a
-lightweight secure element and a more powerful mobile device, so that the secure
-element need only perform operations comparable in cost to producing an ordinary
-digital signature. Anonymous credentials, signatures on committed inputs, and zero-knowledge proofs of knowledge hide the identities of payers and payees from the central
-bank and from the intermediaries, and a verifiable encryption under an auditor's
-key allows double spenders to be identified without compromising the privacy of
-honest users.
-
-  \item An instantiation from the BBS+ and Pointcheval-Sanders signature schemes
-over pairing-friendly groups, with a proof that it securely realises the ideal
-functionality.
-
-  \item An implementation on commodity hardware, integrated into a mobile wallet
-on iOS and Android and a Javacard applet on a smart card, and benchmarked end to
-end.
-
-\end{itemize}
 
 \paragraph{Layout.} The rest of the chapter is organised as follows. \Cref{sec:offline-definitions} describes the participants
 and trust assumptions, gives the syntax of an offline payment scheme, of joint proofs of knowledge

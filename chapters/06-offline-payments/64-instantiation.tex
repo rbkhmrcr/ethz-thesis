@@ -153,8 +153,8 @@ First, the secure element plays the card and the mobile device the holder. The
 card's message is the user's secret key $\sk$, under $\gen_2$, and the
 signature's randomness $r$ is under $\gen_3$.
 
-Second, the secure element and the device are paired at registration and
-communicate directly. The secure element samples $t$ afresh and sends it to the
+Second, the secure element and the device communicate directly, since
+registration pairs them. The secure element samples $t$ afresh and sends it to the
 device, in place of both deriving it from a shared PRF key, and the payee takes
 no part in producing the proof.
 
@@ -438,14 +438,14 @@ $\tilde{\psi} = (k, f_1, f_2)$, and output $\psi = (k, f_2 / f_1^{\mu})$.
 
 Coconut also lets several signers each issue a share of the signature, and lets
 $\pi_s$ prove an application-specific statement about the messages. We use
-neither. Its proofs are compiled with the Fiat-Shamir transform.
+neither. Coconut compiles its proofs with the Fiat-Shamir transform.
 
 The central bank's SCI scheme, given in \Cref{prot:offline-sci}, follows
 \Cref{prim:coconut} with the following changes. It signs with the variant of
 \Cref{prim:ps}, so the signer adds $\theta_\ell \omega$ to the exponent of $k$
-for a fresh $\omega$ and returns $\omega$ with the signature. The messages with
-indices in $\algo{Disc}$ are disclosed. They are sent in the clear, and the
-signer adds them to the exponent of $k$ directly. In $\OP$ the disclosed message
+for a fresh $\omega$ and returns $\omega$ with the signature. The recipient sends
+the messages with indices in $\algo{Disc}$ in the clear, and the signer adds
+them to the exponent of $k$ directly. In $\OP$ the disclosed message
 is the token value. The commitment randomness $\openinfo$ is under its own
 generator $P_\ell$ rather than $\gen$, and the recipient checks the unblinded
 signature with $\PSverify$. The proof $\algoproof_{\algo{req}}$ does not show
@@ -525,8 +525,8 @@ the messages $(\algo{uid}_0, v, s_0)$ with $\algo{Disc} = \{1\}$, so the central
 bank sees only the value. It sets $\openinfo = 0$ rather than sampling it, since
 the hidden message $s_0$ is uniform and already hides $C$.\rebekah{$\SCIrequest$ as written samples $\openinfo$; either make $\openinfo$ an input or say in \Cref{prot:offline} that the withdrawal fixes it to $0$}
 
-The signature $\psi$ can never be shown to a payee, since verifying it needs
-$\algo{uid}_0$. The device instead proves once that it holds a valid signature
+The device does not show $\psi$ to payees, for the reason given in
+\Cref{sec:offline-construction}. It instead proves once that it holds a valid signature
 on the token value and on the identifier and randomness committed in its
 pseudonym. It rerandomises $(k, l)$ to $(k^*, l^*)$ and proves the remaining
 equation by a Sigma protocol whose challenge hashes the value, the pseudonym and
@@ -611,14 +611,11 @@ following hold:
 
 \Cref{tab:offline-instantiation} lists the instantiation of each generic
 component of $\OP$ and the assumptions it rests on. The registration authority
-issues credentials with the BBS+ signature scheme, blindly, so that the secret
-key never leaves the secure element. The central bank signs tokens on committed
+issues credentials with the BBS+ signature scheme. The central bank signs tokens on committed
 inputs, learning neither the identifier nor the randomness $s_0$. The audit
 ciphertext of each payment and deposit is an ElGamal encryption of
 $\gen^{\algo{uid}}$ under the auditor's key, where $\algo{uid}$ is the payer's
-identifier. The construction proves it consistent with the payer's pseudonym in
-a separate proof $\Gamma_i$, and the instantiation makes $\Gamma_i$ part of the
-joint proof.
+identifier.
 
 \begin{table}[htbp]
 \centering

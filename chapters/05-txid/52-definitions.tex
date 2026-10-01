@@ -9,8 +9,8 @@ registration authority authenticates users and issues the credentials required
 to submit transactions and enable selective traceability. It is honest but
 curious during the protocol, so it follows the protocol but tries to learn what
 it can from what it sees. We also assume it does not bias the public
-parameters, which holds in our instantiations because all group generators are
-derived from a public seed and not sampled. Users are potentially malicious, and generate and submit
+parameters, which holds in our instantiations because we derive all group
+generators from a public seed and do not sample them. Users are potentially malicious, and generate and submit
 confidential transactions while retaining fine-grained control over which
 auditors are authorised to trace them, and during which epochs. Auditors are
 potentially malicious, and may be granted permission to trace the transactions
@@ -87,8 +87,8 @@ of a transaction to its originator and not confidentiality of the transaction
 payload. The ledger is public, so $\idfu{\algo{trace}}$ hands every submitted
 payload to the simulator $\simu$ on every $\IDsubmit$ call and withholds only
 the identity of the submitting user.
-Confidentiality of the payload is inherited from the underlying transaction
-system and is orthogonal to what we prove here. Second, $\IDgrant$ places no
+The underlying transaction system provides confidentiality of the payload, and
+this is orthogonal to what we prove here. Second, $\IDgrant$ places no
 constraint on $\epoch$ relative to $\epoch_{\mathsf{cur}}$. A user may grant a
 permission for a future epoch, which is the intended usage, and may also grant
 one for an epoch that has already elapsed, which amounts to voluntary

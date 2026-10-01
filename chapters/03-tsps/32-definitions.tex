@@ -73,7 +73,7 @@ unforgeable in the GGM.
 They also gave a rerandomisable three-element scheme for messages in one group
 only, which is existentially unforgeable in the GGM~\cite{C:AGHO11}. We use this
 scheme with $\group{1}$ and $\group{2}$ swapped, so that messages are in
-$\group{1}$, and call it $\AGHO$. It is given in \Cref{prim:agho}. Its secret
+$\group{1}$, and call it $\AGHO$. \Cref{prim:agho} recalls it. Its secret
 key consists only of field elements, and the message enters signing only through
 the terms $\msg_i^{-\mu_i}$. Our threshold version relies on both properties.
 
@@ -353,7 +353,7 @@ sharing of the result~\cite{FOCS:Feldman87,LC:ADEO21}:
 \end{equation*}
 %
 Since the messages are public group elements, this makes our online phase
-local. In the malicious setting, the same operations are applied to the
+local. In the malicious setting, the signers apply the same operations to the
 authentication information.\rebekah{Your comment: ``ok? but this is breaking
 the abstraction of MPC, right?'' Open: keep the authentication information out of
 the text entirely, or say once that it is handled inside the MPC protocol.}

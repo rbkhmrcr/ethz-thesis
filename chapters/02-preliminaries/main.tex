@@ -11,8 +11,8 @@ scheme, and the BBS+ signature scheme.
 
 The thesis contains numerous primitives, protocols, security definitions,
 instantiations and assumptions. To ease understanding of them, we use a number of different
-coloured boxed environments. Abstract primitives are given directly in prose, and ideal functionalities are
-displayed as plain figures. Security experiments are in green boxes, assumptions
+coloured boxed environments. We give abstract primitives directly in prose and
+display ideal functionalities as plain figures. Security experiments are in green boxes, assumptions
 in pink boxes, instantiations of primitives in blue boxes, and the protocols that
 are contributions of this work in purple boxes. Every box and figure is numbered and titled. Once
 experiments, assumptions, primitives and protocols have been introduced, later
@@ -80,7 +80,7 @@ between the two.
 \paragraph{Security of primitives.} We refer to building blocks such as
 commitments and signature schemes as
 primitives, and to the schemes constructed in each chapter as protocols.
-Security of primitives is handled through defining experiments, a
+We handle the security of primitives by defining experiments, a
 limited number of oracles which an adversary has access to, and then showing
 that the adversary cannot win with greater probability than some predefined
 amount.
@@ -106,8 +106,8 @@ the view of an adversary in the real world, interacting with our protocol, is
 indistinguishable from the view when interacting with the ideal functionality
 itself.
 
-The outputs of the honest parties and~$\adv$ during an execution of a
-protocol~$\Pi$ in the real world are captured in
+We capture the outputs of the honest parties and~$\adv$ during an execution of a
+protocol~$\Pi$ in the real world in
 $\textsc{Exec}_{\Pi,\adv}(\secparam)$, and the outputs of the honest
 parties and~$\simu$ interacting with an ideal functionality~$\idfu{}$ in the
 ideal world by $\textsc{Exec}_{\idfu{},\simu}(\secparam)$. We say the
@@ -118,8 +118,7 @@ $\textsc{Exec}_{\idfu{},\simu}(\secparam)$. As the ideal functionality achieves
 all security properties by design, this shows that the protocol achieves them
 too.
 
-
-Honest but curious participants follow the protocol, and the adversary sees
+\paragraph{Corruption models.} Honest but curious participants follow the protocol, and the adversary sees
 their views and combines them with the views of the other corrupted
 participants. Malicious participants deviate from the protocol arbitrarily.
 Under static corruption, the set of corrupted participants is fixed before the

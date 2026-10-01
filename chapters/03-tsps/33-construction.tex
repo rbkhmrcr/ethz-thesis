@@ -54,8 +54,8 @@ multiplies by its share of $c_j$, a linear operation
 $\gen^{1/(x+\msg)}$, needs an interactive call once the message is known
 \end{outline}
 
-The construction $\TSPS$, applied to an SPS scheme $\SPS$, is given in
-\Cref{prot:tsps-generic}.
+\Cref{prot:tsps-generic} gives the construction $\TSPS$, applied to an SPS
+scheme $\SPS$.
 
 \begin{protocolbox}{Threshold structure-preserving signatures}{tsps-generic}
 
@@ -129,10 +129,10 @@ states in a queue and delete each one once it is used. The offline phase can be
 run repeatedly during quiet periods to build up states for busy ones.
 
 \paragraph{Online signing.} Online signing takes the message vector and
-produces a signature share. By decomposable signing, the only operations needed
-at this point are multiplication of shares and raising the public group elements
-of $\vec{\msg}$ to shared exponents, both of which each signer performs locally.
-No signer communicates with any other during this phase, and its cost is
+produces a signature share. By decomposable signing, each signer only needs
+local group operations at this point. It raises the public group elements of
+$\vec{\msg}$ to its shares of the exponents $e_{j,i}$, and multiplies the
+results by its share of $c_j$. No signer communicates with any other during this phase, and its cost is
 comparable to that of an ordinary invocation of $\SPSsign$.
 
 \paragraph{Combining.} Combining reconstructs the signature from the shares. It

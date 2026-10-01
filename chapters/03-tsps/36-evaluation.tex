@@ -9,7 +9,9 @@ dishonest-majority settings, using ATLAS and MASCOT respectively to realise
 multiplication of shared secrets~\cite{CCS:KelOrsSch16,C:GLOPS21}. ATLAS is
 designed to work in both the honest but curious and malicious settings, but the
 implementation available in MP-SPDZ captures only the honest but curious
-case~\cite{CCS:Keller20}.
+case~\cite{CCS:Keller20}.\rebekah{No
+theorem covers the ATLAS rows: the theorems assume malicious security with abort.
+Scope these rows explicitly.}
 
 We add to MP-SPDZ sharings of group elements with their authentication
 information, and $\algo{ExpGrp}$ with mixed triples. The groups are those of
@@ -17,12 +19,11 @@ BLS12-381, implemented with RELIC~\cite{relictoolkit}. ATLAS uses Shamir sharing
 and MASCOT makes its triples by oblivious transfer. Any MPC protocol with the
 interfaces of our schemes would do, and we take one for each corruption setting,
 ATLAS where high availability matters and MASCOT where resilience to key
-compromise matters. The ATLAS timings are for honest but curious security.\rebekah{No
-theorem covers the ATLAS rows: the theorems assume malicious security with abort.
-Scope these rows explicitly.} As baselines,
-we implement the centralised $\AGHO$ and $\KPW$ schemes and the two existing
-threshold SPS schemes in Go with gnark-crypto, with a trusted dealer for the
-threshold schemes~\cite{AC:CKPSS23,PKC:MMSST24,gnark-crypto}.
+compromise matters. As baselines, we implement the centralised $\AGHO$ and
+$\KPW$ schemes and the threshold SPS schemes of Crites et al.\ and Mitrokotsa et
+al.\ in Go with gnark-crypto, with a trusted dealer for the threshold
+schemes~\cite{AC:CKPSS23,PKC:MMSST24,gnark-crypto}. The tables call these two
+schemes CKPSS23 and MMSST24.
 
 All schemes sign vectors of $\ell = 2$ elements of $\group{1}$. ATLAS runs with
 $n = 2t+1$ and MASCOT with $t = n-1$, and the tables are at $n = 5$. Each party
@@ -76,8 +77,8 @@ MMSST24~\cite{PKC:MMSST24} & & 6.47 & & 1.26 & 0.46--0.90 & 4.18 \\
 $\ell = 2$, with $t = 2$ for ATLAS and $t = 4$ for MASCOT. For our schemes,
 signing is $\TSPSonsign$, and verification is that of the underlying scheme. The
 centralised $\AGHO$ and $\KPW$ schemes follow, then the prior threshold SPS
-schemes, for which key generation is by a trusted dealer, signing is one
-signer's partial signing, and combining is given for $t = 2$ and $t = 4$.}
+schemes, for which key generation is by a trusted dealer, signing is computing one
+signer's signature share, and combining is given for $t = 2$ and $t = 4$.}
 \label{tab:tsps-benchmarks} \end{table}
 
 \begin{table}[htbp] \centering \small \begin{tabular}{l l r r r}
@@ -148,9 +149,10 @@ generation and offline signing. $\TSPSonsign$ sends nothing and is not shown.} \
 centralised schemes, against the number of parties $n$, at $\ell = 2$ and $t =
 n-1$, median.} \label{fig:tsps-baselines} \end{figure}
 
-The existing threshold SPS schemes have no offline phase. Each signer sends one
-partial signature of 96 or 384 bytes to the combiner. Partial signing takes
-2.14~ms for CKPSS23 and 1.26~ms for MMSST24, and the online phase of threshold
+The threshold SPS schemes of Crites et al.\ and Mitrokotsa et al.\ have no
+offline phase. Each signer sends one signature share of 96 or 384 bytes to the
+combiner. Computing a signature share takes 2.14~ms in the scheme of Crites et
+al.\ and 1.26~ms in that of Mitrokotsa et al., and the online phase of threshold
 $\AGHO$ and threshold $\KPW$ with MASCOT takes 0.72~ms and 1.84~ms.
 \Cref{fig:tsps-baselines} compares them against the number of parties. Our
 schemes move the extra cost ahead of the message, off the critical path.

@@ -17,7 +17,7 @@ the hash of a tag raised to a fresh exponent, so that only signatures under the
 same tag aggregate, and signatures can be rerandomised. Signatures aggregate by
 multiplication and verify with one pairing equation, so an aggregate is as short
 as one signature.
-Both hash functions are modelled as random oracles, and the security proof
+We model both hash functions as random oracles, and the security proof
 embeds its challenge in the hashes of the attacked message and tag. Our scheme, given in \Cref{prot:ats}, consists of the following algorithms:
 
 \begin{protocolbox}{The tag-based aggregate signature scheme}{ats}
@@ -143,8 +143,8 @@ the registration authority signs the pair $(\pk, \tid)$, with $\pk$ the user's
 public key.  Every other computation in the protocol uses $\Tag$
 directly. Hashing the tag also lets us extract $\Tag$ from $\tid$ by
 programming the random oracle. The aggregate tag-based signature $\ATS$ is
-instantiated with our construction. The protocol instantiation is described in
-full in \Cref{prot:paac}.
+instantiated with our construction. \Cref{prot:paac} gives the protocol instantiation
+in full.
 \rebekah{Comment: ``would a DL version be possible if tag was a scalar?''
 Decide whether a version with only a discrete-logarithm registration signature
 on a scalar tag would work, and if not, say why here.}
@@ -179,7 +179,7 @@ witness and relation defined as follows:
 %
 \begin{equation}\label{eq:agg-creds-proof-original}\begin{gathered}
 %
-  \inst_2 = (\rapk, \{\atv{i}, \ipk{i}\}_{i \in \ISSUERS}), \qquad \witness_2
+  \inst_2 = (\rapk, \ISSUERS, \{\ipk{i}, \atv{i}\}_{i \in \ISSUERS}), \qquad \witness_2
 = (\sk, \pk, \tid, \signature, \SPSsig), \\
 %
   \rel_2 = \{\ \pairing(v, \widetilde{r}) = \pairing(\gen, \widetilde{s}) \
@@ -191,6 +191,10 @@ witness and relation defined as follows:
 %
 \end{gathered}\end{equation}
 %
+The witness contains $\tid = \hashtwo(\Tag)$ in place of the $\Tag$ of
+$\witness_1$, since the equations of $\rel_2$ use only $\tid$, and the proof of
+\Cref{lem:agg-creds-sigma} recovers $\Tag$ from $\tid$ by programming
+$\hashtwo$.
 The registration authority only signs well-formed pairs, of a public key and the
 hash of a tag, so users do not need to prove that $\tid$ is the hash of a tag,
 which saves a proof of a hash preimage.
@@ -210,8 +214,8 @@ H_i = \hashone(\atv{i})^\delta\ \ \forall i \in \ISSUERS \ \wedge\ \pk' =
 \end{equation}
 %
 $\rel_3$ does not include the signature verification equations of $\rel_2$. The
-randomised signatures reveal nothing about the original ones, so they are sent
-in the clear and their verification equations are checked directly. This gives a
+randomised signatures reveal nothing about the original ones, so the user sends
+them in the clear and the verifier checks their verification equations directly. This gives a
 concretely efficient proof, with no zero-knowledge proof over pairing equations
 or elements of $\group{T}$.
 
@@ -445,7 +449,7 @@ realises ideal functionality $\idfu{\AAC}$.
 \end{theorem}
 
 Since $\AGHO$ is existentially unforgeable in the GGM~\cite{C:AGHO11}, the
-protocol is secure in the random oracle model and the GGM, and the GGM is used
-only for the registration signature. We prove \Cref{thm:agg-creds-thm-2} in \Cref{sec:agg-creds-proof-3}.
+protocol is secure in the random oracle model and the GGM, and the GGM enters
+only through the registration signature. We prove \Cref{thm:agg-creds-thm-2} in \Cref{sec:agg-creds-proof-3}.
 
 

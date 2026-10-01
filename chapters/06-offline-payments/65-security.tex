@@ -51,8 +51,8 @@ $\idfu{\algo{op}}$. It maintains two maps,
 $\mathbb{R}$ from sequences of pseudonyms to the token identifiers
 $\idfu{\algo{op}}$ uses, and $\mathbb{C}$ for the reverse direction, so that it
 can translate between transcripts $\adv$ sees and state $\idfu{\algo{op}}$
-holds. For honest parties $\simu$ never has a witness, so every proof it
-produces is simulated and every commitment and audit ciphertext random. This makes its transcripts
+holds. For honest parties $\simu$ never has a witness, so it simulates every
+proof and samples every commitment and audit ciphertext at random. This makes its transcripts
 independent of the identities and token identifiers it does not learn. For corrupt parties
 $\simu$ extracts witnesses from the proofs $\adv$ produces. It extracts from the SCI request at withdrawal to learn the randomness that fixes
 the token identifier and so continue the simulation, and from $\Sigma$,
@@ -79,8 +79,8 @@ $(\OPcreate, \algo{usr}, v)$ to $\idfu{\algo{op}}$ on behalf of $\algo{Int}$ in
 place of running $\prot$. $\prot$ always accepts when the user has no prior account
 and $\idfu{\algo{op}}$ performs the same check, so the two are identical.
 
-\paragraph{Game 4.} As Game 3, except account creation is also handled for
-corrupt users. $\simu$ sends $(\OPcreate, \algo{usr}, v)$ to $\idfu{\algo{op}}$
+\paragraph{Game 4.} As Game 3, except $\idfu{\algo{op}}$ also handles account
+creation for corrupt users. $\simu$ sends $(\OPcreate, \algo{usr}, v)$ to $\idfu{\algo{op}}$
 on behalf of $\algo{Int}$ and mirrors any abort to $\algo{Int}$. $\idfu{\algo{op}}$ aborts exactly when $\prot$ does, on
 attempts to register duplicate accounts, so no new distinguishing event arises.
 
@@ -126,8 +126,8 @@ Case $i = 0$. $\algo{usr}$ pays $\algo{usr}'$ by sending $(\OPexecute,
 (\algo{id}, \algo{id}')$, and produces a simulated payment $p_0 = (v,
 \com_0, \com_1, \ciph_0, \sigma_0, \Gamma_0, \Sigma)$, where each $\com_b$ is a
 commitment to a fresh uniform value with fresh randomness, $\ciph_0$ is a
-random ciphertext, and the proofs $(\sigma_0, \Gamma_0, \Sigma)$ are simulated,
-which is possible since the proof system is simulation extractable (P5).
+random ciphertext, and $\simu$ simulates the proofs $(\sigma_0, \Gamma_0,
+\Sigma)$, which is possible since the proof system is simulation extractable (P5).
 
   \item If $\algo{usr}'$ is corrupt: $\simu$ sets $\algo{id}' = \com_1$, the
 commitment that $\algo{usr}'$ supplies in $\prot$, and gives it to
@@ -348,7 +348,7 @@ under the DDH assumption.\rebekah{Fischlin, only if confirmed necessary (the cod
 
 \end{description}
 
-\paragraph{Commitments.} Since the generators of the commitment key are derived
+\paragraph{Commitments.} Since we derive the generators of the commitment key
 by hashing, no participant, including the central bank, knows the discrete
 logarithm relations that would break binding.
 
@@ -383,9 +383,9 @@ accepted $\sigma_i$.
 the ciphertexts $\hat{\ciph}_i$ and the proof $\algoproof_{\algo{req}}$. At
 withdrawal the hidden messages include the uniform $s_0$, so $C$ is a uniformly
 random group element. The ciphertexts are under a key sampled afresh for the
-request, so by IND-CPA security of the ElGamal encryption scheme they can be
-replaced with encryptions of zero, and $\algoproof_{\algo{req}}$ can be replaced
-with a simulated proof by its zero knowledge. The result depends only on the
+request, so by IND-CPA security of the ElGamal encryption scheme we can replace
+them with encryptions of zero, and by zero knowledge we can replace
+$\algoproof_{\algo{req}}$ with a simulated proof. The result depends only on the
 disclosed value, which gives the request-hiding simulator.
 
 \paragraph{Extraction from requests.} The extractor for
