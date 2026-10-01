@@ -145,7 +145,9 @@ from $\ek$, and the epoch key keeps the other epochs out of reach.
 
 The elements $\{W_\gamma\}$ are public parameters, not secrets held in trust.
 They are certified with the public tracing key and handed to every auditor a
-user authorises. Two colluding auditors who compare their copies learn only that
+user authorises.\rebekah{the registration authority signs only $(S,T)$, so
+$\{W_\gamma\}$ is not certified; it is proved well formed against $T$ in the
+first grant} Two colluding auditors who compare their copies learn only that
 the same user granted them both, which they already knew. What they cannot do
 is use them to read a tag from an epoch for which neither holds the epoch key.
 
@@ -157,8 +159,9 @@ function on domain $[0,\Max)$.  \end{lemma}
 
 \subsubsection{The tracing protocol}\label{sec:txid-protocol-inst}
 
-Credentials use the BBS+ signature scheme on group elements, recalled in
-\Cref{prim:bbs}. During registration, the user sends only the group elements $S
+Credentials use the group-element variant of the BBS+ signature scheme of
+\Cref{prim:bbs}, on $(S, T)$, with bases $\gen_1$, $\gen_2$ and $\gen_3$ and
+randomness generator $\gen_4$. During registration, the user sends only the group elements $S
 = \G(\sk)$ and $T$, together with a proof of knowledge of the underlying
 secrets, rather than the secrets themselves. Commitments use the Pedersen
 commitment scheme, recalled in \Cref{prim:pedersen}, in its form for vectors of
@@ -279,20 +282,20 @@ local pool for this epoch, and compute $\Tag_\gamma \leftarrow
 	  %
 	  \begin{equation*}
 	    \com \leftarrow \gen_2^{\utk'} \cdot \gen_3^{\utk''} \cdot
-\gen_4^{\openinfo}, \qquad \com_\gamma \leftarrow
-\gen_3^{\gamma}\cdot\gen_4^{r_\gamma}.
+\gen_4^{\openinfo}.
 	  \end{equation*}
 
 	\item Compute the tag proof $\algoproof_7'$ of
-\Cref{prot:txid-tag-proof}, and a Bulletproofs range proof
+\Cref{prot:txid-tag-proof} with the opening $r_\gamma$. It contains the
+commitment $\com_\gamma$ to the index. Compute a Bulletproofs range proof
 $\algoproof_{\mathsf{rng}}$ that $\com_\gamma$ opens to a value in $[0,\Max)$.
 
 	\item Set $\msg \leftarrow
-\payload\|\Tag_\gamma\|\com\|\com_\gamma\|\algoproof_7'\|
+\payload\|\Tag_\gamma\|\com\|\algoproof_7'\|
 \algoproof_{\mathsf{rng}}$, and compute the transaction authorisation proof
 $\algoproof_6'$ of \Cref{prot:txid-tx-proof} with label $\msg$.
 
-	\item Return $\tx \leftarrow (\payload,\Tag_\gamma,\com,\com_\gamma,
+	\item Return $\tx \leftarrow (\payload,\Tag_\gamma,\com,
 \algoproof_7',\algoproof_{\mathsf{rng}},\algoproof_6')$, and submit it to the
 ledger.
 
@@ -308,8 +311,8 @@ following hold:
 
 	\item $\algoproof_7'$ verifies with the tag proof.
 
-	\item $\algoproof_{\mathsf{rng}}$ verifies for $\com_\gamma$ and the
-range $[0,\Max)$.
+	\item $\algoproof_{\mathsf{rng}}$ verifies for the $\com_\gamma$ in
+$\algoproof_7'$ and the range $[0,\Max)$.
 
 	\item $\algoproof_6'$ verifies with the transaction authorisation proof
 on $\msg$.
@@ -364,8 +367,14 @@ certified $T$. \Cref{prot:txid-ek-proof} gives the proof.
 
       \begin{enumerate}
 
-	\item On a first grant, compute $t_\gamma \leftarrow
-\hash(\{W_\gamma\},\gamma)$ for each $\gamma \in [0,\Max)$, and the following:
+	\item On a first grant, compute the following for each $\gamma \in
+[0,\Max)$:
+	  %
+	  \begin{equation*}
+	    t_\gamma \leftarrow \hash(\{W_\gamma\},\gamma).
+	  \end{equation*}
+	  %
+	  Then compute the following:
 	  %
 	  \begin{equation*}
 	    \widehat{W} \leftarrow \prod_{\gamma=0}^{\Max-1}
@@ -428,7 +437,7 @@ follows:
 %
 \begin{equation*}
   \inst_7' = (\inst_7, U, \Pi, X, \com_\gamma), \qquad \witness_7' =
-(\utk', \utk'', \openinfo, \gamma, s, r_\gamma),
+(\utk', \utk'', \openinfo, s, \gamma, r_\gamma),
 \end{equation*}
 %
 \begin{equation*} \begin{gathered}
@@ -462,7 +471,7 @@ do:
       \begin{enumerate}
 
 	\item Parse $\inst_7 = (\HE, \ggen_D, \gen_2, \gen_3, \gen_4, \com,
-\Max, \epoch, \Tag_\gamma)$ and $\witness_7 = (\utk', \utk'', \openinfo,
+\epoch, \Max, \Tag_\gamma)$ and $\witness_7 = (\utk', \utk'', \openinfo,
 \gamma)$.
 
 	\item Sample $s \sample \Zp$ and compute the following:
@@ -470,7 +479,8 @@ do:
 	  \begin{equation*}
 	    U \leftarrow \HE(\epoch)^s, \quad \Pi \leftarrow
 \pairing\big(\HE(\epoch)^{s\cdot\utk'},\, \ggen_D\big), \quad X \leftarrow
-\Tag_\gamma^{\,s}.
+\Tag_\gamma^{\,s}, \quad \com_\gamma \leftarrow
+\gen_3^{\gamma}\cdot\gen_4^{r_\gamma}.
 	  \end{equation*}
 
 	\item Set $\inst_7' \leftarrow (\inst_7, U, \Pi, X, \com_\gamma)$.
@@ -543,11 +553,17 @@ with a fresh $r_1 \sample \Zp^*$, and blinds the base with a fresh $r_2 \sample
 %
 For a valid signature $\bar{E} = E'^{z}$, which the verifier checks with the
 pairing equation $\pairing(E',\ggen_Z) = \pairing(\bar{E},\ggen)$. The user
-proves the rewritten relation $\rel_6'$, with $r_3 = 1/r_1$ and $r'' = r - r_2
-r_3 - \openinfo$, and instance and witness as follows:
+also sets the following:
 %
 \begin{equation*}
-  \inst_6' = (\pk, \com, E', \bar{E}, d), \qquad \witness_6' = (\sk, \utk',
+  r_3 = 1/r_1, \qquad r'' = r - r_2 r_3 - \openinfo.
+\end{equation*}
+%
+The user proves the rewritten relation $\rel_6'$, with instance and witness as
+follows:
+%
+\begin{equation*}
+  \inst_6' = (\rapk, \com, E', \bar{E}, d), \qquad \witness_6' = (\sk, \utk',
 \utk'', \openinfo, e, r_2, r_3, r''),
 \end{equation*}
 %
@@ -580,13 +596,12 @@ $\rel_6$.
 
       \begin{enumerate}
 
-	\item Parse $\inst_6 = (\pk, \com)$ with $\pk = (\gen_0, \gen_1, \gen_2,
+	\item Parse $\inst_6 = (\rapk, \com)$ with $\rapk = (\gen_0, \gen_1, \gen_2,
 \gen_3, \gen_4, \ggen, \ggen_Z)$, and $\witness_6 = (\sk, \utk', \utk'',
 \openinfo, e, r, E)$.
 
 	\item Sample $r_1 \sample \Zp^*$ and $r_2 \sample \Zp$, and compute
-$E'$, $d$ and $\bar{E}$ as above, $r_3 \leftarrow 1/r_1$ and $r'' \leftarrow r -
-r_2 r_3 - \openinfo$.
+$E'$, $d$, $\bar{E}$, $r_3$ and $r''$ as above.
 
 	\item Sample $\mu_x \sample \Zp$ for each witness value $x$ of
 $\witness_6'$, writing $\mu_1$, $\mu_2$ and $\mu_h$ for those of $\utk'$,
@@ -661,13 +676,15 @@ the key and the input with the MiMC hash function, which runs the MiMC
 permutation in Miyaguchi-Preneel mode. MiMC is designed to be cheap inside an
 arithmetic circuit~\cite{AC:AGRRT16}.
 
-  \item $\DS$ is the BBS+ signature scheme of \Cref{prim:bbs}, on the two
-scalars $\sk$ and $\utk$.
+  \item $\DS$ is the BBS+ signature scheme of \Cref{prim:bbs} with $n = 2$ and
+generators $\gen_0, \ldots, \gen_3$, on the two field elements $\sk$ and
+$\utk$. The registration authority signs them in the group-element variant, on
+$\G(\sk) = \gen_1^{\sk}$ and $\PTK = \gen_2^{\utk}$, without learning them.
 
   \item $\Com$ is the Pedersen commitment scheme of \Cref{prim:pedersen}, with
-$\ck = (\gen_2, \gen_3)$. As before, $\gen_3$ is also the randomness generator
-of the BBS+ signature scheme, and all generators are derived by hashing to the
-group.
+$\ck = (\gen_2, \gen_3)$. Here $\gen_3$ is also the randomness generator of
+the BBS+ signature scheme, as $\gen_4$ is in the algebraic instantiation, and all
+generators are derived by hashing to the group.
 
   \item The proofs for $\rel_5$ and $\rel_7$ use a zk-SNARK, a proof system
 whose proofs are a constant number of group elements and whose statements are

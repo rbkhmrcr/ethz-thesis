@@ -19,7 +19,10 @@ instantiation theorems show that each instantiation has them.
 signature without querying the registration authority.
 
   \item[(P2)] $\Com$ is binding, and hiding, so commitments are computationally
-indistinguishable from random.
+indistinguishable from random.\rebekah{hiding in the Katz-Lindell sense of
+\Cref{sec:prelims-commitments} says commitments to two messages are indistinguishable, not
+that a commitment is indistinguishable from random, yet Game 5 samples $\com$
+uniformly; Pedersen gives it, the generic property does not}
 
   \item[(P3)] $\FE$ and $\FT$ are pseudorandom, also against a distinguisher
 holding the user's public tracing key $\PTK$.
@@ -123,7 +126,10 @@ auditor's tracing still succeeds, and simulates the zero-knowledge proof for
 relation $\rel_7$. By pseudorandomness of $\FE$ (P3), which holds against a
 distinguisher given $\PTK_\user$ and is applied across the epochs for which the
 auditor holds no permission, and by (P4), this game is indistinguishable from
-Game 3.
+Game 3.\rebekah{the reduction to PRF security of $\FE$ does not know the key,
+but in this game $\utk$ is still used in $T$, in $\com$ and in the real proofs
+for $\rel_6$ and $\rel_7$; those uses have to be replaced by simulated values
+first}
 
   \paragraph{Game 5.} As Game 4, except $\simu$ also simulates transaction
 submission using $\idfu{\algo{trace}}$'s output on $\IDsubmit$ requests from
@@ -160,8 +166,9 @@ payload. We treat the two cases below.
 
   \begin{description}
 
-    \item[No corrupt auditor holds a permission for this epoch.] $\simu$ sets
-the confidential payload to an arbitrary ciphertext. Instead of computing the
+    \item[No corrupt auditor holds a permission for this user and epoch.]
+$\simu$ places the payload it receives from $\idfu{\algo{trace}}$ in the
+transaction. Instead of computing the
 commitment as $\com = \ComCommit(\ck, \utk, \openinfo)$ and the tag as
 $\Tag_\gamma = \FT(\PTK,\ek,\gamma)$, it samples a commitment $\com^{\star}$ and
 a tag $\Tag_{\gamma}^\star$ uniformly at random, and simulates both
@@ -172,7 +179,10 @@ $\adv$ does not hold it. Pseudorandomness of $\FT$ licenses the substitution:
 the tags of an epoch are pseudorandom to an adversary holding $\PTK$ but not
 $\ek$, which is the position of every corrupt auditor here. So by (P2), (P3),
 and (P4), this is indistinguishable from submitting transactions in an execution
-of $\Pi$.
+of $\Pi$.\rebekah{a user may grant this epoch later, or retrospectively, to a
+corrupt auditor, and the simulator then has to hand over an $\ek$ matching the
+random tags it already published, which it cannot; either forbid such grants in
+$\idfu{\algo{trace}}$ or change the simulation}
 
     \item[A corrupt auditor holds a valid tracing permission for the honest
 user.] $\simu$ obtains the pair $(\user, \algo{TX})$, where $\user$ identifies
@@ -181,7 +191,10 @@ their $\IDsubmit$ query. $\simu$ retrieves $(\sk, \utk,\signature) \leftarrow
 \regsimu[\user]$ and the substituted epoch key $\ek \leftarrow
 \permsimu[(\auditor,\user,\epoch)]$, places that payload in the transaction,
 computes the tag as $\FT(\PTK_\user,\ek,\gamma)$ so that the corrupt auditor's
-tracing succeeds, and simulates the rest of the transaction as in Game 4.
+tracing succeeds, and simulates the rest of the transaction as in
+Game 4.\rebekah{here the proof for $\rel_7$ is simulated for an adversary that
+holds $\ek$, but the tag proof is shown zero knowledge only against
+distinguishers without $\ek$}
 
   \end{description}
 
@@ -196,7 +209,9 @@ $\IDsubmit$ interface.
 valid proofs that does not appear in the ledger, $\simu$ uses (P4) to extract
 $\user$'s witness, and (P1) to identify $\user$ via $\regsimu$.  $\simu$ then
 sends an $\IDsubmit$ request on $\user$'s behalf to $\idfu{\algo{trace}}$ and
-returns its output. If $\idfu{\algo{trace}}$ accepts, $\simu$ records the
+returns its output.\rebekah{nothing here excludes the extracted key being that of
+an honest user, which would make $\simu$ submit on behalf of the wrong user; an
+argument from the one-wayness of $\G$, $\G'$ or from extraction is missing} If $\idfu{\algo{trace}}$ accepts, $\simu$ records the
 transaction in $\txns[(\user,\epoch)]$.
 
   This game is indistinguishable from Game 5 unless $\idfu{\algo{trace}}$
@@ -328,7 +343,9 @@ event $ab = z$, which has probability $1/p$.
 the response $\gen^{z r_i} = \HE(\epoch_i)^{z/a}$, which is again $\FE$, under
 key $z/a$ rather than $b$, so the two cases would be identically distributed.
 
-  It remains to give $\adv$ the public tracing key. Its first component $T =
+  It remains to give $\adv$ the public tracing key.\rebekah{$T$ is not uniform
+given $\{W_\gamma\}$, since $\{W_\gamma\}$ fixes $\utk''$ and then $T$ fixes
+$\utk'$; program $\gen_2$ to a known power of $\gen^b$ instead} Its first component $T =
 \gen_2^{\utk'}\cdot\gen_3^{\utk''}$ is a perfectly hiding Pedersen commitment
 for $\utk'' \sample \Zp$, so $\simu$ samples it uniformly, and its second
 component $\{W_\gamma\}$ is a function of $\utk''$ alone, which $\simu$ draws
@@ -404,7 +421,9 @@ cases, which gives the following bound:
   The lemma is applied once per user, not once per epoch. By
 \Cref{lem:txid-fe-prf}, the epoch keys of distinct epochs are uniform and
 independent, even given $\PTK$, and $\PTK$ is the only value the epochs share.
-So the two lemmas compose without a hybrid over epochs.
+So the two lemmas compose without a hybrid over epochs.\rebekah{this is wrong:
+the challenge has one hidden $A$, so it covers one epoch key; with several
+epochs and the same $\{W_\gamma\}$ a hybrid over epochs is needed}
 
   Finally, $\{W_\gamma\}$ does not reveal $\utk''$, since recovering $\utk''$
 from $\{W_\gamma\}$ would break the $q$-SDH assumption, which the BBS+ signature
@@ -636,15 +655,17 @@ equation gives the following:
   \end{equation*}
   %
   So $(e, \openinfo + r'' + r_2 r_3, E'^{r_3})$ is a BBS+ signature on $\sk$
-and on the values committed in $\com$. The check $E' \neq 1_{\group{1}}$
+and on the values committed in $\com$.\rebekah{the case of an extracted
+$r_3 = 0$ is not handled} The check $E' \neq 1_{\group{1}}$
 prevents a degenerate transcript from being accepting: with $E' = 1_{\group{1}}$
 and $\bar{E} = 1_{\group{1}}$, the pairing equation holds for every key, and
 $E'^{r_3}$ is not a signature.
 
   \paragraph{Honest-verifier zero knowledge.} $E'$ is uniform in $\group{1}$, as
 $r_1 \sample \Zp^*$ is fresh for each transaction, and $d$ is uniform and
-independent of $E'$, as $r_2 \sample \Zp$ is fresh. $\bar{E}$ is determined by
-$E'$ and the public key. So $(E', \bar{E}, d)$ reveals nothing about
+independent of $E'$, as $r_2 \sample \Zp$ is fresh. $\bar{E} = E'^{z}$ is
+determined by $E'$ and the secret key $z$ of the registration authority, which
+the simulator knows as it plays the registration authority. So $(E', \bar{E}, d)$ reveals nothing about
 $\signature$. The simulator samples these three values in the same way, and
 simulates the Sigma protocol of the transaction authorisation proof as for the
 tag proof, by sampling $c$ and $\vec{\theta}$ and solving each verification
@@ -680,7 +701,8 @@ with $\HE$ modelled as a random oracle, by \Cref{lem:txid-fe-prf}, and $\FT$ is
 pseudorandom under the $q$-mDBDHI assumption with $q = \Max$, by
 \Cref{lem:txid-ft-prf}. Both lemmas give the distinguisher the whole of $\PTK$,
 including $\{W_\gamma\}$, which Game 4 and Game 5 need, since every corrupt
-auditor holds it. The simulator of Game 4 reproduces the real distribution by
+auditor holds it.\rebekah{\Cref{lem:txid-ft-prf} gives the distinguisher only
+$\{W_\gamma\}$; $T$ is not simulated in its reduction} The simulator of Game 4 reproduces the real distribution by
 reusing one $\PTK_\user$ per user.
 
   \item[(P4).] The proofs are the Sigma protocol for knowledge of a
@@ -697,7 +719,10 @@ the small exponents argument, if any element is malformed, the batched equation
 holds with probability at most $q_{\hash}/p$, where $q_{\hash}$ bounds the
 prover's hash queries~\cite{EC:BelGarRab98}. Later grants to the same auditor
 prove only the first two equations of $\rel_5$, against the same certified $T$,
-and the binding of $T$ ties both proofs to one pair $(\utk',\utk'')$.
+and the binding of $T$ ties both proofs to one pair $(\utk',\utk'')$.\rebekah{(P4)
+asks for zero knowledge and simulation extractability, but only special
+soundness and honest-verifier zero knowledge with Fiat-Shamir are shown; zero
+knowledge of the epoch key proof and of the proof for $\rel_4$ is never argued}
 
   \item[(P5).] Assumed of the network, as in the generic construction.
 
@@ -726,7 +751,9 @@ computationally binding under the DL assumption in $\group{1}$.
 separation tags, so $\FE$ and $\FT$ are pseudorandom by the assumption that
 MiMC, keyed by a secret input block, is a pseudorandom function. The public
 tracing key is a single group element that $\FT$ does not use, so it gives a
-distinguisher nothing.
+distinguisher nothing.\rebekah{$\PTK = \gen_2^{\utk}$ is public and depends on
+the key of $\FE$, so the MiMC assumption must state pseudorandomness given
+$\gen_2^{\utk}$}
 
   \item[(P4).] The proofs for $\rel_4$ and $\rel_6$ are Sigma protocols with
 the Fiat-Shamir transform applied, as in the algebraic instantiation. For

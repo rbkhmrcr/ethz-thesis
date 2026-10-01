@@ -141,7 +141,10 @@ verify in the algebraic instantiation, and $28.3\,\mathrm{ms}$ and
 $4.44\,\mathrm{ms}$ in the hash-based one. The hash-based transaction is about a
 fifth of the size, 1\,116 bytes against 5\,160.
 
-Verification time does not depend on $\ell$. The hash-based transaction has
+Verification time hardly depends on $\ell$. In the hash-based instantiation it
+stays at $4.44\,\mathrm{ms}$ for every $\ell$ from $1$ to $12$. In the algebraic
+one it grows from $6.55\,\mathrm{ms}$ at $\ell = 1$ to $6.76\,\mathrm{ms}$ at
+$\ell = 12$, since the Bulletproofs verifier is linear in $\ell$. The hash-based transaction has
 constant size, and the algebraic one grows only with the logarithmic size of the
 range proof. Algebraic
 proving steps up just after each power of two, since the range proof pads to the

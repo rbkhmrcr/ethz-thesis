@@ -31,8 +31,8 @@ across several proofs using a commitment scheme $\Com$. Two pseudorandom
 functions, $\FE$ for epoch keys and $\FT$ for tags, derive epoch tracing keys
 and transaction tags from users' long-term tracing keys. These keys are also
 bound using one-way functions $\G$ and $\G'$,
-where $\G'$ is applied to the tracing key as a whole, which the instantiation
-takes to be a tuple. The images $\PSK = \G(\sk)$ and $\PTK = \G'(\utk)$ are
+where $\G'$ is applied to the tracing key as a whole, which the algebraic
+instantiation takes to be a tuple. The images $\PSK = \G(\sk)$ and $\PTK = \G'(\utk)$ are
 users' public signing and tracing keys, and the public tracing key doubles as a
 public parameter of $\FT$. Users prove that these values were derived
 correctly, and, where a proof must also authenticate a message, that the
@@ -222,7 +222,10 @@ key $\PTK$ and epoch key $\ek$. It traces the transactions the user submitted
 during that epoch by computing $\Tag_\gamma = \FT(\PTK, \ek, \gamma)$ for each
 index $\gamma \in [0,\Max)$ and retrieving entry $\ledger[\Tag_\gamma]$ where
 present. Both values reach the auditor in the grant message of the epoch, so
-tracing requires no state carried over from any earlier epoch.
+tracing requires no state carried over from any earlier epoch.\rebekah{in the
+algebraic instantiation the auditor keeps $\{W_\gamma\}$ from its first grant
+and later grants send only $\ek$, which is state carried over; the generic box
+has no first and later grants either}
 
 \paragraph{Increment Epoch.} When an epoch
 ends, all participants move to epoch $\epoch + 1$, and every grant for the old
@@ -365,4 +368,7 @@ unforgeability, $\FE$ and $\FT$ are pseudorandom against a distinguisher holding
 $\PTK$, $\G$ and $\G'$ are one way, and the zero-knowledge proof systems for
 $\rel_4$ through $\rel_7$
 are zero knowledge and simulation extractable, the protocol described above
-securely realises $\idfu{\algo{trace}}$.  \end{theorem}
+securely realises $\idfu{\algo{trace}}$.\rebekah{no game or property uses
+that $\G$ and $\G'$ are one way; binding and hiding of $\Com$ are used as (P2)
+but are not hypotheses here; and Game 6 never excludes a corrupt user submitting
+with an honest user's key}  \end{theorem}

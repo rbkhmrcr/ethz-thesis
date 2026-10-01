@@ -5,7 +5,7 @@ maintains a publicly accessible, append-only ledger that stores submitted
 transactions, and runs the transaction validators that decide, on input of the
 ledger, which transactions are valid. We assume the ledger operator is honest,
 so that the ledger itself is available and correctly maintained. The
-registration authority is honest-but-curious during the protocol, meaning it
+registration authority is honest but curious during the protocol, meaning it
 follows the protocol but tries to learn what it can from what it sees: it
 authenticates users and issues the credentials required to submit transactions
 and enable selective traceability. We additionally assume it does not bias the
@@ -33,7 +33,7 @@ $\crs$ together with the initial ledger state $\state$.
 registration algorithm, run interactively between a user and the registration
 authority on input public parameters $\crs$ and state $\state$, outputs user
 signing key $\sk$, tracing key $\utk$, and registration credential $\regcred$ to
-the user. The instantiation takes $\utk$ to be a tuple.
+the user. The algebraic instantiation takes $\utk$ to be a tuple.
 
   \item[$(\PTK,\ek) \sample \IDgrant(\crs,\sk,\utk,\regcred,\epoch)$ :] The
 authorisation algorithm, run interactively between a user and an auditor on
@@ -96,13 +96,8 @@ one for an epoch that has already elapsed, which amounts to voluntary
 retrospective self-disclosure. What a user cannot do is refuse to be traced in
 an epoch for which they have already granted a permission.
 
-We say that the protocol~$\Pi$ securely realises the ideal
-functionality~$\idfu{\algo{trace}}$ if for every PPT adversary~$\adv$, there
-exists a PPT simulator~$\simu$ where $\textsc{Exec}_{\Pi,\adv}(\secparam)$ is
-computationally indistinguishable from
-$\textsc{Exec}_{\idfu{\algo{trace}},\simu}(\secparam)$.
-
-We work in the standalone model of \Cref{sec:prelims-security}.
+Secure realisation of $\idfu{\algo{trace}}$ by a protocol is defined as in
+\Cref{sec:prelims-security}, in the standalone model.
 
 
 $\idfu{\algo{trace}}$ receives inputs from system participants and $\simu$,
@@ -131,7 +126,11 @@ the validators accept.
 To make their transactions traceable, users call $\IDgrant$ to authorise an auditor to trace
 their transactions for a specific epoch. $\idfu{\algo{trace}}$ records that the
 auditor is authorised to trace the user's transactions for that epoch.  Once the
-epoch elapses, the authorisation lapses with it. Auditors call $\IDidentify$ to obtain the payloads of
+epoch elapses, the authorisation lapses with it.\rebekah{the functionality
+never clears $\perm$ when the epoch advances, and $\IDidentify$ still answers
+for past epochs, so nothing in $\idfu{\algo{trace}}$ makes a grant lapse; say
+instead that a grant covers one epoch only, or clear $\perm$ in Increment Epoch}
+Auditors call $\IDidentify$ to obtain the payloads of
 the transactions a user submitted in an epoch, and succeed only with a
 permission for that user and epoch. They then receive every such transaction,
 which is non-repudiation. $\simu$ also learns the traced payloads when the
