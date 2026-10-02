@@ -36,18 +36,17 @@ parameterised by a security parameter. Then as this parameter grows, the
 resources needed to break a scheme grow faster than any fixed polynomial, and
 the probability of success of the adversary becomes vanishingly small.
 
-We have chosen to follow the asymptotic approach. This deserves some
-consideration, as we are explicitly aiming for concrete efficiency in the design
-of our protocols and primitives. We wish for the schemes to be used in practice.
-The primitives and protocols we design have elements chosen in their
-instantiations specifically for the efficiency benefits. However, we wish to
-separate the instantiation choices from the design and security proofs of the
-abstract constructions that we present.
+We have chosen to follow the asymptotic approach, as do most of the works we
+build on. This deserves some consideration, as we explicitly aim for concrete
+efficiency. We address efficiency through the instantiations, whose elements are
+chosen for their efficiency benefits, and their benchmarks, and keep these
+choices separate from the design and security proofs of the abstract
+constructions.
 
 We call an adversary efficient if it runs in
 probabilistic polynomial time (PPT) in the security parameter. We call this
 parameter $\secparam$, and so the adversary's running time is bounded by
-$p(\secparam)$ for some fixed polynomial $p$. It may use randomness.
+$p(\secparam)$ for some fixed polynomial $p$.
 Honest parties must also satisfy this definition of efficiency.
 
 For the success probability of the adversary, we define a negligible
@@ -68,8 +67,7 @@ commitments and signature schemes as
 primitives, and to the schemes constructed in each chapter as protocols.
 We handle the security of primitives by defining experiments, a
 limited number of oracles which an adversary has access to, and then showing
-that the adversary cannot win with greater probability than some predefined
-amount.
+that every PPT adversary has negligible advantage in winning.
 
 An experiment is a game between a challenger,
 which runs the honest algorithms, and the adversary $\adv$. The adversary may be

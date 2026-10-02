@@ -120,8 +120,7 @@ contents of a message.
 In a financial system, there is something slightly different involved.
 Constructing digital financial systems with auditability may seem analogous to
 building backdoors in messaging systems, and there is the argument that once a
-capability exists, it will be used everywhere possible. This is important to
-consider.
+capability exists, it will be used everywhere possible.
 
 With respect to this, we raise three points. The first is that the two settings
 are technically different: well-designed auditing schemes do not involve an
@@ -170,9 +169,7 @@ we assume that institutions perform their prescribed roles. For privacy, the
 same institution need not be trusted to keep information available to it
 confidential. It may retain and combine this information, share it with other
 participants, and attempt to learn anything it can. We assess privacy against
-the strongest information it can derive in this setting. The institution may be
-relied upon to perform an operational function without being trusted with users'
-private information. Each chapter states which participants may deviate from the
+the strongest information it can derive in this setting. Each chapter states which participants may deviate from the
 protocol, and for which property.
 
 \begin{outline}
@@ -192,9 +189,7 @@ in each existing system.
 \paragraph{Contributions.} We first consider threshold certification, where
 several certifiers must cooperate to certify a message. Based on
 structure-preserving signatures, we construct threshold certification schemes
-that require no interaction during the online signing phase, making them
-suitable for efficient transaction authorisation or other multi-certifier
-settings.
+that require no interaction during the online signing phase.
 
 \begin{outline}
   \item introduce the concept in a few sentences: what threshold certification
@@ -218,7 +213,7 @@ particular transaction and the ability to identify the transactions associated
 with a particular user. These capabilities are related but distinct, and
 granting one need not grant the other. We take the auditor's existence as given
 and ask whether its capability can be scoped like any other permission, to one
-user and one period, and only once it has been granted. We
+user and one period, and only after an explicit grant. We
 develop a transaction identification mechanism that supports concurrent
 transaction creation without requiring the auditor to maintain persistent
 per-user state. Auditing is restricted to a specified epoch, limiting both the

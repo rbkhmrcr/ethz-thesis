@@ -304,8 +304,8 @@ straight-line. It rewinds the prover to the hash query that fixed the
 challenge, answers it with a fresh challenge, and extracts the witness from the
 two accepting transcripts by special soundness. This relies on the forking
 lemma~\cite{JC:PoiSte00}. The extractor then depends on the adversary, and
-extraction loses a polynomial factor in the number of hash queries. For this
-reason, the security proofs of later chapters are in a model where rewinding is
-allowed. Online extraction,
+extraction loses a polynomial factor in the number of hash queries. As the
+extractor rewinds, the security proofs of later chapters are in the standalone
+model of \Cref{sec:prelims-security}, and lose this factor. Online extraction,
 as given by the transform of Fischlin, avoids rewinding at the cost of larger
 proofs~\cite{C:Fischlin05}.

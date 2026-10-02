@@ -186,8 +186,11 @@ wins}].
 A labelled proof system is simulation extractable if this advantage is negligible
 for every PPT adversary $\adv$.
 
-The condition $(\inst^*, \lbl^*) \notin \Query$ makes proofs non-malleable
-across labels. It also makes them non-malleable across statements, as $\adv$
-cannot turn a simulated proof into a proof for another statement. As a
+Simulation extractability is a strong form of
+non-malleability~\cite{AC:Groth06}. Even after seeing simulated
+proofs, including proofs of false statements, $\adv$ cannot produce an accepting
+proof for a new statement or label without a witness being extracted from it.
+The condition $(\inst^*, \lbl^*) \notin \Query$ still allows $\adv$ to modify a
+simulated proof into another proof for the same statement and label. As a
 witness can be extracted, simulation extractable proof systems are proofs of
 knowledge.

@@ -105,7 +105,7 @@ in $\mathcal{K}$ in place of those in $\Cor$.
 
   $\advB$ answers the online oracle as follows. On $\mathcal{O}_{\algo{On}}(h, \mathsf{sid},
 \vec{\msg})$, if $h \in \mathcal{K}$, then $\advB$ holds $\sk_h$ and
-$\state_{\mathsf{sid},h}$, and, since signing is decomposable, runs $\TSPSonsign$ itself. Otherwise, the
+$\state_{\mathsf{sid},h}$, and runs $\TSPSonsign$ itself. Otherwise, the
 first time $\mathsf{sid}$ is used, $\advB$ queries its own signing oracle on
 $\vec{\msg}$ and obtains $\SPSsig$. It computes the shares
 $\{\SPSsig_k\}_{k \in \mathcal{K}}$ by running $\TSPSonsign$ on the material it

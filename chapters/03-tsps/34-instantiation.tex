@@ -10,9 +10,7 @@ $\AGHO$ has the smallest possible signatures, and its secret key consists of
 field elements only, so its threshold version only needs multiplication of
 shared field elements. $\KPW$ relies on a standard assumption, but its secret
 key contains group elements, so its threshold version needs sharings of group
-elements and $\algo{ExpGrp}$. In both, the signers raise a public group element
-to a shared exponent by each raising it to their own share, which gives a
-sharing of the result.
+elements and $\algo{ExpGrp}$.
 
 \subsection{Instantiating the MPC protocol}\label{sec:tsps-mpc-inst}
 
@@ -49,14 +47,10 @@ Neither protocol we benchmark is proven secure against adaptive corruption, so
 
 \subsection{Instantiating $\TSPS$ with $\AGHO$}\label{sec:tsps-abe}
 
-Abe, Groth, Haralambiev, and Ohkubo established a lower bound of three group
-elements for signature size in type III pairing groups, and gave a matching
-construction that signs messages in both groups~\cite{C:AGHO11}. Its signatures
-remain three group elements regardless of message length, and it is strongly
-unforgeable in the GGM.
-
-They also gave a rerandomisable three-element scheme for messages in one group
-only, which is existentially unforgeable in the GGM~\cite{C:AGHO11}. We use this
+Abe, Groth, Haralambiev, and Ohkubo give a strongly unforgeable scheme that
+signs messages in both groups, and a rerandomisable scheme for messages in one
+group only, which is existentially unforgeable in the GGM~\cite{C:AGHO11}. Both
+have signatures of three group elements. We use the second
 scheme with $\group{1}$ and $\group{2}$ swapped, so that messages are in
 $\group{1}$, and call it $\AGHO$. \Cref{prim:agho} recalls it. Its secret
 key consists only of field elements, and the message enters signing only through
