@@ -39,7 +39,7 @@ between two provers: a card, which holds one of the signed messages, and a
 holder, which holds the other messages and the signature. \Cref{prim:hss-joint-proof}
 gives their protocol.
 
-\begin{primitivebox}{The joint proof of knowledge of a BBS+ signature of Hesse, Singh and Sorniotti~\cite{USENIX:HesSinSor23}}{hss-joint-proof}
+\begin{primitivebox}{The joint proof of knowledge of a BBS+ signature of Hesse, Singh and Sorniotti~\cite{USENIX:HesSinSor23}.}{hss-joint-proof}
 
   The card and the holder share a PRF key $\key$, and $\varphi = (e, r, E)$ is a
 BBS+ signature on $(\msg_1, \ldots, \msg_n)$ under $\pk = (\gen_0, \ldots,
@@ -143,7 +143,7 @@ The card proves knowledge of the opening of $D$, a commitment to its message
 under randomness $t$ that both provers derive from their shared PRF key. The
 holder proves knowledge of the rest of the signature with $D$ in place of
 $\gen_1^{\msg_1}$, using the proof of knowledge of a BBS+ signature of
-Camenisch, Drijvers and Lehmann~\cite{EPRINT:CamDriLeh16}.
+Camenisch, Drijvers and Lehmann~\cite{CDL16}.
 
 The joint proof used in $\OP$ extends their proof with what $\OP$ needs beyond
 a proof of knowledge of a BBS+ signature. It differs from
@@ -170,7 +170,7 @@ first-prover privacy required of a JPOK.
 
 Third, the device shows the credential with the rerandomisation of Tessaro and
 Zhu in place of the proof of Camenisch, Drijvers and
-Lehmann~\cite{EC:TesZhu23b,EPRINT:CamDriLeh16}.
+Lehmann~\cite{EC:TesZhu23b,CDL16}.
 
 \begin{outline}
   \item a BBS+ signature cannot be shown directly: verification involves the signed messages, one of which is the identifier
@@ -316,7 +316,7 @@ Coconut credential scheme. \Cref{prim:ps} gives the signature scheme in the
 variant whose signatures carry an extra random field element $\omega$. We index
 its messages from $0$.
 
-\begin{primitivebox}{The Pointcheval-Sanders signature scheme~\cite{RSA:PoiSan16,RSA:PoiSan18}}{ps}
+\begin{primitivebox}{The Pointcheval-Sanders signature scheme~\cite{RSA:PoiSan16,RSA:PoiSan18}.}{ps}
 
   \begin{description}
 
@@ -360,7 +360,7 @@ its messages from $0$.
 Pointcheval and Sanders prove this variant existentially unforgeable under the
 $q$-MSDH assumption of \Cref{asm:qmsdh}~\cite{RSA:PoiSan18}.
 
-\begin{assumptionbox}{$q$-Modified Strong Diffie-Hellman ($q$-MSDH)}{qmsdh}
+\begin{assumptionbox}{The $q$-Modified Strong Diffie-Hellman ($q$-MSDH) assumption~\cite{RSA:PoiSan18}.}{qmsdh}
 
   The $q$-MSDH assumption holds if, given $(\gen^{\chi^i},
 \ggen^{\chi^i})_{i=0}^{q}$ and $(\gen^{\varsigma}, \ggen^{\varsigma},
@@ -380,7 +380,7 @@ ciphertexts are consistent. The signer signs homomorphically on the
 ciphertexts, and the recipient decrypts. \Cref{prim:coconut} gives the protocol
 for a single signer.
 
-\begin{primitivebox}{Signing on committed inputs in Coconut~\cite{NDSS:SABMD19}}{coconut}
+\begin{primitivebox}{Signing on committed inputs in Coconut~\cite{NDSS:SABMD19}.}{coconut}
 
   The signer's key pair is $\sk = (\chi, \theta_1, \ldots, \theta_\ell)$ and
 $\pk = (\tilde{x}, \tilde{y}_1, \ldots, \tilde{y}_\ell)$, with $\tilde{x} =

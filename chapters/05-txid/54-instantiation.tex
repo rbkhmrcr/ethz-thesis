@@ -78,7 +78,7 @@ The Dodis-Yampolskiy PRF is pseudorandom under the $q$-decisional bilinear
 Diffie-Hellman inversion assumption, $q$-DBDHI~\cite{PKC:DodYam05}.
 \Cref{prim:dy-prf} recalls it.
 
-\begin{primitivebox}{The Dodis-Yampolskiy PRF}{dy-prf}
+\begin{primitivebox}{The Dodis-Yampolskiy PRF~\cite{PKC:DodYam05}.}{dy-prf}
 
   \begin{description}
 
@@ -110,8 +110,8 @@ keyed by the epoch key and not by $\utk''$:
 %
 Its security rests on \Cref{asm:qmdbdhi-txid}.
 
-\begin{assumptionbox}{Decisional Bilinear Diffie-Hellman Inversion with
-published elements ($q$-mDBDHI)}{qmdbdhi-txid}
+\begin{assumptionbox}{The Decisional Bilinear Diffie-Hellman Inversion with
+published elements ($q$-mDBDHI) assumption.}{qmdbdhi-txid}
 
   Let $(\group{1},\group{2},\group{T},\pairing)$ be a type III bilinear group of
 prime order $p$ with generators $\gen \in \group{1}$ and $\ggen_D \in
@@ -534,7 +534,7 @@ proof that it originated from a registered user, following relation $\rel_6$.
 The registration authority certifies the key committed in $\com$ with a BBS+
 signature. As for the tag proof, we rewrite $\rel_6$ as an equivalent relation
 $\rel_6'$ that avoids proofs over bilinear
-equations~\cite{EPRINT:CamDriLeh16,USENIX:HesSinSor23}. The rewriting
+equations~\cite{CDL16,USENIX:HesSinSor23}. The rewriting
 randomises the signature, which the verifier checks with one pairing equation on
 public data, and every other equation is one of discrete logarithms. The
 signature and the commitment share the randomness generator, so the proof

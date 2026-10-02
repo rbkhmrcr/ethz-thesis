@@ -61,7 +61,7 @@ if $(\gen^x, \gen^y, \gen^{xy})$ and $(\gen^x, \gen^y, \gen^z)$, for $x, y, z
 
 The symmetric external Diffie-Hellman (SXDH) assumption holds in a bilinear group
 if DDH holds in both $\group{1}$ and
-$\group{2}$~\cite{EPRINT:BGMM05,EPRINT:ACHM05}.
+$\group{2}$~\cite{EC:GroSah08}.
 
 DDH cannot hold in a symmetric bilinear group, with $\group{1} = \group{2}$, or
 in a source group with an efficiently computable homomorphism to the other. SXDH
@@ -139,7 +139,7 @@ return $f_2 / f_1^{\mu}$.
 The BBS+ signature scheme of \Cref{prim:bbs} signs several messages at
 once~\cite{C:BonBoySha04,SCN:AuSusMu06}.
 
-\begin{primitivebox}{The BBS+ signature scheme~\cite{C:BonBoySha04}.}{bbs}
+\begin{primitivebox}{The BBS+ signature scheme~\cite{SCN:AuSusMu06}.}{bbs}
 
   \begin{description}
 
@@ -211,7 +211,7 @@ The BBS+ signature scheme on field elements is existentially unforgeable under
 the $q$-strong Diffie-Hellman ($q$-SDH) assumption of \Cref{asm:qsdh-bbs}, a $q$-type
 assumption~\cite{EC:BonBoy04a}.
 
-\begin{assumptionbox}{$q$-Strong Diffie-Hellman ($q$-SDH)}{qsdh-bbs}
+\begin{assumptionbox}{The $q$-Strong Diffie-Hellman ($q$-SDH) assumption~\cite{EC:BonBoy04a}.}{qsdh-bbs}
 
   The $q$-SDH assumption holds in the type III bilinear group
 $(\group{1},\group{2},\group{T},\pairing)$ if, given $(\gen, \gen^{\theta},
