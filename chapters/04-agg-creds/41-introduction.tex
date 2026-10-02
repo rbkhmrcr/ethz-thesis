@@ -9,6 +9,19 @@ possess~\cite{EC:CamLys01}.
 \begin{outline}
   \item comment: ``define attributes?'' and ``very quick into security properties?'': say what an attribute is (a value about the user that an issuer certifies) before the security properties
   \item then lead more slowly into unlinkability and unforgeability
+  \item motivation, recurring through the thesis: by the end of 2026 every EU
+member state must offer a European Digital Identity Wallet, with selective
+disclosure, unlinkability and pseudonymous authentication (cite eIDAS2024); an
+issuer per attribute (passport agency, licensing body, transport authority) is
+exactly this setting
+  \item deployed credentials and tokens: U-Prove, Idemix (cite CCS:CamVan02),
+Signal private groups (cite CCS:ChaPerZav20), Privacy Pass (cite
+PoPETS:DGSTV18); decentralised issuance: Coconut (cite NDSS:SABMD19), threshold
+BBS+ (cite SP:DKLsT23), blind multisignatures for anonymous tokens (cite
+CCS:KRBKKL24), and silent setup for threshold issuance (cite EPRINT:GGPR25)
+  \item framing shared with GGPR25: coordination between issuers is the
+obstacle; they remove interactive setup for issuers certifying the same
+credential, we remove coordination for issuers certifying different attributes
 \end{outline}
 
 Early anonymous credential schemes assume a single issuer certifying all
@@ -138,10 +151,10 @@ stateless, dynamic setting as an open question.
 \paragraph{Other multi-authority credentials.} Other multi-authority
 credentials are in different settings. Threshold issuance without interactive
 setup lets uncoordinated issuers jointly certify one
-credential~\cite{EPRINT:GGPR25}.\rebekah{``don't cite eprint'': cryptobib has
-no published version of GGPR25 (only ePrint 2025/2042); check whether it has
-appeared since, else keep the ePrint key} Here, each issuer certifies its own
-attributes instead. Independent authorities can also each sign a user's global
+credential, with a constant-size showing of about 5\,KB on
+BLS12-381~\cite{EPRINT:GGPR25}. Here, each issuer certifies its own attributes
+instead, and our presentations are smaller for up to about forty disclosed
+attributes. Independent authorities can also each sign a user's global
 identity, with one proof per credential~\cite{anada2019decentralized}.
 Credentials can be derived from existing identity documents with zk-SNARKs,
 without new issuer infrastructure, at the cost of a general-purpose proof per

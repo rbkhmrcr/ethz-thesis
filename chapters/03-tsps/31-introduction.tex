@@ -120,7 +120,10 @@ indexed Diffie-Hellman tuples, of the form $(\gen^\msg,
 Another non-interactive threshold SPS scheme instead is capable of signing
 arbitrary group elements, and is secure under the SXDH
 assumption~\cite{PKC:MMSST24}. It builds on $\KPW$, and its signatures consist
-of seven group elements~\cite{C:KilPanWee15}.
+of seven group elements~\cite{C:KilPanWee15}. Building on it, a threshold SPS
+scheme with silent setup lets signers generate their keys independently, with no
+interactive key generation, at the cost of larger signatures, a trusted
+powers-of-tau setup and security in the GGM~\cite{EPRINT:GGPR25}.
 
 \Cref{tab:tsps-comp} in \Cref{sec:tsps-evaluation} compares our schemes with the
 two prior threshold SPS schemes in terms of assumptions, key and signature size,
