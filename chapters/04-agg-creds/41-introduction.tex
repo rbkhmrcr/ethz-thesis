@@ -68,21 +68,12 @@ the role.
 \subsection*{Related work}
 
 \paragraph{Single-issuer anonymous credential systems.} An early anonymous
-credential system issues signatures on committed values, with security under the
-strong RSA (sRSA) assumption~\cite{EC:CamLys01,SCN:CamLys02}. A later pairing-based
-construction works under the LRSW assumption, though signature size and
-verification complexity grow linearly with the number of attribute values
+credential system issues signatures on committed values~\cite{EC:CamLys01,SCN:CamLys02}. In a
+later pairing-based construction, signature size and verification complexity
+grow linearly with the number of attribute values
 signed~\cite{C:CamLys04}. An extension supports a constrained form of
-aggregation, but only in settings where all values are known ahead of
-time~\cite{FC:LeeLeeYun13}.
-\rebekah{Comments: ``not sure about assumption relevance'' at sRSA and LRSW,
-``don't think we should drop assumptions like this, what's the idea? is that
-the efficient schemes have bad assumptions'' at $n$-BSDH and $J$-RootDH, and,
-on an older printout, ``CDHK15: lots of unnamed assumptions''. The point about
-assumptions is now made once, after Comparison. Decide: take the assumption
-names out of the related-work prose here and in the CDHK15 and CL11
-paragraphs, leaving them in the table only, or keep them and give CDHK15's full
-list instead of ``\ldots''.}
+aggregation, but only in settings where all values are known in
+advance~\cite{FC:LeeLeeYun13}.
 
 Credentials built on the BBS+ signature scheme support selective disclosure,
 where a user reveals some of their attribute values and hides the rest, in a
@@ -111,18 +102,14 @@ scenarios where different authorities independently certify distinct attributes.
 
 A multi-issuer credential system supports selective disclosure and
 pseudonyms~\cite{AC:CDHK15}. It is proven secure in the universal composability
-framework~\cite{FOCS:Canetti01}, under several assumptions including $n$-BSDH
-and $J$-RootDH, with a common reference string. Credentials from different
+framework~\cite{FOCS:Canetti01}, with a common reference string. Credentials from different
 issuers are linked through a pseudonym and not aggregated, so a presentation
 contains one proof per credential.
 
 \paragraph{Aggregate anonymous credentials.} Aggregate credentials combine
 independently issued credentials into a single compact credential, while
 maintaining user privacy during presentations. Indexed aggregate signature
-schemes support anonymous credentials this way, with unforgeability under the
-$q$-Asymmetric Double Hidden Strong Diffie-Hellman ($q$-ADHSDH) assumption, and
-anonymity under the decisional Diffie-Hellman (DDH) assumption in the random
-oracle model~\cite{canard2011anonymous}. \rebekah{check CL11 against the paper:
+schemes support anonymous credentials this way~\cite{canard2011anonymous}.\rebekah{check CL11 against the paper:
 HP22 list it as multi-issuer with a constant-size showing, which contradicts
 our table row}
 
@@ -136,27 +123,25 @@ tag and index, and keep a record of what they have signed for each user. In a
 bounded variant they instead count the messages signed per tag, and the issuer
 key grows with the bound.
 
-Mir et al.\ build issuer-hiding multi-authority credentials from aggregate
-signatures with randomisable tags and keys~\cite{CCS:MBGLS23}. Their issuers are
-not stateless either. Either the attributes and issuer keys of a user are fixed
-when the user's tag is created, or each issuer signs only once per tag. They name the
-stateless, dynamic setting as an open question. Unforgeability rests on an
-interactive assumption in the random oracle model, or on the GGM, and anonymity
-on a new interactive assumption.
+Issuer-hiding multi-authority credentials can also be built from aggregate
+signatures with randomisable tags and keys~\cite{CCS:MBGLS23}. The issuers there
+are not stateless either. Either the attributes and issuer keys of a user are fixed
+when the user's tag is created, or each issuer signs only once per tag. The authors name the
+stateless, dynamic setting as an open question.
 
 \paragraph{Other multi-authority credentials.} Other multi-authority
 credentials are in different settings. Threshold issuance without interactive
 setup lets uncoordinated issuers jointly certify one
-credential~\cite{EPRINT:GGPR25}\rebekah{``don't cite eprint'': cryptobib has
+credential~\cite{EPRINT:GGPR25}.\rebekah{``don't cite eprint'': cryptobib has
 no published version of GGPR25 (only ePrint 2025/2042); check whether it has
-appeared since, else keep the ePrint key}, while here each issuer certifies its own
-attributes. Independent authorities can also each sign a user's global
+appeared since, else keep the ePrint key} Here, each issuer certifies its own
+attributes instead. Independent authorities can also each sign a user's global
 identity, with one proof per credential~\cite{anada2019decentralized}.
 Credentials can be derived from existing identity documents with zk-SNARKs,
 without new issuer infrastructure, at the cost of a general-purpose proof per
 credential~\cite{SP:RWGM23}. Issuer hiding, where a verifier learns only that an
 issuer lies in a set it accepts, is an orthogonal
-problem~\cite{CANS:BEKRS21,PoPETS:SanTra24}, and one we would like to address in
+problem~\cite{CANS:BEKRS21,PoPETS:SanTra24}. We would like to address it in
 future work.
 
 \paragraph{Comparison.} H\'ebant and Pointcheval's certification authority plays
@@ -184,7 +169,7 @@ non-interactive assumptions by a large class of reductions~\cite{AC:AbeGroOhk11}
 Our tag-based signature scheme needs only BCDH, and the GGM enters only through
 the registration signature.
 
-\begin{table}[htbp] \centering \small
+\begin{table}[htbp] \centering \small \setlength{\tabcolsep}{3pt}
   \begin{tabular}{l|c|c|c|c|c}
     \toprule Scheme & Assumptions & Multi-issuer & $|$cred$|$ & Prover cost &
 Issuer state \\ \midrule
@@ -192,7 +177,7 @@ Issuer state \\ \midrule
     CL04~\cite{C:CamLys04} & LRSW & No & $O(n)$ & $O(n)$ & -- \\
     BBS+~\cite{EC:BonBoy04a,SCN:AuSusMu06} & $q$-SDH & No & $O(1)$ & $O(n)$ & -- \\
     CL11~\cite{canard2011anonymous} & $q$-ADHSDH & Partial & $O(n)$ & $O(k)$ & ? \\
-    CDHK15~\cite{AC:CDHK15} & $n$-BSDH, $J$-RootDH, \ldots & Yes & $O(K)$ & $O(K)$ & None \\
+    CDHK15~\cite{AC:CDHK15} & \parbox[t]{2.3cm}{\centering SXDH, $J$-RootDH, $n$-BSDH, $q$-SDH, XDLIN, co-CDH, DBP} & Yes & $O(K)$ & $O(K)$ & None \\
     HP22~\cite{SCN:HebPoi22} & GGM & Yes & $O(1)$ & $O(k)$ & Per tag \\
     MBGLS23~\cite{CCS:MBGLS23} & Interactive or GGM & Yes & $O(1)$ & $O(k)$ & Per tag \\
     Our scheme & BCDH, DDH, ROM, GGM & Yes & $O(1)$ & $O(k)$ & None \\
