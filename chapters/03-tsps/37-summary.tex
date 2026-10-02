@@ -4,29 +4,16 @@
   \item keep this section and the chapter very brief and concise but correct
 from the start: building blocks, then the changes, the implementation, then move
 on
-  \item be open that this is mostly an implementation contribution, plus
-splitting signing into offline and online phases and proving security still holds
+  \item restate the core idea in two or three sentences, as in the
+introduction, then the online cost: about as much as ordinary signing
   \item threshold $\AGHO$ has the smallest possible signatures of any threshold
 SPS for general messages, at the price of the GGM
-  \item thresholdising an SPS scheme mostly needs only general-purpose MPC: key
-generation, combining and verification need only the MPC
-interfaces; compatibility with ordinary verifiers follows directly
-  \item only signing needs its own design and proof; isolating it to one
-property, decomposable signing, keeps the security argument to one reduction and
-moves all interaction to before the message is known
-  \item the remaining online phase is local, costs about as much as ordinary
-signing and as computing a signature share in the earlier non-interactive threshold schemes
 \end{outline}
 
 \begin{outline}
   \item applies beyond our two schemes: any signature scheme whose
 message-dependent part is public values raised to shared exponents, generic MPC
 for the rest, proof reduced to unforgeability of the underlying scheme
-  \item includes other SPS schemes; more generally a way to look at threshold
-primitives: separate the part depending on the late input and ask whether it can
-be local
-  \item then interaction moves offline, and systems prepare in quiet periods for
-busy ones (payments, transparency logs)
 \end{outline}
 
 \begin{outline}
@@ -41,12 +28,9 @@ institution
 \end{outline}
 
 \begin{outline}
-  \item open: neither MPC protocol is adaptively secure; with one that is, the
-reduction loses $\binom{n}{t}$, large for an honest majority; removing it needs
-an equivocable sharing (one the simulator can later explain as a sharing of any
-value) or secure erasures
-  \item be very clear that the $\binom{n}{t}$ bound applies to no benchmarked
-protocol; the benchmarked ones are covered only by the static theorem
+  \item open: adaptive security needs an adaptively secure MPC protocol, and
+removing the $\binom{n}{t}$ loss needs an equivocable sharing or secure erasures;
+the benchmarked protocols are covered only by the static theorem
   \item if the underlying SPS scheme is strongly unforgeable, the same reduction
 gives the strong threshold analogue
 \end{outline}

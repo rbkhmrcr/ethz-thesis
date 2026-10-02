@@ -20,6 +20,12 @@ no trusted dealer; it runs once, so its cost hardly matters
 \end{outline}
 
 \begin{outline}
+  \item core idea, say it plainly once: any SPS scheme with decomposable
+signing becomes a threshold scheme; everything not depending on the message is
+computed under MPC offline; once the message is known each signer raises the
+public message elements to its own shares, with no interaction; security reduces
+to EUF-CMA of the underlying scheme with no loss; done for $\AGHO$ (smallest
+signatures) and $\KPW$ (standard assumptions)
   \item evaluating $\SPSsign(\sk, \vec{\msg})$ under MPC with the message as one
 more input puts every interactive call after the message is known
   \item instead split signing so all interactive calls happen before the message

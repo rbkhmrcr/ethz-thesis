@@ -71,6 +71,12 @@ discrete logarithm, where the bound does not apply~\cite{PKC:MMSST24,AC:CKPSS23}
 The price of this is security in the GGM.
 
 \begin{outline}
+  \item core idea, say it plainly once: any SPS scheme with decomposable
+signing becomes a threshold scheme; everything not depending on the message is
+computed under MPC offline; once the message is known each signer raises the
+public message elements to its own shares, with no interaction; security reduces
+to EUF-CMA of the underlying scheme with no loss; done for $\AGHO$ (smallest
+signatures) and $\KPW$ (standard assumptions)
   \item signing key held in secret-shared form (enough shares determine it, fewer
 reveal nothing); key generation, combining and verification then done with
 general-purpose MPC, nothing new needed
@@ -97,12 +103,9 @@ decomposable signing, and show that $\AGHO$ and $\KPW$ have it.
   \item second contribution: implementation; thresholdising $\KPW$ needs
 secret-shared group elements and raising a shared group element to a shared
 exponent
-  \item computing on shared group elements between two parties is known (cite
-NDSS:GPVRNC23); as far as we know no multiparty version had been implemented
-  \item threshold ECDSA for many parties has been implemented in MP-SPDZ
-with shared curve points (ESORICS:DOKSS20, cited in the old evaluation); what is
-new here is pairing-friendly groups and a shared group element raised to a
-shared exponent (your answer: sounds correct but check)
+  \item as far as we know, the first multiparty implementation of computing on
+shared pairing-group elements (two-party: cite NDSS:GPVRNC23; threshold ECDSA in
+MP-SPDZ: cite ESORICS:DOKSS20; your answer: sounds correct but check)
 \end{outline}
 
 We benchmark both schemes using two MPC frameworks: ATLAS, which assumes an
@@ -139,11 +142,6 @@ been considered. One non-interactive construction is restricted to signing
 indexed Diffie-Hellman tuples, of the form $(\gen^\msg,
 \ggen^\msg)$~\cite{AC:CKPSS23}.
 
-\begin{outline}
-  \item an element that only exists in $\group{1}$ (a key or commitment
-already on a ledger) can't be signed unless its owner both knows its discrete
-logarithm and provides the corresponding element of $\group{2}$
-\end{outline}
 
 Another non-interactive threshold SPS scheme instead is capable of signing
 arbitrary group elements, and is secure under the SXDH

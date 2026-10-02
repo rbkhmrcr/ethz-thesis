@@ -23,9 +23,6 @@ public keys, and signatures are all group elements, and verification consists
 solely of checking pairing product
 equations~\cite{C:AFGHO10,C:AGHO11,TCC:AGOT14,C:KilPanWee15,AC:Groth15,RSA:Ghadafi16}.
 
-\begin{outline}
-  \item why we want them: nothing is hashed, so they combine with efficient zero-knowledge proofs over the same groups; users prove knowledge of signatures on committed or hidden group elements
-\end{outline}
 
 An SPS scheme $\SPS$ over the bilinear groups of \Cref{sec:prelims-groups}
 consists of the following
@@ -115,17 +112,9 @@ signed, and is our target
   \item achievable because the online phase is local: issuing a share reveals
 nothing further; and it is what a certifier needs (no signature unless
 enough honest signers agreed to that message)
-  \item it is defined for non-interactive threshold signature schemes (cite C:BCKMTZ22):
-$n_s$ servers, signing needs $t$ of them, fewer than $t$ corrupted, and a leader,
-played by the adversary, that collects partial signatures
-  \item their syntax: key generation $\algo{Kg}$ by a trusted algorithm; server
-preprocessing $\algo{SPP}$, a local step giving a token $\mathsf{pp}$ for the
-leader; a leader request $\mathsf{lr}$ naming the message $\mathsf{lr.msg}$ and
-the signer set $\mathsf{lr.SS}$; partial signing $\algo{PS}$; aggregation
-$\algo{Agg}$; verification $\algo{Vf}$; all with access to a random oracle $h$
-drawn from $\mathsf{HF}$
-  \item they assume trusted key generation ``to allow a modular treatment'' and
-consider static corruption only
+  \item it is defined for non-interactive threshold signature schemes (cite
+C:BCKMTZ22), with a leader, played by the adversary, that collects partial
+signatures
 \end{outline}
 
 \Cref{exp:ts-uf-1} gives the TS-UF-1 experiment of Bellare et
