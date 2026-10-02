@@ -22,9 +22,9 @@ underlying SPS scheme is strongly unforgeable, but do not prove it. The second
 is adaptive corruption. Adaptive security needs an adaptively secure MPC
 protocol, and our reduction then loses a factor that grows exponentially with
 the number of signers for an honest majority. We leave removing this loss as
-future work. Threshold Schnorr signatures cannot be
-proven fully adaptively secure without modifications~\cite{C:CriSte25}, so the
-implications of adaptive corruption for threshold schemes are worth making
-clearer. Of the protocols we benchmark, MASCOT is covered by the static theorem. The
+future work. Recent work shows that threshold
+Schnorr signatures cannot be proven fully adaptively secure without
+modifications~\cite{C:CriSte25}, and exploring under which conditions threshold
+SPS schemes can be proven adaptively secure is interesting future work. Of the protocols we benchmark, MASCOT is covered by the static theorem. The
 implementation of ATLAS we use is only secure against honest but curious
 signers, so the theorem does not cover it.
