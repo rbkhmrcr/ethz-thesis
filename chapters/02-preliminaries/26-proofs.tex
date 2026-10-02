@@ -8,10 +8,7 @@ for which some witness $\witness$ has $\rel(\inst, \witness) = 1$.
 Zero-knowledge proof systems enable provers to convince verifiers that a
 statement is true without revealing any information beyond the validity of the
 statement. Soundness requires that verifiers are not convinced of false
-statements. We use non-interactive proof systems throughout.
-\rebekah{cite? Katz and Lindell does not cover these. Suggested:
-STOC:BluFelMic88 (NIZK), FOCS:Sahai99 and C:DDOPS01 (simulation soundness),
-AC:Groth06 (simulation extractability)}
+statements. We use non-interactive proof systems throughout~\cite{STOC:BluFelMic88}.
 
 \paragraph{Syntax.} A non-interactive proof system $\NIZK$ consists of the
 following algorithms. We call it a non-interactive zero-knowledge (NIZK) proof system when it is also
@@ -145,7 +142,7 @@ advantage is negligible for every PPT adversary $\adv$.
 \paragraph{Simulation extractability.} Our security arguments need a
 witness to be recoverable from all accepting proofs, even after an adversary has
 observed simulated proofs. Simulation extractability, defined by
-\Cref{exp:simext}, captures this.
+\Cref{exp:simext}, captures this~\cite{FOCS:Sahai99,C:DDOPS01,AC:Groth06}.
 
 \begin{experimentbox}{Proof systems: simulation extractability}{simext}
 

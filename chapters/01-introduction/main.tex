@@ -61,20 +61,20 @@ having access to users' private information.
 Two cryptographic concepts illustrate this: anonymous credentials and
 multiparty computation.
 
-\rebekah{cite anonymous credentials (EC:Chaum85 / CACM Chaum85, EC:CamLys01, check), decentralised issuance (NDSS:SABBD19 Coconut, check) and MPC (FOCS:Yao86, STOC:GolMicWig87, check) in these paragraphs}In anonymous credential schemes, issuers issue credentials to users, attesting
+In anonymous credential schemes, issuers issue credentials to users, attesting
 that users hold certain attribute values. Users present their credentials,
 proving they hold given attributes without revealing who they are or anything
-about their undisclosed attribute values. Early anonymous credential schemes
+about their undisclosed attribute values~\cite{EC:Chaum85,EC:CamLys01}. Early anonymous credential schemes
 assumed a single issuer certifying all attributes, creating one powerful entity.
 Later schemes decentralised issuance, but the issuers as a whole remain
 responsible for all attributes, so that all issuers can now learn all users'
-attribute values. The power to certify and the knowledge that comes with that
+attribute values~\cite{NDSS:SABMD19}. The power to certify and the knowledge that comes with that
 have both been shared across issuers, which leads to a worse privacy outcome for
 users.
 
 Multiparty computation allows a function to be computed by multiple mutually
 distrusting parties, each with a private input. The function is computed on all
-inputs while revealing nothing but the output. This seems to be an instance
+inputs while revealing nothing but the output~\cite{FOCS:Yao86,STOC:GolMicWig87}. This seems to be an instance
 where decentralisation of the protocol leads to a straightforward privacy gain
 for users. It can be applied to anonymous credential issuance to sidestep the
 issue stated above. The new problem it introduces, however, is in practicality.
