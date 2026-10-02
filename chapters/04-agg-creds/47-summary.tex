@@ -1,52 +1,38 @@
 \section{Summary}\label{sec:agg-creds-summary}
 
-\rebekah{Comment on the first two sentences: ``not really clear.''}
-This chapter addresses a gap in existing anonymous credential systems. While
-later systems decentralise issuance, the issuers as a whole remain responsible
-for all attributes. We instead target the setting of distinct issuers without
-requiring any coordination between issuers, or indeed between the registration
-authority, issuers, and verifiers at any time. The user simply interacts with
-each as needed.
+This chapter considered anonymous credentials in which each attribute is
+certified by its own issuer, and issuers coordinate neither with each other nor
+with the registration authority or verifiers. Users combine credentials from
+independent issuers into a single aggregate credential and present it with one
+proof.
 
-We achieve this through constructing an aggregate anonymous credentials system,
-in which credentials issued independently by different authorities can be
-combined by the user into a single compact credential and presented through one
-proof. Issuers do not need to maintain state across users. We take the
-certified-key assumption implicit in similar constructions and make it
-explicit, introducing the registration authority as its own role, and using
-this role to achieve efficient multi-issuer anonymous credentials.
-\begin{outline}
-  \item the key point: giving the registration authority one job (binding a key to a tag) adds no trust, it learns a key and a tag and is never contacted again, and it is what lets issuers stay uncoordinated and stateless
-  \item separating the requirements on the registration authority from those on the issuers is how issuers become stateless; the stateless case has been named as open (cite CCS:MBGLS23)
-\end{outline}
+The registration authority binds each user's key to a tag, and is not involved
+after registration. Every anonymous credential scheme already assumes that
+users' keys are certified, and we make this role explicit. The registration
+authority learns only keys and tags, so the role adds no trust. Binding
+credentials to the tag lets issuers stay uncoordinated, and since each
+user has one tag, issuers need not remember whom they have signed for.
 
-We present an instantiation based on structure-preserving signatures, and build
-a special-purpose proof for efficiency.
 The instantiation combines the $\AGHO$ SPS scheme, our tag-based aggregate
 signature scheme $\ATS$, and proofs based on Sigma protocols. With $n = 128$ issuers and $k =
 64$ disclosed attributes, a presentation takes 20.1\,ms to produce and
 31.1\,ms to verify.
-A concrete security analysis of the scheme would be valuable for determining
-its real-world security guarantees.
-\begin{outline}
-  \item open direction: constant-size presentations, by proving the equality of
-$\delta$ in $\group{T}$; trades presentation size for one pairing per disclosed
-attribute
-  \item open direction: GGM is needed only through AGHO; a rerandomisable SPS under a standard assumption would remove it, at the cost of larger registration signatures
-\end{outline}
 
-\rebekah{Comment on the revocation and issuer hiding paragraphs: ``should we
-put the extensions in here instead though?'' Decide whether the Extensions
-paragraph of \Cref{sec:agg-creds-construction} moves here.}
-We briefly outline epoch-based revocation, which would address attributes with
-natural expiry dates. However, a more thorough consideration of revocation is
-needed before the scheme would be able to support different attribute
-revocation policies.
-\begin{outline}
-  \item revocation of a whole user through their tag, and of single attributes
-\end{outline}
+Several directions remain open. Proving that every blinded hash uses the same
+$\delta$ in $\group{T}$ would make presentations constant-size, at the cost of
+one pairing per disclosed attribute for the user. The GGM is needed only for the
+registration signature, so a rerandomisable SPS scheme under standard
+assumptions would remove it, at the cost of larger registration signatures. A
+concrete security analysis of the scheme would give its security at real
+parameters.
 
-The anonymous credential scheme as it stands uses the issuer public keys in the
-clear. As the identity of the issuers can reveal information about the user,
-recent work has focused on issuer hiding. Adding the property of issuer hiding
-to this protocol would be interesting future work.
+\rebekah{kept Extensions in the construction; the summary only names revocation
+as future work}
+Epoch-based revocation, one of the extensions of
+\Cref{sec:agg-creds-construction}, covers attributes with natural expiry dates.
+Revoking a whole user through their tag, or a single attribute credential, needs
+more than this, and we leave it to future work.
+
+The scheme uses the issuer public keys in the clear. As the identity of the
+issuers can reveal information about the user, recent work has focused on
+issuer hiding. Adding issuer hiding to this scheme is also future work.

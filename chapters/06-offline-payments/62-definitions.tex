@@ -62,14 +62,10 @@ not give it as an algorithm here, though the ideal functionality below exposes
 an interface for it. Throughout, we suppress the public parameters, the long-term credential, and the counterparty's inputs from the algorithm signatures,
 and name only the state that distinguishes one call from another.
 
-A token after $i$ payments is $T_i = (v, s_i, \com_i, \algo{hist}_i)$. It
-consists of the value $v$, the randomness $s_i$, the pseudonym $\com_i$ of its
-current owner, and the history $\algo{hist}_i$. The pseudonym is a hiding
-commitment to the owner's identifier with randomness $s_i$, and the history is
-the transcript of the withdrawal and of the $i$ payments. Each payment is one hop
-of the token's chain. The secure element stores only $\tau_i = (v, \com_i)$, and
-$d_n$ denotes the deposit request after $n$ hops. The construction gives each of
-these in full.
+A token after $i$ payments is $T_i$, and each payment is one hop of the token's
+chain. The secure element stores only a part $\tau_i$ of the token, the device
+keeps its history $\algo{hist}_i$, and $d_n$ denotes the deposit request after
+$n$ hops. The construction gives each of these in full.
 
 \begin{description}
 
@@ -86,13 +82,12 @@ secure element and outputs long-term credential $\cred$.
 value $v_0$, outputs token $T_0$ of that value, obtained by the user from the
 central bank through their intermediary.
 
-  \item[$p_i \sample \OPexecute(v, s_i, \com_i, \algo{hist}_i)$ :] The
-payment algorithm, on input a token of value $v$ with randomness $s_i$,
-pseudonym $\com_i$, and history $\algo{hist}_i$, outputs payment $p_i$
-transferring the token to the payee.
+  \item[$p_i \sample \OPexecute(T_i)$ :] The payment algorithm, on input token
+$T_i$, outputs payment $p_i$ transferring the token to the payee.
 
   \item[$\{0,1\} \sample \OPdeposit(\tau_n, \algo{hist}_n)$ :] The deposit
-algorithm, on input token $\tau_n$ and its history $\algo{hist}_n$, returns 1 if
+algorithm, on input the part $\tau_n$ of a token that the secure element stores
+and the token's history $\algo{hist}_n$, returns 1 if
 the token is redeemed for bank deposits and 0 otherwise.
 
   \item[$\algo{DS} \leftarrow \OPidentify(d_n, d_{n'})$ :] The identification
@@ -110,15 +105,13 @@ of knowledge and signatures on committed inputs.
 
 \paragraph{Joint proofs of knowledge.}\label{sec:joint-pok-def} A joint proof
 of knowledge (JPOK) lets two provers, each holding part of a witness, together
-produce one proof of knowledge of the whole witness. Such a primitive
-exists for BBS+ signatures~\cite{USENIX:HesSinSor23}. We recall it in the syntax
-used throughout this thesis.
+produce one proof of knowledge of the whole witness.
 
 \paragraph{Syntax.} A JPOK $\JPOK$ is a proof system for a relation $\rel$ over
 statement $\inst$ and witness $\witness = (\witness_0, \witness_1)$, where the first
 prover holds $\witness_0$ and the second prover holds $\witness_1$. We
-work in the random oracle model with generators derived by hashing, so a JPOK
-has no setup algorithm and no common reference string. A JPOK consists of the
+work in the random oracle model, so a JPOK has no setup algorithm and no common
+reference string. A JPOK consists of the
 following protocol and algorithm:
 
   \begin{description}
@@ -135,12 +128,9 @@ $0$ or $1$.
 
   \end{description}
 
-\rebekah{the verifier here receives only $\Phi$; in the protocol of Hesse, Singh and Sorniotti (Section 4, Figure 3) the verifier relays the messages between card and holder, and the two provers share a PRF key, neither of which this syntax has; check}
-
-Hesse, Singh and Sorniotti prove completeness, soundness and zero knowledge for
-their construction in their Theorem 4.1~\cite{USENIX:HesSinSor23}. We require
-completeness, zero knowledge, simulation extractability and first-prover
-privacy, defined as follows.
+The verifier takes no part in the proving protocol, and receives only the proof.
+We require completeness, zero knowledge and simulation extractability, defined
+as follows.
 
 \paragraph{Completeness.} A JPOK is complete if, for every statement $\inst$
 and witness $(\witness_0, \witness_1)$ with $\rel(\inst, (\witness_0,
@@ -164,52 +154,6 @@ satisfies \Cref{exp:simext} with verification algorithm $\JPOKverify$. The
 adversary there produces the proof alone, so this covers a first and a second
 prover that are both corrupt and collude.
 
-\rebekah{differences from the paper: Hesse, Singh and Sorniotti prove zero knowledge only against a semi-honest verifier who sees the whole three-party transcript, and soundness as an extractor against colluding card and holder with an honest verifier, not simulation extractability; the theorem and (P5) use simulation extractability, which the instantiation section claims for the compiled Sigma protocol}
-
-\paragraph{First-prover privacy.} A JPOK protects the first prover's witness
-share against a corrupt second prover if no adversary that plays the second
-prover can recover $\witness_0$. \Cref{exp:jpok-privacy} captures this for a
-PPT instance generator $\algo{G}$ for $\rel$.
-
-\begin{experimentbox}{Joint proofs of knowledge: first-prover privacy}{jpok-privacy}
-
-  \rebekah{drafted from the claim that the second prover learns nothing about $\witness_0$ beyond a commitment and its randomness; Hesse, Singh and Sorniotti (Section 4, Theorem 4.1) define no such property; check whether the security proof needs it, and how to fix $\algo{G}$}
-
-  \begin{enumerate}
-
-    \item The challenger samples $(\inst, (\witness_0, \witness_1)) \sample
-\algo{G}(\secparam)$ with $\rel(\inst, (\witness_0, \witness_1)) = 1$ and sends
-$(\inst, \witness_1)$ to $\adv$.
-
-    \item The adversary is given oracle access to $\mathcal{O}_{\JPOKprove_0}$,
-which on input a statement $\inst'$ runs $\JPOKprove_0(\inst', \witness_0)$
-with $\adv$ in the role of the second prover.
-
-    \item The adversary outputs $\witness_0^\star$.
-
-  \end{enumerate}
-
-  $\adv$ wins the experiment if the following holds:
-  %
-  \begin{equation*}
-  %
-    \rel(\inst, (\witness_0^\star, \witness_1)) = 1.
-  %
-  \end{equation*}
-
-\end{experimentbox}
-
-The advantage of $\adv$ is defined as follows:
-%
-\begin{equation*}
-%
-  \Adv^{\mathsf{priv}}_{\JPOK, \adv}(\secparam) = \Pr[\adv\text{ wins}].
-%
-\end{equation*}
-%
-We say the JPOK satisfies first-prover privacy if this advantage is negligible
-for every PPT adversary $\adv$.
-
 \paragraph{Signatures on committed inputs.}\label{sec:sci-def} A signature
 scheme on committed inputs (SCI) lets a recipient obtain a signature on a vector
 of messages from a signer who sees only some of the messages and a commitment
@@ -228,7 +172,7 @@ in $\Zp^\ell$.
 
   \item[$(\algo{req}, \state) \sample \SCIrequest(\pk, \msg, \algo{Disc})$ :]
 The request algorithm, run by the recipient on input public key $\pk$, message
-vector $\msg \in \Zp^\ell$ and set $\algo{Disc} \subseteq [\ell]_0$ of disclosed
+$\msg \in \Zp^\ell$ and set $\algo{Disc} \subseteq [\ell]_0$ of disclosed
 indices, outputs request $\algo{req}$ and private state $\state$. The request
 contains the disclosed messages $(\msg_i)_{i \in \algo{Disc}}$, a commitment $C$
 to the other messages, and a proof $\algoproof_{\algo{req}}$ that $C$ is well
@@ -244,12 +188,10 @@ unblinding algorithm, run by the recipient on input private state $\state$ and
 response $\algo{resp}$, outputs signature $\signature$ on $\msg$.
 
   \item[$\{0,1\} \leftarrow \SCIverify(\pk, \msg, \signature)$ :] The
-verification algorithm, on input public key $\pk$, message vector $\msg$ and
+verification algorithm, on input public key $\pk$, message $\msg$ and
 signature $\signature$, outputs $0$ or $1$.
 
 \end{description}
-
-\rebekah{disclosed subsets: \Cref{chap:agg-creds} writes a disclosed set as an index set $\ISSUERS \subseteq [1,n]$ with values $(\atv{i})_{i \in \ISSUERS}$, but there it is a set of issuers, and $\algo{Disc}$ is also used in \Cref{prot:offline-sci}; wording now matches (set of disclosed indices, disclosed values indexed by it); renaming $\algo{Disc}$ (for example to $\mathcal{D}$, and $[\ell]_0$ to match $[1,n]$) needs the instantiation section changed too; decide}
 
 We write $\rel_{\algo{req}}$ for the relation that $\algoproof_{\algo{req}}$
 proves. Its statement is $\pk$ together with the request without the proof, and
@@ -267,35 +209,38 @@ $\SCIrequest(\pk, \msg, \algo{Disc})$, the following holds:
 %
 \end{equation*}
 
-\paragraph{One-more unforgeability.} One-more unforgeability, defined by
-\Cref{exp:sci-omuf}, requires that an adversary who completes $q$ issuing
-sessions cannot output valid signatures on $q+1$ distinct message vectors.
+\paragraph{Existential unforgeability.} The signer sees only the disclosed
+messages and a commitment to the others, so an experiment cannot tell which
+messages it signed. In \Cref{exp:sci-euf} the adversary opens its accepted
+requests at the end, and wins with a valid signature on a message that none of
+them contains.
 
-\begin{experimentbox}{Signatures on committed inputs: one-more unforgeability}{sci-omuf}
-
-  \rebekah{drafted from Coconut, Section III-B (unforgeability, stated informally), Pointcheval and Sanders, signing committed values (RSA 2016, Section 6.1, and RSA 2018, Remark 13), and the one-more notion for blind signatures of Pointcheval and Stern; none of them gives it as an experiment for committed inputs; check}
+\begin{experimentbox}{Signatures on committed inputs: existential unforgeability}{sci-euf}
 
   \begin{enumerate}
 
     \item The challenger generates $(\sk, \pk) \sample \SCIgen(\secparam, \ell)$
-and sends $\pk$ to $\adv$. It sets $q \leftarrow 0$.
+and sends $\pk$ to $\adv$.
 
     \item The adversary is given oracle access to $\mathcal{O}_{\SCIissue}$,
 which on input a request $\algo{req}$ returns $\algo{resp} \sample
-\SCIissue(\sk, \algo{req})$, and sets $q \leftarrow q + 1$ if $\algo{resp} \neq
-\perp$.
+\SCIissue(\sk, \algo{req})$ and, if $\algo{resp} \neq \perp$, adds $\algo{req}$
+to the set $\mathcal{Q}$, which is initially empty.
 
-    \item The adversary outputs $(\msg^\star_j, \signature^\star_j)_{j \in
-[q+1]}$.
+    \item The adversary outputs $(\msg^\star, \signature^\star)$ and a witness
+$\witness_{\algo{req}}$ for each $\algo{req} \in \mathcal{Q}$.
 
   \end{enumerate}
 
-  $\adv$ wins the experiment if the following hold:
+  For each $\algo{req} \in \mathcal{Q}$, let $\msg_{\algo{req}}$ be the message
+with the disclosed messages of $\algo{req}$ and the hidden messages of
+$\witness_{\algo{req}}$. $\adv$ wins the experiment if the following hold:
   %
   \begin{equation*}
   %
-    \forall j \in [q+1] : \SCIverify(\pk, \msg^\star_j, \signature^\star_j) = 1
-\ \wedge\ \forall j \neq j' : \msg^\star_j \neq \msg^\star_{j'}.
+    \SCIverify(\pk, \msg^\star, \signature^\star) = 1 \ \wedge\ \forall
+\algo{req} \in \mathcal{Q} : \rel_{\algo{req}}((\pk, \algo{req}),
+\witness_{\algo{req}}) = 1 \ \wedge\ \msg^\star \neq \msg_{\algo{req}}.
   %
   \end{equation*}
 
@@ -305,12 +250,12 @@ The advantage of $\adv$ is defined as follows:
 %
 \begin{equation*}
 %
-  \Adv^{\mathsf{omuf}}_{\SCI, \adv}(\secparam) = \Pr[\adv\text{ wins}].
+  \Adv^{\mathsf{euf}}_{\SCI, \adv}(\secparam) = \Pr[\adv\text{ wins}].
 %
 \end{equation*}
 %
-We say the SCI scheme is one-more unforgeable if this advantage is negligible
-for every PPT adversary $\adv$.
+We say the SCI scheme is existentially unforgeable if this advantage is
+negligible for every PPT adversary $\adv$.
 
 \paragraph{Request hiding.} Request hiding, defined by \Cref{exp:sci-hiding},
 requires that a request reveal nothing beyond its disclosed messages, even to
@@ -318,11 +263,11 @@ the signer. It uses a simulator $\SCIsimrequest$ that, on input public
 key $\pk$, disclosed messages $(\msg_i)_{i \in \algo{Disc}}$ and set
 $\algo{Disc}$, outputs a request without access to the other messages. In the
 random oracle model it may program the random oracle, as the proof simulator of
-\Cref{sec:prelims-nizks} does.
+\Cref{sec:prelims-nizks} does. The definition is adapted from the blindness of
+Coconut~\cite{NDSS:SABMD19}. The signer's key is generated honestly, which
+suffices for an honest-but-curious signer.
 
 \begin{experimentbox}{Signatures on committed inputs: request hiding}{sci-hiding}
-
-  \rebekah{drafted from Coconut, Section III-B (blindness, stated informally), written with a simulator because the security proof replaces honest users' requests by simulated ones; the signer's key is generated honestly here, which is enough only for an honest but curious signer; check}
 
   \begin{enumerate}
 
@@ -356,177 +301,57 @@ wins}] - \frac{1}{2} \right|.
 We say the SCI scheme is request hiding if this advantage is negligible for
 every PPT adversary $\adv$.
 
-\paragraph{Online request extractability.} Online request extractability,
-defined by \Cref{exp:sci-ext}, requires an extractor $\SCIextract$ that,
-given a request the signer accepts and the random oracle queries the recipient
-made, outputs a witness for $\rel_{\algo{req}}$ without rewinding the
-recipient.\rebekah{(P6): only if confirmed necessary; the code uses plain Fiat-Shamir, not Fischlin. Online request extractability is probably unused by the construction proof, and may be needed only for the instantiation; kept for now}
-
-\begin{experimentbox}{Signatures on committed inputs: online request extractability}{sci-ext}
-
-  \rebekah{drafted from the online extractability of the Fischlin transform (CRYPTO 2005, Section 2), applied to $\algoproof_{\algo{req}}$; none of the SCI papers above defines it; check}
-
-  \begin{enumerate}
-
-    \item The challenger generates $(\sk, \pk) \sample \SCIgen(\secparam, \ell)$
-and sends $\pk$ to $\adv$.
-
-    \item The adversary is given oracle access to $\mathcal{O}_{\SCIissue}$,
-which on input a request $\algo{req}$ returns $\algo{resp} \sample
-\SCIissue(\sk, \algo{req})$. If $\algo{resp} \neq \perp$, the challenger
-computes $\witness \leftarrow \SCIextract(\pk, \algo{req}, \Query_\hash)$,
-where $\Query_\hash$ is the list of the adversary's random oracle queries so
-far, and stores $(\algo{req}, \witness)$ in the set $\mathcal{E}$.
-
-    \item The adversary halts.
-
-  \end{enumerate}
-
-  $\adv$ wins the experiment if the following holds:
-  %
-  \begin{equation*}
-  %
-    \exists (\algo{req}, \witness) \in \mathcal{E} : \rel_{\algo{req}}((\pk,
-\algo{req}), \witness) \neq 1.
-  %
-  \end{equation*}
-
-\end{experimentbox}
-
-The advantage of $\adv$ is defined as follows:
-%
-\begin{equation*}
-%
-  \Adv^{\mathsf{ext}}_{\SCI, \adv}(\secparam) = \Pr[\adv\text{ wins}].
-%
-\end{equation*}
-%
-We say the SCI scheme is online request extractable if this advantage is
-negligible for every PPT adversary $\adv$.
-
 \subsection{Security goals}
 
-We define security of an offline payment scheme through an ideal functionality
-that represents a trusted third party which executes the operations of the
-payment system on behalf of system participants in a way that perfectly meets
-the system requirements. The properties this functionality captures are stated
+We define security of an offline payment scheme through an ideal
+functionality. The properties it captures are stated
 informally below and formalised in~\Cref{sec:ideal-func}.
 
-An offline payment system must protect against forgery, token theft, and double
-spending, must conserve value, and must preserve the privacy of users against
-the central bank and the intermediaries. More specifically, it must ensure:
+An offline payment system must ensure the following:
 
 \begin{description}
 
-  \item[Unforgeability.] An honest payee should not be tricked, during a
-payment, into accepting a token that was not issued by the central bank.
-Similarly, the honest but curious central bank will not declare a deposit
-successful unless it previously issued the corresponding token.
+  \item[Unforgeability and theft prevention.] An honest payee, and the central
+bank at deposit, accept a token only if the central bank issued it and the party
+spending it owns it.
 
-  \item[Theft prevention.] A malicious payer should not be able to convince an
-honest payee to accept a token the payer does not own. Likewise, a malicious
-user should not be able to successfully deposit a token they do not own.
-
-  \item[Double-spending detection and identification.] An honest user uses a
-token only once, in either a payment or a deposit, after which the token is
-deleted. A malicious user may instead use a token in multiple payments or
-deposits. A secure offline payment system must ensure that such double spending
-is swiftly detected at the time of deposit, and that the malicious user is
-identified by the authorised auditor.
+  \item[Double-spending identification and non-frameability.] An honest user
+uses a token only once, in either a payment or a deposit. A token that is used
+more than once is detected at deposit, and the auditor identifies the user who
+double spent it. An honest user is never identified, even if every other user,
+the intermediaries, and the central bank collude.
 
   \item[Conservation of value.] The total value in the system must not change
 other than through issuance and redemption by the central bank. No sequence of
 payments may create value, and the value credited on deposit must be the value
 that was withdrawn.
 
-  \item[Non-frameability.] An honest user should never be accused of double
-spending by the authorised auditor, even if every other user, the
-intermediaries, and the central bank collude.
+  \item[User anonymity.] A payment reveals nothing about the honest users who
+held the token before, beyond what is unavoidable: that the payee of the last
+payment is the payer of the current one, and a growing list of random values
+fixed throughout the token's lifetime. We assume the payer and the payee know
+each other, and that this knowledge is not derived from the payment transcript.
 
-  \item[User anonymity.] Only the intermediary of an honest user making a
-withdrawal should learn their identity. During a payment, the history of the
-token being transferred leaks no information about the honest users involved in
-previous payments beyond what is unavoidably revealed. What is unavoidably
-revealed is that the payee of the last payment is the payer of the current one,
-together with a growing list of random values fixed throughout the token's
-lifetime. We assume the payer and the payee know each other, and that this
-knowledge is not derived from the payment transcript.
-
-The same holds for deposits and withdrawals. The intermediary of a withdrawing or depositing user
-knows their identity, but the history of a deposited token leaks nothing about
-the honest users involved in payments preceding the deposit, beyond that same
-list of random values and the intermediary that identifies the depositor for
-accounting purposes.
-
-  \item[Token unlinkability.] The intermediaries and the central bank should not
-be able to link the withdrawal of an honest user to a deposit, beyond what is
-revealed by the value of the withdrawal and the deposit, even if the
-intermediaries and the central bank collude with every other user in the system.
+  \item[Token unlinkability.] The intermediary of a user who withdraws or
+deposits knows their identity, but the intermediaries and the central bank
+cannot link a withdrawal of an honest user to a deposit except through the
+value, even if they collude with every other user. A deposited token's history
+reveals no more about earlier honest owners than a payment does.
 
 \end{description}
 
-\begin{outline}
-  \item proposed shorter list, for you to decide (no property dropped):
-  \item unforgeability and theft prevention merge: a payee or the central bank
-    accepts only a token issued by the central bank and owned by the party
-    spending it
-  \item double-spending detection, identification and non-frameability merge:
-    double spending is detected at deposit, and the auditor names the double
-    spender and never an honest user
-  \item conservation of value stays as it is
-  \item user anonymity keeps only the payment part: a payment reveals nothing
-    about earlier honest owners beyond the random values of the token and that
-    the last payee is the current payer
-  \item token unlinkability absorbs the withdrawal and deposit part of user
-    anonymity: the intermediary knows who withdraws and who deposits, and nobody
-    can link the two beyond the value
-\end{outline}
-
 \subsection{The ideal functionality for offline payments}\label{sec:ideal-func}
 
-We define security for the offline payment protocol through an ideal
-functionality $\idfu{\algo{op}}$, which represents an incorruptible trusted
-party that receives the inputs of each protocol task and returns the prescribed
-outputs. We have the outputs of the honest parties and $\adv$ during an
-execution of protocol $\prot$ in the real world captured in
-$\textsc{Exec}_{\prot,\adv}(\secparam)$, and the outputs of the honest
-parties and $\simu$ interacting with $\idfu{\algo{op}}$ in the ideal world
-captured by $\textsc{Exec}_{\idfu{\algo{op}},\simu}(\secparam)$. We then say
-that $\prot$ securely realises $\idfu{\algo{op}}$ if for every PPT
-adversary $\adv$ there exists a PPT simulator $\simu$ such that
-$\textsc{Exec}_{\prot,\adv}(\secparam)$ is computationally
-indistinguishable from $\textsc{Exec}_{\idfu{\algo{op}},\simu}(\secparam)$. This
-is a standalone simulation-based definition rather than a universally composable
-one, and the distinction matters: our simulator extracts from some proofs by
-rewinding the adversary, which a universally composable simulator may not do. We
-return to this point in~\Cref{sec:offline-security}.
+Secure realisation of the ideal functionality $\idfu{\algo{op}}$ by a protocol
+is defined as in \Cref{sec:prelims-security}, in the standalone model.
 
-$\idfu{\algo{op}}$ interacts with $\simu$ and with the participants described at
-the start of this section, under the trust assumptions given there. Each user is
-represented as a pair consisting of a mobile device and a secure element, so
-that an individual holding multiple bank accounts is modelled as multiple such
-users, one per account. $\simu$ learns the inputs and outputs of the honest but
-curious participants by default, and corrupts devices and secure elements only
-before they interact with $\idfu{\algo{op}}$.
-
-The formal description is given in~\Cref{fig:ideal-func}. We summarise each
-interface below.
-
-\begin{outline}
-  \item proposed shortening of this description, for you to decide (every
-    property still met by the figure):
-  \item state the participants and the honest but curious and static corruption
-    assumptions once, in the participants paragraph of the definitions, and
-    only point to them here
-  \item merge the paragraph on sets and maps with the longest common prefix
-    paragraph; the sentence on a corrupt payee accepting an invalid token is
-    also in the payments paragraph, keep one
-  \item per interface, one sentence on what it checks and one on what $\simu$
-    learns
-  \item the last paragraph (each goal to a behaviour of the functionality) and
-    the informal list of goals say the same thing twice; keep the list short and
-    let this paragraph carry the mapping
-\end{outline}
+$\idfu{\algo{op}}$ interacts with $\simu$ and with the participants at the start
+of this section, under the trust assumptions given there. An individual holding
+several bank accounts is modelled as several users, one per account. $\simu$
+learns the inputs and outputs of the honest-but-curious participants, and
+corrupts devices and secure elements only before they interact with
+$\idfu{\algo{op}}$. \Cref{fig:ideal-func} gives the formal description, and we
+summarise each interface below.
 
 $\idfu{\algo{op}}$ works with the set $\algo{usrs}$ of users, the set $\algo{I}$
 of intermediaries, and the sets $\algo{Dev}$ and $\algo{SE}$ of devices and
@@ -540,61 +365,40 @@ A token is a vector $\vec{\algo{id}}$ of random identifiers, one per hop, where
 $\vec{\algo{id}}[0]$ is fixed at withdrawal. The map $\algo{tokens}$ sends a
 token to its owner and value, and the map $\algo{deposited}$ sends
 $\vec{\algo{id}}[0]$ to the vectors deposited for it. All maps start empty, and
-unset entries are $\bot$.
-
-The longest common prefix of two identifier vectors is
-the longest vector that both start with. The two agree up to it, and then either
-differ in the next entry or one of them ends.
+unset entries are $\bot$. The longest common prefix of two identifier vectors
+is the longest vector that both start with.
 
 $\simu$ uses the corruption interface to compromise users' mobile devices or
-secure elements. We assume that corrupting the secure element also corrupts the
-device, since compromising a secure element is significantly harder in practice.
-Intermediaries open accounts through the account creation interface, with an
-initial value, and each user may hold only one account in the system. The
-registration authority then enrols a user who already holds an account, and a
-user can be registered only once.
+secure elements. Corrupting a secure element also corrupts the device, since a
+secure element is much harder to compromise. Intermediaries open accounts with
+an initial value through the account creation interface, one per user. The
+registration authority then registers a user who holds an account, once.
 
-An intermediary calls the withdrawal interface on behalf of one of its users,
-indicating the value to withdraw. If the user's account and the intermediary's
-reserves hold enough value, the user obtains a token identified by a fresh
-random number, ready for use in subsequent offline payments. This identifier is
-kept hidden from the intermediary and the central bank, so that a withdrawal
-cannot later be linked to a deposit. It is chosen by $\simu$ whenever the user's
-secure element is corrupt, since the secure element generates it in the
-protocol.  $\simu$ learns it whenever either the device or the secure
-element is corrupt, since the device sees it too, and otherwise learns only the
-user's identity and the withdrawn value, reflecting that the intermediary and
-the central bank are honest but curious.
+An intermediary calls the withdrawal interface for one of its users and a value.
+If the user's account and the intermediary's reserves hold enough,
+$\idfu{\algo{op}}$ gives the user a token with a fresh random identifier, which
+$\simu$ chooses if the user's secure element is corrupt. $\simu$ learns the
+identifier only if the user's device or secure element is corrupt, and otherwise
+only the user and the value.
 
-Payments go through the execution interface. A registered user calls it to pay
-another registered user, transferring ownership of a token they hold. $\idfu{\algo{op}}$ checks
-that the payee is willing to accept the payment, and that the token
-belongs to the payer and has the claimed value. If so, the payee receives the
-token under a fresh identifier that lets them transfer it onward in turn. A
-corrupt payee may choose to accept an invalid token, but can never pass it on to
-an honest user, since only valid tokens are recorded as owned.
-$\simu$ learns the identities of the payer and payee only when one of their
-devices or secure elements is corrupt, and otherwise learns only the value and
-the token's history.
+A registered user calls the execution interface to pay another registered user.
+If the payee accepts, $\idfu{\algo{op}}$ checks that the token belongs to the
+payer and has the claimed value, and records the payee as its owner under a
+fresh identifier. A corrupt payee may accept an invalid token, but can never pass
+it on to an honest user, since only valid tokens are recorded as owned. $\simu$
+learns the payer and the payee only if one of their devices or secure elements
+is corrupt, and otherwise only the value and the token's identifiers.
 
-Deposits close the lifecycle of a token. An intermediary calls the deposit
-interface to let a registered user redeem a token for bank deposits. $\idfu{\algo{op}}$ checks that the token
-belongs to the depositing user, has the claimed value, and has not
-already been deposited: a second deposit of the same withdrawal signals double
-spending and the call fails. Otherwise, the user's account and the
-intermediary's reserves are credited accordingly, and by exactly the value that
-was withdrawn, which gives conservation of value. $\simu$ learns the
-deposit information by default, since the central bank and the intermediary are
-honest but curious.
+An intermediary calls the deposit interface for a registered user.
+$\idfu{\algo{op}}$ checks that the token belongs to the user, has the claimed
+value, and is the first deposit of its withdrawal, and then credits the user's
+account and the intermediary's reserves with that value. $\simu$ learns the
+deposit, since the central bank and the intermediary are honest but curious.
 
-Finally, the auditor calls the identification interface with the identifier of a withdrawn
-token, to find out whether it has been double spent. If it has,
-$\idfu{\algo{op}}$ identifies each double spender as the owner of the token at a
-point where two deposit chains for it diverge, and returns the resulting set to
-the auditor and the central bank. Settlement of the double-spent value against
-those users is an operation of the central bank rather than of the scheme, so
-$\idfu{\algo{op}}$ reports the responsible parties and does not model the
-accounting that follows.
+The auditor calls the identification interface with the first identifier of a
+token. If the token was deposited more than once, $\idfu{\algo{op}}$ returns to
+the auditor and the central bank the owner recorded at the longest common prefix
+of each two deposited vectors.
 
 Each informal goal above corresponds to
 a specific behaviour of $\idfu{\algo{op}}$. Unforgeability is the check in
@@ -603,7 +407,7 @@ that only tokens recorded at a prior $\OPwithdraw$ can be spent or redeemed.
 Theft prevention is the stronger check that $\algo{tokens}[\vec{\algo{id}}]$ names
 the calling user. Double-spending detection is the test on
 $|\algo{deposited}[\vec{\algo{id}}[0]]|$ in $\OPdeposit$, and identification is
-$\OPidentify$ returning the owner recorded at the divergence prefix. That this
+$\OPidentify$ returning the owner recorded at the longest common prefix. That this
 owner is recorded rather than inferred gives non-frameability, since an
 honest user is only ever written into $\algo{tokens}$ as the owner of a token
 they were actually paid. Conservation of value is the pairing of the debits in

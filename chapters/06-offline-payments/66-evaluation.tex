@@ -6,13 +6,18 @@ within their hardware and storage limitations, and measure every algorithm
 separately in a server-side implementation, for the intermediary, the central
 bank, the registration authority and the auditor. We benchmark two versions of
 the protocol, with and without the verifiable encryption of the payer's
-identifier for the auditor, to show the overhead auditing imposes.
+identifier for the auditor, to show the overhead auditing imposes. The version
+without auditing has no audit ciphertext, so the statement of the joint proof
+has no $\ciph$, the device does not compute $a_1$, $a_2$ and $\pi_\rho$, and
+$\JPOKverify$ does not check the last two equations of
+\Cref{prot:bbs-joint-proof}.
 
 The phone and smart card measurements come from the original implementation of
-the scheme.\rebekah{cite the original implementation; it is not cited anywhere
-yet} It runs the wallet on a Samsung Galaxy A34 with Android 14 and an iPhone 13
-mini with iOS 17.6.1, both with a crypto library built with Go
-1.21.8\rebekah{confirm Go 1.21.8 for the phone library; it's from the old text and the repo has no record of it}.
+the scheme.\rebekah{phone and card data: cite the original implementation,
+confirm Go 1.21.8, and say which of the kept json or dataset files the tables
+use, since they differ by about 2x} It runs the wallet on a Samsung Galaxy A34
+with Android 14 and an iPhone 13 mini with iOS 17.6.1, both with a crypto
+library built with Go 1.21.8.
 The secure element is a Javacard applet on an NXP smart card running JCOP 4.5,
 which the phone reaches over near-field communication (NFC)~\cite{javacard}.
 \Cref{fig:offline-withdraw-seq,fig:offline-pay-seq} give the message sequences
@@ -80,9 +85,7 @@ Withdrawal and the payer side of a payment both complete in under half a second,
 and the smart card authorises a payment in under $400\,\mathrm{ms}$.
 
 \Cref{tab:offline-timings} gives the time of each wallet
-step on the phones and the card.\rebekah{the text does not say where the phone and card measurements come from (when, which code version, which of the kept json or dataset files); the json files differ from the dataset files the tables use} The card takes most of the time,
-about $230\,\mathrm{ms}$ to generate a pseudonym and $370\,\mathrm{ms}$ for its
-share of the transfer signature, NFC included. Auditing adds $9\,\mathrm{ms}$ on
+step on the phones and the card. The card takes most of the time. Auditing adds $9\,\mathrm{ms}$ on
 Android and $2\,\mathrm{ms}$ on iOS to the payer's phone, which is under $3\%$
 of the payer's total.
 
@@ -106,9 +109,7 @@ We count hops as the signatures of knowledge a verifier checks, so one hop is
 the first payment $p_0$ after withdrawal, or a deposit made straight after
 withdrawal. Payee verification grows linearly with the number of hops, since
 each hop contributes one joint proof to check, which includes the audit
-equations when auditing. Even a chain of 32 hops verifies in under a second.
-Auditing adds an overhead for the payee, who checks the two audit equations in
-every hop's joint proof.
+equations when auditing.
 
 \Cref{fig:offline-hops-times,fig:offline-hops-sizes} show how time and size
 grow with the length of the chain. With auditing, the payee verifies $32$ hops in
@@ -135,7 +136,9 @@ hop and the size of the key, message or proof it produces, and
 \Cref{tab:offline-comms} the bytes each party sends in each protocol. Every server-side
 operation takes under $5\,\mathrm{ms}$, and identification under
 $0.1\,\mathrm{ms}$. The card channel never carries more than $192$ bytes in one
-direction.
+direction.\rebekah{rerun the server benchmarks (commit e5c6daf): the proof of withdrawal
+now has one more field element, so its size and times, and the token and payment
+sizes, are from before the fix}
 
 
 \begin{table}[htbp] \centering \small
@@ -144,7 +147,7 @@ of each algorithm at one hop, in milliseconds, and size of the key, message or
 proof it produces, in bytes, with group elements compressed ($48$ bytes in
 $\group{1}$, $96$ bytes in $\group{2}$). We measure rows that do not depend on auditing
 once and repeat them in both columns. The times do not include the secure
-element's part. The last rows give the sizes of objects no single algorithm sends.\rebekah{the scheme has no $\crs$; the public parameters row counts the hashed generators and keys the implementation bundles as its public parameters, so rename it or drop it}}
+element's part. The last rows give the sizes of objects no single algorithm sends.}
 \label{tab:offline-server} \label{tab:offline-sizes}
   %
   \begin{tabular}{l l r r r r} \toprule
@@ -160,7 +163,7 @@ element's part. The last rows give the sizes of objects no single algorithm send
     & registration authority, $\rapk$ & 0.175 & 96 & 0.175 & 96 \\
     & auditor, $\pk_\auditor$ & 0.0740 & 48 & 0.0740 & 48 \\
     & commitment key & 0.626 & -- & 0.626 & -- \\
-    & public parameters & -- & 1008 & -- & 1056 \\
+    & all public keys and generators & -- & 1008 & -- & 1056 \\
     $\OPregister$ & secure element, request & -- & 192 & -- & 192 \\
     & registration authority, response & 0.526 & 112 & 0.526 & 112 \\
     $\OPwithdraw$ & device, request $\algo{req}$ & 1.53 & 664 & 1.53 & 664 \\

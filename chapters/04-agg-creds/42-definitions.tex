@@ -15,8 +15,9 @@ attribute held by a user. Issuer $i$ has key pair $(\isk{i}, \ipk{i})$, and the
 registration authority $(\rask, \rapk)$.
 
 We assume the registration authority is honest but curious. It follows the
-protocol, but may collude with other participants to try to identify users or
-correlate credential presentations. Issuers, users, and verifiers may be
+protocol and keeps its signing key secret, but may share the rest of its view
+with other participants to try to identify users or correlate credential
+presentations. Issuers, users, and verifiers may be
 arbitrarily malicious, and may collude to try to undermine the privacy of honest
 users, to cause honest verifiers to accept invalid presentations, or to forge
 credentials.  We consider static corruption throughout: the adversary fixes the
@@ -59,16 +60,6 @@ presentation proof $\algoproof$, returns 0 or 1.
 
 \end{description}
 
-We define security of aggregate anonymous credentials through an ideal
-functionality. It represents a
-trusted third party which executes the operations of the credential system on
-behalf of system participants in a way that perfectly meets the system
-requirements.
-
-The ideal functionality captures the properties of aggregate anonymous
-credentials: unforgeability, unlinkability, and aggregatability, meaning that
-credentials from different issuers can be combined into one.
-
 \subsection{Aggregate tag-based signature schemes}
 
 We define an aggregate tag-based signature (ATS) scheme as one that allows
@@ -107,9 +98,6 @@ for set $\ISSUERS \subseteq [1, n]$, on input public keys $(\pk_i)_{i\in
 signature $\signature$, returns 0 or 1.
 
 \end{description}
-
-An aggregate tag-based signature scheme should satisfy correctness and
-existential unforgeability, as defined below.
 
 \paragraph{Correctness.} An $\ATS$ scheme satisfies correctness if the
 following holds for all security parameters $\secparam$, all $n \geq 1$, all
@@ -213,23 +201,13 @@ $\ATSgen$.
 \end{experimentbox}
 
 Corrupted keys are certified, so the adversary outputs the secret key of every
-corrupted key it uses. Without this, it could choose a corrupted key as the
-inverse of an honest one, and the two contributions of a message signed under
-both would cancel, so that the trivial signature verifies. There are two
-standard fixes. One is certified keys, as here, which in the credential scheme
-means that issuers prove knowledge of their secret keys when they publish their
-public keys. The other is to hash the index of the signer together with each
-message, as in unrestricted aggregate signatures~\cite{ICALP:BelNamNev07}. We use
-certified keys, which change neither the scheme nor its costs.
+corrupted key it uses.
 
 \subsection{The ideal functionality for aggregate anonymous credentials}
 
 We define security for the aggregate anonymous credentials protocol through the
 ideal functionality $\idfu{\AAC}$, in the sense of \Cref{sec:prelims-security}.
-$\idfu{\AAC}$ receives inputs from system participants and $\simu$, computes the
-corresponding outputs, and delivers them to the authorised parties. It exposes
-interfaces through which $\simu$ and honest participants submit inputs.  The
-formal description is given in~\Cref{fig:agg-creds-faac}. We summarise each
+The formal description is given in~\Cref{fig:agg-creds-faac}. We summarise each
 interface below.
 
 The functionality keeps three tables. The first, $\creds[\user]$, lists for
@@ -246,17 +224,15 @@ is $\algo{V}$.
 
 \paragraph{Register.} A user calls this to join the system. If the registration
 authority accepts and the user was never registered before, registration
-succeeds. Users are registered only once.
+succeeds.
 
 \paragraph{Issue.} A user calls this to obtain a credential certifying value
 $\atv{}$ of attribute $\att{}$. If the authorised issuer accepts, the user
 receives a credential usable in later presentations. Honest issuers only
 issue to registered users. An issuer may certify several values of its attribute
 for the same user, and a presentation discloses at most one of them. The
-functionality records every value issued, but honest issuers in the protocol
-keep no such record, and security does not depend on how many credentials a user
-holds. Without loss
-of generality, issuer $\issuer{i}$ certifies attribute $\att{i}$ only. $\simu$ learns the user's identity on
+functionality records every value issued, and security does not depend on how
+many credentials a user holds. $\simu$ learns the user's identity on
 every call, and also the attribute value on issue calls.
 
 \paragraph{Aggregate.} A user calls this to combine their credentials for
@@ -273,9 +249,8 @@ $\idfu{\AAC}$ accepts if the user previously called aggregate on $\vec{\atv{}}$,
 or otherwise if the user actually holds $\vec{\atv{}}$. This means a corrupt
 user who skips aggregate can still succeed if they hold the credentials.
 Unregistered users cannot present. On
-acceptance, $\idfu{\AAC}$ generates a random string $\algoproof$, whose
-randomness ensures $(\vec{\atv{}}, \msg, \algoproof)$ reveals nothing about the
-user beyond $\vec{\atv{}}$.
+acceptance, $\idfu{\AAC}$ generates a random string $\algoproof$, so the
+presentation reveals nothing about the user beyond the disclosed values.
 
 \paragraph{Verify.} A verifier calls this to check a presentation
 $(\vec{\atv{}}, \msg, \algoproof)$. If it was already produced by a valid
@@ -285,11 +260,9 @@ forged by corrupt parties: whether corrupt users hold all disclosed values, or
 failing that, whether corrupt issuers could produce valid credentials for the
 remaining values. If either check succeeds, $\idfu{\AAC}$ defers to $\simu$ and
 returns its answer. Otherwise, it records the presentation as invalid and
-returns false.
-
-\begin{outline}
-  \item verify: the first case (produced by a valid present call) gives completeness, the last case (recorded invalid) gives unforgeability
-\end{outline}
+returns false. The first case gives completeness, since every honest
+presentation verifies. The last gives unforgeability, since a presentation that
+corrupt parties could not have produced is rejected.
 
     \begin{framed}
 

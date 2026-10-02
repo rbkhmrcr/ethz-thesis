@@ -10,16 +10,20 @@ and \Cref{sec:txid-evaluation} compares the two.
 \subsection{Instantiating $\ID$ with algebraic PRFs}\label{sec:txid-alg-instantiation}
 
 Three of the four relations of the construction involve pairing equations,
-and proving statements about pairings is expensive.
-
-\begin{outline}
-  \item why this instantiation is more complex than the construction: the derivations of \Cref{sec:txid-construction}, tracing key to epoch keys to tags, need every step to be one way, hard to invert from the epoch key back to the tracing key, and from a tag back to the epoch key
-  \item every step must also be provable with a Sigma protocol, so its inputs and outputs must be group or field elements related by equations of discrete logarithms; a hash function is one way but has no such structure
-  \item one-way functions alone are not enough, since tags and epoch keys must also look random; so both steps are algebraic PRFs
-  \item algebraic PRFs with this shape, like Dodis-Yampolskiy for the tag step, rest on $q$-type assumptions, and pairing-based constructions of this type are known not to admit both short proofs and a reduction to a simple assumption (EC:TCRSTW22, TCC:BHKU22, already cited after \Cref{asm:qmdbdhi-txid})
-  \item the rewritten relations and blinding below come from the same tension: pairing equations are not equations of discrete logarithms, so the prover proves the latter and the verifier checks the pairings
-  \item the hash-based instantiation drops the algebraic structure and pays with a general-purpose proof system
-\end{outline}
+and proving statements about pairings is expensive. So this instantiation is
+more involved than the construction. The derivations of
+\Cref{sec:txid-construction}, from the tracing key to epoch keys and from epoch
+keys to tags, need every step to be one way. It must be hard to go back from an
+epoch key to the tracing key, and from a tag to the epoch key. Every step must
+also be provable with a Sigma protocol, so its inputs and outputs must be group
+or field elements related by equations of discrete logarithms. A hash function
+is one way, but has no such structure. One-way functions alone are not enough
+either, since tags and epoch keys must also look random, so both steps are
+algebraic pseudorandom functions. Pairing equations are not equations of
+discrete logarithms, so we rewrite the relations and blind their values, and the
+prover proves equations of discrete logarithms while the verifier checks the
+pairings. The hash-based instantiation drops the algebraic structure and pays
+with a general-purpose proof system.
 
 The setup is transparent. We derive all group generators by hashing to the
 group from a public seed, so no party, including the registration authority,
@@ -32,20 +36,20 @@ first component keys the epoch PRF, and the second keys the tag PRF below, which
 inverts against a scalar. The user draws both once at registration, and the
 registration authority certifies them together in the same credential.
 
-\begin{outline}
-  \item why this epoch PRF: the epoch key must be in $\group{1}$ (the tag PRF pairs it against $\group{2}$) and its derivation must be provable with a Sigma protocol
-  \item a per-epoch hash raised to a secret exponent is the simplest PRF with both properties
-\end{outline}
-
-The epoch PRF raises a per-epoch hash to the first component of the tracing
-key, so the epoch tracing key is a single element of $\group{1}$:
+The epoch key must be an element of $\group{1}$, since the tag PRF pairs it with
+an element of $\group{2}$, and its derivation must be provable with a Sigma
+protocol. A hash of the epoch raised to a secret exponent is the simplest
+pseudorandom function with both properties. For a hash function $\HE$ into
+$\group{1}$, the epoch PRF raises the hash of the epoch to the first component
+of the tracing key:
 %
 \begin{equation*}
   \FE(\utk, \epoch) = \HE(\epoch)^{\utk'}.
 \end{equation*}
 %
 The public tracing key $\PTK$ contains a Pedersen commitment $T$ to the pair,
-and the vector of group elements that tag evaluation needs:
+and the vector of group elements that tag evaluation needs, for generators
+$\gen_2, \gen_3$ of $\group{1}$ and $\ggen_D$ of $\group{2}$:
 %
 \begin{equation*}
   T = \gen_2^{\utk'}\cdot\gen_3^{\utk''}, \qquad W_\gamma =
@@ -55,9 +59,10 @@ and the vector of group elements that tag evaluation needs:
 These elements do not change with the epoch. If the epoch PRF output them, they
 would repeat in every epoch and its output could not be pseudorandom, so they
 are part of the public tracing key instead, which is already sent in the grant
-message. The registration authority signs only $(S,T)$, so the elements
-$\{W_\gamma\}$ are not certified. The user proves them well formed against the
-certified $T$ at the first grant to each auditor, in the epoch key proof.
+message. The registration authority signs only $T$ and the public signing key,
+so the elements $\{W_\gamma\}$ are not certified. The user proves them well
+formed against the certified $T$ at the first grant to each auditor, in the
+epoch key proof.
 
 \begin{lemma}\label{lem:txid-fe-prf}
   %
@@ -69,14 +74,12 @@ so against a distinguisher given the whole of $\PTK$.
 
 \subsubsection{The tag PRF}\label{sec:txid-ft}
 
-\begin{outline}
-  \item requirements on the tag PRF: takes the epoch key as input; correct evaluation provable by equalities of discrete logarithms
-  \item Dodis-Yampolskiy has this shape: output raised to (key + input) gives back a fixed value, one equation for a Sigma protocol
-\end{outline}
-
-The Dodis-Yampolskiy PRF is pseudorandom under the $q$-decisional bilinear
-Diffie-Hellman inversion assumption, $q$-DBDHI~\cite{PKC:DodYam05}.
-\Cref{prim:dy-prf} recalls it.
+The tag PRF takes the epoch key as input, and its correct evaluation must be
+provable with equations of discrete logarithms. The Dodis-Yampolskiy PRF has
+this shape. Its output raised to the key plus the input gives back a fixed
+value, which is one equation for a Sigma protocol. It is pseudorandom under the
+$q$-decisional bilinear Diffie-Hellman inversion assumption,
+$q$-DBDHI, and is given in \Cref{prim:dy-prf}~\cite{PKC:DodYam05}.
 
 \begin{primitivebox}{The Dodis-Yampolskiy PRF~\cite{PKC:DodYam05}.}{dy-prf}
 
@@ -132,18 +135,25 @@ pairing-based constructions of this type are known not to admit both short
 proofs and a reduction to a simple assumption~\cite{EC:TCRSTW22,TCC:BHKU22}.
 
 The auditor gets the outputs $\{W_\gamma\}$ and not the key $\utk''$.
-Every tag of an epoch is $Y^{1/(\utk''+\gamma)}$ for the
-same $Y = \pairing(\ek,\ggen_D)$. An auditor holding $\utk''$ could recover $Y$
+Every tag of an epoch has the following form, for the same $Y$:
+%
+\begin{equation*}
+  \Tag_\gamma = Y^{1/(\utk''+\gamma)}, \qquad Y = \pairing(\ek,\ggen_D).
+\end{equation*}
+%
+An auditor holding $\utk''$ could recover $Y$
 from any single tag on the ledger and compute every other tag of that user in
 that epoch without the epoch key. Since $\utk''$ never changes, one grant would
 then let the auditor trace the user in every later epoch. With the elements
 $\{W_\gamma\}$ instead, the auditor still computes every tag of a granted epoch
-from $\ek$, and the epoch key keeps the other epochs out of reach.
+from $\ek$, and the epoch key keeps the other epochs out of reach. The
+elements $\{W_\gamma\}$ do not reveal $\utk''$, since recovering $\utk''$
+from them would break the $q$-SDH assumption, which the BBS+ signature scheme
+already requires.
 
 The elements $\{W_\gamma\}$ are public parameters, not secrets held in trust.
 The user hands them to every auditor they authorise. Two colluding auditors who
-compare their copies learn only that the same user granted them both, which they already knew. They cannot use them
-to read a tag from an epoch for which neither holds the epoch key.
+compare their copies learn only that the same user granted them both, which they already knew.
 
 \begin{lemma}\label{lem:txid-ft-prf} Let $\ek$ be uniform in $\group{1}$ and
 unknown to the adversary, and let the public parameters
@@ -158,16 +168,19 @@ Credentials use the group-element variant of the BBS+ signature scheme of
 randomness generator $\gen_4$. During registration, the user sends only the group elements $S
 = \G(\sk)$ and $T$, together with a proof of knowledge of the underlying
 secrets, rather than the secrets themselves. Commitments use the Pedersen
-commitment scheme, recalled in \Cref{prim:pedersen}, in its form for vectors of
+commitment scheme, given in \Cref{prim:pedersen}, in its form for vectors of
 two field elements, so that one commitment holds both components of $\utk$. Its
 generators are shared with the BBS+ signature scheme. Range proofs use Bulletproofs~\cite{SP:BBBPWM18}.
 
-\begin{outline}
-  \item BBS+: signs several committed values at once, can sign values the signer never sees, has a Sigma protocol for knowledge of a signature
-  \item this form is only unforgeable if every signed element comes with a proof of knowledge of its representation, so the registration proof is a precondition, not optional hardening (cite SCN:AuSusMu06, EC:TesZhu23b)
-  \item Pedersen: group elements, so openings provable in a Sigma protocol; shared generators so the same committed key appears in both
-  \item Bulletproofs: no trusted setup, logarithmic in the range, keeps the setup transparent
-\end{outline}
+BBS+ signs several values at once, can sign values the signer never sees, and
+has a Sigma protocol for proving knowledge of a signature. The variant that signs
+group elements is unforgeable only if every signed element comes with a proof of
+knowledge of its representation, so the registration proof is required and not
+optional~\cite{SCN:AuSusMu06,EC:TesZhu23b}. Pedersen commitments are group
+elements, so their openings can be proved in a Sigma protocol, and sharing the
+generators with BBS+ lets the same committed key appear in both. Bulletproofs
+need no trusted setup and their proofs grow logarithmically with the bit length
+of the range, so the setup stays transparent.
 
 \Cref{prot:txid} gives the protocol. Each of its algorithms is the algorithm of
 the same name in \Cref{prot:txid-generic}, with the following proofs. The proof
@@ -268,8 +281,8 @@ input from the user, do:
 	\item Parse $\regcred = (S,T,\signature)$ and compute $\ek \leftarrow
 \HE(\epoch)^{\utk'}$.
 
-	\item Take a fresh, unused index $\gamma \in [0,\Max)$ from the user's
-local pool for this epoch, and compute $\Tag_\gamma \leftarrow
+	\item Take an index $\gamma \in [0,\Max)$ that the user has not used in
+this epoch, and compute $\Tag_\gamma \leftarrow
 \pairing(\ek,W_\gamma)$.
 
 	\item Sample $\openinfo, r_\gamma \sample \Zp$ and compute the following:
@@ -327,9 +340,7 @@ the set of retrieved payloads.
 
 Because the elements $\{W_\gamma\}$ do not
 depend on the epoch, each auditor receives them once, at its first grant from a
-user, and every later grant is constant size. That first grant also proves them
-well formed against the same commitment $T$ that the credential certifies, so
-the auditor can rely on them when it evaluates tags. In the instantiation,
+user, and every later grant is constant size. In the instantiation,
 $\rel_5$ has the following instance and witness:
 %
 \begin{equation*}
@@ -449,14 +460,17 @@ follows:
 %
 Every equation is now one of discrete logarithms, and the only pairing is
 computed by the verifier on public data. The rewriting loses nothing, provided
-the verifier rejects $U = 1_{\group{1}}$ and $\Pi = 1_{\group{T}}$.
+the verifier rejects $U = 1_{\group{1}}$ and $\Pi = 1_{\group{T}}$. Otherwise a
+prover could blind with zero, or pick a key and index that cancel, and any tag
+would pass.
 
 \begin{lemma}\label{lem:txid-rel7} Every witness for $\rel_7$ gives a witness
 for $\rel_7'$, and every witness for $\rel_7'$ with $U \neq 1_{\group{1}}$ and
 $\Pi \neq 1_{\group{T}}$ gives a witness for $\rel_7$ with the same index. The
 tag proof of \Cref{prot:txid-tag-proof}, together with a range proof on
 $\com_\gamma$, satisfies completeness, special soundness and honest-verifier
-zero knowledge for $\rel_7$, the last under the DDH assumption in $\group{1}$.
+zero knowledge for $\rel_7$, the last with a simulator that is also given the
+index $\gamma$ and under the DDH assumption in $\group{1}$.
 \end{lemma}
 
 \begin{protocolbox}{The tag proof}{txid-tag-proof}
@@ -471,13 +485,13 @@ do:
 
 	\item Parse $\inst_7 = (\HE, \ggen_D, \gen_2, \gen_3, \gen_4, \com,
 \epoch, \Max, \Tag_\gamma)$ and $\witness_7 = (\utk', \utk'', \openinfo,
-\gamma)$.
+\ek, \gamma)$.
 
 	\item Sample $s \sample \Zp$ and compute the following:
 	  %
 	  \begin{equation*}
 	    U \leftarrow \HE(\epoch)^s, \quad \Pi \leftarrow
-\pairing\big(\HE(\epoch)^{s\cdot\utk'},\, \ggen_D\big), \quad X \leftarrow
+\pairing\big(\ek^{\,s},\, \ggen_D\big), \quad X \leftarrow
 \Tag_\gamma^{\,s}, \quad \com_\gamma \leftarrow
 \gen_3^{\gamma}\cdot\gen_4^{r_\gamma}.
 	  \end{equation*}
@@ -524,10 +538,6 @@ X^{\theta_2 + \theta_\gamma} = F \cdot \Pi^c, \quad
   \end{description}
 
 \end{protocolbox}
-
-\begin{outline}
-  \item a point from the security proof that shapes the protocol: the non-degeneracy checks $U \neq 1$, $\Pi \neq 1$ are needed, otherwise blind with zero, or key and index that cancel, and any tag passes (\Cref{sec:rel7-equiv})
-\end{outline}
 
 Each transaction comes with a
 proof that it originated from a registered user, following relation $\rel_6$.
@@ -660,11 +670,10 @@ under the DL assumption the commitments are binding and the range proofs sound.
 
 \subsection{Instantiating $\ID$ with hash-based PRFs}\label{sec:txid-hash-instantiation}
 
-We designed the protocol above with the computational efficiency of its proofs
-in mind. We now give a more straightforward instantiation, in which both
-pseudorandom functions are hash functions and the proofs about them use a
-general-purpose proof system. Its prover does more work, and
-\Cref{sec:txid-evaluation} compares the two. We use independent hash functions
+The protocol above keeps its proofs algebraic so that they are cheap to compute.
+We now give a more straightforward instantiation, in which both pseudorandom
+functions are hash functions and the proofs about them use a general-purpose
+proof system. We use independent hash functions
 $\hashfs$ for Fiat-Shamir challenges, $\HE$ for epoch keys and $\HT$ for tags,
 and instantiate the components of \Cref{prot:txid-generic} as follows:
 %
@@ -690,29 +699,43 @@ $\ck = (\gen_2, \gen_3)$. Here $\gen_3$ is also the randomness generator of
 the BBS+ signature scheme, as $\gen_4$ is in the algebraic instantiation, and we
 derive all generators by hashing to the group.
 
-  \item The proofs for $\rel_5$ and $\rel_7$ use a zk-SNARK. Its proofs
-are a constant number of group elements and its statements are arithmetic
-circuits over $\Zp$. Each proof also comes with a commitment to the
-tracing key in the witness, and the linking proof of \Cref{prot:txid-link}.
+  \item The proofs for $\rel_5$ and $\rel_7$ use the zk-SNARK of Groth,
+extended with a commitment to part of the
+witness~\cite{EC:Groth16,CCS:BelSolBeg23}. Its proofs are a constant number of
+group elements and its statements are arithmetic circuits over $\Zp$. Its
+structured reference string is generated for each circuit from secret values,
+so this instantiation needs a trusted setup. Each proof comes with a commitment
+to the tracing key in the witness, and the linking proof of
+\Cref{prot:txid-link}.
 
   \item The proofs for $\rel_4$ and $\rel_6$ are Sigma protocols compiled with
 the Fiat-Shamir transform under $\hashfs$, as in the algebraic instantiation.
 
 \end{enumerate}
 
-\begin{outline}
-  \item MiMC assumption: not every hash function is a PRF; collision and preimage resistance say nothing about outputs looking random
-  \item random oracle heuristic does not help, since we prove statements about the concrete function inside a circuit
-  \item so state it as an assumption: MiMC hash of (domain separation tag, secret key, input) is a PRF of the input
-  \item MiMC was designed as a block cipher, so its cryptanalysis is of the keyed permutation (cite AC:AGRRT16); here the key enters as a message block, not the cipher key, so the assumption is heuristic and has no security reduction
-  \item open question (p.91): why does the key enter as a message block and not as the cipher key? what is the cipher key then? because tracing would then be decryption?
-\end{outline}
+The hash-based pseudorandom functions have no Sigma protocol, so their relations
+need a general-purpose proof system. A zk-SNARK has small proofs and cheap
+verification, which the validators pay for on every transaction. The linking
+proof adds only what ties the hidden key of the circuit to the group elements
+used elsewhere.
 
-\begin{outline}
-  \item why a linking proof: circuits cannot take $\PTK$ or $\com$ as input; zk-SNARK statements are over $\Zp$, the group elements have coordinates in a different field
-  \item checking them in-circuit costs hundreds of thousands of constraints; listing them as public inputs binds nothing
-\end{outline}
+Not every hash function is a pseudorandom function. Collision and preimage
+resistance say nothing about outputs looking random, and the random oracle
+heuristic does not help, since we prove statements about the concrete function
+inside a circuit. So we assume that the MiMC hash of a domain separation tag, a
+secret key and an input is a pseudorandom function of the input, also against a
+distinguisher holding $\PTK = \gen_2^{\utk}$. MiMC was designed as a block
+cipher, and its cryptanalysis is of the keyed permutation~\cite{AC:AGRRT16}.
+Here the key enters the hash as a message block and not as the key of the
+cipher, so the assumption is heuristic and has no security
+reduction.\rebekah{the key enters as a message block because the
+implementation uses gnark's MiMC hash unchanged; add the reason if there is a
+better one}
 
+Circuits cannot take $\PTK$ or $\com$ as input. Statements of the zk-SNARK are
+over $\Zp$, and the coordinates of these group elements lie in a different
+field. Checking them in the circuit costs hundreds of thousands of constraints,
+and listing them as public inputs binds nothing.
 So each zk-SNARK proof comes with a commitment and a linking proof, in the
 commit-and-prove style of LegoSNARK~\cite{CCS:CamFioQue19}. The circuit commits
 to the tracing key. A small Sigma protocol then shows that this commitment
@@ -769,11 +792,8 @@ following hold:
 \begin{theorem}\label{thm:hash-inst} The hash-based instantiation securely
 realises $\idfu{\algo{trace}}$ in the standalone model, in the random oracle
 model for $\hashfs$, under the $q$-SDH assumption and the DL assumption in
-$\group{1}$, if the zk-SNARK with commitments is zero knowledge and simulation
-extractable, and the MiMC hash function, keyed by a secret input block, is a
-pseudorandom function.  \end{theorem}
-
-\begin{outline}
-  \item why a zk-SNARK: the hash-based PRFs have no Sigma protocol, so need a general-purpose proof system; a zk-SNARK has small proofs and cheap verification, which validators pay for
-  \item the linking proof adds only what ties the circuit's hidden key to the group elements used elsewhere
-\end{outline}
+$\group{1}$, if the zk-SNARK of Groth with commitments is zero knowledge and
+simulation extractable, and the MiMC hash function, keyed by a secret input
+block, is a pseudorandom function against a distinguisher holding
+$\gen_2^{\utk}$.\rebekah{check: added ``against a distinguisher holding
+$\gen_2^{\utk}$'' to the MiMC assumption}  \end{theorem}

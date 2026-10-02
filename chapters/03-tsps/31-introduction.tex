@@ -43,8 +43,7 @@ identities to their public keys. Transparency logs move trust from the applicati
 serving a key onto the log providers, and a threshold signature scheme narrows
 what any one of them can do. Signatures from a threshold SPS scheme, given to the
 owners of keys, would also let them prove, in zero knowledge, that their keys are
-recorded in the log without revealing which keys they are. Since the key is signed
-directly, without hashing it first, that proof is efficient.
+recorded in the log without revealing which keys they are.
 
 \paragraph{Contributions.} We give two threshold SPS schemes, building on two
 existing SPS schemes together with secure multiparty computation (MPC)
@@ -56,9 +55,6 @@ Threshold $\AGHO$ outputs ordinary $\AGHO$ signatures of three group elements,
 which meets the lower bound for SPS in type III groups, so it has the smallest
 possible signatures of any threshold SPS for general messages, but is secure only
 in the GGM~\cite{C:AGHO11}.
-Existing threshold SPS schemes either need seven group elements, or have smaller
-signatures but only sign messages given in both source groups with the same
-discrete logarithm, where the bound does not apply~\cite{PKC:MMSST24,AC:CKPSS23}.
 
 Our construction applies to any SPS scheme with decomposable signing, a
 property of the signing algorithm that we define, and that $\AGHO$ and $\KPW$
@@ -89,12 +85,6 @@ many parties in MP-SPDZ on a curve without a pairing~\cite{ESORICS:DOKSS20}. We
 add sharings of pairing-group elements and this operation to MP-SPDZ, for any
 number of parties~\cite{CCS:Keller20}. To our knowledge, this is the first multiparty
 implementation of computation on shared elements of pairing groups.
-
-We benchmark both schemes using two MPC frameworks: ATLAS, which assumes an
-honest majority of participants, and MASCOT, which assumes a dishonest
-majority~\cite{C:GLOPS21,CCS:KelOrsSch16}. We also
-implement previously suggested threshold SPS schemes, so as to compare concrete
-efficiency~\cite{AC:CKPSS23,PKC:MMSST24}.
 
 This chapter is about unforgeability and does not treat privacy directly. In
 the applications above, privacy comes from composition. The signers sign
@@ -130,10 +120,6 @@ threshold $\AGHO$. We benchmark against it in \Cref{sec:tsps-evaluation}. Buildi
 scheme with silent setup lets signers generate their keys independently, with no
 interactive key generation, at the cost of larger signatures, a trusted
 setup and security in the GGM~\cite{EPRINT:GGPR25}.
-
-\Cref{tab:tsps-comp} in \Cref{sec:tsps-evaluation} compares our schemes with the
-two prior threshold SPS schemes in terms of assumptions, key and signature size,
-and verification cost~\cite{AC:CKPSS23,PKC:MMSST24}.
 
 \paragraph{Computing on shared group elements.} Smart and Talibi Alaoui give
 maliciously secure computation over an elliptic curve group, by mapping

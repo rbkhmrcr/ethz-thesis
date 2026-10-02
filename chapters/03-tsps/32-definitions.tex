@@ -170,10 +170,7 @@ is no leader, as $\adv$ calls the honest signers directly, and no random oracle.
 An honest signer uses each session for one message only, since reusing a state
 reuses the signing randomness.
 
-The experiment is parameterised by the message length $\ell$. The adversary
-has offline and online oracles. It wins if it outputs a valid
-signature on a message for which fewer than $t + 1 - |\Cor|$ honest signers
-issued shares. The experiment idealises key generation, with the challenger
+The experiment idealises key generation, with the challenger
 running $\TSPSgen$, as in the existing definitions~\cite{C:BCKMTZ22,C:CriKomMal23}.
 
 The advantage of a PPT adversary $\adv$ is defined as follows:
@@ -262,7 +259,7 @@ themselves elements of $\group{}$, and reconstruction combines them with the
 group operation, as a product of shares raised to fixed coefficients, so that
 the linear operations below remain local.
 
-Any $t$ shares are independent of $\alpha$. The authentication information means that a
+The authentication information means that a
 modified share is detected at opening. In protocol
 boxes, $\shr{\alpha}$ also stands for the signer's own share.
 

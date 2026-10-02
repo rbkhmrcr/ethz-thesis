@@ -65,9 +65,6 @@ between the two.
 \paragraph{Security of primitives.} We refer to building blocks such as
 commitments and signature schemes as
 primitives, and to the schemes constructed in each chapter as protocols.
-We handle the security of primitives by defining experiments, a
-limited number of oracles which an adversary has access to, and then showing
-that every PPT adversary has negligible advantage in winning.
 
 An experiment is a game between a challenger,
 which runs the honest algorithms, and the adversary $\adv$. The adversary may be
@@ -85,10 +82,6 @@ an incorruptible trusted party that receives the inputs of each protocol task
 and returns the prescribed outputs. The view of a party consists of its inputs,
 its randomness and the messages it receives. In the ideal execution, honest
 parties communicate only with $\idfu{}$, and $\simu$ takes the place of $\adv$.
-We construct a simulator to show that
-the view of an adversary in the real world, interacting with our protocol, is
-indistinguishable from the view when interacting with the ideal functionality
-itself.
 
 We capture the outputs of the honest parties and~$\adv$ during an execution of a
 protocol~$\Pi$ in the real world in

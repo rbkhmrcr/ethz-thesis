@@ -2,7 +2,7 @@
 
 We implement both instantiations in Go over the BLS12-381 curve. They use
 gnark-crypto v0.21.0 for the groups and the pairing, and gnark v0.16.3 for the
-Groth16 circuits~\cite{gnark-crypto}. We take all measurements on a MacBook
+zk-SNARK circuits~\cite{gnark-crypto}. We take all measurements on a MacBook
 Air with an Apple M2 and 16\,GB of RAM. Each measurement is 10 warm-up calls
 followed by 100 timed repetitions, and we report the median. The interquartile
 range is typically within 2\% of the median and at most 8\%, except for
@@ -10,12 +10,11 @@ hash-based tracing at small $\ell$, which takes well under a millisecond and
 varies by up to 20\%.
 
 We implement the algebraic instantiation as \Cref{prot:txid}. The
-hash-based instantiation uses MiMC over the scalar field of BLS12-381 and
-Groth16 as the zk-SNARK~\cite{EC:Groth16}. It uses gnark's extension of
-Groth16 by a commitment to part of the witness~\cite{CCS:BelSolBeg23}. A Groth16 proof is
-three group elements.
+hash-based instantiation uses MiMC over the scalar field of BLS12-381, and
+gnark's implementation of the zk-SNARK of Groth with its commitment
+extension.
 
-We report results at $\ell = 8$, so that each user can submit up to $\Max = 256$
+We report results at $\ell = 8$, just before algebraic proving steps up, so that each user can submit up to $\Max = 256$
 transactions per epoch. \Cref{tab:txid-protocol} gives the time of every
 algorithm and the size of the message it sends, and \Cref{tab:txid-relations}
 the time of every proof. \Cref{fig:txid-ell-times,fig:txid-ell-sizes} show how
@@ -94,35 +93,22 @@ milliseconds, for the prover and the verifier.} \label{tab:txid-relations}
 \end{table}
 
 Of the 5\,160 bytes of an algebraic transaction, the tag takes 576, the
-commitment 48, the proof of $\rel_6'$ 544, the proof of $\rel_7'$ 3\,312 and the
-range proof 640. Of the 1\,116 bytes of a hash-based transaction, the tag takes
+commitment 48, the proof of $\rel_6'$ 544, the proof of $\rel_7'$ 3\,312, the
+largest part, and the range proof 640. Of the 1\,116 bytes of a hash-based transaction, the tag takes
 32, the commitment 48, the proof of $\rel_6$ 512, and the proof of $\rel_7$
 with its linking proof 292 and 192. The public tracing key is 24\,624 bytes in
 the algebraic instantiation and 48 in the hash-based one.
 
-A Groth16 proof with its commitment takes 292 bytes, rather than the 192 bytes
-of three group elements. The linking proof adds 160 bytes at a grant and 192
-bytes in a transaction. The range check is a constraint of the transaction
-circuit, so there is no Bulletproofs range proof. There are no elements
-$\{W_\gamma\}$, so there is no first grant message of 25\,280 bytes as in the
-algebraic instantiation. Tracing is $\Max$ evaluations of $\HT$ instead of
+A proof of the zk-SNARK of Groth with its commitment takes 292 bytes, rather
+than the 192 bytes of three group elements. The linking proof adds 160 bytes at
+a grant and 192 bytes in a transaction. Tracing is $\Max$ evaluations of $\HT$ instead of
 $\Max$ pairings. The two circuits have 668 and 1\,343 constraints, and their
 setups take 95.3\,ms and 165\,ms.
 
-The hash-based instantiation gives up the transparent setup. Groth16 needs a structured reference string for
-each circuit, generated from secret values, so this instantiation needs a
-trusted setup and loses the property that no party samples anything. The prover
-is also much slower. Which instantiation is preferable depends on whether a
+The hash-based instantiation gives up the transparent setup, and its prover is
+much slower. Which instantiation is preferable depends on whether a
 deployment can tolerate a trusted setup, and on whether proving or verification
 cost matters more.
-
-Groth16 proofs can be rerandomised, so from one proof anyone can produce
-another for the same statement. The simulation extractability of
-\Cref{exp:simext} allows this, since it excludes only statement and label pairs
-on which a proof was simulated, and it is the notion \Cref{thm:hash-inst}
-assumes. Plain Groth16 is simulation extractable in this sense in the
-algebraic group model~\cite{FC:BKSV21}. This result does not cover the
-commitment extension, so the theorem assumes it.
 
 \begin{figure}[htbp] \centering
 \includegraphics[width=\textwidth]{chapters/05-txid/txid-ell-times.pdf}
@@ -136,11 +122,6 @@ with $\Max = 2^\ell$ and are on a log scale.} \label{fig:txid-ell-times}
 \caption[Tracing: sizes against $\ell$]{Size against $\ell$ of the first grant message, on a log scale, and of
 a transaction.} \label{fig:txid-ell-sizes} \end{figure}
 
-A transaction takes $11.3\,\mathrm{ms}$ to prove and $6.70\,\mathrm{ms}$ to
-verify in the algebraic instantiation, and $28.3\,\mathrm{ms}$ and
-$4.44\,\mathrm{ms}$ in the hash-based one. The hash-based transaction is about a
-fifth of the size, 1\,116 bytes against 5\,160.
-
 Verification time hardly depends on $\ell$. In the hash-based instantiation it
 stays at $4.44\,\mathrm{ms}$ for every $\ell$ from $1$ to $12$. In the algebraic
 one it grows from $6.55\,\mathrm{ms}$ at $\ell = 1$ to $6.76\,\mathrm{ms}$ at
@@ -150,14 +131,7 @@ range proof. Algebraic
 proving steps up just after each power of two, since the range proof pads to the
 next power of two. In the algebraic instantiation the first grant grows with
 $\Max = 2^\ell$, and in both instantiations tracing does. Tracing one user for
-one epoch never depends on the size of the ledger or the number of users. At
-$\ell = 8$ it takes $36.9\,\mathrm{ms}$ in the algebraic instantiation and
-$1.10\,\mathrm{ms}$ in the hash-based one.
-
-\begin{outline}
-  \item algebraic: the tag proof ($\rel_7'$, 3312 bytes) is the largest item on the ledger; the $\group{T}$ tag is 576 bytes
-  \item $\ell = 8$ as headline, since algebraic proving steps up just after it
-\end{outline}
+one epoch never depends on the size of the ledger or the number of users.
 
 \begin{table}[htbp] \centering \small
 \caption[Tracing against Idemix]{Per-transaction time in milliseconds and size in bytes, against Hyperledger Idemix, at $\ell = 8$. Idemix sizes are its own serialisation, with

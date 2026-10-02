@@ -1,61 +1,35 @@
 \section{Summary}\label{sec:offline-summary}
 
-\rebekah{rewrite this summary at the end}
+We gave a transferable offline payment scheme $\OP$, whose payments are
+anonymous and whose withdrawals cannot be linked to deposits. We proved that
+$\OP$ securely realises $\idfu{\algo{op}}$ when its building blocks have the
+properties of \Cref{thm:offline-construction-security}, and that its
+instantiation does so under the DL, DDH, $q$-SDH and $q$-MSDH assumptions in the
+random oracle model. A smart card authorises a payment in under
+$400\,\mathrm{ms}$, the payer's phone needs under $50\,\mathrm{ms}$, and a payee
+verifies a chain of $32$ hops in under a second, with payments growing by $912$
+bytes per hop.
 
-This chapter addresses offline retail CBDC payments: payments conducted while
-both payer and payee are disconnected from the network, and settled only when
-tokens are eventually deposited. The central difficulty in this setting is that
-a payee has no way to verify, in real time, that the token they are receiving
-has not already been spent elsewhere. Rather than rely on prevention or
-detection alone, we combine the two: a secure element makes double spending
-expensive and impractical to mount at scale, while an efficient auditing
-mechanism ensures that, should an attack succeed, the responsible party can
-still be identified and held accountable.
+Availability does not require removing institutions. The secure element is
+issued by an institution and trusted only to keep the user's key. Its
+single-use rule makes double spending expensive, but identification does not
+rest on it. The phone, which users control, does the heavy computation.
+Splitting the joint proof so that the secure element's share costs about as
+much as an ordinary signature lets the scheme run on existing hardware. The same
+split applies wherever a small trusted component vouches for a statement too
+expensive for it to prove, such as hardware wallets, identity cards and device
+attestation. A trusted execution environment on the phone could replace the
+card if it protected the single-use logic as well as the key.
 
-Our scheme $\OP$ is transferable, and its payments are anonymous and
-unlinkable.\rebekah{the summary should state the headline numbers (card and phone times per payment, payee verification at 32 hops, bytes per hop) and the security result (\Cref{thm:offline-construction-security,thm:offline-instantiation-security})}
+The auditor's capability is triggered by an event, a double spend, rather than
+granted against a particular person, and the role can be distributed by
+threshold decryption. \Cref{chap:txid} makes the same move with a different
+accountability measure, a grant limited to one user and one epoch. The two
+chapters share a credential layer, and a joint analysis is the next step, so
+that one registration supports online payments traceable under a grant and
+offline payments traced only on double spending.
 
-\begin{outline}
-  \item (1) availability does not require removing institutions
-  \item the secure element is issued by an institution and trusted for one narrow
-    job, refusing to sign a spent token twice; the phone, fully user-controlled,
-    does the heavy computation
-  \item splitting the JPOK so the secure element's share costs about an ordinary
-    signature is what makes it run on existing hardware
-  \item same split applies wherever a small trusted component vouches for a
-    statement too expensive for it to prove: hardware wallets, identity cards,
-    device attestation
-  \item the trusted component could be a TEE on the phone instead of a card;
-    construction unchanged as long as it enforces single use
-\end{outline}
-
-\begin{outline}
-  \item (2) the auditor's capability is triggered by an event, a double spend,
-    rather than granted against a particular person
-  \item the auditor point (identity only from a double spend) is already in the paragraph below; this insight builds on it
-  \item same move as \Cref{chap:txid}, where the capability is limited to a user and
-    an epoch
-  \item the chapters share a credential layer; next step is a joint analysis, so one
-    registration supports online payments traceable under a grant and offline
-    payments traced only on double spending
-  \item address the different accountability measures
-\end{outline}
-
-The scheme keeps the institutions that an offline payment system already has,
-and constrains what each of them learns. The central bank issues and redeems
-tokens without learning what it signs at withdrawal or which withdrawal a
-deposit corresponds to. Intermediaries hold accounts and route requests, and
-learn the identity of users only when they withdraw or deposit. The
-registration authority enrols users once and plays no part in payments. The
-auditor recovers an identity, and only then from a payment that double spends a
-token, and the role can be distributed via threshold decryption. None of these
-participants is removed in pursuit of decentralisation, and none of them is
-trusted with the privacy of honest users.
-
-\begin{outline}
-  \item what remains open is mostly practical: fixed denominations keep deposits
-    simple; aggregated deposits would reduce the number of tokens users hold, at
-    the cost of a more involved deposit proof
-  \item (old text also had: performance numbers, divisibility, revocation as the
-    sharpest limitation; decide whether to keep)
-\end{outline}
+What remains open is mostly practical. Fixed denominations keep deposits simple,
+and aggregating deposits under value commitments would also hide the value at
+deposit, at the cost of a more involved deposit proof. Divisibility remains
+future work, and revocation offline is limited to expiry by epochs.

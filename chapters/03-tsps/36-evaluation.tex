@@ -25,8 +25,7 @@ of the honest-majority setting, but are not covered by our theorems.
 
 We add to MP-SPDZ sharings of group elements with their authentication
 information, and $\algo{ExpGrp}$ with mixed triples. The groups are those of
-BLS12-381, implemented with RELIC~\cite{relictoolkit}. Every signer opens the
-signature when combining, so each sends its share to all others. As baselines, we implement the centralised $\AGHO$ and
+BLS12-381, implemented with RELIC~\cite{relictoolkit}. As baselines, we implement the centralised $\AGHO$ and
 $\KPW$ schemes and two existing threshold SPS schemes in Go with gnark-crypto, with a trusted dealer for the threshold
 schemes~\cite{AC:CKPSS23,PKC:MMSST24,gnark-crypto}. The tables call these two
 schemes CKPSS23 and MMSST24.
@@ -109,14 +108,10 @@ combining, so it sends its share to all others. MASCOT shares carry a MAC share,
 which doubles their size.}
 \label{tab:tsps-comms} \end{table}
 
-The online phase sends nothing in any of the four settings, and takes between
-0.36 and 1.84~ms. This is comparable to centralised signing, which takes 0.84~ms
-for $\AGHO$ and 2.00~ms for $\KPW$. All interaction is in the offline phase and
-in key generation, and there MASCOT is far more expensive than ATLAS. The offline
-phase of threshold $\AGHO$ takes 31.0~ms with MASCOT and 2.09~ms with ATLAS, and
-sends over a megabyte per party with MASCOT and half a kilobyte with ATLAS.
-Batching 16 states brings this to 8.2~ms per signature under MASCOT and 1.3~ms
-under ATLAS. \Cref{fig:tsps-n-times,fig:tsps-n-comm} show time and communication
+The online phase sends nothing in any of the four settings, and its time is
+comparable to centralised signing. All interaction is in the offline phase and
+in key generation, and there MASCOT is far more expensive than ATLAS. Batching
+lowers the offline time per signature. \Cref{fig:tsps-n-times,fig:tsps-n-comm} show time and communication
 against the number of parties. Communication grows linearly in $n$, and the
 online phase stays below 3~ms up to eleven parties.
 
@@ -141,9 +136,7 @@ centralised schemes, against the number of parties $n$, at $\ell = 2$ and $t =
 n-1$, median.} \label{fig:tsps-baselines} \end{figure}
 
 The threshold SPS schemes CKPSS23 and MMSST24 have no offline phase. Each signer sends one signature share of 96 or 384 bytes to the
-combiner. Computing a signature share takes 2.14~ms in CKPSS23 and 1.26~ms in
-MMSST24, and the online phase of threshold
-$\AGHO$ and threshold $\KPW$ with MASCOT takes 0.72~ms and 1.84~ms.
+combiner.
 \Cref{fig:tsps-baselines} compares them against the number of parties. Our
 schemes move the extra cost to before the message is known.
 Compared with MMSST24, threshold $\AGHO$ has signatures

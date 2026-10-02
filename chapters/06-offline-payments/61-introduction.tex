@@ -1,8 +1,8 @@
 \section{Introduction}\label{sec:offline-intro}
 
-An offline payment is one made while both the payer and the payee are
-disconnected from the network, and settled only once the token that changed
-hands is eventually deposited.\rebekah{this opening sentence reads oddly, rewrite} Offline operation matters for availability and
+An offline payment is made while both the payer and the payee are disconnected
+from the network. It is settled later, once the money that changed hands is
+deposited. Offline operation matters for availability and
 for accessibility. A payment instrument that stops working during a blackout, or
 in a place with poor network coverage, is not a replacement for cash.
 
@@ -42,21 +42,19 @@ everyone who sees a transcript. The central bank and the intermediaries cannot
 link a withdrawal to a deposit. The auditor recovers an identity only from a
 payment that double spends a token.
 
-\paragraph{Contributions.} We give a transferable offline payment scheme for this setting. Users obtain a
+\paragraph{Contributions.} We give a transferable offline payment scheme for
+this setting, in which a payee can pay a token onward without depositing it
+first. Users obtain a
 long-term credential once, then pay one another offline by extending a chain of
 anonymous signatures over a token. Each payment carries a verifiable encryption
 of the payer's identifier under the auditor's key. This is an encryption
 together with a proof that it encrypts the identifier the payment is made under. The cryptography this
 requires is too heavy for an off-the-shelf secure element, so we split each
 payment in two. The secure element holds the signing key and enforces that a
-token is used once. Users' mobile devices perform the rest.
-
-\begin{outline}
-  \item the insight behind the design: to stop double spending, the rule (use
-    each token once) is cheap to enforce
-  \item so everything protecting users' privacy can run on hardware users control,
-    as long as the secret never leaves the secure element
-\end{outline}
+token is used once. Users' mobile devices perform the rest. Using each token
+once is a cheap rule to enforce, so everything that protects users' privacy can
+run on hardware users control, as long as the key never leaves the secure
+element.
 
 We do not give a new primitive. Our contribution is a combination of existing
 ones, and consists of the following.
@@ -87,8 +85,6 @@ end.
 \end{itemize}
 
 \subsection*{Related work}
-
-\rebekah{introduction and related work a little long, maybe compress, in particular the CBDC offline payments paragraph}
 
 \paragraph{Original ecash.} Ecash has been studied for several decades,
 beginning with Chaum's solutions, which focus on the privacy of users and on
@@ -134,24 +130,14 @@ this, the user becomes identifiable~\cite{SCN:CamHohLys06}. We define the anonym
 revocation conditions outside of the protocol.
 
 \paragraph{Offchain settlement.} Payment channels such as the Lightning network
-and Teechain provide offchain payments rather than offline
-payments~\cite{poon2016bitcoin,lind2019teechain}. The Lightning network was the
-first payment channel network designed for Bitcoin~\cite{poon2016bitcoin}.
-Users commit funds to an account controlled by signatures from both payer and
-payee, then exchange small transactions offchain. Only the final batched
-transaction is committed to the ledger, which improves latency and scalability.
-A network of such channels lets users route transactions through counterparties
-with whom they do not share an account directly. Onion routing offers some
-notion of privacy, though it has been shown that ordinary use of the network can
-bypass these privacy aims~\cite{FC:KYPKDM21}. Teechain instead has users fund an
-account controlled by a committee of treasurers, who then use that value
-offchain~\cite{lind2019teechain}. The treasurers store their share of the
-private key in trusted hardware, which raises the cost of stealing funds.
-Teechain does not target privacy, and is motivated by reducing the onchain
-storage costs of every transaction rather than by enabling offline payments.
+and Teechain provide offchain payments rather than offline payments. Users
+exchange transactions without the ledger, but both counterparties are
+online~\cite{poon2016bitcoin,lind2019teechain}. Ordinary use of the Lightning
+network can bypass the privacy its onion routing aims for, and Teechain keeps
+treasurers' keys in trusted hardware to protect funds rather than users'
+privacy~\cite{FC:KYPKDM21,lind2019teechain}.
 
-\paragraph{CBDC offline payments.} Several reports motivate the need for CBDC
-offline payments and describe current technologies. Project
+\paragraph{CBDC offline payments.} Project
 Polaris\footnote{Project Polaris: secure and resilient CBDC systems, offline and
 online.  \url{https://www.bis.org/about/bisih/topics/cbdc/polaris.htm}.} from
 the Bank for International Settlements sets out design goals for offline payment
@@ -164,30 +150,11 @@ offline in this sense: a payee accepts a payment on the strength of the
 transcript alone, and needs no contact with any other party either to accept it
 or to pay it onward.
 
-The deployed and announced systems we are aware of are all staged offline.
-Sweden has piloted its e-krona project on the Corda platform, where locally
-stored e-krona can be used offline and, like cash, is not recoverable if the
-wallet is lost, but transactions formed offline are not settled until the device
-goes online, as double spending is checked
-online~\cite{brown2016corda,soderberg2019krona}. The People's Bank of China has
-designed a system for digital payments in which transaction values are hidden.
-No technical specification has been published, and press reporting suggests that
-user anonymity and transaction unlinkability are not implemented and that
-offline payments are not specifically addressed.\footnote{Reported at
-\url{https://www.nytimes.com/2021/03/01/technology/china-national-digital-currency.html}.}
-The Bank of Ghana's design document for the digital Cedi (eCedi) highlights
-offline payments as a key focus area while emphasising privacy alongside
-regulatory compliance.\footnote{Reported at
-\url{https://www.bog.gov.gh/news/design-paper-of-the-digital-cedi-ecedi/}.} The
-US Federal Reserve Board's report distinguishes hybrid payment systems, where
-the payee must come online to settle, from fully offline systems, where this is
-not required, and finds no production examples of the
-latter~\cite{aboulaiz2024offline}. It highlights the digital Rupee from the
-National Payments Corporation of India, which allows offline transactions from a
-smartphone app, settled once the app reconnects,\footnote{Reported at
-\url{https://rbi.org.in/scripts/FAQView.aspx?Id=169}.} and Pix in Brazil, which
-allows the payer to be offline when creating a transaction, but requires the
-payee's point-of-sale terminal to be online to authorise it~\cite{lobo2021pix}.
+None of the deployed or announced systems we are aware of is fully offline.
+The e-krona pilot in Sweden and the digital rupee in India settle offline
+payments only once the device reconnects, Pix in Brazil needs the payee to be
+online, and the US Federal Reserve Board finds no fully offline system in
+production~\cite{brown2016corda,soderberg2019krona,lobo2021pix,aboulaiz2024offline}.
 
 \paragraph{Decentralised payments.} Peredi, Platypus, and UTT give privacy-preserving token schemes that distribute trust via threshold cryptography while
 providing accountability and compliance guarantees, but do not address the
@@ -207,10 +174,7 @@ deposit of the same token, and identify the party responsible.
 payment schemes closest to it. All of the ecash schemes listed are offline in
 the sense above, so the axes that distinguish them are transferability,
 divisibility, what happens once a conflict is detected, and what the scheme asks of
-users' wallets. We target transferability rather than divisibility. We
-identify the double spender rather than absorbing the loss or identifying every
-previous holder of the token. We assume a secure element, so that prevention and
-identification reinforce one another.
+users' wallets.
 
 \begin{table}[htbp] \centering \small
 %
@@ -245,12 +209,12 @@ alone is identified, absorbed means the issuer covers the double-spent value,
 and prevented means double spending is stopped rather than resolved after the
 fact. The hardware column records the hardware assumption the scheme places on
 users' wallets, where OTR denotes one-time readable memory. Entries marked --
-are not addressed by the cited work.\rebekah{check OPERA (PB17) for transferability and divisibility, the -- entries}} \label{tab:offline-related-comparison}
+are not addressed by the cited work.\rebekah{OPERA (PB17): check transferability and divisibility for the -- entries; paper not on disk}} \label{tab:offline-related-comparison}
 \end{table}
 
 \paragraph{Layout.} The rest of the chapter is organised as follows. \Cref{sec:offline-definitions} describes the participants
-and trust assumptions, gives the syntax of an offline payment scheme, of joint proofs of knowledge
-and of signatures on committed inputs, and formalises the security goals as an ideal
+and trust assumptions, gives the syntax of an offline payment scheme and of its
+two new building blocks, and formalises the security goals as an ideal
 functionality. \Cref{sec:offline-construction} gives our construction $\OP$, first
 informally and then in full. \Cref{sec:offline-instantiation} instantiates joint
 proofs of knowledge with the BBS+ signature scheme and signatures on committed

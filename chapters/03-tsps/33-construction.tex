@@ -115,12 +115,8 @@ $\SPSverify(\pk, \vec{\msg}, \SPSsig)$.
 so the signers keep their
 states in a queue and delete each one once it is used. The offline phase can be
 run repeatedly during quiet periods to build up states for busy ones.
-The security proof uses two properties of $\TSPSoffsign$. Every value it opens
-is masked by a fresh uniform value, and each component of $c_0$ and each $c_j$ is
-computed from its own fresh sharing.
 
-\paragraph{Online signing.} By decomposable signing, each signer only needs
-local group operations at this point. No signer communicates with any other during this phase, and its cost is
+\paragraph{Online signing.} No signer communicates with any other during this phase, and its cost is
 comparable to that of an ordinary invocation of $\SPSsign$.
 
 \paragraph{Combining.} Combining is performed by whichever party is to hold the signature, and needs no
@@ -132,10 +128,7 @@ makes this check fail.
 whenever $t+1$ honest signers take part~\cite{EC:GJKR96}. Robustness is a
 property of the MPC protocol, and is not given by security with abort.
 
-The threshold scheme is unforgeable whenever the underlying SPS scheme is, given
-an MPC protocol that is secure with abort against up to $t$
-statically corrupted signers. From the SPS scheme, the construction needs
-decomposable signing and existential unforgeability. Strong unforgeability is
+Strong unforgeability of the SPS scheme is
 not needed, as a TS-UF-1 forgery must be on a message that too few honest
 signers signed, and a new signature on a message that was properly signed does
 not count. Requiring it would rule out rerandomisable schemes.
@@ -161,8 +154,7 @@ queries $\adv$ makes to the offline oracle:
 \end{theorem}
 
 We prove \Cref{thm:tsps-construction-security} in
-\Cref{sec:tsps-proof-construction}. Under adaptive corruption, the reduction
-loses a factor $\binom{n}{t}$.
+\Cref{sec:tsps-proof-construction}.
 
 \begin{lemma}\label{lem:tsps-adaptive} Under the conditions of
 \Cref{thm:tsps-construction-security}, with the MPC protocol secure against up

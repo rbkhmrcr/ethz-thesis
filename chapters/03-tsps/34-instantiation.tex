@@ -6,12 +6,6 @@ schemes built from the MPC protocol~\cite{C:AGHO11,C:KilPanWee15}. In each case 
 the signing algorithm admits the decomposition the construction requires, and
 give the resulting threshold scheme.
 
-$\AGHO$ has the smallest possible signatures, and its secret key consists of
-field elements only, so its threshold version only needs multiplication of
-shared field elements. $\KPW$ relies on a standard assumption, but its secret
-key contains group elements, so its threshold version needs sharings of group
-elements and $\algo{ExpGrp}$.
-
 \subsection{Instantiating the MPC protocol}\label{sec:tsps-mpc-inst}
 
 Most MPC protocols do not provide $\algo{ExpGrp}$, so we build it from
@@ -49,9 +43,7 @@ scheme for messages in one group only, which is existentially unforgeable in the
 GGM~\cite{C:AGHO11}. We use the second scheme with $\group{1}$ and $\group{2}$ swapped, so that messages are in
 $\group{1}$, and call it $\AGHO$. \Cref{prim:agho} recalls it. Its secret
 key consists only of field elements, and the message enters signing only through
-the terms $\msg_i^{-\mu_i}$. Our threshold version relies on both properties. As
-$\AGHO$ is rerandomisable, it is not strongly unforgeable, so it relies on the
-construction needing only existential unforgeability.
+the terms $\msg_i^{-\mu_i}$. Our threshold version relies on both properties.
 
 \begin{primitivebox}{The $\AGHO$ SPS scheme~\cite{C:AGHO11}.}{agho}
 

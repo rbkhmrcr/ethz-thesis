@@ -9,10 +9,9 @@ registration authority authenticates users and issues the credentials required
 to submit transactions and enable selective traceability. It is honest but
 curious during the protocol, so it follows the protocol but tries to learn what
 it can from what it sees. We also assume it does not bias the public
-parameters, which holds in our instantiations because we derive all group
-generators from a public seed and do not sample them. Users are potentially malicious, and generate and submit
-confidential transactions while retaining fine-grained control over which
-auditors are authorised to trace them, and during which epochs. Auditors are
+parameters. Users are potentially malicious, and generate and submit
+confidential transactions. They decide which auditors are authorised to trace
+them, and during which epochs. Auditors are
 potentially malicious, and may be granted permission to trace the transactions
 of specific users during specific epochs. Time is divided into epochs, numbered
 consecutively, and the ledger operator advances the current epoch on a schedule
@@ -33,16 +32,14 @@ $\crs$ together with the initial ledger state $\state$.
 registration algorithm, run interactively between a user and the registration
 authority on input public parameters $\crs$ and state $\state$, outputs user
 signing key $\sk$, tracing key $\utk$, and registration credential $\regcred$ to
-the user. The algebraic instantiation takes $\utk$ to be a tuple.
+the user.
 
   \item[$(\PTK,\ek) \sample \IDgrant(\crs,\sk,\utk,\regcred,\epoch)$ :] The
 authorisation algorithm, run interactively between a user and an auditor on
 input public parameters $\crs$, signing key $\sk$, tracing key $\utk$,
 registration credential $\regcred$, and epoch $\epoch$, outputs the user's
 certified public tracing key
-$\PTK$ and the epoch tracing key $\ek$ to the auditor. Only $\ek$ depends on
-$\epoch$, so an auditor authorised for several epochs of the same user receives
-$\PTK$ once.
+$\PTK$ and the epoch tracing key $\ek$ to the auditor.
 
   \item[$\tx \sample \IDsubmit(\crs,\sk,\utk,\regcred,\epoch,\payload)$ :] The
 submission algorithm, on input public parameters $\crs$, signing key $\sk$,
@@ -71,16 +68,13 @@ $\idfu{\algo{trace}}$ that represents a trusted third party which executes the
 operations of the ledger on behalf of system participants, and which by
 construction satisfies the three properties set out below.
 
-The ideal functionality captures the properties of tracing: anonymity,
-non-repudiation, and permission expiration. Anonymity is enforced by ensuring
-that only an auditor holding a valid tracing permission for a specific user and
-epoch can de-anonymise that user's transactions during that epoch.
-Non-repudiation is achieved by ensuring that every transaction a user submitted
-during an epoch can be traced back to them by any auditor holding a valid
-permission for that user and epoch. Permission expiration is enforced by
-ensuring that tracing permissions are automatically revoked at the end of the
-epoch for which they were granted, so an auditor retains no tracing capability
-beyond it.
+Anonymity means
+that only an auditor holding a tracing permission for a user and epoch can
+de-anonymise that user's transactions during that epoch. Non-repudiation means
+that every transaction a user submitted during an epoch can be traced back to
+them by any auditor holding a permission for that user and epoch. Permission
+expiration means that a permission covers only the epoch for which it was
+granted, so an auditor gains no tracing capability for any other epoch.
 
 The functionality does not capture two things. First, it models unlinkability
 of a transaction to its originator and not confidentiality of the transaction
@@ -88,23 +82,19 @@ payload. The ledger is public, so $\idfu{\algo{trace}}$ hands every submitted
 payload to the simulator $\simu$ on every $\IDsubmit$ call and withholds only
 the identity of the submitting user.
 The underlying transaction system provides confidentiality of the payload, and
-this is orthogonal to what we prove here. Second, $\IDgrant$ places no
-constraint on $\epoch$ relative to $\epoch_{\mathsf{cur}}$. A user may grant a
-permission for a future epoch, which is the intended usage, and may also grant
-one for an epoch that has already elapsed, which amounts to voluntary
-retrospective self-disclosure. A user cannot refuse to be traced in
-an epoch for which they have already granted a permission.
+this is orthogonal to what we prove here. Second, it does not capture
+retrospective disclosure. $\IDgrant$ accepts only epochs that have not started,
+so users grant a permission before the epoch it covers. A user cannot refuse to
+be traced in an epoch for which they have already granted a
+permission.\rebekah{check: $\idfu{\algo{trace}}$ now refuses grants for
+epochs that have started, which were allowed before as retrospective
+disclosure; Game 5 needs this}
 
 Secure realisation of $\idfu{\algo{trace}}$ by a protocol is defined as in
 \Cref{sec:prelims-security}, in the standalone model.
 
 
-$\idfu{\algo{trace}}$ receives inputs from system participants and $\simu$,
-computes the corresponding outputs, and delivers them to the authorised parties.
-It exposes interfaces through which $\simu$ and honest participants submit
-inputs, and also maintains a current epoch counter that advances by one
-whenever the system moves to the next epoch. The formal description is given
-in~\Cref{fig:ftxid}, and we summarise it here.
+The formal description is given in~\Cref{fig:ftxid}, and we summarise it here.
 
 The functionality keeps three tables: $\reg$ records which users are
 registered, $\txns$ the payloads each user submitted in each epoch, and $\perm$
@@ -114,21 +104,17 @@ participants $\simu$ corrupted before the first call.
 
 Users call $\IDregister$ to join the system.
 Registration succeeds if the registration authority approves, and each user can
-register only once. Registered users then call $\IDsubmit$ to submit up to
-$\Max$ transactions per epoch, each for the current epoch. Each
+register only once. Registered users then call $\IDsubmit$ to submit up to a
+fixed number $\Max$ of transactions per epoch, each for the current epoch. Each
 successful call records the payload together with the identity of the user and
-the epoch. Since the ledger is public, $\simu$ learns the payload of every call,
-and it also learns who submitted it when that user is corrupt. The functionality subsumes
+the epoch. $\simu$ also learns who submitted a payload when that user is corrupt. The functionality subsumes
 $\algo{Verify}$, as a call that passes its checks corresponds to a transaction that
 the validators accept.
 
 To make their transactions traceable, users call $\IDgrant$ to authorise an auditor to trace
 their transactions for a specific epoch. $\idfu{\algo{trace}}$ records that the
-auditor is authorised to trace the user's transactions for that epoch.  Once the
-epoch elapses, the authorisation lapses with it.\rebekah{the functionality
-never clears $\perm$ when the epoch advances, and $\IDidentify$ still answers
-for past epochs, so nothing in $\idfu{\algo{trace}}$ makes a grant lapse; say
-instead that a grant covers one epoch only, or clear $\perm$ in Increment Epoch}
+auditor is authorised to trace the user's transactions for that epoch, provided the epoch has not started. A grant covers that one epoch
+only, and tracing another epoch needs another grant.
 Auditors call $\IDidentify$ to obtain the payloads of
 the transactions a user submitted in an epoch, and succeed only with a
 permission for that user and epoch. They then receive every such transaction,
@@ -172,8 +158,8 @@ do:
 	  \item If $|\txns[(\user,\epoch_{\mathsf{cur}})]| + 1 > \Max$, then
 stop.
 
-	  \item If $\user \in \Cor$, then $\mathsf{origin} \leftarrow \user$,
-else $\mathsf{origin} \leftarrow \varnothing$.
+	  \item If $\user \in \Cor$, then $\mathsf{origin} \leftarrow \user$, and
+otherwise $\mathsf{origin} \leftarrow \varnothing$.
 
 	  \item Send $(\IDsubmit, \payload, \epoch, \mathsf{origin})$ to
 $\simu$, and wait for the go-ahead.
@@ -192,6 +178,8 @@ receiving confirmation, do:
 	\begin{enumerate}
 
 	  \item If $\reg[\user] = \bot$, then stop.
+
+	  \item If $\epoch \leq \epoch_{\mathsf{cur}}$, then stop.
 
 	  \item Send $(\IDgrant, \auditor, \user, \epoch)$ to $\simu$ and wait
 for the go-ahead. On receiving it, do:
@@ -217,7 +205,7 @@ stop.
 
 	  \item Otherwise, set $T \leftarrow \txns[(\user,\epoch)]$.
 
-	  \item If $\auditor \in \Cor$, then $T^\star \leftarrow T$, else
+	  \item If $\auditor \in \Cor$, then $T^\star \leftarrow T$, and otherwise
 $T^\star \leftarrow \varnothing$.
 
 	  \item Return $(\IDidentifyend, T)$ to $\auditor$ and $(\IDidentifyend,

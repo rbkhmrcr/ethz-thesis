@@ -1,26 +1,15 @@
 \section{Construction}\label{sec:agg-creds-construction}
 
-The protocol proceeds as follows. Each user first establishes a
-pseudonymous identity with the registration authority. Issuers then issue
-credentials to that identity for the attributes they certify. Before
-presentation, the user aggregates the credentials corresponding to the
-attributes they wish to disclose into a single aggregate signature. Finally, the
-user proves knowledge of the aggregate credential and their registered identity
-using a non-interactive zero-knowledge proof system.
-
-The construction assumes that the registration authority ensures users' public
-keys are unique, and that users hold the corresponding secret keys.
+The construction assumes that the registration authority checks that users'
+public keys are unique, and that users hold the corresponding secret keys.
 This prevents users from registering others' public keys and pooling credentials
 across identities.  The registration authority assigns each user exactly one
-tag, and signs only messages of the prescribed form: public keys and tags. A
-malicious registration authority could violate these, for instance by assigning
-duplicate tags or registering users under adversarially chosen identities.
-Addressing this is orthogonal to our contribution.  We assume that verifiers
+tag, and signs only messages of the prescribed form: public keys and tags. We assume that verifiers
 accept credentials only from the set of issuers with published public keys. This
 prevents a malicious user from being able to impersonate an issuer to an honest
 verifier.
 
-The choice of building blocks follows from this separation of responsibilities. The
+Each party's responsibilities fix the building block it needs. The
 registration authority only links a public key to a tag, so an existentially
 unforgeable signature scheme is enough. Presentations should show one short
 object, so issuers' signatures must aggregate. Ordinary aggregate signatures
@@ -33,8 +22,8 @@ proof simulates honest users' presentations while extracting from the
 adversary's. Each presentation uses the verifier's message as its label, so
 it cannot be replayed elsewhere.
 
-We now present the construction in full. \Cref{fig:agg-creds-seq} shows its
-messages and local steps.
+\Cref{fig:agg-creds-seq} shows the messages and local steps of the
+construction.
 
 \begin{figure}[htbp] \centering \small
 \begin{tikzpicture}[seq]
@@ -72,18 +61,8 @@ and verifiers only accept issuer keys whose proof verifies. The public
 parameters $\crs$ consist of the registration authority's public key, the issuer
 public keys $\ipk{1}, \ldots, \ipk{n}$ and the parameters of the proof system.
 
-\paragraph{Registration.} During registration, the user establishes a long-term
-pseudonymous identity with the registration authority. The user proves knowledge
-of the secret key corresponding to their public key, after which the
-registration authority binds that public key to a unique user tag. This tag is
-what later links the credentials a user obtains from different issuers to one
-another and to the user's registration: it is embedded in every credential
-issued to the user, and at presentation the user proves that the same tag
-underlies both their registration signature and their aggregated credentials,
-without revealing which tag it is.
-
-The user samples $(\sk, \pk) \sample \DSgen(\secparam)$, and sends $\pk$ to
-the registration authority together with a proof of knowledge of $\sk$ on a
+\paragraph{Registration.} Users' keys are related by a one-way function $f$. The user samples $\sk$
+uniformly, sets $\pk = f(\sk)$, and sends $\pk$ to the registration authority together with a proof of knowledge of $\sk$ on a
 fresh message from the registration authority.
 If the proof verifies, the registration authority assigns the user a unique tag
 $\Tag$ and signs $(\pk, \Tag)$ with $\DS$, giving $\psi$.
@@ -92,12 +71,7 @@ The user initialises their credential state as $(\Tag, \sk, \pk, \psi, \cred_1,
 \ldots, \cred_n)$, with $\cred_i = \varnothing$ for all $i \in [1,n]$, and
 $\regcred = (\Tag, \pk, \psi)$ is their registration credential.
 
-\paragraph{Issuance.} To obtain an attribute credential, the user authenticates
-their registered identity to an issuer. If the issuer is satisfied that the user
-possesses the requested attribute value, it issues an aggregate tag-based
-signature on that attribute.
-
-On input $(\Tag, \pk, \psi, \atv{i})$ from the user, the issuer checks that
+\paragraph{Issuance.} On input $(\Tag, \pk, \psi, \atv{i})$ from the user, the issuer checks that
 $\psi$ verifies, and rejects if it does not.  Otherwise, the user next proves
 knowledge of $\sk$.  If this succeeds and the user holds attribute value
 $\atv{i}$, the issuer sends back $\signature_i \sample \ATSsign(\isk{i},
@@ -105,19 +79,9 @@ $\atv{i}$, the issuer sends back $\signature_i \sample \ATSsign(\isk{i},
 
 \paragraph{Aggregation.} Before presenting credentials, the user aggregates the
 signatures corresponding to the attributes they wish to disclose into a single
-aggregate signature. Aggregating under a common tag lets credentials issued by
-different issuers be compressed into one short signature, so that presentation
-requires a single proof of possession rather than one per issuer.
+aggregate signature.
 
-\paragraph{Presentation.} To prove possession of a collection of attributes, the
-user aggregates the corresponding credentials and produces a proof.  This
-simultaneously demonstrates possession of a valid registration credential and
-that the aggregate signature verifies under the disclosed issuer public keys and
-attribute values, without linking the presentation to the user's identity, to
-their registration, or to any other presentation of the same underlying
-credentials.
-
-The user has $(\Tag, \sk, \pk, \psi, \cred_1, \ldots, \cred_n)$, where $\cred_i
+\paragraph{Presentation.} The user has $(\Tag, \sk, \pk, \psi, \cred_1, \ldots, \cred_n)$, where $\cred_i
 = (\atv{i}, \signature_i)$.  To prove possession of attribute values
 $(\atv{i})_{i \in \ISSUERS}$ to a verifier providing a fresh message $\msg$, the
 user first constructs the aggregate signature as follows:
@@ -135,7 +99,7 @@ following parameters:
 \begin{equation*}
 %
   \inst_1 = (\rapk, \ISSUERS, \{\ipk{i}, \atv{i}\}_{i \in \ISSUERS}), \qquad
-\witness_1 = (\Tag, \sk, \pk, \psi, \signature),
+\witness_1 = (\Tag, \sk, \pk, \psi, \signature).
 %
 \end{equation*}
 %
@@ -143,15 +107,13 @@ The relation is the following:
 %
 \begin{equation}\label{eq:agg-creds-proof-abstract} \begin{gathered}
 %
-  \rel_1 = \{\ (\sk, \pk) \sample \DSgen(\secparam) \ \wedge \
+  \rel_1 = \{\ \pk = f(\sk) \ \wedge \
 \DSverify(\rapk, (\pk, \Tag), \psi) = 1 \\
 %
   \wedge\ \ATSverifyagg((\ipk{i})_{i \in \ISSUERS}, \Tag, (\atv{i})_{i \in
 \ISSUERS}, \signature) = 1\ \}.
 %
 \end{gathered} \end{equation}
-%
-\rebekah{$\rel_1$ states the randomised $\DSgen$ as a relation condition. Generically there is no equation linking $\sk$ and $\pk$, and the instantiation checks $\pk = \gen^\sk$, so the generic construction needs a key relation for the user's keys.}
 
 The user proves that they possess a valid registration signature, an aggregate
 credential under a single tag, and the secret key corresponding to the
@@ -161,11 +123,7 @@ issuer in $\ISSUERS$. The statement contains only $\rapk$, the issuer set, the
 issuer public keys and the disclosed values, so the presentation links neither
 to the user nor to other presentations.
 
-\paragraph{Verification.} The verifier checks the proof with respect to the
-disclosed attributes and issuer public keys. The presentation is accepted if and
-only if the verification succeeds.
-
-On input $(\{\atv{i}\}_{i \in \ISSUERS}, \msg, \algoproof)$, the verifier
+\paragraph{Verification.} On input $(\{\atv{i}\}_{i \in \ISSUERS}, \msg, \algoproof)$, the verifier
 returns the output of the proof verification algorithm.
 
 \begin{theorem}\label{thm:agg-creds-construction-security} If $\DS$ is an
@@ -177,8 +135,7 @@ functionality~$\idfu{\AAC}$.  \end{theorem}
 We prove \Cref{thm:agg-creds-construction-security} in \Cref{sec:agg-creds-proof-1}.
 
 
-\paragraph{Extensions.} The construction supports several straightforward
-extensions.
+\paragraph{Extensions.} The construction extends in several ways.
 
 To bind each presentation to a verifier and a session, $\msg$ contains the
 verifier's identity and a fresh nonce. Aggregation is over $\ISSUERS$ only, so
@@ -189,10 +146,7 @@ New issuers can join the system without impacting the construction. The
 aggregation of credentials and their presentation is agnostic to the number of
 issuers.
 
-An issuer may issue several credentials to one user, one for each value it
-certifies, and the user discloses at most one value per issuer in a
-presentation. An
-issuer certifying multiple attribute types can hold a different key for each
+An issuer certifying multiple attribute types can hold a different key for each
 type. To support an issuer certifying multiple attribute types under one key,
 the issuer instead signs $(\Tag, \att{} \| \atv{})$ rather than $(\Tag,
 \atv{})$, with $\att{}$ the attribute type and $\atv{}$ the attribute value.

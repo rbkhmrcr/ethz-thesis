@@ -15,49 +15,37 @@ The construction assumes that the registration authority issues each user
 exactly one identifier, and issues a credential only to a secure element that
 holds the corresponding secret key. This prevents a user from
 accumulating identities. We assume identifiers are
-unpredictable and that a user does not publish their own. We assume the secure
-element does not disclose its secret key. We do not assume it succeeds in
-enforcing that a token is spent once. That enforcement makes double
-spending expensive to attempt, but detection and identification do not rest on
-it, and a scheme that relied on hardware alone would have no recourse once the
-hardware failed. We assume payees hold the public keys of the central bank and
+unpredictable and that a user does not publish their own. The one thing we
+trust the secure element with is that its secret key never leaves it, since a
+phone alone cannot keep a key from its owner. We do not assume it succeeds in
+enforcing that a token is spent once, and detection and identification do not
+rest on it. We assume payees hold the public keys of the central bank and
 of the registration authority, so that they can verify a payment without
 contacting either. Addressing a malicious registration authority is orthogonal
-to our contribution. We now present the construction in full.
-
-\begin{outline}
-  \item secret key not leaving the secure element is the one thing we trust it with
-  \item why: a phone alone cannot keep a key from its owner
-  \item everything that protects privacy can run on hardware the user controls
-  \item each wallet is a mobile device and a secure element, which together let
-    users pay offline securely and accountably (moved from the participants
-    paragraph of the definitions)
-\end{outline}
+to our contribution.
 
 \paragraph{Tokens.} A token is a value together with a pseudonym for its owner,
 and it is transferred whole. It is never split and never merged, which
 keeps a payment a single fixed-size operation rather than one that scales with
-the amount being paid.
+the amount being paid. A token after $i$ payments is $T_i = (v, s_i, \com_i,
+\algo{hist}_i)$. It consists of the value $v$, the randomness $s_i$, the
+pseudonym $\com_i$ of its current owner, and the history $\algo{hist}_i$, which
+is the transcript of the withdrawal and of the $i$ payments. The secure element
+stores only $\tau_i = (v, \com_i)$.
 
-The pseudonym is a hiding commitment to the owner's identifier. Committing
+The pseudonym is a hiding commitment to the owner's identifier with randomness
+$s_i$. Committing
 rather than naming a public key makes a payment anonymous to anyone who
 reads its transcript, since a user commits afresh for every token they hold.
 The commitment randomness also distinguishes two
 payments that are otherwise identical, so it never has to be sent alongside the
-pseudonym.
-
-\begin{outline}
-  \item which commitment properties are used: hiding keeps the owner anonymous,
-    binding ties the audit ciphertext, proven consistent with the pseudonym,
-    to one identifier
-\end{outline}
+pseudonym. Hiding keeps the owner anonymous, and binding ties the audit
+ciphertext, which is proven consistent with the pseudonym, to one identifier.
 
 \paragraph{Setup.} During setup the central bank generates a key pair for an
-SCI scheme, the registration authority generates a key pair for a signature
-scheme over message vectors, and the auditor generates an encryption key pair.
-All public keys are published.\rebekah{surely we should call these the same
-things as $\OP$? or not? (SCI scheme and signature scheme here, central bank
-and registration authority keys in $\OPgen$)}
+SCI scheme, the registration authority generates a key pair for the credential
+signature scheme, and the auditor generates an
+encryption key pair. All public keys are published.
 
 Both signature schemes sign vectors, because a token binds an owner, a value,
 and the commitment randomness, and a credential binds an identifier to a secret
@@ -66,85 +54,52 @@ has already been detected. This allows the role to be distributed across
 several parties by threshold decryption, without any change to the rest of the
 protocol.
 
-\begin{outline}
-  \item we require EUF-CMA for the credential signature; malleability is
-    acceptable because the signature itself never leaves the user's device: it
-    is only ever proven, never shown
-  \item why IND-CPA is enough for the auditor's encryption: every ciphertext it
-    decrypts has already been proven consistent with a pseudonym, and nobody else
-    can ask for decryptions, so it must hide identifiers from eavesdroppers but
-    never faces a decryption oracle\rebekah{um? dig into this point: the auditor
-    does decrypt in $\OPidentify$, and the IND-CPA game hop of the security
-    proof is made while it still does}
-\end{outline}
-
-The generators that make up the commitment key are derived by hashing into the
-group rather than chosen by any participant, so that no party knows the discrete
-logarithm relations between them. The identification argument relies on
-binding of the commitments, which would otherwise rest on whoever generated the
-commitment key never revealing the discrete logarithm relations.
+The registration authority also signs on committed inputs, since it must not
+learn users' secret keys. Its SCI scheme needs only existential unforgeability
+and request hiding. A malleable scheme is fine, since a credential is never
+shown, only proven. The
+auditor's encryption needs only IND-CPA security. Every ciphertext the auditor
+decrypts carries a proof that it encrypts the identifier in a pseudonym, and an
+honest user's ciphertexts are never decrypted, since an honest user never spends
+a token twice.
 
 \paragraph{Registration.} A user enrols once. Their secure element is
-provisioned with a fresh secret key and a unique identifier, and proves to the
-registration authority that it holds that key. The registration authority issues
-a credential binding the two, blindly, so that the secret key never leaves the
-secure element even during enrolment. Each user's mobile device is then paired
-with their secure element.\rebekah{concise?}
-
-The two checks serve different purposes. Requiring a fresh identifier
-means that an identifier recovered at audit names one enrolled user rather than a role
-several people share. Requiring the secure element to prove knowledge of the key
-binds the credential to hardware the enrolling user actually holds, so
-that a payment authorised under that credential can be attributed to them.
-Payments need the device and the secure element to be paired. The two then
-communicate directly, so the secure element can pass the device values it would
-otherwise have to derive from a shared key.
+provisioned with a fresh secret key and a unique identifier, and the
+registration authority issues a credential binding the two. It does so blindly,
+after the secure element proves knowledge of the key, so the key never leaves the
+secure element even during enrolment. A fresh identifier means that an
+identifier recovered at audit names one enrolled user rather than a role several
+people share. The user's mobile device is then paired with their secure element,
+so that the two communicate directly during payments.
 
 \paragraph{Withdrawal.} To withdraw, the user's secure element generates a
 pseudonym for the new token, and the device asks the intermediary for a
 signature on it from the central bank. The intermediary checks the user has the
 funds and forwards the request. The central bank checks the intermediary has the
 reserves and signs. The device then converts the signature it receives into a
-proof that the token was issued.\rebekah{concise; this is in the OP paper
-appendix so we could cover it here}
+proof that the token was issued.
 
-Two constraints shape this exchange. The central bank must be satisfied that the
+The exchange has two constraints. The central bank must be satisfied that the
 token is well-formed and that the funds exist, but it must not learn who the
 token belongs to, or it could later match a withdrawal to a deposit. The request
 discloses the value and hides the identifier and the randomness, and
 the central bank signs on committed inputs. The value is disclosed because the central
-bank is accounting for it. One-more unforgeability of the SCI scheme stops users
-minting tokens, since every token needs a signature the central bank issued, and
-each issuance debits one withdrawal. Request hiding keeps the central bank from
+bank is accounting for it. Unforgeability of the SCI scheme stops users
+minting tokens, since every token needs a signature on a message the central
+bank was asked to sign, and each issuance debits one withdrawal. Request hiding keeps the central bank from
 learning whose token it signs. The disclosed value is the only channel that
 remains. A withdrawal and a deposit of unusual value can still be matched, so a
 deployment should use a small set of fixed denominations.
-
-\begin{outline}
-  \item why signatures on committed inputs (moved from the definitions): the
-    central bank signs each token at withdrawal without learning whose it is
-    (else it could match withdrawal to deposit), but must see the value
-    (accounting)
-  \item so: recipient commits to the messages, discloses some, gets a signature on
-    all
-  \item why not blind signatures: they ask for more than needed; blindness hides the
-    signature when later shown, but ours are never shown (payees check a proof of
-    knowledge of it); we only need the request to hide the committed messages
-\end{outline}
-
-\rebekah{online request extractability, only if confirmed necessary (the code
-uses plain Fiat-Shamir, not Fischlin); the old definition justified it as
-follows: the simulator must learn the contents of every token a corrupt user
-withdraws in order to continue the simulation, and these requests come
-adaptively and without bound, so rewinding at each one would compound across
-requests; an extractor that rewinds is enough everywhere else in the proof}
 
 The second constraint is that the signature can never be shown. Verifying it
 requires the messages it was issued on, and one of those is the withdrawer's
 identifier, so a payee who checked the signature directly would learn who
 withdrew the token. The device proves knowledge of it instead, once,
 at withdrawal, and every subsequent payee verifies the resulting proof of
-withdrawal.
+withdrawal. This is why the central bank signs on committed inputs rather than
+with a blind signature scheme. Blindness also hides the signature when it is
+later shown, but ours is never shown, so it is enough that the request hides the
+committed messages.
 
 Nothing in the withdrawal binds the committed identifier to the withdrawing
 user, since the central bank never sees it. It does not need to. Spending the
@@ -190,45 +145,20 @@ also protects an honest payee from a malicious payer who chooses their
 pseudonym for them, since producing it requires knowing the identifier the
 pseudonym commits to.
 
-That proof and the transfer signature both open the payer's pseudonym, on the
-same witness. The construction keeps them separate, because the device produces
-the audit proof alone and the transfer signature jointly with the secure element.
-In the instantiation of \Cref{sec:joint-proof}, the two are one proof.
+That proof and the transfer signature both prove knowledge of the opening of
+the payer's pseudonym, on the same witness. The construction keeps them
+separate, because the device produces the audit proof alone and the transfer
+signature jointly with the secure element.
 
-The payer's secure element and device produce the signature jointly, as a JPOK,
-in which two provers each hold part of the witness and together produce one
-proof. The secret key never leaves the secure element, and the secure element is not
-powerful enough to produce the whole proof. The secure element contributes only knowledge of the key. The device
-supplies the rest of the witness and computes the rest of the proof. This split
-makes the scheme deployable on existing hardware. We give the details in
-\Cref{sec:joint-proof}.\rebekah{two provers are socially one prover though, it's just two
-devices. I think that maybe we should skip the JPOK stuff til later?}
-
-The device is the second prover, and carries out the bulk of the proof without
-ever holding the secret key. This matters because users have full control of
-their devices but not of their secure elements.
-
-\begin{outline}
-  \item why a JPOK (moved from the definitions): payments authorised jointly by
-    secure element and mobile device
-  \item each payment proves the payer holds a credential on the identifier in their
-    pseudonym and knows the secret key it is bound to
-  \item the key never leaves the secure element, which cannot compute the whole proof
-  \item so: two provers, witness split between them, weaker prover holds a small part
-  \item why not an ordinary proof system (one prover holds the whole witness) or
-    generic two-party computation (too much for the secure element)
-  \item two ways we go slightly beyond the cited result:
-  \item (1) Hesse, Singh and Sorniotti prove zero knowledge against an honest but
-    curious verifier, since their verifier relays between the provers and can be
-    caught deviating; our payee may be malicious but is not interposed: provers
-    talk directly, payee only supplies $\com_{i+1}$ and gets the finished proof,
-    so the restriction does not bind
-  \item (2) since the second prover also gets the commitment's randomness,
-    $\witness_0$ is protected by DL hardness, not by the commitment
-\end{outline}
-
-\rebekah{you suggested the ``two ways beyond the cited result'' belong in the
-instantiation, \Cref{sec:joint-proof}; here for now}
+The payer's secure element and device produce the signature jointly, as a
+JPOK, in which two provers each hold part of the witness and together produce
+one proof. The two provers belong to the same user, but the user controls only
+the device, and the secret key must never leave the secure element. An ordinary
+proof system would need one prover to hold the whole witness, and generic
+two-party computation is too much for the secure element. So the secure element
+contributes only knowledge of the key, and the device supplies the rest of the
+witness and computes the rest of the proof. This split makes the scheme
+deployable on existing hardware.
 
 The payee verifies every link in the chain before accepting. This is the cost of operating offline: the transcript grows
 by one link per transfer, and verification grows with it.
@@ -263,54 +193,28 @@ whatever they do afterwards, so a conflict cannot be hidden by paying the token
 along a different route.
 
 The central bank refuses a second deposit of the same token and credits
-nothing. It keeps the conflicting requests, and the auditor names the user at the point
+nothing, so the total value is unchanged, unlike in schemes where the issuer
+absorbs the double-spent value~\cite{Beer2024}. It keeps the conflicting requests, and the auditor names the user at the point
 where they diverge. Settlement of the double-spent value, such as compensating an
 honest holder who was paid an already-spent token, is an operation of the central
 bank rather than a step of the protocol. The consequences for the named user are
 outside the scheme.
 
-\begin{outline}
-  \item no deposit is credited twice, so total value is unchanged, unlike schemes
-    where the issuer absorbs the double-spent value (contrast, cite Beer2024)
-\end{outline}
-
 \paragraph{Identification.} Two conflicting deposits of one token agree on a
 prefix and then differ, either because the owner at that point sent two
 different payments, or because they deposited the token and also paid it onward.
 The auditor takes the last position at which the two agree, decrypts the
-ciphertext the owner attached there, and recovers their identifier.
+ciphertext the owner attached there, and recovers their identifier. The
+ciphertexts before that position belong to owners who passed the token on
+exactly once, and are never opened.
 
-Nothing else is recovered. The ciphertexts before that position belong to owners
-whose payments agree in both deposits, so each of them passed the token on
-exactly once, and their ciphertexts are never opened. The auditor can in
-principle deanonymise any payment, which is why we recommend distributing the
-role so that decryption requires more than a threshold of auditors to cooperate.
-
-\begin{outline}
-  \item much shorter; the interesting points instead:
-  \item decryption is one division of the two ciphertext components, $c_2 /
-    c_1^{\sk_\auditor} = \gen^{\algo{uid}}$, so the identifier is recovered as a
-    group element and looked up
-  \item the same step as tracing in \Cref{chap:txid}: link to the tracing
-    protocol there\rebekah{consider the differences: this is not general-purpose
-    auditing as in \Cref{chap:txid}, but targeted identification of known
-    double-spent transactions, so anonymity revocation, which the tracing chapter
-    does not address since it was not its focus}\rebekah{other ways of anonymity
-    revocation: schemes where two payments spending the same token give two
-    equations that anyone can solve for the identity, with no auditor; cut and choose
-    (cite C:ChaFiaNao88), linear equations in the user's secret (cite C:Brands93),
-    double-spending tags (cite EC:CamHohLys05), and for transferable tokens (cite
-    PKC:BCFK15); very inefficient, could even implement one
-    as a baseline}
-\end{outline}
-
-\paragraph{Privacy guarantees.} The scheme gives two guarantees. Transactors
-are anonymous to anyone who sees a transaction transcript, assuming payer and
-payee exchange identities out of band. Withdrawals and deposits are unlinkable
-to every party in the system, so no one can trace a deposit or a payment to its
-origin or its destination from the transcripts.\rebekah{this paragraph is a
-response to a paper reviewer who wanted privacy stated clearly; probably should
-put it elsewhere, e.g.\ with the security goals}
+This is anonymity revocation for a known double spend, not the general-purpose
+auditing of \Cref{chap:txid}. Ecash schemes without an auditor let anyone
+compute a double spender's identity from two payments of the same token, through
+cut and choose, linear equations in the user's secret, or double-spending tags,
+also for transferable tokens, at a higher cost per
+payment~\cite{C:ChaFiaNao88,C:Brands93,EC:CamHohLys05,PKC:BCFK15}.\rebekah{baseline:
+implement one auditor-free scheme?}
 
 \Cref{prot:offline} gives the complete protocol. It is stated
 generically with respect to the underlying commitment scheme, digital signature
@@ -331,15 +235,13 @@ three messages, $(\sk_{\algo{cb}}, \pk_{\algo{cb}}) \sample \SCIgen(\secparam,
 3)$.
 
 	\item Run $\ck \sample \ComGen(\secparam)$ to obtain a public
-commitment key, with all generators derived by hashing into the group, so that
-no participant knows the discrete logarithm relations between them.
+commitment key.
 
 	\item The auditor generates an asymmetric encryption key pair
 $(\sk_\auditor, \pk_\auditor) \sample \PKEgen(\secparam)$.
 
-	\item The registration authority generates keys for a multi-message
-signature scheme supporting vectors of two messages, obtaining $(\rask, \rapk)
-\sample \DSgen(\secparam)$.
+	\item The registration authority generates keys for an SCI scheme on
+vectors of two messages, $(\rask, \rapk) \sample \SCIgen(\secparam, 2)$.
 
 	\item Publish all public keys and generators to every participant, and
 return $(\pk_{\algo{cb}}, \ck, \pk_\auditor, \rapk)$.
@@ -354,20 +256,25 @@ do the following:
 	\item Provision the user's secure element $\algo{se}$ with a fresh
 secret key $\sk_{\algo{usr}}$ and a unique random identifier $\algo{uid}$.
 
-	\item $\algo{se}$ sends the registration authority $\algo{uid}$ and a
-commitment to $\sk_{\algo{usr}}$, together with a zero-knowledge proof of
-knowledge of its opening. $\algo{se}$ makes the proof non-interactive with the
-Fiat-Shamir transform, and includes a fresh nonce from the registration
-authority in the hash, so that nobody can replay it.
+	\item $\algo{se}$ runs $(\algo{req}, \state) \sample \SCIrequest(\rapk,
+(\algo{uid}, \sk_{\algo{usr}}), \{0\})$, which discloses $\algo{uid}$ and
+commits to $\sk_{\algo{usr}}$, and sends $\algo{req}$ to the registration
+authority. Its proof is bound to a fresh nonce from the registration authority,
+so that nobody can replay it.
 
 	\item The registration authority verifies that $\algo{uid}$ is fresh and
-that the proof holds, and issues $\varphi$, a signature under $\rask$ on
-the vector $(\algo{uid}, \sk_{\algo{usr}})$ committed in that message. The
+returns $\algo{resp} \sample \SCIissue(\rask, \algo{req})$, and $\algo{se}$
+computes $\varphi \leftarrow \SCIunblind(\state, \algo{resp})$. The
 registration authority does not learn $\sk_{\algo{usr}}$.
 
-	\item $\algo{se}$ unblinds $\varphi$ and stores credential $\cred =
-(\algo{uid}, \varphi)$, which satisfies $\DSverify(\rapk, (\algo{uid},
-\sk_{\algo{usr}}), \varphi) = 1$.\rebekah{registration is blind BBS+ issuance with unblinding, but the signature syntax of the preliminaries has neither; the commitment key for $\sk_{\algo{usr}}$ is not specified; and the (P4) reduction needs $\sk_{\algo{usr}}$ extracted at every registration, which the proof does not do}
+	\item $\algo{se}$ stores credential $\cred = (\algo{uid}, \varphi)$, which
+satisfies the following:
+          %
+          \begin{equation*}
+          %
+            \SCIverify(\rapk, (\algo{uid}, \sk_{\algo{usr}}), \varphi) = 1.
+          %
+          \end{equation*}
 
 	\item Pair the user's mobile device $\algo{dev}$ with $\algo{se}$, so
 that only $\algo{dev}$ can send instructions to $\algo{se}$. At pairing,
@@ -397,8 +304,7 @@ discloses $v_0$ alone, the message at index $1$, $(\algo{req}, \state) \sample
 \SCIrequest(\pk_{\algo{cb}}, (\algo{uid}_0, v_0, s_0), \{1\})$, and sends $\algo{req}$ to the
 intermediary. The commitment $C$ in $\algo{req}$ commits to the hidden messages
 under $\pk_{\algo{cb}}$, and is a different object from the pseudonym $\com_0$,
-which commits to $\algo{uid}_0$ alone under $\ck$. Nothing in $\algo{req}$
-reveals $\algo{uid}_0$ or $s_0$.
+which commits to $\algo{uid}_0$ alone under $\ck$.
 
 	\item The intermediary locks $v_0$ in the user's account and forwards
 $\algo{req}$ to the central bank.
@@ -427,8 +333,8 @@ and relation as follows:
 
     \end{enumerate}
 
-  \item[$p_i \sample \OPexecute(v, s_i, \com_i, \algo{hist}_i)$ :] The payer
-pays the payee using token $(v, s_i, \com_i, \algo{hist}_i)$. Do the following:
+  \item[$p_i \sample \OPexecute(T_i)$ :] The payer pays the payee using token
+$T_i = (v, s_i, \com_i, \algo{hist}_i)$. Do the following:
 
     \begin{enumerate}
 
@@ -445,14 +351,14 @@ $(s_{i+1}, \com_{i+1})$ to their device.
 under way. The secure element locks token $\tau_i = (v, \com_i)$.
 
       \item The payer's device computes the audit ciphertext $\ciph_i \leftarrow
-\PKEencrypt(\pk_\auditor, \gen^{\algo{uid}_i}; \rho_i)$ and a proof of correctness
+\PKEencrypt(\pk_\auditor, \algo{uid}_i; \rho_i)$ and a proof of correctness
 $\Gamma_i$, with $\inst = (\ck, \pk_\auditor, \com_i, \ciph_i)$, $\witness =
 (\algo{uid}_i, s_i, \rho_i)$, and relation as follows:
           %
           \begin{equation*}
           %
             \com_i = \ComCommit(\ck, \algo{uid}_i, s_i) \;\wedge\; \ciph_i =
-\PKEencrypt(\pk_\auditor, \gen^{\algo{uid}_i}; \rho_i).
+\PKEencrypt(\pk_\auditor, \algo{uid}_i; \rho_i).
           %
           \end{equation*}
 
@@ -462,13 +368,12 @@ relation as follows:
           %
           \begin{equation*}
           %
-            \DSverify(\rapk, (\algo{uid}_i, \sk_{\algo{usr}_i}), \varphi_i) = 1
+            \SCIverify(\rapk, (\algo{uid}_i, \sk_{\algo{usr}_i}), \varphi_i) = 1
 \;\wedge\; \com_i = \ComCommit(\ck, \algo{uid}_i, s_i).
           %
           \end{equation*}
           %
-          Binding $\com_{i+1}$ into $m_i$ fixes
-the destination of the payment. This is a JPOK, in which the secure element runs $\JPOKprove_0$ and
+          This is a JPOK, in which the secure element runs $\JPOKprove_0$ and
 contributes knowledge of the payer's secret key, and the device runs
 $\JPOKprove_1$ and contributes the remaining witness.
 
@@ -498,13 +403,13 @@ deposits token $\tau_n = (v, \com_n)$. Do the following:
 instructs the secure element to lock $\tau_n$.
 
     \item The device computes the audit ciphertext $\ciph_n \leftarrow
-\PKEencrypt(\pk_\auditor, \gen^{\algo{uid}_n}; \rho_n)$ and proof $\Gamma_n$, exactly
+\PKEencrypt(\pk_\auditor, \algo{uid}_n; \rho_n)$ and proof $\Gamma_n$, exactly
 as in $\OPexecute$.
 
     \item The device and secure element jointly compute $\sigma_n$, a signature
 of knowledge on the message $m_n = (v, \com_n, \algo{dep})$ for the relation of
 $\OPexecute$, where $\algo{dep}$ is a fixed marker distinct from every
-pseudonym, so that a deposit signature cannot be replayed as a payment.
+pseudonym.
 
     \item The device sends deposit request $d_n = (\tau_n, \ciph_n, \sigma_n,
 \Gamma_n, \algo{hist}_n)$ to the intermediary, which forwards it to the central
@@ -543,15 +448,11 @@ sent two different payments, or one of the two chains ends at $j$, in which case
 the owner at $j$ deposited the token and also spent or deposited it a second
 time. Both requests carry $\ciph_j$.
 
-    \item Decrypt $\ciph_j$ using $\sk_\auditor$ to recover $\gen^{\algo{uid}^*}$,
-where $\algo{uid}^*$ is the identifier of the owner of $\tau_j = (v, \com_j)$.
-The ciphertext encrypts the identifier as a group element, so decryption gives
-$\gen^{\algo{uid}^*}$ rather than $\algo{uid}^*$. Mapping it to the user is a
-lookup against the identifiers the registration authority assigned, and is
-outside the scheme.
+    \item Decrypt $\ciph_j$ using $\sk_\auditor$ to recover $\algo{uid}^*$,
+the identifier of the owner of $\tau_j = (v, \com_j)$.
 
-    \item Return $\algo{DS} = \{\gen^{\algo{uid}^*}\}$, extended by repeating the above
-for each further pair of conflicting deposits of the same token.\rebekah{the syntax in \Cref{sec:offline-definitions} says $\OPidentify$ outputs the identifiers of the double spenders, and $\idfu{\algo{op}}$ returns users, but this returns group elements $\gen^{\algo{uid}^*}$; align the definition or include the lookup}
+    \item Return $\algo{DS} = \{\algo{uid}^*\}$, extended by repeating the above
+for each further pair of conflicting deposits of the same token.
 
   \end{enumerate}
 
@@ -559,35 +460,33 @@ for each further pair of conflicting deposits of the same token.\rebekah{the syn
 
 \end{protocolbox}
 
-The security of $\OP$ rests on the properties of its building blocks.
 \Cref{thm:offline-construction-security} states which properties it needs, and
 \Cref{sec:offline-security} proves it.
 
 \begin{theorem}\label{thm:offline-construction-security}
   %
-  If the commitment scheme is binding, the public-key encryption scheme is
-IND-CPA secure, the central bank's SCI scheme is one-more unforgeable, request
-hiding and online request extractable,\rebekah{online request extractability
-only if confirmed necessary; the code uses plain Fiat-Shamir} the signature scheme used by the registration authority is
-existentially unforgeable, and the proofs and signatures of knowledge, including the JPOK, are
+  If the commitment scheme is hiding and binding, the public-key encryption
+scheme is IND-CPA secure, the central bank's SCI scheme is existentially
+unforgeable and request hiding, the registration authority's SCI scheme
+is existentially unforgeable and request hiding, and the proofs and signatures of knowledge, including the JPOK and the request proof, are
 zero knowledge and simulation extractable, then
 $\OP$ securely realises ideal functionality
-$\idfu{\algo{op}}$ against static corruption of devices and secure elements,
+$\idfu{\algo{op}}$ against static corruption of users,
 with the registration authority, the central bank, and the intermediaries honest
 but curious.
 %
 \end{theorem}
 
-\paragraph{Extensions.} The construction supports several
-extensions.\rebekah{you wrote: needs paragraphs. I'm kind of surprised we're
-even in the construction section. I feel like this chapter is stressful}
+\paragraph{Extensions.} The construction supports several extensions, each a
+change to the construction rather than to its instantiation.
 
-It extends to epoch-based expiry, which is how it accommodates revocation. The registration authority signs the triple $(\algo{uid},
+It extends to expiry by epochs, fixed periods after which credentials and tokens
+are no longer accepted, which is how it accommodates revocation. The registration authority signs the triple $(\algo{uid},
 \sk_{\algo{usr}},\allowbreak \epoch)$ rather than the pair $(\algo{uid},
 \sk_{\algo{usr}})$, and the central bank signs $(\algo{uid}_0,\allowbreak v,\allowbreak s_0,\allowbreak \epoch)$
 at withdrawal, tying each token to the epoch in which it was issued. Both
-schemes sign vectors one longer than in the instantiation, and the withdrawal proof and the JPOK
-gain one exponent each. Nothing else changes.
+schemes sign vectors one message longer, and the proof of withdrawal and the
+JPOK each prove one more message. Nothing else changes.
 
 Payees enforce the policy,
 rejecting payments carrying an epoch outside the window they accept, and the
@@ -595,8 +494,7 @@ width of that window can be tuned to the value of the payment. An epoch can
 equally be counted in spending hops rather than in wall-clock time, capping the
 length of a chain that will be accepted at deposit.
 
-Expiry is the form revocation
-takes offline. A payee who has been offline since before a payer was revoked has
+A payee who has been offline since before a payer was revoked has
 no verified real-time information with which to reject that payer, so the
 guarantee is expressed as a bound on how long a credential remains usable rather
 than as an instruction delivered to payees.
@@ -613,23 +511,12 @@ financially unattractive independently of whether the spender is subsequently
 identified. Both are payee-side checks and require no change to the protocol
 messages.
 
-The construction is parametric in the hardware that realises the secure element,
-and admits several instantiations. Mobile trusted execution environments (TEEs)
-protect application secrets from
-a malicious device owner, but expose them to the application developer through
-key management APIs, so key confidentiality does not by itself give integrity of
-the logic that uses the key~\cite{trustzone,secureenclave}. Smart cards such as
-Javacard and MIFARE protect the key and the logic together, in tamper-resistant
-isolated execution, which the single-use enforcement of
-$\OP$ requires~\cite{javacard,mifare}. Our implementation uses a smart card for
-this reason. A deployment
-chooses among these according to the equipment cost it can bear, the system-wide
-value limits it sets, and the cost of attacking a single card. No hardware
-assumption is unconditional, and the epoch and value caps above bound
-the exposure when one fails.
+The secure element can be any hardware that protects the key and the
+single-use logic together. Smart cards do, while mobile trusted execution
+environments protect keys but not the logic that uses
+them~\cite{trustzone,secureenclave,javacard,mifare}.
 
-The requirement that $\sk_{\algo{usr}}$ never leave the secure element, which
-the JPOK exists to satisfy, extends to a recovery
+The requirement that $\sk_{\algo{usr}}$ never leave the secure element extends to a recovery
 mechanism at the credential layer. A user who loses their device re-enrols with
 the registration authority under a fresh pair $(\algo{uid}, \sk_{\algo{usr}})$,
 restoring their ability to transact without migrating any state. The unspent
@@ -641,6 +528,4 @@ The central bank needs its list of deposited tokens to detect double spending,
 so it cannot simply discard it. Logical or wall-clock timestamps that bound a
 token's validity span let it prune entries once that span has elapsed.
 
-We leave divisibility and coin transparency to future work, as well as
-aggregating deposits under value commitments, which would also hide the value at
-deposit.
+We leave coin transparency to future work.

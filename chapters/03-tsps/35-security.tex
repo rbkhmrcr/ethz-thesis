@@ -18,15 +18,7 @@ from the signatures it obtains from its own oracle.
 
   Let $\adv$ be a PPT adversary against the TS-UF-1 security of
 $\TSPS$ applied to $\SPS$. We build $\advB$ playing the EUF-CMA experiment of
-\Cref{exp:euf-cma} against $\SPS$. Recall that $\adv$ wins if the following
-hold:
-  %
-  \begin{equation*}
-  %
-    \SPSverify(\pk, \vec{\msg}^\star, \SPSsig^\star) = 1, \quad |S(\vec{\msg}^\star) \cap
-\mathcal{H}| < t + 1 - |\Cor|.
-  %
-  \end{equation*}
+\Cref{exp:euf-cma} against $\SPS$.
 
   We first describe the setup. $\advB$ receives $\pk$ from its challenger. On
 receiving $(n, t, \Cor)$ from $\adv$, it samples key shares $\{\sk_h\}_{h \in
@@ -90,14 +82,9 @@ applied to $\SPS$. $\advB$ is as in the proof of
 $(n, t, \Cor_0)$ from $\adv$, where $\Cor_0$ is the set of signers corrupted
 from the start, it samples a set $\mathcal{K} \subseteq [1,n]$ of
 size $t$ uniformly at random, and aborts if $\Cor_0 \not\subseteq \mathcal{K}$.
-It samples key shares $\{\sk_h\}_{h \in \mathcal{K}}$ uniformly. $\advB$ does
-not know $\sk$, so it can hold at most $t$ shares, and by the first consequence these are
-distributed exactly as in a real execution. For each group element of $\pk$, it
-computes the shares of the signers in $\mathcal{K}$ from their key shares where
-that element is a generator raised to a component of $\sk$, and samples them
-uniformly otherwise, which by the first consequence is again their real distribution. It derives
-every other signer's share from $\pk$ and these $t$ shares by the second
-consequence of linear sharing, and sends $\pk$, all $n$ shares of it, and $\{\sk_h\}_{h
+It samples the key shares and the shares of $\pk$ as in the proof of
+\Cref{thm:tsps-construction-security}, with $\mathcal{K}$ in place of $\Cor$
+and the further signers, and sends $\pk$, all $n$ shares of it, and $\{\sk_h\}_{h
 \in \Cor_0}$ to $\adv$. The set $\mathcal{K}$ is a guess at the signers that $\adv$ will
 either corrupt or ask for a signature share on its forgery message.
 

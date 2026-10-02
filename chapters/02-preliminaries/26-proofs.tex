@@ -2,8 +2,7 @@
 
 A relation $\rel$ is an efficiently decidable set of pairs $(\inst, \witness)$
 of a statement and a witness. We write $\rel(\inst, \witness) = 1$ when
-$(\inst, \witness)$ is in $\rel$, and $\lang$ for the set of statements $\inst$
-for which some witness $\witness$ has $\rel(\inst, \witness) = 1$.
+$(\inst, \witness)$ is in $\rel$.
 
 Zero-knowledge proof systems enable provers to convince verifiers that a
 statement is true without revealing any information beyond the validity of the
@@ -187,10 +186,7 @@ A labelled proof system is simulation extractable if this advantage is negligibl
 for every PPT adversary $\adv$.
 
 Simulation extractability is a strong form of
-non-malleability~\cite{AC:Groth06}. Even after seeing simulated
-proofs, including proofs of false statements, $\adv$ cannot produce an accepting
-proof for a new statement or label without a witness being extracted from it.
-The condition $(\inst^*, \lbl^*) \notin \Query$ still allows $\adv$ to modify a
+non-malleability~\cite{AC:Groth06}. The condition $(\inst^*, \lbl^*) \notin \Query$ still allows $\adv$ to modify a
 simulated proof into another proof for the same statement and label. As a
 witness can be extracted, simulation extractable proof systems are proofs of
 knowledge.
