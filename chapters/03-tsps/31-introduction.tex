@@ -58,8 +58,8 @@ The price of this is security in the GGM.
 
 Our construction applies to any SPS scheme with decomposable signing, a
 property of the signing algorithm that we define, and that $\AGHO$ and $\KPW$
-have. The signing key is secret-shared between the signers, and key generation, combining
-and verification use general-purpose MPC. Evaluating signing under MPC directly
+have. The signing key is secret-shared between the signers, and key generation uses
+general-purpose MPC. Evaluating signing under MPC directly
 would mean the signers interact for each signature. In the SPS schemes we use,
 the message is a vector of public group elements raised to shared exponents,
 which each signer can do locally. So we do all message-independent computations
@@ -67,9 +67,13 @@ under MPC in an offline phase, and once the message is known,
 signing needs no interaction. \Cref{sec:tsps-security} shows that security
 reduces to the unforgeability of the underlying scheme.
 
-Existing threshold SPS schemes avoid interaction altogether, but they are new
-schemes, with restrictions on messages or assumptions. Splitting signing in two
-keeps existing SPS schemes as they are.
+One existing threshold SPS scheme avoids interaction altogether, but only signs
+pairs of group elements, one in each source group, with the same discrete
+logarithm. Existing commitments and public keys lie in one group and cannot be
+signed with it, which rules out the ledger and transparency-log uses
+above~\cite{AC:CKPSS23,EPRINT:GGPR25}. Splitting signing in two keeps existing
+SPS schemes as they are, including $\AGHO$, which has the smallest possible
+signatures.
 
 High-throughput applications, such as payments, have quiet and busy periods,
 and the preprocessing can run in the quiet ones.
@@ -117,10 +121,10 @@ indexed Diffie-Hellman tuples, of the form $(\gen^\msg,
 \ggen^\msg)$~\cite{AC:CKPSS23}.
 
 
-Another non-interactive threshold SPS scheme instead is capable of signing
-arbitrary group elements, and is secure under the SXDH
-assumption~\cite{PKC:MMSST24}. It builds on $\KPW$, and its signatures consist
-of seven group elements~\cite{C:KilPanWee15}. Building on it, a threshold SPS
+Following our work, a non-interactive threshold SPS scheme was given that signs
+arbitrary group elements and is secure under SXDH~\cite{PKC:MMSST24}. It builds
+on $\KPW$, and its signatures consist of seven group elements, against three for
+threshold $\AGHO$. We benchmark against it in \Cref{sec:tsps-evaluation}. Building on this scheme, a threshold SPS
 scheme with silent setup lets signers generate their keys independently, with no
 interactive key generation, at the cost of larger signatures, a trusted
 powers-of-tau setup and security in the GGM~\cite{EPRINT:GGPR25}.

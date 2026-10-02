@@ -17,13 +17,13 @@ elements and $\algo{ExpGrp}$.
 We realise $\algo{ExpGrp}$ as Smart and Talibi Alaoui do, from multiplication
 triples made in preprocessing~\cite{C:Beaver91b,IMA:SmaTal19}.
 
-$\algo{ExpGrp}$ consumes a mixed triple $(\shr{\eta}, \shr{h}, \shr{h^\eta})$
-with $\eta \sample \Zp$ and $h \sample \group{}$. The signers open the
+$\algo{ExpGrp}$ consumes a mixed triple $(\shr{\eta}, \shr{f}, \shr{f^\eta})$
+with $\eta \sample \Zp$ and $f \sample \group{}$. The signers open the
 following, which are uniform and reveal nothing:
 %
 \begin{equation*}
 %
-  \epsilon = \alpha - \eta, \quad \delta = b h^{-1}.
+  \epsilon = \alpha - \eta, \quad \delta = b f^{-1}.
 %
 \end{equation*}
 %
@@ -31,7 +31,7 @@ They then compute the following locally:
 %
 \begin{equation*}
 %
-  \shr{b^{\alpha}} = \shr{h^{\eta}} \cdot \shr{h}^{\epsilon} \cdot
+  \shr{b^{\alpha}} = \shr{f^{\eta}} \cdot \shr{f}^{\epsilon} \cdot
 \delta^{\shr{\eta}} \cdot \delta^{\epsilon},
 %
 \end{equation*}
@@ -270,7 +270,7 @@ the following:
       %
       \begin{gather*}
       %
-	\vec{\mu} = \mat{K}\vec{\alpha}, \quad \vec{\nu} =
+	\vec{\zeta} = \mat{K}\vec{\alpha}, \quad \vec{\nu} =
 \mat{\Gamma}\vec{\alpha}, \quad \vec{\omega} = \mat{\Delta}\vec{\alpha}, \\
       %
 	\vec{\xi} = \vec{\beta}^{\mathsf{T}}\mat{\Gamma}, \quad \vec{\upsilon} =
@@ -286,7 +286,7 @@ the following:
 \beta)}, \gen^{\vec{\xi}}, \gen^{\vec{\upsilon}}), \\
       %
 	\pk = (\vec{\widetilde{a}}, \vec{\widetilde{u}}, \vec{\widetilde{v}},
-\vec{\widetilde{w}}) = (\ggen^{(1, \alpha)}, \ggen^{\vec{\mu}},
+\vec{\widetilde{w}}) = (\ggen^{(1, \alpha)}, \ggen^{\vec{\zeta}},
 \ggen^{\vec{\nu}}, \ggen^{\vec{\omega}}).
       %
       \end{gather*}
@@ -338,7 +338,13 @@ compute $\gen^{k_{1,j}}$ in the online phase instead, which is also local.
 
 The group elements of the secret key are $\vec{b}, \vec{x}, \vec{y} \in
 \group{1}^2$, and the offline phase raises each of them to a shared exponent
-with $\algo{ExpGrp}_1$.
+with $\algo{ExpGrp}_1$. We thresholdise $\KPW$ with its secret key as
+published, to show that the construction also applies when the secret key
+contains group elements. Since our key generation knows their discrete
+logarithms, the signers could keep these instead, and the offline phase would
+then need only $\algo{Mul}$, as for $\AGHO$.\rebekah{benchmark threshold $\KPW$
+with the discrete logarithms kept as shared field elements (no $\algo{ExpGrp}$)
+in the server rerun, and compare the offline phase}
 
 \Cref{prot:tsps-kiltz} gives threshold $\KPW$. Its offline phase makes one
 multiplication, then one round of eight calls to $\algo{ExpGrp}_1$.
@@ -356,7 +362,7 @@ signers do the following:
 $\shr{\mat{K}}$, $\shr{\mat{\Gamma}}$ and $\shr{\mat{\Delta}}$ with
 $\algo{RandShare}$.
 
-	\item Compute $\shr{\vec{\mu}}$, $\shr{\vec{\nu}}$, $\shr{\vec{\omega}}$,
+	\item Compute $\shr{\vec{\zeta}}$, $\shr{\vec{\nu}}$, $\shr{\vec{\omega}}$,
 $\shr{\vec{\xi}}$ and $\shr{\vec{\upsilon}}$ with one call to $\algo{Mul}$ per
 entry, followed by a local addition, since the first entries of $\vec{\alpha}$ and
 $\vec{\beta}$ are the public constant $1$.
@@ -369,7 +375,7 @@ $\vec{\beta}$ are the public constant $1$.
 \gen^{\shr{\vec{\xi}}}, \quad \shr{\vec{y}} = \gen^{\shr{\vec{\upsilon}}}, \\
 	  %
 	    \shr{\vec{\widetilde{a}}} = \ggen^{(1, \shr{\alpha})}, \quad
-\shr{\vec{\widetilde{u}}} = \ggen^{\shr{\vec{\mu}}}, \quad
+\shr{\vec{\widetilde{u}}} = \ggen^{\shr{\vec{\zeta}}}, \quad
 \shr{\vec{\widetilde{v}}} = \ggen^{\shr{\vec{\nu}}}, \quad
 \shr{\vec{\widetilde{w}}} = \ggen^{\shr{\vec{\omega}}}.
 	  %
@@ -459,12 +465,13 @@ $1$ if and only if the following hold:
 
 \end{protocolbox}
 
-\begin{theorem}\label{thm:tsps-security} Let the MPC protocol be private and
-secure with abort against up to $t$ statically corrupted signers, over a linear
+\begin{theorem}\label{thm:tsps-security} Let the MPC protocol be secure with
+abort against up to $t$ statically corrupted signers, over a linear
 $(t+1, n)$ threshold sharing. Then
 the threshold $\AGHO$ and $\KPW$ schemes are correct. The threshold $\AGHO$
 scheme is TS-UF-1 secure in the GGM, and the threshold $\KPW$ scheme is
-TS-UF-1 secure under SXDH, in both cases with no loss. If the MPC protocol is
+TS-UF-1 secure under SXDH, with the bound of
+\Cref{thm:tsps-construction-security}. If the MPC protocol is
 secure against adaptive corruption, both are adp-TS-UF-1 secure with the loss of
 \Cref{lem:tsps-adaptive}.\end{theorem}
 

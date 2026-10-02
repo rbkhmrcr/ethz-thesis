@@ -49,13 +49,13 @@ sharing. It computes their state shares from these and from their key shares,
 with the local operations of $\TSPSoffsign$. Where an entry of the state is an
 entry of the key, as the $e_{j,i}$ are in $\KPW$, this gives a copy of the key
 share. Every value opened in $\TSPSoffsign$ is masked by a fresh uniform value,
-so $\advB$ samples these uniformly as well, and runs $\algo{Sim}$ on the
+so $\advB$ samples these uniformly as well, and runs $\simu$ on the
 corrupted signers' inputs and outputs and the opened values to produce their
 view. If $\adv$ makes the execution abort,
 $\advB$ returns $\bot$ and marks $\mathsf{sid}$ unusable. $\advB$ never fixes the
-randomness $\varrho$ that $\shr{\state}_{\mathsf{sid}}$ shares. It fixes at most $t$
-shares, which are independent of $\varrho$, and $\varrho$ is determined later by
-the signature $\advB$ obtains for that session. This is sound because each
+signing randomness that $\shr{\state}_{\mathsf{sid}}$ shares. It fixes at most
+$t$ shares, which are independent of this randomness, and the randomness is
+determined later by the signature $\advB$ obtains for that session. This is sound because each
 session is used for one message only.
 
   $\advB$ answers the online oracle as follows. Each component of $c_0$ and each
@@ -71,8 +71,10 @@ signature share from the signature and the $t$ shares already fixed.
   Finally, $\advB$ forwards $\adv$'s output $(\vec{\msg}^\star,
 \SPSsig^\star)$ to its challenger. If $\adv$ wins, fewer than $t + 1 - |\Cor|$
 honest signers issued shares on $\vec{\msg}^\star$, so in no session on
-$\vec{\msg}^\star$ does $\advB$ query its own oracle. $\advB$ therefore wins
-whenever $\adv$ does, and no guess is needed.
+$\vec{\msg}^\star$ does $\advB$ query its own oracle. Replacing the real offline
+executions by simulated ones changes the probability that $\adv$ wins by at most
+$\Adv^{\mathsf{mpc}}(\secparam)$ for each of the $q$ sessions. Otherwise
+$\advB$ wins whenever $\adv$ does, and no guess is needed.
 
 \end{proof}
 
@@ -108,14 +110,14 @@ in $\mathcal{K}$ in place of those in $\Cor$.
 $\state_{\mathsf{sid},h}$, and runs $\TSPSonsign$ itself. Otherwise, the
 first time $\mathsf{sid}$ is used, $\advB$ queries its own signing oracle on
 $\vec{\msg}$ and obtains $\SPSsig$. It computes the shares
-$\{\SPSsig_k\}_{k \in \mathcal{K}}$ by running $\TSPSonsign$ on the material it
+$\{\SPSsig_{h'}\}_{h' \in \mathcal{K}}$ by running $\TSPSonsign$ on the material it
 holds, derives every other share from $\SPSsig$ and these by the second
 consequence of linear sharing, and stores them against $\mathsf{sid}$, so that later
 queries in the same session are answered consistently. The share returned is the
 unique one consistent with a real execution.
 
-  For the corruption oracle, on $\mathcal{O}_{\algo{Cor}}(k)$, $\advB$
-returns $\sk_k$ and every $\state_{\mathsf{sid},k}$ if $k \in \mathcal{K}$, and
+  For the corruption oracle, on $\mathcal{O}_{\algo{Cor}}(h)$, $\advB$
+returns $\sk_h$ and every $\state_{\mathsf{sid},h}$ if $h \in \mathcal{K}$, and
 aborts otherwise.
 
   Finally, $\advB$ forwards $\adv$'s output $(\vec{\msg}^\star,
@@ -128,7 +130,9 @@ Its output then wins the EUF-CMA experiment. The shares $\advB$ hands out are
 distributed identically whichever $\mathcal{K}$ it chose, so $\mathcal{K}$ is
 independent of $\adv$'s view, and is such a set with probability at least
 $\binom{n}{t}^{-1}$. $\advB$ therefore wins with at least $\binom{n}{t}^{-1}$
-times the probability that $\adv$ wins.
+times the probability that $\adv$ wins, less the simulation loss of $q \cdot
+\Adv^{\mathsf{mpc}}(\secparam)$ as in the proof of
+\Cref{thm:tsps-construction-security}.
 
 \end{proof}
 
@@ -143,7 +147,7 @@ check the algebra of correctness. We assume the MPC properties.
 SXDH~\cite{C:AGHO11,C:KilPanWee15}. The reduction of
 \Cref{thm:tsps-construction-security} only applies group operations to the
 group elements it receives, and samples uniform group elements as $\gen^r$, so
-it is generic whenever $\adv$ and $\algo{Sim}$ are, and the GGM bound for
+it is generic whenever $\adv$ and $\simu$ are, and the GGM bound for
 $\AGHO$ applies.
 
   For decomposable signing, the values of $c_0$, the $c_j$ and the $e_{j,i}$

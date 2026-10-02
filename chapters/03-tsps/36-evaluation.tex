@@ -9,11 +9,14 @@ elements of $\Zp$, with all operations defined between elements of $\Zp$. For
 the protocols of this chapter, we also need operations between elements
 of $\group{1}$ and $\group{2}$. We benchmark both the honest-majority and
 dishonest-majority settings, using ATLAS and MASCOT respectively to realise
-multiplication of shared secrets~\cite{CCS:KelOrsSch16,C:GLOPS21}. ATLAS is
-designed to work in both the honest but curious and malicious settings, but the
-implementation available in MP-SPDZ captures only the honest but curious
-case~\cite{CCS:Keller20}. Our theorems assume an MPC protocol secure against
-malicious signers, so they do not cover the ATLAS rows.
+multiplication of shared secrets~\cite{C:GLOPS21,CCS:KelOrsSch16}.
+
+Our theorems assume static corruption and an MPC protocol that is secure with
+abort against malicious signers. MASCOT provides this with a dishonest majority,
+so the theorems cover the MASCOT rows. The ATLAS protocol provides it with an
+honest majority, but its implementation in MP-SPDZ is only secure against
+honest but curious signers~\cite{CCS:Keller20}. So the ATLAS rows show the cost
+of the honest-majority setting, but are not covered by our theorems.
 
 We add to MP-SPDZ sharings of group elements with their authentication
 information, and $\algo{ExpGrp}$ with mixed triples. The groups are those of

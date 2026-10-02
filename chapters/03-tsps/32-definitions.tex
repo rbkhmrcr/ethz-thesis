@@ -47,9 +47,9 @@ $\vec{\msg}$ and $\SPSsig$, and outputs $0$ or $1$.
 \end{description}
 %
 Some schemes are rerandomisable: they also provide an algorithm
-$\SPSsig' \sample \SPSrandomise(\SPSsig)$, which, without the secret key,
-turns a signature into a new signature on the same message, distributed as a
-freshly generated one.
+$\SPSrandomise$, which, without the secret key, turns a signature $\SPSsig$
+into a new signature $\SPSsig'$ on the same message, distributed as a freshly
+generated one.
 
 A rerandomisable scheme cannot be strongly unforgeable, since rerandomising a
 signature is itself a strong forgery.
@@ -60,8 +60,8 @@ messages in $\group{1}^\ell$.
 
 \subsection{Threshold structure-preserving signature schemes}
 
-We write $\shr{x}$ for a sharing of $x$ between the $n$ signers, and $x_i$ for
-the share of signer $i$. Signing is split
+We write $\shr{x}$ for a sharing of $x$ between the $n$ signers, and $x_h$ for
+the share of signer $h$. Signing is split
 into an offline phase, run before the message is known, and an online phase. A
 threshold SPS scheme $\TSPS$ consists of the following algorithms.
 
@@ -70,7 +70,8 @@ threshold SPS scheme $\TSPS$ consists of the following algorithms.
   \item[{$(\shr{\sk}, \pk) \sample \TSPSgen(\secparam, \ell, t, n)$ :}] Run
 jointly by the signers. On input the message length $\ell$, the corruption bound
 $t$, and the number of signers $n > t$, gives each signer $h$ a share $\sk_h$
-of the secret key and outputs a public key $\pk$.
+of the secret key, and outputs a public key $\pk$ together with the share
+$\pk_h$ of it that each signer $h$ broadcasts.
 
   \item[{$\shr{\state} \sample \TSPSoffsign(\shr{\sk})$ :}] Run jointly by the
 signers before the message is known. Gives each signer $h$ a share $\state_h$ of
@@ -115,16 +116,19 @@ notions are defined for non-interactive threshold signature schemes, with a
 leader, played by the adversary, that collects the signature
 shares~\cite{C:BCKMTZ22}.
 
-\Cref{exp:ts-uf-1} gives the TS-UF-1 experiment as originally defined~\cite{C:BCKMTZ22}.
+\Cref{exp:ts-uf-1} gives the TS-UF-1 experiment as originally
+defined~\cite{C:BCKMTZ22}. The only change we make is that $t+1$ signers are
+needed to sign, rather than $t$, to match the rest of this chapter. The other
+symbols in the box are local to it.
 
 \begin{experimentbox}{Threshold signature schemes: TS-UF-1~\cite{C:BCKMTZ22}.}{ts-uf-1}
 
   \begin{enumerate}
 
     \item The adversary outputs a set $\mathsf{CS} \subseteq [1, n_s]$ of
-corrupted servers with $|\mathsf{CS}| < t$. The challenger samples $h \sample
+corrupted servers with $|\mathsf{CS}| \leq t$. The challenger samples $\mathsf{H} \sample
 \mathsf{HF}$, runs $(\mathsf{vk}, \mathsf{aux}, \mathsf{sk}_1, \ldots,
-\mathsf{sk}_{n_s}) \sample \algo{Kg}[h]$, sets $\mathsf{HS} := [1, n_s]
+\mathsf{sk}_{n_s}) \sample \algo{Kg}[\mathsf{H}]$, sets $\mathsf{HS} := [1, n_s]
 \setminus \mathsf{CS}$, stores $\mathsf{sk}_i$, $\mathsf{vk}$ and $\mathsf{aux}$
 in the state $\mathsf{st}_i$ of every $i \in \mathsf{HS}$, and sends
 $\mathsf{vk}$, $\mathsf{aux}$ and $\{\mathsf{sk}_i\}_{i \in \mathsf{CS}}$ to
@@ -135,16 +139,16 @@ $\adv$.
       \begin{description}
 
 	\item[$\algo{PPO}(i)$:] If $i \notin \mathsf{HS}$, $\adv$ loses. Otherwise
-run $(\mathsf{pp}, \mathsf{st}_i) \sample \algo{SPP}[h](\mathsf{st}_i)$, add
+run $(\mathsf{pp}, \mathsf{st}_i) \sample \algo{SPP}[\mathsf{H}](\mathsf{st}_i)$, add
 $\mathsf{pp}$ to $\mathsf{PP}_i$, and return $\mathsf{pp}$.
 
 	\item[$\algo{PSignO}(i, \mathsf{lr})$:] Let $M = \mathsf{lr.msg}$. If
 $\mathsf{lr.SS} \not\subseteq [1, n_s]$ or $i \notin \mathsf{HS} \cap
 \mathsf{lr.SS}$, $\adv$ loses. Otherwise run $(\mathsf{psig}, \mathsf{st}_i)
-\sample \algo{PS}[h](\mathsf{lr}, i, \mathsf{st}_i)$, add $i$ to $S_1(M)$ if
+\sample \algo{PS}[\mathsf{H}](\mathsf{lr}, i, \mathsf{st}_i)$, add $i$ to $S_1(M)$ if
 $\mathsf{psig} \neq \perp$, and return $\mathsf{psig}$.
 
-	\item[$\algo{RO}(x)$:] Return $h(x)$.
+	\item[$\algo{RO}(x)$:] Return $\mathsf{H}(x)$.
 
       \end{description}
 
@@ -152,8 +156,8 @@ $\mathsf{psig} \neq \perp$, and return $\mathsf{psig}$.
 
   \end{enumerate}
 
-  $\adv$ wins the experiment if $\algo{Vf}[h](\mathsf{vk}, M, \mathsf{sig}) = 1$
-and $|S_1(M)| < t - |\mathsf{CS}|$.
+  $\adv$ wins the experiment if $\algo{Vf}[\mathsf{H}](\mathsf{vk}, M, \mathsf{sig}) = 1$
+and $|S_1(M)| < t + 1 - |\mathsf{CS}|$.
 
 \end{experimentbox}
 
@@ -195,8 +199,8 @@ secure if this advantage is negligible for every PPT adversary $\adv$.
 challenger sets $\mathcal{H} := [1,n] \setminus \Cor$.
 
     \item The challenger generates $(\shr{\sk}, \pk) \sample \TSPSgen(\secparam,
-\ell, t, n)$, and sends $\pk$, the shares $\{\pk_i\}_{i \in [1,n]}$ that the
-signers broadcast to open it, and $\{\sk_i\}_{i \in \Cor}$ to $\adv$.
+\ell, t, n)$, and sends $\pk$, the shares $\{\pk_h\}_{h \in [1,n]}$ that the
+signers broadcast to open it, and $\{\sk_h\}_{h \in \Cor}$ to $\adv$.
 
     \item The adversary is given oracle access to the following:
 
@@ -208,12 +212,12 @@ signers, with $\adv$ acting for $\Cor$, store the shares
 $\shr{\state}_{\mathsf{sid}}$, and return the view of the corrupted signers. If
 the run aborts, return $\perp$ and mark $\mathsf{sid}$ as used.
 
-	\item[$\mathcal{O}_{\algo{On}}(i, \mathsf{sid}, \vec{\msg})$:] If $i
+	\item[$\mathcal{O}_{\algo{On}}(h, \mathsf{sid}, \vec{\msg})$:] If $h
 \notin \mathcal{H}$, $\mathsf{sid}$ was not initialised by
 $\mathcal{O}_{\algo{Off}}$, or $\mathsf{sid}$ has been used with a message other
-than $\vec{\msg}$, return $\perp$. Otherwise compute $\SPSsig_i \leftarrow
-\TSPSonsign(\sk_i, \state_{\mathsf{sid},i}, \vec{\msg})$, add $i$ to
-$S(\vec{\msg})$, and return $\SPSsig_i$.
+than $\vec{\msg}$, return $\perp$. Otherwise compute $\SPSsig_h \leftarrow
+\TSPSonsign(\sk_h, \state_{\mathsf{sid},h}, \vec{\msg})$, add $h$ to
+$S(\vec{\msg})$, and return $\SPSsig_h$.
 
       \end{description}
 
@@ -230,9 +234,9 @@ $\vec{\msg}$.
 
 \paragraph{Adaptive corruption.} In the adaptive variant, adp-TS-UF-1, the
 adversary also has the corruption oracle of Crites, Komlo and
-Maller~\cite{C:CriKomMal23}. On $\mathcal{O}_{\algo{Cor}}(k)$, the oracle
-returns $\perp$ if $k \in \Cor$ or $|\Cor| = t$. Otherwise it moves $k$ from
-$\mathcal{H}$ to $\Cor$, and returns $\sk_k$ together with every
+Maller~\cite{C:CriKomMal23}. On $\mathcal{O}_{\algo{Cor}}(h)$, the oracle
+returns $\perp$ if $h \in \Cor$ or $|\Cor| = t$. Otherwise it moves $h$ from
+$\mathcal{H}$ to $\Cor$, and returns $\sk_h$ together with every
 $\state_{\mathsf{sid},k}$. The winning condition is unchanged, with $\Cor$ the
 set at the end of the experiment, and we write
 $\Adv_{\TSPS, \adv}^{\mathsf{adp\text{-}TS\text{-}UF\text{-}1}}(\secparam)$
@@ -253,8 +257,8 @@ We describe our schemes as sequences of calls to a secure multiparty
 computation protocol. Let $\alpha \in \Zp$ be a secret value
 shared between the $n$ signers, such that any $t+1$ of them can reconstruct it
 by a pre-defined linear combination. We write $\shr{\alpha}$ for such a sharing:
-the vector $(\alpha_1, \ldots, \alpha_n)$ in which $\alpha_i$ is the share held
-by the $i^{\mathrm{th}}$ signer, and we use the same notation $\shr{a}$ for a
+the vector $(\alpha_1, \ldots, \alpha_n)$ in which $\alpha_h$ is the share held
+by signer $h$, and we use the same notation $\shr{a}$ for a
 sharing of a group element $a \in \group{}$, where $\group{}$ is either source
 group. We assume this notation
 incorporates the authentication components that malicious security requires,
@@ -346,10 +350,13 @@ $\Zp^*$, the signers sample from $\Zp$ and abort if an opened $\gamma$ is zero,
 which happens with probability $1/p$. Where no inverse is taken, sampling from
 $\Zp$ instead of $\Zp^*$ changes the distribution only negligibly.
 
-Finally, we require the MPC protocol to be private and secure with
-abort against up to $t$ statically corrupted signers, or adaptively corrupted
-signers for adp-TS-UF-1. Privacy means that the
-view of the corrupted signers, over any sequence of calls, can be simulated by a
-PPT simulator $\algo{Sim}$ from their own inputs and outputs and the values
-opened. Security with abort means that corrupted signers may make a call return
-$\bot$ to every honest signer, but cannot make it return a wrong output.
+Finally, we require the MPC protocol to be secure with abort against up to $t$
+statically corrupted signers, or adaptively corrupted signers for adp-TS-UF-1,
+in the standard simulation-based sense~\cite{EPRINT:Lindell16}. For every
+adversary controlling the corrupted signers, there is a PPT simulator $\simu$
+that interacts with the adversary in place of the honest signers, given only the
+outputs of the corrupted signers and the values opened. Corrupted signers may
+make a call return $\bot$ to every honest signer, but cannot make it return a
+wrong output. We write $\Adv^{\mathsf{mpc}}(\secparam)$ for the largest
+advantage of a PPT distinguisher between a real execution of $\TSPSoffsign$ and
+one simulated by $\simu$.

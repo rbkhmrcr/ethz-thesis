@@ -100,7 +100,10 @@ PPT adversary~$\adv$, there exists a PPT simulator~$\simu$ where
 $\textsc{Exec}_{\Pi,\adv}(\secparam)$ is computationally indistinguishable from
 $\textsc{Exec}_{\idfu{},\simu}(\secparam)$. As the ideal functionality achieves
 all security properties by design, this shows that the protocol achieves them
-too.
+too. This definition is in the standalone model: it considers a single
+execution of the protocol, with no other protocols running alongside it. This
+lets a simulator rewind the adversary, which the extractors of Sigma protocols
+and of the Fiat-Shamir transform need.
 
 \paragraph{Corruption models.} Honest but curious participants follow the protocol, and the adversary sees
 their views and combines them with the views of the other corrupted

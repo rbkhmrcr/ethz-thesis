@@ -132,7 +132,7 @@ we choose achieves it, as both are only secure with abort against
 malicious adversaries~\cite{C:GLOPS21,CCS:KelOrsSch16}.
 
 The threshold scheme is unforgeable whenever the underlying SPS scheme is, given
-an MPC protocol that is private and secure with abort against up to $t$
+an MPC protocol that is secure with abort against up to $t$
 statically corrupted signers. From the SPS scheme, the construction needs
 decomposable signing and existential unforgeability. Strong unforgeability is
 not needed, as a TS-UF-1 forgery must be on a message that too few honest
@@ -140,16 +140,20 @@ signers signed, and a new signature on a message that was properly signed does
 not count. Requiring it would rule out rerandomisable schemes such as $\AGHO$.
 
 \begin{theorem}\label{thm:tsps-construction-security} Let $\SPS$ be an EUF-CMA
-secure SPS scheme with decomposable signing, and let the MPC protocol be private
-and secure with abort against up to $t$ statically corrupted signers, over a
-linear $(t+1, n)$ threshold sharing. For every PPT adversary $\adv$ against the
+secure SPS scheme with decomposable signing, and let the MPC protocol be secure
+with abort against up to $t$ statically corrupted signers, over a
+linear $(t+1, n)$ threshold sharing. Let every value opened in $\TSPSoffsign$ be
+masked by a fresh uniform value, and let each component of $c_0$ and each $c_j$
+be computed from its own fresh sharing. For every PPT adversary $\adv$ against the
 TS-UF-1 security of $\TSPS$ applied to $\SPS$, there is a PPT adversary $\advB$
-such that the following holds for any $n$ and $t$:
+such that the following holds for any $n$ and $t$, where $q$ is the number of
+queries $\adv$ makes to the offline oracle:
   %
   \begin{equation*}
   %
     \Adv_{\TSPS, \adv}^{\mathsf{TS\text{-}UF\text{-}1}}(\secparam) \leq
-\Adv_{\SPS, \advB}^{\mathsf{euf\text{-}cma}}(\secparam).
+\Adv_{\SPS, \advB}^{\mathsf{euf\text{-}cma}}(\secparam) + q \cdot
+\Adv^{\mathsf{mpc}}(\secparam).
   %
   \end{equation*}
   %
@@ -168,7 +172,8 @@ $\advB$ such that the following holds:
   \begin{equation*}
   %
     \Adv_{\TSPS, \adv}^{\mathsf{adp\text{-}TS\text{-}UF\text{-}1}}(\secparam) \leq \binom{n}{t}
-\cdot \Adv_{\SPS, \advB}^{\mathsf{euf\text{-}cma}}(\secparam).
+\cdot \Adv_{\SPS, \advB}^{\mathsf{euf\text{-}cma}}(\secparam) + q \cdot
+\Adv^{\mathsf{mpc}}(\secparam).
   %
   \end{equation*}
   %

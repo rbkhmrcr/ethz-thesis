@@ -134,16 +134,6 @@ consequential. The third point is that the alternative to auditable payments is
 not perfect privacy, but the status quo, where banks and payment providers see
 all transactions in the clear.
 
-\begin{outline}
-  \item fourth point, structural: the internet and messaging apps are
-  decentralised (anyone can run a server, no permission needed to talk); money
-  is issued by central banks, held by regulated intermediaries and settled
-  through few institutions, set by law rather than protocol design
-  \item choosing which systems to build is a moral as well as a technical choice
-  \item here the choice is between auditing that cryptography constrains and
-  auditing that nothing constrains
-\end{outline}
-
 For both social and technical reasons, financial systems come with requirements
 that private communication does not. Payment providers are required to identify
 their customers and to report suspicious
@@ -172,11 +162,6 @@ participants, and attempt to learn anything it can. We assess privacy against
 the strongest information it can derive in this setting. Each chapter states which participants may deviate from the
 protocol, and for which property.
 
-\begin{outline}
-  \item name the corruption model of institutions here: honest but curious for
-  privacy, honest for availability and correct operation
-\end{outline}
-
 \paragraph{The thesis.} This thesis argues that practical privacy is achieved
 not by assuming away existing infrastructure, but by modelling its participants
 and responsibilities accurately, and cryptographically constraining what each
@@ -186,14 +171,14 @@ availability without being trusted with users' private information. Each of the
 protocols comes from considering the specific responsibilities of participants
 in each existing system.
 
-\begin{outline}
-  \item a concrete instance running through every chapter: by the end of 2026
-every EU member state must offer a European Digital Identity Wallet, with
-selective disclosure, unlinkability and pseudonymous authentication (cite
-eIDAS2024), issued to by many independent authorities; payments have the same
-shape with central bank digital currencies (cite cbdctracker); mention it in
-each chapter's motivation in a different way rather than repeating it
-\end{outline}
+Every member state of the European Union must offer its residents a European
+Digital Identity Wallet by the end of 2026~\cite{eIDAS2024}. These wallets must
+support selective disclosure, unlinkability and pseudonymous authentication.
+Central banks are also designing payment networks that take a very similar
+shape~\cite{cbdctracker}. For the digital euro, requirements include privacy
+for users, payments without a network connection, limits on holdings, and
+compliance with anti-money-laundering rules through regulated
+intermediaries~\cite{digitaleuro2023}.
 
 \paragraph{Contributions.} We first consider threshold certification, where
 several certifiers must cooperate to certify a message. Based on
