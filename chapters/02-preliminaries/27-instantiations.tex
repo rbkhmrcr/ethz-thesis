@@ -40,10 +40,10 @@ without that discrete logarithm being recovered. A pairing product equation is
 an equation of the form $\prod_j \pairing(a_j, \widetilde{b}_j) = t$ for $t \in
 \group{T}$.
 
-Our schemes rely on the DL assumption in \Cref{asm:dl} and the DDH assumption
-in \Cref{asm:ddh}~\cite{DifHel76,Boneh98}.
+We first state the discrete logarithm and Decisional Diffie-Hellman assumptions in \Cref{asm:dl} and
+\Cref{asm:ddh}~\cite{DifHel76,Boneh98}.
 
-\begin{assumptionbox}{Discrete logarithm (DL)}{dl}
+\begin{assumptionbox}{The discrete logarithm (DL) assumption~\cite{DifHel76}.}{dl}
 
   The DL assumption holds in a group of prime order $p$ with generator $\gen$
 if, for $x \sample \Zp$, no PPT adversary given $\gen^x$ outputs $x$ with
@@ -51,7 +51,7 @@ non-negligible probability.
 
 \end{assumptionbox}
 
-\begin{assumptionbox}{Decisional Diffie-Hellman (DDH)}{ddh}
+\begin{assumptionbox}{The Decisional Diffie-Hellman (DDH) assumption~\cite{Boneh98}.}{ddh}
 
   The DDH assumption holds in a group of prime order $p$ with generator $\gen$
 if $(\gen^x, \gen^y, \gen^{xy})$ and $(\gen^x, \gen^y, \gen^z)$, for $x, y, z
@@ -74,76 +74,6 @@ the group operations and the pairing. A proof in the GGM rules out attacks that
 ignore the representation of the group, but gives a weaker guarantee than a
 reduction to a stated assumption. Some assumptions are $q$-type, meaning their
 statement grows with a parameter $q$, typically the number of signing queries.
-Such assumptions are stronger than the fixed-size assumptions they generalise.
-
-\subsection{Sigma protocols and the Fiat-Shamir transform}\label{sec:prelims-sigma}
-
-Most proof systems in this thesis are Sigma protocols made non-interactive. A
-Sigma protocol for a relation $\rel$, with a statement $\inst$ known to both
-parties and a witness $\witness$ known to the prover, has three moves. The prover sends a first
-message $a$, the verifier replies with a uniform challenge $c$, and the prover
-sends a response $z$. The verifier then checks $z$ against $(\inst, a, c)$.
-Completeness is defined like the correctness of proof systems, and requires that
-proofs of true statements verify. Special soundness
-requires an efficient extractor that computes a witness from any two accepting
-transcripts $(a, c, z)$ and $(a, c', z')$ with $c \neq c'$. Special
-honest-verifier zero knowledge (SHVZK) requires an efficient simulator that,
-given $\inst$ and $c$, outputs $(a, z)$ distributed as in an honest run with
-challenge $c$~\cite{C:CraDamSch94}.
-
-The Sigma protocol for proof of knowledge of a discrete logarithm proves
-knowledge of $x$ with $h = \gen^x$~\cite{JC:Schnorr91}. Sigma protocols for
-discrete logarithms are also called Schnorr proofs.
-The prover samples $r \sample \Zp$, sends $a$, receives a challenge $c
-\sample \Zp$, and returns $z$, computed as follows:
-%
-\begin{equation*}
-%
-  a = \gen^r, \qquad z = r + cx.
-%
-\end{equation*}
-%
-The verifier accepts if and only if the following holds:
-%
-\begin{equation*}
-%
-  \gen^z = a \cdot h^c.
-%
-\end{equation*}
-%
-The same protocol proves knowledge of a representation $h = \prod_i
-\gen_i^{x_i}$, with one response per exponent. We prove several equations over the same witness by
-running the protocol for each in parallel with one shared challenge, so that
-they hold together. In this way we can show, for example, that two group
-elements have the same discrete logarithm.
-
-The Fiat-Shamir transform makes a Sigma protocol non-interactive. The prover
-computes the challenge itself as $c = \hash(\inst, a, \lbl)$, where $\hash$ is a
-random oracle and $\lbl$ a label~\cite{C:FiaSha86}. A Sigma protocol has
-quasi-unique responses if, for given $(\inst, a, c)$, no efficient prover finds
-two distinct accepting responses. It has unique responses if, for given $(\inst,
-a, c)$, at most one response is accepting, as in the protocol above. If the
-whole statement is hashed, a Sigma protocol with special soundness, SHVZK and
-quasi-unique responses gives a simulation extractable labelled proof system in
-the random oracle model~\cite{INDOCRYPT:FKMV12}. The hash function takes
-group elements and field elements as input, through a fixed encoding of each
-into bit strings.
-
-In the random oracle model, the definitions of \Cref{sec:prelims-nizks} are read
-as follows~\cite{CCS:BelRog93,INDOCRYPT:FKMV12}. The common reference string
-is empty, and the trapdoor of $\NIZKsimgen$ is the ability to program the
-random oracle. The simulator samples the challenge and the responses, solves the
-verification equations for the first message, and programs the random oracle at
-the hashed point to return that challenge. The extractor $\NIZKextract$ is not
-straight-line. It rewinds the prover to the hash query that fixed the
-challenge, answers it with a fresh challenge, and extracts the witness from the
-two accepting transcripts by special soundness. This relies on the forking
-lemma~\cite{JC:PoiSte00}. The extractor then depends on the adversary, and
-extraction loses a polynomial factor in the number of hash queries. For this
-reason, the security proofs of later chapters are in a model where rewinding is
-allowed. Online extraction,
-as given by the transform of Fischlin, avoids rewinding at the cost of larger
-proofs~\cite{C:Fischlin05}.
 
 \subsection{The Pedersen commitment scheme}
 
@@ -154,7 +84,7 @@ parties that know no discrete logarithm relation between the elements of $\ck$.
 Where a participant could otherwise choose $\ck$, our instantiations derive it
 from a public seed with a hash function.
 
-\begin{primitivebox}{The Pedersen commitment scheme}{pedersen}
+\begin{primitivebox}{The Pedersen commitment scheme~\cite{C:Pedersen91}.}{pedersen}
 
   \begin{description}
 
@@ -187,7 +117,7 @@ elements~\cite{C:ElGamal84}. In $\group{1}$, it is IND-CPA secure under the DDH
 assumption in $\group{1}$. We encrypt field elements $m$ as $\gen^m$, and
 decryption gives back $\gen^m$ rather than $m$.
 
-\begin{primitivebox}{The ElGamal encryption scheme}{elgamal}
+\begin{primitivebox}{The ElGamal encryption scheme~\cite{C:ElGamal84}.}{elgamal}
 
   \begin{description}
 
@@ -207,9 +137,9 @@ return $f_2 / f_1^{\mu}$.
 \subsection{The BBS+ signature scheme}\label{sec:prelims-bbs}
 
 The BBS+ signature scheme of \Cref{prim:bbs} signs several messages at
-once~\cite{C:BonBoySha04,SCN:AuSusMu06,EPRINT:CamDriLeh16}.
+once~\cite{C:BonBoySha04,SCN:AuSusMu06}.
 
-\begin{primitivebox}{The BBS+ signature scheme}{bbs}
+\begin{primitivebox}{The BBS+ signature scheme~\cite{C:BonBoySha04}.}{bbs}
 
   \begin{description}
 
@@ -309,6 +239,73 @@ This variant is malleable, as a signature on one tuple of group elements is also
 signature on any other tuple with the same product. It is unforgeable only if
 the signer signs elements that come with a proof of knowledge of their
 representation in the bases $\gen_1, \ldots, \gen_n$, from which the reduction
-to $q$-SDH extracts the field elements~\cite{SCN:AuSusMu06,EC:TesZhu23b}.\rebekah{you wrote
-``non-malleability? should be a named, defined property; this is much more
-appropriate here'': name and define the property instead of ``malleable''}
+to $q$-SDH extracts the field elements~\cite{SCN:AuSusMu06,EC:TesZhu23b}.
+
+\subsection{Sigma protocols and the Fiat-Shamir transform}\label{sec:prelims-sigma}
+
+Most proof systems in this thesis are Sigma protocols made non-interactive. A
+Sigma protocol for a relation $\rel$, with a statement $\inst$ known to both
+parties and a witness $\witness$ known to the prover, has three moves. The prover sends a first
+message $a$, the verifier replies with a uniform challenge $c$, and the prover
+sends a response $z$. The verifier then checks $z$ against $(\inst, a, c)$.
+Completeness is defined like the correctness of proof systems, and requires that
+proofs of true statements verify. Special soundness
+requires an efficient extractor that computes a witness from any two accepting
+transcripts $(a, c, z)$ and $(a, c', z')$ with $c \neq c'$. Special
+honest-verifier zero knowledge (SHVZK) requires an efficient simulator that,
+given $\inst$ and $c$, outputs $(a, z)$ distributed as in an honest run with
+challenge $c$~\cite{C:CraDamSch94}.
+
+The Sigma protocol for proof of knowledge of a discrete logarithm proves
+knowledge of $x$ with $h = \gen^x$~\cite{JC:Schnorr91}. Sigma protocols for
+discrete logarithms are also called Schnorr proofs.
+The prover samples $r \sample \Zp$, sends $a$, receives a challenge $c
+\sample \Zp$, and returns $z$, computed as follows:
+%
+\begin{equation*}
+%
+  a = \gen^r, \qquad z = r + cx.
+%
+\end{equation*}
+%
+The verifier accepts if and only if the following holds:
+%
+\begin{equation*}
+%
+  \gen^z = a \cdot h^c.
+%
+\end{equation*}
+%
+The same protocol proves knowledge of a representation $h = \prod_i
+\gen_i^{x_i}$, with one response per exponent. We prove several equations over the same witness by
+running the protocol for each in parallel with one shared challenge, so that
+they hold together. In this way we can show, for example, that two group
+elements have the same discrete logarithm.
+
+The Fiat-Shamir transform makes a Sigma protocol non-interactive. The prover
+computes the challenge itself as $c = \hash(\inst, a, \lbl)$, where $\hash$ is a
+random oracle and $\lbl$ a label~\cite{C:FiaSha86}. A Sigma protocol has
+quasi-unique responses if, for given $(\inst, a, c)$, no efficient prover finds
+two distinct accepting responses. It has unique responses if, for given $(\inst,
+a, c)$, at most one response is accepting, as in the protocol above. If the
+whole statement is hashed, a Sigma protocol with special soundness, SHVZK and
+quasi-unique responses gives a simulation extractable labelled proof system in
+the random oracle model~\cite{INDOCRYPT:FKMV12}. The hash function takes
+group elements and field elements as input, through a fixed encoding of each
+into bit strings.
+
+In the random oracle model, the definitions of \Cref{sec:prelims-nizks} are read
+as follows~\cite{CCS:BelRog93,INDOCRYPT:FKMV12}. The common reference string
+is empty, and the trapdoor of $\NIZKsimgen$ is the ability to program the
+random oracle. The simulator samples the challenge and the responses, solves the
+verification equations for the first message, and programs the random oracle at
+the hashed point to return that challenge. The extractor $\NIZKextract$ is not
+straight-line. It rewinds the prover to the hash query that fixed the
+challenge, answers it with a fresh challenge, and extracts the witness from the
+two accepting transcripts by special soundness. This relies on the forking
+lemma~\cite{JC:PoiSte00}. The extractor then depends on the adversary, and
+extraction loses a polynomial factor in the number of hash queries. For this
+reason, the security proofs of later chapters are in a model where rewinding is
+allowed. Online extraction,
+as given by the transform of Fischlin, avoids rewinding at the cost of larger
+proofs~\cite{C:Fischlin05}.
