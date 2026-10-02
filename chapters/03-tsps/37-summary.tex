@@ -16,8 +16,13 @@ Certifiers of a ledger or transparency log keep their role, but no single signer
 can certify alone, and dividing the role costs little when a signature is
 needed.
 
-Adaptive security needs an adaptively secure MPC protocol, and removing the loss
-in the adaptive case needs an equivocable sharing or secure erasures. The
-protocols we benchmark are covered only by the static theorem. We expect the
-same reduction to give the strong threshold analogue when the underlying SPS
-scheme is strongly unforgeable.
+Two directions remain for future work. The first is strong unforgeability. We
+expect the same reduction to give the strong threshold analogue when the
+underlying SPS scheme is strongly unforgeable, but do not prove it. The second
+is adaptive corruption. Adaptive security needs an adaptively secure MPC
+protocol, and our reduction then loses a factor that grows exponentially with
+the number of signers for an honest majority. Removing this loss needs an
+equivocable sharing or secure erasures. Threshold Schnorr signatures cannot be
+proven fully adaptively secure without modifications~\cite{C:CriSte25}, so the
+implications of adaptive corruption for threshold schemes are worth making
+clearer. The protocols we benchmark are covered only by the static theorem.
