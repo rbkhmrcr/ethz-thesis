@@ -174,7 +174,7 @@ Lehmann~\cite{EC:TesZhu23b,CDL16}.
 
 \begin{outline}
   \item a BBS+ signature cannot be shown directly: verification involves the signed messages, one of which is the identifier
-  \item Tessaro-Zhu rerandomisation \cite{EC:TesZhu23b}: $E$ with two fresh exponents becomes $u, w, x$
+  \item Tessaro-Zhu rerandomisation (cite EC:TesZhu23b): $E$ with two fresh exponents becomes $u, w, x$
   \item verification becomes one pairing equation on public values, $\pairing(u, \ggen_Z)\pairing(x, \ggen) = 1$, plus two discrete-logarithm equations proven by a Sigma protocol
   \item the check $u \neq 1$ rules out the trivial solution of the pairing equation
 \end{outline}
@@ -454,7 +454,7 @@ $B = \gen^{\mu}$.\rebekah{Coconut's $\pi_s$ includes $B = \gen^{\mu}$ and ours (
 \begin{outline}
   \item why $k$ is a hash of the commitment rather than sampled: both parties agree on it without the signer seeing the messages
   \item recipient key fresh per execution, so two requests cannot be linked by it
-  \item \rebekah{Fischlin: the earlier text compiled $\algoproof_{\algo{req}}$ with the Fischlin transform rather than Fiat-Shamir, because online request extractability needs a non-rewinding extractor \cite{C:Fischlin05}, at the cost of a larger proof computed once per withdrawal by the device; Coconut does not use it; only if confirmed necessary, the code uses plain Fiat-Shamir}
+  \item \rebekah{Fischlin: the earlier text compiled $\algoproof_{\algo{req}}$ with the Fischlin transform rather than Fiat-Shamir, because online request extractability needs a non-rewinding extractor (cite C:Fischlin05), at the cost of a larger proof computed once per withdrawal by the device; Coconut does not use it; only if confirmed necessary, the code uses plain Fiat-Shamir}
 \end{outline}
 
 \begin{protocolbox}{Signing on committed inputs in $\OP$}{offline-sci}

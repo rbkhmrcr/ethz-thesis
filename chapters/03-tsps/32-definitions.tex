@@ -115,7 +115,7 @@ signed, and is our target
   \item achievable because the online phase is local: issuing a share reveals
 nothing further; and it is what a certifier needs (no signature unless
 enough honest signers agreed to that message)
-  \item Bellare et al.\ define it for non-interactive threshold signature schemes:
+  \item it is defined for non-interactive threshold signature schemes (cite C:BCKMTZ22):
 $n_s$ servers, signing needs $t$ of them, fewer than $t$ corrupted, and a leader,
 played by the adversary, that collects partial signatures
   \item their syntax: key generation $\algo{Kg}$ by a trusted algorithm; server
@@ -188,8 +188,10 @@ has offline and online oracles. It wins if it outputs a valid
 signature on a message for which fewer than $t + 1 - |\Cor|$ honest signers
 issued shares. The experiment idealises key generation, with the challenger
 running $\TSPSgen$, as in the existing definitions~\cite{C:BCKMTZ22,C:CriKomMal23}.
-In our construction, as $\TSPSgen$ is a single MPC computation, the security of
-MPC allows the signers to replace the challenger in practice.
+In our construction, $\TSPSgen$ is a direct application of generic MPC, and
+inherits its security properties. Our proof does not cover this step
+explicitly, as it focuses on the separation of signing into offline and online
+phases.
 
 The advantage of a PPT adversary $\adv$ is defined as follows:
 %
@@ -282,15 +284,14 @@ In practice $\group{}$ is an elliptic curve group, whose elements are coordinate
 pairs $(x_0, y_0)$ satisfying the curve equation. A group element is not shared
 by independently sharing its coordinates, as $(\shr{x_0}, \shr{y_0})$, since
 computing a group operation on such shares would require the signers to
-communicate. It is instead shared as a single unit, $\shr{a} = \shr{(x_0,
-y_0)}$, so that the linear operations below remain local.
+communicate. It is instead shared in the group: the shares of $a$ are
+themselves elements of $\group{}$, and reconstruction combines them with the
+group operation, as a product of shares raised to fixed coefficients, so that
+the linear operations below remain local.
 
-Any $t$ shares are independent of $\alpha$. The shares of a group element $a$ are themselves in $\group{}$,
-and reconstruction takes their product. The authentication information, such as
+Any $t$ shares are independent of $\alpha$. The authentication information, such as
 MAC shares, means that a modified share is detected at opening. In protocol
 boxes, $\shr{\alpha}$ also stands for the signer's own share.
-
-Our constructions are stated for a general $(t+1, n)$ sharing.
 
 The protocol provides the following interfaces, each run by all signers
 together. The interfaces over $\group{}$ exist once for each source group, and

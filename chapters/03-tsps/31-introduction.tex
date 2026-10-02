@@ -97,9 +97,9 @@ decomposable signing, and show that $\AGHO$ and $\KPW$ have it.
   \item second contribution: implementation; thresholdising $\KPW$ needs
 secret-shared group elements and raising a shared group element to a shared
 exponent
-  \item Ghosh et al.\ compute on shared group elements between two parties (cite
+  \item computing on shared group elements between two parties is known (cite
 NDSS:GPVRNC23); as far as we know no multiparty version had been implemented
-  \item Dalskov et al.\ implemented threshold ECDSA for many parties in MP-SPDZ
+  \item threshold ECDSA for many parties has been implemented in MP-SPDZ
 with shared curve points (ESORICS:DOKSS20, cited in the old evaluation); what is
 new here is pairing-friendly groups and a shared group element raised to a
 shared exponent (your answer: sounds correct but check)
@@ -108,9 +108,7 @@ shared exponent (your answer: sounds correct but check)
 We benchmark both schemes using two MPC frameworks: ATLAS, which assumes an
 honest majority, and MASCOT, which assumes a dishonest
 majority~\cite{C:GLOPS21,CCS:KelOrsSch16}. We extend MP-SPDZ with support for
-the group element functionalities our schemes require~\cite{CCS:Keller20}. The
-former suits settings where robustness and high availability are desirable, the
-latter settings where resilience to key compromise takes precedence. We also
+the group element functionalities our schemes require~\cite{CCS:Keller20}. We also
 implement previously suggested threshold SPS schemes, so as to compare concrete
 efficiency~\cite{AC:CKPSS23,PKC:MMSST24}.
 
@@ -130,8 +128,7 @@ rerandomisable scheme $\AGHO$ that we use~\cite{C:AGHO11}.
 SPS schemes with such short signatures cannot be proven secure from non-interactive assumptions
 by a large class of reductions~\cite{AC:AbeGroOhk11}. Kiltz, Pan, and Wee give a
 scheme with seven group elements that is secure under SXDH~\cite{C:KilPanWee15}.
-A linearly homomorphic SPS scheme, also with signatures of three group
-elements, enables further applications~\cite{C:LPJY13}. Fully structure-preserving
+Fully structure-preserving
 signature schemes also have secret keys that are group elements, so
 a user can prove statements about their own key with Groth-Sahai proofs, but
 their signatures grow with the square root of the message
@@ -164,10 +161,10 @@ generator to its share, goes back to threshold cryptosystems~\cite{C:DesFra89}.
   \item Smart and Talibi Alaoui: maliciously secure computation over an elliptic
 curve group, maps multiplication triples over $\Zp$ locally into triples over the
 group (cite IMA:SmaTal19)
-  \item Aranha et al.: generalise this as linear secret sharing isomorphisms, use
-it to realise Pointcheval-Sanders in MPC (cite LC:ADEO21)
-  \item we extend to $n$ parties the approach of Ghosh et al., who share group
-elements between two parties and compute on the shares (cite NDSS:GPVRNC23)
+  \item linear secret sharing isomorphisms generalise this, and realise
+Pointcheval-Sanders in MPC (cite LC:ADEO21)
+  \item we extend to $n$ parties the two-party approach of sharing group
+elements and computing on the shares (cite NDSS:GPVRNC23)
 \end{outline}
 
 \paragraph{Layout.} The rest of the chapter is organised as follows. \Cref{sec:tsps-definitions} defines threshold SPS schemes
