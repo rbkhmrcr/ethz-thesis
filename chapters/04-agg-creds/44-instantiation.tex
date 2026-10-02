@@ -217,7 +217,12 @@ $\rel_3$ does not include the signature verification equations of $\rel_2$. The
 randomised signatures reveal nothing about the original ones, so the user sends
 them in the clear and the verifier checks their verification equations directly. This gives a
 concretely efficient proof, with no zero-knowledge proof over pairing equations
-or elements of $\group{T}$.
+or elements of $\group{T}$. The cost is that a presentation grows with the number of
+disclosed attributes. Each disclosed attribute adds its blinded hash $H_i$ and
+one Sigma protocol commitment, two elements of $\group{1}$. Proving that every
+$H_i$ uses the same $\delta$ in $\group{T}$ instead would make the proof
+constant-size, apart from the disclosed values, at the cost of one pairing per
+disclosed attribute for the user.
 
 \begin{lemma}\label{lem:agg-creds-sigma}
 

@@ -113,8 +113,13 @@ verification 4.05\,ms against 11.8\,ms. At $n = 128$, Idemix verifies faster
 once more than about 20 attributes are disclosed, but it is in the single-issuer
 setting.
 \rebekah{At $n = 128$, Idemix presentation is also faster beyond about $k = 85$ disclosed attributes; say so here.}
-\rebekah{Comment: ``what about implementing HP?''. Decide whether to
-implement HP22 as a second baseline, or say why it is not.}
+\rebekah{implement three more variants and compare (benchmarking branch,
+impl/agg-creds): our scheme with the equality of $\delta$ proven in $\group{T}$,
+giving constant-size presentations at one pairing per disclosed attribute; CL11,
+the closest prior scheme, never implemented by its authors, constant-size
+showing with $18+k$ pairings for prover and verifier; and HP22, constant-size
+showing with per-tag issuer state. Then compare presentation size and time
+against $k$.}
 \begin{outline}
   \item close: costs are low enough for client devices
 \end{outline}

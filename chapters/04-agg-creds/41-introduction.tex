@@ -109,9 +109,15 @@ contains one proof per credential.
 \paragraph{Aggregate anonymous credentials.} Aggregate credentials combine
 independently issued credentials into a single compact credential, while
 maintaining user privacy during presentations. Indexed aggregate signature
-schemes support anonymous credentials this way~\cite{canard2011anonymous}.\rebekah{check CL11 against the paper:
-HP22 list it as multi-issuer with a constant-size showing, which contradicts
-our table row}
+schemes support anonymous credentials this way~\cite{canard2011anonymous}.\rebekah{CL11 is closer to ours than this says: users get an
+index from a registration authority knowing a trapdoor (Sec.~4.3, UserKeyGen),
+issuers keep no state (Fig.~3), and credentials from several organisations
+aggregate into one constant-size showing (Remark~2). Issuers see the index in
+the clear, as ours see the tag. Differences: CL11 bounds the number of users by
+its $q$-type assumption $q$-ADHSDH (Conclusion), works in the chosen-key model
+rather than with certified issuer keys, has game-based security only, and was
+never implemented. Say what we add, and revisit the stateless-issuers claim at the
+start of the chapter.}
 
 ART-Sign is a traceable aggregate signature scheme using randomisable tags as
 pseudonyms, from which H\'ebant and Pointcheval build multi-authority
@@ -169,25 +175,26 @@ non-interactive assumptions by a large class of reductions~\cite{AC:AbeGroOhk11}
 Our tag-based signature scheme needs only BCDH, and the GGM enters only through
 the registration signature.
 
-\begin{table}[htbp] \centering \small \setlength{\tabcolsep}{3pt}
-  \begin{tabular}{l|c|c|c|c|c}
-    \toprule Scheme & Assumptions & Multi-issuer & $|$cred$|$ & Prover cost &
+\begin{table}[htbp] \centering \small \setlength{\tabcolsep}{2.5pt}
+  \begin{tabular}{l|c|c|c|c|c|c}
+    \toprule Scheme & Assumptions & Multi-issuer & $|$cred$|$ & $|$pres$|$ & Prover &
 Issuer state \\ \midrule
-    CL02~\cite{SCN:CamLys02} & sRSA & No & $O(1)$ & $O(n)$ & -- \\
-    CL04~\cite{C:CamLys04} & LRSW & No & $O(n)$ & $O(n)$ & -- \\
-    BBS+~\cite{EC:BonBoy04a,SCN:AuSusMu06} & $q$-SDH & No & $O(1)$ & $O(n)$ & -- \\
-    CL11~\cite{canard2011anonymous} & $q$-ADHSDH & Partial & $O(n)$ & $O(k)$ & ? \\
-    CDHK15~\cite{AC:CDHK15} & \parbox[t]{2.3cm}{\centering SXDH, $J$-RootDH, $n$-BSDH, $q$-SDH, XDLIN, co-CDH, DBP} & Yes & $O(K)$ & $O(K)$ & None \\
-    HP22~\cite{SCN:HebPoi22} & GGM & Yes & $O(1)$ & $O(k)$ & Per tag \\
-    MBGLS23~\cite{CCS:MBGLS23} & Interactive or GGM & Yes & $O(1)$ & $O(k)$ & Per tag \\
-    Our scheme & BCDH, DDH, ROM, GGM & Yes & $O(1)$ & $O(k)$ & None \\
+    CL02~\cite{SCN:CamLys02} & sRSA & No & $O(1)$ & $O(n)$ & $O(n)$ & -- \\
+    CL04~\cite{C:CamLys04} & LRSW & No & $O(n)$ & $O(n)$ & $O(n)$ & -- \\
+    BBS+~\cite{EC:BonBoy04a,SCN:AuSusMu06} & $q$-SDH & No & $O(1)$ & $O(n)$ & $O(n)$ & -- \\
+    CL11~\cite{canard2011anonymous} & $q$-ADHSDH, DDH, ROM & Yes & $O(1)$ & $O(1)$ & $O(k)$ & None \\
+    CDHK15~\cite{AC:CDHK15} & \parbox[t]{2.3cm}{\centering SXDH, $J$-RootDH, $n$-BSDH, $q$-SDH, XDLIN, co-CDH, DBP} & Yes & $O(K)$ & $O(K)$ & $O(K)$ & None \\
+    HP22~\cite{SCN:HebPoi22} & GGM & Yes & $O(1)$ & $O(1)$ & $O(k)$ & Per tag \\
+    MBGLS23~\cite{CCS:MBGLS23} & \parbox[t]{1.8cm}{\centering Interactive or GGM} & Yes & $O(1)$ & $O(K)$ & $O(k)$ & Per tag \\
+    Our scheme & BCDH, DDH, ROM, GGM & Yes & $O(1)$ & $O(k)$ & $O(k)$ & None \\
 \bottomrule
   \end{tabular}
   \caption[Comparison with existing anonymous credential schemes]{Comparison with
 existing single and multi-issuer anonymous credential schemes. $n$ is the total
 number of attributes a scheme supports, $k$ the number of attributes disclosed in
-a presentation, $K$ the number of issuers in a presentation, and $|$cred$|$ the
-size of the credentials needed for a presentation. The assumptions of the other
+a presentation, $K$ the number of issuers in a presentation, $|$cred$|$ the
+size of the credentials needed for a presentation, and $|$pres$|$ the size of a
+presentation, not counting the disclosed values. The assumptions of the other
 schemes are those of the cited papers.
 Issuer state is what an issuer has to remember about each user. For HP22 this
 is which tags it has signed for, and for MBGLS23 either the same or the
