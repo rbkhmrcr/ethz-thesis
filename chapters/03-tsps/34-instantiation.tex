@@ -1,8 +1,8 @@
 \section{Instantiation}\label{sec:tsps-instantiation}
 
 This section instantiates the construction of \Cref{sec:tsps-construction}
-twice, with $\AGHO$ and $\KPW$~\cite{C:AGHO11,C:KilPanWee15}, giving full
-descriptions of two threshold SPS schemes built from the MPC protocol. In each case we verify that
+twice, with $\AGHO$ and $\KPW$, giving full descriptions of two threshold SPS
+schemes built from the MPC protocol~\cite{C:AGHO11,C:KilPanWee15}. In each case we verify that
 the signing algorithm admits the decomposition the construction requires, and
 give the resulting threshold scheme.
 
@@ -11,13 +11,13 @@ field elements only, so its threshold version only needs multiplication of
 shared field elements. $\KPW$ relies on a standard assumption, but its secret
 key contains group elements, so its threshold version needs sharings of group
 elements and $\algo{ExpGrp}$. In both, the signers raise a public group element
-to a shared field element by each raising it to their own share, which gives a
+to a shared exponent by each raising it to their own share, which gives a
 sharing of the result.
 
 \subsection{Instantiating the MPC protocol}\label{sec:tsps-mpc-inst}
 
 We realise $\algo{ExpGrp}$ as Smart and Talibi Alaoui do, from multiplication
-triples made in preprocessing~\cite{C:Beaver91b,IMA:SmaTal19}.\rebekah{check against Smart and Talibi Alaoui that their construction is this mixed triple; ours is adding it to MP-SPDZ}
+triples made in preprocessing~\cite{C:Beaver91b,IMA:SmaTal19}.
 
 $\algo{ExpGrp}$ consumes a mixed triple $(\shr{\eta}, \shr{h}, \shr{h^\eta})$
 with $\eta \sample \Zp$ and $h \sample \group{}$. The signers open the
@@ -205,7 +205,8 @@ following:
 	  \end{gather*}
 
 	\item Store $\shr{\state} = (\shr{\widetilde{r}}, \shr{\widetilde{s}},
-\shr{\gen^{\rho}}, \shr{\rho\mu_1}, \ldots, \shr{\rho\mu_\ell})$.
+\shr{\gen^{\rho}}, \shr{e_{1,1}}, \ldots, \shr{e_{1,\ell}})$, where
+$\shr{e_{1,i}} = -\shr{\rho\mu_i}$.
 
       \end{enumerate}
 
@@ -219,7 +220,7 @@ Each signer does the following:
 	  \begin{equation*}
 	  %
 	    \shr{z} = \shr{\gen^{\rho}} \cdot \prod_{i=1}^\ell
-\msg_i^{-\shr{\rho\mu_i}}.
+\msg_i^{\shr{e_{1,i}}}.
 	  %
 	  \end{equation*}
 
@@ -250,32 +251,19 @@ $1$ if and only if the following hold:
 
 \Cref{prim:sps-kiltz} recalls the $\KPW$ SPS scheme~\cite{C:KilPanWee15}. We write
 $k_{i,j}$ for the entry of $\mat{K}$ in row $i$ and column $j$, and
-$\mathsf{T}$ denotes transposition. For a vector of group elements $\vec{f} =
-(f_1, \ldots, f_{\ell+1})$ and a matrix $\mat{K} \in \Zp^{(\ell+1) \times 2}$,
-we write the following:
+$\mathsf{T}$ denotes transposition. We write $(\gen, \vec{\msg})$ for the
+vector $(\gen, \msg_1, \ldots, \msg_\ell)$, and $\gen^{\vec{\theta}}$ for
+$(\gen^{\theta_1}, \gen^{\theta_2}, \ldots)$ when $\vec{\theta}$ is a vector of
+field elements. We take products of vectors entry by entry. For vectors
+$\vec{f}$ and $\vec{\widetilde{f}}$ of the same length, with entries in
+$\group{1}$ and $\group{2}$, we write the following:
 %
 \begin{equation*}
 %
-  \vec{f}^{\,\mat{K}} = \left(\prod_{i=1}^{\ell+1} f_i^{k_{i,1}}, \
-\prod_{i=1}^{\ell+1} f_i^{k_{i,2}}\right).
+  \pairing(\vec{f}, \vec{\widetilde{f}}) = \prod_{i} \pairing(f_i,
+\widetilde{f}_i).
 %
 \end{equation*}
-%
-We write $(\gen, \vec{\msg})$ for the vector $(\gen, \msg_1, \ldots,
-\msg_\ell)$, and $\gen^{\vec{\theta}}$ for $(\gen^{\theta_1}, \gen^{\theta_2}, \ldots)$ when
-$\vec{\theta}$ is a vector of field elements. We take products of vectors entry by
-entry. For $\vec{f} \in \group{1}^2$ and $\vec{\widetilde{f}} \in \group{2}^2$,
-we write the following:
-%
-\begin{equation*}
-%
-  \pairing(\vec{f}, \vec{\widetilde{f}}) = \pairing(f_1,
-\widetilde{f}_1)\pairing(f_2, \widetilde{f}_2).
-%
-\end{equation*}
-%
-\rebekah{Your comment on this notation: ``wow gross.'' It is more explicit now
-but the same; decide whether to simplify.}
 
 \begin{primitivebox}{The $\KPW$ SPS scheme~\cite{C:KilPanWee15}.}{sps-kiltz}
 
@@ -317,8 +305,9 @@ the following:
       \begin{equation*}
       %
 	\widetilde{q} = \ggen^{\sigma}, \quad \vec{r} = \vec{b}^{\,\rho},
-\quad \vec{s} = \vec{b}^{\,\rho\sigma}, \quad \vec{z} = (\gen,
-\vec{\msg})^{\mat{K}} \cdot \vec{x}^{\,\rho}\, \vec{y}^{\,\rho\sigma}.
+\quad \vec{s} = \vec{b}^{\,\rho\sigma}, \quad z_j = \gen^{k_{1,j}}
+\prod_{i=1}^{\ell} \msg_i^{k_{i+1,j}} \cdot x_j^{\rho}\, y_j^{\rho\sigma}
+\text{ for } j \in \{1, 2\}.
       %
       \end{equation*}
 
@@ -334,9 +323,7 @@ $1$ if and only if the following hold:
       %
       \end{equation*}
       %
-      where $r_1$ and $s_1$ are the first entries of $\vec{r}$ and $\vec{s}$, and
-$\pairing((\gen, \vec{\msg}), \vec{\widetilde{u}}) = \pairing(\gen,
-\widetilde{u}_1) \prod_{i=1}^{\ell} \pairing(\msg_i, \widetilde{u}_{i+1})$.
+      where $r_1$ and $s_1$ are the first entries of $\vec{r}$ and $\vec{s}$.
 
   \end{description}
 
@@ -354,17 +341,11 @@ x_j^{\rho} y_j^{\rho\sigma}, \quad e_{j,i} = k_{i+1,j}.
 \end{equation*}
 %
 None of these depend on the message. Our protocol and implementation
-compute $\gen^{k_{1,j}}$ in the online phase instead, which is also local.\rebekah{Here the $e_{j,i}$ are entries of the secret key, so the definition of decomposable signing in \Cref{sec:tsps-construction} has to allow $c_j$ and $e_{j,i}$ to be linear in $\sk$.}
+compute $\gen^{k_{1,j}}$ in the online phase instead, which is also local.
 
 The group elements of the secret key are $\vec{b}, \vec{x}, \vec{y} \in
 \group{1}^2$, and the offline phase raises each of them to a shared exponent
-with $\algo{ExpGrp}_1$. The signers could instead keep the discrete logarithms $\beta, \vec{\xi},
-\vec{\upsilon}$ as shares of field elements, so that $\algo{Mul}$ and linear
-operations would suffice, but they would then no longer hold shares of the
-secret key of $\KPW$ as it is defined.\rebekah{Your comments here: ``dunno
-man.'' and, on the earlier version, ``definitely don't say this like this''.
-Open: drop the discrete-logarithm alternative entirely, or keep it in one
-sentence.}
+with $\algo{ExpGrp}_1$.
 
 \Cref{prot:tsps-kiltz} gives threshold $\KPW$. Its offline phase makes one
 multiplication, then one round of eight calls to $\algo{ExpGrp}_1$.
@@ -455,8 +436,8 @@ Each signer does the following:
 	  %
 	  \begin{equation*}
 	  %
-	    \shr{\vec{z}} = \shr{\vec{z}^*} \cdot (\gen,
-\vec{\msg})^{\shr{\mat{K}}}.
+	    \shr{z_j} = \shr{z^*_j} \cdot \gen^{\shr{k_{1,j}}} \prod_{i=1}^{\ell}
+\msg_i^{\shr{k_{i+1,j}}} \ \text{ for } j \in \{1, 2\}.
 	  %
 	  \end{equation*}
 
@@ -492,8 +473,7 @@ the threshold $\AGHO$ and $\KPW$ schemes are correct. The threshold $\AGHO$
 scheme is TS-UF-1 secure in the GGM, and the threshold $\KPW$ scheme is
 TS-UF-1 secure under SXDH, in both cases with no loss. If the MPC protocol is
 secure against adaptive corruption, both are adp-TS-UF-1 secure with the loss of
-\Cref{lem:tsps-adaptive}.\rebekah{The GGM
-conclusion for threshold $\AGHO$ needs the reduction to be generic.}\end{theorem}
+\Cref{lem:tsps-adaptive}.\end{theorem}
 
 We prove \Cref{thm:tsps-security} in \Cref{sec:tsps-proof-instantiation}.
 

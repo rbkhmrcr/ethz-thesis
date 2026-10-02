@@ -42,31 +42,29 @@ corrupted. $\advB$ sends $\pk$, all $n$ shares of it, and $\{\sk_h\}_{h \in
 \Cor}$ to $\adv$.
 
   $\advB$ answers the offline oracle as follows. On $\mathcal{O}_{\algo{Off}}(\mathsf{sid})$ with
-$\mathsf{sid}$ fresh, $\advB$ samples the shares
-$\{\state_{\mathsf{sid},h}\}_{h \in \Cor}$ uniformly, which by the first consequence is
-their real distribution, and runs $\algo{Sim}$ on the corrupted signers' inputs
-and these outputs to produce their view.\rebekah{Two gaps. State shares are not
-independent of key shares for $\KPW$: the $e_{j,i}$ are key entries and $\vec{z}^*$
-depends on $\mat{K}$, so sampling them uniformly needs a fresh or masked
-condition. $\algo{Sim}$ also needs the values opened, such as $\gamma$ in
-threshold $\AGHO$, and the theorem lacks the hypothesis that opened values are
-independent of $\sk$.} If $\adv$ makes the execution abort,
+$\mathsf{sid}$ fresh, $\advB$ samples the corrupted signers' shares of the
+output of every call to $\algo{MPC}$ in $\TSPSoffsign$ uniformly, which by the
+first consequence is their real distribution, since each output is a fresh
+sharing. It computes their state shares from these and from their key shares,
+with the local operations of $\TSPSoffsign$. Where an entry of the state is an
+entry of the key, as the $e_{j,i}$ are in $\KPW$, this gives a copy of the key
+share. Every value opened in $\TSPSoffsign$ is masked by a fresh uniform value,
+so $\advB$ samples these uniformly as well, and runs $\algo{Sim}$ on the
+corrupted signers' inputs and outputs and the opened values to produce their
+view. If $\adv$ makes the execution abort,
 $\advB$ returns $\bot$ and marks $\mathsf{sid}$ unusable. $\advB$ never fixes the
 randomness $\varrho$ that $\shr{\state}_{\mathsf{sid}}$ shares. It fixes at most $t$
 shares, which are independent of $\varrho$, and $\varrho$ is determined later by
 the signature $\advB$ obtains for that session. This is sound because each
 session is used for one message only.
 
-  $\advB$ answers the online oracle as follows. The output of every call to
-$\algo{MPC}$ is a fresh sharing, so the state shares of a session, and the
-signature shares computed from them, are independent of the key shares and of
-other sessions.\rebekah{False for $\KPW$, whose state contains the key entries
-$e_{j,i}$ of $\mat{K}$; the step needs a fresh or masked condition on the state.} In each session, $\advB$ answers a query to an honest signer with
-a uniform signature share as long as the signers of $\Cor$, together with the
-honest signers it has answered in that session, number at most $t$. By the first consequence of linear sharing,
-any $t$ shares of a fresh sharing are uniform.\rebekah{You wrote ``no'' next to
-``lazily'' and next to ``so these answers are distributed as in a real
-execution''; both removed. Check the step still argues what it needs.} At the first query that would make this number $t+1$,
+  $\advB$ answers the online oracle as follows. Each component of $c_0$ and each
+$c_j$ is computed from its own fresh sharing, so any $t$ shares of it are
+uniform given the rest of the adversary's view, and so are the signature shares
+computed from them. In each session, $\advB$ answers a query to an honest
+signer with a uniform signature share as long as the signers of $\Cor$,
+together with the honest signers it has answered in that session, number at
+most $t$. At the first query that would make this number $t+1$,
 $\advB$ queries its own oracle on the session's message, and derives every other
 signature share from the signature and the $t$ shares already fixed.
 
@@ -142,12 +140,23 @@ times the probability that $\adv$ wins.
 check the algebra of correctness. We assume the MPC properties.
 
   $\AGHO$ is existentially unforgeable in the GGM, and $\KPW$ under
-SXDH~\cite{C:AGHO11,C:KilPanWee15}.
+SXDH~\cite{C:AGHO11,C:KilPanWee15}. The reduction of
+\Cref{thm:tsps-construction-security} only applies group operations to the
+group elements it receives, and samples uniform group elements as $\gen^r$, so
+it is generic whenever $\adv$ and $\algo{Sim}$ are, and the GGM bound for
+$\AGHO$ applies.
 
-  For decomposable signing, the instantiation gives $c_0$, the $c_j$ and the $e_{j,i}$ for each
-scheme. In both, they are computed from the secret key and
-the signing randomness with $\algo{RandShare}$, $\algo{Mul}$, $\algo{Inv}$,
-$\algo{ExpGrp}_1$ and linear operations, as in $\TSPSoffsign$.
+  For decomposable signing, the values of $c_0$, the $c_j$ and the $e_{j,i}$
+given in \Cref{sec:tsps-instantiation} depend only on the secret key and the
+signing randomness. For the two properties of $\TSPSoffsign$ used in the proof,
+threshold $\AGHO$ opens only $\gamma = \rho\beta$, masked by the fresh $\beta$.
+Its $c_1 = \gen^{\rho}$ is computed from the fresh sharing of $\rho$, and
+$\widetilde{r}$ and $\widetilde{s}$ from those of $\beta$ and $\tau\beta$.
+Threshold $\KPW$ opens only the values $\epsilon$ and $\delta$ of
+$\algo{ExpGrp}_1$, masked by a fresh mixed triple. Each component of $c_0$
+other than $\widetilde{q} = \ggen^{\sigma}$, and each $c_j$, contains its own
+output of $\algo{ExpGrp}_1$, and $\widetilde{q}$ is computed from the fresh
+sharing of $\sigma$.
 
   For correctness of the threshold $\AGHO$ scheme, the combining party reconstructs
 the following:
@@ -167,18 +176,22 @@ For the threshold $\KPW$ scheme, it reconstructs the following:
   \begin{equation*}
   %
     \widetilde{q} = \ggen^{\sigma}, \quad \vec{r} = \vec{b}^{\,\rho}, \quad
-\vec{s} = \vec{b}^{\,\rho\sigma}, \quad \vec{z} = (\gen, \vec{\msg})^{\mat{K}}
-\cdot \vec{x}^{\,\rho} \vec{y}^{\,\rho\sigma},
+\vec{s} = \vec{b}^{\,\rho\sigma}, \quad z_j = \gen^{k_{1,j}}
+\prod_{i=1}^{\ell} \msg_i^{k_{i+1,j}} \cdot x_j^{\rho} y_j^{\rho\sigma},
   %
   \end{equation*}
   %
   which is $\SPSsign(\sk, \vec{\msg}; \rho, \sigma)$ for $\KPW$. Both schemes are
 therefore instances of $\TSPS$. Correctness follows from correctness of the SPS
 scheme and of the MPC protocol, and \Cref{thm:tsps-construction-security} and
-\Cref{lem:tsps-adaptive} give security.\rebekah{Asserted, not shown: the boxes do not
-map one to one onto \Cref{prot:tsps-generic}. The state contents differ, $\algo{Inv}$
-is inlined and never used, threshold $\AGHO$ adds the mask $\beta$ and stores
-$\rho\mu_i$ rather than $e_{1,i} = -\rho\mu_i$, and $\KPW$ computes $\gen^{k_{1,j}}$
-online.}
+\Cref{lem:tsps-adaptive} give security.
+
+  The two threshold schemes follow \Cref{prot:tsps-generic}. Threshold $\AGHO$
+computes $1/\rho$ as $\algo{Inv}$ does, with its mask $\beta$ also applied to
+$\tau$ to save a round, and stores $c_0 = (\widetilde{r}, \widetilde{s})$,
+$c_1 = \gen^{\rho}$ and the $e_{1,i}$. Threshold $\KPW$ stores $c_0$ and the
+part $\vec{z}^*$ of each $c_j$ computed with $\algo{ExpGrp}_1$. The rest of
+$c_j$, $\gen^{k_{1,j}}$, and the $e_{j,i}$ are computed locally from the key,
+so each signer computes them from its key share when signing.
 
 \end{proof}

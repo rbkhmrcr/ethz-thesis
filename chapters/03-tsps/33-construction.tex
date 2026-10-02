@@ -1,11 +1,10 @@
 \section{Construction}\label{sec:tsps-construction}
 
-The signing key of an underlying SPS scheme $\SPS$ is secret-shared among the
-$n$ signers. The signers never reconstruct it, and instead use the MPC protocol
-to jointly compute shares of every value that the signing
-algorithm derives from the key and from its own randomness.\rebekah{Your
-comment: ``no idea what to do here but this isn't it. would say TSPS is a
-primitive we instantiate''. Open: how to reframe this opening.}
+We construct a threshold SPS scheme generically, from an SPS scheme $\SPS$
+whose signing algorithm is decomposable and an MPC protocol with the interfaces
+of \Cref{sec:tsps-mpc}. \Cref{sec:tsps-instantiation} then instantiates $\SPS$
+with $\AGHO$ and $\KPW$. The signing key of $\SPS$ is secret-shared among the
+$n$ signers, who never reconstruct it.
 
 \paragraph{Setup.} The signers agree in advance on $(\ell, t, n)$ and the
 pairing groups, and abort if any call to $\algo{MPC}$ returns $\bot$.
@@ -40,10 +39,7 @@ message, and $z_1, \ldots, z_k$ of the following form:
 \end{equation*}
 %
 where the group elements $c_0, c_1, \ldots, c_k$ and field elements $e_{j,i}$
-are computed from $\sk$ and the signing randomness alone, using the interfaces
-of $\algo{MPC}$ and linear operations.\rebekah{Defining this through the MPC
-interfaces makes it vacuous, since any function can be computed with them. It
-should be a property of $\SPS$ itself.}
+depend only on $\sk$ and the signing randomness, and not on the message.
 
 \begin{outline}
   \item why this makes the online phase local: from sharings of $c_j$ and
@@ -88,7 +84,8 @@ following:
 $\algo{Mul}$, $\algo{Inv}$, $\algo{ExpGrp}$ and linear operations.
 
 	\item Store $\shr{\state} = (\shr{c_0}, \ldots, \shr{c_k},
-(\shr{e_{j,i}})_{j,i})$.
+(\shr{e_{j,i}})_{j,i})$. Parts of the state computed locally from $\shr{\sk}$
+need not be stored, and each signer computes them from $\sk_h$ when signing.
 
       \end{enumerate}
 
@@ -120,12 +117,14 @@ $\SPSverify(\pk, \vec{\msg}, \SPSsig)$.
 
 \end{protocolbox}
 
-\paragraph{Offline signing.} Each state is used for one message only. Two
-signatures under the same state can give a
-relation between the two messages and the secret key,\rebekah{Your comment:
-``?''. Open: say what the relation is, or drop the reason.} so the signers keep their
+\paragraph{Offline signing.} Each state is used for one message only,
+so the signers keep their
 states in a queue and delete each one once it is used. The offline phase can be
 run repeatedly during quiet periods to build up states for busy ones.
+The security proof uses two properties of $\TSPSoffsign$. Every value it opens
+is masked by a fresh uniform value, and each component of $c_0$ and each $c_j$ is
+computed from its own fresh sharing. Both hold for threshold $\AGHO$ and
+threshold $\KPW$.
 
 \paragraph{Online signing.} Online signing takes the message vector and
 produces a signature share. By decomposable signing, each signer only needs
@@ -138,17 +137,14 @@ comparable to that of an ordinary invocation of $\SPSsign$.
 is performed by whichever party is to hold the signature, and needs no
 participation from the signers beyond their having published their shares. In
 our benchmarks, every signer opens the signature, so each sends its share to all
-others.\rebekah{Combining is defined as non-interactive by any holder, but bad
-shares are only caught at the authenticated opening, and the benchmarks measure
-every party opening. Say how a holder combining alone detects a bad share.}
+others. The holder checks the result with $\TSPSverify$, so a malformed share
+makes this check fail.
 
-\paragraph{Robustness and abort.} With an honest majority, the honest signers' shares alone are enough to combine,
-so signing is robust and succeeds whatever the corrupted signers do. With
-additive sharing, every signer has to contribute, and corrupted signers can make
-signing abort. If the MPC protocol has identifiable abort, meaning that an abort
-also names a corrupted signer, such signers can be excluded.\rebekah{Robust
-overstates it: the offline MPC can abort even with an honest majority, and
-$\TSPScombine$ has to detect bad shares for the honest shares to be enough.}
+\paragraph{Robustness.} A threshold scheme is robust if signing succeeds
+whenever $t+1$ honest signers take part~\cite{EC:GJKR96}. Robustness is a
+property of the MPC protocol chosen for the instantiation, and neither protocol
+we choose achieves it, as both are only secure with abort against
+malicious adversaries~\cite{C:GLOPS21,CCS:KelOrsSch16}.
 
 \begin{outline}
   \item what we prove: thresholdising loses nothing; if $\SPS$ can't be forged
@@ -205,13 +201,9 @@ $\advB$ such that the following holds:
 We prove \Cref{lem:tsps-adaptive} in \Cref{sec:tsps-adaptive}.
 
 \begin{outline}
-  \item if $n$ is polynomial in $\secparam$ and $t$ or $n - t$ is constant, then
-$\binom{n}{t} \leq n^{\min(t, n-t)}$ is polynomial, so $\TSPS$ is adp-TS-UF-1
-secure\rebekah{Your comment: ``is that possible? where has this come from?''
-It follows from $\binom{n}{t} = \binom{n}{n-t}$; decide whether to keep it.}
-  \item with an adaptively secure protocol: dishonest majority $t = n-1$ loses
-only $\binom{n}{n-1} = n$; honest majority $t \approx n/2$ loses a factor
-exponential in $n$, only covered for constant $n$
+  \item the loss $\binom{n}{t}$ is polynomial when $t$ or $n-t$ is constant:
+dishonest majority $t = n-1$ loses only $n$; honest majority $t \approx n/2$
+loses a factor exponential in $n$, so is only covered for constant $n$
   \item where the factor comes from: the reduction guesses, before any
 corruption, which signers the adversary will corrupt or ask for shares on its
 forgery message

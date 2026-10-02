@@ -2,8 +2,7 @@
 
 A threshold structure-preserving signature scheme distributes the signing key of
 an SPS scheme $\SPS$ between $n$ signers, so that any $t+1$ of them can jointly produce a signature, and no
-$t$ of them learn anything about the key.\rebekah{Overclaim: key secrecy is
-never defined or proven in this chapter, only TS-UF-1.}
+$t$ of them can produce one alone.
 
 The signers are the only participants in the protocol. They communicate over
 authenticated point-to-point channels, together with a broadcast channel that
@@ -184,9 +183,13 @@ message only, since reusing a state reuses the signing randomness
 and the winning condition, with our $t+1$ signers in place of their $t$
 \end{outline}
 
-The adversary has offline and online oracles. It wins if it outputs a valid
+The experiment is parameterised by the message length $\ell$. The adversary
+has offline and online oracles. It wins if it outputs a valid
 signature on a message for which fewer than $t + 1 - |\Cor|$ honest signers
-issued shares.
+issued shares. The experiment idealises key generation, with the challenger
+running $\TSPSgen$, as in the existing definitions~\cite{C:BCKMTZ22,C:CriKomMal23}.
+In our construction, as $\TSPSgen$ is a single MPC computation, the security of
+MPC allows the signers to replace the challenger in practice.
 
 The advantage of a PPT adversary $\adv$ is defined as follows:
 %
@@ -204,21 +207,11 @@ secure if this advantage is negligible for every PPT adversary $\adv$.
   \begin{enumerate}
 
     \item The adversary outputs $(n, t, \Cor)$ with $|\Cor| \leq t$, and the
-challenger sets $\mathcal{H} := [1,n] \setminus \Cor$.\rebekah{$\ell$ is
-unbound here. Letting the adversary output it clashes with the proof, where
-$\advB$ receives $\pk$ before $\adv$ speaks, so the experiment should fix $\ell$
-as a parameter. There is also no rule for sessions that abort.}
+challenger sets $\mathcal{H} := [1,n] \setminus \Cor$.
 
     \item The challenger generates $(\shr{\sk}, \pk) \sample \TSPSgen(\secparam,
 \ell, t, n)$, and sends $\pk$, the shares $\{\pk_i\}_{i \in [1,n]}$ that the
-signers broadcast to open it, and $\{\sk_i\}_{i \in \Cor}$ to $\adv$.\rebekah{The
-challenger runs $\TSPSgen$ alone, so this is a trusted dealer, while the chapter
-claims distributed key generation with malicious signers. Bellare et al., Crites et
-al.\ and Crites, Komlo and Maller all assume trusted key generation on purpose.
-Either run $\TSPSgen$ like $\mathcal{O}_{\algo{Off}}$, with $\adv$ acting for
-$\Cor$, and simulate it in the proof, or say that the experiment idealises key
-generation and argue that the MPC protocol realises it. The proof never
-simulates key generation.}
+signers broadcast to open it, and $\{\sk_i\}_{i \in \Cor}$ to $\adv$.
 
     \item The adversary is given oracle access to the following:
 
@@ -227,7 +220,8 @@ simulates key generation.}
 	\item[$\mathcal{O}_{\algo{Off}}(\mathsf{sid})$:] If $\mathsf{sid}$ has
 been used before, return $\perp$. Otherwise run $\TSPSoffsign$ between all $n$
 signers, with $\adv$ acting for $\Cor$, store the shares
-$\shr{\state}_{\mathsf{sid}}$, and return the view of the corrupted signers.
+$\shr{\state}_{\mathsf{sid}}$, and return the view of the corrupted signers. If
+the run aborts, return $\perp$ and mark $\mathsf{sid}$ as used.
 
 	\item[$\mathcal{O}_{\algo{On}}(i, \mathsf{sid}, \vec{\msg})$:] If $i
 \notin \mathcal{H}$, $\mathsf{sid}$ was not initialised by
@@ -266,10 +260,6 @@ We prove that our construction is TS-UF-1 secure in
 \Cref{sec:tsps-security}.
 
 \begin{outline}
-  \item key secrecy follows from MPC privacy\rebekah{Your comment on key
-secrecy: ``is this not part of unf? why is it listed?'' Decide whether to keep
-it as a separate point.}: signers only open $\pk$ and
-signatures, so at most $t$ signers learn nothing about $\sk$ beyond those
   \item compatibility: $\TSPSverify = \SPSverify$ and a combined signature is an
 ordinary signature under uniform randomness, so a verifier can't tell it was
 produced by a threshold of signers
@@ -351,7 +341,8 @@ each signer obtains the following:
 \end{equation*}
 %
 Raising a public group element to a shared exponent gives a
-sharing of the result~\cite{FOCS:Feldman87,LC:ADEO21}:
+sharing of the result~\cite{C:DesFra89,LC:ADEO21}. For a public $d$, this is
+the following:
 %
 \begin{equation*}
 %
@@ -360,15 +351,11 @@ sharing of the result~\cite{FOCS:Feldman87,LC:ADEO21}:
 \end{equation*}
 %
 Since the messages are public group elements, this makes our online phase
-local. In the malicious setting, the signers apply the same operations to the
-authentication information.\rebekah{Your comment: ``ok? but this is breaking
-the abstraction of MPC, right?'' Open: keep the authentication information out of
-the text entirely, or say once that it is handled inside the MPC protocol.}
+local.
 
-$\algo{ExpGrp}$ mixes the two domains. It is needed when the secret key
-contains group elements. For a key of field elements, $\algo{Mul}$ is enough.\rebekah{Your comment on this paragraph: ``what,
-this doesn't even sound correct?'' Struck words removed; check the remaining
-claim.}
+$\algo{ExpGrp}$ raises a shared group element to a shared exponent. This is
+needed in threshold $\KPW$, as signing raises group elements of its secret key
+to shared exponents.
 
 $\algo{Inv}$ is built from $\algo{Mul}$ and
 $\algo{Open}$. The signers sample $\shr{\beta} \sample \algo{RandShare}()$, open

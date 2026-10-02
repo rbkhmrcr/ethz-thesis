@@ -24,8 +24,11 @@ forges a certification
   \item why not multi-signatures: they need every signer and verifiers must know
 who signed; a threshold scheme keeps one public key and ordinary signatures, so
 verifiers don't change
-  \item SPS separates authority from knowledge: signers certify committed values
-without learning them
+  \item SPS separates verification from knowledge: the signers know the values
+they certify, but the signature is on a commitment, so anyone can check its
+validity on the ledger without learning the value\rebekah{describe this better:
+authority stays with knowledge (the signers see the transaction), only
+verification of validity is separated from it}
   \item practicality (as in the rest of the thesis): for a threshold signer the
 cost is interaction when a signature is needed; our online phase needs no
 interaction between signers
@@ -59,6 +62,13 @@ existing SPS schemes together with secure multiparty computation (MPC)
 techniques~\cite{C:AGHO11,C:KilPanWee15,C:DPSZ12,CCS:KelOrsSch16,C:GLOPS21}.
 We select $\AGHO$ for its optimal signature size, and $\KPW$ for its reliance
 on standard assumptions alone~\cite{C:AGHO11,C:KilPanWee15}.
+Threshold $\AGHO$ outputs ordinary $\AGHO$ signatures of three group elements,
+which meets the lower bound for SPS in type III groups, so it has the smallest
+possible signatures of any threshold SPS for general messages~\cite{C:AGHO11}.
+Existing threshold SPS schemes either need seven group elements, or have smaller
+signatures but only sign messages given in both source groups with the same
+discrete logarithm, where the bound does not apply~\cite{PKC:MMSST24,AC:CKPSS23}.
+The price of this is security in the GGM.
 
 \begin{outline}
   \item signing key held in secret-shared form (enough shares determine it, fewer
@@ -67,44 +77,37 @@ general-purpose MPC, nothing new needed
   \item the hard part is signing: evaluating it under MPC directly means the
 signers must interact for each signature
   \item observation: in SPS the message is public group elements and (in the
-schemes we use) only gets raised to secret exponents, which each signer can do on
+schemes we use) only gets raised to shared exponents, which each signer can do on
 its own shares; if everything else is prepared in advance, no interaction needed at
 message time
   \item why not remove interaction completely: that means designing a new scheme
 for the threshold setting, as existing threshold SPS schemes do, with their
 restrictions on messages or assumptions; splitting signing in two keeps existing
-SPS schemes as they are and moves the interaction off the critical path
+SPS schemes as they are and moves the interaction to before the message is known
 \end{outline}
 
-Both schemes are designed so that the online phase, run once the messages to be
-signed are known, requires no interaction between parties, keeping its cost
-comparable to that of ordinary, non-threshold signing. Both underlying
-signatures let the threshold signers perform the majority of their computation
-offline, in a preprocessing phase before the message to be signed is known,
-which suits high-throughput applications, such as payments, that experience
-interspersed periods of low and high traffic. Our schemes inherit the security
-properties of the underlying SPS schemes.\rebekah{Your comment on this
-paragraph: ``interesting but weak?'' Open: strengthen or cut.}\rebekah{Overclaim: only TS-UF-1
-is proven, from EUF-CMA of the underlying scheme, not every property.}
+High-throughput applications, such as payments, have quiet and busy periods,
+and the preprocessing can run in the quiet ones. \Cref{sec:tsps-security} shows that the
+threshold schemes are unforgeable whenever the underlying SPS scheme is.
 
 We call the property of the signing algorithm that makes this possible
 decomposable signing, and show that $\AGHO$ and $\KPW$ have it.
 
 \begin{outline}
   \item second contribution: implementation; thresholdising $\KPW$ needs
-secret-shared group elements and multiplication of a shared field element with a
-shared group element
+secret-shared group elements and raising a shared group element to a shared
+exponent
   \item Ghosh et al.\ compute on shared group elements between two parties (cite
 NDSS:GPVRNC23); as far as we know no multiparty version had been implemented
   \item Dalskov et al.\ implemented threshold ECDSA for many parties in MP-SPDZ
 with shared curve points (ESORICS:DOKSS20, cited in the old evaluation); what is
-new here is pairing-friendly groups and a shared field element times a shared
-group element (your answer: sounds correct but check)
+new here is pairing-friendly groups and a shared group element raised to a
+shared exponent (your answer: sounds correct but check)
 \end{outline}
 
 We benchmark both schemes using two MPC frameworks: ATLAS, which assumes an
 honest majority, and MASCOT, which assumes a dishonest
-majority~\cite{C:GLOPS21,CCS:KelOrsSch16}, extending MP-SPDZ with support for
+majority~\cite{C:GLOPS21,CCS:KelOrsSch16}. We extend MP-SPDZ with support for
 the group element functionalities our schemes require~\cite{CCS:Keller20}. The
 former suits settings where robustness and high availability are desirable, the
 latter settings where resilience to key compromise takes precedence. We also
@@ -118,8 +121,7 @@ a zero-knowledge proof.
 
 \subsection*{Related work}
 
-\paragraph{SPS schemes.} SPS schemes were introduced by Abe et al., whose
-scheme signs messages of arbitrary length
+\paragraph{SPS schemes.} The first SPS scheme signs messages of arbitrary length
 with signatures of seven group elements, and is secure in the standard model
 under a non-interactive assumption~\cite{C:AFGHO10}. Abe, Groth, Haralambiev, and
 Ohkubo then showed that a signature in type III groups needs at least three group
@@ -155,12 +157,10 @@ of seven group elements~\cite{C:KilPanWee15}.
 two prior threshold SPS schemes in terms of assumptions, key and signature size,
 and verification cost~\cite{AC:CKPSS23,PKC:MMSST24}.
 
-\paragraph{Computing on shared group elements.}
+\paragraph{Computing on shared group elements.} Moving a sharing of a field
+element into a group without interaction, where each party raises a public
+generator to its share, goes back to threshold cryptosystems~\cite{C:DesFra89}.
 \begin{outline}
-  \item moving a sharing of a field element into a group without interaction
-(each party raises a public generator to its share) goes back to verifiable
-secret sharing (cite FOCS:Feldman87)\rebekah{Your comment: ``um?.'' Open: keep
-the Feldman point or drop it.}
   \item Smart and Talibi Alaoui: maliciously secure computation over an elliptic
 curve group, maps multiplication triples over $\Zp$ locally into triples over the
 group (cite IMA:SmaTal19)
