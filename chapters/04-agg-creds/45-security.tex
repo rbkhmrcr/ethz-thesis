@@ -350,7 +350,9 @@ This is $\ATSsign(\gamma, \Tag, \msg)$ with randomness $\upsilon = \phi -
 
   \end{itemize}
 
-  \paragraph{Extraction.} \rebekah{If $\adv$ never queried $\hashone(\msg^*_j)$ or $\hashtwo(\Tag^*)$, $\advB$ has to query them itself before this step, so that they are embedded or plain as needed.} $\advB$ stops unless $\msg^*_j$ is embedded and
+  \paragraph{Extraction.} If $\adv$ never queried $\hashone(\msg^*_j)$ or
+$\hashtwo(\Tag^*)$, $\advB$ first queries them itself, so that each is embedded
+or plain as above. $\advB$ stops unless $\msg^*_j$ is embedded and
 $\Tag^*$ is plain, so that $\hashone(\msg^*_j) = y^{\rho^*}$ and
 $\hashtwo(\Tag^*) = \gen^{\eta^*}$. It removes the contributions of the other
 keys as follows:
@@ -408,7 +410,7 @@ So $\ATS$ is existentially unforgeable under tag-based aggregation.
 
 %%%% proof of Theorem 3 - the concrete instantiation, corollary of Theorem 1
 
-\subsection{Proof of \Cref{lem:agg-creds-sigma}: extraction and simulation}\label{sec:agg-creds-proof-lemma}
+\subsection{Proof of \Cref{lem:agg-creds-sigma}: extraction and simulation of presentations}\label{sec:agg-creds-proof-lemma}
 
 \begin{proof}
 
