@@ -7,7 +7,8 @@ schemes, public key encryption schemes and proof systems. These are standard and
 follow Katz and Lindell~\cite{KatLin14}. It then instantiates these primitives,
 defining bilinear groups, the assumptions we rely on, Sigma protocols and the
 Fiat-Shamir transform, the Pedersen commitment scheme, the ElGamal encryption
-scheme, and the BBS+ signature scheme.
+scheme, and the BBS+ signature scheme. Our notation is listed on
+page~\pageref{sec:notation}.
 
 The thesis contains numerous primitives, protocols, security definitions,
 instantiations and assumptions. To ease understanding of them, we use a number of different
@@ -18,21 +19,6 @@ are contributions of this work in purple boxes. Every box and figure is numbered
 experiments, assumptions, primitives and protocols have been introduced, later
 chapters refer back to them rather than restating them. Each chapter aims to be
 otherwise as self-contained as possible.
-
-\section{Notation}\label{sec:prelims-notation}
-
-\rebekah{this section repeats the notation page almost line by line; keep one, or keep only what the page does not say}
-
-We write $\{0,1\}^*$ for the set of bit strings of any length, $|x|$ for the
-length of $x$, and $x \| y$ for the concatenation of $x$ and $y$. We write
-$[1,n]$ for the set $\{1, \ldots, n\}$. Vectors are denoted $\vec{x}$, and
-matrices are upright capitals. We write $x \sample S$ for
-sampling $x$ uniformly from a set $S$, $y \sample \algo{A}(x)$ for running a
-randomised algorithm $\algo{A}$ on input $x$, and $y \leftarrow \algo{A}(x)$ for
-running a deterministic one. Where a security argument needs to specify the
-randomness, we write $\algo{A}(x; \rho)$, so that $y \sample \algo{A}(x)$ is
-$y \leftarrow \algo{A}(x; \rho)$ for uniform $\rho$. The notation used
-throughout is listed on page~\pageref{sec:notation}.
 
 \section{Defining secure protocols}\label{sec:prelims-security}
 

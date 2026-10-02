@@ -1,96 +1,15 @@
 \section{Hash functions}\label{sec:prelims-hash}
 
-Hash functions compress inputs of arbitrary length into a short digest.\rebekah{the keyed family, collision resistance and second preimages are not used in later chapters, which only use hash functions as random oracles or MiMC; trim, or say why they are here}
+Hash functions compress inputs of arbitrary length into a short digest. They
+are usually defined as keyed families, with collision resistance, preimage
+resistance and second preimage resistance as the standard security
+notions~\cite{KatLin14}. Our constructions do not rely on these properties
+directly. Instead, our security proofs model hash functions as random oracles, and the
+one hash function used inside a circuit, MiMC, is assumed to be a pseudorandom
+function (\Cref{sec:txid-hash-instantiation}). We write $\hash(x)$ for the
+hash of $x$.
 
-\paragraph{Syntax.} A hash function family consists of algorithms defined as
-follows:
-%
-\begin{description}
-
-  \item[$\key \sample \hashgen(\secparam)$ :] The key generation algorithm takes
-the security parameter as input, and outputs a key $\key \in \keyspace$.
-
-  \item[$y \leftarrow \hasheval(\key, x)$ :] The evaluation algorithm takes key
-$\key$ and input $x \in \{0,1\}^*$, and outputs a digest $y \in \range$.
-
-\end{description}
-%
-We say $\Hash = (\hashgen, \hasheval)$ is a hash function family if $\hasheval(\key, \cdot)$ is efficiently computable for every
-$\key$ output by $\hashgen(\secparam)$. We use the standard syntax and security
-notions for hash functions~\cite{KatLin14}.
-
-\paragraph{Collision resistance.} Collision resistance requires that no
-efficient adversary can find two distinct inputs hashing to the same digest, as
-in \Cref{exp:hash-cr}.
-
-\begin{experimentbox}{Hash functions: collision resistance}{hash-cr}
-
-  \begin{enumerate}
-
-    \item The challenger generates $\key \sample \hashgen(\secparam)$ and sends
-$\key$ to $\adv$.
-
-    \item The adversary outputs $(x, x')$.
-
-  \end{enumerate}
-
-  $\adv$ wins the experiment if the following hold:
-  %
-  \begin{equation*}
-  %
-    x \neq x' \ \wedge\ \hasheval(\key, x) = \hasheval(\key, x').
-  %
-  \end{equation*}
-
-\end{experimentbox}
-
-The collision resistance advantage of $\adv$ is defined as follows:
-%
-\begin{equation*}
-%
-  \Adv^{\mathsf{cr}}_{\Hash, \adv}(\secparam) = \Pr[\adv \text{ wins}].
-%
-\end{equation*}
-%
-We say $\Hash$ is collision resistant if this advantage is negligible for every
-PPT adversary $\adv$.
-
-\paragraph{Preimage resistance.} Preimage resistance requires that no efficient
-adversary, given the digest of a random input, can find any input hashing to
-it, as in \Cref{exp:hash-preimage}.
-
-\begin{experimentbox}{Hash functions: preimage resistance}{hash-preimage}
-
-  \begin{enumerate}
-
-    \item The challenger generates $\key \sample \hashgen(\secparam)$, samples
-$x \sample \{0,1\}^{\secparam}$, computes $y \leftarrow \hasheval(\key, x)$, and
-sends $(\key, y)$ to $\adv$.
-
-    \item The adversary outputs $x'$.
-
-  \end{enumerate}
-
-  $\adv$ wins the experiment if $\hasheval(\key, x') = y$.
-
-\end{experimentbox}
-
-The preimage resistance advantage of $\adv$ is defined as follows:
-%
-\begin{equation*}
-%
-  \Adv^{\mathsf{preimage}}_{\Hash, \adv}(\secparam) = \Pr[\adv \text{ wins}].
-%
-\end{equation*}
-%
-We say $\Hash$ is preimage resistant if this advantage is negligible for every
-PPT adversary $\adv$. A related property is second preimage resistance,
-which requires that no efficient adversary, given $x$, can find a distinct
-input $x'$ with the same digest. Collision resistance implies
-second preimage resistance.
-
-When the key $\key$ is fixed and public, we write $\hash(x)$ for
-$\hasheval(\key, x)$. The range can be any set, and later sections also hash
+The range can be any set, and later sections also hash
 into fields and groups. Schemes that use several hash functions write them
 $\hashone, \hashtwo, \ldots$ and give each its own domain separation tag. A
 domain separation tag is a fixed string prefixed to every input, and distinct
@@ -100,12 +19,11 @@ tags make the hash functions behave as independent functions.
 computable and, for a uniform input $x$, no PPT adversary given $f(x)$ outputs
 any $x'$ with $f(x') = f(x)$ with non-negligible probability.
 
-Preimage resistance is one-wayness for a keyed family of functions. Our
-instantiations use exponentiation $x \mapsto \gen^x$ in a group of prime order
+Our instantiations use exponentiation $x \mapsto \gen^x$ in a group of prime order
 as the one-way function, which is one-way under the DL assumption in
 \Cref{asm:dl}.
 
-\paragraph{The random oracle model.} Beyond these properties, our security
+\paragraph{The random oracle model.} Our security
 proofs generally model a hash
 function as a random oracle: a function sampled uniformly at random from all
 functions with the given domain and range, to which every party, including the

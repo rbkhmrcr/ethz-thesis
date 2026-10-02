@@ -2,9 +2,8 @@
 
 The desire to conceal written information has been considered for at least the
 last four thousand years, from the obfuscated hieroglyphs found in the tomb of
-Khnumhotep II.\rebekah{cite, e.g.\ Kahn, The Codebreakers (check)} More recently, encryption schemes have let people communicate by
-exchanging messages that are, to eavesdroppers, computationally
-indistinguishable from random.\rebekah{IND-CPA/CCA only make ciphertexts of two messages indistinguishable, not indistinguishable from random; soften?} Parties with a shared key can send each other
+Khnumhotep II~\cite{Kahn96}. More recently, encryption schemes have let people communicate by
+exchanging messages that reveal nothing about their content to eavesdroppers. Parties with a shared key can send each other
 confidential messages, regardless of the content of those messages, and
 independently of the power of, language spoken by, or any other attributes of
 the communicating parties. Modern cryptography has enabled encrypted
@@ -14,7 +13,7 @@ The communicating parties are not assumed to be as powerful as the
 entities trying to break the system---encryption demands relatively little
 computational power of the users while keeping the adversary's computational
 task infeasible. This asymmetry of computational power between users
-and attacking entities\rebekah{your note struck ``necessary'' here and rewrote it in the margin; where should it go?} is well noted, and lies at the foundation of modern
+and attacking entities is well noted, and lies at the foundation of modern
 cryptography itself~\cite{DifHel76}.
 
 However, protecting the content of a message says nothing about who is
@@ -25,7 +24,7 @@ their relationships, or patterns in their behaviour. Protecting each of these
 brings the next piece of observable information into focus.
 
 Over the last fifty years, privacy-enhancing technologies have been developed
-to protect each new piece of information identified as valuable.\rebekah{cite or soften this historical claim} As the adoption
+to protect each new piece of information identified as valuable~\cite{Chaum81,USENIX:DinMatSyv04}. As the adoption
 of digital systems has grown, even of those with privacy protections, so has the
 number of entities capable of observing some part of a system. Service
 providers, issuers, validators, network operators and public authorities may all
