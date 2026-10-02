@@ -48,10 +48,8 @@ pseudonym.
 
 \begin{outline}
   \item which commitment properties are used: hiding keeps the owner anonymous,
-    binding lets an audit name the right user\rebekah{you wrote ``???'' at the
-    binding part: the audit decrypts the ciphertext, not the pseudonym; binding
-    is what ties that ciphertext, proven consistent with the pseudonym, to one
-    identifier; reword or drop}
+    binding ties the audit ciphertext, proven consistent with the pseudonym,
+    to one identifier
 \end{outline}
 
 \paragraph{Setup.} During setup the central bank generates a key pair for an
@@ -83,10 +81,8 @@ protocol.
 The generators that make up the commitment key are derived by hashing into the
 group rather than chosen by any participant, so that no party knows the discrete
 logarithm relations between them. The identification argument relies on
-binding of the commitments, and a central bank that generated the
-commitment key itself would be able to break it.\rebekah{a malicious central
-bank! but is our central bank malicious? it is honest but curious in the
-definitions}
+binding of the commitments, which would otherwise rest on whoever generated the
+commitment key never revealing the discrete logarithm relations.
 
 \paragraph{Registration.} A user enrols once. Their secure element is
 provisioned with a fresh secret key and a unique identifier, and proves to the
@@ -296,7 +292,17 @@ role so that decryption requires more than a threshold of auditors to cooperate.
     c_1^{\sk_\auditor} = \gen^{\algo{uid}}$, so the identifier is recovered as a
     group element and looked up
   \item the same step as tracing in \Cref{chap:txid}: link to the tracing
-    protocol there
+    protocol there\rebekah{consider the differences: this is not general-purpose
+    auditing as in \Cref{chap:txid}, but targeted identification of known
+    double-spent transactions, so anonymity revocation, which the tracing chapter
+    does not address since it was not its focus}\rebekah{other ways of anonymity
+    revocation: schemes where two payments spending the same token give two
+    equations that anyone can solve for the identity, with no auditor; cut and choose
+    in Chaum, Fiat and Naor~\cite{C:ChaFiaNao88}, linear equations in the user's
+    secret in Brands~\cite{C:Brands93}, double-spending tags in Camenisch,
+    Hohenberger and Lysyanskaya~\cite{EC:CamHohLys05}, and for transferable tokens
+    Baldimtsi et al.~\cite{PKC:BCFK15}; very inefficient, could even implement one
+    as a baseline}
 \end{outline}
 
 \paragraph{Privacy guarantees.} The scheme gives two guarantees. Transactors
@@ -472,7 +478,7 @@ $\JPOKprove_1$ and contributes the remaining witness.
 
     \item The payee's device verifies $\algo{hist}_i$: if $i = 0$, it checks
 $\Sigma$. Otherwise it verifies $\Sigma$ and every $(\Gamma_k, \sigma_k)_{k \in
-[i]}$.\rebekah{off by one: $\algo{hist}_i$ holds the links $k = 0, \ldots, i-1$, so the index set should be $[i]_0$ rather than $[i] = \{1, \ldots, i\}$}
+[i]_0}$.
 
     \item If $\Gamma_i$ and $\sigma_i$ also verify, the payee's device accepts
 and stores $T_{i+1} = (v, s_{i+1}, \com_{i+1}, \algo{hist}_{i+1} = (\com_i,
@@ -526,11 +532,11 @@ does:
 
   \begin{enumerate}
 
-    \item Parse $d_n$ into the pseudonyms $(\com_k)_{k \in [n+1]}$ and
-ciphertexts $(\ciph_k)_{k \in [n+1]}$ it contains, taking these from
+    \item Parse $d_n$ into the pseudonyms $(\com_k)_{k \in [n+1]_0}$ and
+ciphertexts $(\ciph_k)_{k \in [n+1]_0}$ it contains, taking these from
 $\algo{hist}_n$ together with the depositor's own $\com_n$ and $\ciph_n$, and
-parse $d_{n'}$ analogously into $(\com'_k)_{k \in [n'+1]}$ and $(\ciph'_k)_{k \in
-[n'+1]}$.\rebekah{off by one: $d_n$ carries $\com_0, \ldots, \com_n$, so the index set should be $[n+1]_0$ rather than $[n+1] = \{1, \ldots, n+1\}$, and likewise for $d_{n'}$}
+parse $d_{n'}$ analogously into $(\com'_k)_{k \in [n'+1]_0}$ and $(\ciph'_k)_{k \in
+[n'+1]_0}$.
 
     \item Find the largest index $j$ such that $\com_k = \com'_k$ for all $k
 \leq j$. Either $\com_{j+1} \neq \com'_{j+1}$, in which case the owner at $j$

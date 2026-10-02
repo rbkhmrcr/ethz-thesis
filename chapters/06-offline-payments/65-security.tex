@@ -161,7 +161,7 @@ $(\algo{uid}, s)$ from $\Sigma$, computes $\algo{id} \leftarrow \ComCommit(\ck,\
 $\vec{\algo{id}} = (\algo{id})$.
 
 $\algo{usr}'$ honest. If $\algo{usr}'$ accepts $p_0$ but $\idfu{\algo{op}}$
-rejects, exactly one of the following holds:\rebekah{the cases are not exclusive: (d) overlaps with (a) to (c), here and in Game 11; say at least one holds}
+rejects, at least one of the following holds:
 
 \begin{enumerate}[label=\alph*)]
 
@@ -239,7 +239,7 @@ indistinguishable from Game 9.
 
 \paragraph{Game 11.} As Game 10, except $\idfu{\algo{op}}$ also handles
 $\OPdeposit$ queries from corrupt users. When $\algo{tokens}[\vec{\algo{id}}] \neq
-\langle \algo{usr}, v \rangle$, exactly one of the following holds. Each is
+\langle \algo{usr}, v \rangle$, at least one of the following holds. Each is
 handled by the same argument as in Game 9, with the payment in question replaced
 by the deposit in question.
 

@@ -3,7 +3,7 @@
 \begin{outline}
   \item instantiate $\OP$: every statement proven is an equation between group elements, so every proof is a Sigma protocol
   \item pseudonyms: Pedersen commitments (perfectly hiding, binding under DL, group elements so Sigma protocols apply)
-  \item audit ciphertexts: ElGamal in $\group{1}$, IND-CPA under DDH; decryption gives $\gen^{\algo{uid}}$, auditor looks the identifier up\rebekah{you asked whether these were commitments rather than ciphertexts: the pseudonyms are the commitments; the audit ciphertexts have to be ciphertexts, since the auditor decrypts them to name a double spender}
+  \item audit ciphertexts: ElGamal in $\group{1}$, IND-CPA under DDH; decryption gives $\gen^{\algo{uid}}$, auditor looks the identifier up
   \item credentials: BBS+ as in \Cref{chap:txid}, so the two chapters share a credential layer; EUF-CMA; provable via a few discrete-logarithm equations, in a proof that splits so the secure element only touches $\sk$
   \item central bank's SCI: Pointcheval-Sanders with signing on committed inputs; short, rerandomisable signatures, so the proof of withdrawal is a few group elements
   \item all Sigma protocols via Fiat-Shamir\rebekah{Fischlin: the earlier text compiled the withdrawal request proof with the Fischlin transform as the only place online extraction is needed; not decided yet, redo the proof and confirm before it goes back in the text; the code uses plain Fiat-Shamir}
