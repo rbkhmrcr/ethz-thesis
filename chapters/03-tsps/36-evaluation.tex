@@ -9,9 +9,8 @@ dishonest-majority settings, using ATLAS and MASCOT respectively to realise
 multiplication of shared secrets~\cite{CCS:KelOrsSch16,C:GLOPS21}. ATLAS is
 designed to work in both the honest but curious and malicious settings, but the
 implementation available in MP-SPDZ captures only the honest but curious
-case~\cite{CCS:Keller20}.\rebekah{No
-theorem covers the ATLAS rows: the theorems assume malicious security with abort.
-Scope these rows explicitly.}
+case~\cite{CCS:Keller20}. Our theorems assume an MPC protocol secure against
+malicious signers, so they do not cover the ATLAS rows.
 
 We add to MP-SPDZ sharings of group elements with their authentication
 information, and $\algo{ExpGrp}$ with mixed triples. The groups are those of

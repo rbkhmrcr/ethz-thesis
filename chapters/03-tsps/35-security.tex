@@ -16,7 +16,7 @@ from the signatures it obtains from its own oracle.
 
 \begin{proof}
 
-  Let $\adv$ be a PPT adversary against the adp-TS-UF-1 security of
+  Let $\adv$ be a PPT adversary against the TS-UF-1 security of
 $\TSPS$ applied to $\SPS$. We build $\advB$ playing the EUF-CMA experiment of
 \Cref{exp:euf-cma} against $\SPS$. Recall that $\adv$ wins if the following
 hold:
@@ -27,6 +27,64 @@ hold:
 \mathcal{H}| < t + 1 - |\Cor|.
   %
   \end{equation*}
+
+  We first describe the setup. $\advB$ receives $\pk$ from its challenger. On
+receiving $(n, t, \Cor)$ from $\adv$, it samples key shares $\{\sk_h\}_{h \in
+\Cor}$ uniformly, which by the first consequence are distributed exactly as in a
+real execution. For each group element of $\pk$, it computes the shares of the
+signers in $\Cor$ from their key shares where that element is a generator raised
+to a component of $\sk$, and samples them uniformly otherwise. It samples the
+shares of $t - |\Cor|$ further signers uniformly, which by the first consequence
+is again their real distribution, and derives every other signer's share from
+$\pk$ and these $t$ shares by the second consequence of linear sharing. The key
+shares behind the sampled ones are never needed, since no further signer is
+corrupted. $\advB$ sends $\pk$, all $n$ shares of it, and $\{\sk_h\}_{h \in
+\Cor}$ to $\adv$.
+
+  $\advB$ answers the offline oracle as follows. On $\mathcal{O}_{\algo{Off}}(\mathsf{sid})$ with
+$\mathsf{sid}$ fresh, $\advB$ samples the shares
+$\{\state_{\mathsf{sid},h}\}_{h \in \Cor}$ uniformly, which by the first consequence is
+their real distribution, and runs $\algo{Sim}$ on the corrupted signers' inputs
+and these outputs to produce their view.\rebekah{Two gaps. State shares are not
+independent of key shares for $\KPW$: the $e_{j,i}$ are key entries and $\vec{z}^*$
+depends on $\mat{K}$, so sampling them uniformly needs a fresh or masked
+condition. $\algo{Sim}$ also needs the values opened, such as $\gamma$ in
+threshold $\AGHO$, and the theorem lacks the hypothesis that opened values are
+independent of $\sk$.} If $\adv$ makes the execution abort,
+$\advB$ returns $\bot$ and marks $\mathsf{sid}$ unusable. $\advB$ never fixes the
+randomness $\varrho$ that $\shr{\state}_{\mathsf{sid}}$ shares. It fixes at most $t$
+shares, which are independent of $\varrho$, and $\varrho$ is determined later by
+the signature $\advB$ obtains for that session. This is sound because each
+session is used for one message only.
+
+  $\advB$ answers the online oracle as follows. The output of every call to
+$\algo{MPC}$ is a fresh sharing, so the state shares of a session, and the
+signature shares computed from them, are independent of the key shares and of
+other sessions.\rebekah{False for $\KPW$, whose state contains the key entries
+$e_{j,i}$ of $\mat{K}$; the step needs a fresh or masked condition on the state.} In each session, $\advB$ answers a query to an honest signer with
+a uniform signature share as long as the signers of $\Cor$, together with the
+honest signers it has answered in that session, number at most $t$. By the first consequence of linear sharing,
+any $t$ shares of a fresh sharing are uniform.\rebekah{You wrote ``no'' next to
+``lazily'' and next to ``so these answers are distributed as in a real
+execution''; both removed. Check the step still argues what it needs.} At the first query that would make this number $t+1$,
+$\advB$ queries its own oracle on the session's message, and derives every other
+signature share from the signature and the $t$ shares already fixed.
+
+  Finally, $\advB$ forwards $\adv$'s output $(\vec{\msg}^\star,
+\SPSsig^\star)$ to its challenger. If $\adv$ wins, fewer than $t + 1 - |\Cor|$
+honest signers issued shares on $\vec{\msg}^\star$, so in no session on
+$\vec{\msg}^\star$ does $\advB$ query its own oracle. $\advB$ therefore wins
+whenever $\adv$ does, and no guess is needed.
+
+\end{proof}
+
+\subsection{Proof of \Cref{lem:tsps-adaptive}: security under adaptive corruption}\label{sec:tsps-adaptive}
+
+\begin{proof}
+
+  Let $\adv$ be a PPT adversary against the adp-TS-UF-1 security of $\TSPS$
+applied to $\SPS$. $\advB$ is as in the proof of
+\Cref{thm:tsps-construction-security}, with the following changes.
 
   We first describe the setup. $\advB$ receives $\pk$ from its challenger. On receiving
 $(n, t, \Cor_0)$ from $\adv$, where $\Cor_0$ is the set of signers corrupted
@@ -43,21 +101,9 @@ consequence of linear sharing, and sends $\pk$, all $n$ shares of it, and $\{\sk
 \in \Cor_0}$ to $\adv$. The set $\mathcal{K}$ is a guess at the signers that $\adv$ will
 either corrupt or ask for a signature share on its forgery message.
 
-  $\advB$ answers the offline oracle as follows. On $\mathcal{O}_{\algo{Off}}(\mathsf{sid})$ with
-$\mathsf{sid}$ fresh, $\advB$ samples the shares
-$\{\state_{\mathsf{sid},h}\}_{h \in \mathcal{K}}$ uniformly, which by the first consequence is
-their real distribution, and runs $\algo{Sim}$ on the corrupted signers' inputs
-and these outputs to produce their view.\rebekah{Two gaps. State shares are not
-independent of key shares for $\KPW$: the $e_{j,i}$ are key entries and $\vec{z}^*$
-depends on $\mat{K}$, so sampling them uniformly needs a fresh or masked
-condition. $\algo{Sim}$ also needs the values opened, such as $\gamma$ in
-threshold $\AGHO$, and the theorem lacks the hypothesis that opened values are
-independent of $\sk$.} If $\adv$ makes the execution abort,
-$\advB$ returns $\bot$ and marks $\mathsf{sid}$ unusable. $\advB$ never fixes the
-randomness $\varrho$ that $\shr{\state}_{\mathsf{sid}}$ shares. It fixes only $t$
-shares, which are independent of $\varrho$, and $\varrho$ is determined later by
-the signature $\advB$ obtains for that session. This is sound because each
-session is used for one message only.
+  $\advB$ answers the offline oracle as in the proof of
+\Cref{thm:tsps-construction-security}, sampling the state shares of the signers
+in $\mathcal{K}$ in place of those in $\Cor$.
 
   $\advB$ answers the online oracle as follows. On $\mathcal{O}_{\algo{On}}(h, \mathsf{sid},
 \vec{\msg})$, if $h \in \mathcal{K}$, then $\advB$ holds $\sk_h$ and
@@ -83,38 +129,8 @@ since every signer that issued a share on $\vec{\msg}^\star$ lies in $\mathcal{K
 Its output then wins the EUF-CMA experiment. The shares $\advB$ hands out are
 distributed identically whichever $\mathcal{K}$ it chose, so $\mathcal{K}$ is
 independent of $\adv$'s view, and is such a set with probability at least
-$\binom{n}{t}^{-1}$, which gives the bound.\rebekah{You marked ``which gives
-the bound'' with an arrow. Open: cut it or spell out the bound.}
-
-\end{proof}
-
-\subsection{Proof of \Cref{lem:tsps-static}: security under static corruption}\label{sec:tsps-static}
-
-\begin{proof}
-
-  Let $\adv$ fix $\Cor_0$ before key generation and make no corruption queries.
-$\advB$ is as in the proof above, with two changes. First, it holds key shares only for the signers in $\Cor_0$. For the
-shares of $\pk$, it computes those of $\Cor_0$ as before, samples those of $t -
-|\Cor_0|$ further signers uniformly, and derives the rest from $\pk$. The key
-shares behind the sampled ones are never needed, since no further signer is
-corrupted.
-
-Second, it answers online queries as follows. The output of every call to
-$\algo{MPC}$ is a fresh sharing, so the state shares of a session, and the
-signature shares computed from them, are independent of the key shares and of
-other sessions.\rebekah{False for $\KPW$, whose state contains the key entries
-$e_{j,i}$ of $\mat{K}$; the step needs a fresh or masked condition on the state.} In each session, $\advB$ answers a query to an honest signer with
-a uniform signature share as long as the signers of $\Cor_0$, together with the
-honest signers it has answered in that session, number at most $t$. By the first consequence of linear sharing,
-any $t$ shares of a fresh sharing are uniform.\rebekah{You wrote ``no'' next to
-``lazily'' and next to ``so these answers are distributed as in a real
-execution''; both removed. Check the step still argues what it needs.} At the first query that would make this number $t+1$,
-$\advB$ queries its own oracle on the session's message, and derives every other
-signature share from the signature and the $t$ shares already fixed.
-
-If $\adv$ wins, fewer than $t + 1 - |\Cor_0|$ honest signers issued shares on
-$\vec{\msg}^\star$, so in no session on $\vec{\msg}^\star$ does $\advB$ query its own
-oracle. $\advB$ therefore wins whenever $\adv$ does, and no guess is needed.
+$\binom{n}{t}^{-1}$. $\advB$ therefore wins with at least $\binom{n}{t}^{-1}$
+times the probability that $\adv$ wins.
 
 \end{proof}
 
@@ -158,8 +174,8 @@ For the threshold $\KPW$ scheme, it reconstructs the following:
   %
   which is $\SPSsign(\sk, \vec{\msg}; \rho, \sigma)$ for $\KPW$. Both schemes are
 therefore instances of $\TSPS$. Correctness follows from correctness of the SPS
-scheme and of the MPC protocol, and \Cref{thm:tsps-construction-security} gives
-security.\rebekah{Asserted, not shown: the boxes do not
+scheme and of the MPC protocol, and \Cref{thm:tsps-construction-security} and
+\Cref{lem:tsps-adaptive} give security.\rebekah{Asserted, not shown: the boxes do not
 map one to one onto \Cref{prot:tsps-generic}. The state contents differ, $\algo{Inv}$
 is inlined and never used, threshold $\AGHO$ adds the mask $\beta$ and stores
 $\rho\mu_i$ rather than $e_{1,i} = -\rho\mu_i$, and $\KPW$ computes $\gen^{k_{1,j}}$

@@ -14,10 +14,105 @@ elements and $\algo{ExpGrp}$. In both, the signers raise a public group element
 to a shared field element by each raising it to their own share, which gives a
 sharing of the result.
 
+\subsection{Instantiating the MPC protocol}\label{sec:tsps-mpc-inst}
+
+We realise $\algo{ExpGrp}$ as Smart and Talibi Alaoui do, from multiplication
+triples made in preprocessing~\cite{C:Beaver91b,IMA:SmaTal19}.\rebekah{check against Smart and Talibi Alaoui that their construction is this mixed triple; ours is adding it to MP-SPDZ}
+
+$\algo{ExpGrp}$ consumes a mixed triple $(\shr{\eta}, \shr{h}, \shr{h^\eta})$
+with $\eta \sample \Zp$ and $h \sample \group{}$. The signers open the
+following, which are uniform and reveal nothing:
+%
+\begin{equation*}
+%
+  \epsilon = \alpha - \eta, \quad \delta = b h^{-1}.
+%
+\end{equation*}
+%
+They then compute the following locally:
+%
+\begin{equation*}
+%
+  \shr{b^{\alpha}} = \shr{h^{\eta}} \cdot \shr{h}^{\epsilon} \cdot
+\delta^{\shr{\eta}} \cdot \delta^{\epsilon},
+%
+\end{equation*}
+%
+where one designated signer adds the public term $\delta^{\epsilon}$. The
+signers obtain a mixed triple from an ordinary triple over $\Zp$ by raising a
+generator to the shares of its second and third entries. We added this to
+MP-SPDZ, together with sharings of group elements and their authentication
+information.
+
+Neither protocol we benchmark is proven secure against adaptive corruption, so
+\Cref{lem:tsps-adaptive} does not apply to them.
+
 \subsection{Instantiating $\TSPS$ with $\AGHO$}\label{sec:tsps-abe}
 
-\Cref{prim:agho} recalls the $\AGHO$ SPS scheme~\cite{C:AGHO11}. Writing $\rho =
-1/\omega$ for its signing randomness, a signature on $\vec{\msg}$ is as
+Abe, Groth, Haralambiev, and Ohkubo established a lower bound of three group
+elements for signature size in type III pairing groups, and gave a matching
+construction that signs messages in both groups~\cite{C:AGHO11}. Its signatures
+remain three group elements regardless of message length, and it is strongly
+unforgeable in the GGM.
+
+They also gave a rerandomisable three-element scheme for messages in one group
+only, which is existentially unforgeable in the GGM~\cite{C:AGHO11}. We use this
+scheme with $\group{1}$ and $\group{2}$ swapped, so that messages are in
+$\group{1}$, and call it $\AGHO$. \Cref{prim:agho} recalls it. Its secret
+key consists only of field elements, and the message enters signing only through
+the terms $\msg_i^{-\mu_i}$. Our threshold version relies on both properties.
+
+\begin{primitivebox}{The $\AGHO$ SPS scheme~\cite{C:AGHO11}.}{agho}
+
+  \begin{description}
+
+    \item[$(\sk, \pk) \sample \SPSgen(\secparam, \ell)$ :] Sample $\mu_1,
+\ldots, \mu_\ell, \tau \sample \Zp^*$, and return the following:
+      %
+      \begin{gather*}
+      %
+	\sk = (\mu_1, \ldots, \mu_\ell, \tau), \quad \pk = (\widetilde{u}_1,
+\ldots, \widetilde{u}_\ell, v), \\
+      %
+	\widetilde{u}_i = \ggen^{\mu_i} \ \text{ for } i \in [1,\ell], \quad v =
+\gen^{\tau}.
+      %
+      \end{gather*}
+
+    \item[$\SPSsig \sample \SPSsign(\sk, \vec{\msg})$ :] On input $\vec{\msg} =
+(\msg_1, \ldots, \msg_\ell) \in \group{1}^\ell$, sample $\omega \sample \Zp^*$
+and return the following:
+      %
+      \begin{equation*}
+      %
+	\SPSsig = (\widetilde{r}, \widetilde{s}, z) = \left(\ggen^{\omega}, \
+\widetilde{r}^{\,\tau}, \ \left(\gen \prod_{i=1}^{\ell}
+\msg_i^{-\mu_i}\right)^{1/\omega}\right).
+      %
+      \end{equation*}
+
+    \item[$\SPSsig' \sample \SPSrandomise(\SPSsig)$ :] On input $\SPSsig =
+(\widetilde{r}, \widetilde{s}, z)$, sample $\omega' \sample \Zp^*$ and return
+$(\widetilde{r}^{\,\omega'}, \widetilde{s}^{\,\omega'}, z^{1/\omega'})$.
+
+    \item[$\{0,1\} \leftarrow \SPSverify(\pk, \vec{\msg}, \SPSsig)$ :] On input
+$\SPSsig = (\widetilde{r}, \widetilde{s}, z)$, return $1$ if and only if the
+following hold:
+      %
+      \begin{equation*}
+      %
+	\pairing(v, \widetilde{r}) = \pairing(\gen, \widetilde{s}), \quad
+\pairing(z, \widetilde{r}) \cdot \prod_{i=1}^{\ell} \pairing(\msg_i, \widetilde{u}_i)
+= \pairing(\gen, \ggen).
+      %
+      \end{equation*}
+
+  \end{description}
+
+\end{primitivebox}
+
+Writing $\rho =
+1/\omega$ for the signing randomness of $\AGHO$, a signature on $\vec{\msg}$ is as
 follows:
 %
 \begin{equation*}
@@ -43,7 +138,10 @@ directly, it takes a multiplication and an opening, and $\tau/\rho$ then takes
 one more multiplication, which makes three rounds. Multiplying $\tau$ by the same
 mask as $\rho$ in the first round gives $\tau/\rho$ once the mask is opened, so
 two rounds suffice. The result is threshold $\AGHO$, given in
-\Cref{prot:tsps-abe}.
+\Cref{prot:tsps-abe}. Since $\rho$ and $\beta$ are both
+sampled from $\Zp$, the opened $\gamma = \rho\beta$ is zero with probability
+about $2/p$. Under adaptive corruption, the signers' shares of $\rho$, $\beta$
+and $\tau\beta$ are among the intermediate shares they are assumed to erase.
 
 \begin{protocolbox}{The threshold structure-preserving signature scheme from AGHO}{tsps-abe}
 
@@ -256,7 +354,7 @@ x_j^{\rho} y_j^{\rho\sigma}, \quad e_{j,i} = k_{i+1,j}.
 \end{equation*}
 %
 None of these depend on the message. Our protocol and implementation
-compute $\gen^{k_{1,j}}$ in the online phase instead, which is also local.
+compute $\gen^{k_{1,j}}$ in the online phase instead, which is also local.\rebekah{Here the $e_{j,i}$ are entries of the secret key, so the definition of decomposable signing in \Cref{sec:tsps-construction} has to allow $c_j$ and $e_{j,i}$ to be linear in $\sk$.}
 
 The group elements of the secret key are $\vec{b}, \vec{x}, \vec{y} \in
 \group{1}^2$, and the offline phase raises each of them to a shared exponent
@@ -388,15 +486,14 @@ $1$ if and only if the following hold:
 \end{protocolbox}
 
 \begin{theorem}\label{thm:tsps-security} Let the MPC protocol be private and
-secure with abort against up to $t$ adaptively corrupted signers, over a linear
+secure with abort against up to $t$ statically corrupted signers, over a linear
 $(t+1, n)$ threshold sharing. Then
 the threshold $\AGHO$ and $\KPW$ schemes are correct. The threshold $\AGHO$
-scheme is adp-TS-UF-1 secure in the GGM, and the threshold $\KPW$ scheme is
-adp-TS-UF-1 secure under SXDH, in both
-cases with the same loss as the generic construction.\rebekah{The GGM
-conclusion for threshold $\AGHO$ needs the reduction to be generic. The theorem
-assumes an adaptively secure MPC protocol, while the benchmarked protocols are
-only covered by the static \Cref{lem:tsps-static}.}\end{theorem}
+scheme is TS-UF-1 secure in the GGM, and the threshold $\KPW$ scheme is
+TS-UF-1 secure under SXDH, in both cases with no loss. If the MPC protocol is
+secure against adaptive corruption, both are adp-TS-UF-1 secure with the loss of
+\Cref{lem:tsps-adaptive}.\rebekah{The GGM
+conclusion for threshold $\AGHO$ needs the reduction to be generic.}\end{theorem}
 
 We prove \Cref{thm:tsps-security} in \Cref{sec:tsps-proof-instantiation}.
 
