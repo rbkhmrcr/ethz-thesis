@@ -10,11 +10,11 @@ the communicating parties. Modern cryptography has enabled encrypted
 communication that even truly powerful entities cannot read.
 
 The communicating parties are not assumed to be as powerful as the
-entities trying to break the system---encryption demands relatively little
+entities trying to break the system -- encryption demands relatively little
 computational power of the users while keeping the adversary's computational
 task infeasible. This asymmetry of computational power between users
-and attacking entities is well noted, and lies at the foundation of modern
-cryptography itself~\cite{DifHel76}.
+and attacking entities is well noted, and is the foundation of modern
+cryptography~\cite{DifHel76}.
 
 However, protecting the content of a message says nothing about who is
 exchanging it, when, or how often. Cryptography today covers much more than private
@@ -92,7 +92,7 @@ protocols does not remove that need. Their functions are then either taken on by
 users, who bear the computational costs, or moved outside the protocols, where
 nothing limits what these parties learn. Privacy-focused systems are often
 discussed as if the choice is between decentralised privacy and centralised
-surveillance. This thesis challenges that binary. Privacy does not automatically
+surveillance. Privacy does not automatically
 follow from decentralisation, nor does it automatically disappear when
 corporations or public institutions participate in a protocol. What matters is
 the information made available to each participant. Powerful institutions can
@@ -124,8 +124,9 @@ capability exists, it will be used everywhere possible.
 
 With respect to this, we raise three points. The first is that the two settings
 are technically different: well-designed auditing schemes do not involve an
-all-powerful entity with the ability to silently decrypt, and so the protocols
-developed for auditing cannot be repurposed for backdoors in encryption schemes.
+all-powerful entity with the ability to silently decrypt, and so the auditing
+protocols in this thesis cannot be repurposed to put backdoors in encryption
+schemes.
 The second is that the two settings are socially different: crimes can be
 organised using encrypted messaging, but what is at stake in a financial system
 extends to the collapse of the global financial system. Whether that would be
@@ -180,15 +181,15 @@ for users, payments without a network connection, limits on holdings, and
 compliance with anti-money-laundering rules through regulated
 intermediaries~\cite{digitaleuro2023}.
 
-\paragraph{Contributions.} We first consider threshold certification, where
-several certifiers must cooperate to certify a message. Based on
-structure-preserving signatures, we construct threshold certification schemes
-that require no interaction during the online signing phase.
-
-\begin{outline}
-  \item introduce the concept in a few sentences: what threshold certification
-  is, what structure-preserving signatures are and why they are needed here
-\end{outline}
+\paragraph{Contributions.} We first consider threshold certification, which we
+use to refer to the threshold signing of commitments. We achieve this by constructing a framework for creating
+threshold structure-preserving signature schemes. Structure-preserving signature
+schemes allow signers to sign commitments directly, and threshold versions allow
+us to distribute the signing responsibilities across several parties. We give a
+generic construction which splits signing into offline and online phases, in
+order to remove communication requirements between signers entirely in the
+online phase. We instantiate the construction with two signature schemes, and
+implement and evaluate both instantiations with two MPC protocols.
 
 We then consider aggregate anonymous credentials. Existing credential models do
 not always reflect the way that authority is divided in practice. Users may

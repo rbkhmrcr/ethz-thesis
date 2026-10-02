@@ -2,16 +2,19 @@
 
 We construct a threshold SPS scheme generically, from an SPS scheme $\SPS$
 whose signing algorithm is decomposable and an MPC protocol with the interfaces
-of \Cref{sec:tsps-mpc}. \Cref{sec:tsps-instantiation} then instantiates $\SPS$
-with $\AGHO$ and $\KPW$. The signing key of $\SPS$ is secret-shared among the
+of \Cref{sec:tsps-mpc}. The signing key of $\SPS$ is secret-shared among the
 $n$ signers, who never reconstruct it.
 
 \paragraph{Setup.} The signers agree in advance on $(\ell, t, n)$ and the
 pairing groups, and abort if any call to $\algo{MPC}$ returns $\bot$.
 
 \paragraph{Key generation and verification.} Key generation runs $\SPSgen$
-under the MPC protocol. Verification is $\SPSverify$ unchanged, since it uses no
-secret shares.
+under the MPC protocol, a direct application of generic MPC that inherits its
+security properties. Our proof does not cover this step explicitly, as it
+focuses on the separation of signing into offline and online phases.
+Verification is $\SPSverify$ unchanged, since it uses no
+secret shares, and the distributions of signatures are the same in the threshold
+and non-threshold cases.
 
 Evaluating $\SPSsign(\sk, \vec{\msg})$ under MPC, with the message as one more
 input, would put every interactive call after the message is known. We instead
@@ -36,7 +39,9 @@ depend only on $\sk$ and the signing randomness, and not on the message.
 Given sharings of these values, each signer computes its share of the signature
 with a linear operation on its own shares, so the online phase is local. Not
 every signature scheme has this form. If the message appears inside an inverse,
-for example, signing needs an interactive call once the message is known.
+for example, signing needs an interactive call once the message is known. The
+definition does not use the structure-preserving property, so the construction
+applies to any signature scheme of this form.
 
 \Cref{prot:tsps-generic} gives the construction $\TSPS$, applied to an SPS
 scheme $\SPS$.
@@ -112,24 +117,20 @@ states in a queue and delete each one once it is used. The offline phase can be
 run repeatedly during quiet periods to build up states for busy ones.
 The security proof uses two properties of $\TSPSoffsign$. Every value it opens
 is masked by a fresh uniform value, and each component of $c_0$ and each $c_j$ is
-computed from its own fresh sharing. Both hold for threshold $\AGHO$ and
-threshold $\KPW$.
+computed from its own fresh sharing.
 
 \paragraph{Online signing.} By decomposable signing, each signer only needs
 local group operations at this point. No signer communicates with any other during this phase, and its cost is
 comparable to that of an ordinary invocation of $\SPSsign$.
 
 \paragraph{Combining.} Combining is performed by whichever party is to hold the signature, and needs no
-participation from the signers beyond their having published their shares. In
-our benchmarks, every signer opens the signature, so each sends its share to all
-others. The holder checks the result with $\TSPSverify$, so a malformed share
+participation from the signers beyond their having published their shares. The
+holder checks the result with $\TSPSverify$, so a malformed share
 makes this check fail.
 
 \paragraph{Robustness.} A threshold scheme is robust if signing succeeds
 whenever $t+1$ honest signers take part~\cite{EC:GJKR96}. Robustness is a
-property of the MPC protocol chosen for the instantiation, and neither protocol
-we choose achieves it, as both are only secure with abort against
-malicious adversaries~\cite{C:GLOPS21,CCS:KelOrsSch16}.
+property of the MPC protocol, and is not given by security with abort.
 
 The threshold scheme is unforgeable whenever the underlying SPS scheme is, given
 an MPC protocol that is secure with abort against up to $t$
@@ -137,7 +138,7 @@ statically corrupted signers. From the SPS scheme, the construction needs
 decomposable signing and existential unforgeability. Strong unforgeability is
 not needed, as a TS-UF-1 forgery must be on a message that too few honest
 signers signed, and a new signature on a message that was properly signed does
-not count. Requiring it would rule out rerandomisable schemes such as $\AGHO$.
+not count. Requiring it would rule out rerandomisable schemes.
 
 \begin{theorem}\label{thm:tsps-construction-security} Let $\SPS$ be an EUF-CMA
 secure SPS scheme with decomposable signing, and let the MPC protocol be secure
@@ -159,9 +160,9 @@ queries $\adv$ makes to the offline oracle:
   %
 \end{theorem}
 
-We prove \Cref{thm:tsps-construction-security} in \Cref{sec:tsps-proof-construction}.
-
-Under adaptive corruption, the reduction loses a factor $\binom{n}{t}$.
+We prove \Cref{thm:tsps-construction-security} in
+\Cref{sec:tsps-proof-construction}. Under adaptive corruption, the reduction
+loses a factor $\binom{n}{t}$.
 
 \begin{lemma}\label{lem:tsps-adaptive} Under the conditions of
 \Cref{thm:tsps-construction-security}, with the MPC protocol secure against up

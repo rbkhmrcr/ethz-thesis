@@ -7,9 +7,14 @@ Our implementation builds on MP-SPDZ, a framework for implementing MPC with
 preprocessing~\cite{CCS:Keller20}. MP-SPDZ is built for the paradigm of sharing
 elements of $\Zp$, with all operations defined between elements of $\Zp$. For
 the protocols of this chapter, we also need operations between elements
-of $\group{1}$ and $\group{2}$. We benchmark both the honest-majority and
-dishonest-majority settings, using ATLAS and MASCOT respectively to realise
-multiplication of shared secrets~\cite{C:GLOPS21,CCS:KelOrsSch16}.
+of $\group{1}$ and $\group{2}$. We benchmark both the honest-majority setting,
+$t < n/2$, and the dishonest-majority setting, $t < n$, using ATLAS and MASCOT
+respectively~\cite{C:GLOPS21,CCS:KelOrsSch16}. ATLAS uses Shamir's secret sharing, and
+MASCOT makes its multiplication triples by oblivious transfer. Any MPC protocol
+with the interfaces of our schemes can be used. Neither protocol is robust, as
+both are only secure with abort against malicious signers, and neither is
+proven secure against adaptive corruption, so \Cref{lem:tsps-adaptive} does not
+apply to them.
 
 Our theorems assume static corruption and an MPC protocol that is secure with
 abort against malicious signers. MASCOT provides this with a dishonest majority,
@@ -20,10 +25,8 @@ of the honest-majority setting, but are not covered by our theorems.
 
 We add to MP-SPDZ sharings of group elements with their authentication
 information, and $\algo{ExpGrp}$ with mixed triples. The groups are those of
-BLS12-381, implemented with RELIC~\cite{relictoolkit}. ATLAS uses Shamir sharing,
-and MASCOT makes its triples by oblivious transfer. Any MPC protocol with the
-interfaces of our schemes would do, and we take ATLAS for the honest majority
-setting and MASCOT for the dishonest majority setting. As baselines, we implement the centralised $\AGHO$ and
+BLS12-381, implemented with RELIC~\cite{relictoolkit}. Every signer opens the
+signature when combining, so each sends its share to all others. As baselines, we implement the centralised $\AGHO$ and
 $\KPW$ schemes and two existing threshold SPS schemes in Go with gnark-crypto, with a trusted dealer for the threshold
 schemes~\cite{AC:CKPSS23,PKC:MMSST24,gnark-crypto}. The tables call these two
 schemes CKPSS23 and MMSST24.
@@ -34,7 +37,7 @@ runs in one thread, and all parties run on one MacBook Air with an Apple M2 and
 16~GB of RAM, over authenticated channels on that machine. Each timed call starts
 from empty preprocessing, so the times of the offline phase and of key
 generation include making their triples. We report the median of 100
-repetitions after 10 warm-up calls, for party $p_0$. In the tables, the
+repetitions after 10 warm-up calls, for party $p_1$. In the tables, the
 interquartile range is within 5\% of the median for all but five measurements,
 and within 16\% for all.
 \Cref{tab:tsps-comp} compares the parameters of the schemes, and
@@ -76,7 +79,7 @@ CKPSS23~\cite{AC:CKPSS23} & & 4.09 & & & 2.14 & 9.51--15.9 & 3.18 \\
 MMSST24~\cite{PKC:MMSST24} & & 6.47 & & & 1.26 & 0.46--0.90 & 4.18 \\
 \bottomrule
 \end{tabular}
-\caption[Threshold SPS schemes: time]{Time in ms for party $p_0$ at $n = 5$ and
+\caption[Threshold SPS schemes: time]{Time in ms for party $p_1$ at $n = 5$ and
 $\ell = 2$, with $t = 2$ for ATLAS and $t = 4$ for MASCOT. For our schemes,
 batched is the offline time per state when 16 states are made together,
 signing is $\TSPSonsign$, and verification is that of the underlying scheme. The
@@ -99,7 +102,7 @@ $\KPW$ & ATLAS & 2.7 & 4.2 & 1.6 & 873 & 486 & 391 & 391 & 391 \\
 \bottomrule
 \end{tabular}
 \caption[Threshold SPS schemes: communication and sizes]{Kilobytes sent by party
-$p_0$ of threshold $\AGHO$ and threshold $\KPW$ in each phase at $n = 5$, and sizes in bytes of the public key, one
+$p_1$ of threshold $\AGHO$ and threshold $\KPW$ in each phase at $n = 5$, and sizes in bytes of the public key, one
 signer's key share, state share and signature share, and the signature, both at
 $\ell = 2$. The online phase sends nothing. Every party opens the signature when
 combining, so it sends its share to all others. MASCOT shares carry a MAC share,
@@ -119,13 +122,13 @@ online phase stays below 3~ms up to eleven parties.
 
 \begin{figure}[htbp] \centering
 \includegraphics[width=\textwidth]{chapters/03-tsps/tsps-n-times.pdf}
-\caption[Threshold SPS schemes: time against $n$]{Time of party $p_0$ against the number of parties $n$, at $\ell = 2$,
+\caption[Threshold SPS schemes: time against $n$]{Time of party $p_1$ against the number of parties $n$, at $\ell = 2$,
 median. ATLAS runs at $n = 2t+1$ and MASCOT at $t = n-1$.}
 \label{fig:tsps-n-times} \end{figure}
 
 \begin{figure}[htbp] \centering
 \includegraphics[width=\textwidth]{chapters/03-tsps/tsps-n-comm.pdf}
-\caption[Threshold SPS schemes: communication against $n$]{Kilobytes sent by party $p_0$ against the number of parties $n$, at $\ell =
+\caption[Threshold SPS schemes: communication against $n$]{Kilobytes sent by party $p_1$ against the number of parties $n$, at $\ell =
 2$, one panel per phase, with ATLAS as solid and MASCOT as dashed lines. MASCOT
 sends about a thousand times more, so the ATLAS lines lie close to zero for key
 generation and offline signing. $\TSPSonsign$ sends nothing and is not shown.} \label{fig:tsps-n-comm}
@@ -147,9 +150,5 @@ Compared with MMSST24, threshold $\AGHO$ has signatures
 of three group elements instead of seven, and verifies in 2.93~ms instead of
 4.18~ms, but is secure in the GGM rather than under SXDH~\cite{PKC:MMSST24}.
 
-CKPSS23 has smaller signatures, but only signs indexed Diffie-Hellman messages:
-pairs of group elements, one in each source group, with the same discrete
-logarithm relative to a base derived from an index. Whoever creates a message
-must know this discrete logarithm, and existing commitments or public keys
-cannot be signed as they are~\cite{EPRINT:GGPR25}. Each signed element also needs a counterpart in
+CKPSS23 has smaller signatures, but each signed element needs a counterpart in
 the second group, which on BLS12-381 triples the message size~\cite{AC:CKPSS23}.

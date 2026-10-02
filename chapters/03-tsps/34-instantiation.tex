@@ -14,8 +14,9 @@ elements and $\algo{ExpGrp}$.
 
 \subsection{Instantiating the MPC protocol}\label{sec:tsps-mpc-inst}
 
-We realise $\algo{ExpGrp}$ as Smart and Talibi Alaoui do, from multiplication
-triples made in preprocessing~\cite{C:Beaver91b,IMA:SmaTal19}.
+Most MPC protocols do not provide $\algo{ExpGrp}$, so we build it from
+multiplication triples made in the offline phase, following Smart and Talibi
+Alaoui~\cite{C:Beaver91b,IMA:SmaTal19}.
 
 $\algo{ExpGrp}$ consumes a mixed triple $(\shr{\eta}, \shr{f}, \shr{f^\eta})$
 with $\eta \sample \Zp$ and $f \sample \group{}$. The signers open the
@@ -38,12 +39,7 @@ They then compute the following locally:
 %
 where one designated signer adds the public term $\delta^{\epsilon}$. The
 signers obtain a mixed triple from an ordinary triple over $\Zp$ by raising a
-generator to the shares of its second and third entries. We added this to
-MP-SPDZ, together with sharings of group elements and their authentication
-information.
-
-Neither protocol we benchmark is proven secure against adaptive corruption, so
-\Cref{lem:tsps-adaptive} does not apply to them.
+generator to the shares of its second and third entries.
 
 \subsection{Instantiating $\TSPS$ with $\AGHO$}\label{sec:tsps-abe}
 
@@ -53,7 +49,9 @@ scheme for messages in one group only, which is existentially unforgeable in the
 GGM~\cite{C:AGHO11}. We use the second scheme with $\group{1}$ and $\group{2}$ swapped, so that messages are in
 $\group{1}$, and call it $\AGHO$. \Cref{prim:agho} recalls it. Its secret
 key consists only of field elements, and the message enters signing only through
-the terms $\msg_i^{-\mu_i}$. Our threshold version relies on both properties.
+the terms $\msg_i^{-\mu_i}$. Our threshold version relies on both properties. As
+$\AGHO$ is rerandomisable, it is not strongly unforgeable, so it relies on the
+construction needing only existential unforgeability.
 
 \begin{primitivebox}{The $\AGHO$ SPS scheme~\cite{C:AGHO11}.}{agho}
 
@@ -333,8 +331,8 @@ x_j^{\rho} y_j^{\rho\sigma}, \quad e_{j,i} = k_{i+1,j}.
 %
 \end{equation*}
 %
-None of these depend on the message. Our protocol and implementation
-compute $\gen^{k_{1,j}}$ in the online phase instead, which is also local.
+None of these depend on the message. Our protocol computes
+$\gen^{k_{1,j}}$ in the online phase instead, which is also local.
 
 The group elements of the secret key are $\vec{b}, \vec{x}, \vec{y} \in
 \group{1}^2$, and the offline phase raises each of them to a shared exponent

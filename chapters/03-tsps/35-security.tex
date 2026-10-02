@@ -47,8 +47,8 @@ output of every call to $\algo{MPC}$ in $\TSPSoffsign$ uniformly, which by the
 first consequence is their real distribution, since each output is a fresh
 sharing. It computes their state shares from these and from their key shares,
 with the local operations of $\TSPSoffsign$. Where an entry of the state is an
-entry of the key, as the $e_{j,i}$ are in $\KPW$, this gives a copy of the key
-share. Every value opened in $\TSPSoffsign$ is masked by a fresh uniform value,
+entry of the key, as for example in threshold $\KPW$, this gives a copy of the
+key share. Every value opened in $\TSPSoffsign$ is masked by a fresh uniform value,
 so $\advB$ samples these uniformly as well, and runs $\simu$ on the
 corrupted signers' inputs and outputs and the opened values to produce their
 view. If $\adv$ makes the execution abort,

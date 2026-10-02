@@ -4,9 +4,7 @@ Hash functions compress inputs of arbitrary length into a short digest. They
 are usually defined as keyed families, with collision resistance, preimage
 resistance and second preimage resistance as the standard security
 notions~\cite{KatLin14}. Our constructions do not rely on these properties
-directly. Instead, our security proofs model hash functions as random oracles, and the
-one hash function used inside a circuit, MiMC, is assumed to be a pseudorandom
-function. We write $\hash(x)$ for the
+directly. Instead, our security proofs model hash functions as random oracles. We write $\hash(x)$ for the
 hash of $x$.
 
 The range can be any set, and later sections also hash
@@ -18,10 +16,6 @@ tags make the hash functions behave as independent functions.
 \paragraph{One-way functions.} A function $f$ is one-way if it is efficiently
 computable and, for a uniform input $x$, no PPT adversary given $f(x)$ outputs
 any $x'$ with $f(x') = f(x)$ with non-negligible probability.
-
-Our instantiations use exponentiation $x \mapsto \gen^x$ in a group of prime order
-as the one-way function, which is one-way under the DL assumption in
-\Cref{asm:dl}.
 
 \paragraph{The random oracle model.} Our security
 proofs generally model a hash

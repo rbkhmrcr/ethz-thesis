@@ -175,10 +175,6 @@ has offline and online oracles. It wins if it outputs a valid
 signature on a message for which fewer than $t + 1 - |\Cor|$ honest signers
 issued shares. The experiment idealises key generation, with the challenger
 running $\TSPSgen$, as in the existing definitions~\cite{C:BCKMTZ22,C:CriKomMal23}.
-In our construction, $\TSPSgen$ is a direct application of generic MPC, and
-inherits its security properties. Our proof does not cover this step
-explicitly, as it focuses on the separation of signing into offline and online
-phases.
 
 The advantage of a PPT adversary $\adv$ is defined as follows:
 %
@@ -248,9 +244,6 @@ that of TS-UF-1.
 We prove that our construction is TS-UF-1 secure in
 \Cref{sec:tsps-security}.
 
-The verification algorithms and the distributions of signatures are the same in
-the threshold and non-threshold cases.
-
 \subsection{Secure multiparty computation}\label{sec:tsps-mpc}
 
 We describe our schemes as sequences of calls to a secure multiparty
@@ -264,17 +257,13 @@ group. We assume this notation
 incorporates the authentication components that malicious security requires,
 which we otherwise abstract away.
 
-In practice $\group{}$ is an elliptic curve group, whose elements are coordinate
-pairs $(x_0, y_0)$ satisfying the curve equation. A group element is not shared
-by independently sharing its coordinates, as $(\shr{x_0}, \shr{y_0})$, since
-computing a group operation on such shares would require the signers to
-communicate. It is instead shared in the group: the shares of $a$ are
+A group element $a$ is shared in the group: the shares of $a$ are
 themselves elements of $\group{}$, and reconstruction combines them with the
 group operation, as a product of shares raised to fixed coefficients, so that
 the linear operations below remain local.
 
-Any $t$ shares are independent of $\alpha$. The authentication information, such as
-MAC shares, means that a modified share is detected at opening. In protocol
+Any $t$ shares are independent of $\alpha$. The authentication information means that a
+modified share is detected at opening. In protocol
 boxes, $\shr{\alpha}$ also stands for the signer's own share.
 
 The protocol provides the following interfaces, each run by all signers
@@ -314,7 +303,7 @@ each signer applies the combination to its own shares to obtain the following:
 %
 \end{equation*}
 %
-Under additive sharing, as in MASCOT, only one designated signer adds the
+Under additive sharing, only one designated signer adds the
 public $\theta$, and likewise multiplies by the public $d$ below.
 In a group, given sharings $\shr{a}$, $\shr{b}$ and a public group element $d$,
 each signer obtains the following:
@@ -335,12 +324,10 @@ the following:
 %
 \end{equation*}
 %
-Since the messages are public group elements, this makes our online phase
-local.
 
 $\algo{ExpGrp}$ raises a shared group element to a shared exponent. This is
-needed in threshold $\KPW$, as signing raises group elements of its secret key
-to shared exponents.
+needed when the secret key contains group elements that signing raises to
+shared exponents.
 
 $\algo{Inv}$ is built from $\algo{Mul}$ and
 $\algo{Open}$. The signers sample $\shr{\beta} \sample \algo{RandShare}()$, open
