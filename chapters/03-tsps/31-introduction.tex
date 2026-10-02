@@ -15,8 +15,10 @@ Many systems have an entity that certifies state for everyone else, such as a
 transparency log provider or a ledger administrator. In threshold certification,
 each signer holds a share of the signing key, and a threshold of them is needed
 to sign a commitment, so no single signer or compromised key share can certify
-alone. Unlike with
-multi-signatures, verifiers see one public key and ordinary signatures.
+alone. In a multi-signature scheme, by contrast, each signer has its own key
+pair, and a verifier checks one combined signature against the public keys of
+all signers. With threshold certification, verifiers see one public key and
+ordinary signatures.
 
 For a threshold signer, the cost is interaction whenever a signature is needed.
 In our schemes, the online phase needs no interaction between signers.
@@ -89,7 +91,7 @@ number of parties~\cite{CCS:Keller20}. To our knowledge, this is the first multi
 implementation of computation on shared elements of pairing groups.
 
 We benchmark both schemes using two MPC frameworks: ATLAS, which assumes an
-honest majority, and MASCOT, which assumes a dishonest
+honest majority of participants, and MASCOT, which assumes a dishonest
 majority~\cite{C:GLOPS21,CCS:KelOrsSch16}. We also
 implement previously suggested threshold SPS schemes, so as to compare concrete
 efficiency~\cite{AC:CKPSS23,PKC:MMSST24}.
@@ -111,8 +113,8 @@ by a large class of reductions~\cite{AC:AbeGroOhk11}. The scheme $\KPW$ has
 signatures of seven group elements and is secure under SXDH~\cite{C:KilPanWee15}.
 Fully structure-preserving
 signature schemes also have secret keys that are group elements, so
-a user can prove statements about their own key with Groth-Sahai proofs, but
-their signatures grow with the square root of the message
+a user can prove statements about their own key with Groth-Sahai proofs, which
+prove pairing product equations in zero knowledge, but their signatures grow with the square root of the message
 length~\cite{JC:AGKOT19,EC:GroSah08}.
 
 \paragraph{Threshold SPS schemes.} Threshold SPS schemes have only recently
@@ -127,7 +129,7 @@ on $\KPW$, and its signatures consist of seven group elements, against three for
 threshold $\AGHO$. We benchmark against it in \Cref{sec:tsps-evaluation}. Building on this scheme, a threshold SPS
 scheme with silent setup lets signers generate their keys independently, with no
 interactive key generation, at the cost of larger signatures, a trusted
-powers-of-tau setup and security in the GGM~\cite{EPRINT:GGPR25}.
+setup and security in the GGM~\cite{EPRINT:GGPR25}.
 
 \Cref{tab:tsps-comp} in \Cref{sec:tsps-evaluation} compares our schemes with the
 two prior threshold SPS schemes in terms of assumptions, key and signature size,
@@ -138,7 +140,8 @@ maliciously secure computation over an elliptic curve group, by mapping
 multiplication triples over $\Zp$ locally into triples over the
 group~\cite{IMA:SmaTal19}. We realise $\algo{ExpGrp}$ with these triples. Linear
 secret sharing isomorphisms generalise this approach, and give
-Pointcheval-Sanders signatures in MPC, implemented for two
+Pointcheval-Sanders signatures, short randomisable signatures on field elements,
+in MPC, implemented for two
 parties~\cite{LC:ADEO21}.
 
 \paragraph{Layout.} The rest of the chapter is organised as follows. \Cref{sec:tsps-definitions} defines threshold SPS schemes

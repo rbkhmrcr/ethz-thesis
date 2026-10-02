@@ -29,8 +29,8 @@ of digital systems has grown, even of those with privacy protections, so has the
 number of entities capable of observing some part of a system. Service
 providers, issuers, validators, network operators and public authorities may all
 learn sensitive information while performing otherwise legitimate functions.
-These new participants of the systems then raise the question of how the
-protocols should treat them.
+This raises the question of how these participants should be incorporated into
+the system model, and what information they should be permitted to learn.
 
 These entities are often modelled as adversaries.
 Protocol designers have understandably been active in designing systems that
@@ -55,10 +55,8 @@ verification need not be those who set the verification conditions. The
 distribution of these responsibilities does not by itself determine the trust
 assumptions of the system. An institution may be relied upon to provide
 availability, maintain state or execute a prescribed computation without ever
-having access to users' private information.
-
-Two cryptographic concepts illustrate this: anonymous credentials and
-multiparty computation.
+having access to users' private information. Anonymous credentials and
+multiparty computation are two examples.
 
 In anonymous credential schemes, issuers issue credentials to users, attesting
 that users hold certain attribute values. Users present their credentials,
@@ -140,7 +138,8 @@ that private communication does not. Payment providers are required to identify
 their customers and to report suspicious
 transactions~\cite{fatf2012recommendations}. The systems themselves must establish the validity of
 transactions, maintain a consistent shared state, control issuance, and prevent
-or detect double spending~\cite{C:Chaum82,C:ChaFiaNao88}. They must remain
+or detect double spending, where a user spends the same token
+twice~\cite{C:Chaum82,C:ChaFiaNao88}. They must remain
 efficient as the number of participants grows, ideally without cost per
 participant growing linearly with the size of the system. They must also
 continue to function for a user with no network
@@ -211,7 +210,7 @@ and ask whether its capability can be scoped like any other permission, to one
 user and one period, and only after an explicit grant. We
 develop a transaction identification mechanism that supports concurrent
 transaction creation without requiring the auditor to maintain persistent
-per-user state. Auditing is restricted to a specified epoch, limiting both the
+per-user state. Auditing is restricted to a specified epoch, a fixed period of time, limiting both the
 scope and duration of the information disclosed to an auditor.
 
 Finally, we study privacy in offline payments. Offline operation improves

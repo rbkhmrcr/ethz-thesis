@@ -51,8 +51,7 @@ non-negligible probability.
 
 \end{assumptionbox}
 
-Exponentiation $x \mapsto \gen^x$ is then a one-way function, and our
-instantiations use it as one.
+Exponentiation $x \mapsto \gen^x$ is then a one-way function.
 
 \begin{assumptionbox}{The Decisional Diffie-Hellman (DDH) assumption~\cite{Boneh98}.}{ddh}
 
@@ -75,7 +74,8 @@ Some schemes we use are only proven secure in the generic group model
 opaque handles to group elements, and computes on them only through oracles for
 the group operations and the pairing. A proof in the GGM rules out attacks that
 ignore the representation of the group, but gives a weaker guarantee than a
-reduction to a stated assumption. Some assumptions are $q$-type, meaning their
+reduction to a stated assumption. A proof that uses neither random oracles nor
+the GGM is in the standard model. Some assumptions are $q$-type, meaning their
 statement grows with a parameter $q$, typically the number of signing queries.
 
 \subsection{The Pedersen commitment scheme}
