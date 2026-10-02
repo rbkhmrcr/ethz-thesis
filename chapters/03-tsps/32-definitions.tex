@@ -103,22 +103,19 @@ every set $Q \subseteq [1,n]$ of $t+1$ signers:
 \end{equation*}
 
 \paragraph{Unforgeability.} Threshold signatures have a hierarchy of
-unforgeability notions~\cite{C:BCKMTZ22}. We rely on TS-UF-1 security.
+unforgeability notions~\cite{C:BCKMTZ22}.
 
-\begin{outline}
-  \item TS-UF-0 is weaker: counts a forgery only if no honest signer signed
-$\vec{\msg}^\star$; TS-UF-1 also counts forgeries on messages too few honest signers
-signed, and is our target
-  \item achievable because the online phase is local: issuing a share reveals
-nothing further; and it is what a certifier needs (no signature unless
-enough honest signers agreed to that message)
-  \item it is defined for non-interactive threshold signature schemes (cite
-C:BCKMTZ22), with a leader, played by the adversary, that collects partial
-signatures
-\end{outline}
+TS-UF-0 counts a forgery only if no honest signer signed the message. TS-UF-1
+counts a forgery whenever fewer than $t+1-|\Cor|$ honest signers signed it, so
+that the adversary never held $t+1$ shares on that message. The two notions are
+equivalent when the adversary corrupts $t$ signers, and TS-UF-1 is stronger when
+it corrupts fewer. TS-UF-1 is our target, and is what a certifier needs, as no
+signature should exist unless enough honest signers agreed to that message. Both
+notions are defined for non-interactive threshold signature schemes, with a
+leader, played by the adversary, that collects the signature
+shares~\cite{C:BCKMTZ22}.
 
-\Cref{exp:ts-uf-1} gives the TS-UF-1 experiment of Bellare et
-al.~\cite{C:BCKMTZ22}.
+\Cref{exp:ts-uf-1} gives the TS-UF-1 experiment as originally defined~\cite{C:BCKMTZ22}.
 
 \begin{experimentbox}{Threshold signature schemes: TS-UF-1~\cite{C:BCKMTZ22}.}{ts-uf-1}
 
@@ -160,17 +157,14 @@ and $|S_1(M)| < t - |\mathsf{CS}|$.
 
 \end{experimentbox}
 
-\begin{outline}
-  \item why not use it as it is: their preprocessing is one local step per
-server, while our offline phase is an MPC protocol between all signers; so our
-offline oracle runs $\TSPSoffsign$ with $\adv$ acting for $\Cor$ and returns the
-corrupted signers' view
-  \item simplifications for our setting: no leader, $\adv$ calls the honest
-signers directly; no random oracle; an honest signer uses each session for one
-message only, since reusing a state reuses the signing randomness
-  \item unchanged: trusted key generation by the challenger, static corruption,
-and the winning condition, with our $t+1$ signers in place of their $t$
-\end{outline}
+We adapt this experiment to our setting. In the original, preprocessing and
+signing are both local steps, and each signer sends its output only to the
+leader. Our signing is local too, but our offline (preprocessing) phase is an
+MPC protocol between all signers. So our offline oracle runs $\TSPSoffsign$ with
+$\adv$ acting for $\Cor$, and returns the view of the corrupted signers. There
+is no leader, as $\adv$ calls the honest signers directly, and no random oracle.
+An honest signer uses each session for one message only, since reusing a state
+reuses the signing randomness.
 
 The experiment is parameterised by the message length $\ell$. The adversary
 has offline and online oracles. It wins if it outputs a valid
@@ -250,11 +244,8 @@ that of TS-UF-1.
 We prove that our construction is TS-UF-1 secure in
 \Cref{sec:tsps-security}.
 
-\begin{outline}
-  \item compatibility: $\TSPSverify = \SPSverify$ and a combined signature is an
-ordinary signature under uniform randomness, so a verifier can't tell it was
-produced by a threshold of signers
-\end{outline}
+The verification algorithms and the distributions of signatures are the same in
+the threshold and non-threshold cases.
 
 \subsection{Secure multiparty computation}\label{sec:tsps-mpc}
 
@@ -331,7 +322,7 @@ each signer obtains the following:
 \end{equation*}
 %
 Raising a public group element to a shared exponent gives a
-sharing of the result~\cite{C:DesFra89,LC:ADEO21}. For a public $d$, this is
+sharing of the result~\cite{LC:ADEO21}. For a public $d$, this is
 the following:
 %
 \begin{equation*}

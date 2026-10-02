@@ -13,25 +13,11 @@ pairing groups, and abort if any call to $\algo{MPC}$ returns $\bot$.
 under the MPC protocol. Verification is $\SPSverify$ unchanged, since it uses no
 secret shares.
 
-\begin{outline}
-  \item both generic: general-purpose MPC gives a distributed key generation with
-no trusted dealer; it runs once, so its cost hardly matters
-  \item nothing for the MPC protocol to do in verification
-\end{outline}
-
-\begin{outline}
-  \item core idea, say it plainly once: any SPS scheme with decomposable
-signing becomes a threshold scheme; everything not depending on the message is
-computed under MPC offline; once the message is known each signer raises the
-public message elements to its own shares, with no interaction; security reduces
-to EUF-CMA of the underlying scheme with no loss; done for $\AGHO$ (smallest
-signatures) and $\KPW$ (standard assumptions)
-  \item evaluating $\SPSsign(\sk, \vec{\msg})$ under MPC with the message as one
-more input puts every interactive call after the message is known
-  \item instead split signing so all interactive calls happen before the message
-is known and the online phase is local; this depends on the signing algorithm,
-which we define first
-\end{outline}
+Evaluating $\SPSsign(\sk, \vec{\msg})$ under MPC, with the message as one more
+input, would put every interactive call after the message is known. We instead
+split signing into an offline phase, which makes every interactive call before
+the message is known, and an online phase, which is local. This depends on the
+form of the signing algorithm, which we define first.
 
 \paragraph{Decomposable signing.} A scheme $\SPS$ has decomposable signing if every
 signature $\SPSsig \sample \SPSsign(\sk, \vec{\msg})$ on $\vec{\msg} = (\msg_1,
@@ -47,13 +33,10 @@ message, and $z_1, \ldots, z_k$ of the following form:
 where the group elements $c_0, c_1, \ldots, c_k$ and field elements $e_{j,i}$
 depend only on $\sk$ and the signing randomness, and not on the message.
 
-\begin{outline}
-  \item why this makes the online phase local: from sharings of $c_j$ and
-$e_{j,i}$, each signer raises the public $\msg_i$ to its shares of $e_{j,i}$ and
-multiplies by its share of $c_j$, a linear operation
-  \item not every scheme has this form: e.g.\ message inside an inverse,
-$\gen^{1/(x+\msg)}$, needs an interactive call once the message is known
-\end{outline}
+Given sharings of these values, each signer computes its share of the signature
+with a linear operation on its own shares, so the online phase is local. Not
+every signature scheme has this form. If the message appears inside an inverse,
+for example, signing needs an interactive call once the message is known.
 
 \Cref{prot:tsps-generic} gives the construction $\TSPS$, applied to an SPS
 scheme $\SPS$.
@@ -148,17 +131,13 @@ property of the MPC protocol chosen for the instantiation, and neither protocol
 we choose achieves it, as both are only secure with abort against
 malicious adversaries~\cite{C:GLOPS21,CCS:KelOrsSch16}.
 
-\begin{outline}
-  \item what we prove: thresholdising loses nothing; if $\SPS$ can't be forged
-and the MPC reveals nothing beyond what it opens, $\TSPS$ can't be forged
-  \item only need EUF-CMA of $\SPS$, not strong unforgeability: TS-UF-1 counts a
-forgery by its message, so the reduction never has to tell two signatures on the
-same message apart; asking for more would rule out rerandomisable schemes
-  \item from the MPC: privacy and security with abort against up to $t$
-statically corrupted signers, the linear $(t+1, n)$ sharing
-  \item from $\SPS$: decomposable signing, which is what lets the online phase
-run without the MPC
-\end{outline}
+The threshold scheme is unforgeable whenever the underlying SPS scheme is, given
+an MPC protocol that is private and secure with abort against up to $t$
+statically corrupted signers. From the SPS scheme, the construction needs
+decomposable signing and existential unforgeability. Strong unforgeability is
+not needed, as a TS-UF-1 forgery must be on a message that too few honest
+signers signed, and a new signature on a message that was properly signed does
+not count. Requiring it would rule out rerandomisable schemes such as $\AGHO$.
 
 \begin{theorem}\label{thm:tsps-construction-security} Let $\SPS$ be an EUF-CMA
 secure SPS scheme with decomposable signing, and let the MPC protocol be private
@@ -177,11 +156,6 @@ such that the following holds for any $n$ and $t$:
 \end{theorem}
 
 We prove \Cref{thm:tsps-construction-security} in \Cref{sec:tsps-proof-construction}.
-
-\begin{outline}
-  \item why there is no loss: the reduction answers honest signers with uniform
-shares until a session would reach $t+1$ shares, instead of guessing
-\end{outline}
 
 Under adaptive corruption, the reduction loses a factor $\binom{n}{t}$.
 
@@ -202,14 +176,6 @@ $\advB$ such that the following holds:
 
 We prove \Cref{lem:tsps-adaptive} in \Cref{sec:tsps-adaptive}.
 
-\begin{outline}
-  \item the loss $\binom{n}{t}$ is polynomial when $t$ or $n-t$ is constant:
-dishonest majority $t = n-1$ loses only $n$; honest majority $t \approx n/2$
-loses a factor exponential in $n$, so is only covered for constant $n$
-  \item where the factor comes from: the reduction guesses, before any
-corruption, which signers the adversary will corrupt or ask for shares on its
-forgery message
-  \item removing it adaptively would need an equivocable sharing (simulator can
-later explain it as a sharing of any value) or secure erasures (honest signers
-reliably delete states); neither benchmarked protocol provides these
-\end{outline}
+In the adaptive case, the loss is a factor of the number of signers with a
+dishonest majority, and grows exponentially with the number of signers with an
+honest majority.

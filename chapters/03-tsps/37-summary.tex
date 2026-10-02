@@ -1,36 +1,23 @@
 \section{Summary}\label{sec:tsps-summary}
 
-\begin{outline}
-  \item keep this section and the chapter very brief and concise but correct
-from the start: building blocks, then the changes, the implementation, then move
-on
-  \item restate the core idea in two or three sentences, as in the
-introduction, then the online cost: about as much as ordinary signing
-  \item threshold $\AGHO$ has the smallest possible signatures of any threshold
-SPS for general messages, at the price of the GGM
-\end{outline}
+This chapter gave threshold SPS schemes in which signing needs no interaction
+once the message is known. Any SPS scheme with decomposable signing can be made
+threshold this way. All message-independent computations are done under MPC in
+an offline phase, and the online phase is local, costing about as much as
+ordinary signing. Unforgeability reduces to that of the underlying scheme.
+Threshold $\AGHO$ has the smallest possible signatures of any threshold SPS for
+general messages, at the price of security in the GGM. Threshold $\KPW$ has
+larger signatures, at seven group elements versus the three of $\AGHO$, but
+relies on standard assumptions. The approach applies beyond SPS, to any
+signature scheme whose message-dependent part is public values raised to shared
+exponents.
 
-\begin{outline}
-  \item applies beyond our two schemes: any signature scheme whose
-message-dependent part is public values raised to shared exponents, generic MPC
-for the rest, proof reduced to unforgeability of the underlying scheme
-\end{outline}
+Certifiers of a ledger or transparency log keep their role, but no single signer
+can certify alone, and dividing the role costs little when a signature is
+needed.
 
-\begin{outline}
-  \item link to the thesis statement: certifiers of a ledger or transparency log
-keep their role
-  \item authority divided (no one certifies alone); signers know what they
-certify, but the signature is on a commitment, so verifying it needs no
-knowledge of the value
-  \item no interaction once the message is known, so dividing authority costs
-little when a signature is needed, which is what makes the role practical for an
-institution
-\end{outline}
-
-\begin{outline}
-  \item open: adaptive security needs an adaptively secure MPC protocol, and
-removing the $\binom{n}{t}$ loss needs an equivocable sharing or secure erasures;
-the benchmarked protocols are covered only by the static theorem
-  \item if the underlying SPS scheme is strongly unforgeable, the same reduction
-gives the strong threshold analogue
-\end{outline}
+Adaptive security needs an adaptively secure MPC protocol, and removing the loss
+in the adaptive case needs an equivocable sharing or secure erasures. The
+protocols we benchmark are covered only by the static theorem. We expect the
+same reduction to give the strong threshold analogue when the underlying SPS
+scheme is strongly unforgeable.

@@ -47,11 +47,10 @@ Neither protocol we benchmark is proven secure against adaptive corruption, so
 
 \subsection{Instantiating $\TSPS$ with $\AGHO$}\label{sec:tsps-abe}
 
-Abe, Groth, Haralambiev, and Ohkubo give a strongly unforgeable scheme that
-signs messages in both groups, and a rerandomisable scheme for messages in one
-group only, which is existentially unforgeable in the GGM~\cite{C:AGHO11}. Both
-have signatures of three group elements. We use the second
-scheme with $\group{1}$ and $\group{2}$ swapped, so that messages are in
+There are two AGHO schemes with signatures of three group elements: a strongly
+unforgeable scheme that signs messages in both groups, and a rerandomisable
+scheme for messages in one group only, which is existentially unforgeable in the
+GGM~\cite{C:AGHO11}. We use the second scheme with $\group{1}$ and $\group{2}$ swapped, so that messages are in
 $\group{1}$, and call it $\AGHO$. \Cref{prim:agho} recalls it. Its secret
 key consists only of field elements, and the message enters signing only through
 the terms $\msg_i^{-\mu_i}$. Our threshold version relies on both properties.

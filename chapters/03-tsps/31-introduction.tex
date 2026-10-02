@@ -4,35 +4,21 @@ Structure-preserving signature schemes have proved useful across a range of priv
 signatures, delegatable anonymous credentials, and group signatures, to name a
 few~\cite{AFRICACRYPT:FucVer10,CCS:CamDriDub17,RSA:CriLys19,PoPETS:MSBM23,AC:Groth06,AC:Groth07,C:LibPetYun15}.
 
-\begin{outline}
-  \item so a signer can sign a commitment it cannot open, and the holder later
-proves statements about the committed value in zero knowledge without revealing it
-  \item contrast: an ordinary signature hashes the message first, so proving
-knowledge of a signature on a commitment needs a general-purpose proof over the
-hash; signing the group elements directly keeps the proofs algebraic and cheap
-\end{outline}
+These applications rely on signing group elements directly. A signer can sign a
+commitment without opening it, and the holder of the signature can later prove
+statements about the committed value in zero knowledge without revealing it. An
+ordinary signature scheme hashes the message first, so proving knowledge of a
+signature on a commitment needs a general-purpose proof over the hash function.
+Signing the group elements directly keeps these proofs algebraic and efficient.
 
-\begin{outline}
-  \item many systems have an entity that certifies state for everyone else:
-transparency log provider, ledger administrator or endorser
-  \item the role can't be removed (something has to attest that a key was
-recorded, a transaction was valid, an account held a balance at a time), but the
-capability attached to it can be narrowed
-  \item threshold signatures: key shared between signers, a threshold of them
-needed to sign; no single signer certifies alone, no single key compromise
-forges a certification
-  \item why not multi-signatures: they need every signer and verifiers must know
-who signed; a threshold scheme keeps one public key and ordinary signatures, so
-verifiers don't change
-  \item SPS separates verification from knowledge: the signers know the values
-they certify, but the signature is on a commitment, so anyone can check its
-validity on the ledger without learning the value\rebekah{describe this better:
-authority stays with knowledge (the signers see the transaction), only
-verification of validity is separated from it}
-  \item practicality (as in the rest of the thesis): for a threshold signer the
-cost is interaction when a signature is needed; our online phase needs no
-interaction between signers
-\end{outline}
+Many systems have an entity that certifies state for everyone else, such as a
+transparency log provider or a ledger administrator. In a threshold signature
+scheme, the signers share one key and a threshold of them is needed to sign, so
+no single signer or compromised key can certify alone. Unlike with
+multi-signatures, verifiers see one public key and ordinary signatures.
+
+For a threshold signer, the cost is interaction whenever a signature is needed.
+In our schemes, the online phase needs no interaction between signers.
 
 Ledgers are the first setting where such certifiers appear. A ledger records
 commitments to tokens or accounts, and to spend a token or report on an account,
@@ -70,48 +56,36 @@ signatures but only sign messages given in both source groups with the same
 discrete logarithm, where the bound does not apply~\cite{PKC:MMSST24,AC:CKPSS23}.
 The price of this is security in the GGM.
 
-\begin{outline}
-  \item core idea, say it plainly once: any SPS scheme with decomposable
-signing becomes a threshold scheme; everything not depending on the message is
-computed under MPC offline; once the message is known each signer raises the
-public message elements to its own shares, with no interaction; security reduces
-to EUF-CMA of the underlying scheme with no loss; done for $\AGHO$ (smallest
-signatures) and $\KPW$ (standard assumptions)
-  \item signing key held in secret-shared form (enough shares determine it, fewer
-reveal nothing); key generation, combining and verification then done with
-general-purpose MPC, nothing new needed
-  \item the hard part is signing: evaluating it under MPC directly means the
-signers must interact for each signature
-  \item observation: in SPS the message is public group elements and (in the
-schemes we use) only gets raised to shared exponents, which each signer can do on
-its own shares; if everything else is prepared in advance, no interaction needed at
-message time
-  \item why not remove interaction completely: that means designing a new scheme
-for the threshold setting, as existing threshold SPS schemes do, with their
-restrictions on messages or assumptions; splitting signing in two keeps existing
-SPS schemes as they are and moves the interaction to before the message is known
-\end{outline}
+Our construction applies to any SPS scheme with decomposable signing, a
+property of the signing algorithm that we define, and that $\AGHO$ and $\KPW$
+have. The signing key is secret-shared between the signers, and key generation, combining
+and verification use general-purpose MPC. Evaluating signing under MPC directly
+would mean the signers interact for each signature. In the SPS schemes we use,
+the message is a vector of public group elements raised to shared exponents,
+which each signer can do locally. So we do all message-independent computations
+under MPC in an offline phase, and once the message is known,
+signing needs no interaction. \Cref{sec:tsps-security} shows that security
+reduces to the unforgeability of the underlying scheme.
+
+Existing threshold SPS schemes avoid interaction altogether, but they are new
+schemes, with restrictions on messages or assumptions. Splitting signing in two
+keeps existing SPS schemes as they are.
 
 High-throughput applications, such as payments, have quiet and busy periods,
-and the preprocessing can run in the quiet ones. \Cref{sec:tsps-security} shows that the
-threshold schemes are unforgeable whenever the underlying SPS scheme is.
+and the preprocessing can run in the quiet ones.
 
-We call the property of the signing algorithm that makes this possible
-decomposable signing, and show that $\AGHO$ and $\KPW$ have it.
-
-\begin{outline}
-  \item second contribution: implementation; thresholdising $\KPW$ needs
-secret-shared group elements and raising a shared group element to a shared
-exponent
-  \item as far as we know, the first multiparty implementation of computing on
-shared pairing-group elements (two-party: cite NDSS:GPVRNC23; threshold ECDSA in
-MP-SPDZ: cite ESORICS:DOKSS20; your answer: sounds correct but check)
-\end{outline}
+Our second contribution is an implementation. Threshold $\KPW$ needs
+secret-shared group elements, and raising a shared group element to a shared
+exponent. Computation on shared group elements has been implemented for two
+parties, including in pairing groups~\cite{NDSS:GPVRNC23,LC:ADEO21}, and for
+many parties in MP-SPDZ on a curve without a pairing~\cite{ESORICS:DOKSS20}. We
+add sharings of pairing-group elements and $\algo{ExpGrp}$ to MP-SPDZ, for any
+number of parties~\cite{CCS:Keller20}. To our knowledge, this is the first multiparty
+implementation of computation on shared elements of pairing groups.
 
 We benchmark both schemes using two MPC frameworks: ATLAS, which assumes an
 honest majority, and MASCOT, which assumes a dishonest
-majority~\cite{C:GLOPS21,CCS:KelOrsSch16}. We extend MP-SPDZ with support for
-the group element functionalities our schemes require~\cite{CCS:Keller20}. We also
+majority~\cite{C:GLOPS21,CCS:KelOrsSch16}. We also
 implement previously suggested threshold SPS schemes, so as to compare concrete
 efficiency~\cite{AC:CKPSS23,PKC:MMSST24}.
 
@@ -152,18 +126,13 @@ of seven group elements~\cite{C:KilPanWee15}.
 two prior threshold SPS schemes in terms of assumptions, key and signature size,
 and verification cost~\cite{AC:CKPSS23,PKC:MMSST24}.
 
-\paragraph{Computing on shared group elements.} Moving a sharing of a field
-element into a group without interaction, where each party raises a public
-generator to its share, goes back to threshold cryptosystems~\cite{C:DesFra89}.
-\begin{outline}
-  \item Smart and Talibi Alaoui: maliciously secure computation over an elliptic
-curve group, maps multiplication triples over $\Zp$ locally into triples over the
-group (cite IMA:SmaTal19)
-  \item linear secret sharing isomorphisms generalise this, and realise
-Pointcheval-Sanders in MPC (cite LC:ADEO21)
-  \item we extend to $n$ parties the two-party approach of sharing group
-elements and computing on the shares (cite NDSS:GPVRNC23)
-\end{outline}
+\paragraph{Computing on shared group elements.} Smart and Talibi Alaoui give
+maliciously secure computation over an elliptic curve group, by mapping
+multiplication triples over $\Zp$ locally into triples over the
+group~\cite{IMA:SmaTal19}. We realise $\algo{ExpGrp}$ with these triples. Linear
+secret sharing isomorphisms generalise this approach, and give
+Pointcheval-Sanders signatures in MPC, implemented for two
+parties~\cite{LC:ADEO21}.
 
 \paragraph{Layout.} The rest of the chapter is organised as follows. \Cref{sec:tsps-definitions} defines threshold SPS schemes
 and the MPC interfaces our constructions use.

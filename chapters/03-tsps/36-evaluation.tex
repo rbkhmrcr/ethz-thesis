@@ -144,8 +144,9 @@ Compared with MMSST24, threshold $\AGHO$ has signatures
 of three group elements instead of seven, and verifies in 2.93~ms instead of
 4.18~ms, but is secure in the GGM rather than under SXDH~\cite{PKC:MMSST24}.
 
-\begin{outline}
-  \item CKPSS23 only signs messages given in both source groups with the
-same discrete logarithm, so can't sign a commitment or public key whose discrete
-logarithm nobody knows (cite AC:CKPSS23)
-\end{outline}
+CKPSS23 has smaller signatures, but only signs indexed Diffie-Hellman messages:
+pairs of group elements, one in each source group, with the same discrete
+logarithm relative to a base derived from an index. Whoever creates a message
+must know this discrete logarithm, and existing commitments or public keys
+cannot be signed as they are. Each signed element also needs a counterpart in
+the second group, which on BLS12-381 triples the message size~\cite{AC:CKPSS23}.
