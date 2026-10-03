@@ -94,16 +94,25 @@ $\idfu{\algo{trace}}$ accepts, $\simu$ retrieves $(\sk, \utk, \signature)
 \leftarrow \regsimu[\user]$, simulates $\user$'s response following $\prot$, and
 sets $\permsimu[(\auditor,\user,\epoch)] \leftarrow \FE(\utk, \epoch)$.
 
+  For an authorisation from a corrupt user $\user$ to honest auditor
+$\auditor$ in epoch $\epoch$, $\simu$ runs the auditor's checks of $\prot$. If
+they pass, $\simu$ extracts $(\sk, \utk)$ from the proof for $\rel_4$ (P4), calls
+$\IDgrant$ on $\user$'s behalf, and sets $\permsimu[(\auditor,\user,\epoch)]
+\leftarrow \ek$. By (P1) the credential was issued to $\user$ at registration,
+so the extracted key is the one in $\regsimu[\user]$, and by (P4) $\ek =
+\FE(\utk, \epoch)$. The checks pass only for an epoch that has not started, so
+$\idfu{\algo{trace}}$ accepts exactly when the real auditor does.
+
   This simulated response is indistinguishable from a real one, so Game 3 is
 indistinguishable from Game 2.
 
-  \paragraph{Game 4.} As Game 3, except for an authorisation request from a
-corrupt auditor for honest user $\user$ and epoch $\epoch$, $\simu$ replaces the
-epoch tracing key by a uniform value, and simulates the proof for relation
-$\rel_5$.
+  \paragraph{Game 4.} As Game 3, except $\simu$ replaces $\FE(\utk,\cdot)$ of
+every honest user by a random function, and uses its values as that user's
+epoch keys in every grant and transaction.
 
-  $\simu$ samples $\ek$ uniformly from the range of $\FE$ and sets
-the following:
+  $\simu$ samples each epoch key $\ek$ of an honest user uniformly from the
+range of $\FE$, the first time it is needed, and reuses it for that user and
+epoch. For a grant to a corrupt auditor, it sets the following:
   %
   \begin{equation*}
     \permsimu[(\auditor,\user,\epoch)] \leftarrow \ek.
@@ -116,18 +125,21 @@ simulator that drew a fresh one per grant would be trivially distinguishable by 
 corrupt auditor holding grants for two epochs.
 
   When such a user submits a transaction, $\simu$ computes the tag as
-$\FT(\PTK_\user,\ek,\gamma)$ under this substituted key, so that the corrupt
-auditor's tracing still succeeds, and simulates the zero-knowledge proof for
-relation $\rel_7$.
+$\FT(\PTK_\user,\ek,\gamma)$ under the substituted key, so that a corrupt
+auditor's tracing still succeeds.
 
   Before the substitution, $\simu$ simulates every proof of honest users (P4),
+including the proofs for $\rel_4$ at registration and for $\rel_5$ at grants,
 and replaces each of their commitments $\com$ by a commitment to a fresh
 uniform value (P2). After this step, an honest user's $\utk$ enters the view of
-$\adv$ only through $\PTK_\user$ and the outputs of $\FE$. So pseudorandomness
-of $\FE$ (P3), which holds against a distinguisher given $\PTK_\user$, applies
-across all epochs, and this game is indistinguishable from
-Game 3.\rebekah{check: Game 4 now simulates honest users' proofs and
-commitments before the step to (P3)}
+$\adv$ only through $\PTK_\user$ and the outputs of $\FE(\utk,\cdot)$. We then
+replace these functions one honest user at a time. Two neighbouring hybrids
+differ in one user's function, and a distinguisher between them breaks
+pseudorandomness of $\FE$ (P3) against a distinguisher given $\PTK_\user$,
+since the reduction can compute every other user's keys itself. So this game is
+indistinguishable from Game 3, with a loss of the number of honest
+users.\rebekah{check: Game 4 now replaces all of $\FE(\utk,\cdot)$ per honest
+user, with a hybrid over users, not only the keys granted to corrupt auditors}
 
   \paragraph{Game 5.} As Game 4, except $\simu$ also simulates transaction
 submission using $\idfu{\algo{trace}}$'s output on $\IDsubmit$ requests from
@@ -205,8 +217,7 @@ sends an $\IDsubmit$ request on $\user$'s behalf to $\idfu{\algo{trace}}$ and
 returns its output. The extracted $\sk$ is that of an honest user only with
 negligible probability, since otherwise a reduction that sets that user's $\PSK$ to a
 challenge for $\G$ and simulates that user's proofs (P4) would invert $\G$,
-which contradicts one-wayness of $\G$.\rebekah{check: new argument for an
-extracted honest user's key} If $\idfu{\algo{trace}}$ accepts, $\simu$ records the
+which contradicts one-wayness of $\G$. If $\idfu{\algo{trace}}$ accepts, $\simu$ records the
 transaction in $\txns[(\user,\epoch)]$.
 
   This game is indistinguishable from Game 5 unless $\idfu{\algo{trace}}$
@@ -544,12 +555,13 @@ oracle and sets the following:
 keys of other epochs, which also depend on $\utk'$, from $\gen^a$ by programming
 $\gen_2$ and $\HE$ at other epochs to known powers of $\gen$. It knows $\ek =
 \gen^a$, so it can also give $\ek$ to the distinguisher. If $Q = \gen^{ab}$, this
-is an honest proof, and if $Q$ is uniform, it is the simulated one. The
-simulator uses $W_\gamma$, so it is given the index $\gamma$ as well as the
-instance. This suffices where the lemma is used, since the simulator of
-\Cref{thm:txid-bb} assigns honest users' indices itself.\rebekah{check:
-\Cref{lem:txid-rel7} now gives the simulator $\gamma$, and the simulation holds
-against a distinguisher holding $\ek$}
+is an honest proof, and if $Q$ is uniform, it is the simulated one. For the up
+to $\Max$ proofs per epoch, which share $\ek$, the reduction derives one
+challenge per proof from $(\gen, \gen^a, \gen^b, Q)$ by random
+self-reducibility of DDH. The simulator uses $W_\gamma$, so it is given the
+index $\gamma$ as well as the instance. This suffices where the lemma is used,
+since the simulator of \Cref{thm:txid-bb} assigns honest users' indices
+itself.
 
   $\simu$ then fixes $(U, \Pi, X, \com_\gamma)$ and runs the honest-verifier
 simulator of the Sigma protocol. It samples the challenge $c$ and the six
@@ -701,7 +713,9 @@ pseudorandom under the $q$-mDBDHI assumption with $q = \Max$, by
 whole of $\PTK$, since every corrupt auditor holds it. \Cref{lem:txid-fe-prf}
 gives it the whole of $\PTK$. \Cref{lem:txid-ft-prf} gives it $\{W_\gamma\}$,
 and $T$ is uniform and independent of $\utk''$ once $\utk'$ enters the view
-only through $T$, as from Game 4 on, so the reduction samples $T$ itself.
+only through $T$. This holds from Game 4 on, where the proofs for $\rel_4$ at
+registration and the epoch key proofs at grants are simulated and the epoch
+keys are uniform, so the reduction samples $T$ itself.
 
   \item[(P4).] The proofs are the Sigma protocol for knowledge of a
 representation for $\rel_4$, the epoch key proof for $\rel_5$, and the tag
@@ -713,7 +727,8 @@ $\group{1}$ and simulation extractable~\cite{SP:BBBPWM18,EC:DaoGru23}. By
 $\rel_7$ and $\rel_6$. The proof for $\rel_4$ and the epoch key proof are Sigma
 protocols for equations of discrete logarithms, with the standard simulator and
 extractor. Each Sigma protocol has special soundness, honest-verifier zero
-knowledge and unique responses, and hashes its whole statement, so with the
+knowledge and quasi-unique responses, under the DL assumption among the
+hashed generators, and hashes its whole statement, so with the
 Fiat-Shamir transform it is zero knowledge and simulation extractable in the
 random oracle model, as in \Cref{sec:prelims-sigma}~\cite{INDOCRYPT:FKMV12}. Extraction is
 by rewinding, which is sound in the standalone model. For the epoch key proof,
@@ -748,10 +763,10 @@ under the $q$-SDH assumption.
   \item[(P2).] $\Com$ is the Pedersen commitment scheme, perfectly hiding, and
 computationally binding under the DL assumption in $\group{1}$.
 
-  \item[(P3).] $\HE$ and $\HT$ are the MiMC hash function with separate domain
-separation tags, so $\FE$ and $\FT$ are pseudorandom by the assumption that
-MiMC, keyed by a secret input block, is a pseudorandom function against a
-distinguisher holding $\gen_2^{\utk}$. This is the public tracing key, which
+  \item[(P3).] $\HE$ and $\HT$ are the MiMC block cipher, keyed by $\utk$ and
+by the epoch key, so $\FE$ and $\FT$ are pseudorandom by the assumption that
+MiMC is a pseudorandom permutation against a distinguisher holding
+$\gen_2^{\utk}$, and the switching lemma. This is the public tracing key, which
 depends on the key of $\FE$. $\FT$ is keyed by the epoch key, which is uniform
 once $\FE$ is replaced, so the public tracing key gives a distinguisher of $\FT$
 nothing.

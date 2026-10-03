@@ -150,8 +150,11 @@ offline in this sense: a payee accepts a payment on the strength of the
 transcript alone, and needs no contact with any other party either to accept it
 or to pay it onward.
 
-None of the deployed or announced systems we are aware of is fully offline.
-The e-krona pilot in Sweden and the digital rupee in India settle offline
+China's e-CNY is the largest CBDC pilot, and its hardware wallets can pay each
+other with both parties offline~\cite{pboc2021ecny,atlanticcouncil2026cbdc}.
+Its design is not public, so whether received money can be paid onward offline
+is not known. None of the other deployed or announced systems we are aware of
+is fully offline. The e-krona pilot in Sweden and the digital rupee in India settle offline
 payments only once the device reconnects, Pix in Brazil needs the payee to be
 online, and the US Federal Reserve Board finds no fully offline system in
 production~\cite{brown2016corda,soderberg2019krona,lobo2021pix,aboulaiz2024offline}.
@@ -191,8 +194,6 @@ users' wallets.
 %
     BCFK15~\cite{PKC:BCFK15} & Yes & No & Spender only & None \\
 %
-    PB17~\cite{park2017opera} & -- & -- & Prevented & OTR memory \\
-%
     RP23~\cite{PoPETS:RiaPio23} & No & Yes & Detected & None \\
 %
     BZKWCC24~\cite{Beer2024} & Yes & No & Absorbed & None \\
@@ -205,11 +206,9 @@ users' wallets.
 column records what happens once a conflict is detected at deposit. Detected
 means the conflict is observed but no party is named, all holders means every
 previous owner of the token is identified, spender only means the double spender
-alone is identified, absorbed means the issuer covers the double-spent value,
-and prevented means double spending is stopped rather than resolved after the
-fact. The hardware column records the hardware assumption the scheme places on
-users' wallets, where OTR denotes one-time readable memory. Entries marked --
-are not addressed by the cited work.\rebekah{OPERA (PB17): check transferability and divisibility for the -- entries; paper not on disk}} \label{tab:offline-related-comparison}
+alone is identified, and absorbed means the issuer covers the double-spent
+value. The hardware column records the hardware assumption the scheme places on
+users' wallets.} \label{tab:offline-related-comparison}
 \end{table}
 
 \paragraph{Layout.} The rest of the chapter is organised as follows. \Cref{sec:offline-definitions} describes the participants

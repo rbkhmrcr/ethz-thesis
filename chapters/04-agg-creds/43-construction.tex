@@ -129,8 +129,10 @@ returns the output of the proof verification algorithm.
 \begin{theorem}\label{thm:agg-creds-construction-security} If $\DS$ is an
 existentially unforgeable digital signature scheme, $\ATS$ an existentially
 unforgeable aggregate tag-based signature scheme under tag-based aggregation,
-and the proof system is zero knowledge and simulation extractable, then the above protocol securely realises ideal
-functionality~$\idfu{\AAC}$.  \end{theorem}
+the proof system is zero knowledge and simulation extractable, $f$ is one way,
+and the proofs of knowledge of users' and issuers' secret keys are
+zero-knowledge proofs of knowledge, then the above protocol securely realises
+ideal functionality~$\idfu{\AAC}$.  \end{theorem}
 
 We prove \Cref{thm:agg-creds-construction-security} in \Cref{sec:agg-creds-proof-1}.
 

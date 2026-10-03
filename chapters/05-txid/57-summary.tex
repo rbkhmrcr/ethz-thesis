@@ -19,7 +19,10 @@ check for one counterparty. In each, the design question is the smallest
 capability that meets the need, and whether its use is visible to the person
 concerned.
 
-Several directions remain for future work. Grants are issued by users, so
+Several directions remain for future work. Grants must come before the epoch
+they cover, and auditors often ask about the past. Retrospective grants work in
+the protocol without the epoch check, but need a proof that can explain uniform
+tags with a key chosen later. Grants are issued by users, so
 compelled disclosure relies on the legal system. A threshold auditor, with the
 techniques of \Cref{chap:tsps}, would split that authority between
 institutions. Our simulator rewinds, so the result holds in the standalone

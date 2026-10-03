@@ -3,7 +3,7 @@
 We give two instantiations of the generic construction of $\ID$. The first uses
 algebraic pseudorandom functions and tailored Sigma protocols, and needs no
 trusted setup. The second builds both pseudorandom functions from the MiMC
-permutation and proves the two pseudorandom function relations with a
+block cipher and proves the two pseudorandom function relations with a
 general-purpose zk-SNARK. Both follow \Cref{prot:txid-generic} step by step,
 and \Cref{sec:txid-evaluation} compares the two.
 
@@ -257,6 +257,8 @@ Between the user and an auditor, do:
 
 	\item The auditor sends a fresh nonce $\rand$ to the user.
 
+	\item The user exits if the epoch $\epoch$ has started.
+
 	\item The user parses $\regcred = (S,T,\signature)$, and computes $\ek
 \leftarrow \HE(\epoch)^{\utk'}$ and the epoch key proof $\algoproof_5$ of
 \Cref{prot:txid-ek-proof} with label $\rand$. On the user's first grant to this
@@ -267,9 +269,9 @@ $(\sk,\utk',\utk'')$ with label $\algoproof_5\|\rand$, and sends
 $(\regcred,\ek,\algoproof_5,\algoproof_4)$ to the auditor, together with
 $\{W_\gamma\}$ on a first grant.
 
-	\item The auditor outputs $\PTK = (T,\{W_\gamma\})$ and $\ek$ if
-$\BBSverify(\rapk,(S,T),\signature) = 1$ and both proofs verify, and exits
-otherwise.
+	\item The auditor outputs $\PTK = (T,\{W_\gamma\})$ and $\ek$ if the
+epoch $\epoch$ has not started, $\BBSverify(\rapk,(S,T),\signature) = 1$
+and both proofs verify, and exits otherwise.
 
       \end{enumerate}
 
@@ -658,7 +660,7 @@ t_2\cdot(\bar{E}/d)^c, \\ \gen_1^{\theta_\sk}\cdot d^{-\theta_{r_3}}\cdot
 
 \begin{theorem}\label{thm:inst} The algebraic instantiation securely realises
 $\idfu{\algo{trace}}$ in the standalone model, in the random oracle model for
-$\HE$ and $\hash$, under the DDH assumption in $\group{1}$, the $q$-mDBDHI
+$\HE$, $\hash$ and the hash to the group that derives the generators, under the DDH assumption in $\group{1}$, the $q$-mDBDHI
 assumption with $q = \Max$, the $q$-SDH assumption, and the DL assumption in
 $\group{1}$.
 \end{theorem}
@@ -684,10 +686,9 @@ and instantiate the components of \Cref{prot:txid-generic} as follows:
 The public tracing key is one group element.
 
   \item The pseudorandom functions are $\FE(\utk,\epoch) = \HE(\utk,\epoch)$ and
-$\FT(\PTK,\ek,\gamma) = \HT(\ek,\gamma)$. Both hash a domain separation tag,
-the key and the input with the MiMC hash function, which runs the MiMC
-permutation in Miyaguchi-Preneel mode. MiMC is designed to be cheap inside an
-arithmetic circuit~\cite{AC:AGRRT16}.
+$\FT(\PTK,\ek,\gamma) = \HT(\ek,\gamma)$. Both are the MiMC block cipher, keyed
+by $\utk$ and by $\ek$ respectively and applied to the input. MiMC is designed
+to be cheap inside an arithmetic circuit~\cite{AC:AGRRT16}.
 
   \item $\DS$ is the BBS+ signature scheme of \Cref{prim:bbs} with $n = 2$ and
 generators $\gen_0, \ldots, \gen_3$, on the two field elements $\sk$ and
@@ -722,15 +723,13 @@ used elsewhere.
 Not every hash function is a pseudorandom function. Collision and preimage
 resistance say nothing about outputs looking random, and the random oracle
 heuristic does not help, since we prove statements about the concrete function
-inside a circuit. So we assume that the MiMC hash of a domain separation tag, a
-secret key and an input is a pseudorandom function of the input, also against a
-distinguisher holding $\PTK = \gen_2^{\utk}$. MiMC was designed as a block
-cipher, and its cryptanalysis is of the keyed permutation~\cite{AC:AGRRT16}.
-Here the key enters the hash as a message block and not as the key of the
-cipher, so the assumption is heuristic and has no security
-reduction.\rebekah{the key enters as a message block because the
-implementation uses gnark's MiMC hash unchanged; add the reason if there is a
-better one}
+inside a circuit. So we use the MiMC block cipher keyed with the secret, and
+assume that it is a pseudorandom permutation, also against a distinguisher
+holding $\PTK = \gen_2^{\utk}$. Over $\Zp$, a pseudorandom permutation is a
+pseudorandom function up to a loss of $q^2/p$ for $q$
+queries~\cite{EC:BelRog06}. The cryptanalysis of MiMC is of this keyed
+permutation~\cite{AC:AGRRT16}. Holding $\PTK$ is outside the standard notion,
+so that part of the assumption is ours.
 
 Circuits cannot take $\PTK$ or $\com$ as input. Statements of the zk-SNARK are
 over $\Zp$, and the coordinates of these group elements lie in a different
@@ -791,9 +790,8 @@ following hold:
 
 \begin{theorem}\label{thm:hash-inst} The hash-based instantiation securely
 realises $\idfu{\algo{trace}}$ in the standalone model, in the random oracle
-model for $\hashfs$, under the $q$-SDH assumption and the DL assumption in
+model for $\hashfs$ and the hash to the group that derives the generators,
+under the $q$-SDH assumption and the DL assumption in
 $\group{1}$, if the zk-SNARK of Groth with commitments is zero knowledge and
-simulation extractable, and the MiMC hash function, keyed by a secret input
-block, is a pseudorandom function against a distinguisher holding
-$\gen_2^{\utk}$.\rebekah{check: added ``against a distinguisher holding
-$\gen_2^{\utk}$'' to the MiMC assumption}  \end{theorem}
+simulation extractable, and the MiMC block cipher is a pseudorandom permutation
+against a distinguisher holding $\gen_2^{\utk}$.  \end{theorem}

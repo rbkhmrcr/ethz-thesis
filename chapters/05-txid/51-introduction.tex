@@ -160,8 +160,8 @@ no \\
 is that counter-based tracing makes users create their transactions one after
 another~\cite{CCS:KiaKohSar22,CANS:SarKiaKoh24}, but an auditor never needs to
 know their order. It only needs to find every transaction of the user, and their
-number is bounded. The second is that an auditor can be constrained by what it
-is given. A key that derives the tags of one user for one epoch lets the auditor
+number is bounded. The second is that an auditor can be limited by the key it
+is given, rather than trusted to limit itself. A key that derives the tags of one user for one epoch lets the auditor
 trace that user in that epoch and nowhere else. Both lead to one design, in
 which tags are computed from a bounded index space local to one epoch.
 
@@ -183,7 +183,7 @@ Fiat-Shamir transform. Its setup is transparent, so no party samples any group
 generator,
 and the BBS+ signature scheme lets the registration authority certify users' keys without
 ever learning their tracing keys. The second
-builds both pseudorandom functions from the MiMC permutation and proves the two
+builds both pseudorandom functions from the MiMC block cipher and proves the two
 corresponding relations with a general-purpose zero-knowledge succinct
 non-interactive argument of knowledge (zk-SNARK). This gives constant-size
 transaction proofs and faster verification, but a slower prover and a

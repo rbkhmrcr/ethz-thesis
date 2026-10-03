@@ -9,7 +9,8 @@ proof.
 The registration authority binds each user's key to a tag, and is not involved
 after registration. Every anonymous credential scheme already assumes that
 users' keys are certified, and we make this role explicit. The registration
-authority learns only keys and tags, so the role adds no trust. Binding
+authority learns keys and tags, but nothing about users' attributes or
+presentations. Binding
 credentials to the tag lets issuers stay uncoordinated, and since each
 user has one tag, issuers need not remember whom they have signed for.
 
@@ -26,8 +27,6 @@ assumptions would remove it, at the cost of larger registration signatures. A
 concrete security analysis of the scheme would give its security at real
 parameters.
 
-\rebekah{kept Extensions in the construction; the summary only names revocation
-as future work}
 Epoch-based revocation, one of the extensions of
 \Cref{sec:agg-creds-construction}, covers attributes with natural expiry dates.
 Revoking a whole user through their tag, or a single attribute credential, needs

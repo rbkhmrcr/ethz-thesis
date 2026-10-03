@@ -154,14 +154,15 @@ logarithms, without a general-purpose zero-knowledge proof.
 
 The tag and its hash each have a role. Issuers sign under $\Tag$, and
 $\ATSsign$ hashes it to $\tid$, so that the security proof of $\ATS$ can program
-$\hashtwo$ at the attacked tag. A tag chosen directly as a group element could
-not be programmed. Structure-preserving signatures sign group elements and not
-field elements, so the registration authority signs $\tid$. The registration
-signature and the aggregate signature then share the group element $\tid$, and
-the presentation only shows that they share it. A registration signature on
-the scalar $\Tag$ itself, such as a discrete-logarithm signature, would instead
-need the presentation to prove that $\tid$ is the hash of the signed tag, which
-needs a general-purpose proof.
+$\hashtwo$ at the tag of the forgery. A tag chosen directly as a group element
+could not be programmed. The registration authority computes $\tid$ from $\Tag$
+itself and signs $\tid$, which a structure-preserving signature scheme allows,
+since it signs group elements. The registration signature and the aggregate
+signature then share $\tid$, and the presentation only proves that they share
+it, without showing $\tid$. A signature scheme on field elements could only sign
+$\Tag$, and the presentation would then have to prove that the hidden $\tid$ is
+the hash of the hidden signed tag. Proving a hash to the group in zero knowledge
+needs a general-purpose proof system.
 
 We write the registration authority's public key, the issuer public keys, the
 tag identifier and the two signatures as follows:
@@ -224,14 +225,14 @@ disclosed attribute for the user.
 
 \begin{lemma}\label{lem:agg-creds-sigma}
 
-  In the random oracle model, a witness $(\Tag, \sk, \pk, \SPSsig,
-\signature)$ for $\rel_1$, with $\DS$ set to $\AGHO$ on $(\pk, \hashtwo(\Tag))$,
-can be extracted by rewinding from any adversary that outputs a presentation
-that verifies, except with the probability of forging an $\AGHO$ signature. If
-the DDH assumption holds in $\group{1}$, presentations can be simulated without
-a witness by programming $\hash$.
-\rebekah{check: lemma restated to extract a witness for $\rel_1$ including
-$\Tag$, from an adversary, up to $\AGHO$ forgeries}
+  In the random oracle model, if the registration authority signs only pairs
+$(\pk, \hashtwo(\Tag))$, a witness $(\Tag, \sk, \pk, \SPSsig, \signature)$ for
+$\rel_1$, with $\DS$ set to $\AGHO$ on $(\pk, \hashtwo(\Tag))$, can be extracted
+by rewinding from any adversary that outputs a verifying presentation for a
+statement and label on which it saw no simulated presentation, except with the
+probability of forging an $\AGHO$ signature or computing a discrete logarithm
+in $\group{1}$. If the DDH assumption holds in $\group{1}$, presentations can
+be simulated without a witness, with $\rask$ and by programming $\hash$.
 
 \end{lemma}
 

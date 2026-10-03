@@ -74,7 +74,9 @@ de-anonymise that user's transactions during that epoch. Non-repudiation means
 that every transaction a user submitted during an epoch can be traced back to
 them by any auditor holding a permission for that user and epoch. Permission
 expiration means that a permission covers only the epoch for which it was
-granted, so an auditor gains no tracing capability for any other epoch.
+granted. Once that epoch ends, the auditor cannot trace the user's later
+transactions, or those of earlier epochs, but can still trace those of the
+granted epoch.
 
 The functionality does not capture two things. First, it models unlinkability
 of a transaction to its originator and not confidentiality of the transaction
@@ -83,12 +85,12 @@ payload to the simulator $\simu$ on every $\IDsubmit$ call and withholds only
 the identity of the submitting user.
 The underlying transaction system provides confidentiality of the payload, and
 this is orthogonal to what we prove here. Second, it does not capture
-retrospective disclosure. $\IDgrant$ accepts only epochs that have not started,
-so users grant a permission before the epoch it covers. A user cannot refuse to
+retrospective disclosure, and this is a limitation of our model. $\IDgrant$
+accepts only epochs that have not started, so users grant a permission before
+the epoch it covers, and an auditor cannot be given access to an epoch that has
+already started. A user cannot refuse to
 be traced in an epoch for which they have already granted a
-permission.\rebekah{check: $\idfu{\algo{trace}}$ now refuses grants for
-epochs that have started, which were allowed before as retrospective
-disclosure; Game 5 needs this}
+permission.
 
 Secure realisation of $\idfu{\algo{trace}}$ by a protocol is defined as in
 \Cref{sec:prelims-security}, in the standalone model.

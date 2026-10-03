@@ -43,7 +43,7 @@ cores. Each time is the median of 100 repetitions.
     \toprule
     Object & Size (bytes) \\
     \midrule
-    $\crs$ & 12528 \\
+    $\crs$ & 28912 \\
     registration request & 128 \\
     $\regcred$ & 320 \\
     issuance request & 440 \\
@@ -107,12 +107,12 @@ than about 85 are, but it is in the single-issuer setting.
 
 Threshold issuance with silent setup has a constant-size presentation of about
 5\,KB on BLS12-381~\cite{EPRINT:GGPR25}. Not counting the disclosed values and
-their indices, our presentations are smaller for up to about forty disclosed
+their indices, our presentations are smaller for up to 45 disclosed
 attributes.
 
 With $k = 64$ disclosed attributes, every operation of the user takes at most
-20.1\,ms, which is low enough for client devices.
+20.1\,ms, so even a phone several times slower stays well below a second.
 \rebekah{todo (impl/agg-creds): HP22 baseline, or an operation-count table;
-CL11; our scheme with the equality of $\delta$ in $\group{T}$; and the issuer
-proof of knowledge in Go $\AACgen$, which the time and size of $\crs$ above
-leave out.}
+CL11; our scheme with the equality of $\delta$ in $\group{T}$. Rerun the
+benchmarks: $\AACgen$ now computes the issuers' proofs of knowledge, so its
+time and the size plot of $\crs$ are from before; the table size is new.}

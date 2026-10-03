@@ -252,8 +252,8 @@ $\ek \leftarrow \FE(\utk,\epoch)$ and $\algoproof_5 \sample
 \NIZKprove(\crs_4,\inst_4,\witness_4,\algoproof_5\|\rand)$ and sends
 $(\regcred,\ek,\algoproof_5,\algoproof_4)$ to the auditor.
 
-	\item The auditor outputs $(\PTK,\ek)$ if the following all hold, and
-exits otherwise:
+	\item The auditor outputs $(\PTK,\ek)$ if the epoch $\epoch$ has not
+started and the following all hold, and exits otherwise:
 	  %
 	  \begin{gather*}
 	    \DSverify(\rapk,\PSK\|\PTK,\signature) = 1, \quad
@@ -316,11 +316,17 @@ the set of retrieved payloads.
 
 \begin{theorem}\label{thm:txid-bb} Assuming that $\DS$ satisfies existential
 unforgeability, $\Com$ is binding and hiding, $\FE$ and $\FT$ are pseudorandom
-against a distinguisher holding $\PTK$, $\G$ and $\G'$ are one way, and the
+against a distinguisher holding $\PTK$, $\G$ is one way, and the
 zero-knowledge proof systems for $\rel_4$ through $\rel_7$ are zero knowledge
 and simulation extractable, the protocol described above securely realises
 $\idfu{\algo{trace}}$ in the standalone model against static corruption, with
-secure channels between honest users and auditors.\rebekah{check: added
-$\Com$, the standalone model, static corruption and secure channels to the
-statement; one-wayness of $\G$ is now used in Game 6, that of $\G'$ is still
-unused}  \end{theorem}
+secure channels between honest users and auditors.  \end{theorem}
+
+\paragraph{Extensions.} Dropping the check that the epoch has not started gives
+retrospective grants. Tags depend only on the epoch key and the index, so an
+auditor given the epoch key of a past epoch traces it as before. The proof of
+\Cref{thm:txid-bb} does not cover this. Until a grant arrives, the simulator
+publishes uniform tags, and a later grant would need an epoch key under which
+these tags are correct. A pseudorandom function that the simulator can program
+after the fact, such as one modelled as a random oracle, would allow this. We
+leave retrospective grants to future work.
