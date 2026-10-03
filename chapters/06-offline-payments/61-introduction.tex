@@ -176,29 +176,28 @@ deposit of the same token, and identify the party responsible.
 \Cref{tab:offline-related-comparison} compares our scheme with the offline
 payment schemes closest to it. All of the ecash schemes listed are offline in
 the sense above, so the axes that distinguish them are transferability,
-divisibility, what happens once a conflict is detected, and what the scheme asks of
-users' wallets.
+divisibility, and what happens once a conflict is detected.
 
 \begin{table}[htbp] \centering \small
 %
-  \begin{tabular}{l|c|c|c|c}
+  \begin{tabular}{l|c|c|c}
 %
-    \toprule Scheme & Transferable & Divisible & Double spending & Hardware \\
-\midrule \hline C82, CFN88~\cite{C:Chaum82,C:ChaFiaNao88} & No & No & Detected & None \\
+    \toprule Scheme & Transferable & Divisible & Double spending \\
+\midrule C82, CFN88~\cite{C:Chaum82,C:ChaFiaNao88} & No & No & Detected \\
 %
-    OO91, O95~\cite{C:OkaOht91,C:Okamoto95} & No & Yes & Detected & None \\
+    OO91, O95~\cite{C:OkaOht91,C:Okamoto95} & No & Yes & Detected \\
 %
-    CPST15~\cite{PKC:CPST15,ACNS:CPST15} & No & Yes & Detected & None \\
+    CPST15~\cite{PKC:CPST15,ACNS:CPST15} & No & Yes & Detected \\
 %
-    FPV09~\cite{CANS:FucPoiVer09} & Yes & No & All holders & None \\
+    FPV09~\cite{CANS:FucPoiVer09} & Yes & No & All holders \\
 %
-    BCFK15~\cite{PKC:BCFK15} & Yes & No & Spender only & None \\
+    BCFK15~\cite{PKC:BCFK15} & Yes & No & Spender only \\
 %
-    RP23~\cite{PoPETS:RiaPio23} & No & Yes & Detected & None \\
+    RP23~\cite{PoPETS:RiaPio23} & No & Yes & Detected \\
 %
-    BZKWCC24~\cite{Beer2024} & Yes & No & Absorbed & None \\
+    BZKWCC24~\cite{Beer2024} & Yes & No & Absorbed \\
 %
-    Our scheme & Yes & No & Spender only & Secure element \\ \bottomrule
+    Our scheme & Yes & No & Spender only \\ \bottomrule
 %
   \end{tabular}
 %
@@ -207,8 +206,7 @@ column records what happens once a conflict is detected at deposit. Detected
 means the conflict is observed but no party is named, all holders means every
 previous owner of the token is identified, spender only means the double spender
 alone is identified, and absorbed means the issuer covers the double-spent
-value. The hardware column records the hardware assumption the scheme places on
-users' wallets.} \label{tab:offline-related-comparison}
+value.} \label{tab:offline-related-comparison}
 \end{table}
 
 \paragraph{Layout.} The rest of the chapter is organised as follows. \Cref{sec:offline-definitions} describes the participants

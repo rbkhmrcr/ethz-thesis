@@ -14,56 +14,37 @@ on a MacBook Air with an Apple M2 and 16\,GB of RAM, using all eight
 cores. Each time is the median of 100 repetitions.
 
 \begin{table}[htbp] \centering \small
-  \begin{tabular}[t]{l l r}
+  \begin{tabular}{l r l r}
     \toprule
-    Algorithm & Party & Time (ms) \\
+    Algorithm & Time (ms) & Output & Size (bytes) \\
     \midrule
-    $\AACgen$ & & 22.5 \\
-    $\AACregister$ & user & 0.149 \\
-    $\AACregister$ & RA & 0.807 \\
-    $\AACissue$ & user & 0.0756 \\
-    $\AACissue$ & issuer & 2.94 \\
-    $\AACaggregate$ & user & 0.543 \\
-    $\AACpresent$ & user & 20.1 \\
-    $\AACverify$ & verifier & 31.1 \\
+    $\AACgen$ & 22.5 & $\crs$ & 28912 \\
+    $\AACregister$, user & 0.149 & registration request & 128 \\
+    $\AACregister$, RA & 0.807 & $\regcred$ & 320 \\
+    $\AACissue$, user & 0.0756 & issuance request & 440 \\
+    $\AACissue$, issuer & 2.94 & $\cred$ & 192 \\
+    $\AACaggregate$ & 0.543 & $\aggcred$ & 3224 \\
+    $\AACpresent$ & 20.1 & $\algoproof$ & 10008 \\
+    $\AACverify$ & 31.1 & & \\
     \midrule
-    $\ATSgen$ & & 0.176 \\
-    $\ATSsign$ & & 0.482 \\
-    $\ATSrandomise$ & & 0.333 \\
-    $\ATSverify$ & & 1.27 \\
-    $\ATSaggregate$ & & 0.533 \\
-    $\ATSverifyagg$ & & 18.9 \\
+    $\ATSgen$ & 0.176 & public key & 96 \\
+    $\ATSsign$ & 0.482 & signature & 144 \\
+    $\ATSrandomise$ & 0.333 & & \\
+    $\ATSverify$ & 1.27 & & \\
+    $\ATSverifyagg$ & 18.9 & & \\
     \midrule
-    Idemix present & user & 27.0 \\
-    Idemix verify & verifier & 11.9 \\
-    \bottomrule
-  \end{tabular}
-  \hspace{1.5em}
-  \begin{tabular}[t]{l r}
-    \toprule
-    Object & Size (bytes) \\
-    \midrule
-    $\crs$ & 28912 \\
-    registration request & 128 \\
-    $\regcred$ & 320 \\
-    issuance request & 440 \\
-    $\cred$ & 192 \\
-    $\aggcred$ & 3224 \\
-    $\algoproof$ & 10008 \\
-    \midrule
-    $\ATS$ public key & 96 \\
-    $\ATS$ signature & 144 \\
-    \midrule
-    Idemix presentation & 3034 \\
+    Idemix present & 27.0 & presentation & 3034 \\
+    Idemix verify & 11.9 & & \\
     \bottomrule
   \end{tabular}
   \caption[Aggregate credentials: times and sizes]{Time of each algorithm and
-size of each object, for $n = 128$ issuers and $k = 64$ disclosed attributes.
-$\AACregister$ and $\AACissue$ are split into the computation of each party. The
-$\ATS$ rows sign and aggregate single messages under one tag, with
-$\ATSaggregate$ and $\ATSverifyagg$ over $k = 64$ signatures, and a single and
-an aggregate $\ATS$ signature have the same size. The Idemix rows present one
-credential on $n = 128$ attributes.}
+size of its output, for $n = 128$ issuers and $k = 64$ disclosed attributes.
+$\AACregister$ and $\AACissue$ are split into the computation of each
+party, with RA the registration authority. The
+$\ATS$ rows sign single messages under one tag, with $\ATSverifyagg$ over
+$k = 64$ signatures. $\ATSaggregate$ takes the time of $\AACaggregate$, and an
+aggregate $\ATS$ signature has the size of a single one. The
+Idemix rows present one credential on $n = 128$ attributes.}
   \label{tab:agg-creds-times}
 \end{table}
 

@@ -121,7 +121,7 @@ Auditors call $\IDidentify$ to obtain the payloads of
 the transactions a user submitted in an epoch, and succeed only with a
 permission for that user and epoch. They then receive every such transaction,
 which gives non-repudiation. $\simu$ also learns the traced payloads when the
-auditor is corrupt. Finally, the ledger operator calls Increment Epoch to move all
+auditor is corrupt. Finally, the ledger operator calls $\IDincepoch$ to move all
 participants to the next epoch, on the schedule described above.
 
     \begin{framed}
@@ -215,14 +215,8 @@ T^\star)$ to $\simu$.
 
 	\end{enumerate}
 
-	{Increment Epoch.} On input from the ledger operator:
-
-	\begin{enumerate}
-
-	  \item Set $\epoch_{\mathsf{cur}} \leftarrow \epoch_{\mathsf{cur}} +
-1$.
-
-	\end{enumerate}
+	\fuinterface{\IDincepoch} On input $\IDincepoch$ from the ledger operator,
+set $\epoch_{\mathsf{cur}} \leftarrow \epoch_{\mathsf{cur}} + 1$.
 
     \end{framed}
 

@@ -144,56 +144,33 @@ sizes, are from before the fix}
 \begin{table}[htbp] \centering \small
 \caption[Offline payments: server-side time and size]{Median server-side time
 of each algorithm at one hop, in milliseconds, and size of the key, message or
-proof it produces, in bytes, with group elements compressed ($48$ bytes in
-$\group{1}$, $96$ bytes in $\group{2}$). We measure rows that do not depend on auditing
-once and repeat them in both columns. The times do not include the secure
-element's part. The last rows give the sizes of objects no single algorithm sends.}
-\label{tab:offline-server} \label{tab:offline-sizes}
+proof it produces, in bytes, with auditing, and without it in parentheses where
+it differs. Group elements are compressed, at $48$ bytes in $\group{1}$ and
+$96$ bytes in $\group{2}$. The times do not include the secure element's part.}
+\label{tab:offline-server}
   %
-  \begin{tabular}{l l r r r r} \toprule
+  \begin{tabular}{l r r} \toprule
     %
-    & & \multicolumn{2}{c}{No audit} & \multicolumn{2}{c}{Audit} \\
-    \cmidrule(lr){3-4} \cmidrule(lr){5-6}
-    %
-    Algorithm & Party & ms & B & ms & B \\
+    Algorithm & ms & B \\
     %
     \midrule
     %
-    $\OPgen$ & central bank, $\pk_{\algo{cb}}$ & 0.875 & 480 & 0.875 & 480 \\
-    & registration authority, $\rapk$ & 0.175 & 96 & 0.175 & 96 \\
-    & auditor, $\pk_\auditor$ & 0.0740 & 48 & 0.0740 & 48 \\
-    & commitment key & 0.626 & -- & 0.626 & -- \\
-    & all public keys and generators & -- & 1008 & -- & 1056 \\
-    $\OPregister$ & secure element, request & -- & 192 & -- & 192 \\
-    & registration authority, response & 0.526 & 112 & 0.526 & 112 \\
-    $\OPwithdraw$ & device, request $\algo{req}$ & 1.53 & 664 & 1.53 & 664 \\
-    & intermediary & 1.15 & -- & 1.15 & -- \\
-    & central bank, response $\algo{resp}$ & 1.61 & 128 & 1.61 & 128 \\
-    & device, unblind and $\Sigma$ & 2.83 & 432 & 2.83 & 432 \\
-    $\OPexecute$ & payer device, payment $p_i$ & 1.14 & 1176 & 1.65 & 1400 \\
-    & payee device, 1 hop & 3.75 & -- & 4.32 & -- \\
-    $\OPdeposit$ & device, request $d_n$ & 1.16 & 1128 & 1.65 & 1352 \\
-    & central bank, 1 hop & 3.83 & -- & 4.28 & -- \\
-    $\OPidentify$ & auditor & -- & -- & 0.0778 & -- \\
-    %
-    \midrule
-    %
-    $\JPOKverify$, one hop & verifier & 1.97 & -- & 2.38 & -- \\
-    PS sign & & 0.148 & -- & 0.148 & -- \\
-    PS verify & & 1.42 & -- & 1.42 & -- \\
-    BBS+ sign & & 0.280 & -- & 0.280 & -- \\
-    BBS+ verify & & 1.31 & -- & 1.31 & -- \\
-    ElGamal encrypt & & 0.148 & -- & 0.148 & -- \\
-    ElGamal decrypt & & 0.0754 & -- & 0.0754 & -- \\
-    Pedersen commit & & 0.175 & -- & 0.175 & -- \\
-    %
-    \midrule
-    %
-    \multicolumn{2}{l}{Credential $\cred$} & -- & 144 & -- & 144 \\
-    \multicolumn{2}{l}{Withdrawal request proof $\algoproof_{\algo{req}}$, in $\algo{req}$} & -- & 368 & -- & 368 \\
-    \multicolumn{2}{l}{Secure element's share of the JPOK} & -- & 192 & -- & 192 \\
-    \multicolumn{2}{l}{Transfer signature $\sigma_i$} & -- & 640 & -- & 768 \\
-    \multicolumn{2}{l}{One hop of $\algo{hist}$} & -- & 688 & -- & 912 \\
+    $\OPgen$, central bank key $\pk_{\algo{cb}}$ & 0.875 & 480 \\
+    $\OPgen$, registration authority key $\rapk$ & 0.175 & 96 \\
+    $\OPgen$, auditor key $\pk_\auditor$ & 0.0740 & 48 \\
+    $\OPgen$, commitment key & 0.626 & -- \\
+    $\OPgen$, all public keys and generators & -- & 1056 (1008) \\
+    $\OPregister$, secure element & -- & 192 \\
+    $\OPregister$, registration authority & 0.526 & 112 \\
+    $\OPwithdraw$, request $\algo{req}$ & 1.53 & 664 \\
+    $\OPwithdraw$, intermediary & 1.15 & -- \\
+    $\OPwithdraw$, response $\algo{resp}$ & 1.61 & 128 \\
+    $\OPwithdraw$, unblind and $\Sigma$ & 2.83 & 432 \\
+    $\OPexecute$, payer & 1.65 (1.14) & 1400 (1176) \\
+    $\OPexecute$, payee, 1 hop & 4.32 (3.75) & -- \\
+    $\OPdeposit$, request $d_n$ & 1.65 (1.16) & 1352 (1128) \\
+    $\OPdeposit$, central bank, 1 hop & 4.28 (3.83) & -- \\
+    $\OPidentify$ & 0.0778 & -- \\
     %
   \bottomrule \end{tabular}
 %

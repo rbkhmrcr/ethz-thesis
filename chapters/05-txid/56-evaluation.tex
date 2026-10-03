@@ -30,63 +30,69 @@ two, in each case starting with a 32 byte nonce from the registration authority
 or the auditor. A transaction includes a 32 byte payload and its 8 byte length.}
 \label{tab:txid-protocol}
   %
-  \begin{tabular}{l l r r r r} \toprule
+  \begin{tabular}{l r r r r} \toprule
     %
-    & & \multicolumn{2}{c}{Algebraic} & \multicolumn{2}{c}{Hash-based} \\
-    \cmidrule(lr){3-4} \cmidrule(lr){5-6}
+    & \multicolumn{2}{c}{Algebraic} & \multicolumn{2}{c}{Hash-based} \\
+    \cmidrule(lr){2-3} \cmidrule(lr){4-5}
     %
-    Algorithm & Party & ms & B & ms & B \\
+    Algorithm & ms & B & ms & B \\
     %
     \midrule
     %
-    $\IDgen$ & & 2.50 & -- & 267 & -- \\
+    $\IDgen$ & 2.50 & -- & 267 & -- \\
     %
-    $\IDregister$ & user & 46.0 & 288 & 0.298 & 256 \\
+    $\IDregister$, user & 46.0 & 288 & 0.298 & 256 \\
     %
-    $\IDregister$ & registration authority & 0.552 & 112 & 0.475 & 112 \\
+    $\IDregister$, registration authority & 0.552 & 112 & 0.475 & 112 \\
     %
-    $\IDgrant$, first & user & 4.22 & 25\,280 & 17.3 & 852 \\
+    $\IDgrant$, first, user & 4.22 & 25\,280 & 17.3 & 852 \\
     %
-    $\IDgrant$, first & auditor & 9.07 & -- & 4.16 & -- \\
+    $\IDgrant$, first, auditor & 9.07 & -- & 4.16 & -- \\
     %
-    $\IDgrant$, later & user & 0.689 & 608 & 17.3 & 852 \\
+    $\IDgrant$, later, user & 0.689 & 608 & 17.3 & 852 \\
     %
-    $\IDgrant$, later & auditor & 2.04 & -- & 4.16 & -- \\
+    $\IDgrant$, later, auditor & 2.04 & -- & 4.16 & -- \\
     %
-    $\IDsubmit$ & user & 11.3 & 5\,160 & 28.3 & 1\,116 \\
+    $\IDsubmit$ & 11.3 & 5\,160 & 28.3 & 1\,116 \\
     %
-    $\algo{Verify}$ & validator & 6.70 & -- & 4.44 & -- \\
+    $\algo{Verify}$ & 6.70 & -- & 4.44 & -- \\
     %
-    $\IDidentify$, one epoch & auditor & 36.9 & -- & 1.10 & -- \\
+    $\IDidentify$, one epoch & 36.9 & -- & 1.10 & -- \\
     %
   \bottomrule \end{tabular}
 %
 \end{table}
 
 \begin{table}[htbp] \centering \small
-\caption[Tracing: time of every proof]{Time of each proof at $\ell = 8$, in
-milliseconds, for the prover and the verifier.} \label{tab:txid-relations}
+\caption[Tracing: time of every proof]{Time to prove and verify each relation
+at $\ell = 8$, in milliseconds. Every grant proves $\rel_4$ and $\rel_5$, and
+every transaction $\rel_6$ and $\rel_7$. In the algebraic instantiation, the
+first grant to an auditor also proves that $\{W_\gamma\}$ is well formed, and
+$\rel_7$ is proven by a Sigma protocol for $\rel_7'$, timed in the $\rel_7$ row,
+and a range proof for $0 \leq \gamma < \Max$. In the hash-based instantiation, $\rel_5$ and $\rel_7$
+are proven by the zk-SNARK, the same for every grant, and the times leave out
+the linking proof.} \label{tab:txid-relations}
   %
   \begin{tabular}{l l r r r r} \toprule
     %
     & & \multicolumn{2}{c}{Algebraic} & \multicolumn{2}{c}{Hash-based} \\
     \cmidrule(lr){3-4} \cmidrule(lr){5-6}
     %
-    Proof & Frequency & prove & verify & prove & verify \\
+    Relation & Proven in & prove & verify & prove & verify \\
     %
     \midrule
     %
-    $\rel_4$ & registration, grant & 0.228 & 0.381 & 0.151 & 0.303 \\
+    $\rel_4$ & $\IDregister$, $\IDgrant$ & 0.228 & 0.381 & 0.151 & 0.303 \\
     %
-    $\rel_5$ & grant & 0.451 & 0.597 & 16.8 & 2.24 \\
+    $\rel_5$ & first $\IDgrant$ & 4.00 & 7.64 & 16.8 & 2.24 \\
     %
-    $\rel_5$ with $\{W_\gamma\}$ & first grant & 4.00 & 7.64 & -- & -- \\
+    $\rel_5$ & later $\IDgrant$ & 0.451 & 0.597 & 16.8 & 2.24 \\
     %
-    $\rel_6$ & transaction & 1.31 & 1.79 & 1.16 & 1.69 \\
+    $\rel_6$ & $\IDsubmit$ & 1.31 & 1.79 & 1.16 & 1.69 \\
     %
-    $\rel_7$ & transaction & 3.96 & 4.05 & 26.5 & 2.27 \\
+    $\rel_7$ & $\IDsubmit$ & 3.96 & 4.05 & 26.5 & 2.27 \\
     %
-    Range proof & transaction & 4.82 & 0.809 & -- & -- \\
+    $\rel_7$, range proof & $\IDsubmit$ & 4.82 & 0.809 & -- & -- \\
     %
   \bottomrule \end{tabular}
 %
@@ -112,6 +118,17 @@ much slower. Which instantiation is preferable depends on whether a
 deployment can tolerate a trusted setup, and on whether proving or verification
 cost matters more.
 
+Verification time hardly depends on $\ell$. In the hash-based instantiation it
+stays at $4.44\,\mathrm{ms}$ for every $\ell$ from $1$ to $12$. In the algebraic
+one it grows from $6.55\,\mathrm{ms}$ at $\ell = 1$ to $6.76\,\mathrm{ms}$ at
+$\ell = 12$, since the Bulletproofs verifier is linear in $\ell$. The hash-based transaction has
+constant size, and the algebraic one grows only with the logarithmic size of the
+range proof. Algebraic
+proving steps up just after each power of two, since the range proof pads to the
+next power of two. In the algebraic instantiation the first grant grows with
+$\Max = 2^\ell$, and in both instantiations tracing does. Tracing one user for
+one epoch never depends on the size of the ledger or the number of users.
+
 \begin{figure}[htbp] \centering
 \includegraphics[width=\textwidth]{chapters/05-txid/txid-ell-times.pdf}
 \caption[Tracing: time against $\ell$]{Time against $\ell$ for $\IDsubmit$, $\algo{Verify}$, the first grant as
@@ -124,16 +141,10 @@ with $\Max = 2^\ell$ and are on a log scale.} \label{fig:txid-ell-times}
 \caption[Tracing: sizes against $\ell$]{Size against $\ell$ of the first grant message, on a log scale, and of
 a transaction.} \label{fig:txid-ell-sizes} \end{figure}
 
-Verification time hardly depends on $\ell$. In the hash-based instantiation it
-stays at $4.44\,\mathrm{ms}$ for every $\ell$ from $1$ to $12$. In the algebraic
-one it grows from $6.55\,\mathrm{ms}$ at $\ell = 1$ to $6.76\,\mathrm{ms}$ at
-$\ell = 12$, since the Bulletproofs verifier is linear in $\ell$. The hash-based transaction has
-constant size, and the algebraic one grows only with the logarithmic size of the
-range proof. Algebraic
-proving steps up just after each power of two, since the range proof pads to the
-next power of two. In the algebraic instantiation the first grant grows with
-$\Max = 2^\ell$, and in both instantiations tracing does. Tracing one user for
-one epoch never depends on the size of the ledger or the number of users.
+We compare against Hyperledger Idemix, which is based on Camenisch-Lysyanskaya
+anonymous credentials~\cite{CCS:CamVan02}. It runs over the same library.
+\Cref{tab:txid-idemix} compares a transaction with an Idemix signature, with and
+without audit pseudonyms.
 
 \begin{table}[htbp] \centering \small
 \caption[Tracing against Idemix]{Per-transaction time in milliseconds and size in bytes, against Hyperledger Idemix, at $\ell = 8$. Idemix sizes are its own serialisation, with
@@ -160,11 +171,6 @@ uncompressed group elements.} \label{tab:txid-idemix}
   \bottomrule \end{tabular}
 %
 \end{table}
-
-We compare against Hyperledger Idemix, which is based on Camenisch-Lysyanskaya
-anonymous credentials~\cite{CCS:CamVan02}. It runs over the same library.
-\Cref{tab:txid-idemix} compares a transaction with an Idemix signature, with and
-without audit pseudonyms.
 
 Idemix audits by testing one ledger entry at a time, at $0.189\,\mathrm{ms}$ per
 entry on one core. Our tracing breaks even with Idemix at

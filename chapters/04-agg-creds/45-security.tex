@@ -370,13 +370,12 @@ query on a message other than $\msg^*_j$ is not embedded, and a query on
 $\msg^*_j$ has a tag other than $\Tag^*$, since $(\pk_j, \Tag^*, \msg^*_j)$ was
 never queried, so its tag is not plain. The events are independent of the view
 of $\adv$, so $\advB$ succeeds with probability at least $\frac{1}{n}$ times
-the square of this bound, times that of $\adv$. Since $(1-\frac{1}{q+1})^q \geq
-1/e$, this gives the following:
+the square of this bound, times that of $\adv$, which gives the following:
 %
 \begin{equation*}
-  \Adv^{\text{BCDH}}_{\advB}(\secparam) \geq
-\frac{\Adv^{\text{EUF-TBA}}_{\ATS,\adv}(\secparam) - q_H/p}{e^2\,
-n\,(q+1)^2}.
+  \Adv^{\text{BCDH}}_{\advB}(\secparam) \geq \frac{1}{n}
+\left(\frac{1}{q+1}\Big(1-\frac{1}{q+1}\Big)^q\right)^2
+\left(\Adv^{\text{EUF-TBA}}_{\ATS,\adv}(\secparam) - q_H/p\right).
 \end{equation*}
 %
 So $\ATS$ is existentially unforgeable under tag-based aggregation.

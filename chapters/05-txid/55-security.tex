@@ -686,61 +686,47 @@ equation for $t_1$, $t_2$, and $t_3$. It handles the Fiat-Shamir transform as in
 
 \subsection{Proof of \Cref{thm:inst}: security of the algebraic instantiation}\label{sec:txid-inst-sec}
 
-\Cref{thm:txid-bb} reduces security to the properties (P1) to (P5). We show
-that each building block of the algebraic instantiation has the property it
-needs.
+By \Cref{thm:txid-bb}, it suffices to show that the algebraic instantiation
+has (P1) to (P5).
 
 \begin{proof}
 
 \begin{description}
 
-  \item[(P1).] $\DS$ is the BBS+ signature scheme of~\Cref{prim:bbs},
-existentially unforgeable under the $q$-SDH assumption of \Cref{asm:qsdh-bbs}.
-The variant used signs group elements rather than scalars, so unforgeability
-also requires that the signer only signs elements accompanied by a proof of
-knowledge of their representation. $\algoproof_4$ in $\IDregister$ supplies this.
+  \item[(P1).] $\DS$ is the BBS+ signature scheme of~\Cref{prim:bbs}, existentially unforgeable
+under the $q$-SDH assumption of \Cref{asm:qsdh-bbs}, provided the signer signs
+group elements only with a proof of knowledge of their representation, which
+$\algoproof_4$ in $\IDregister$ supplies.
 
   \item[(P2).] $\Com$ is the Pedersen commitment scheme of~\Cref{prim:pedersen},
-perfectly hiding, and computationally binding under the DL assumption in
-$\group{1}$. Binding holds against every party, including the registration
-authority, because $\IDgen$ derives $\gen_2$, $\gen_3$ and $\gen_4$ by hashing to
-the group from a public seed and does not let any party sample them.
+perfectly hiding, and binding under the DL assumption in $\group{1}$, also
+against the registration authority, since $\IDgen$ derives $\gen_2$, $\gen_3$
+and $\gen_4$ by hashing to the group.
 
   \item[(P3).] $\FE$ is pseudorandom under the DDH assumption in $\group{1}$,
-with $\HE$ modelled as a random oracle, by \Cref{lem:txid-fe-prf}, and $\FT$ is
-pseudorandom under the $q$-mDBDHI assumption with $q = \Max$, by
-\Cref{lem:txid-ft-prf}. Game 4 and Game 5 need the distinguisher to hold the
-whole of $\PTK$, since every corrupt auditor holds it. \Cref{lem:txid-fe-prf}
-gives it the whole of $\PTK$. \Cref{lem:txid-ft-prf} gives it $\{W_\gamma\}$,
-and $T$ is uniform and independent of $\utk''$ once $\utk'$ enters the view
-only through $T$. This holds from Game 4 on, where the proofs for $\rel_4$ at
-registration and the epoch key proofs at grants are simulated and the epoch
-keys are uniform, so the reduction samples $T$ itself.
+with $\HE$ a random oracle, by \Cref{lem:txid-fe-prf}, and $\FT$ under the
+$q$-mDBDHI assumption with $q = \Max$, by \Cref{lem:txid-ft-prf}. Both hold
+against a distinguisher holding $\PTK$, as Game 4 and Game 5 need.
+\Cref{lem:txid-ft-prf} gives it only $\{W_\gamma\}$, but from Game 4 on $T$ is
+uniform and independent of $\utk''$, so the reduction samples $T$ itself.
 
-  \item[(P4).] The proofs are the Sigma protocol for knowledge of a
-representation for $\rel_4$, the epoch key proof for $\rel_5$, and the tag
-proof and the transaction authorisation proof for $\rel_7$ and $\rel_6$, all
-with the Fiat-Shamir transform applied and $\hash$ modelled as a random oracle,
+  \item[(P4).] The proofs for $\rel_4$, $\rel_5$, $\rel_6'$ and $\rel_7'$ are
+Sigma protocols with the Fiat-Shamir transform and $\hash$ a random oracle,
 together with Bulletproofs, which are sound under the DL assumption in
 $\group{1}$ and simulation extractable~\cite{SP:BBBPWM18,EC:DaoGru23}. By
-\Cref{lem:txid-rel7,lem:txid-rel6}, the proofs for $\rel_7'$ and $\rel_6'$ prove
-$\rel_7$ and $\rel_6$. The proof for $\rel_4$ and the epoch key proof are Sigma
-protocols for equations of discrete logarithms, with the standard simulator and
-extractor. Each Sigma protocol has special soundness, honest-verifier zero
-knowledge and quasi-unique responses, under the DL assumption among the
-hashed generators, and hashes its whole statement, so with the
-Fiat-Shamir transform it is zero knowledge and simulation extractable in the
-random oracle model, as in \Cref{sec:prelims-sigma}~\cite{INDOCRYPT:FKMV12}. Extraction is
-by rewinding, which is sound in the standalone model. For the epoch key proof,
-the coefficients $\lambda_\gamma$ are drawn from all of $\Zp$ by $\hash$ and derived
-from $\{W_\gamma\}$, so they are fixed only after the elements they check. By
-the small exponents argument, if any element is malformed, the batched equation
-holds with probability at most $q_{\hash}/p$, where $q_{\hash}$ bounds the
-prover's hash queries~\cite{EC:BelGarRab98}. Later grants to the same auditor
-prove only the first two equations of $\rel_5$, against the same certified $T$,
-and the binding of $T$ ties both proofs to one pair $(\utk',\utk'')$.
+\Cref{lem:txid-rel7,lem:txid-rel6}, they prove $\rel_7$ and $\rel_6$. Each
+Sigma protocol has special soundness, honest-verifier zero knowledge and
+quasi-unique responses under the DL assumption among the hashed generators, and
+hashes its whole statement, so it is zero knowledge and simulation extractable
+in the random oracle model, as in \Cref{sec:prelims-sigma}~\cite{INDOCRYPT:FKMV12},
+with extraction by rewinding in the standalone model. In the epoch key proof,
+$\hash$ derives the $\lambda_\gamma$ from $\{W_\gamma\}$, so a malformed element
+passes the batched equation with probability at most $q_{\hash}/p$ for
+$q_{\hash}$ hash queries~\cite{EC:BelGarRab98}. Later grants prove the first
+two equations of $\rel_5$ against the same certified $T$, which binds them to
+one pair $(\utk',\utk'')$.
 
-  \item[(P5).] Assumed of the network, as in the generic construction.
+  \item[(P5).] Assumed of the network.
 
 \end{description}
 

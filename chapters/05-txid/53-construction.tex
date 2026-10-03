@@ -66,70 +66,52 @@ The four relations are as follows.
 The first relation, $\rel_4$, lets a user prove knowledge of their long-term
 signing and tracing keys. Its instance, witness, and relation are as follows:
 %
-\begin{equation*}
+\begin{gather*}
 %
-  \inst_4 = (\G, \G', \PSK, \PTK), \qquad \witness_4 = (\sk, \utk),
-%
-\end{equation*}
-%
-\begin{equation*} \begin{gathered}
-%
+  \inst_4 = (\G, \G', \PSK, \PTK), \qquad \witness_4 = (\sk, \utk), \\
   \rel_4 = \{\ \PSK = \G(\sk) \ \wedge \ \PTK = \G'(\utk)\ \}.
 %
-\end{gathered} \end{equation*}
+\end{gather*}
 %
 The second relation, $\rel_5$, captures correctness of epoch tracing key
 generation, with instance, witness, and relation given as follows:
 %
-\begin{equation*}
+\begin{gather*}
 %
-  \inst_5 = (\FE, \G', \PTK, \epoch, \ek), \qquad \witness_5 = \utk,
-%
-\end{equation*}
-%
-\begin{equation*} \begin{gathered}
-%
+  \inst_5 = (\FE, \G', \PTK, \epoch, \ek), \qquad \witness_5 = \utk, \\
   \rel_5 = \{\ \PTK = \G'(\utk) \ \wedge \ \ek = \FE(\utk, \epoch)\ \}.
 %
-\end{gathered} \end{equation*}
+\end{gather*}
 %
 The third relation, $\rel_6$, has two purposes. It lets a user prove
 possession of a valid registration credential, and prove that the tracing key
 certified by that credential is the one inside a commitment. Its instance,
 witness, and relation are as follows:
 %
-\begin{equation*}
+\begin{gather*}
 %
   \inst_6 = (\G, \G', \rapk, \ck, \com), \qquad \witness_6 = (\signature, \sk,
-\utk, \openinfo),
-%
-\end{equation*}
-%
-\begin{equation*} \begin{gathered}
-%
+\utk, \openinfo), \\
   \rel_6 = \{\ \DSverify(\rapk, \G(\sk) \| \G'(\utk), \signature) = 1 \ \wedge \
 \com = \ComCommit(\ck, \utk, \openinfo)\ \}.
 %
-\end{gathered} \end{equation*}
+\end{gather*}
 %
 The fourth relation, $\rel_7$, lets a user prove that a given epoch tracing key
 and transaction tag were correctly derived from the tracing key contained in the
 same commitment, with instance, witness, and relation defined as follows:
 %
-\begin{equation*}
+\begin{gather*}
 %
   \inst_7 = (\FE, \FT, \G', \ck, \com, \epoch, \Max, \Tag_\gamma), \qquad
-\witness_7 = (\utk, \openinfo, \ek, \gamma),
-%
-\end{equation*}
-%
-\begin{equation*} \begin{gathered}
-%
+\witness_7 = (\utk, \openinfo, \ek, \gamma), \\
+  \begin{gathered}
   \rel_7 = \{\ \com = \ComCommit(\ck, \utk, \openinfo) \ \wedge \ \ek =
 \FE(\utk, \epoch) \\ \wedge \ \Tag_\gamma = \FT(\G'(\utk), \ek, \gamma) \ \wedge
 \ 0 \leq \gamma < \Max\ \}.
+  \end{gathered}
 %
-\end{gathered} \end{equation*}
+\end{gather*}
 
 There are four relations because the validators accept or reject each
 transaction on their own and non-interactively, without contacting the sender,

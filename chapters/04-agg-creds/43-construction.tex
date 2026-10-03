@@ -22,35 +22,6 @@ proof simulates honest users' presentations while extracting from the
 adversary's. Each presentation uses the verifier's message as its label, so
 it cannot be replayed elsewhere.
 
-\Cref{fig:agg-creds-seq} shows the messages and local steps of the
-construction.
-
-\begin{figure}[htbp] \centering \small
-\begin{tikzpicture}[seq]
-  \foreach \x/\n/\e in {0/RA/4.4, 1/User/13.4, 2/Issuer $i$/10.4, 3/Verifier/14.4} {
-    \node[seqhead] at (\x, 0) {\n};
-    \draw[seqlife] (\x, 0.6) -- (\x, \e);
-  }
-  \draw[seqmsg] (0, 1) -- node[seqlabel] {$\rand$} (1, 1);
-  \draw[seqmsg] (1, 2) -- node[seqlabel] {$\pk$, proof on $\rand$} (0, 2);
-  \node[seqloc] at (0, 3) {new $\Tag$, $\DSsign$};
-  \draw[seqmsg] (0, 4) -- node[seqlabel] {$\Tag$, $\psi$} (1, 4);
-  \draw[seqmsg] (1, 5) -- node[seqlabel] {$\Tag$, $\pk$, $\psi$, $\atv{i}$} (2, 5);
-  \node[seqloc] at (2, 6) {$\DSverify$};
-  \draw[seqmsg] (2, 7) -- node[seqlabel] {$\rand$} (1, 7);
-  \draw[seqmsg] (1, 8) -- node[seqlabel] {proof on $\rand$} (2, 8);
-  \node[seqloc] at (2, 9) {$\ATSsign$};
-  \draw[seqmsg] (2, 10) -- node[seqlabel] {$\signature_i$} (1, 10);
-  \draw[seqmsg] (3, 11) -- node[seqlabel] {$\msg$} (1, 11);
-  \node[seqloc] at (1, 12) {$\AACaggregate$, $\AACpresent$};
-  \draw[seqmsg] (1, 13) -- node[seqlabel] {$(\atv{i})_{i \in \ISSUERS}$, $\algoproof$} (3, 13);
-  \node[seqloc] at (3, 14) {$\AACverify$};
-\end{tikzpicture}
-\caption[Aggregate credentials: messages]{Messages and local steps of
-registration, issuance from issuer $i$, aggregation and presentation, between
-the registration authority, the user, issuer $i$ and a verifier. The proofs on
-$\rand$ prove knowledge of $\sk$.} \label{fig:agg-creds-seq} \end{figure}
-
 \paragraph{Setup.} During setup, the registration authority generates a key pair
 for the digital signature scheme and public parameters for the proofs used
 throughout the protocol. Each issuer independently generates a key pair for the

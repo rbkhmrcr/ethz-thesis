@@ -1,13 +1,7 @@
-% tighter lists and displays
+% tighter lists
 \setlist[description]{itemsep=3pt, parsep=0pt, topsep=4pt}
 \setlist[enumerate]{itemsep=2pt, parsep=0pt, topsep=4pt}
 \setlist[itemize]{itemsep=2pt, parsep=0pt, topsep=4pt}
-\AtBeginDocument{%
-  \setlength{\abovedisplayskip}{6pt plus 2pt minus 2pt}%
-  \setlength{\belowdisplayskip}{6pt plus 2pt minus 2pt}%
-  \setlength{\abovedisplayshortskip}{3pt plus 2pt}%
-  \setlength{\belowdisplayshortskip}{3pt plus 2pt}%
-}
 \usetikzlibrary{arrows.meta}
 % message sequence diagrams
 \tikzset{
@@ -184,6 +178,7 @@
 \newcommand{\IDexecute}{\ID\algo{.Execute}}
 \newcommand{\IDgen}{\ID\algo{.Gen}}
 \newcommand{\IDidentify}{\ID\algo{.Trace}}
+\newcommand{\IDincepoch}{\ID\algo{.IncEpoch}}
 
 \newcommand{\IDregisterend}{\msgend{\IDregister}}
 \newcommand{\IDgrantend}{\msgend{\IDgrant}}
