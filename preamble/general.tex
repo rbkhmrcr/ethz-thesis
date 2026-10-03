@@ -194,6 +194,18 @@
 \renewcommand{\cftchapafterpnum}{\cftparfillskip}
 \renewcommand{\cftsecafterpnum}{\cftparfillskip}
 \renewcommand{\cftsubsecafterpnum}{\cftparfillskip}
+\renewcommand{\cftfigafterpnum}{\cftparfillskip}
+\renewcommand{\cfttabafterpnum}{\cftparfillskip}
+
+% list of figures and tables: same layout as the tcolorbox lists
+\renewcommand{\cftfigpresnum}{}
+\renewcommand{\cfttabpresnum}{}
+\setlength{\cftfigindent}{1.5em}
+\setlength{\cfttabindent}{1.5em}
+\setlength{\cftfignumwidth}{2.3em}
+\setlength{\cfttabnumwidth}{2.3em}
+\renewcommand{\cftfigleader}{\cftdotfill{4.5}}
+\renewcommand{\cfttableader}{\cftdotfill{4.5}}
 
 % Chapter number on inside
 \titleformat{\chapter}[display]%
