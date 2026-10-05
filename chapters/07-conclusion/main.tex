@@ -23,7 +23,7 @@ it: one user and one epoch in \Cref{chap:txid}, one double-spending event in
 \Cref{chap:offline-payments}, and a disclosed subset of attributes in
 \Cref{chap:agg-creds}. The design question is the same in every chapter: what is
 the smallest capability that meets the need, and can the person concerned see
-when it is used. This brings us back to the argument of
+when it is used? This brings us back to the argument of
 \Cref{chap:introduction}. Money is not end-to-end encryption, and the realistic
 alternative to scoped access is the status quo, in which banks see everything.
 
@@ -43,8 +43,8 @@ open.
 
 Several questions cut across the chapters. Our security proofs are in the
 standalone model, since extraction rewinds, and composable guarantees would need
-different proof techniques. The chapters share a credential layer, a
-registration authority with BBS+ or SPS credentials, and one system combining
+different proof techniques. The chapters share a credential layer:
+a registration authority with BBS+ or SPS credentials. One system combining
 credentials, tracing and offline payments deserves a joint analysis. The
 auditor of \Cref{chap:offline-payments} is already split between institutions by
 threshold decryption, and the same could be done for the auditor of

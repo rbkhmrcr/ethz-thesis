@@ -1,26 +1,13 @@
 \section{Introduction}
 
-The contributions of this chapter are heavily motivated by transaction systems.
-Though the construction could be presented compactly and in isolation, the
-contributions are clearer when explained in context.
-
 We use the term transaction system for all systems that involve
 moving value. We describe the systems as if they handle just one type of
 currency, but extensions to labelled assets are generally simple. Transaction
 systems in this chapter must satisfy three properties. Balance means that no
 money can be created by transactions. Theft prevention means that no user of the
-system can spend money belonging to another. Privacy we define formally
+system can spend money belonging to another. We define privacy formally
 in~\Cref{sec:txid-definitions}, and all the transaction systems we work with
 provide it.
-
-The mechanism we give is agnostic to how the first two properties are achieved.
-It constrains only the tag attached to a transaction and not its contents, so it
-composes with any transaction system that already provides balance and theft
-prevention. The confidential payload of a transaction in our scheme is just the
-transaction of the underlying system, left unchanged. We add
-a way for a designated auditor to recover which of those payloads belong to a
-given user, only for the epochs that the user
-has agreed to.
 
 Confidentiality of wealth at rest is a simple problem for cryptography, since
 it can be solved by encrypting the value. Privacy of money in motion is the open
@@ -50,10 +37,9 @@ between the two. They are cryptocurrencies with completely centralised issuance,
 by fiat assets in an unofficial capacity and issued by private companies. By
 trading volume and usage, stable coins are the largest digital assets backed by
 fiat, larger than central bank digital currencies
-(CBDCs)~\cite{BIS26stablecoins}.
-
-Our protocols generally deal with fiat money and so assume the role of a central
-bank as issuer, though the issuer role is easy to distribute.
+(CBDCs)~\cite{BIS26stablecoins}. Our protocols generally deal with fiat money and
+so assume the role of a central bank as issuer, though the issuer role is easy
+to distribute.
 
 Cash is anonymous and tied to no identity at all, though depositing large sums
 into the banking system often requires proof of provenance. The current digital
@@ -66,7 +52,16 @@ Congress, Bank Secrecy Act (1970) and Uniting and Strengthening America by
 Providing Appropriate Tools Required to Intercept and Obstruct Terrorism (USA
 PATRIOT) Act (2001)}.  In proposed digital fiat systems, users prove ownership
 of the money being moved while the transactions stay private, and regulators
-keep oversight under well-defined conditions~\cite{digitaleuro2023}. This is generally achieved through anonymous credentials.
+keep oversight under well-defined conditions~\cite{digitaleuro2023}.
+
+The mechanism we give is agnostic to how balance and theft prevention are
+achieved. It constrains only the tag attached to a transaction and not its
+contents, so it composes with any transaction system that already provides
+them. The confidential payload of a transaction in our scheme is just the
+transaction of the underlying system, left unchanged. We add
+a way for a designated auditor to recover which of those payloads belong to a
+given user, only for the epochs that the user
+has agreed to.
 
 
 \subsection*{Related work}
@@ -88,7 +83,7 @@ ledger, incurring overhead linear in the ledger size and exposing unrelated
 users' activity to the auditor.
 
 \paragraph{Tag-based tracing.} Per-transaction tags can be derived from users' tracing keys combined with a
-monotonically increasing counter, and use zero-knowledge proofs to show the tags
+monotonically increasing counter, with zero-knowledge proofs showing that the tags
 are correctly formed and bound to the transaction's
 origin~\cite{CCS:KiaKohSar22,CANS:SarKiaKoh24}. Similar techniques trace the
 lineage of assets rather than the activity of users~\cite{FC:GarGreMie16}.
@@ -116,11 +111,6 @@ enforcement of balance limits, but neither provides a mechanism for efficient
 per-user tracing across arbitrary
 transactions~\cite{CCS:WKDC22,EPRINT:ACDDET19}.
 
-A tracing permission in our scheme covers one user for one epoch.
-Recovering that user's transactions for that epoch costs $\Max$ tag
-computations and $\Max$ lookups, where $\Max$ is the per-epoch transaction bound. It does not grow with the ledger, and it
-reveals nothing about the transactions of users other than the target.
-
 \paragraph{Contributions.} Two observations shaped the construction. The first
 is that counter-based tracing makes users create their transactions one after
 another~\cite{CCS:KiaKohSar22,CANS:SarKiaKoh24}, but an auditor never needs to
@@ -137,7 +127,11 @@ transaction has an index drawn from a bounded, epoch-local space $[0,\Max)$,
 and the only constraint is that an index is not reused within an epoch. Order is
 irrelevant, so a user may partition the space among concurrent workers and
 submit transactions in parallel and in any order. Users decide who traces them
-and when through epoch-bound tracing permissions. Tracing the next epoch needs a fresh grant. We
+and when through epoch-bound tracing permissions. A tracing permission covers one user for one epoch, and
+tracing the next epoch needs a fresh grant.
+Recovering that user's transactions for that epoch costs $\Max$ tag
+computations and $\Max$ lookups, where $\Max$ is the per-epoch transaction bound. It does not grow with the ledger, and it
+reveals nothing about the transactions of users other than the target. We
 formalise tracing as an ideal
 functionality capturing anonymity, non-repudiation, and permission expiration,
 give a generic construction from signatures, commitments, pseudorandom

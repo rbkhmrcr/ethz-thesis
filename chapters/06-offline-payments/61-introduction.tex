@@ -125,8 +125,8 @@ and to the fact that physical cash does not satisfy it either.
 
 The bounded anonymity model keeps transactions anonymous as long as each user
 interacts with a given merchant no more than a fixed number of times. Beyond
-this, the user becomes identifiable~\cite{SCN:CamHohLys06}. We define the anonymity
-revocation conditions outside of the protocol.
+this, the user becomes identifiable~\cite{SCN:CamHohLys06}. Instead of such a
+bound, we define the anonymity revocation conditions outside of the protocol.
 
 \paragraph{Offchain settlement.} Payment channels such as the Lightning network
 and Teechain provide offchain payments rather than offline payments. Users
@@ -210,7 +210,7 @@ value.} \label{tab:offline-related-comparison}
 
 \paragraph{Layout.} The rest of the chapter is organised as follows. \Cref{sec:offline-definitions} describes the participants
 and trust assumptions, gives the syntax of an offline payment scheme and of its
-two new building blocks, and formalises the security goals as an ideal
+two building blocks, and formalises the security goals as an ideal
 functionality. \Cref{sec:offline-construction} gives our construction $\OP$, first
 informally and then in full. \Cref{sec:offline-instantiation} instantiates joint
 proofs of knowledge with the BBS+ signature scheme and signatures on committed

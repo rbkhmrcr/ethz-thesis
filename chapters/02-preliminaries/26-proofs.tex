@@ -1,18 +1,19 @@
 \section{Proof systems}\label{sec:prelims-nizks}
 
-A relation $\rel$ is an efficiently decidable set of pairs $(\inst, \witness)$
-of a statement and a witness. We write $\rel(\inst, \witness) = 1$ when
-$(\inst, \witness)$ is in $\rel$.
-
 Zero-knowledge proof systems enable provers to convince verifiers that a
 statement is true without revealing any information beyond the validity of the
 statement. Soundness requires that verifiers are not convinced of false
 statements. We use non-interactive proof systems throughout~\cite{STOC:BluFelMic88}.
 
-\paragraph{Syntax.} A non-interactive proof system $\NIZK$ consists of the
-following algorithms. We call it a non-interactive zero-knowledge (NIZK) proof system when it is also
-zero knowledge, as defined below. We write $\NIZK$ throughout, as all of our
-constructions satisfy zero knowledge.
+A relation $\rel$ is an efficiently decidable set of pairs $(\inst, \witness)$
+of a statement and a witness. We write $\rel(\inst, \witness) = 1$ when
+$(\inst, \witness)$ is in $\rel$.
+
+\paragraph{Syntax.} We call a non-interactive proof system a non-interactive
+zero-knowledge (NIZK) proof system when it is also zero knowledge, as defined
+below. We write $\NIZK$ throughout, as all of our constructions satisfy zero
+knowledge. A non-interactive proof system $\NIZK$ consists of the following
+algorithms.
 
 \begin{description}
 

@@ -26,9 +26,8 @@ The contributions of this thesis include constructions of protocols and of their
 underlying primitives. We take different approaches to defining and proving the
 security of protocols and primitives, described below.
 
-First, the definitions of the security goals that we wish to achieve are not
-possible without defining the capabilities of the adversary and its success
-probability. There are two main ways of doing this: the concrete approach and
+Defining the security goals that we wish to achieve requires defining the
+capabilities of the adversary and its success probability. There are two main ways of doing this: the concrete approach and
 the asymptotic approach. The concrete approach assigns numbers to the amount of
 operations that the adversary is able to execute and a fixed bound to the
 probability of success. The asymptotic approach instead treats security as a
@@ -70,7 +69,7 @@ with many roles as protocols.
 An experiment is a game between a challenger,
 which runs the honest algorithms, and the adversary $\adv$. The adversary may be
 given oracle access, in which it submits inputs and the challenger responds. The advantage $\Adv$ of $\adv$ is its probability of
-winning, or the distance of that probability from $1/2$. A property holds if every PPT adversary has negligible advantage.
+winning or, in experiments where $\adv$ guesses a bit, the distance of that probability from $1/2$. A property holds if every PPT adversary has negligible advantage.
 
 \paragraph{Security of protocols.} For larger protocols with many parties
 and interfaces, we capture all security goals inside one ideal functionality.
@@ -78,7 +77,7 @@ The ideal functionality can be thought of as an incorruptible trusted party
 receiving the inputs of each protocol task and returning outputs. The view of
 parties consists of their inputs, their randomness and the messages they
 receive. In the ideal execution, honest parties communicate only with
-$\idfu{}$, and $\simu$ takes the place of $\adv$.
+$\idfu{}$, and a simulator $\simu$ takes the place of $\adv$.
 
 We capture the outputs of honest parties and~$\adv$ during an execution of a
 protocol~$\prot$ in the real world in

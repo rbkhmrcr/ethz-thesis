@@ -24,9 +24,9 @@ Several questions remain open. We expect strong unforgeability to carry over
 when the underlying scheme is strongly unforgeable, but do not prove it. Under
 adaptive corruption, our reduction loses a factor of $\binom{n}{t}$, which is
 exponential in the number of signers for an honest majority, and it assumes that
-signers erase intermediate shares. Threshold Schnorr signatures, the Fiat-Shamir
-transform of the Sigma protocol for a discrete logarithm, cannot be proven fully
-adaptively secure without modifications, and it is open whether threshold SPS
+signers erase intermediate shares. Schnorr signatures are the Fiat-Shamir transform of the
+Sigma protocol for a discrete logarithm. Their threshold versions cannot be
+proven fully adaptively secure without modifications, and it is open whether threshold SPS
 schemes face the same barrier~\cite{C:CriSte25}. Our proofs idealise key
 generation, and neither MPC protocol we benchmark is robust, so one malicious
 party can stop signing. Schemes in which the message enters signing

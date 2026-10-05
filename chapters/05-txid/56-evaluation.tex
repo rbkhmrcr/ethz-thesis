@@ -14,7 +14,8 @@ hash-based instantiation uses MiMC over the scalar field of BLS12-381, and
 gnark's implementation of the zk-SNARK of Groth with its commitment
 extension.
 
-We report results at $\ell = 8$, just before algebraic proving steps up, so that each user can submit up to $\Max = 256$
+We report results at $\ell = 8$, the largest $\ell$ before the range proof of
+the algebraic instantiation pads to the next power of two, so that each user can submit up to $\Max = 256$
 transactions per epoch. \Cref{tab:txid-protocol} gives the time of every
 algorithm and the size of the message it sends, and \Cref{tab:txid-relations}
 the time of every proof. \Cref{fig:txid-ell-times,fig:txid-ell-sizes} show how
@@ -109,9 +110,7 @@ A proof of the zk-SNARK of Groth with its commitment takes 292 bytes, rather
 than the 192 bytes of three group elements. The linking proof adds 160 bytes at
 a grant and 192 bytes in a transaction. Tracing is $\Max$ evaluations of $\HT$ instead of
 $\Max$ pairings. The two circuits have 335 and 677 constraints, and their
-setups take 95.3\,ms and 165\,ms.\rebekah{rerun the hash benchmarks: the
-pseudorandom functions are now the MiMC cipher (one call each instead of three
-hash blocks), so the setup, proving and tracing times are from the MiMC hash}
+setups take 95.3\,ms and 165\,ms.
 
 The hash-based instantiation gives up the transparent setup, and its prover is
 much slower. Which instantiation is preferable depends on whether a

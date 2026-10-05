@@ -1,23 +1,19 @@
 \section{Summary}\label{sec:txid-summary}
 
-Tracing in payments is often discussed as if it were a backdoor in end-to-end
-encrypted messaging, but it is neither technically nor socially the same
-problem. A backdoor is a master capability that reveals everything, at any time,
-unnoticed. A permission here covers one user for one epoch, only after that
-user's grant, and never exposes users who are not targeted. A message has
-meaning only to its sender and recipient, so any other reader is an intrusion. A
-payment moves value in a system that already answers to
-regulators~\cite{fatf2012recommendations}, and the realistic alternative is the
-status quo, where banks see every transaction in the clear.
+We gave a tracing protocol $\ID$ in which tags come from a bounded, epoch-local
+index space instead of a counter, so users can create transactions concurrently
+and in any order. Users grant an auditor permission to trace them for one epoch,
+and a permission never exposes users who are not targeted. We formalised tracing
+as an ideal functionality, gave a generic construction, and instantiated it once
+with algebraic pseudorandom functions and Sigma protocols, and once with MiMC
+and a zk-SNARK.
 
 The scoping came from moving the question from who may see a transaction to how
 narrowly a capability can be granted. An epoch-local index space, and not a
 counter or per-user state, gives a permission a boundary in time, an owner, and
 a cost that does not depend on the size of the ledger. The same shape appears in
 tax reporting over one period, a court order for one account, or a compliance
-check for one counterparty. In each, the design question is the smallest
-capability that meets the need, and whether its use is visible to the person
-concerned.
+check for one counterparty.
 
 Several directions remain for future work. Grants must come before the epoch
 they cover, and auditors often ask about the past. Retrospective grants work in
@@ -31,9 +27,4 @@ proofs. Choosing $\Max$ trades the privacy of transaction volume against
 capacity, and is a deployment question as much as a cryptographic one.
 Algebraic pseudorandom functions that fit Sigma protocols, like
 Dodis-Yampolskiy, seem to need $q$-type assumptions, and it is worth asking
-whether a different primitive avoids them, since one-way functions alone are not
-enough. More generally, a long-term key derives epoch keys, which derive tags,
-and only the current epoch key is released to an auditor. It must give neither
-the keys nor the tags of other epochs, and tags must give no key. If each stage
-can be one way like this and still have short proofs, the generic protocol gets
-a clean generic instantiation.
+whether a different primitive avoids them.

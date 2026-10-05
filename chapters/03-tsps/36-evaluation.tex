@@ -1,8 +1,5 @@
 \section{Evaluation}\label{sec:tsps-evaluation}
 
-\rebekah{rerun all MPC benchmarks on a big server before submission; the
-current numbers are from a MacBook Air, some overnight and some during the day,
-so they are noisy}
 \paragraph{Instantiating MPC.} Our implementation builds on
 MP-SPDZ~\cite{CCS:Keller20}. We benchmark the honest-majority setting, $t <
 n/2$, with ATLAS, and the dishonest-majority setting, $t < n$, with
@@ -13,9 +10,9 @@ oblivious transfer, in which a receiver learns one of two messages without the
 sender learning which~\cite{C:EveGolLem82}. Both are secure
 with abort against malicious parties, so neither is robust, and neither is
 proven secure against adaptive corruption. MASCOT meets the assumptions of our
-theorems. MP-SPDZ implements ATLAS only against honest but curious parties,
-though, so the ATLAS rows show the cost of an honest majority without being
-covered by our theorems~\cite{CCS:Keller20}.
+theorems. MP-SPDZ implements ATLAS only against honest but curious parties. The ATLAS
+rows are not covered by our theorems, and show the cost of an honest
+majority~\cite{CCS:Keller20}.
 
 \paragraph{Extending MP-SPDZ.} MP-SPDZ computes only on elements of $\Zp$. We
 add sharings of elements of $\group{1}$ and $\group{2}$, with their

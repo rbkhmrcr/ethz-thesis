@@ -13,9 +13,7 @@ $\JPOKverify$ does not check the last two equations of
 \Cref{prot:bbs-joint-proof}.
 
 The phone and smart card measurements come from the original implementation of
-the scheme, written at IBM Research Zurich.\rebekah{cite the original
-implementation if it is public: not found on GitHub under IBM, hyperledger-labs
-or ale-linux (Sorniotti); ask him or Angelo De Caro} It runs the wallet on a Samsung Galaxy A34
+the scheme, written at IBM Research Zurich. It runs the wallet on a Samsung Galaxy A34
 with Android 14 and an iPhone 13 mini with iOS 17.6.1, both with a crypto
 library built with Go 1.21.8.
 The secure element is a Javacard applet on an NXP smart card with the JCOP 4.5
@@ -137,9 +135,7 @@ hop and the size of the key, message or proof it produces, and
 \Cref{tab:offline-comms} the bytes each party sends in each protocol. Every server-side
 operation takes under $5\,\mathrm{ms}$, and identification under
 $0.1\,\mathrm{ms}$. The card channel never carries more than $192$ bytes in one
-direction.\rebekah{rerun the server benchmarks (commit e5c6daf): the proof of withdrawal
-now has one more field element, so its size and times, and the token and payment
-sizes, are from before the fix}
+direction.
 
 
 \begin{table}[htbp] \centering \small

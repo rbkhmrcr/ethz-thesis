@@ -1,8 +1,8 @@
 \section{Instantiation}\label{sec:tsps-instantiation}
 
 Unlike in later chapters, the construction already works with group and field
-elements, since structure preservation and decomposable signing are properties
-of them. This section fixes the SPS schemes and realises $\algo{ExpGrp}$. It
+elements, since it is defined for structure-preserving schemes with
+decomposable signing. This section fixes the SPS schemes and realises $\algo{ExpGrp}$. It
 gives two instantiations of the construction of \Cref{sec:tsps-construction}.
 One uses the $\AGHO$ SPS scheme, and the other the $\KPW$
 scheme~\cite{C:AGHO11,C:KilPanWee15}. In each case we verify that
@@ -12,9 +12,9 @@ give the resulting threshold scheme.
 \subsection{Instantiating $\algo{ExpGrp}$}\label{sec:tsps-mpc-inst}
 
 The MPC protocols over $\Zp$ that we use do not provide $\algo{ExpGrp}$, so we build it from
-multiplication triples, sharings of uniform $x$, $y$ and $xy$, made in the
-offline phase, following Smart and Talibi
-Alaoui~\cite{C:Beaver91b,IMA:SmaTal19}.
+multiplication triples made in the offline phase, following Smart and Talibi
+Alaoui~\cite{C:Beaver91b,IMA:SmaTal19}. A multiplication triple is a sharing of
+uniform $x$, $y$ and $xy$.
 
 $\algo{ExpGrp}$ consumes a mixed triple $(\shr{\eta}, \shr{f}, \shr{f^\eta})$
 with $\eta \sample \Zp$ and $f \sample \group{}$. The parties open the
@@ -313,9 +313,7 @@ with $\algo{ExpGrp}_1$. We thresholdise $\KPW$ with its secret key as
 published, to show that the construction also applies when the secret key
 contains group elements. Since our key generation knows their discrete
 logarithms, the signers could keep these instead, and the offline phase would
-then need only $\algo{Mul}$, as for $\AGHO$.\rebekah{benchmark threshold $\KPW$
-with the discrete logarithms kept as shared field elements (no $\algo{ExpGrp}$)
-in the server rerun, and compare the offline phase}
+then need only $\algo{Mul}$, as for $\AGHO$.
 
 \Cref{prot:tsps-kiltz} gives threshold $\KPW$. Its offline phase makes one
 multiplication, then one round of eight calls to $\algo{ExpGrp}_1$: four for

@@ -17,13 +17,13 @@ and attacking entities is well noted, and is the foundation of modern
 cryptography~\cite{DifHel76}.
 
 However, protecting the content of a message says nothing about who is
-exchanging it, when, or how often. Cryptography today covers much more than private
-communication. Once the contents of a communication are protected, a resourceful
+exchanging it, when, or how often. Once the contents of a communication are protected, a resourceful
 adversary may instead try to learn the identities of the communicating parties,
 their relationships, or patterns in their behaviour. Protecting each of these
 brings the next piece of observable information into focus.
 
-Over the last fifty years, privacy-enhancing technologies have been developed
+Cryptography today covers much more than private communication. Over the last
+fifty years, privacy-enhancing technologies have been developed
 to protect each new piece of information identified as valuable~\cite{Chaum81,USENIX:DinMatSyv04}. As the adoption
 of digital systems has grown, even of those with privacy protections, so has the
 number of entities capable of observing some part of a system. Service
@@ -84,7 +84,7 @@ themselves. And so practicality is also an aim in all of our constructions. By
 this, we mean minimising the interaction, coordination, communication and
 computational costs required by the protocols.
 
-Designing these parties out of systems is often not possible. Issuers,
+Designing institutions out of systems is often not possible. Issuers,
 validators and auditors exist because systems need them, and removing them from
 protocols does not remove that need. Their functions are then either taken on by
 users, who bear the computational costs, or moved outside the protocols, where
@@ -107,9 +107,17 @@ CAPTCHAs with tokens a server cannot link to their issuance, and Apple's Private
 Relay routes traffic through two relays so that no single one sees both a user's
 address and the sites they visit. Both use institutional infrastructure while
 limiting the information available to the institutions involved~\cite{PoPETS:DGSTV18,privaterelay2021}.
-This thesis explores how modelling such roles explicitly can enable practical
-and efficient systems, and increase our understanding of the goals of private
-and decentralised systems.
+Modelling such roles explicitly can enable practical and efficient systems, and
+increase our understanding of the goals of private and decentralised systems.
+
+Systems now being built have the same shape. Every member state of the European
+Union must offer its residents a European Digital Identity Wallet by the end of
+2026~\cite{eIDAS2024}. These wallets must support selective disclosure,
+unlinkability and pseudonymous authentication. Central banks are also designing
+payment networks that take a very similar shape~\cite{cbdctracker}. For the
+digital euro, requirements include privacy for users, payments without a network
+connection, limits on holdings, and compliance with anti-money-laundering rules
+through regulated intermediaries~\cite{digitaleuro2023}.
 
 \paragraph{Financial privacy.} There are extremely strong arguments against
 governments being able to read the communications of their citizens, and
@@ -117,7 +125,7 @@ companies the messages of their customers. A private communication system can
 aim to ensure that no party other than the intended recipient learns the
 contents of a message.
 
-In a financial system, there is something slightly different involved.
+In a financial system, the situation is different.
 Constructing digital financial systems with auditability may seem analogous to
 building backdoors in messaging systems, and there is the argument that once a
 capability exists, it will be used everywhere possible.
@@ -129,9 +137,8 @@ protocols in this thesis cannot be repurposed to put backdoors in encryption
 schemes.
 The second is that the two settings are socially different: crimes can be
 organised using encrypted messaging, but what is at stake in a financial system
-extends to the collapse of the global financial system. Whether that would be
-considered good or bad is independent of the fact that it would be
-consequential. The third point is that the alternative to auditable payments is
+extends to the collapse of the global financial system. Whether that outcome
+would be good or bad, it would be consequential. The third point is that the alternative to auditable payments is
 not perfect privacy, but the status quo, where banks and payment providers see
 all transactions in the clear.
 
@@ -149,7 +156,7 @@ connection~\cite{aboulaiz2024offline}. We will assume throughout this thesis
 that these extra parties and constraints are necessary. Their involvement makes
 systems that control tokens of value more complex than private communication.
 
-This thesis takes the existence of financial auditing requirements as a system
+We take the existence of financial auditing requirements as a system
 constraint and asks how narrowly the corresponding capabilities can be defined.
 What information should an auditor be able to obtain? Should access be limited
 to a transaction, a user, a period of time, a single purpose, or be ongoing?
@@ -173,17 +180,8 @@ availability without being trusted with users' private information. Each of the
 protocols comes from considering the specific responsibilities of participants
 in each existing system.
 
-Every member state of the European Union must offer its residents a European
-Digital Identity Wallet by the end of 2026~\cite{eIDAS2024}. These wallets must
-support selective disclosure, unlinkability and pseudonymous authentication.
-Central banks are also designing payment networks that take a very similar
-shape~\cite{cbdctracker}. For the digital euro, requirements include privacy
-for users, payments without a network connection, limits on holdings, and
-compliance with anti-money-laundering rules through regulated
-intermediaries~\cite{digitaleuro2023}.
-
-\paragraph{Contributions.} We first consider threshold certification, which we
-use to refer to the threshold signing of commitments. We achieve this by constructing a framework for creating
+\paragraph{Contributions.} We first consider threshold certification, by which we
+mean the threshold signing of commitments. We achieve this by constructing a framework for creating
 threshold structure-preserving signature schemes. Structure-preserving signature
 schemes allow signers to sign commitments directly, and threshold versions allow
 us to distribute the signing responsibilities across several parties. We give a

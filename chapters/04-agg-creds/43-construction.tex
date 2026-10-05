@@ -25,7 +25,7 @@ it cannot be replayed elsewhere.
 \paragraph{Setup.} During setup, the registration authority generates a key pair
 for the digital signature scheme and public parameters for the proofs used
 throughout the protocol. Each issuer independently generates a key pair for the
-aggregate tag-based signature scheme. The registration authority's public key,
+tag-based aggregate signature scheme. The registration authority's public key,
 each issuer's public key, and the public parameters are published. Each issuer
 publishes its public key together with a proof of knowledge of its secret key,
 and verifiers only accept issuer keys whose proof verifies. The public
@@ -99,7 +99,7 @@ returns the output of the proof verification algorithm.
 
 \begin{theorem}\label{thm:agg-creds-construction-security} If $\DS$ is an
 existentially unforgeable digital signature scheme, $\ATS$ an existentially
-unforgeable aggregate tag-based signature scheme under tag-based aggregation,
+unforgeable tag-based aggregate signature scheme under tag-based aggregation,
 the proof system is zero knowledge and simulation extractable, $f$ is one way,
 and the proofs of knowledge of users' and issuers' secret keys are
 zero-knowledge proofs of knowledge, then the above protocol securely realises

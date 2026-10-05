@@ -139,7 +139,7 @@ We prove \Cref{thm:agg-creds-thm-1} in \Cref{sec:agg-creds-proof-2}.
 public keys $(\sk, \pk = \gen^\sk)$, so the one-way function of the construction
 is exponentiation. The digital signature $\DS$ is instantiated using the $\AGHO$
 structure-preserving signature scheme of \Cref{prim:agho}~\cite{C:AGHO11}, and
-the aggregate tag-based signature $\ATS$ with our construction. Every user is
+the tag-based aggregate signature $\ATS$ with our construction. Every user is
 assigned a unique tag $\Tag \in \Zp$, and the registration authority signs the
 pair $(\pk, \tid)$, with $\tid = \hashtwo(\Tag)$. \Cref{prot:paac} gives the
 protocol instantiation in full.

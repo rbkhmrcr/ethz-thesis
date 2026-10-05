@@ -38,7 +38,7 @@ The extraction in (P4) relies on binding in (P2). (P3) is what
 
 \begin{proof}
 
-  $\simu$ maintains three tables, analogous to $\reg$, $\perm$, and $\txns$ in
+  $\simu$ maintains three tables, analogous to $\registered$, $\perm$, and $\txns$ in
 $\idfu{\algo{trace}}$:
 
   \begin{enumerate}
@@ -76,7 +76,7 @@ following $\prot$, sends it to $\user$, and records $\regsimu[\user] = (\sk, \ut
 $\IDregister$ call differs from $\prot$'s. The correctness of $\prot$ rules out
 $\idfu{\algo{trace}}$ accepting where $\prot$ rejects, and the registration
 authority's tracking of past requests rules out the reverse, since only a double
-registration could cause it, and that never succeeds. So Game 2 is
+registration could cause it, and a double registration never succeeds. So Game 2 is
 indistinguishable from Game 1.
 
   \paragraph{Game 3.} As Game 2, except $\simu$ simulates honest users'
@@ -138,8 +138,7 @@ differ in one user's function, and a distinguisher between them breaks
 pseudorandomness of $\FE$ (P3) against a distinguisher given $\PTK_\user$,
 since the reduction can compute every other user's keys itself. So this game is
 indistinguishable from Game 3, with a loss of the number of honest
-users.\rebekah{check: Game 4 now replaces all of $\FE(\utk,\cdot)$ per honest
-user, with a hybrid over users, not only the keys granted to corrupt auditors}
+users.
 
   \paragraph{Game 5.} As Game 4, except $\simu$ also simulates transaction
 submission using $\idfu{\algo{trace}}$'s output on $\IDsubmit$ requests from
@@ -301,9 +300,9 @@ non-negligible advantage.
 
   Let $\adv$ be a PPT adversary in the experiment of \Cref{exp:prf} for $\FE$,
 with advantage $\Adv^{\mathsf{prf}}_{\FE,\adv}(\secparam)$. We construct an
-adversary $\simu$ against DDH in $\group{1}$.
+adversary $\advB$ against DDH in $\group{1}$.
 
-  $\simu$ receives a DDH challenge $(\gen, \gen^a, \gen^b, Q)$, where either $Q =
+  $\advB$ receives a DDH challenge $(\gen, \gen^a, \gen^b, Q)$, where either $Q =
 \gen^{ab}$ or $Q$ is uniform in $\group{1}$. It does the following:
 
   \begin{enumerate}
@@ -324,7 +323,7 @@ for the pair $(r_i, t_i)$ stored for $\epoch_i$.
   Since $(r_i, t_i)$ is drawn once per epoch and reused, both oracles answer
 repeated queries consistently. We consider the two cases of the challenge.
 
-  If $Q = \gen^{ab}$, the response on $\epoch_i$ is the following, so $\simu$
+  If $Q = \gen^{ab}$, the response on $\epoch_i$ is the following, so $\advB$
 answers exactly as $\FE$ with key $b$:
   %
   \begin{equation*}
@@ -349,7 +348,7 @@ event $ab = \omega$, which has probability $1/p$.
 the response $\gen^{\omega r_i} = \HE(\epoch_i)^{\omega/a}$, which is again $\FE$, under
 key $\omega/a$ rather than $b$, so the two cases would be identically distributed.
 
-  It remains to give $\adv$ the public tracing key. $\simu$ draws $\utk''$
+  It remains to give $\adv$ the public tracing key. $\advB$ draws $\utk''$
 itself and computes $\{W_\gamma\}$ from it. It sets $\gen_2 = \gen^{x}$ for $x
 \sample \Zp$, which is distributed as a generator derived by hashing, and
 computes the first component as follows:
@@ -358,16 +357,16 @@ computes the first component as follows:
     T = (\gen^{b})^{x}\cdot\gen_3^{\utk''} = \gen_2^{b}\cdot\gen_3^{\utk''}.
   \end{equation*}
   %
-  So $T$ matches the key $b$ in both cases of the challenge. As $\simu$ also
+  So $T$ matches the key $b$ in both cases of the challenge. As $\advB$ also
 plays the registration authority, it chooses the remaining BBS+ generators and the issuing key, and
 produces every other public value of the protocol.
 
-  So $\simu$ wins the DDH experiment whenever $\adv$ wins, up to the event $ab =
+  So $\advB$ wins the DDH experiment whenever $\adv$ wins, up to the event $ab =
 \omega$, which gives the following bound:
   %
   \begin{equation*}
     \Adv^{\mathsf{prf}}_{\FE,\adv}(\secparam) \leq
-\Adv^{\mathsf{ddh}}_{\simu}(\secparam) + \frac{1}{p}.
+\Adv^{\mathsf{ddh}}_{\advB}(\secparam) + \frac{1}{p}.
   \end{equation*}
   %
   The bound does not depend on the number of random oracle queries, since a
@@ -389,10 +388,10 @@ key $\ek \in \group{1}$:
 \begin{proof}
 
   Let $\adv$ be a PPT adversary in the experiment of \Cref{exp:prf} for $\FT$,
-given $\{W_\gamma\}$ as public parameters. We construct an adversary $\simu$
+given $\{W_\gamma\}$ as public parameters. We construct an adversary $\advB$
 against $q$-mDBDHI with $q = \Max$.
 
-  $\simu$ receives the following $q$-mDBDHI challenge:
+  $\advB$ receives the following $q$-mDBDHI challenge:
   %
   \begin{equation*}
     \Big(\gen, \ \ggen_D, \ \{\ggen_D^{1/(k+\gamma)}\}_{\gamma\in[0,\Max)}, \
@@ -401,7 +400,7 @@ against $q$-mDBDHI with $q = \Max$.
   %
   Either $\Delta_{\gamma} = \pairing(P, \ggen_D^{1/(k+\gamma)})$ for every
 $\gamma$ and a hidden $P \sample \group{1}$, or every $\Delta_{\gamma} \sample
-\group{T}$ is uniform and independent. $\simu$ does the following:
+\group{T}$ is uniform and independent. $\advB$ does the following:
 
   \begin{enumerate}
 
@@ -416,15 +415,15 @@ P$.
   \end{enumerate}
 
   The challenge supplies every $W_\gamma$ directly, which is exactly what an
-auditor receives in the protocol. If the challenge is real, $\simu$ answers
-every query with $\FT(\PTK,\ek^\star,\gamma)$. If it is random, $\simu$ answers
+auditor receives in the protocol. If the challenge is real, $\advB$ answers
+every query with $\FT(\PTK,\ek^\star,\gamma)$. If it is random, $\advB$ answers
 with independent uniform elements of $\group{T}$, which is a random function on
-$[0,\Max)$. So $\simu$ runs the experiment of \Cref{exp:prf} perfectly in both
+$[0,\Max)$. So $\advB$ runs the experiment of \Cref{exp:prf} perfectly in both
 cases, which gives the following bound:
   %
   \begin{equation*}
     \Adv^{\mathsf{prf}}_{\FT,\adv}(\secparam) \leq
-\Adv^{q\text{-}\mathsf{mdbdhi}}_{\simu}(\secparam).
+\Adv^{q\text{-}\mathsf{mdbdhi}}_{\advB}(\secparam).
   \end{equation*}
 
   The lemma covers one epoch key. Several epochs share $\{W_\gamma\}$ but have
@@ -456,7 +455,7 @@ proof, and treat the Fiat-Shamir transform at the end.
 
 \begin{proof}
 
-  \paragraph{Correctness.} Let $\witness_7$ satisfy $\rel_7$, and let $s,
+  \paragraph{Completeness.} Let $\witness_7$ satisfy $\rel_7$, and let $s,
 r_\gamma \sample \Zp$ and $U$, $\Pi$, $X$ and $\com_\gamma$ be computed as in
 the tag proof. The equations for $\com$, $U$, $X$ and $\com_\gamma$, and the
 range of $\gamma$, hold by construction. The equation for $\Pi$ holds as
@@ -614,7 +613,7 @@ b^{1/(z+e)}$, for the base $b$ of the credential, and the rewritten relation:
 
 \begin{proof}
 
-  \paragraph{Correctness.} Let $E'$, $d$ and $\bar{E}$ be computed as in the
+  \paragraph{Completeness.} Let $E'$, $d$ and $\bar{E}$ be computed as in the
 transaction authorisation proof. The first equation of $\rel_6'$ is the opening
 of $\com$. Substituting $d$ into $\bar{E}$, and using $b = E^{z+e}$, gives the
 following:
@@ -780,11 +779,11 @@ zero knowledge.
   We need simulation extractability in the sense of \Cref{exp:simext}, which
 excludes only statement and label pairs on which a proof was simulated. Proofs
 of the zk-SNARK of Groth can be rerandomised, so from one proof anyone can
-produce another for the same statement, and this notion allows it. The algebraic group model is weaker than the GGM. Its
-adversary sees real group elements, but must say how each one it outputs was
-computed from those it received~\cite{C:FucKilLos18}. The plain
+produce another for the same statement, and this notion allows it. The plain
 zk-SNARK is simulation extractable in this sense in the algebraic group
-model~\cite{FC:BKSV21}. We assume that the commitment extension preserves
+model~\cite{FC:BKSV21}, which is weaker than the GGM. Its adversary sees real
+group elements, but must say how each one it outputs was computed from those it
+received~\cite{C:FucKilLos18}. We assume that the commitment extension preserves
 this property, as \Cref{thm:hash-inst} states. The zk-SNARK has no label of its own. Its label is bound instead by the linking
 proof, whose Fiat-Shamir context contains the zk-SNARK proof, and by the
 transaction authorisation proof or the registration proof, which signs both.

@@ -23,6 +23,9 @@ users, to cause honest verifiers to accept invalid presentations, or to forge
 credentials.  We consider static corruption throughout: the adversary fixes the
 set of corrupt participants before any protocol interaction takes place.
 
+An aggregate anonymous credential scheme $\AAC$ consists of the following
+algorithms.
+
 \begin{description}
 
   \item[$\crs \sample \AACgen(\secparam, n)$ :] The setup algorithm, on input
@@ -60,13 +63,13 @@ presentation proof $\algoproof$, returns 0 or 1.
 
 \end{description}
 
-\subsection{Aggregate tag-based signature schemes}
+\subsection{Tag-based aggregate signature schemes}
 
-We define an aggregate tag-based signature (ATS) scheme as one that allows
+We define a tag-based aggregate signature (ATS) scheme as one that allows
 signatures computed over the same tag to be aggregated into a compact signature.
 A tag is a string that is signed together with each message, and only signatures
 under the same tag can be aggregated. With $n$ signers and a set $\ISSUERS
-\subseteq [1,n]$, an aggregate tag-based signature scheme is defined by
+\subseteq [1,n]$, a tag-based aggregate signature scheme is defined by
 the following algorithms:
 
 \begin{description}
@@ -153,22 +156,15 @@ oracle $\signo$ is defined as follows:
 %
 \begin{equation*}
 %
-  \Adv_{\ATS, \adv}^{\text{EUF-TBA}}(\secparam) = \Pr[\adv \text{
+  \Adv_{\ATS, \adv}^{\mathsf{EUF\text{-}TBA}}(\secparam) = \Pr[\adv \text{
 wins}],
 %
 \end{equation*}
 %
 where the experiment and its oracles $\corrupto$ and $\signo$ are given in
 \Cref{exp:ats-euf}. An $\ATS$
-scheme is existentially unforgeable under tag-based aggregation if, for every
-PPT adversary $\adv$, the following holds:
-%
-\begin{equation*}
-%
-  \Adv_{\ATS, \adv}^{\text{EUF-TBA}}(\secparam) \leq
-\negl(\secparam).
-%
-\end{equation*}
+scheme is existentially unforgeable under tag-based aggregation if this
+advantage is negligible for every PPT adversary $\adv$.
 
 \begin{experimentbox}{Tag-based aggregate signature schemes: existential unforgeability under tag-based aggregation}{ats-euf}
 

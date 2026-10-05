@@ -15,10 +15,14 @@ indistinguishable games that start with Game 0 representing the real world, and
 end with Game 12 representing the ideal world. Each game changes one step of the
 previous one, and we argue that $\adv$'s view changes only negligibly between
 consecutive games. Throughout, we call a user
-corrupt if both their device and secure element are compromised. We do not
-prove the split setting, with a corrupt device and an honest secure element. There the
+corrupt if both their device and secure element are compromised.
+
+Our proof does not cover the split setting, in which a user's device is corrupt
+and their secure element is honest. There the
 device learns a commitment to the secure element's key but not the key itself. The details are as for the joint proof of
-\Cref{prim:hss-joint-proof}~\cite{USENIX:HesSinSor23}. We also simplify
+\Cref{prim:hss-joint-proof}~\cite{USENIX:HesSinSor23}.
+
+We also simplify
 exposition by treating the identifiers $\algo{id}$ produced by $\idfu{\algo{op}}$
 during $\OPwithdraw$ and $\OPexecute$ as the output of $\ComCommit(\ck, \cdot,
 \cdot)$.
@@ -355,7 +359,8 @@ existentially unforgeable under the $q$-SDH assumption, with the same extraction
 from requests as for (P3), and its requests are perfectly
 hiding~\cite{SCN:AuSusMu06,CDL16}.
 
-  \item[(P5)] Every other proof, including the JPOK, is a Sigma protocol with the
+  \item[(P5)] Every proof other than those in the requests of (P3) and (P4),
+including the JPOK and the proof of withdrawal, is a Sigma protocol with the
 Fiat-Shamir transform, and so is zero knowledge and simulation extractable in
 the random oracle model~\cite{C:FiaSha86,INDOCRYPT:FKMV12}.
 

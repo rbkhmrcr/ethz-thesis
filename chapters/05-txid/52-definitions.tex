@@ -15,8 +15,8 @@ of specific users during specific epochs. Time is divided into epochs, numbered
 consecutively, and the ledger operator advances the current epoch on a schedule
 fixed in the public parameters.
 
-We consider static corruption throughout: the simulator corrupts users and
-auditors of its choice before any call to the ideal functionality is made.
+We consider static corruption throughout: the adversary fixes the set of
+corrupt users and auditors before any protocol interaction takes place.
 
 A tag-based tracing protocol $\ID$ consists of the following algorithms.
 
@@ -96,7 +96,7 @@ Secure realisation of $\idfu{\algo{trace}}$ by a protocol is defined as in
 
 The formal description is given in~\Cref{fig:ftxid}, and we summarise it here.
 
-The functionality keeps three tables: $\reg$ records which users are
+The functionality keeps three tables: $\registered$ records which users are
 registered, $\txns$ the payloads each user submitted in each epoch, and $\perm$
 the tracing permissions users granted to auditors. It also keeps the current
 epoch $\epoch_{\mathsf{cur}}$, which starts at $1$, and $\Cor$ is the set of
@@ -126,7 +126,7 @@ participants to the next epoch, on the schedule described above.
 
       \setlist[enumerate]{ topsep=2pt, partopsep=0pt, parsep=0pt, itemsep=1pt }
 
-      $\idfu{\algo{trace}}$ keeps tables $\reg$, $\txns$ and $\perm$, the set
+      $\idfu{\algo{trace}}$ keeps tables $\registered$, $\txns$ and $\perm$, the set
 $\Cor$ of corrupt participants, and the epoch $\epoch_{\mathsf{cur}} = 1$.
 
 	\fuinterface{\IDregister} On input register from the user $\user$, send
@@ -135,12 +135,12 @@ On receiving confirmation, do the following:
 
 	\begin{enumerate}
 
-	  \item If $\reg[\user] \neq \bot$, then stop.
+	  \item If $\registered[\user] \neq \bot$, then stop.
 
 	  \item Send $(\IDregister, \user)$ to $\simu$ and wait for the
 go-ahead. On receiving it, continue.
 
-	  \item Set $\reg[\user] \leftarrow \mathsf{true}$.
+	  \item Set $\registered[\user] \leftarrow \mathsf{true}$.
 
 	  \item Return $\IDregisterend$ to $\user$ and $\simu$.
 
@@ -151,7 +151,7 @@ do:
 
 	\begin{enumerate}
 
-	  \item If $\reg[\user] = \bot$, then stop.
+	  \item If $\registered[\user] = \bot$, then stop.
 
 	  \item If $\epoch \neq \epoch_{\mathsf{cur}}$, then stop.
 
@@ -177,7 +177,7 @@ receiving confirmation, do:
 
 	\begin{enumerate}
 
-	  \item If $\reg[\user] = \bot$, then stop.
+	  \item If $\registered[\user] = \bot$, then stop.
 
 	  \item If $\epoch \leq \epoch_{\mathsf{cur}}$, then stop.
 

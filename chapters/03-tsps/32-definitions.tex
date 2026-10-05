@@ -58,7 +58,8 @@ messages in $\group{1}^\ell$.
 
 \subsection{Threshold structure-preserving signature schemes}
 
-We write $\shr{x}$ for a sharing of $x$ between the $n$ signers, and $x_h$ for
+We write $\shr{x}$ for a sharing of $x$ between the $n$ signers, which
+\Cref{sec:tsps-mpc} defines, and $x_h$ for
 the share of signer $h$. Signing is split
 into an offline phase, run before the message is known, and an online phase. A
 threshold SPS scheme $\TSPS$ consists of the following algorithms.
@@ -298,8 +299,7 @@ the following:
 %
 \end{equation*}
 %
-
-$\algo{ExpGrp}$ raises a shared group element to a shared exponent.
+$\algo{ExpGrp}$ instead raises a shared group element to a shared exponent.
 
 $\algo{Inv}$ is built from $\algo{Mul}$ and
 $\algo{Open}$. The parties sample $\shr{\beta} \sample \algo{RandShare}()$, open

@@ -340,7 +340,7 @@ its messages from $0$.
           %
           \begin{equation*}
           %
-            l = k^{\chi + \sum_{i \in [\ell]_0} \theta_i \msg_i + \theta_\ell
+            l = k^{\chi + \sum_{i \in [0, \ell-1]} \theta_i \msg_i + \theta_\ell
 \omega}.
           %
           \end{equation*}
@@ -350,7 +350,7 @@ its messages from $0$.
           %
           \begin{equation*}
           %
-            k \neq 1, \quad \pairing\Big(k, \tilde{x} \cdot \prod_{i \in [\ell]_0}
+            k \neq 1, \quad \pairing\Big(k, \tilde{x} \cdot \prod_{i \in [0, \ell-1]}
 \tilde{y}_i^{\msg_i} \cdot \tilde{z}^{\omega}\Big) = \pairing(l, \ggen).
           %
           \end{equation*}
@@ -400,7 +400,7 @@ and compute the following:
           %
             C = \gen^{\openinfo} \prod_{j=1}^{\ell} P_j^{\msg_j}, \quad k =
 \hash_{\group{1}}(C), \quad \hat{\ciph}_j = (\gen^{\rho_j}, B^{\rho_j}
-k^{\msg_j}) \ \text{for } j \in [\ell].
+k^{\msg_j}) \ \text{for } j \in [1, \ell].
           %
           \end{equation*}
           %
@@ -413,11 +413,11 @@ Compute the following proof:
 P_j^{\msg_j} \\
           %
             \wedge\ \hat{\ciph}_j = (\gen^{\rho_j}, B^{\rho_j} k^{\msg_j}) \
-\text{for } j \in [\ell]\bigr\}.
+\text{for } j \in [1, \ell]\bigr\}.
           %
           \end{multline*}
           %
-Output $\mu$ and $\Lambda = (B, C, (\hat{\ciph}_j)_{j \in [\ell]}, \pi_s)$.
+Output $\mu$ and $\Lambda = (B, C, (\hat{\ciph}_j)_{j \in [1, \ell]}, \pi_s)$.
 
     \item[$\tilde{\psi} \leftarrow \algo{BlindSign}(\sk, \Lambda)$ :]
 Recompute $k = \hash_{\group{1}}(C)$, and output $\perp$ if $\pi_s$ does not
@@ -467,8 +467,8 @@ $B$ is fresh for each request, so two requests cannot be linked by it.
 generators for committed inputs.
 
     \item[$(\algo{req}, \state) \sample \SCIrequest(\pk, \msg, \algo{Disc})$ :]
-On input $\msg \in \Zp^{\ell}$ and a set $\algo{Disc} \subseteq [\ell]_0$ of
-indices to disclose, let $H = [\ell]_0 \setminus \algo{Disc}$. Sample $\openinfo,
+On input $\msg \in \Zp^{\ell}$ and a set $\algo{Disc} \subseteq [0, \ell-1]$ of
+indices to disclose, let $H = [0, \ell-1] \setminus \algo{Disc}$. Sample $\openinfo,
 \mu \sample \Zp$, set $B = \gen^{\mu}$, and compute the following:
           %
           \begin{equation*}
@@ -528,7 +528,8 @@ Sanders do~\cite{RSA:PoiSan16}. It proves this equation by a Sigma protocol
 whose challenge hashes the value, the pseudonym and $(k^*, l^*)$, so that none of
 them can be swapped later.
 The blinding matters because the central bank chose $\omega$. Without it, the
-central bank could combine $\tilde{c}$ with the pseudonym to link tokens of the
+central bank could combine the element $\tilde{c}$ of \Cref{prot:ps-proof} with
+the pseudonym to link tokens of the
 same user. The proof of
 withdrawal $\Sigma$ is the first entry of every token's history, and every
 payee verifies it. \Cref{prot:ps-proof} gives the proof of withdrawal.
@@ -629,7 +630,8 @@ logarithm (DL) assumption, DDH, $q$-SDH, $q$-MSDH, and the random oracle model
 \label{tab:offline-instantiation}
 \end{table}
 
-Every other proof in the instantiation, including the JPOK, is a Sigma protocol
+Every proof in the instantiation, including the JPOK and the proof of withdrawal,
+is a Sigma protocol
 compiled with the Fiat-Shamir transform~\cite{C:FiaSha86}. We obtain the
 following theorem.
 

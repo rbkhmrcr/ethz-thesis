@@ -208,10 +208,9 @@ exactly once, and are never opened.
 This is anonymity revocation for a known double spend, not the general-purpose
 auditing of \Cref{chap:txid}. Ecash schemes without an auditor let anyone compute a double spender's identity
 from two payments of the same token. They use cut and choose, linear equations
-in the user's secret, or double-spending tags, values that reveal the user's
-secret if the same token is spent twice. Some also cover transferable tokens, at
-a higher cost per payment~\cite{C:ChaFiaNao88,C:Brands93,EC:CamHohLys05,PKC:BCFK15}.\rebekah{baseline:
-implement one auditor-free scheme?}
+in the user's secret, or double-spending tags, which reveal the user's secret
+if the same token is spent twice. Some also cover transferable tokens, at a
+higher cost per payment~\cite{C:ChaFiaNao88,C:Brands93,EC:CamHohLys05,PKC:BCFK15}.
 
 \Cref{prot:offline} gives the complete protocol. It is stated
 generically with respect to the underlying commitment scheme, digital signature
@@ -379,7 +378,7 @@ $\JPOKprove_1$ and contributes the remaining witness.
 
     \item The payee's device verifies $\algo{hist}_i$: if $i = 0$, it checks
 $\Sigma$. Otherwise it verifies $\Sigma$ and every $(\Gamma_k, \sigma_k)_{k \in
-[i]_0}$.
+[0, i-1]}$.
 
     \item If $\Gamma_i$ and $\sigma_i$ also verify, the payee's device accepts
 and stores $T_{i+1} = (v, s_{i+1}, \com_{i+1}, \algo{hist}_{i+1} = (\com_i,
@@ -433,11 +432,11 @@ does:
 
   \begin{enumerate}
 
-    \item Parse $d_n$ into the pseudonyms $(\com_k)_{k \in [n+1]_0}$ and
-ciphertexts $(\ciph_k)_{k \in [n+1]_0}$ it contains, taking these from
+    \item Parse $d_n$ into the pseudonyms $(\com_k)_{k \in [0, n]}$ and
+ciphertexts $(\ciph_k)_{k \in [0, n]}$ it contains, taking these from
 $\algo{hist}_n$ together with the depositor's own $\com_n$ and $\ciph_n$, and
-parse $d_{n'}$ analogously into $(\com'_k)_{k \in [n'+1]_0}$ and $(\ciph'_k)_{k \in
-[n'+1]_0}$.
+parse $d_{n'}$ analogously into $(\com'_k)_{k \in [0, n']}$ and $(\ciph'_k)_{k \in
+[0, n']}$.
 
     \item Find the largest index $j$ such that $\com_k = \com'_k$ for all $k
 \leq j$. Either $\com_{j+1} \neq \com'_{j+1}$, in which case the owner at $j$
@@ -526,4 +525,4 @@ The central bank needs its list of deposited tokens to detect double spending,
 so it cannot simply discard it. Logical or wall-clock timestamps that bound a
 token's validity span let it prune entries once that span has elapsed.
 
-We leave coin transparency to future work.
+Like physical cash, $\OP$ does not provide coin transparency.

@@ -10,16 +10,12 @@ and \Cref{sec:txid-evaluation} compares the two.
 \subsection{Instantiating $\ID$ with algebraic PRFs}\label{sec:txid-alg-instantiation}
 
 Three of the four relations of the construction involve pairing equations,
-and proving statements about pairings is expensive. So this instantiation is
-more involved than the construction. The derivations of
+and proving statements about pairings is expensive. Every derivation of
 \Cref{sec:txid-construction}, from the tracing key to epoch keys and from epoch
-keys to tags, need every step to be one way. It must be hard to go back from an
-epoch key to the tracing key, and from a tag to the epoch key. Every step must
-also be provable with a Sigma protocol, so its inputs and outputs must be group
-or field elements related by equations of discrete logarithms. A hash function
-is one way, but has no such structure. One-way functions alone are not enough
-either, since tags and epoch keys must also look random, so both steps are
-algebraic pseudorandom functions. Pairing equations are not equations of
+keys to tags, must also be provable with a Sigma protocol, so its inputs and
+outputs must be group or field elements related by equations of discrete
+logarithms. A hash function is one way, but has no such structure, so both steps
+are algebraic pseudorandom functions. Pairing equations are not equations of
 discrete logarithms, so we rewrite the relations and blind their values, and the
 prover proves equations of discrete logarithms while the verifier checks the
 pairings. The hash-based instantiation drops the algebraic structure and pays

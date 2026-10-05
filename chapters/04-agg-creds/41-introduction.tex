@@ -31,7 +31,7 @@ attributes.
 Credential systems with distributed issuance still require the issuers to coordinate. With many
 issuers worldwide, each relevant to only some users, that coordination is
 impractical, and between issuers with no relationship to one another it may be
-impossible. Coordination between issuers is the obstacle. Threshold issuance
+impossible. Threshold issuance
 without an interactive setup removes it for issuers certifying the same
 credential~\cite{EPRINT:GGPR25}. We remove coordination for issuers certifying
 different attributes.
@@ -140,10 +140,10 @@ setup lets uncoordinated issuers jointly certify one
 credential, with a constant-size presentation~\cite{EPRINT:GGPR25}. Here, each
 issuer certifies its own attributes instead. Independent authorities can also each sign a user's global
 identity, with one proof per credential~\cite{anada2019decentralized}.
+zk-SNARKs are zero-knowledge proofs that are short and quick to verify.
 Credentials can also be derived from existing identity documents with
 zk-SNARKs, without new issuer infrastructure, at the cost of one general-purpose
-proof per credential~\cite{SP:RWGM23}. These are zero-knowledge proofs that are
-short and quick to verify. Issuer hiding is an orthogonal problem~\cite{CANS:BEKRS21,PoPETS:SanTra24}. We would like to address it in
+proof per credential~\cite{SP:RWGM23}. Issuer hiding is an orthogonal problem~\cite{CANS:BEKRS21,PoPETS:SanTra24}. We would like to address it in
 future work.
 
 \paragraph{Comparison.} In ART-Sign, users' tags are their public keys, and
