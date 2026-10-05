@@ -17,8 +17,8 @@ previous one, and we argue that $\adv$'s view changes only negligibly between
 consecutive games. Throughout, we call a user
 corrupt if both their device and secure element are compromised. We do not
 prove the split setting, with a corrupt device and an honest secure element. There the
-device learns a commitment to the secure element's key but not the key
-itself, as in the joint proof of Hesse, Singh and Sorniotti, who give the details~\cite{USENIX:HesSinSor23}. We also simplify
+device learns a commitment to the secure element's key but not the key itself. The details are as for the joint proof of
+\Cref{prim:hss-joint-proof}~\cite{USENIX:HesSinSor23}. We also simplify
 exposition by treating the identifiers $\algo{id}$ produced by $\idfu{\algo{op}}$
 during $\OPwithdraw$ and $\OPexecute$ as the output of $\ComCommit(\ck, \cdot,
 \cdot)$.

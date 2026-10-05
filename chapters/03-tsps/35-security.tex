@@ -40,7 +40,7 @@ $\advB$ samples these too, and runs $\simu$ on them to produce the corrupted
 signers' view. If $\adv$ makes the execution abort, $\advB$ returns $\bot$ and
 marks $\mathsf{sid}$ unusable. As each session signs one message only, the at
 most $t$ shares that $\advB$ fixes are independent of the session's signing
-randomness, which the signature $\advB$ later obtains determines.
+randomness. The signature that $\advB$ later obtains determines this randomness.
 
   In the online phase, each component of $c_0$ and each $c_j$ comes from its
 own fresh sharing, so any $t$ signature shares are uniform given the rest of

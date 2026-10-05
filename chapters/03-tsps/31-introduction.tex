@@ -14,33 +14,28 @@ ordinary signature scheme hashes the message first, so proving knowledge of a
 signature on a commitment needs a general-purpose proof over the hash function.
 Signing the group elements directly keeps these proofs algebraic and efficient.
 
-In systems with entities that publicly certify state, such as transparency log
-providers or ledger administrators, threshold certification shares the signing
-key between several signers, so that a threshold of them is needed to sign a
-commitment and no single signer or compromised key share can certify alone.
-Verifiers still see one public key and ordinary signatures.
+In systems with entities that publicly certify state, such as ledger
+administrators or transparency log providers, threshold certification shares
+the signing key between several signers. A threshold of them is needed to sign,
+so no single signer or compromised key share can certify alone. Verifiers still
+see one public key and ordinary signatures.
 
-A ledger records
-commitments to tokens or accounts, and to spend a token or report on an account,
-its owner needs a signature showing that the commitment is
-recorded~\cite{EPRINT:ACDDET19,EPRINT:TBAAGP22,CCS:KiaKohSar22,RSA:PoiSan18,NDSS:SABMD19}.
-With an SPS scheme, the certifier signs the committed group elements as they
-appear on the ledger and publishes the signatures, without interacting with the
-owner, and the owner later proves statements about the committed values in zero
-knowledge. Where a ledger is run by several authorities, for example a central
-bank digital currency in which every transaction is endorsed before it is
-recorded, a threshold signature scheme divides the certification between them.
+In privacy-preserving ledgers, users hold tokens or accounts as commitments. To
+spend a token or report on an account, users need a signature showing that its
+commitment is on the
+ledger~\cite{EPRINT:ACDDET19,EPRINT:TBAAGP22,CCS:KiaKohSar22,RSA:PoiSan18,NDSS:SABMD19}.
+With an SPS scheme, the administrator signs the committed group elements
+directly, and users then prove statements about the committed values in zero
+knowledge. Some ledgers are run by several authorities, which each endorse a
+transaction before it is recorded. This is the case in several proposed designs
+for central bank digital currencies~\cite{EPRINT:ACDDET19,EPRINT:TBAAGP22}. A
+threshold SPS scheme divides the certification between them.
 
-Certificate transparency (CT) and key
-transparency (KT) logs are append-only, publicly verifiable records of
-certificates or keys. Each entry is sent to a log provider, signed, and appended
-to the log. In CT the log server returns a signed certificate timestamp to the
-certificate provider, and in KT the log server signs the mapping from users'
-identities to their public keys. Transparency logs move trust from the application
-serving a key onto the log providers, and a threshold signature scheme narrows
-what any one of them can do. Signatures from a threshold SPS scheme, given to the
-owners of keys, would also let them prove, in zero knowledge, that their keys are
-recorded in the log without revealing which keys they are.
+Certificate transparency (CT) and key transparency (KT) logs are append-only,
+publicly verifiable records of certificates or keys, signed by log providers. A
+threshold signature scheme narrows what any one provider can do. With a
+threshold SPS scheme, key owners could also prove in zero knowledge that their
+keys are in the log without revealing which keys they are.
 
 \paragraph{Contributions.} We give two threshold SPS schemes, built from
 existing SPS schemes and secure multiparty computation (MPC)
@@ -58,10 +53,10 @@ unforgeability of the underlying scheme.
 
 Our second contribution is an implementation. Computation on shared group
 elements has been implemented for two parties~\cite{NDSS:GPVRNC23,LC:ADEO21}
-and for many parties on curves without a pairing~\cite{ESORICS:DOKSS20}. We add
-sharings of pairing-group elements, and raising them to shared exponents, to
-MP-SPDZ, a library implementing a wide range of MPC protocols, for any number of
-parties~\cite{CCS:Keller20}. To our knowledge, this is
+and for many parties on curves without a pairing~\cite{ESORICS:DOKSS20}. MP-SPDZ is a library
+implementing a wide range of MPC protocols~\cite{CCS:Keller20}. We extend it to
+share group elements of pairing-friendly curves and raise them to shared
+exponents, for any number of parties. To our knowledge, this is
 the first multiparty implementation of computation on shared elements of pairing
 groups.
 
@@ -78,26 +73,27 @@ GGM, among them the rerandomisable scheme $\AGHO$ that we use~\cite{C:AGHO11}.
 SPS schemes with such short signatures cannot be proven secure from non-interactive assumptions
 by a large class of reductions~\cite{AC:AbeGroOhk11}. The scheme $\KPW$ has
 signatures of seven group elements and is secure under SXDH~\cite{C:KilPanWee15}.
-Fully structure-preserving
-signature schemes also have secret keys that are group elements, so
-a user can prove statements about their own key with Groth-Sahai proofs, which
-prove pairing product equations in zero knowledge, but their signatures grow with the square root of the message
-length~\cite{JC:AGKOT19,EC:GroSah08}.
+If secret keys are also group elements, the scheme is fully
+structure-preserving, and users can prove statements about their own keys with
+Groth-Sahai proofs~\cite{EC:GroSah08}. Signatures of such schemes grow with the
+square root of the message length~\cite{JC:AGKOT19}.
 
 \paragraph{Threshold SPS schemes.} Threshold SPS schemes have only recently
 been considered. One non-interactive construction is restricted to signing
 indexed Diffie-Hellman tuples, of the form $(\gen^\msg,
-\ggen^\msg)$~\cite{AC:CKPSS23}. Existing commitments and public keys lie in one group, so it
-cannot sign them, which rules out the ledger and transparency-log uses above.
+\ggen^\msg)$~\cite{AC:CKPSS23}. Existing commitments and public keys lie in one group, so this
+construction cannot sign them. This rules out the ledger and transparency log
+uses above.
 
 
 Following our work, a non-interactive threshold SPS scheme was given that signs
 arbitrary group elements and is secure under SXDH~\cite{PKC:MMSST24}. It builds
 on $\KPW$, and its signatures consist of seven group elements, against three for
-threshold $\AGHO$. We benchmark against it in \Cref{sec:tsps-evaluation}. Building on this scheme, a threshold SPS
-scheme with silent setup lets signers generate their keys independently, with no
-interactive key generation, at the cost of larger signatures, a trusted
-setup, whose public parameters come from secrets that must be deleted, and security in the GGM~\cite{EPRINT:GGPR25}.
+threshold $\AGHO$. We benchmark against it in \Cref{sec:tsps-evaluation}. Building on this scheme, a threshold SPS scheme with silent setup lets signers
+generate their keys independently, without interactive key generation. Its
+signatures are larger, it needs a trusted setup, whose public parameters come
+from secrets that must be deleted, and it is secure only in the
+GGM~\cite{EPRINT:GGPR25}.
 
 \paragraph{Layout.} The rest of the chapter is organised as follows. \Cref{sec:tsps-definitions} defines threshold SPS schemes
 and the MPC interfaces our constructions use.

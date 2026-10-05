@@ -6,10 +6,8 @@ transactions, and runs the transaction validators that decide, on input of the
 ledger, which transactions are valid. We assume the ledger operator is honest,
 so that the ledger itself is available and correctly maintained. The
 registration authority authenticates users and issues the credentials required
-to submit transactions and enable selective traceability. It is honest but
-curious during the protocol, so it follows the protocol but tries to learn what
-it can from what it sees. We also assume it does not bias the public
-parameters. Users are potentially malicious, and generate and submit
+to submit transactions and enable selective traceability. It is honest but curious during the protocol, and we also assume that it does
+not bias the public parameters. Users are potentially malicious, and generate and submit
 confidential transactions. They decide which auditors are authorised to trace
 them, and during which epochs. Auditors are
 potentially malicious, and may be granted permission to trace the transactions
@@ -64,9 +62,9 @@ transactions submitted under $\ek$ during $\epoch$.
 \subsection{The ideal functionality for tracing}
 
 We define security of tracing through an ideal functionality
-$\idfu{\algo{trace}}$ that represents a trusted third party which executes the
-operations of the ledger on behalf of system participants, and which by
-construction satisfies the three properties set out below.
+$\idfu{\algo{trace}}$. It represents a trusted third party that executes the
+operations of the ledger on behalf of system participants, and it satisfies by
+construction the three properties set out below.
 
 Anonymity means
 that only an auditor holding a tracing permission for a user and epoch can

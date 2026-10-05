@@ -144,8 +144,8 @@ a transaction.} \label{fig:txid-ell-sizes} \end{figure}
 We compare against Hyperledger Idemix, which is built on
 BBS+~\cite{CCS:CamVan02,SCN:AuSusMu06,CDL16}. It runs over the same library.
 \Cref{tab:txid-idemix} compares a transaction with an Idemix signature, with and
-without audit pseudonyms, commitments to the user's enrolment identity and
-revocation handle that an auditor can check.
+without audit pseudonyms. Audit pseudonyms are commitments to users' enrolment
+identities and revocation handles that an auditor can check.
 
 \begin{table}[htbp] \centering \small
 \caption[Tracing against Idemix]{Per-transaction time in milliseconds and size in bytes, against Hyperledger Idemix, at $\ell = 8$. Idemix sizes are its own serialisation, with

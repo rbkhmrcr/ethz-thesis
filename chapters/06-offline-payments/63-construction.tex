@@ -108,11 +108,10 @@ committing to somebody else's identifier could never spend it, and would only
 have destroyed their own funds.
 
 \paragraph{Payment.} A payment begins with the payee's secure element, which
-generates a fresh pseudonym and sends it to the payer. The payer's secure
-element locks the token being spent, the payer's device encrypts the payer's
-identifier under the auditor's key, and the two jointly produce a signature of
-knowledge, over the value and the two pseudonyms, transferring the token to the
-payee. The payer sends the payee the token, the ciphertext, the signature, and
+generates a fresh pseudonym and sends it to the payer. The payer's secure element locks the token being spent, and the payer's device
+encrypts the payer's identifier under the auditor's key. The two then jointly
+produce a signature of knowledge over the value and the two pseudonyms, which
+transfers the token to the payee. The payer sends the payee the token, the ciphertext, the signature, and
 everything the payee needs to check the token's history. On acknowledgement the
 payer's secure element deletes the token.
 
@@ -150,9 +149,7 @@ the payer's pseudonym, on the same witness. The construction keeps them
 separate, because the device produces the audit proof alone and the transfer
 signature jointly with the secure element.
 
-The payer's secure element and device produce the signature jointly, as a
-JPOK, in which two provers each hold part of the witness and together produce
-one proof. The two provers belong to the same user, but the user controls only
+The payer's secure element and device produce the signature jointly, as a JPOK. The two provers belong to the same user, but the user controls only
 the device, and the secret key must never leave the secure element. An ordinary
 proof system would need one prover to hold the whole witness, and generic
 two-party computation is too much for the secure element. So the secure element
@@ -209,11 +206,11 @@ ciphertexts before that position belong to owners who passed the token on
 exactly once, and are never opened.
 
 This is anonymity revocation for a known double spend, not the general-purpose
-auditing of \Cref{chap:txid}. Ecash schemes without an auditor let anyone
-compute a double spender's identity from two payments of the same token, through
-cut and choose, linear equations in the user's secret, or double-spending tags, values that reveal the user's secret if the same token
-is spent twice, also for transferable tokens, at a higher cost per
-payment~\cite{C:ChaFiaNao88,C:Brands93,EC:CamHohLys05,PKC:BCFK15}.\rebekah{baseline:
+auditing of \Cref{chap:txid}. Ecash schemes without an auditor let anyone compute a double spender's identity
+from two payments of the same token. They use cut and choose, linear equations
+in the user's secret, or double-spending tags, values that reveal the user's
+secret if the same token is spent twice. Some also cover transferable tokens, at
+a higher cost per payment~\cite{C:ChaFiaNao88,C:Brands93,EC:CamHohLys05,PKC:BCFK15}.\rebekah{baseline:
 implement one auditor-free scheme?}
 
 \Cref{prot:offline} gives the complete protocol. It is stated
@@ -480,8 +477,9 @@ but curious.
 \paragraph{Extensions.} The construction supports several extensions, each a
 change to the construction rather than to its instantiation.
 
-It extends to expiry by epochs, fixed periods after which credentials and tokens
-are no longer accepted, which is how it accommodates revocation. The registration authority signs the triple $(\algo{uid},
+An epoch is a fixed period after which credentials and tokens are no longer
+accepted. The construction extends to expiry by epochs, which is how it
+accommodates revocation. The registration authority signs the triple $(\algo{uid},
 \sk_{\algo{usr}},\allowbreak \epoch)$ rather than the pair $(\algo{uid},
 \sk_{\algo{usr}})$, and the central bank signs $(\algo{uid}_0,\allowbreak v,\allowbreak s_0,\allowbreak \epoch)$
 at withdrawal, tying each token to the epoch in which it was issued. Both
@@ -512,8 +510,8 @@ identified. Both are payee-side checks and require no change to the protocol
 messages.
 
 The secure element can be any hardware that protects the key and the
-single-use logic together. Smart cards do, while mobile trusted execution
-environments, isolated parts of a phone's main processor, protect keys but not the logic that uses
+single-use logic together. Smart cards do. Mobile trusted execution environments are isolated parts of a
+phone's main processor, and they protect keys but not the logic that uses
 them~\cite{trustzone,secureenclave,javacard,mifare}.
 
 The requirement that $\sk_{\algo{usr}}$ never leave the secure element extends to a recovery

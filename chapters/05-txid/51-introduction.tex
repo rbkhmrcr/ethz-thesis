@@ -19,7 +19,7 @@ composes with any transaction system that already provides balance and theft
 prevention. The confidential payload of a transaction in our scheme is just the
 transaction of the underlying system, left unchanged. We add
 a way for a designated auditor to recover which of those payloads belong to a
-given user, and only for the epochs, periods of fixed length, that the user
+given user, only for the epochs that the user
 has agreed to.
 
 Confidentiality of wealth at rest is a simple problem for cryptography, since
@@ -43,9 +43,9 @@ issuer with a public ledger whose validators follow the protocol for economic
 rather than institutional reasons. This lets them remain permissionless,
 and function with participants who have no registered identities at
 all. They cover the entire spectrum of privacy, from pseudonymity with each
-transaction in the clear to hidden values and anonymity sets, the sets of users a transaction could have
-come from, equal to the total number of users of the
-system~\cite{bitcoin,ethereum,EPRINT:Noether15,SP:BCGGMT14}. Stable coins sit
+transaction in the clear to hidden values and anonymity sets that contain every
+user of the system~\cite{bitcoin,ethereum,EPRINT:Noether15,SP:BCGGMT14}. The
+anonymity set of a transaction is the set of users it could have come from. Stable coins sit
 between the two. They are cryptocurrencies with completely centralised issuance, backed
 by fiat assets in an unofficial capacity and issued by private companies. By
 trading volume and usage, stable coins are the largest digital assets backed by
@@ -96,9 +96,9 @@ Given the tracing secret of a
 target user, an auditor identifies the corresponding transactions by recomputing
 the tags and matching them against the ledger, and the counter binding also
 stops a user later repudiating their own transactions. These systems are
-tied to users' identities, and all share one limitation:
-because the counter must increase by one with each transaction and leave no
-gaps, users' transactions must be generated sequentially, which prevents
+tied to users' identities, and all share one limitation. The counter must
+increase by one with each transaction and leave no gaps, so users must generate
+their transactions sequentially. This prevents
 concurrent transaction creation and slows down users who transact often.
 
 \paragraph{Cryptocurrencies.} Cryptocurrencies generally provide auditability through interactive protocols or
@@ -145,16 +145,13 @@ functions, one-way functions, and zero-knowledge proofs, and instantiate it
 concretely in two ways. The first works in pairing-based groups with algebraic
 pseudorandom functions and Sigma protocols made non-interactive by the
 Fiat-Shamir transform. Its setup is transparent, so no party samples any group
-generator,
-and the BBS+ signature scheme lets the registration authority certify users' keys without
-ever learning their tracing keys. The second
-builds both pseudorandom functions from the MiMC block cipher, which is designed
-to be cheap to prove in zero knowledge, and proves the two
-corresponding relations with a general-purpose zero-knowledge succinct
-non-interactive argument of knowledge (zk-SNARK). This gives constant-size
-transaction proofs and faster verification, but a slower prover and a
-trusted setup, whose parameters are generated from secrets that must be
-deleted.
+generator. The BBS+ signature scheme lets the registration authority certify
+users' keys without ever learning their tracing keys. The second builds both
+pseudorandom functions from the MiMC block cipher, which is designed to be cheap
+to prove in zero knowledge. It proves the two corresponding relations with a
+general-purpose zero-knowledge succinct non-interactive argument of knowledge
+(zk-SNARK). This gives constant-size transaction proofs and faster verification,
+but a slower prover and a trusted setup.
 
 \paragraph{Layout.} The rest of the chapter is organised as follows. \Cref{sec:txid-definitions} gives the syntax of a tracing
 protocol and formalises its security as an ideal functionality.

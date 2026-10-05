@@ -174,9 +174,10 @@ signature's randomness $r$ is under $\gen_3$.
 
 Second, the secure element and the device communicate directly, since
 registration pairs them. The secure element samples $t$ afresh and sends it to the
-device, in place of both deriving it from a shared PRF key, and the payee takes
-no part in producing the proof. The zero knowledge of
-\Cref{prim:hss-joint-proof} holds only against an honest-but-curious verifier, who relays the messages between the provers. Our payee
+device, in place of both deriving it from a shared PRF key. The payee takes no part in
+producing the proof. In \Cref{prim:hss-joint-proof} the verifier relays the
+messages between the provers, and zero knowledge holds only if it is honest but
+curious. Our payee
 relays nothing and receives only the finished proof, so it may be malicious.
 
 All the device receives from the secure element is the commitment
@@ -185,20 +186,19 @@ opening. So the device learns $\gen_2^{\sk}$ but never $\sk$, which rests on the
 assumption.
 
 Third, the device shows the credential with the rerandomisation of Tessaro and
-Zhu in place of that proof~\cite{EC:TesZhu23b}. It turns $E$, with two fresh
-exponents, into $u$, $w$ and $x$, and verification into one pairing equation on
-these public values and two discrete-logarithm equations, which the device
-proves with a Sigma protocol. The check $u \neq 1$ rules out the trivial
+Zhu in place of that proof~\cite{EC:TesZhu23b}. With two fresh exponents, it turns $E$ into $u$, $w$ and $x$. Verification
+becomes one pairing equation on these public values and two discrete-logarithm
+equations, and the device proves the latter with a Sigma protocol. The check $u \neq 1$ rules out the trivial
 solution of the pairing equation. Together these hold exactly when the device
 knows a BBS+ signature on its identifier and the key committed in $D$.
 
 Fourth, the proof is non-interactive and signs a message $m$. Both challenges
 hash $m$ in place of the nonces of the verifier, the card and the holder.
 
-Fifth, the device proves two further statements under its challenge, sharing
-its response for $\algo{uid}$ with the credential equations: that the payer's
-pseudonym $\com$ commits to $\algo{uid}$, and that the audit ciphertext $\ciph$
-encrypts $\gen^{\algo{uid}}$. The shared response ties the pseudonym and the
+Fifth, the device proves two further statements under its challenge: that the
+payer's pseudonym $\com$ commits to $\algo{uid}$, and that the audit ciphertext
+$\ciph$ encrypts $\gen^{\algo{uid}}$. They share the device's response for
+$\algo{uid}$ with the credential equations. The shared response ties the pseudonym and the
 ciphertext to the credential, and proves both with one response for
 $\algo{uid}$ per hop. The secure element's challenge hashes the signed message,
 so the secure element sees the destination of every payment it signs.
@@ -313,8 +313,7 @@ construction is the part of $\Phi$ that concerns $\ciph$.
 
 \subsection{Instantiating $\SCI$ with Pointcheval-Sanders}\label{sec:offline-token-issuance}
 
-The central bank's SCI scheme combines the Pointcheval-Sanders signature
-scheme, which we abbreviate as PS, with the signing on committed inputs of the
+The central bank's SCI scheme combines the Pointcheval-Sanders (PS) signature scheme with the signing on committed inputs of the
 Coconut credential scheme. \Cref{prim:ps} gives the signature scheme in the
 variant whose signatures carry an extra random field element $\omega$. We index
 its messages from $0$.
@@ -524,10 +523,10 @@ a sampled one, since the hidden message $s_0$ is uniform and already hides $C$.
 The device does not show $\psi$ to payees, for the reason given in
 \Cref{sec:offline-construction}. It instead proves once that it holds a valid signature
 on the token value and on the identifier and randomness committed in its
-pseudonym. It rerandomises $(k, l)$ to $(k^*, l^*)$, blinds the remaining
-equation with a fresh $\ggen^{t}$ as Pointcheval and Sanders do, and proves it
-by a Sigma protocol whose challenge hashes the value, the pseudonym and
-$(k^*, l^*)$, so that none of them can be swapped later~\cite{RSA:PoiSan16}.
+pseudonym. It rerandomises $(k, l)$ to $(k^*, l^*)$ and blinds the remaining equation with a fresh $\ggen^{t}$, as Pointcheval and
+Sanders do~\cite{RSA:PoiSan16}. It proves this equation by a Sigma protocol
+whose challenge hashes the value, the pseudonym and $(k^*, l^*)$, so that none of
+them can be swapped later.
 The blinding matters because the central bank chose $\omega$. Without it, the
 central bank could combine $\tilde{c}$ with the pseudonym to link tokens of the
 same user. The proof of

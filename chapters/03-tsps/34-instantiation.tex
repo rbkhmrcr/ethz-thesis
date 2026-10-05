@@ -12,7 +12,7 @@ give the resulting threshold scheme.
 \subsection{Instantiating $\algo{ExpGrp}$}\label{sec:tsps-mpc-inst}
 
 The MPC protocols over $\Zp$ that we use do not provide $\algo{ExpGrp}$, so we build it from
-multiplication triples, sharings of uniform $a$, $b$ and $ab$, made in the
+multiplication triples, sharings of uniform $x$, $y$ and $xy$, made in the
 offline phase, following Smart and Talibi
 Alaoui~\cite{C:Beaver91b,IMA:SmaTal19}.
 
@@ -97,9 +97,9 @@ following hold:
 
 \end{primitivebox}
 
-Writing $\rho =
+We write $\rho =
 1/\omega$ for the signing randomness of $\AGHO$, so that the message terms need
-no inverse, a signature on $\vec{\msg}$ is as
+no inverse. A signature on $\vec{\msg}$ is then as
 follows:
 %
 \begin{equation*}

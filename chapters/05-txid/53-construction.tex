@@ -40,9 +40,8 @@ to one hidden tracing key. Binding stops users switching keys between proofs,
 and hiding means the commitment reveals nothing about the key. The one-way
 functions give a public image of each secret key that can be certified and
 checked. The registration authority certifies these images once with the
-signature scheme, and later proofs rely on that signature. The proofs are proofs
-of knowledge, so that the simulator can extract users' keys, and zero
-knowledge, since they are published on the ledger.
+signature scheme, and later proofs rely on that signature. The proofs are proofs of knowledge so that the simulator can extract users'
+keys. They are zero knowledge since they are published on the ledger.
 
 The tracing key derives one epoch key per epoch, and each epoch key derives the
 tags of its epoch. Each derivation comes with a proof that it was computed
@@ -157,8 +156,8 @@ linkable.
 The clause $0 \leq \gamma < \Max$ in $\rel_7$ is needed because an auditor
 holding $\ek$ evaluates $\FT$ only at indices in $[0,\Max)$. A user who could tag
 a transaction with $\gamma = \Max$ would obtain a transaction that no permission
-can ever trace. Together with the validators' check that tags are unique, which
-stops users reusing an index, the range clause makes the bound of $\Max$
+can ever trace. The validators' check that tags are unique stops users reusing an index.
+Together with this check, the range clause makes the bound of $\Max$
 transactions per user and epoch hold in the real world, as step 3 of $\IDsubmit$
 in $\idfu{\algo{trace}}$ requires.
 

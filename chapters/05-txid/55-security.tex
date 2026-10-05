@@ -758,8 +758,8 @@ by the epoch key, so $\FE$ and $\FT$ are pseudorandom permutations, by the assum
 on MiMC against a distinguisher holding $\gen_2^{\utk}$. By the switching
 lemma, which bounds the advantage in telling a random permutation from a random
 function by $q^2/p$ for $q$ queries, they are also pseudorandom
-functions~\cite{EC:BelRog06}. This is the public tracing key, which
-depends on the key of $\FE$. $\FT$ is keyed by the epoch key, which is uniform
+functions~\cite{EC:BelRog06}. The element $\gen_2^{\utk}$ is the public
+tracing key, which depends on the key of $\FE$. $\FT$ is keyed by the epoch key, which is uniform
 once $\FE$ is replaced, so the public tracing key gives a distinguisher of $\FT$
 nothing.
 

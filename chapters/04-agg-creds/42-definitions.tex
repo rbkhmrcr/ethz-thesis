@@ -242,9 +242,9 @@ aggregate, and registered users aggregate exactly the values they hold. Success
 results in a random string $\signature$ representing the aggregate credential.
 
 \paragraph{Present.} A user queries this to produce a presentation of
-$\vec{\atv{}}$, submitting $(\vec{\atv{}}, \signature, \msg)$, where
-$\signature$ aggregates the credentials for $\vec{\atv{}}$ and $\msg$ is a fresh
-message supplied by the verifier that the resulting presentation is bound to.
+$\vec{\atv{}}$, submitting $(\vec{\atv{}}, \signature, \msg)$. Here
+$\signature$ aggregates the credentials for $\vec{\atv{}}$, and $\msg$ is a fresh
+message from the verifier to which the presentation is bound.
 $\idfu{\AAC}$ accepts if the user previously called aggregate on $\vec{\atv{}}$,
 or otherwise if the user actually holds $\vec{\atv{}}$. This means a corrupt
 user who skips aggregate can still succeed if they hold the credentials.

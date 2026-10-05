@@ -32,8 +32,7 @@ knows a discrete logarithm relation among them.
 \subsubsection{The epoch PRF}\label{sec:txid-fe}
 
 A user's tracing key is a pair of field elements $\utk = (\utk', \utk'')$. The
-first component keys the epoch PRF, and the second keys the tag PRF below, which
-inverts against a scalar. The user draws both once at registration, and the
+first component keys the epoch PRF, and the second keys the tag PRF below. The user draws both once at registration, and the
 registration authority certifies them together in the same credential.
 
 The epoch key must be an element of $\group{1}$, since the tag PRF pairs it with
@@ -56,10 +55,9 @@ $\gen_2, \gen_3$ of $\group{1}$ and $\ggen_D$ of $\group{2}$:
 \ggen_D^{1/(\utk''+\gamma)} \ \text{ for } \gamma \in [0,\Max).
 \end{equation*}
 %
-These elements do not change with the epoch. If the epoch PRF output them, they
-would repeat in every epoch and its output could not be pseudorandom, so they
-are part of the public tracing key instead, which is already sent in the grant
-message. The registration authority signs only $T$ and the public signing key,
+These elements do not change with the epoch, so, as in
+\Cref{sec:txid-construction}, they are part of the public tracing key, which is
+already sent in the grant message. The registration authority signs only $T$ and the public signing key,
 so the elements $\{W_\gamma\}$ are not certified. The user proves them well
 formed against the certified $T$ at the first grant to each auditor, in the
 epoch key proof.
@@ -77,9 +75,8 @@ so against a distinguisher given the whole of $\PTK$.
 The tag PRF takes the epoch key as input, and its correct evaluation must be
 provable with equations of discrete logarithms. The Dodis-Yampolskiy PRF has
 this shape. Its output raised to the key plus the input gives back a fixed
-value, which is one equation for a Sigma protocol. It is pseudorandom under the
-$q$-decisional bilinear Diffie-Hellman inversion assumption,
-$q$-DBDHI, and is given in \Cref{prim:dy-prf}~\cite{PKC:DodYam05}.
+value, which is one equation for a Sigma protocol. It is pseudorandom under the $q$-decisional bilinear Diffie-Hellman inversion
+($q$-DBDHI) assumption~\cite{PKC:DodYam05}. \Cref{prim:dy-prf} gives it.
 
 \begin{primitivebox}{The Dodis-Yampolskiy PRF~\cite{PKC:DodYam05}.}{dy-prf}
 
@@ -167,10 +164,9 @@ Credentials use the group-element variant of the BBS+ signature scheme of
 \Cref{prim:bbs}, on $(S, T)$, with bases $\gen_1$, $\gen_2$ and $\gen_3$ and
 randomness generator $\gen_4$. During registration, the user sends only the group elements $S
 = \G(\sk)$ and $T$, together with a proof of knowledge of the underlying
-secrets, rather than the secrets themselves. Commitments use the Pedersen
-commitment scheme, given in \Cref{prim:pedersen}, in its form for vectors of
-two field elements, so that one commitment holds both components of $\utk$. Its
-generators are shared with the BBS+ signature scheme. Range proofs, which show that a committed value lies
+secrets, rather than the secrets themselves. Commitments use the Pedersen commitment scheme of \Cref{prim:pedersen} for
+vectors of two field elements, so that one commitment holds both components of
+$\utk$. It shares its generators with the BBS+ signature scheme. Range proofs, which show that a committed value lies
 in an interval, use Bulletproofs~\cite{SP:BBBPWM18}.
 
 BBS+ signs several values at once, can sign values the signer never sees, and
@@ -726,9 +722,10 @@ Not every hash function is a pseudorandom function. Collision and preimage
 resistance say nothing about outputs looking random, and the random oracle
 heuristic does not help, since we prove statements about the concrete function
 inside a circuit. So we use the MiMC block cipher keyed with the secret, and
-assume that it is a pseudorandom permutation, a keyed permutation no efficient
-distinguisher can tell from a uniformly random one, also against a distinguisher
-holding $\PTK = \gen_2^{\utk}$. The switching lemma says that no one making $q$
+assume that it is a pseudorandom permutation, also against a distinguisher
+holding $\PTK = \gen_2^{\utk}$. A pseudorandom permutation is a keyed
+permutation that no efficient distinguisher can tell from a uniformly random
+one. The switching lemma says that no one making $q$
 queries can tell a random permutation on $\Zp$ from a random function, except
 with probability about $q^2/p$~\cite{EC:BelRog06}. So a pseudorandom
 permutation is also a pseudorandom function, up to this loss. The cryptanalysis of MiMC is of this keyed

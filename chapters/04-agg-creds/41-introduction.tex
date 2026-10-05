@@ -5,10 +5,10 @@ age, their nationality or a driving licence. Anonymous credential schemes let
 users prove they hold certain attributes without revealing who they are or
 anything about their undisclosed attribute values. Issuers give users
 credentials on their attribute values, and users present these credentials to
-verifiers. The two main security properties are unlinkability, so two
-presentations of the same user cannot be tied to one another, and
-unforgeability, so a user can only successfully attest to having attribute
-values that they truly possess~\cite{EC:CamLys01}.
+verifiers. The two main security properties are unlinkability and
+unforgeability~\cite{EC:CamLys01}. Unlinkability means that two presentations by
+the same user cannot be tied to one another, and unforgeability means that users
+can only attest to attribute values they truly possess.
 
 Idemix and U-Prove implement anonymous credentials, Signal uses them for
 private groups, and Privacy Pass issues related anonymous
@@ -19,12 +19,12 @@ authentication~\cite{eIDAS2024}. Its attributes come from many issuers, such as
 a passport agency, a licensing body and a transport authority, each certifying
 its own.
 
-Early anonymous credential schemes assume a single issuer certifying all
-attributes, creating a single entity responsible for all issuance, and able to
-learn all attribute values of every user. Later schemes distribute issuance
-across multiple authorities or delegate it to
-sub-issuers~\cite{NDSS:SABMD19,SP:DKLsT23,CCS:KRBKKL24}, but the issuer,
-though now decentralised, remains conceptually responsible for all attributes.
+Early anonymous credential schemes assume a single issuer that certifies all
+attributes. This issuer is responsible for all issuance and can learn all
+attribute values of every user. Later schemes distribute issuance across
+multiple authorities or delegate it to
+sub-issuers~\cite{NDSS:SABMD19,SP:DKLsT23,CCS:KRBKKL24}. The issuer is then
+decentralised, but remains conceptually responsible for all attributes.
 This reduces trust in any one party, but does not reflect real-world scenarios,
 where distinct entities independently certify one or a small subset of
 attributes.
@@ -47,17 +47,16 @@ In our scheme, a credential rests on a chain of
 links: from a user's secret key to their public key, from the public key to a
 tag, and from the tag to the credentials issued under it. Each link can be
 established by a different party. Users show that they know their secret key. A
-registration authority, which certifies users' keys in any case, links each
-public key to a tag. Issuers then sign attributes under the tag, and their
+registration authority links each public key to a tag. Issuers then sign attributes under the tag, and their
 signatures do not involve the key. At presentation, the verifier checks all three
 links together, and so sees that the chain is unbroken without learning the key
 or the tag.
 
 The registration authority sees no attribute values and is not involved after
 registration. To present
-attributes, users aggregate the relevant credentials and prove, in zero
-knowledge, that they know the key, hold a valid aggregate credential for the
-disclosed values, and that both share a tag. Binding by tag stops
+attributes, users aggregate the relevant credentials. They then prove in zero
+knowledge that they know the key, that they hold a valid aggregate credential for
+the disclosed values, and that the key and the credential share a tag. Binding by tag stops
 different users' credentials being pooled, and lets honest users aggregate
 credentials from issuers that have never communicated, without contacting any
 issuer again. Separating the requirements on the registration authority from
@@ -80,17 +79,18 @@ signed~\cite{C:CamLys04}. An extension supports a constrained form of
 aggregation, but only in settings where all values are known in
 advance~\cite{FC:LeeLeeYun13}.
 
-Credentials built on the BBS+ signature scheme support selective disclosure,
-where a user reveals some of their attribute values and hides the rest, in a
+Credentials built on the BBS+ signature scheme support selective disclosure in a
 single-issuer setting, with verification linear in the total number of
-attributes, and form the basis of the ongoing standardisation effort of the
-Internet Engineering Task Force (IETF)~\cite{EC:BonBoy04a,SCN:AuSusMu06}.
+attributes~\cite{EC:BonBoy04a,SCN:AuSusMu06}. They form the basis of the
+ongoing standardisation effort of the Crypto Forum Research Group of the
+Internet Research Task Force (IRTF)~\cite{bbsdraft}.
 
 Further improvements targeted efficiency. The Pointcheval-Sanders signature
 scheme introduces randomisable signatures with sequential aggregation, and
 proves unforgeability in the GGM~\cite{RSA:PoiSan16}. More recently, structure-preserving
-signatures on equivalence classes, whose signatures also hold for every scalar
-multiple of the signed vector, enable efficient proofs, with security proven in the GGM~\cite{JC:FucHanSla19}. Unlinkable
+signatures on equivalence classes give signatures that also hold for every
+scalar multiple of the signed vector. They enable efficient proofs, with
+security proven in the GGM~\cite{JC:FucHanSla19}. Unlinkable
 proofs of knowledge over a subset of signed messages, building on the
 Pointcheval-Sanders signature scheme, are also proven secure in the
 GGM~\cite{PKC:Sanders20}.
@@ -128,9 +128,9 @@ tag and index, and keep a record of what they have signed for each user. In a
 bounded variant they instead count the messages signed per tag, and the issuer
 key grows with the bound.
 
-Issuer-hiding multi-authority credentials, where a verifier learns only that
-the issuer lies in a set it accepts, can also be built from aggregate
-signatures with randomisable tags and keys~\cite{CCS:MBGLS23}. The issuers there
+Aggregate signatures with randomisable tags and keys also give issuer-hiding
+multi-authority credentials~\cite{CCS:MBGLS23}. In these, verifiers learn only
+that the issuer lies in a set they accept. The issuers there
 are not stateless either. Either the attributes and issuer keys of a user are fixed
 when the user's tag is created, or each issuer signs only once per tag. The authors name the
 stateless, dynamic setting as an open question.
@@ -141,16 +141,16 @@ setup lets uncoordinated issuers jointly certify one
 credential, with a constant-size presentation~\cite{EPRINT:GGPR25}. Here, each
 issuer certifies its own attributes instead. Independent authorities can also each sign a user's global
 identity, with one proof per credential~\cite{anada2019decentralized}.
-Credentials can be derived from existing identity documents with zk-SNARKs,
-general-purpose zero-knowledge proofs that are short and quick to verify,
-without new issuer infrastructure, at the cost of a general-purpose proof per
-credential~\cite{SP:RWGM23}. Issuer hiding is an orthogonal problem~\cite{CANS:BEKRS21,PoPETS:SanTra24}. We would like to address it in
+Credentials can also be derived from existing identity documents with
+zk-SNARKs, without new issuer infrastructure, at the cost of one general-purpose
+proof per credential~\cite{SP:RWGM23}. These are zero-knowledge proofs that are
+short and quick to verify. Issuer hiding is an orthogonal problem~\cite{CANS:BEKRS21,PoPETS:SanTra24}. We would like to address it in
 future work.
 
-\paragraph{Comparison.} In ART-Sign the tag is the user's public key, whose
-validity is proven again at every presentation, while ours is a separate value
-that the registration authority signs together with the key, so issuers keep
-no record.
+\paragraph{Comparison.} In ART-Sign, users' tags are their public keys, and
+every presentation proves their validity again. In our scheme the tag is a
+separate value that the registration authority signs together with the key, so
+issuers keep no record.
 
 \Cref{tab:agg-creds-related} compares our scheme with several single- and
 multi-issuer credential systems. The efficient schemes in the table, ours

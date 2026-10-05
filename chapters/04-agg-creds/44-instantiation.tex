@@ -115,10 +115,9 @@ aggregate signature $\signature$, do:
 Issuer keys are certified, as in \Cref{exp:ats-euf}. Without this, an adversary
 could choose its key as the inverse of an honest one, and the contributions of a
 message signed under both would cancel in $\ATSverifyagg$, so that the signature
-$(1, 1)$ verifies. Hashing the index of the signer together with each message
-would also prevent this, as in unrestricted aggregate
-signatures~\cite{ICALP:BelNamNev07}, but certified keys change neither the
-scheme nor its costs.
+$(1, 1)$ verifies. Unrestricted aggregate signatures prevent this by hashing
+the index of the signer together with each message~\cite{ICALP:BelNamNev07}.
+Certified keys prevent it too, and change neither the scheme nor its costs.
 
   \begin{assumptionbox}{The Bilinear Computational Diffie-Hellman (BCDH) assumption~\cite{C:BonFra01}.}{bcdh}
 

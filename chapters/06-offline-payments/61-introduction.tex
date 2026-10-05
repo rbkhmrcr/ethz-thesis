@@ -69,10 +69,9 @@ non-frameability, anonymity, unlinkability, and conservation of value at once.
   \item A construction that splits the cost of authorising a payment between a
 lightweight secure element and a more powerful mobile device, so that the secure
 element need only perform operations comparable in cost to producing an ordinary
-digital signature. Anonymous credentials, signatures on committed inputs, and zero-knowledge proofs of knowledge hide the identities of payers and payees from the central
-bank and from the intermediaries, and a verifiable encryption under an auditor's
-key allows double spenders to be identified without compromising the privacy of
-honest users.
+digital signature. Anonymous credentials, signatures on committed inputs, and zero-knowledge proofs of knowledge hide the identities of payers and payees from the central bank and from the
+intermediaries. A verifiable encryption under an auditor's key identifies double
+spenders without compromising the privacy of honest users.
 
   \item An instantiation from the BBS+ and Pointcheval-Sanders signature schemes
 over pairing-friendly groups, with a proof that it securely realises the ideal
@@ -134,7 +133,7 @@ and Teechain provide offchain payments rather than offline payments. Users
 exchange transactions without the ledger, but both counterparties are
 online~\cite{poon2016bitcoin,lind2019teechain}. Ordinary use of the Lightning
 network can bypass the privacy its onion routing aims for. In Teechain,
-treasurers hold the channel funds with keys kept in trusted hardware, which
+treasurers hold the channel funds with keys kept in trusted hardware. This
 protects funds rather than users' privacy~\cite{FC:KYPKDM21,lind2019teechain}.
 
 \paragraph{CBDC offline payments.} Project
@@ -169,9 +168,9 @@ consider divisible offline payments, while we focus on efficient
 transferability~\cite{PoPETS:RiaPio23}. PayOff offers a transferable offline
 CBDC solution using more complex cryptography than ours~\cite{Beer2024}. It
 assigns the central bank responsibility for covering double-spent values, which
-can inflate the total value in the system. We instead equip users with a secure
-element, to prevent double spending rather than only detect it, refuse a second
-deposit of the same token, and identify the party responsible.
+can inflate the total value in the system. We instead equip users with a secure element to prevent double spending rather
+than only detect it. The central bank refuses a second deposit of the same
+token, and the auditor identifies the party responsible.
 
 \Cref{tab:offline-related-comparison} compares our scheme with the offline
 payment schemes closest to it. All of the ecash schemes listed are offline in
