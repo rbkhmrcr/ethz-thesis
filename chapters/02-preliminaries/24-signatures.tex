@@ -77,6 +77,5 @@ negligible for every PPT adversary $\adv$.
 
 Strong unforgeability under chosen-message attack (sUF-CMA) is defined by the
 same experiment except that the oracle stores the pairs $(\msg, \signature)$ it
-returns, and any valid pair that was not returned counts as a forgery. Every
-scheme in this thesis needs only EUF-CMA security of the signature schemes it
-builds on.
+returns, and any valid pair that was not output by the oracle counts as a
+forgery. EUF-CMA is sometimes called weak unforgeability (wUF-CMA).

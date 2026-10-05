@@ -12,7 +12,8 @@ verifier.
 Each party's responsibilities fix the building block it needs. The
 registration authority only links a public key to a tag, so an existentially
 unforgeable signature scheme is enough. Presentations should show one short
-object, so issuers' signatures must aggregate. Ordinary aggregate signatures
+object, so issuers' signatures must aggregate. Ordinary aggregate signatures,
+which combine signatures by several signers on different messages into one,
 would let two users pool their credentials, and multi-signatures require every
 signer to sign the same message, while issuers sign different attributes.
 Tag-based aggregation combines only signatures under one tag, without issuers

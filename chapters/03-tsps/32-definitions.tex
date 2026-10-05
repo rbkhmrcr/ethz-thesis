@@ -4,17 +4,15 @@ A threshold structure-preserving signature scheme distributes the signing key of
 an SPS scheme $\SPS$ between $n$ signers, so that any $t+1$ of them can jointly produce a signature, and no
 $t$ of them can produce one alone.
 
-The signers are the only participants in the protocol. They communicate over
-authenticated point-to-point channels, together with a broadcast channel that
-delivers the same message to every signer. There is no trusted dealer to
-generate the key and hand out its shares, so the signing key is never held in
-full by any party. A verifier holds only the public key, and needs to know neither $n$, nor
-$t$, nor which signers took part. Signers may be arbitrarily malicious,
-deviating from the protocol at will, and may collude to forge signatures or to
-recover the signing key. We write $\Cor$ for the set of corrupted signers and
-$\mathcal{H}$ for its complement. We consider static corruption: the adversary
-chooses which signers to corrupt before key generation, subject to $|\Cor|
-\leq t$. Under adaptive corruption, it chooses them during protocol execution.
+Signers communicate over authenticated point-to-point channels, together with a
+broadcast channel. A verifier holds the public key, and needs to know neither
+$n$, nor $t$, nor which signers took part. Signers may be malicious, and may
+collude to forge signatures or to recover the signing key. We write $\Cor$ for
+the set of corrupted signers and $\mathcal{H}$ for its complement. We consider
+static corruption: the adversary chooses which signers to corrupt before key
+generation, subject to $|\Cor| \leq t$. \Cref{sec:tsps-adaptive} extends this to
+adaptive corruption, where the adversary chooses them during protocol
+execution.
 
 \subsection{Structure-preserving signature schemes}\label{sec:tsps-sps}
 
@@ -86,9 +84,13 @@ signature shares from a set $Q$ of $t+1$ signers, outputs a signature
 $\SPSsig$, without interaction.
 
   \item[$\{0,1\} \leftarrow \TSPSverify(\pk, \vec{\msg}, \SPSsig)$ :] Equal to
-$\SPSverify$.
+$\SPSverify(\pk, \vec{\msg}, \SPSsig)$.
 
 \end{description}
+
+This follows the syntax of threshold signatures with
+preprocessing~\cite{C:BCKMTZ22}, except that our offline phase is a joint
+protocol between the signers rather than a local step.
 
 \paragraph{Correctness.} A threshold SPS scheme is correct if the following holds
 for all $(\ell, t, n)$ with $n > t$, every $(\shr{\sk}, \pk)$ output by
@@ -104,74 +106,64 @@ every set $Q \subseteq [1,n]$ of $t+1$ signers:
 \end{equation*}
 
 \paragraph{Unforgeability.} Threshold signatures have a hierarchy of
-unforgeability notions~\cite{C:BCKMTZ22}.
+unforgeability notions, starting from TS-UF-0, which counts a forgery only if no
+honest signer signed the message~\cite{C:BCKMTZ22}. TS-UF-1 counts a forgery
+whenever fewer than $t+1-|\Cor|$ honest signers signed it, so that the adversary
+never held $t+1$ shares on that message. The two notions are equivalent when the
+adversary corrupts $t$ signers. TS-UF-1 is our target, as no signature should
+exist unless enough honest signers agreed to that message. Both notions are
+defined for non-interactive threshold signature schemes, with the adversary
+collecting the signature shares~\cite{C:BCKMTZ22}.
 
-TS-UF-0 counts a forgery only if no honest signer signed the message. TS-UF-1
-counts a forgery whenever fewer than $t+1-|\Cor|$ honest signers signed it, so
-that the adversary never held $t+1$ shares on that message. The two notions are
-equivalent when the adversary corrupts $t$ signers, and TS-UF-1 is stronger when
-it corrupts fewer. TS-UF-1 is our target, and is what a certifier needs, as no
-signature should exist unless enough honest signers agreed to that message. Both
-notions are defined for non-interactive threshold signature schemes, with a
-leader, played by the adversary, that collects the signature
-shares~\cite{C:BCKMTZ22}.
-
-\Cref{exp:ts-uf-1} gives the TS-UF-1 experiment as originally
-defined~\cite{C:BCKMTZ22}. The only change we make is that $t+1$ signers are
-needed to sign, rather than $t$, to match the rest of this chapter. The other
-symbols in the box are local to it.
+\Cref{exp:ts-uf-1} gives the TS-UF-1 experiment of~\cite{C:BCKMTZ22} in the
+notation of this chapter, with $t+1$ signers needed to sign rather than $t$.
 
 \begin{experimentbox}{Threshold signature schemes: TS-UF-1~\cite{C:BCKMTZ22}.}{ts-uf-1}
 
   \begin{enumerate}
 
-    \item The adversary outputs a set $\mathsf{CS} \subseteq [1, n_s]$ of
-corrupted servers with $|\mathsf{CS}| \leq t$. The challenger samples $\mathsf{H} \sample
-\mathsf{HF}$, runs $(\mathsf{vk}, \mathsf{aux}, \mathsf{sk}_1, \ldots,
-\mathsf{sk}_{n_s}) \sample \algo{Kg}[\mathsf{H}]$, sets $\mathsf{HS} := [1, n_s]
-\setminus \mathsf{CS}$, stores $\mathsf{sk}_i$, $\mathsf{vk}$ and $\mathsf{aux}$
-in the state $\mathsf{st}_i$ of every $i \in \mathsf{HS}$, and sends
-$\mathsf{vk}$, $\mathsf{aux}$ and $\{\mathsf{sk}_i\}_{i \in \mathsf{CS}}$ to
+    \item The adversary outputs $\Cor \subseteq [1, n]$ with $|\Cor| \leq t$,
+and the challenger sets $\mathcal{H} := [1, n] \setminus \Cor$. It runs $(\pk,
+\algo{aux}, \sk_1, \ldots, \sk_n) \sample \TSgen^{\hash}(\secparam, t, n)$, stores
+$\sk_h$, $\pk$ and $\algo{aux}$ in the state $\algo{st}_h$ of every $h \in
+\mathcal{H}$, and sends $\pk$, $\algo{aux}$ and $\{\sk_h\}_{h \in \Cor}$ to
 $\adv$.
 
     \item The adversary is given oracle access to the following:
 
       \begin{description}
 
-	\item[$\algo{PPO}(i)$:] If $i \notin \mathsf{HS}$, $\adv$ loses. Otherwise
-run $(\mathsf{pp}, \mathsf{st}_i) \sample \algo{SPP}[\mathsf{H}](\mathsf{st}_i)$, add
-$\mathsf{pp}$ to $\mathsf{PP}_i$, and return $\mathsf{pp}$.
+	\item[$\mathcal{O}_{\algo{Pre}}(h)$:] If $h \notin \mathcal{H}$, $\adv$
+loses. Otherwise run $(\algo{pp}, \algo{st}_h) \sample
+\TSpre^{\hash}(\algo{st}_h)$ and return $\algo{pp}$.
 
-	\item[$\algo{PSignO}(i, \mathsf{lr})$:] Let $M = \mathsf{lr.msg}$. If
-$\mathsf{lr.SS} \not\subseteq [1, n_s]$ or $i \notin \mathsf{HS} \cap
-\mathsf{lr.SS}$, $\adv$ loses. Otherwise run $(\mathsf{psig}, \mathsf{st}_i)
-\sample \algo{PS}[\mathsf{H}](\mathsf{lr}, i, \mathsf{st}_i)$, add $i$ to $S_1(M)$ if
-$\mathsf{psig} \neq \perp$, and return $\mathsf{psig}$.
+	\item[$\mathcal{O}_{\algo{PSign}}(h, \vec{\msg}, Q)$:] If $Q \not\subseteq
+[1, n]$ or $h \notin \mathcal{H} \cap Q$, $\adv$ loses. Otherwise run
+$(\SPSsig_h, \algo{st}_h) \sample \TSpsign^{\hash}(\vec{\msg}, Q, h,
+\algo{st}_h)$, add $h$ to $S(\vec{\msg})$ if $\SPSsig_h \neq \perp$, and return
+$\SPSsig_h$.
 
-	\item[$\algo{RO}(x)$:] Return $\mathsf{H}(x)$.
+	\item[$\mathcal{O}_{\hash}(x)$:] Return $\hash(x)$.
 
       \end{description}
 
-    \item The adversary outputs $(M, \mathsf{sig})$.
+    \item The adversary outputs $(\vec{\msg}^\star, \SPSsig^\star)$.
 
   \end{enumerate}
 
-  $\adv$ wins the experiment if $\algo{Vf}[\mathsf{H}](\mathsf{vk}, M, \mathsf{sig}) = 1$
-and $|S_1(M)| < t + 1 - |\mathsf{CS}|$.
+  $\adv$ wins the experiment if $\TSverify^{\hash}(\pk, \vec{\msg}^\star,
+\SPSsig^\star) = 1$ and $|S(\vec{\msg}^\star)| < t + 1 - |\Cor|$.
 
 \end{experimentbox}
 
-We adapt this experiment to our setting. In the original, preprocessing and
-signing are both local steps, and each signer sends its output only to the
-leader. Our signing is local too, but our offline (preprocessing) phase is an
-MPC protocol between all signers. So our offline oracle runs $\TSPSoffsign$ with
-$\adv$ acting for $\Cor$, and returns the view of the corrupted signers. There
-is no leader, as $\adv$ calls the honest signers directly, and no random oracle.
-An honest signer uses each session for one message only, since reusing a state
-reuses the signing randomness.
-
-The experiment idealises key generation, with the challenger
-running $\TSPSgen$, as in the existing definitions~\cite{C:BCKMTZ22,C:CriKomMal23}.
+\Cref{exp:tsps-ts-uf-1} adapts this experiment to our setting. Our offline
+oracle runs $\TSPSoffsign$ between all signers, with $\adv$ acting for $\Cor$,
+and returns the view of the corrupted signers. Our online oracle runs
+$\TSPSonsign$ for one honest signer. There is no leader, since $\adv$ calls the
+honest signers directly. There is no random oracle, since our schemes do not use
+one. Each session is used for one message only, since reusing a state reuses the
+signing randomness. The challenger runs $\TSPSgen$, idealising key generation as
+in the existing definitions~\cite{C:BCKMTZ22,C:CriKomMal23}.
 
 The advantage of a PPT adversary $\adv$ is defined as follows:
 %
@@ -225,52 +217,37 @@ $\vec{\msg}$.
 
 \end{experimentbox}
 
-\paragraph{Adaptive corruption.} In the adaptive variant, adp-TS-UF-1, the
-adversary also has the corruption oracle of Crites, Komlo and
-Maller~\cite{C:CriKomMal23}. On $\mathcal{O}_{\algo{Cor}}(h)$, the oracle
-returns $\perp$ if $h \in \Cor$ or $|\Cor| = t$. Otherwise it moves $h$ from
-$\mathcal{H}$ to $\Cor$, and returns $\sk_h$ together with every
-$\state_{\mathsf{sid},k}$. The winning condition is unchanged, with $\Cor$ the
-set at the end of the experiment, and we write
-$\Adv_{\TSPS, \adv}^{\mathsf{adp\text{-}TS\text{-}UF\text{-}1}}(\secparam)$
-for the advantage. Returning only key and state shares assumes that honest
-signers erase the intermediate shares of the offline phase. Crites, Komlo and
-Maller use this oracle with the winning condition of TS-UF-0, and we use it with
-that of TS-UF-1.
-
 We prove that our construction is TS-UF-1 secure in
 \Cref{sec:tsps-security}.
 
 \subsection{Secure multiparty computation}\label{sec:tsps-mpc}
 
-We describe our schemes as sequences of calls to a secure multiparty
-computation protocol. Let $\alpha \in \Zp$ be a secret value
-shared between the $n$ signers, such that any $t+1$ of them can reconstruct it
-by a pre-defined linear combination. We write $\shr{\alpha}$ for such a sharing:
-the vector $(\alpha_1, \ldots, \alpha_n)$ in which $\alpha_h$ is the share held
-by signer $h$, and we use the same notation $\shr{a}$ for a
-sharing of a group element $a \in \group{}$, where $\group{}$ is either source
-group. We assume this notation
-incorporates the authentication components that malicious security requires,
-which we otherwise abstract away.
+We describe our schemes as sequences of calls to interfaces of a secure
+multiparty computation protocol. For a secret value $\alpha \in \Zp$ shared
+between $n$ parties, such that any $t+1$ of them can reconstruct it by a
+pre-defined linear combination, we write $\shr{\alpha}$ for the vector
+$(\alpha_1, \ldots, \alpha_n)$ in which $\alpha_h$ is the share held by party
+$h$. We use the same notation $\shr{a}$ for a sharing of a group element $a \in
+\group{}$, where $\group{}$ is either source group.
 
 A group element $a$ is shared in the group: the shares of $a$ are
 themselves elements of $\group{}$, and reconstruction combines them with the
 group operation, as a product of shares raised to fixed coefficients, so that
 the linear operations below remain local.
 
-The authentication information means that a
-modified share is detected at opening. In protocol
-boxes, $\shr{\alpha}$ also stands for the signer's own share.
+We assume this notation incorporates the authentication components that
+malicious security requires, which we otherwise abstract away. They mean that a
+modified share is detected at opening. In protocol boxes, $\shr{\alpha}$ also
+stands for the party's own share.
 
-The protocol provides the following interfaces, each run by all signers
+The protocol provides the following interfaces, each run by all parties
 together. The interfaces over $\group{}$ exist once for each source group, and
 we write $\algo{ExpGrp}_1$ for the one over $\group{1}$.
 
   \begin{description}
 
     \item[$\shr{\alpha} \sample \algo{RandShare}()$ :] Outputs a sharing of a
-uniform $\alpha \sample \Zp$ that no signer learns.
+uniform $\alpha \sample \Zp$ that no party learns.
 
     \item[$\shr{\gamma} \sample \algo{Mul}(\shr{\alpha}, \shr{\beta})$ :] Outputs
 a sharing of $\gamma = \alpha\beta$.
@@ -283,15 +260,15 @@ sharing of $\alpha \in \Zp$ and a sharing of $b \in \group{}$, outputs a sharing
 of $c = b^\alpha$.
 
     \item[$\alpha \leftarrow \algo{Open}(\shr{\alpha})$ :] Reconstructs $\alpha$
-and gives it to every signer, or to a designated party. Applies equally to a
+and gives it to every party, or to a designated one. Applies equally to a
 sharing of a group element.
 
   \end{description}
 
 
-Linear operations are not interfaces, since they need no interaction. Given
+Linear operations need no interaction, and are not exposed as interfaces. Given
 sharings $\shr{\alpha}$, $\shr{\beta}$ and public $\phi, \psi, \theta \in \Zp$,
-each signer applies the combination to its own shares to obtain the following:
+each party applies the combination to its own shares to obtain the following:
 %
 \begin{equation*}
 %
@@ -300,10 +277,8 @@ each signer applies the combination to its own shares to obtain the following:
 %
 \end{equation*}
 %
-Under additive sharing, only one designated signer adds the
-public $\theta$, and likewise multiplies by the public $d$ below.
 In a group, given sharings $\shr{a}$, $\shr{b}$ and a public group element $d$,
-each signer obtains the following:
+each party obtains the following:
 %
 \begin{equation*}
 %
@@ -311,6 +286,8 @@ each signer obtains the following:
 %
 \end{equation*}
 %
+Under additive sharing, only one designated party adds the public $\theta$, or
+multiplies by the public $d$, and the others leave their shares unchanged.
 Raising a public group element to a shared exponent gives a
 sharing of the result~\cite{LC:ADEO21}. For a public $d$, this is
 the following:
@@ -322,25 +299,23 @@ the following:
 \end{equation*}
 %
 
-$\algo{ExpGrp}$ raises a shared group element to a shared exponent. This is
-needed when the secret key contains group elements that signing raises to
-shared exponents.
+$\algo{ExpGrp}$ raises a shared group element to a shared exponent.
 
 $\algo{Inv}$ is built from $\algo{Mul}$ and
-$\algo{Open}$. The signers sample $\shr{\beta} \sample \algo{RandShare}()$, open
+$\algo{Open}$. The parties sample $\shr{\beta} \sample \algo{RandShare}()$, open
 $\gamma = \alpha\beta$, which is uniform and so reveals nothing, and take
 $\shr{\alpha^{-1}} = \gamma^{-1}\shr{\beta}$. Where a scheme samples from
-$\Zp^*$, the signers sample from $\Zp$ and abort if an opened $\gamma$ is zero,
+$\Zp^*$, the parties sample from $\Zp$ and abort if an opened $\gamma$ is zero,
 which happens with probability $1/p$. Where no inverse is taken, sampling from
 $\Zp$ instead of $\Zp^*$ changes the distribution only negligibly.
 
 Finally, we require the MPC protocol to be secure with abort against up to $t$
-statically corrupted signers, or adaptively corrupted signers for adp-TS-UF-1,
-in the standard simulation-based sense~\cite{EPRINT:Lindell16}. For every
-adversary controlling the corrupted signers, there is a PPT simulator $\simu$
-that interacts with the adversary in place of the honest signers, given only the
-outputs of the corrupted signers and the values opened. Corrupted signers may
-make a call return $\bot$ to every honest signer, but cannot make it return a
-wrong output. We write $\Adv^{\mathsf{mpc}}(\secparam)$ for the largest
-advantage of a PPT distinguisher between a real execution of $\TSPSoffsign$ and
-one simulated by $\simu$.
+statically corrupted parties, in the standard simulation-based
+sense~\cite{EPRINT:Lindell16}. Security with abort means that corrupted parties
+may make a call return $\bot$ to every honest party, but cannot make it return
+a wrong output. For every adversary controlling the corrupted parties, there is
+a PPT simulator $\simu$ that interacts with the adversary in place of the honest
+parties, given only the outputs of the corrupted parties and the values opened.
+We write $\Adv^{\mathsf{mpc}}(\secparam)$ for the largest advantage of a PPT
+distinguisher between a real execution of a sequence of interface calls and one
+simulated by $\simu$.

@@ -20,7 +20,7 @@ cores. Each time is the median of 100 repetitions.
     \midrule
     $\AACgen$ & 22.5 & $\crs$ & 28912 \\
     $\AACregister$, user & 0.149 & registration request & 128 \\
-    $\AACregister$, RA & 0.807 & $\regcred$ & 320 \\
+    $\AACregister$, registration authority & 0.807 & $\regcred$ & 320 \\
     $\AACissue$, user & 0.0756 & issuance request & 440 \\
     $\AACissue$, issuer & 2.94 & $\cred$ & 192 \\
     $\AACaggregate$ & 0.543 & $\aggcred$ & 3224 \\
@@ -40,7 +40,7 @@ cores. Each time is the median of 100 repetitions.
   \caption[Aggregate credentials: times and sizes]{Time of each algorithm and
 size of its output, for $n = 128$ issuers and $k = 64$ disclosed attributes.
 $\AACregister$ and $\AACissue$ are split into the computation of each
-party, with RA the registration authority. The
+party. The
 $\ATS$ rows sign single messages under one tag, with $\ATSverifyagg$ over
 $k = 64$ signatures. $\ATSaggregate$ takes the time of $\AACaggregate$, and an
 aggregate $\ATS$ signature has the size of a single one. The

@@ -3,45 +3,53 @@
 \rebekah{rerun all MPC benchmarks on a big server before submission; the
 current numbers are from a MacBook Air, some overnight and some during the day,
 so they are noisy}
-Our implementation builds on MP-SPDZ, a framework for implementing MPC with
-preprocessing~\cite{CCS:Keller20}. MP-SPDZ is built for MPC consisting of
-exclusively elements of and operations in $\Zp$. For
-the protocols of this chapter, we also need operations between elements
-of $\group{1}$ and $\group{2}$. We benchmark both the honest-majority setting,
-$t < n/2$, and the dishonest-majority setting, $t < n$, using ATLAS and MASCOT
-respectively~\cite{C:GLOPS21,CCS:KelOrsSch16}. ATLAS uses Shamir's secret sharing, and
-MASCOT makes its multiplication triples by oblivious transfer. Any MPC protocol
-with the interfaces of our schemes can be used. Neither protocol is robust, as
-both are only secure with abort against malicious signers, and neither is
-proven secure against adaptive corruption, so \Cref{lem:tsps-adaptive} does not
-apply to them.
+\paragraph{Instantiating MPC.} Our implementation builds on
+MP-SPDZ~\cite{CCS:Keller20}. We benchmark the honest-majority setting, $t <
+n/2$, with ATLAS, and the dishonest-majority setting, $t < n$, with
+MASCOT~\cite{C:GLOPS21,CCS:KelOrsSch16}. ATLAS uses Shamir's secret sharing, where
+shares are points on a random polynomial of degree $t$ whose constant term is
+the secret~\cite{Shamir79}. MASCOT makes its multiplication triples by
+oblivious transfer, in which a receiver learns one of two messages without the
+sender learning which~\cite{C:EveGolLem82}. Both are secure
+with abort against malicious parties, so neither is robust, and neither is
+proven secure against adaptive corruption. MASCOT meets the assumptions of our
+theorems. MP-SPDZ implements ATLAS only against honest but curious parties,
+though, so the ATLAS rows show the cost of an honest majority without being
+covered by our theorems~\cite{CCS:Keller20}.
 
-Our theorems assume static corruption and an MPC protocol that is secure with
-abort against malicious signers. MASCOT provides this with a dishonest majority,
-so the theorems cover the MASCOT rows. The ATLAS protocol provides it with an
-honest majority, but its implementation in MP-SPDZ is only secure against
-honest but curious signers~\cite{CCS:Keller20}. So the ATLAS rows show the cost
-of the honest-majority setting, but are not covered by our theorems.
+\paragraph{Extending MP-SPDZ.} MP-SPDZ computes only on elements of $\Zp$. We
+add sharings of elements of $\group{1}$ and $\group{2}$, with their
+authentication information, and $\algo{ExpGrp}$ with mixed triples. The groups
+are those of BLS12-381, a pairing-friendly curve with around 128-bit security,
+implemented with the RELIC library~\cite{relictoolkit}.
 
-We add to MP-SPDZ sharings of group elements with their authentication
-information, and $\algo{ExpGrp}$ with mixed triples. The groups are those of
-BLS12-381, implemented with RELIC~\cite{relictoolkit}. As baselines, we implement the centralised $\AGHO$ and
-$\KPW$ schemes and two existing threshold SPS schemes in Go with gnark-crypto, with a trusted dealer for the threshold
-schemes~\cite{AC:CKPSS23,PKC:MMSST24,gnark-crypto}. The tables call these two
-schemes CKPSS23 and MMSST24.
+\paragraph{Setup.} All schemes sign vectors of $\ell = 2$ elements of
+$\group{1}$. ATLAS runs with $n = 2t+1$ and MASCOT with $t = n-1$. All parties
+run on one MacBook Air with an Apple M2 and 16~GB of RAM, one thread each, over
+authenticated channels on that machine. Each timed call starts from empty
+preprocessing, so the offline and key generation times include making triples.
+We report the median of 100 repetitions after 10 warm-up calls, for party $p_1$.
+In the tables, the interquartile range is within 5\% of the median for all but
+five measurements, and within 16\% for all.
 
-All schemes sign vectors of $\ell = 2$ elements of $\group{1}$. ATLAS runs with
-$n = 2t+1$ and MASCOT with $t = n-1$, and the tables are at $n = 5$. Each party
-runs in one thread, and all parties run on one MacBook Air with an Apple M2 and
-16~GB of RAM, over authenticated channels on that machine. Each timed call starts
-from empty preprocessing, so the times of the offline phase and of key
-generation include making their triples. We report the median of 100
-repetitions after 10 warm-up calls, for party $p_1$. In the tables, the
-interquartile range is within 5\% of the median for all but five measurements,
-and within 16\% for all.
-\Cref{tab:tsps-comp} compares the parameters of the schemes, and
-\Cref{tab:tsps-benchmarks,tab:tsps-comms}
-give their times, communication and sizes.
+\paragraph{Results.} \Cref{tab:tsps-comp} compares our schemes with the
+threshold SPS schemes CKPSS23 and MMSST24. We implement these, with a trusted
+dealer, and the centralised $\AGHO$ and $\KPW$ schemes in Go with
+the gnark-crypto library~\cite{AC:CKPSS23,PKC:MMSST24,gnark-crypto}.
+\Cref{tab:tsps-benchmarks,tab:tsps-comms} give times, communication and sizes at
+$n = 5$. The online phase sends nothing, and its time is comparable to
+centralised signing. All interaction is in key generation and the offline
+phase, where MASCOT costs far more than ATLAS.
+\Cref{fig:tsps-n-times,fig:tsps-n-comm} show that communication grows linearly
+in $n$, and that the online phase stays below 3~ms up to eleven parties.
+
+CKPSS23 and MMSST24 have no offline phase, and each signer sends one signature
+share of 96 or 384 bytes to the combiner. \Cref{fig:tsps-baselines} compares
+them with our schemes, which move the extra cost to before the message is known.
+Threshold $\AGHO$ has signatures of three group elements instead of the seven of
+MMSST24, and verifies in 2.93~ms instead of 4.18~ms, but is secure only in the
+GGM. CKPSS23 has smaller signatures, but each signed element needs a counterpart
+in the second group, which on BLS12-381 triples the message size.
 
 \begin{table}[htbp] \centering \small \setlength{\tabcolsep}{3pt}
 \begin{tabular}{l l l l l}
@@ -56,10 +64,10 @@ Threshold $\KPW$ & SXDH & $(\ell+7)|\group{2}|$ & $6|\group{1}| + |\group{2}|$ &
 \end{tabular}
 \caption[Comparison of threshold SPS schemes]{Threshold structure-preserving
 signature schemes: the assumption each is proven under, the sizes of a public key
-and a signature, and the number of pairings in verification. All sign vectors of
-$\ell$ elements of $\group{1}$, except CKPSS23, which needs
-each message element in both source groups. ROM is the random oracle model, and
-PS the assumption of Pointcheval and Sanders~\cite{RSA:PoiSan16}.}
+and a signature, and the number of pairings in verification. Our schemes and MMSST24
+sign vectors of $\ell$ elements of $\group{1}$, and CKPSS23 needs each message
+element in both source groups. ROM is the random oracle model, and
+PS the interactive assumption of Pointcheval and Sanders~\cite{RSA:PoiSan16}.}
 \label{tab:tsps-comp} \end{table}
 
 \begin{table}[htbp] \centering \small \setlength{\tabcolsep}{4pt}
@@ -79,12 +87,11 @@ MMSST24~\cite{PKC:MMSST24} & & 6.47 & & & 1.26 & 0.46--0.90 & 4.18 \\
 \bottomrule
 \end{tabular}
 \caption[Threshold SPS schemes: time]{Time in ms for party $p_1$ at $n = 5$ and
-$\ell = 2$, with $t = 2$ for ATLAS and $t = 4$ for MASCOT. For our schemes,
-batched is the offline time per state when 16 states are made together,
-signing is $\TSPSonsign$, and verification is that of the underlying scheme. The
-centralised $\AGHO$ and $\KPW$ schemes follow, then the prior threshold SPS
-schemes, for which key generation is by a trusted dealer, signing is computing one
-signer's signature share, and combining is given for $t = 2$ and $t = 4$.}
+$\ell = 2$, with $t = 2$ for ATLAS and $t = 4$ for MASCOT. Batched is the
+offline time per state when 16 states are made together. For our schemes,
+signing is $\TSPSonsign$ and verification is that of the underlying SPS scheme.
+For CKPSS23 and MMSST24, key generation is by a trusted dealer, signing computes
+one signer's share, and combining is given for $t = 2$ and $t = 4$.}
 \label{tab:tsps-benchmarks} \end{table}
 
 \begin{table}[htbp] \centering \small \setlength{\tabcolsep}{4pt}
@@ -104,16 +111,10 @@ $\KPW$ & ATLAS & 2.7 & 4.2 & 1.6 & 873 & 486 & 391 & 391 & 391 \\
 $p_1$ of threshold $\AGHO$ and threshold $\KPW$ in each phase at $n = 5$, and sizes in bytes of the public key, one
 signer's key share, state share and signature share, and the signature, both at
 $\ell = 2$. The online phase sends nothing. Every party opens the signature when
-combining, so it sends its share to all others. MASCOT shares carry a MAC share,
+combining, so it sends its share to all others. MASCOT shares carry a share of a
+message authentication code (MAC),
 which doubles their size.}
 \label{tab:tsps-comms} \end{table}
-
-The online phase sends nothing in any of the four settings, and its time is
-comparable to centralised signing. All interaction is in the offline phase and
-in key generation, and there MASCOT is far more expensive than ATLAS. Batching
-lowers the offline time per signature. \Cref{fig:tsps-n-times,fig:tsps-n-comm} show time and communication
-against the number of parties. Communication grows linearly in $n$, and the
-online phase stays below 3~ms up to eleven parties.
 
 \begin{figure}[htbp] \centering
 \includegraphics[width=\textwidth]{chapters/03-tsps/tsps-n-times.pdf}
@@ -135,13 +136,3 @@ generation and offline signing. $\TSPSonsign$ sends nothing and is not shown.} \
 centralised schemes, against the number of parties $n$, at $\ell = 2$ and $t =
 n-1$, median.} \label{fig:tsps-baselines} \end{figure}
 
-The threshold SPS schemes CKPSS23 and MMSST24 have no offline phase. Each signer sends one signature share of 96 or 384 bytes to the
-combiner.
-\Cref{fig:tsps-baselines} compares them against the number of parties. Our
-schemes move the extra cost to before the message is known.
-Compared with MMSST24, threshold $\AGHO$ has signatures
-of three group elements instead of seven, and verifies in 2.93~ms instead of
-4.18~ms, but is secure in the GGM rather than under SXDH~\cite{PKC:MMSST24}.
-
-CKPSS23 has smaller signatures, but each signed element needs a counterpart in
-the second group, which on BLS12-381 triples the message size~\cite{AC:CKPSS23}.

@@ -1,22 +1,18 @@
 \section{Construction}\label{sec:tsps-construction}
 
-We construct a threshold SPS scheme generically, from an SPS scheme $\SPS$
-whose signing algorithm is decomposable and an MPC protocol with the interfaces
-of \Cref{sec:tsps-mpc}. The signing key of $\SPS$ is secret-shared among the
-$n$ signers, who never reconstruct it.
+We construct a threshold SPS scheme generically from an SPS scheme $\SPS$ with
+decomposable signing, defined below, and an MPC protocol with the interfaces of
+\Cref{sec:tsps-mpc}.
 
 \paragraph{Setup.} The signers agree in advance on $(\ell, t, n)$ and the
-pairing groups, and abort if any call to $\algo{MPC}$ returns $\bot$.
+pairing groups.
 
 \paragraph{Key generation and verification.} Key generation runs $\SPSgen$
-under the MPC protocol, a direct application of generic MPC that inherits its
-security properties. Our proof does not cover this step explicitly, as it
-focuses on the separation of signing into offline and online phases.
-Verification is $\SPSverify$ unchanged, since it uses no
+under the MPC protocol. Verification is $\SPSverify$ unchanged, since it uses no
 secret shares, and the distributions of signatures are the same in the threshold
 and non-threshold cases.
 
-Evaluating $\SPSsign(\sk, \vec{\msg})$ under MPC, with the message as one more
+\paragraph{Signing.} Evaluating $\SPSsign(\sk, \vec{\msg})$ under MPC, with the message as one more
 input, would put every interactive call after the message is known. We instead
 split signing into an offline phase, which makes every interactive call before
 the message is known, and an online phase, which is local. This depends on the
@@ -41,7 +37,9 @@ with a linear operation on its own shares, so the online phase is local. Not
 every signature scheme has this form. If the message appears inside an inverse,
 for example, signing needs an interactive call once the message is known. The
 definition does not use the structure-preserving property, so the construction
-applies to any signature scheme of this form.
+applies to any signature scheme with decomposable signing. We also assume that every group element of
+$\pk$ and $\sk$ is a fixed generator raised to a field element that $\SPSgen$
+samples or derives, as in $\AGHO$ and $\KPW$.
 
 \Cref{prot:tsps-generic} gives the construction $\TSPS$, applied to an SPS
 scheme $\SPS$.
@@ -62,8 +60,8 @@ field elements it derives is a call to $\algo{Mul}$.
 	\item Compute the shares of the group elements of $\pk$ and $\sk$
 locally, by raising the generators to the shares of their discrete logarithms.
 
-	\item Call $\algo{Open}$ on $\pk$ only, which broadcasts each signer's
-share $\pk_h$ of it.
+	\item Open $\pk$: each signer broadcasts its share $\pk_h$, and every
+signer reconstructs $\pk$.
 
       \end{enumerate}
 
@@ -116,10 +114,9 @@ so the signers keep their
 states in a queue and delete each one once it is used. The offline phase can be
 run repeatedly during quiet periods to build up states for busy ones.
 
-\paragraph{Online signing.} No signer communicates with any other during this phase, and its cost is
-comparable to that of an ordinary invocation of $\SPSsign$.
-
-\paragraph{Combining.} Combining is performed by whichever party is to hold the signature, and needs no
+\paragraph{Online signing and combining.} No signer communicates with any other
+during online signing, and its cost is comparable to that of an ordinary
+invocation of $\SPSsign$. Combining is performed by whichever party is to hold the signature, and needs no
 participation from the signers beyond their having published their shares. The
 holder checks the result with $\TSPSverify$, so a malformed share
 makes this check fail.
@@ -128,14 +125,14 @@ makes this check fail.
 whenever $t+1$ honest signers take part~\cite{EC:GJKR96}. Robustness is a
 property of the MPC protocol, and is not given by security with abort.
 
-Strong unforgeability of the SPS scheme is
+\paragraph{Strong unforgeability.} Strong unforgeability of the SPS scheme is
 not needed, as a TS-UF-1 forgery must be on a message that too few honest
 signers signed, and a new signature on a message that was properly signed does
 not count. Requiring it would rule out rerandomisable schemes.
 
 \begin{theorem}\label{thm:tsps-construction-security} Let $\SPS$ be an EUF-CMA
 secure SPS scheme with decomposable signing, and let the MPC protocol be secure
-with abort against up to $t$ statically corrupted signers, over a
+with abort against up to $t$ statically corrupted parties, over a
 linear $(t+1, n)$ threshold sharing. Let every value opened in $\TSPSoffsign$ be
 masked by a fresh uniform value, and let each component of $c_0$ and each $c_j$
 be computed from its own fresh sharing. For every PPT adversary $\adv$ against the
@@ -155,25 +152,3 @@ queries $\adv$ makes to the offline oracle:
 
 We prove \Cref{thm:tsps-construction-security} in
 \Cref{sec:tsps-proof-construction}.
-
-\begin{lemma}\label{lem:tsps-adaptive} Under the conditions of
-\Cref{thm:tsps-construction-security}, with the MPC protocol secure against up
-to $t$ adaptively corrupted signers, for every PPT adversary $\adv$ against the
-adp-TS-UF-1 security of $\TSPS$ applied to $\SPS$, there is a PPT adversary
-$\advB$ such that the following holds:
-  %
-  \begin{equation*}
-  %
-    \Adv_{\TSPS, \adv}^{\mathsf{adp\text{-}TS\text{-}UF\text{-}1}}(\secparam) \leq \binom{n}{t}
-\cdot \Adv_{\SPS, \advB}^{\mathsf{euf\text{-}cma}}(\secparam) + q \cdot
-\Adv^{\mathsf{mpc}}(\secparam).
-  %
-  \end{equation*}
-  %
-\end{lemma}
-
-We prove \Cref{lem:tsps-adaptive} in \Cref{sec:tsps-adaptive}.
-
-In the adaptive case, the loss is a factor of the number of signers with a
-dishonest majority, and grows exponentially with the number of signers with an
-honest majority.

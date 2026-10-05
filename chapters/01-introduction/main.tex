@@ -69,7 +69,7 @@ attribute values~\cite{NDSS:SABMD19}. The power to certify and the knowledge tha
 have both been shared across issuers, which leads to a worse privacy outcome for
 users.
 
-Multiparty computation allows a function to be computed by multiple mutually
+Secure multiparty computation (MPC) allows a function to be computed by multiple mutually
 distrusting parties, each with a private input. The function is computed on all
 inputs while revealing nothing but the output~\cite{FOCS:Yao86,STOC:GolMicWig87}. This seems to be an instance
 where decentralisation of the protocol leads to a straightforward privacy gain
@@ -102,9 +102,11 @@ that exist in practice.
 
 Systems deployed today to protect user privacy already involve service
 providers, issuers, auditors, validators and other accountable entities with
-operational responsibilities. Privacy Pass, deployed by Cloudflare, and Apple's
-Private Relay use institutional infrastructure while limiting the information
-available to the institutions involved~\cite{PoPETS:DGSTV18,privaterelay2021}.
+operational responsibilities. Privacy Pass, deployed by Cloudflare, lets users skip repeated checks such as
+CAPTCHAs with tokens a server cannot link to their issuance, and Apple's Private
+Relay routes traffic through two relays so that no single one sees both a user's
+address and the sites they visit. Both use institutional infrastructure while
+limiting the information available to the institutions involved~\cite{PoPETS:DGSTV18,privaterelay2021}.
 This thesis explores how modelling such roles explicitly can enable practical
 and efficient systems, and increase our understanding of the goals of private
 and decentralised systems.
@@ -217,7 +219,7 @@ Finally, we study privacy in offline payments. Offline operation improves
 availability and accessibility, but changes how double spending must be handled.
 We develop an offline payment scheme with two defences against double spending.
 The first is prevention: we divide computation between a mobile device and a
-secure element, and the secure element does not allow the same value to be spent
+secure element, a tamper-resistant chip such as those in bank cards, and the secure element does not allow the same value to be spent
 twice. The second is detection: if a secure element is broken and double
 spending occurs, information identifying the double spender can be recovered.
 Payments made by honest users remain unlinkable.

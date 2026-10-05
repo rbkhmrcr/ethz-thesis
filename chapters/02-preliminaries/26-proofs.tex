@@ -74,15 +74,14 @@ proofs produced under that label.
 
 \end{description}
 
-Correctness is as before but over all labels. A proof without a label is a
-proof with the empty label. A labelled proof system that is
+Correctness is then defined as above, over all labels. A labelled proof system that is
 zero knowledge and simulation extractable, as defined below, is what Chase and
 Lysyanskaya call a signature of knowledge, with the label as the signed
 message~\cite{C:ChaLys06}.
 
-Zero knowledge and simulation extractability use two further algorithms: a
-simulator, which produces proofs without a witness, and an extractor, which
-recovers a witness from a proof.
+Zero knowledge and simulation extractability require defining further
+algorithms: simulators, producing proofs without witnesses, and extractors,
+recovering witnesses from proofs. We define the algorithms as follows:
 
 \begin{description}
 
@@ -186,7 +185,8 @@ A labelled proof system is simulation extractable if this advantage is negligibl
 for every PPT adversary $\adv$.
 
 Simulation extractability is a strong form of
-non-malleability~\cite{AC:Groth06}. The condition $(\inst^*, \lbl^*) \notin \Query$ still allows $\adv$ to modify a
+non-malleability, which prevents an adversary from turning proofs it has seen
+into proofs of related statements~\cite{AC:Groth06}. The condition $(\inst^*, \lbl^*) \notin \Query$ still allows $\adv$ to modify a
 simulated proof into another proof for the same statement and label. As a
 witness can be extracted, simulation extractable proof systems are proofs of
 knowledge.

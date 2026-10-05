@@ -89,8 +89,8 @@ Internet Engineering Task Force (IETF)~\cite{EC:BonBoy04a,SCN:AuSusMu06}.
 Further improvements targeted efficiency. The Pointcheval-Sanders signature
 scheme introduces randomisable signatures with sequential aggregation, and
 proves unforgeability in the GGM~\cite{RSA:PoiSan16}. More recently, structure-preserving
-signatures on equivalence classes enable efficient
-proofs, with security proven in the GGM~\cite{JC:FucHanSla19}. Unlinkable
+signatures on equivalence classes, whose signatures also hold for every scalar
+multiple of the signed vector, enable efficient proofs, with security proven in the GGM~\cite{JC:FucHanSla19}. Unlinkable
 proofs of knowledge over a subset of signed messages, building on the
 Pointcheval-Sanders signature scheme, are also proven secure in the
 GGM~\cite{PKC:Sanders20}.
@@ -102,7 +102,7 @@ issuers~\cite{TCC:BCKL08,CCS:CamDriDub17,NDSS:SABMD19}.
 
 A multi-issuer credential system supports selective disclosure and
 pseudonyms~\cite{AC:CDHK15}. It is proven secure in the universal composability
-framework~\cite{FOCS:Canetti01}, with a common reference string. Credentials from different
+framework, with a common reference string~\cite{FOCS:Canetti01}. Credentials from different
 issuers are linked through a pseudonym and not aggregated, so a presentation
 contains one proof per credential.
 
@@ -121,13 +121,15 @@ ART-Sign is a traceable aggregate signature scheme using randomisable tags as
 pseudonyms, from which H\'ebant and Pointcheval build multi-authority
 credentials~\cite{SCN:HebPoi22}. Presentations are of
 constant size, and a designated authority can trace users. The signatures are
-linearly homomorphic, so two signatures by one issuer under one tag and index
+linearly homomorphic, so signatures on two messages combine into a signature on
+any linear combination of them, and two signatures by one issuer under one tag and index
 would let anyone sign any value for that index. Issuers sign at most once per
 tag and index, and keep a record of what they have signed for each user. In a
 bounded variant they instead count the messages signed per tag, and the issuer
 key grows with the bound.
 
-Issuer-hiding multi-authority credentials can also be built from aggregate
+Issuer-hiding multi-authority credentials, where a verifier learns only that
+the issuer lies in a set it accepts, can also be built from aggregate
 signatures with randomisable tags and keys~\cite{CCS:MBGLS23}. The issuers there
 are not stateless either. Either the attributes and issuer keys of a user are fixed
 when the user's tag is created, or each issuer signs only once per tag. The authors name the
@@ -140,10 +142,9 @@ credential, with a constant-size presentation~\cite{EPRINT:GGPR25}. Here, each
 issuer certifies its own attributes instead. Independent authorities can also each sign a user's global
 identity, with one proof per credential~\cite{anada2019decentralized}.
 Credentials can be derived from existing identity documents with zk-SNARKs,
+general-purpose zero-knowledge proofs that are short and quick to verify,
 without new issuer infrastructure, at the cost of a general-purpose proof per
-credential~\cite{SP:RWGM23}. Issuer hiding, where a verifier learns only that an
-issuer lies in a set it accepts, is an orthogonal
-problem~\cite{CANS:BEKRS21,PoPETS:SanTra24}. We would like to address it in
+credential~\cite{SP:RWGM23}. Issuer hiding is an orthogonal problem~\cite{CANS:BEKRS21,PoPETS:SanTra24}. We would like to address it in
 future work.
 
 \paragraph{Comparison.} In ART-Sign the tag is the user's public key, whose
@@ -178,7 +179,8 @@ number of attributes a scheme supports, $k$ the number of attributes disclosed i
 a presentation, $K$ the number of issuers in a presentation, $|$cred$|$ the
 size of the credentials needed for a presentation, and $|$pres$|$ the size of a
 presentation, not counting the disclosed values. The assumptions of the other
-schemes are those of the cited papers.
+schemes are those of the cited papers. BCDH is the bilinear computational
+Diffie-Hellman assumption of \Cref{sec:agg-creds-instantiation}.
 Issuer state is what an issuer has to remember about each user. For HP22 this
 is which tags it has signed for, and for MBGLS23 either the same or the
 attributes and issuer keys fixed in advance.} \label{tab:agg-creds-related} \end{table}

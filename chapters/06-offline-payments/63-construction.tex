@@ -211,8 +211,8 @@ exactly once, and are never opened.
 This is anonymity revocation for a known double spend, not the general-purpose
 auditing of \Cref{chap:txid}. Ecash schemes without an auditor let anyone
 compute a double spender's identity from two payments of the same token, through
-cut and choose, linear equations in the user's secret, or double-spending tags,
-also for transferable tokens, at a higher cost per
+cut and choose, linear equations in the user's secret, or double-spending tags, values that reveal the user's secret if the same token
+is spent twice, also for transferable tokens, at a higher cost per
 payment~\cite{C:ChaFiaNao88,C:Brands93,EC:CamHohLys05,PKC:BCFK15}.\rebekah{baseline:
 implement one auditor-free scheme?}
 
@@ -513,7 +513,7 @@ messages.
 
 The secure element can be any hardware that protects the key and the
 single-use logic together. Smart cards do, while mobile trusted execution
-environments protect keys but not the logic that uses
+environments, isolated parts of a phone's main processor, protect keys but not the logic that uses
 them~\cite{trustzone,secureenclave,javacard,mifare}.
 
 The requirement that $\sk_{\algo{usr}}$ never leave the secure element extends to a recovery

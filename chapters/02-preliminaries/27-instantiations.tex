@@ -61,23 +61,20 @@ DDH cannot hold in a symmetric bilinear group, with $\group{1} = \group{2}$, or
 in a source group with an efficiently computable homomorphism to the other. SXDH
 requires the type III setting.
 
-Some schemes we use are only proven secure in the generic group model
-(GGM)~\cite{EC:Shoup97,IMA:Maurer05}. In the GGM, the adversary sees only
-opaque handles to group elements, and computes on them only through oracles for
-the group operations and the pairing. A proof in the GGM rules out attacks that
-ignore the representation of the group, but gives a weaker guarantee than a
-reduction to a stated assumption. A proof that uses neither random oracles nor
-the GGM is in the standard model. Some assumptions are $q$-type, meaning their
-statement grows with a parameter $q$, typically the number of signing queries.
+Schemes can be proven secure in the generic group model
+(GGM)~\cite{EC:Shoup97,IMA:Maurer05}. In the GGM, the adversary sees
+opaque handles to group elements, and computes on them through oracles for
+the group operations and pairing. A proof in the GGM rules out attacks that
+ignore the representation of the group, giving a weaker guarantee than a
+reduction to a stated assumption. Some assumptions may be $q$-type, meaning their
+statement grows with parameter $q$, typically the number of signing queries.
 
 \subsection{The Pedersen commitment scheme}
 
-The Pedersen commitment scheme in \Cref{prim:pedersen} commits to a field
-element with a single group element~\cite{C:Pedersen91}. It is perfectly hiding,
+The Pedersen commitment scheme, shown in \Cref{prim:pedersen}, commits to a field
+element with a single group element~\cite{C:Pedersen91}. It is perfectly hiding
 and computationally binding under the DL assumption. Binding holds only against
 parties that know no discrete logarithm relation between the elements of $\ck$.
-Where a participant could otherwise choose $\ck$, our instantiations derive it
-from a public seed with a hash function.
 
 \begin{primitivebox}{The Pedersen commitment scheme~\cite{C:Pedersen91}.}{pedersen}
 
@@ -103,14 +100,14 @@ following:
   \com = \prod_{i=1}^{n} \gen_i^{\msg_i} \cdot \hgen^{\openinfo}.
 \end{equation*}
 %
-It is perfectly hiding and binding under the DL assumption in the same way.
+This is also binding under the DL assumption and perfectly hiding.
 
 \subsection{The ElGamal encryption scheme}
 
-The ElGamal encryption scheme in \Cref{prim:elgamal} encrypts group
-elements~\cite{C:ElGamal84}. In $\group{1}$, it is IND-CPA secure under the DDH
-assumption in $\group{1}$. We encrypt field elements $m$ as $\gen^m$, and
-decryption gives back $\gen^m$ rather than $m$.
+The ElGamal encryption scheme, given in \Cref{prim:elgamal}, encrypts group
+elements~\cite{C:ElGamal84}. For messages in $\group{1}$, the scheme is IND-CPA
+secure under the DDH assumption in $\group{1}$. If field elements $m$ are
+encrypted as $\gen^m$, decryption gives back $\gen^m$ rather than $m$.
 
 \begin{primitivebox}{The ElGamal encryption scheme~\cite{C:ElGamal84}.}{elgamal}
 
@@ -131,7 +128,8 @@ return $f_2 / f_1^{\mu}$.
 
 \subsection{The BBS+ signature scheme}\label{sec:prelims-bbs}
 
-The BBS+ signature scheme of \Cref{prim:bbs} signs several messages at
+The BBS+ signature scheme of Boneh, Boyen and Shacham, in the variant of Au,
+Susilo and Mu, given in \Cref{prim:bbs}, can sign several messages at
 once~\cite{C:BonBoySha04,SCN:AuSusMu06}.
 
 \begin{primitivebox}{The BBS+ signature scheme~\cite{SCN:AuSusMu06}.}{bbs}
@@ -230,16 +228,15 @@ following:
 \prod_{i=1}^{k} M_i \cdot \gen_{n+1}^{r}, \ggen\Big).
 \end{equation*}
 %
-This variant is malleable, as a signature on one tuple of group elements is also a
-signature on any other tuple with the same product. It is unforgeable only if
+This variant is malleable, as signatures are valid for all tuples of group
+elements with the same product. It is then unforgeable only if
 the signer signs elements that come with a proof of knowledge of their
 representation in the bases $\gen_1, \ldots, \gen_n$, from which the reduction
 to $q$-SDH extracts the field elements~\cite{SCN:AuSusMu06,EC:TesZhu23b}.
 
 \subsection{Sigma protocols and the Fiat-Shamir transform}\label{sec:prelims-sigma}
 
-Most proof systems in this thesis are Sigma protocols made non-interactive. A
-Sigma protocol for a relation $\rel$, with a statement $\inst$ known to both
+A Sigma protocol for a relation $\rel$, with a statement $\inst$ known to both
 parties and a witness $\witness$ known to the prover, has three moves. The prover sends a first
 message $a$, the verifier replies with a uniform challenge $c$, and the prover
 sends a response $z$. The verifier then checks $z$ against $(\inst, a, c)$.
@@ -249,7 +246,7 @@ requires an efficient extractor that computes a witness from any two accepting
 transcripts $(a, c, z)$ and $(a, c', z')$ with $c \neq c'$. Special
 honest-verifier zero knowledge (SHVZK) requires an efficient simulator that,
 given $\inst$ and $c$, outputs $(a, z)$ distributed as in an honest run with
-challenge $c$~\cite{C:CraDamSch94}.
+challenge $c$~\cite{Damgard10sigma,C:CraDamSch94}.
 
 The Sigma protocol for proof of knowledge of a discrete logarithm proves
 knowledge of $x$ with $h = \gen^x$~\cite{JC:Schnorr91}.
@@ -270,36 +267,25 @@ The verifier accepts if and only if the following holds:
 %
 \end{equation*}
 %
-The same protocol proves knowledge of a representation $h = \prod_i
-\gen_i^{x_i}$, with one response per exponent. We prove several equations over the same witness by
-running the protocol for each in parallel with one shared challenge, so that
-they hold together. In this way we can show, for example, that two group
-elements have the same discrete logarithm.
+The same protocol can prove knowledge of a representation $h = \prod_i
+\gen_i^{x_i}$, with one response per exponent.
 
 The Fiat-Shamir transform makes a Sigma protocol non-interactive. The prover
 computes the challenge itself as $c = \hash(\inst, a, \lbl)$, where $\hash$ is a
 random oracle and $\lbl$ a label~\cite{C:FiaSha86}. A Sigma protocol has
 quasi-unique responses if, for given $(\inst, a, c)$, no efficient prover finds
-two distinct accepting responses. It has unique responses if, for given $(\inst,
+two distinct accepting responses~\cite{INDOCRYPT:FKMV12}. It has unique responses if, for given $(\inst,
 a, c)$, at most one response is accepting, as in the protocol above. If the
 whole statement is hashed, a Sigma protocol with special soundness, SHVZK and
 quasi-unique responses gives a simulation extractable labelled proof system in
-the random oracle model~\cite{INDOCRYPT:FKMV12}. The hash function takes
-group elements and field elements as input, through a fixed encoding of each
-into bit strings.
+the random oracle model~\cite{INDOCRYPT:FKMV12}.
 
-In the random oracle model, the definitions of \Cref{sec:prelims-nizks} are read
-as follows~\cite{CCS:BelRog93,INDOCRYPT:FKMV12}. The common reference string
-is empty, and the trapdoor of $\NIZKsimgen$ is the ability to program the
-random oracle. The simulator samples the challenge and the responses, solves the
-verification equations for the first message, and programs the random oracle at
-the hashed point to return that challenge. The extractor $\NIZKextract$ is not
-straight-line. It rewinds the prover to the hash query that fixed the
-challenge, answers it with a fresh challenge, and extracts the witness from the
-two accepting transcripts by special soundness. This relies on the forking
-lemma~\cite{JC:PoiSte00}. The extractor then depends on the adversary, and
-extraction loses a polynomial factor in the number of hash queries. As the
-extractor rewinds, the security proofs of later chapters are in the standalone
-model of \Cref{sec:prelims-security}, and lose this factor. Online extraction,
-as given by the transform of Fischlin, avoids rewinding at the cost of larger
+In the random oracle model, the simulator programs the random oracle, and the
+extractor rewinds the prover to the hash query that fixed the challenge,
+answers it with a fresh challenge, and applies special
+soundness~\cite{CCS:BelRog93,INDOCRYPT:FKMV12,JC:PoiSte00}. Extraction loses a
+polynomial factor in the number of hash queries, and because it rewinds, the
+security proofs of later chapters are in the standalone model of
+\Cref{sec:prelims-security}. An extractor that does not rewind is called
+straight-line. Fischlin's transform gives one at the cost of larger
 proofs~\cite{C:Fischlin05}.

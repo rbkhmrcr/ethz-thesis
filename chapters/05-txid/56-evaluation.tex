@@ -141,10 +141,11 @@ with $\Max = 2^\ell$ and are on a log scale.} \label{fig:txid-ell-times}
 \caption[Tracing: sizes against $\ell$]{Size against $\ell$ of the first grant message, on a log scale, and of
 a transaction.} \label{fig:txid-ell-sizes} \end{figure}
 
-We compare against Hyperledger Idemix, which is based on Camenisch-Lysyanskaya
-anonymous credentials~\cite{CCS:CamVan02}. It runs over the same library.
+We compare against Hyperledger Idemix, which is built on
+BBS+~\cite{CCS:CamVan02,SCN:AuSusMu06,CDL16}. It runs over the same library.
 \Cref{tab:txid-idemix} compares a transaction with an Idemix signature, with and
-without audit pseudonyms.
+without audit pseudonyms, commitments to the user's enrolment identity and
+revocation handle that an auditor can check.
 
 \begin{table}[htbp] \centering \small
 \caption[Tracing against Idemix]{Per-transaction time in milliseconds and size in bytes, against Hyperledger Idemix, at $\ell = 8$. Idemix sizes are its own serialisation, with

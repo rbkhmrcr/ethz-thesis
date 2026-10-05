@@ -170,7 +170,8 @@ randomness generator $\gen_4$. During registration, the user sends only the grou
 secrets, rather than the secrets themselves. Commitments use the Pedersen
 commitment scheme, given in \Cref{prim:pedersen}, in its form for vectors of
 two field elements, so that one commitment holds both components of $\utk$. Its
-generators are shared with the BBS+ signature scheme. Range proofs use Bulletproofs~\cite{SP:BBBPWM18}.
+generators are shared with the BBS+ signature scheme. Range proofs, which show that a committed value lies
+in an interval, use Bulletproofs~\cite{SP:BBBPWM18}.
 
 BBS+ signs several values at once, can sign values the signer never sees, and
 has a Sigma protocol for proving knowledge of a signature. The variant that signs
@@ -688,7 +689,8 @@ The public tracing key is one group element.
   \item The pseudorandom functions are $\FE(\utk,\epoch) = \HE(\utk,\epoch)$ and
 $\FT(\PTK,\ek,\gamma) = \HT(\ek,\gamma)$. Both are the MiMC block cipher, keyed
 by $\utk$ and by $\ek$ respectively and applied to the input. MiMC is designed
-to be cheap inside an arithmetic circuit~\cite{AC:AGRRT16}.
+to be cheap inside an arithmetic circuit, a statement written as additions and
+multiplications over $\Zp$~\cite{AC:AGRRT16}.
 
   \item $\DS$ is the BBS+ signature scheme of \Cref{prim:bbs} with $n = 2$ and
 generators $\gen_0, \ldots, \gen_3$, on the two field elements $\sk$ and
@@ -724,10 +726,12 @@ Not every hash function is a pseudorandom function. Collision and preimage
 resistance say nothing about outputs looking random, and the random oracle
 heuristic does not help, since we prove statements about the concrete function
 inside a circuit. So we use the MiMC block cipher keyed with the secret, and
-assume that it is a pseudorandom permutation, also against a distinguisher
-holding $\PTK = \gen_2^{\utk}$. Over $\Zp$, a pseudorandom permutation is a
-pseudorandom function up to a loss of $q^2/p$ for $q$
-queries~\cite{EC:BelRog06}. The cryptanalysis of MiMC is of this keyed
+assume that it is a pseudorandom permutation, a keyed permutation no efficient
+distinguisher can tell from a uniformly random one, also against a distinguisher
+holding $\PTK = \gen_2^{\utk}$. The switching lemma says that no one making $q$
+queries can tell a random permutation on $\Zp$ from a random function, except
+with probability about $q^2/p$~\cite{EC:BelRog06}. So a pseudorandom
+permutation is also a pseudorandom function, up to this loss. The cryptanalysis of MiMC is of this keyed
 permutation~\cite{AC:AGRRT16}. Holding $\PTK$ is outside the standard notion,
 so that part of the assumption is ours.
 

@@ -1,19 +1,23 @@
 \section{Instantiation}\label{sec:tsps-instantiation}
 
-This section instantiates the construction of \Cref{sec:tsps-construction}
-twice, with $\AGHO$ and $\KPW$, giving full descriptions of two threshold SPS
-schemes built from the MPC protocol~\cite{C:AGHO11,C:KilPanWee15}. In each case we verify that
+Unlike in later chapters, the construction already works with group and field
+elements, since structure preservation and decomposable signing are properties
+of them. This section fixes the SPS schemes and realises $\algo{ExpGrp}$. It
+gives two instantiations of the construction of \Cref{sec:tsps-construction}.
+One uses the $\AGHO$ SPS scheme, and the other the $\KPW$
+scheme~\cite{C:AGHO11,C:KilPanWee15}. In each case we verify that
 the signing algorithm admits the decomposition the construction requires, and
 give the resulting threshold scheme.
 
-\subsection{Instantiating the MPC protocol}\label{sec:tsps-mpc-inst}
+\subsection{Instantiating $\algo{ExpGrp}$}\label{sec:tsps-mpc-inst}
 
-Most MPC protocols do not provide $\algo{ExpGrp}$, so we build it from
-multiplication triples made in the offline phase, following Smart and Talibi
+The MPC protocols over $\Zp$ that we use do not provide $\algo{ExpGrp}$, so we build it from
+multiplication triples, sharings of uniform $a$, $b$ and $ab$, made in the
+offline phase, following Smart and Talibi
 Alaoui~\cite{C:Beaver91b,IMA:SmaTal19}.
 
 $\algo{ExpGrp}$ consumes a mixed triple $(\shr{\eta}, \shr{f}, \shr{f^\eta})$
-with $\eta \sample \Zp$ and $f \sample \group{}$. The signers open the
+with $\eta \sample \Zp$ and $f \sample \group{}$. The parties open the
 following, which are uniform and reveal nothing:
 %
 \begin{equation*}
@@ -31,19 +35,18 @@ They then compute the following locally:
 %
 \end{equation*}
 %
-where one designated signer adds the public term $\delta^{\epsilon}$. The
-signers obtain a mixed triple from an ordinary triple over $\Zp$ by raising a
+where one designated party adds the public term $\delta^{\epsilon}$. The
+parties obtain a mixed triple from an ordinary triple over $\Zp$ by raising a
 generator to the shares of its second and third entries.
 
 \subsection{Instantiating $\TSPS$ with $\AGHO$}\label{sec:tsps-abe}
 
-There are two AGHO schemes with signatures of three group elements: a strongly
-unforgeable scheme that signs messages in both groups, and a rerandomisable
-scheme for messages in one group only, which is existentially unforgeable in the
-GGM~\cite{C:AGHO11}. We use the second scheme with $\group{1}$ and $\group{2}$ swapped, so that messages are in
-$\group{1}$, and call it $\AGHO$. \Cref{prim:agho} recalls it. Its secret
-key consists only of field elements, and the message enters signing only through
-the terms $\msg_i^{-\mu_i}$. Our threshold version relies on both properties.
+We use the rerandomisable SPS scheme of Abe, Groth, Haralambiev and Ohkubo,
+with $\group{1}$ and $\group{2}$ swapped so that messages are in $\group{1}$,
+and call it $\AGHO$~\cite{C:AGHO11}. \Cref{prim:agho} gives it. Its secret key
+consists only of field elements, so the offline phase needs no $\algo{ExpGrp}$.
+The message enters signing only through the terms $\msg_i^{-\mu_i}$, which gives
+the decomposable form.
 
 \begin{primitivebox}{The $\AGHO$ SPS scheme~\cite{C:AGHO11}.}{agho}
 
@@ -95,7 +98,8 @@ following hold:
 \end{primitivebox}
 
 Writing $\rho =
-1/\omega$ for the signing randomness of $\AGHO$, a signature on $\vec{\msg}$ is as
+1/\omega$ for the signing randomness of $\AGHO$, so that the message terms need
+no inverse, a signature on $\vec{\msg}$ is as
 follows:
 %
 \begin{equation*}
@@ -110,21 +114,19 @@ It has decomposable signing with $c_0$, $c_1$ and $e_{1,i}$ as follows:
 \begin{equation*}
 %
   c_0 = (\widetilde{r}, \widetilde{s}), \quad c_1 = \gen^{\rho}, \quad e_{1,i}
-= -\rho\mu_i,
+= -\rho\mu_i.
 %
 \end{equation*}
-%
-none of which depend on the message.
-Everything the offline phase computes is a field element or a generator raised
-to one, so it needs no $\algo{ExpGrp}$. The costly step is $1/\rho$. Computed
-directly, it takes a multiplication and an opening, and $\tau/\rho$ then takes
-one more multiplication, which makes three rounds. Multiplying $\tau$ by the same
-mask as $\rho$ in the first round gives $\tau/\rho$ once the mask is opened, so
-two rounds suffice. The result is threshold $\AGHO$, given in
-\Cref{prot:tsps-abe}. Since $\rho$ and $\beta$ are both
-sampled from $\Zp$, the opened $\gamma = \rho\beta$ is zero with probability
-about $2/p$. Under adaptive corruption, the signers' shares of $\rho$, $\beta$
-and $\tau\beta$ are among the intermediate shares they are assumed to erase.
+
+Signing needs one inversion, $1/\rho$, for $\widetilde{r}$ and
+$\widetilde{s}$. In the first round, the signers compute $\rho\beta$,
+$\tau\beta$ and every $\rho\mu_i$ with $\algo{Mul}$, for a fresh mask $\beta$.
+In the second, they open $\gamma = \rho\beta$, and then compute $\shr{1/\rho} =
+\gamma^{-1}\shr{\beta}$ and $\shr{\tau/\rho} = \gamma^{-1}\shr{\tau\beta}$
+locally. Threshold $\AGHO$ is given in \Cref{prot:tsps-abe}, and combining and
+verification are as in \Cref{prot:tsps-generic}. Since $\rho$ and $\beta$ are
+both sampled from $\Zp$, the opened $\gamma$ is zero with probability at most
+$2/p$.
 
 \begin{protocolbox}{The threshold structure-preserving signature scheme from AGHO}{tsps-abe}
 
@@ -211,42 +213,15 @@ Each signer does the following:
 
       \end{enumerate}
 
-    \item[$\SPSsig \leftarrow \TSPScombine(\{\SPSsig_h\}_{h \in Q})$ :]
-Reconstruct $\widetilde{r}$, $\widetilde{s}$ and $z$ from the shares of the $t+1$
-signers in $Q$, and return $\SPSsig = (\widetilde{r}, \widetilde{s}, z)$.
-
-    \item[$\{0,1\} \leftarrow \TSPSverify(\pk, \vec{\msg}, \SPSsig)$ :] Return
-$1$ if and only if the following hold:
-      %
-      \begin{equation*}
-      %
-	\pairing(v, \widetilde{r}) = \pairing(\gen, \widetilde{s}), \quad
-\pairing(z, \widetilde{r}) \cdot \prod_{i=1}^{\ell} \pairing(\msg_i, \widetilde{u}_i)
-= \pairing(\gen, \ggen).
-      %
-      \end{equation*}
-
   \end{description}
 
 \end{protocolbox}
 
 \subsection{Instantiating $\TSPS$ with $\KPW$}\label{sec:tsps-kiltz}
 
-\Cref{prim:sps-kiltz} recalls the $\KPW$ SPS scheme~\cite{C:KilPanWee15}. We write
-$k_{i,j}$ for the entry of $\mat{K}$ in row $i$ and column $j$, and
-$\mathsf{T}$ denotes transposition. We write $(\gen, \vec{\msg})$ for the
-vector $(\gen, \msg_1, \ldots, \msg_\ell)$, and $\gen^{\vec{\theta}}$ for
-$(\gen^{\theta_1}, \gen^{\theta_2}, \ldots)$ when $\vec{\theta}$ is a vector of
-field elements. We take products of vectors entry by entry. For vectors
-$\vec{f}$ and $\vec{\widetilde{f}}$ of the same length, with entries in
-$\group{1}$ and $\group{2}$, we write the following:
-%
-\begin{equation*}
-%
-  \pairing(\vec{f}, \vec{\widetilde{f}}) = \prod_{i} \pairing(f_i,
-\widetilde{f}_i).
-%
-\end{equation*}
+The SPS scheme of Kiltz, Pan and Wee, $\KPW$, is given in
+\Cref{prim:sps-kiltz}~\cite{C:KilPanWee15}. We write $k_{i,j}$ for the entry of
+$\mat{K}$ in row $i$ and column $j$, and ${}^{\mathsf{T}}$ for transposition.
 
 \begin{primitivebox}{The $\KPW$ SPS scheme~\cite{C:KilPanWee15}.}{sps-kiltz}
 
@@ -272,12 +247,16 @@ the following:
       %
       \begin{gather*}
       %
-	\sk = (\mat{K}, \vec{b}, \vec{x}, \vec{y}) = (\mat{K}, \gen^{(1,
-\beta)}, \gen^{\vec{\xi}}, \gen^{\vec{\upsilon}}), \\
+	\sk = (\mat{K}, \vec{b}, \vec{x}, \vec{y}), \quad \pk =
+(\vec{\widetilde{a}}, \vec{\widetilde{u}}, \vec{\widetilde{v}},
+\vec{\widetilde{w}}), \quad \text{where} \\
       %
-	\pk = (\vec{\widetilde{a}}, \vec{\widetilde{u}}, \vec{\widetilde{v}},
-\vec{\widetilde{w}}) = (\ggen^{(1, \alpha)}, \ggen^{\vec{\zeta}},
-\ggen^{\vec{\nu}}, \ggen^{\vec{\omega}}).
+	\vec{b} = (\gen, \gen^{\beta}), \quad x_j = \gen^{\xi_j}, \quad y_j =
+\gen^{\upsilon_j}, \quad \vec{\widetilde{a}} = (\ggen, \ggen^{\alpha}), \\
+      %
+	\widetilde{u}_i = \ggen^{\zeta_i}, \quad \widetilde{v}_j =
+\ggen^{\nu_j}, \quad \widetilde{w}_j = \ggen^{\omega_j} \quad \text{for } i \in
+[1, \ell+1],\ j \in \{1, 2\}.
       %
       \end{gather*}
 
@@ -287,34 +266,36 @@ the following:
       %
       \begin{equation*}
       %
-	\widetilde{q} = \ggen^{\sigma}, \quad \vec{r} = \vec{b}^{\,\rho},
-\quad \vec{s} = \vec{b}^{\,\rho\sigma}, \quad z_j = \gen^{k_{1,j}}
+	\widetilde{q} = \ggen^{\sigma}, \quad r_j = b_j^{\rho},
+\quad s_j = b_j^{\rho\sigma}, \quad z_j = \gen^{k_{1,j}}
 \prod_{i=1}^{\ell} \msg_i^{k_{i+1,j}} \cdot x_j^{\rho}\, y_j^{\rho\sigma}
 \text{ for } j \in \{1, 2\}.
       %
       \end{equation*}
 
-    \item[$\{0,1\} \leftarrow \SPSverify(\pk, \vec{\msg}, \SPSsig)$ :] Return
-$1$ if and only if the following hold:
+    \item[$\{0,1\} \leftarrow \SPSverify(\pk, \vec{\msg}, \SPSsig)$ :] On input
+$\SPSsig = (\widetilde{q}, \vec{r}, \vec{s}, \vec{z})$, where $r_1$ and $s_1$
+are the first entries of $\vec{r}$ and $\vec{s}$, return $1$ if and only if the
+following hold:
       %
-      \begin{equation*}
+      \begin{gather*}
       %
-	\pairing(\vec{z}, \vec{\widetilde{a}}) = \pairing((\gen,
-\vec{\msg}), \vec{\widetilde{u}}) \cdot \pairing(\vec{r},\vec{\widetilde{v}}) \cdot
-\pairing(\vec{s}, \vec{\widetilde{w}}), \quad \pairing(r_1, \widetilde{q})
-= \pairing(s_1, \ggen),
+	\prod_{j=1}^{2} \pairing(z_j, \widetilde{a}_j) = \pairing(\gen,
+\widetilde{u}_1) \prod_{i=1}^{\ell} \pairing(\msg_i, \widetilde{u}_{i+1}) \cdot
+\prod_{j=1}^{2} \pairing(r_j, \widetilde{v}_j)\, \pairing(s_j,
+\widetilde{w}_j), \\
       %
-      \end{equation*}
+	\pairing(r_1, \widetilde{q}) = \pairing(s_1, \ggen).
       %
-      where $r_1$ and $s_1$ are the first entries of $\vec{r}$ and $\vec{s}$.
+      \end{gather*}
 
   \end{description}
 
 \end{primitivebox}
 
 $\KPW$ is EUF-CMA secure under SXDH~\cite{C:KilPanWee15}. It has decomposable
-signing with $c_0$ and, for entry $j$ of $\vec{z}$, $c_j$ and $e_{j,i}$ as
-follows:
+signing with $c_0$ as below, and for each $j \in \{1, 2\}$, $c_j$ and $e_{j,i}$
+as follows:
 %
 \begin{equation*}
 %
@@ -323,8 +304,8 @@ x_j^{\rho} y_j^{\rho\sigma}, \quad e_{j,i} = k_{i+1,j}.
 %
 \end{equation*}
 %
-None of these depend on the message. Our protocol computes
-$\gen^{k_{1,j}}$ in the online phase instead, which is also local.
+As \Cref{prot:tsps-generic} allows, the signers do not store $\gen^{k_{1,j}}$,
+and compute it locally from their key shares when signing.
 
 The group elements of the secret key are $\vec{b}, \vec{x}, \vec{y} \in
 \group{1}^2$, and the offline phase raises each of them to a shared exponent
@@ -337,7 +318,9 @@ with the discrete logarithms kept as shared field elements (no $\algo{ExpGrp}$)
 in the server rerun, and compare the offline phase}
 
 \Cref{prot:tsps-kiltz} gives threshold $\KPW$. Its offline phase makes one
-multiplication, then one round of eight calls to $\algo{ExpGrp}_1$.
+multiplication, then one round of eight calls to $\algo{ExpGrp}_1$: four for
+$\vec{r}$ and $\vec{s}$, and four for the $x_j^{\rho}$ and $y_j^{\rho\sigma}$.
+Combining and verification are as in \Cref{prot:tsps-generic}.
 
 \begin{protocolbox}{The threshold structure-preserving signature scheme from KPW}{tsps-kiltz}
 
@@ -361,13 +344,13 @@ $\vec{\beta}$ are the public constant $1$.
 	  %
 	  \begin{gather*}
 	  %
-	    \shr{\vec{b}} = \gen^{(1, \shr{\beta})}, \quad \shr{\vec{x}} =
-\gen^{\shr{\vec{\xi}}}, \quad \shr{\vec{y}} = \gen^{\shr{\vec{\upsilon}}}, \\
+	    \shr{\vec{b}} = (\gen, \gen^{\shr{\beta}}), \quad \shr{x_j} =
+\gen^{\shr{\xi_j}}, \quad \shr{y_j} = \gen^{\shr{\upsilon_j}}, \quad
+\shr{\vec{\widetilde{a}}} = (\ggen, \ggen^{\shr{\alpha}}), \\
 	  %
-	    \shr{\vec{\widetilde{a}}} = \ggen^{(1, \shr{\alpha})}, \quad
-\shr{\vec{\widetilde{u}}} = \ggen^{\shr{\vec{\zeta}}}, \quad
-\shr{\vec{\widetilde{v}}} = \ggen^{\shr{\vec{\nu}}}, \quad
-\shr{\vec{\widetilde{w}}} = \ggen^{\shr{\vec{\omega}}}.
+	    \shr{\widetilde{u}_i} = \ggen^{\shr{\zeta_i}}, \quad
+\shr{\widetilde{v}_j} = \ggen^{\shr{\nu_j}}, \quad \shr{\widetilde{w}_j} =
+\ggen^{\shr{\omega_j}} \quad \text{for } i \in [1, \ell+1],\ j \in \{1, 2\}.
 	  %
 	  \end{gather*}
 
@@ -392,13 +375,12 @@ following:
 	  %
 	    \shr{\rho\sigma} \sample \algo{Mul}(\shr{\rho}, \shr{\sigma}), \\
 	  %
-	    \shr{\vec{r}} \sample \algo{ExpGrp}_1(\shr{\rho}, \shr{\vec{b}}),
-\quad \shr{\vec{s}} \sample \algo{ExpGrp}_1(\shr{\rho\sigma}, \shr{\vec{b}}),
-\\
+	    \shr{r_j} \sample \algo{ExpGrp}_1(\shr{\rho}, \shr{b_j}), \quad
+\shr{s_j} \sample \algo{ExpGrp}_1(\shr{\rho\sigma}, \shr{b_j}), \\
 	  %
-	    \shr{\vec{x}^{\,\rho}} \sample \algo{ExpGrp}_1(\shr{\rho},
-\shr{\vec{x}}), \quad \shr{\vec{y}^{\,\rho\sigma}} \sample
-\algo{ExpGrp}_1(\shr{\rho\sigma}, \shr{\vec{y}}).
+	    \shr{x_j^{\rho}} \sample \algo{ExpGrp}_1(\shr{\rho}, \shr{x_j}), \quad
+\shr{y_j^{\rho\sigma}} \sample \algo{ExpGrp}_1(\shr{\rho\sigma}, \shr{y_j})
+\quad \text{for } j \in \{1, 2\}.
 	  %
 	  \end{gather*}
 
@@ -406,13 +388,13 @@ following:
 	  %
 	  \begin{equation*}
 	  %
-	    \shr{\widetilde{q}} = \ggen^{\shr{\sigma}}, \quad \shr{\vec{z}^*} =
-\shr{\vec{x}^{\,\rho}} \cdot \shr{\vec{y}^{\,\rho\sigma}}.
+	    \shr{\widetilde{q}} = \ggen^{\shr{\sigma}}, \quad \shr{z^*_j} =
+\shr{x_j^{\rho}} \cdot \shr{y_j^{\rho\sigma}} \quad \text{for } j \in \{1, 2\}.
 	  %
 	  \end{equation*}
 
 	\item Store $\shr{\state} = (\shr{\widetilde{q}}, \shr{\vec{r}},
-\shr{\vec{s}}, \shr{\vec{z}^*})$.
+\shr{\vec{s}}, \shr{z^*_1}, \shr{z^*_2})$.
 
       \end{enumerate}
 
@@ -435,35 +417,16 @@ Each signer does the following:
 
       \end{enumerate}
 
-    \item[$\SPSsig \leftarrow \TSPScombine(\{\SPSsig_h\}_{h \in Q})$ :]
-Reconstruct every group element from the shares of the $t+1$ signers in $Q$, and
-return $\SPSsig = (\widetilde{q}, \vec{r}, \vec{s}, \vec{z})$.
-
-    \item[$\{0,1\} \leftarrow \TSPSverify(\pk, \vec{\msg}, \SPSsig)$ :] Return
-$1$ if and only if the following hold:
-      %
-      \begin{equation*}
-      %
-	\pairing(\vec{z}, \vec{\widetilde{a}}) = \pairing((\gen,
-\vec{\msg}), \vec{\widetilde{u}}) \cdot \pairing(\vec{r},\vec{\widetilde{v}}) \cdot
-\pairing(\vec{s}, \vec{\widetilde{w}}), \quad \pairing(r_1, \widetilde{q})
-= \pairing(s_1, \ggen).
-      %
-      \end{equation*}
-
   \end{description}
 
 \end{protocolbox}
 
 \begin{theorem}\label{thm:tsps-security} Let the MPC protocol be secure with
-abort against up to $t$ statically corrupted signers, over a linear
-$(t+1, n)$ threshold sharing. Then
-the threshold $\AGHO$ and $\KPW$ schemes are correct. The threshold $\AGHO$
-scheme is TS-UF-1 secure in the GGM, and the threshold $\KPW$ scheme is
-TS-UF-1 secure under SXDH, with the bound of
-\Cref{thm:tsps-construction-security}. If the MPC protocol is
-secure against adaptive corruption, both are adp-TS-UF-1 secure with the loss of
-\Cref{lem:tsps-adaptive}.\end{theorem}
+abort against up to $t$ statically corrupted parties, over a linear $(t+1, n)$
+threshold sharing. Then threshold $\AGHO$ and threshold $\KPW$ are correct.
+Threshold $\AGHO$ is TS-UF-1 secure in the GGM, and threshold $\KPW$ is TS-UF-1
+secure under SXDH, both with the bound of
+\Cref{thm:tsps-construction-security}.\end{theorem}
 
 We prove \Cref{thm:tsps-security} in \Cref{sec:tsps-proof-instantiation}.
 

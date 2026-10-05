@@ -43,8 +43,8 @@ issuer with a public ledger whose validators follow the protocol for economic
 rather than institutional reasons. This lets them remain permissionless,
 and function with participants who have no registered identities at
 all. They cover the entire spectrum of privacy, from pseudonymity with each
-transaction in the clear to hidden values and anonymity sets equal to the total
-number of users of the
+transaction in the clear to hidden values and anonymity sets, the sets of users a transaction could have
+come from, equal to the total number of users of the
 system~\cite{bitcoin,ethereum,EPRINT:Noether15,SP:BCGGMT14}. Stable coins sit
 between the two. They are cryptocurrencies with completely centralised issuance, backed
 by fiat assets in an unofficial capacity and issued by private companies. By
@@ -148,7 +148,8 @@ Fiat-Shamir transform. Its setup is transparent, so no party samples any group
 generator,
 and the BBS+ signature scheme lets the registration authority certify users' keys without
 ever learning their tracing keys. The second
-builds both pseudorandom functions from the MiMC block cipher and proves the two
+builds both pseudorandom functions from the MiMC block cipher, which is designed
+to be cheap to prove in zero knowledge, and proves the two
 corresponding relations with a general-purpose zero-knowledge succinct
 non-interactive argument of knowledge (zk-SNARK). This gives constant-size
 transaction proofs and faster verification, but a slower prover and a

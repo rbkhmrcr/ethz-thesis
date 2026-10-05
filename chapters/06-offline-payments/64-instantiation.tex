@@ -176,7 +176,7 @@ Second, the secure element and the device communicate directly, since
 registration pairs them. The secure element samples $t$ afresh and sends it to the
 device, in place of both deriving it from a shared PRF key, and the payee takes
 no part in producing the proof. The zero knowledge of
-\Cref{prim:hss-joint-proof} holds only against a semi-honest verifier, who relays the messages between the provers. Our payee
+\Cref{prim:hss-joint-proof} holds only against an honest-but-curious verifier, who relays the messages between the provers. Our payee
 relays nothing and receives only the finished proof, so it may be malicious.
 
 All the device receives from the secure element is the commitment

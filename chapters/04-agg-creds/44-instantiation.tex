@@ -275,14 +275,14 @@ $\ipk{i} \neq 1$ and $\ggen^{\zeta_i} = \widetilde{a}_i \cdot \ipk{i}^{c_i}$.
       \end{enumerate}
 
     \item[$(\sk,\regcred) \sample \AACregister(\crs,\rask)$ :] Between the user
-and the RA, on input $\rask$ to the RA, do:
+and the registration authority, on input $\rask$ to the registration authority, do:
 
       \begin{enumerate}
 
 	\item The user samples $\sk \sample \Zp$ and sets $\pk \leftarrow
 \gen^\sk$.
 
-	\item The RA samples a fresh nonce $\rand \sample \Zp$ and sends it to
+	\item The registration authority samples a fresh nonce $\rand \sample \Zp$ and sends it to
 the user.
 
 	\item The user samples $\varrho \sample \Zp$ and computes the following:
@@ -296,10 +296,10 @@ the user.
 
 	\item The user sends $(\pk, a, \zeta)$.
 
-	\item The RA recomputes $c$ and exits unless $\pk \neq 1$, $\pk$ has not
+	\item The registration authority recomputes $c$ and exits unless $\pk \neq 1$, $\pk$ has not
 been registered before, and $\gen^\zeta = a \cdot \pk^c$.
 
-	\item Otherwise, the RA samples a fresh $\Tag \sample \Zp$ it has not
+	\item Otherwise, the registration authority samples a fresh $\Tag \sample \Zp$ it has not
 assigned before, sets $\tid \leftarrow \hashtwo(\Tag)$, and computes $\SPSsig
 \sample \SPSsign(\rask,(\pk,\tid))$.
 

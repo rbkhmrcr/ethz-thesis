@@ -555,10 +555,14 @@ oracle and sets the following:
 keys of other epochs, which also depend on $\utk'$, from $\gen^a$ by programming
 $\gen_2$ and $\HE$ at other epochs to known powers of $\gen$. It knows $\ek =
 \gen^a$, so it can also give $\ek$ to the distinguisher. If $Q = \gen^{ab}$, this
-is an honest proof, and if $Q$ is uniform, it is the simulated one. For the up
+is an honest proof, and if $Q$ is uniform, it is the simulated one.
+
+DDH is randomly self-reducible: from one tuple $(\gen, \gen^a, \gen^b, Q)$,
+anyone can compute any number of tuples $(\gen, \gen^a, \gen^{b'}, Q')$ with
+fresh uniform $b'$, where every $Q' = \gen^{ab'}$ if $Q = \gen^{ab}$, and every
+$Q'$ is uniform otherwise~\cite{FOCS:NaoRei97}. For the up
 to $\Max$ proofs per epoch, which share $\ek$, the reduction derives one
-challenge per proof from $(\gen, \gen^a, \gen^b, Q)$ by random
-self-reducibility of DDH. The simulator uses $W_\gamma$, so it is given the
+challenge per proof from $(\gen, \gen^a, \gen^b, Q)$. The simulator uses $W_\gamma$, so it is given the
 index $\gamma$ as well as the instance. This suffices where the lemma is used,
 since the simulator of \Cref{thm:txid-bb} assigns honest users' indices
 itself.
@@ -750,9 +754,11 @@ under the $q$-SDH assumption.
 computationally binding under the DL assumption in $\group{1}$.
 
   \item[(P3).] $\HE$ and $\HT$ are the MiMC block cipher, keyed by $\utk$ and
-by the epoch key, so $\FE$ and $\FT$ are pseudorandom by the assumption that
-MiMC is a pseudorandom permutation against a distinguisher holding
-$\gen_2^{\utk}$, and the switching lemma. This is the public tracing key, which
+by the epoch key, so $\FE$ and $\FT$ are pseudorandom permutations, by the assumption
+on MiMC against a distinguisher holding $\gen_2^{\utk}$. By the switching
+lemma, which bounds the advantage in telling a random permutation from a random
+function by $q^2/p$ for $q$ queries, they are also pseudorandom
+functions~\cite{EC:BelRog06}. This is the public tracing key, which
 depends on the key of $\FE$. $\FT$ is keyed by the epoch key, which is uniform
 once $\FE$ is replaced, so the public tracing key gives a distinguisher of $\FT$
 nothing.
@@ -774,10 +780,12 @@ zero knowledge.
   We need simulation extractability in the sense of \Cref{exp:simext}, which
 excludes only statement and label pairs on which a proof was simulated. Proofs
 of the zk-SNARK of Groth can be rerandomised, so from one proof anyone can
-produce another for the same statement, and this notion allows it. The plain
+produce another for the same statement, and this notion allows it. The algebraic group model is weaker than the GGM. Its
+adversary sees real group elements, but must say how each one it outputs was
+computed from those it received~\cite{C:FucKilLos18}. The plain
 zk-SNARK is simulation extractable in this sense in the algebraic group
-model~\cite{FC:BKSV21}. This result does not cover the commitment extension, so
-\Cref{thm:hash-inst} assumes it. The zk-SNARK has no label of its own. Its label is bound instead by the linking
+model~\cite{FC:BKSV21}. We assume that the commitment extension preserves
+this property, as \Cref{thm:hash-inst} states. The zk-SNARK has no label of its own. Its label is bound instead by the linking
 proof, whose Fiat-Shamir context contains the zk-SNARK proof, and by the
 transaction authorisation proof or the registration proof, which signs both.
 
