@@ -1,7 +1,7 @@
 \section{Construction}\label{sec:agg-creds-construction}
 
 The construction assumes that the registration authority checks that users'
-public keys are unique, and that users hold the corresponding secret keys.
+public keys are unique and that users hold the corresponding secret keys.
 This prevents users from registering others' public keys and pooling credentials
 across identities.  The registration authority assigns each user exactly one
 tag, and signs only messages of the prescribed form: public keys and tags. We assume that verifiers
@@ -9,12 +9,11 @@ accept credentials only from the set of issuers with published public keys. This
 prevents a malicious user from being able to impersonate an issuer to an honest
 verifier.
 
-Each party's responsibilities fix the building block it needs. The
-registration authority only links a public key to a tag, so an existentially
+The registration authority only links a public key to a tag, so an existentially
 unforgeable signature scheme is enough. Presentations should show one short
 object, so issuers' signatures must aggregate. Ordinary aggregate signatures
 combine signatures by several signers on different messages into one, so they
-would let two users pool their credentials. Multi-signatures require every
+would let users pool their credentials. Multi-signatures require every
 signer to sign the same message, while issuers sign different attributes.
 Tag-based aggregation combines only signatures under one tag, without issuers
 coordinating. The proof system must be zero knowledge, so that presentations

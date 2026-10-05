@@ -231,9 +231,6 @@ are zero knowledge by (P4), inverts $f$ on $\pk$, contradicting its one-wayness.
 
   \end{description}
 
-  \rebekah{check: Game 7 now runs straight-line; extraction moved into the
-  reductions for $a_1$, $a_2$, $a_3$, each extracting once at the first $E$}
-
   \paragraph{Game 8.} This is the ideal world. As Game 7, except $\idfu{\AAC}'$
 is now identical to ideal functionality $\idfu{\AAC}$, so Game 8 is
 indistinguishable from Game 7. This concludes the proof
@@ -360,11 +357,17 @@ $\advB$ does not stop when all of the following
 hold:
   \begin{itemize}
     \item the guess of $j$ is right, with probability $1/n$;
-    \item $\msg^*_j$ is embedded and no other message signed under $\pk_j$ is,
-with probability at least $\frac{1}{q+1}\big(1-\frac{1}{q+1}\big)^q$;
-    \item $\Tag^*$ is plain and no other tag signed under $\pk_j$ is, with
-probability at least $\frac{1}{q+1}\big(1-\frac{1}{q+1}\big)^q$.
+    \item $\msg^*_j$ is embedded, with probability $\frac{1}{q+1}$, and none of
+the at most $q$ other messages signed under $\pk_j$ is, each independently with
+probability $1-\frac{1}{q+1}$, so together with probability at least
+$\frac{1}{q+1}\big(1-\frac{1}{q+1}\big)^q$;
+    \item $\Tag^*$ is plain, with probability $\frac{1}{q+1}$, and none of the at
+most $q$ other tags signed under $\pk_j$ is, each independently with probability
+$1-\frac{1}{q+1}$, so together with probability at least
+$\frac{1}{q+1}\big(1-\frac{1}{q+1}\big)^q$.
   \end{itemize}
+The probability $\frac{1}{q+1}$ maximises $x(1-x)^q$ over $x \in [0, 1]$, which
+is why $\advB$ embeds with it.
 Every signing query under $\pk_j$ then falls into one of the first two cases. A
 query on a message other than $\msg^*_j$ is not embedded, and a query on
 $\msg^*_j$ has a tag other than $\Tag^*$, since $(\pk_j, \Tag^*, \msg^*_j)$ was
@@ -389,9 +392,9 @@ So $\ATS$ is existentially unforgeable under tag-based aggregation.
 \begin{proof}
 
     Recall the instance $\inst_2$, witness $\witness_2$ and relation $\rel_2$
-of \eqref{eq:agg-creds-proof-original}, and that $\algoproof = (\eta, \inst_3)$, with $\inst_3 = (\bar{\gen},
-\bar{v}, \pk', \{i, \atv{i}, H_i\}_{i\in\ISSUERS}, \widetilde{r}',
-\widetilde{s}', \bar{z}, \signatureone', \bar{\signaturetwo}, \bar{\tid})$.
+of \eqref{eq:agg-creds-proof-original}, and $\inst_3$ of
+\eqref{eq:agg-creds-proof-rel}. A presentation is $\algoproof = (\eta,
+\inst_3)$.
 
   \paragraph{Extraction.} By special soundness of the Sigma protocol, which
 Fiat-Shamir preserves in the random oracle model, if a user is able to produce
@@ -540,9 +543,6 @@ $\signatureone'$ is uniform after randomisation, and $\bar{\signaturetwo}$ is
 fixed by the verification equation below. Here $\bar{\signaturetwo}$ is uniform
 and $\signatureone'$ is fixed by the same equation, which gives the same
 distribution.
-\rebekah{check: simulation now sets $\bar{v} = v^\theta$ and signs with $\rask$;
-$\bar{v} = \gen^\mu$ failed the check $\pairing(v, \widetilde{r}') =
-\pairing(\gen, \widetilde{s}')$}
       Now we have by construction that $(\bar{\gen}, \bar{v}, \widetilde{r}',
 \widetilde{s}', \bar{z}, \signatureone', \bar{\signaturetwo}, \bar{\tid}, \pk',
 \{\atv{i}, H_i\}_{i\in \ISSUERS})$ satisfies the following:
@@ -618,23 +618,19 @@ $\AGHO$ or computing a discrete logarithm in $\group{1}$, both negligible, and
 simulation of presentations under the DDH assumption in $\group{1}$. The
 simulator programs the random oracle to simulate honest users' presentations.
 It needs $\rask$, which the simulator of the construction's proof holds, since
-it plays the honest registration authority. The reduction to (P1) in $a_1$ has
-no $\rask$, and answers each simulated presentation with a signing query on a
-random pair, as in the proof of the lemma. Extraction rewinds the adversary,
-which the standalone model of \Cref{sec:prelims-security} allows. The
-simulator of the construction's proof runs straight-line, and only the
+it plays the honest registration authority. The
+simulator of the construction's proof runs straight-line and the
 reductions for $a_1$, $a_2$ and $a_3$ extract, each once, at the first
-presentation where $E$ occurs. So the rewinding is not nested, and each
+presentation where $E$ occurs. Each
 extraction loses a polynomial factor in the number of hash
 queries~\cite{JC:PoiSte00}.
 
     \item[$f$ is one way, and the proofs of knowledge of secret keys are
 zero-knowledge proofs of knowledge.] Here $f(\sk) = \gen^\sk$, which is one way
-under the DL assumption in $\group{1}$, implied by the DDH assumption there.
+under the DL assumption in $\group{1}$.
 Users' and issuers' proofs of knowledge are Sigma protocols for a discrete
 logarithm with the Fiat-Shamir transform, which are zero knowledge and proofs of knowledge in the random
-oracle model~\cite{JC:PoiSte00}. Game 1 extracts issuers' keys once at setup,
-before any other interaction, so this rewinding is not nested either.
+oracle model~\cite{JC:PoiSte00}.
 
   \end{description}
 

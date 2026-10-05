@@ -1,23 +1,22 @@
 \section{Introduction}
 
-An attribute is a value about a user that an issuer certifies, such as their
-age, their nationality or a driving licence. Anonymous credential schemes let
-users prove they hold certain attributes without revealing who they are or
-anything about their undisclosed attribute values. Issuers give users
+By the end of 2026, every member state of the European Union must offer a
+European Digital Identity Wallet with selective disclosure, unlinkability and
+pseudonymous authentication~\cite{eIDAS2024}. The attributes it holds come from
+many issuers, such as a passport agency, a licensing body and a transport
+authority, each certifying its own.
+
+Anonymous credential schemes let users prove they hold certain attributes, such
+as their age, their nationality or a driving licence, without revealing who they
+are or anything about their undisclosed attribute values. Issuers give users
 credentials on their attribute values, and users present these credentials to
 verifiers. The two main security properties are unlinkability and
 unforgeability~\cite{EC:CamLys01}. Unlinkability means that two presentations by
 the same user cannot be tied to one another, and unforgeability means that users
-can only attest to attribute values they truly possess.
-
-Idemix and U-Prove implement anonymous credentials, Signal uses them for
-private groups, and Privacy Pass issues related anonymous
-tokens~\cite{CCS:CamVan02,UProve,CCS:ChaPerZav20,PoPETS:DGSTV18}. By the end of
-2026, every member state of the European Union must offer a European Digital
-Identity Wallet with selective disclosure, unlinkability and pseudonymous
-authentication~\cite{eIDAS2024}. Its attributes come from many issuers, such as
-a passport agency, a licensing body and a transport authority, each certifying
-its own.
+can only attest to attribute values they truly possess. Idemix and U-Prove
+implement anonymous credentials, Signal uses them for private groups, and
+Privacy Pass issues related anonymous
+tokens~\cite{CCS:CamVan02,UProve,CCS:ChaPerZav20,PoPETS:DGSTV18}.
 
 Early anonymous credential schemes assume a single issuer that certifies all
 attributes. This issuer is responsible for all issuance and can learn all
@@ -33,7 +32,7 @@ Credential systems with distributed issuance still require the issuers to coordi
 issuers worldwide, each relevant to only some users, that coordination is
 impractical, and between issuers with no relationship to one another it may be
 impossible. Coordination between issuers is the obstacle. Threshold issuance
-with silent setup removes interactive setup for issuers certifying the same
+without an interactive setup removes it for issuers certifying the same
 credential~\cite{EPRINT:GGPR25}. We remove coordination for issuers certifying
 different attributes.
 

@@ -1,10 +1,11 @@
 \section{Evaluation}\label{sec:agg-creds-evaluation}
 
-We implement the instantiation of \Cref{sec:agg-creds-instantiation} in Go using
+\paragraph{Implementation.} We implement the instantiation of \Cref{sec:agg-creds-instantiation} in Go using
 the \texttt{gnark-crypto} library, which provides optimised implementations of
 group and pairing operations for the BLS12-381 pairing groups~\cite{gnark-crypto}.
 We use version 0.21.0 of the library, and implement both $\AAC$ and $\ATS$.
-The baseline is Idemix, which is built on
+
+\paragraph{Setup.} The baseline is Idemix, which is built on
 BBS+~\cite{CCS:CamVan02,SCN:AuSusMu06,CDL16}. We run the upstream
 Idemix implementation on the same version of \texttt{gnark-crypto} and on the
 same machine as our scheme, so that the comparison is between the schemes and
@@ -48,7 +49,7 @@ Idemix rows present one credential on $n = 128$ attributes.}
   \label{tab:agg-creds-times}
 \end{table}
 
-Registration and issuance in \Cref{tab:agg-creds-times} depend on neither $n$
+\paragraph{Results.} Registration and issuance in \Cref{tab:agg-creds-times} depend on neither $n$
 nor $k$. In registration, the user sends 128 bytes and the registration authority
 352 bytes, in three messages in total. In issuance, the user sends 440 bytes and
 the issuer 224 bytes, in four messages in total.
@@ -76,7 +77,7 @@ two panels vary the total number of attributes $n$ with $k = 1$ disclosed, and
 the bottom two vary the number of disclosed attributes $k$ with $n = 128$.}
 \label{fig:agg-creds-idemix} \end{figure}
 
-\Cref{fig:agg-creds-idemix} compares our scheme with Idemix. Idemix proves
+\paragraph{Comparison.} \Cref{fig:agg-creds-idemix} compares our scheme with Idemix. Idemix proves
 knowledge of a signature on all $n$ attributes, so its cost grows with the
 attributes held, while ours grows with the attributes disclosed. Idemix proves
 knowledge of the $n - k$ hidden attributes, so at fixed $n$ its presentation
@@ -86,7 +87,7 @@ verification 4.05\,ms against 11.8\,ms. At $n = 128$, Idemix verifies faster
 once more than about 20 attributes are disclosed, and presents faster once more
 than about 85 are, but it is in the single-issuer setting.
 
-Threshold issuance with silent setup has a constant-size presentation of about
+Threshold issuance without an interactive setup has a constant-size presentation of about
 5\,KB on BLS12-381~\cite{EPRINT:GGPR25}. Not counting the disclosed values and
 their indices, our presentations are smaller for up to 45 disclosed
 attributes.
