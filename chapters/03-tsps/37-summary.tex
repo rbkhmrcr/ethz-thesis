@@ -1,34 +1,27 @@
 \section{Summary}\label{sec:tsps-summary}
 
-Structure-preserving signature schemes sign by raising public message elements
-to secret exponents. All other work depends only on the secret key and the
-signing randomness, so it can run under MPC before the message is known.
-Decomposable signing captures this form. Any signature scheme with it,
-structure-preserving or not, becomes a threshold scheme whose online phase is
-local and costs about as much as ordinary signing. The result is an ordinary
-signature under one public key, so verifiers and the applications built on them
-stay unchanged, and unforgeability reduces to that of the underlying scheme with
-only the simulation loss of the offline phase.
+This chapter gave threshold SPS schemes in which signing needs no interaction
+once the message is known. We capture this concept through decomposable
+signing.  Any signature scheme with it, structure-preserving or not, can become
+a threshold scheme whose online phase is local and costs about as much as
+ordinary signing.
 
 Threshold $\AGHO$ has the smallest possible signatures of any threshold SPS
-scheme for general messages, but relies on the GGM. Threshold $\KPW$ relies on
-SXDH, at the cost of seven group elements. The secret key of $\KPW$ contains
-group elements, which needs raising shared group elements to shared exponents.
-Our extension of MP-SPDZ provides this for any number of parties. The online
-phase stays below 3~ms up to eleven parties, and all interaction and most of the
-cost sit in the offline phase. For ledgers and transparency logs, this lets a
-certifier be split between several parties at little cost when a signature is
-needed.
+scheme for general messages and is secure in the GGM. Threshold $\KPW$ has
+larger signatures, of seven group elements versus the two of $\AGHO$
+signatures, and its security rests on the SXDH assumption.
 
-Several questions remain open. We expect strong unforgeability to carry over
-when the underlying scheme is strongly unforgeable, but do not prove it. Under
-adaptive corruption, our reduction loses a factor of $\binom{n}{t}$, which is
-exponential in the number of signers for an honest majority, and it assumes that
-signers erase intermediate shares. Schnorr signatures are the Fiat-Shamir transform of the
-Sigma protocol for a discrete logarithm. Their threshold versions cannot be
-proven fully adaptively secure without modifications, and it is open whether threshold SPS
-schemes face the same barrier~\cite{C:CriSte25}. Our proofs idealise key
-generation, and neither MPC protocol we benchmark is robust, so one malicious
-party can stop signing. Schemes in which the message enters signing
-non-linearly, for example inside an inverse, do not decompose, and it is open
-which other SPS schemes do.
+Our extension of MP-SPDZ provides implementations of the protocols for any
+number of parties. The online phase stays below 3~ms up to eleven parties, and
+all interaction is in the offline phase.  For ledgers and transparency logs,
+this lets certification be split between several parties at little cost.
+
+Two directions remain for future work. We expect strong unforgeability to hold
+when the underlying scheme is strongly unforgeable, but do not prove this.
+Under adaptive corruption, our reduction loses a factor of $\binom{n}{t}$,
+which is exponential in the number of signers for an honest majority. It also
+assumes signers erase intermediate shares. Threshold versions of somewhat
+similar signature schemes cannot be proven fully adaptively secure without
+modifications~\cite{C:CriSte25}. Our proof also idealises key generation.
+Exploring the conditions under which threshold SPS schemes can be proven
+adaptively secure is interesting future work.

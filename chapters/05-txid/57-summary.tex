@@ -1,30 +1,21 @@
 \section{Summary}\label{sec:txid-summary}
 
-We gave a tracing protocol $\ID$ in which tags come from a bounded, epoch-local
-index space instead of a counter, so users can create transactions concurrently
-and in any order. Users grant an auditor permission to trace them for one epoch,
-and a permission never exposes users who are not targeted. We formalised tracing
-as an ideal functionality, gave a generic construction, and instantiated it once
-with algebraic pseudorandom functions and Sigma protocols, and once with MiMC
-and a zk-SNARK.
+In this chapter we constructed a tracing protocol in which tags come from a
+bounded, epoch-local index space instead of a counter, so users can create
+transactions concurrently and in any order. Users grant an auditor permission
+to trace them for one epoch, and a permission never exposes users who are not
+targeted. We formalised tracing as an ideal functionality, gave a generic
+construction, and instantiated it once with algebraic pseudorandom functions
+and Sigma protocols, and once with MiMC and a zk-SNARK.
 
-The scoping came from moving the question from who may see a transaction to how
-narrowly a capability can be granted. An epoch-local index space, and not a
-counter or per-user state, gives a permission a boundary in time, an owner, and
-a cost that does not depend on the size of the ledger. The same shape appears in
-tax reporting over one period, a court order for one account, or a compliance
-check for one counterparty.
+We use an epoch-local index space, giving permissions boundaries in time and
+costs that do not grow with the total ledger size.
 
-Several directions remain for future work. Grants must come before the epoch
-they cover, and auditors often ask about the past. Retrospective grants work in
-the protocol without the epoch check, but need a proof that can explain uniform
-tags with a key chosen later. Grants are issued by users, so
-compelled disclosure relies on the legal system. A threshold auditor, with the
-techniques of \Cref{chap:tsps}, would split that authority between
-institutions. Our simulator rewinds, so the result holds in the standalone
-model, and straight-line extraction would give a composable result with larger
-proofs. Choosing $\Max$ trades the privacy of transaction volume against
-capacity, and is a deployment question as much as a cryptographic one.
-Algebraic pseudorandom functions that fit Sigma protocols, like
-Dodis-Yampolskiy, seem to need $q$-type assumptions, and it is worth asking
-whether a different primitive avoids them.
+Several directions remain for future work. Currently, grants must come before
+the epoch they cover. Retrospective grants work in the protocol but require a
+proof that can explain uniform tags with a key chosen in later epochs. A
+threshold auditor, with the techniques of \Cref{chap:tsps}, would split
+auditing capabilities between institutions.  Algebraic pseudorandom functions
+that compose well with Sigma protocols may require $q$-type assumptions. It is
+future work to explore whether the generic construction could be built from a
+primitive that avoids this.

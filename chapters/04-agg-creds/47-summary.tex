@@ -1,37 +1,32 @@
 \section{Summary}\label{sec:agg-creds-summary}
 
-This chapter considered anonymous credentials in which each attribute is
-certified by its own issuer, and issuers coordinate neither with each other nor
-with the registration authority or verifiers. Users combine credentials from
-independent issuers into a single aggregate credential and present it with one
-proof.
-
-The registration authority binds each user's key to a tag, and is not involved
-after registration. Every anonymous credential scheme already assumes that
-users' keys are certified, and we make this role explicit. The registration
-authority learns keys and tags, but nothing about users' attributes or
-presentations. Binding
-credentials to the tag lets issuers stay uncoordinated, and since each
-user has one tag, issuers need not remember whom they have signed for.
+This chapter considered anonymous credentials with each attribute certified by
+its own issuer - aggregate anonymous credentials.  Issuers need not coordinate
+with each other, nor with the registration authority, nor verifiers. Users
+communicate with each of their credential issuers once, and then can combine
+credentials from these independent issuers into a single aggregate credential
+and present that with one proof.  The registration authority binds each user's
+key to a tag. Binding credentials to the tag lets issuers stay uncoordinated,
+and since each user has one tag, issuers are stateless.
 
 The instantiation combines the $\AGHO$ SPS scheme, our tag-based aggregate
-signature scheme $\ATS$, and proofs based on Sigma protocols. With $n = 128$ issuers and $k =
-64$ disclosed attributes, a presentation takes 20.1\,ms to produce and
-31.1\,ms to verify.
+signature scheme $\ATS$, and proofs based on Sigma protocols. With $n = 128$
+issuers and $k = 64$ disclosed attributes, a presentation takes 20.1\,ms to
+produce and 31.1\,ms to verify.
 
 Several directions remain open. Proving that every blinded hash uses the same
 $\delta$ in $\group{T}$ would make presentations constant-size, at the cost of
-one pairing per disclosed attribute for the user. The GGM is needed only for the
-registration signature, so a rerandomisable SPS scheme under standard
+one pairing per disclosed attribute for the user. The GGM is needed only for
+the registration signature, so a rerandomisable SPS scheme under standard
 assumptions would remove it, at the cost of larger registration signatures. A
-concrete security analysis of the scheme would give its security at real
+concrete security analysis of the scheme would give its security at the used
 parameters.
 
 Epoch-based revocation, one of the extensions of
 \Cref{sec:agg-creds-construction}, covers attributes with natural expiry dates.
-Revoking a whole user through their tag, or a single attribute credential, needs
-more than this, and we leave it to future work.
+We use revocation of users or credentials for future work.
 
 The scheme uses the issuer public keys in the clear. As the identity of the
 issuers can reveal information about the user, recent work has focused on
-issuer hiding. Adding issuer hiding to this scheme is also future work.
+issuer hiding. Adding issuer hiding to this scheme is another direction for
+future work.
