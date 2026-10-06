@@ -3,36 +3,26 @@
 This thesis argued that practical privacy comes from modelling the participants
 and responsibilities that systems already have, and constraining with
 cryptography what each one can learn and do, rather than from removing them.
-Each chapter started from a role that exists in practice: certifiers in
-\Cref{chap:tsps}, issuers and the registration authority in
-\Cref{chap:agg-creds}, auditors in \Cref{chap:txid}, and the central bank,
-intermediaries and secure elements in \Cref{chap:offline-payments}.
+Each chapter starts from a role that exists in practice: certifiers in
+\Cref{chap:tsps}, issuers and registration authorities in
+\Cref{chap:agg-creds}, auditors in \Cref{chap:txid}, and all entities in the
+transaction system in \Cref{chap:offline-payments}.
 
-In each case an institution keeps its function without being trusted with more
-than that function needs. Threshold certifiers sign committed values, and no
-single one of them can certify alone. The registration authority binds a key to
-a tag and learns nothing else, while issuers stay independent and keep no state
-about users. The auditor of \Cref{chap:txid} computes tags for one user and one
-epoch, and learns nothing about anyone else. In offline payments the secure
-element enforces single use, and the auditor learns an identity only from a
-double spend.
+In each case institution keeps its function without being trusted with more
+than that specific function requires. Threshold certifiers sign committed
+values, and no single one of them can certify alone. The registration authority
+binds a key to a tag and learns nothing else, while issuers stay independent
+and keep no state about users. The auditor of \Cref{chap:txid} computes tags
+for one user and one epoch, and learns nothing about anyone else.
 
-The same pattern appears in the capabilities that the constructions grant. A
-capability is scoped by whom it concerns, the period it covers and what triggers
-it: one user and one epoch in \Cref{chap:txid}, one double-spending event in
-\Cref{chap:offline-payments}, and a disclosed subset of attributes in
-\Cref{chap:agg-creds}. The design question is the same in every chapter: what is
-the smallest capability that meets the need, and can the person concerned see
-when it is used? This brings us back to the argument of
-\Cref{chap:introduction}. Money is not end-to-end encryption, and the realistic
-alternative to scoped access is the status quo, in which banks see everything.
-
-Practicality was a design constraint throughout. The constructions avoid
-interaction where they can. Threshold signing moves all interaction to an
-offline phase, issuers of aggregate credentials never coordinate, users submit
-transactions for tracing concurrently without counters, and offline payments
-need no network at all. Every construction is implemented and measured, so these
-claims come with concrete costs.
+The same pattern appears in the capabilities that the constructions grant.
+Capabilities are scoped by a given user and period. Practicality was a
+constraint throughout. The constructions avoid interaction wherever possible.
+Threshold signing moves all interaction to an offline phase, issuers of
+aggregate credentials never coordinate, users submit transactions for tracing
+concurrently without counters, and offline payments need no network at all.
+Every construction is implemented and measured, so these claims come with
+concrete costs.
 
 Each chapter gives a generic construction from standard primitives, and then an
 instantiation tailored to Sigma protocols and pairing product equations. The
@@ -41,14 +31,8 @@ $\AGHO$, and $q$-type assumptions for BBS+ and the Dodis-Yampolskiy PRF.
 Instantiations under standard assumptions with comparable efficiency remain
 open.
 
-Several questions cut across the chapters. Our security proofs are in the
-standalone model, since extraction rewinds, and composable guarantees would need
-different proof techniques. The chapters share a credential layer:
-a registration authority with BBS+ or SPS credentials. One system combining
-credentials, tracing and offline payments deserves a joint analysis. The
-auditor of \Cref{chap:offline-payments} is already split between institutions by
-threshold decryption, and the same could be done for the auditor of
-\Cref{chap:txid}, while the techniques of \Cref{chap:tsps} could split the
-registration authority and the issuers. Finally, some deployment questions are
-not only cryptographic, such as choosing the per-epoch transaction bound, setting
-revocation policies, and deciding who may compel an auditor to act.
+Our security proofs are in the standalone model, since extraction rewinds, and
+composable guarantees would need different proof techniques. The chapters share
+a credential layer: a registration authority with BBS+ or SPS credentials. One
+system combining credentials, tracing and offline payments deserves a joint
+analysis.

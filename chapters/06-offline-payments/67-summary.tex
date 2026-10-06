@@ -1,6 +1,6 @@
 \section{Summary}\label{sec:offline-summary}
 
-We gave a transferable offline payment scheme $\OP$, whose payments are
+In this chapter, we gave a transferable offline payment scheme, whose payments are
 anonymous and whose withdrawals cannot be linked to deposits. We proved that
 $\OP$ securely realises $\idfu{\algo{op}}$ when its building blocks have the
 properties of \Cref{thm:offline-construction-security}, and that its
@@ -10,26 +10,5 @@ $400\,\mathrm{ms}$, the payer's phone needs under $50\,\mathrm{ms}$, and a payee
 verifies a chain of $32$ hops in under a second, with payments growing by $912$
 bytes per hop.
 
-Availability does not require removing institutions. The secure element is
-issued by an institution and trusted only to keep the user's key. Its
-single-use rule makes double spending expensive, but identification does not
-rest on it. The phone, which users control, does the heavy computation.
-Splitting the joint proof so that the secure element's share costs about as
-much as an ordinary signature lets the scheme run on existing hardware. The same
-split applies wherever a small trusted component vouches for a statement too
-expensive for it to prove, such as hardware wallets, identity cards and device
-attestation. A trusted execution environment on the phone could replace the
-card if it protected the single-use logic as well as the key.
-
-The auditor's capability is triggered by an event, a double spend, rather than
-granted against a particular person, and the role can be distributed by
-threshold decryption. \Cref{chap:txid} makes the same move with a different
-accountability measure, a grant limited to one user and one epoch. The two
-chapters share a credential layer, and a joint analysis is the next step, so
-that one registration supports online payments traceable under a grant and
-offline payments traced only on double spending.
-
-What remains open is mostly practical. Fixed denominations keep deposits simple,
-and aggregating deposits under value commitments would also hide the value at
-deposit, at the cost of a more involved deposit proof. Divisibility remains
-future work, and revocation offline is limited to expiry by epochs.
+Divisibility remains future work, and revocation offline is limited to expiry by epochs.
+Replacing the auditor with a different scheme in an efficient way is also future work.
