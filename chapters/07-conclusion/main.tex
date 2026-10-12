@@ -10,7 +10,7 @@ protocols that maintain or improve user privacy, while being cheaper for users
 to run and more likely to be adopted.
 
 Decentralisation is often treated as a proxy for privacy, so that any central
-party looks like a threat to it. The two are different properties. When
+party looks like a threat to it, but they are not the same property. When
 credential issuance is distributed across many issuers, every issuer can learn
 every attribute. In \Cref{chap:agg-creds}, a single registration authority that
 learns nothing about attributes makes aggregation cheap and keeps issuers
@@ -30,24 +30,21 @@ and learns nothing else, while issuers stay independent and keep no state about
 users. The auditor of \Cref{chap:txid} computes tags for one user and one
 epoch, and learns nothing about anyone else.
 
-The same pattern appears in the capabilities that the constructions grant,
-which are scoped as narrowly as each role allows. The constructions also avoid
-interaction wherever possible. Threshold
-signing moves all interaction to an offline phase, issuers of aggregate
+The capabilities our constructions grant are as narrow as each role allows, and
+the constructions avoid interaction wherever possible. Threshold signing moves all interaction to an offline phase, issuers of aggregate
 credentials never coordinate, users submit transactions for tracing
 concurrently without counters, and offline payments need no network at all.
-Every construction is implemented and measured, so these claims come with
-concrete costs.
+We implement and benchmark every construction.
 
 Each chapter gives a generic construction from standard primitives, and then an
-instantiation tailored to Sigma protocols and pairing product equations. The
-price of that efficiency is often a stronger assumption: the GGM through
-$\AGHO$, and $q$-type assumptions for BBS+ and the Dodis-Yampolskiy PRF.
+instantiation tailored to Sigma protocols and pairing product equations. These
+instantiations often need stronger assumptions, the GGM for $\AGHO$ and $q$-type
+assumptions for BBS+ and the Dodis-Yampolskiy PRF.
 Instantiations under standard assumptions with comparable efficiency remain
 open.
 
 Our security proofs are in the standalone model, since extraction rewinds, and
 composable guarantees would need different proof techniques. The chapters share
-a credential layer: a registration authority with BBS+ or SPS credentials. One
-system combining credentials, tracing and offline payments deserves a joint
-analysis.
+a credential layer: a registration authority with BBS+ or SPS credentials. A
+system that combines credentials, tracing and offline payments would need a
+joint security analysis.

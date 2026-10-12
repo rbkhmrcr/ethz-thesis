@@ -18,8 +18,8 @@ logarithms. A hash function is one way, but has no such structure, so both steps
 are algebraic pseudorandom functions. Pairing equations are not equations of
 discrete logarithms, so we rewrite the relations and blind their values, and the
 prover proves equations of discrete logarithms while the verifier checks the
-pairings. The hash-based instantiation drops the algebraic structure and pays
-with a general-purpose proof system.
+pairings. The hash-based instantiation has no algebraic structure, so it
+needs a general-purpose proof system.
 
 The setup is transparent. We derive all group generators by hashing to the
 group from a public seed, so no party, including the registration authority,
@@ -139,14 +139,14 @@ from any single tag on the ledger and compute every other tag of that user in
 that epoch without the epoch key. Since $\utk''$ never changes, one grant would
 then let the auditor trace the user in every later epoch. With the elements
 $\{W_\gamma\}$ instead, the auditor still computes every tag of a granted epoch
-from $\ek$, and the epoch key keeps the other epochs out of reach. The
+from $\ek$, but cannot compute tags of other epochs without their epoch keys. The
 elements $\{W_\gamma\}$ do not reveal $\utk''$, since recovering $\utk''$
 from them would break the $q$-SDH assumption, which the BBS+ signature scheme
 already requires.
 
-The elements $\{W_\gamma\}$ are public parameters, not secrets held in trust.
-The user hands them to every auditor they authorise. Two colluding auditors who
-compare their copies learn only that the same user granted them both, which they already knew.
+The elements $\{W_\gamma\}$ are public parameters, and the user hands them to
+every auditor they authorise. Two colluding auditors who compare their copies
+learn only that the same user granted them both.
 
 \begin{lemma}\label{lem:txid-ft-prf} Let $\ek$ be uniform in $\group{1}$ and
 unknown to the adversary, and let the public parameters
@@ -454,8 +454,8 @@ follows:
 \end{gathered} \end{equation*}
 %
 Every equation is now one of discrete logarithms, and the only pairing is
-computed by the verifier on public data. The rewriting loses nothing, provided
-the verifier rejects $U = 1_{\group{1}}$ and $\Pi = 1_{\group{T}}$. Otherwise a
+computed by the verifier on public data. The rewritten relation is equivalent
+to the original as long as the verifier rejects $U = 1_{\group{1}}$ and $\Pi = 1_{\group{T}}$. Otherwise a
 prover could blind with zero, or pick a key and index that cancel, and any tag
 would pass.
 
@@ -710,7 +710,7 @@ the Fiat-Shamir transform under $\hashfs$, as in the algebraic instantiation.
 
 The hash-based pseudorandom functions have no Sigma protocol, so their relations
 need a general-purpose proof system. A zk-SNARK has small proofs and cheap
-verification, which the validators pay for on every transaction. The linking
+verification, and the validators verify every transaction. The linking
 proof adds only what ties the hidden key of the circuit to the group elements
 used elsewhere.
 
@@ -731,7 +731,7 @@ so that part of the assumption is ours.
 Circuits cannot take $\PTK$ or $\com$ as input. Statements of the zk-SNARK are
 over $\Zp$, and the coordinates of these group elements lie in a different
 field. Checking them in the circuit costs hundreds of thousands of constraints,
-and listing them as public inputs binds nothing.
+and listing them as public inputs does not bind them to the witness.
 So each zk-SNARK proof comes with a commitment and a linking proof, in the
 commit-and-prove style of LegoSNARK~\cite{CCS:CamFioQue19}. The circuit commits
 to the tracing key. A small Sigma protocol then shows that this commitment

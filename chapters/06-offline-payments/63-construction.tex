@@ -32,7 +32,7 @@ SCI scheme, the registration authority one for the credential signature scheme,
 and the auditor an encryption key pair. The registration authority also signs
 on committed inputs, since it must not learn users' secret keys. Its SCI scheme
 needs only existential unforgeability and request hiding, and may be malleable,
-since a credential is never shown, only proven. The auditor's encryption needs
+since users only ever prove knowledge of a credential and never show it. The auditor's encryption needs
 only IND-CPA security, since every ciphertext it decrypts carries a proof that
 it encrypts the identifier in a pseudonym, and an honest user's ciphertexts are
 never decrypted.
@@ -51,17 +51,17 @@ reserves and signs on committed inputs. The request discloses the value, which
 the central bank accounts for, and hides the identifier and the randomness, so
 the central bank cannot later match the withdrawal to a deposit. Unforgeability
 of the SCI scheme stops users minting tokens, and request hiding keeps the
-central bank from learning whose token it signs. The value remains a channel,
-so a deployment should use a small set of fixed denominations.
+central bank from learning whose token it signs. The central bank still sees
+the value, so a deployment should use a small set of fixed denominations.
 
 The signature is never shown, since verifying it requires the withdrawer's
 identifier. The device instead proves knowledge of it once, at withdrawal, and
-every later payee verifies this proof of withdrawal. This is why the central
-bank signs on committed inputs rather than with a blind signature scheme, as
-there is no later showing for blindness to protect. Nothing binds the committed
-identifier to the withdrawing user. This is not needed, since spending requires
-a credential on that identifier, so a user who commits to somebody else's
-identifier only destroys their own funds.
+every later payee verifies this proof of withdrawal. As the signature is
+never shown, blindness gains nothing, and the central bank signs on committed
+inputs instead of using a blind signature scheme. We do not bind the committed
+identifier to the withdrawing user. Spending needs a credential on that
+identifier, so a user who commits to someone else's identifier cannot spend the
+token.
 
 \paragraph{Payment.} The payee's secure element generates a fresh pseudonym and
 sends it to the payer. The payer's secure element locks the token, the payer's
@@ -73,13 +73,13 @@ acknowledgement.
 
 Signing the payee's pseudonym fixes the destination, so nobody who sees the
 signature can redirect the token. The payee chooses that pseudonym so that two
-payments of the same token to the same payee still differ, and the point at
-which two histories diverge names the payer. Payees who deliberately reuse
-their randomness only move the divergence one link along, and are identified
-themselves.
+payments of the same token to the same payee still differ, and the auditor
+identifies the payer from the last position where the two histories agree. If
+payees reuse their randomness on purpose, the histories differ one payment
+later, and the payee is identified instead.
 
-The ciphertext is there because an offline payee cannot ask anyone who the
-payer is, so the transcript must contain what the auditor needs. The device
+An offline payee cannot ask anyone who the payer is, so the payment has to carry
+what the auditor needs, which is the ciphertext. The device
 proves that the ciphertext matches the pseudonym it spends under. This stops a
 double spender encrypting someone else's identifier, and stops a malicious payer
 choosing the pseudonym for an honest payee, which would need the payee's
@@ -95,11 +95,11 @@ payee verifies every link before accepting, so the transcript and its
 verification grow by one link per transfer. \Cref{sec:offline-evaluation}
 measures both.
 
-A payment that stops partway loses no value. Once the payer's secure element
+If a payment stops partway, no value is lost. Once the payer's secure element
 has signed, it is locked to that destination. Whether the payment or the
 acknowledgement was lost, a retry completes the payment, and the token cannot be
-spent elsewhere. A secure element that resets to escape the rule destroys the
-token it held.
+spent elsewhere. If a secure element is reset to get around this, the
+token it held is lost.
 
 \paragraph{Deposit.} The final owner signs the token over to the central bank
 through their intermediary, with their own audit ciphertext and proof as in a
@@ -395,8 +395,8 @@ instantiates each of them.
 %
 \end{theorem}
 
-\paragraph{Extensions.} The construction supports several extensions, each a
-change to the construction rather than to its instantiation.
+\paragraph{Extensions.} The construction supports several extensions, none of
+which change the instantiation.
 
 \paragraph{Epochs.} An epoch is a fixed period after which credentials and tokens are no longer
 accepted. The construction extends to expiry by epochs, which is how it
@@ -406,7 +406,7 @@ $(\algo{uid}, \sk_{\algo{usr}})$, and the central bank signs
 $(\algo{uid}_0,\allowbreak v,\allowbreak s_0,\allowbreak \epoch)$ at
 withdrawal, tying each token to the epoch in which it was issued. Both schemes
 sign vectors one message longer, and the proof of withdrawal and the JPOK each
-prove one more message. Nothing else changes.
+prove one more message, and the rest of the protocol is unchanged.
 
 Payees enforce the policy, rejecting payments carrying an epoch outside the
 window they accept, and the width of that window can be tuned to the value of
@@ -415,8 +415,8 @@ wall-clock time, capping the length of a chain that will be accepted at
 deposit.
 
 A payee who has been offline since before a payer was revoked has no verified
-real-time information with which to reject that payer, so revocation is a
-bound on how long a credential remains usable.
+real-time information with which to reject that payer, so a revoked
+credential can still be used until it expires.
 
 Epochs are disclosed, so they narrow the anonymity set of a withdrawal to the
 users who withdrew the same denomination in the same epoch, and a deployment
@@ -428,7 +428,7 @@ not the spender is later identified. Both are payee-side checks and require no c
 messages.
 
 \paragraph{Secure element hardware.} The secure element can be any hardware that protects the key and the single-use
-logic together. Smart cards do. Mobile trusted execution environments are
+logic together, such as a smart card. Mobile trusted execution environments are
 isolated parts of a phone's main processor, and they protect keys but not the
 logic that uses them~\cite{trustzone,secureenclave,javacard,mifare}.
 

@@ -21,15 +21,14 @@ state, political, legal, and economic structures.
 For us, the main technical distinction between fiat and non-fiat money is the
 treatment of identity. Fiat money is issued by an entity such as a
 central bank, whose backing gives the currency its value and so centralises
-issuance by design\footnote{Fiat is Latin for `let it be done'.}. Behaviour in
-such systems is enforced not by protocol-level incentive compatibility but by
-the ability of regulators and legal authorities to act against malicious
-parties. This requires participants to be identifiable, and so introduces the
+issuance by design\footnote{Fiat is Latin for `let it be done'.}. In such
+systems, regulators and legal authorities enforce behaviour by acting against
+malicious parties, so the protocol itself does not need to be incentive
+compatible. This requires participants to be identifiable, and so introduces the
 requirement of registered identities. Cryptocurrencies instead replace the
 issuer with a public ledger whose validators follow the protocol for economic
-rather than institutional reasons. This lets them remain permissionless,
-and function with participants who have no registered identities at
-all. The anonymity set of a transaction is the set of users it could have come
+rather than institutional reasons. So they can stay permissionless, and work
+with participants who have no registered identities at all. The anonymity set of a transaction is the set of users it could have come
 from. Cryptocurrencies cover the entire spectrum of privacy, from pseudonymity with each
 transaction in the clear to hidden values and anonymity sets that contain every
 user of the system~\cite{bitcoin,ethereum,EPRINT:Noether15,SP:BCGGMT14}. Stablecoins sit
@@ -54,7 +53,7 @@ PATRIOT) Act (2001).}  In proposed digital fiat systems, users prove ownership
 of the money being moved while the transactions stay private, and regulators
 keep oversight under well-defined conditions~\cite{digitaleuro2023}.
 
-Oversight need not mean access to every transaction. An auditor can be given
+Oversight does not require access to every transaction. An auditor can be given
 the transactions of one user, for a period that user has agreed to, and nothing
 else. The mechanism we give is agnostic to how balance and theft prevention are
 achieved. It constrains only the tag attached to a transaction and not its
@@ -70,10 +69,10 @@ has agreed to.
 is that counter-based tracing makes users create their transactions one after
 another~\cite{CCS:KiaKohSar22,CANS:SarKiaKoh24}, but an auditor never needs to
 know their order. It only needs to find every transaction of the user, and their
-number is bounded. The second is that an auditor can be limited by the key it
-is given, rather than trusted to limit itself. A key that derives the tags of one user for one epoch lets the auditor
-trace that user in that epoch and nowhere else. Both lead to one design, in
-which tags are computed from a bounded index space local to one epoch.
+number is bounded. The second is that the key an auditor is given can limit
+what it traces, so the auditor does not have to be trusted to limit itself. A key that derives the tags of one user for one epoch lets the auditor
+trace that user in that epoch and nowhere else. Together they give tags
+computed from a bounded index space local to one epoch.
 
 This chapter introduces a tracing protocol, $\ID$, that needs neither
 encrypted user identifiers nor the monotonically increasing counters of prior
@@ -107,7 +106,7 @@ but a slower prover and a trusted setup.
 Prior work on regulatory oversight in privacy-preserving payment systems
 typically supports either anonymity revocation or tracing.  Anonymity revocation
 lets an auditor identify the user responsible for a specific transaction.
-Tracing, by contrast, lets the auditor recover all transactions associated with
+Tracing lets the auditor recover all transactions associated with
 a given user. Tracing can be emulated by applying anonymity revocation to every
 transaction in turn, but this costs time linear in the number of transactions
 and exposes information about non-targeted users.

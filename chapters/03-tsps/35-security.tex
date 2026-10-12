@@ -8,8 +8,8 @@ Any $t$ shares of a value are uniform and independent of it, so they may be
 sampled without knowing the value. Given a value $w$ and any $t$ shares of
 $\shr{w}$, every other share of $\shr{w}$ is determined and efficiently
 computable, since reconstruction from any $t+1$ shares is a fixed linear map,
-or a fixed product in a group. This lets a reduction that does not know the
-signing key still produce honest signers' shares of the public key and of
+or a fixed product in a group. A reduction that does not know the signing
+key can then still compute honest signers' shares of the public key and of
 signatures, from the public key and from the signatures it obtains from its own
 oracle.
 

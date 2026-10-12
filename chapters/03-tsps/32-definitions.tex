@@ -5,8 +5,8 @@ an SPS scheme $\SPS$ between $n$ signers, so that any $t+1$ of them can jointly 
 $t$ of them can produce one alone.
 
 Signers communicate over authenticated point-to-point channels, together with a
-broadcast channel. A verifier holds the public key, and needs to know neither
-$n$, nor $t$, nor which signers took part. Signers may be malicious, and may
+broadcast channel. A verifier only needs the public key, and does not need to
+know $n$, $t$ or which signers took part. Signers may be malicious, and may
 collude to forge signatures or to recover the signing key. We write $\Cor$ for
 the set of corrupted signers and $\mathcal{H}$ for its complement. We consider
 static corruption: the adversary chooses which signers to corrupt before key
@@ -111,8 +111,8 @@ unforgeability notions, starting from TS-UF-0, which counts a forgery only if no
 honest signer signed the message~\cite{C:BCKMTZ22}. TS-UF-1 counts a forgery
 whenever fewer than $t+1-|\Cor|$ honest signers signed it, so that the adversary
 never held $t+1$ shares on that message. The two notions are equivalent when the
-adversary corrupts $t$ signers. TS-UF-1 is our target, as no signature should
-exist unless enough honest signers agreed to that message. Both notions are
+adversary corrupts $t$ signers. We aim for TS-UF-1, since a signature should only
+exist if enough honest signers agreed to the message. Both notions are
 defined for non-interactive threshold signature schemes, with the adversary
 collecting the signature shares~\cite{C:BCKMTZ22}.
 
@@ -231,8 +231,8 @@ $(\alpha_1, \ldots, \alpha_n)$ in which $\alpha_h$ is the share held by party
 $h$. We use the same notation $\shr{a}$ for a sharing of a group element $a \in
 \group{}$, where $\group{}$ is either source group.
 
-A group element $a$ is shared in the group: the shares of $a$ are
-themselves elements of $\group{}$, and reconstruction combines them with the
+A group element $a$ is shared in the group. Its shares are
+elements of $\group{}$, and reconstruction combines them with the
 group operation, as a product of shares raised to fixed coefficients, so that
 the linear operations below remain local.
 

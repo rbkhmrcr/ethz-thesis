@@ -28,7 +28,7 @@ public parameter of $\FT$. Users prove with zero-knowledge proofs of knowledge
 that these values were derived correctly and, where a proof must also
 authenticate a message, that the message came from the same user.
 
-Tags come from a pseudorandom function. A tag must look random to anyone
+We compute tags with a pseudorandom function. A tag must look random to anyone
 without the epoch key, so that one user's transactions cannot be linked, and
 must be recomputable by whoever holds the key, so that the auditor finds every
 transaction. A pseudorandom function gives both, and a one-way or hash function
@@ -44,7 +44,8 @@ keys. They are zero knowledge since they are published on the ledger.
 
 The tracing key derives one epoch key per epoch, and each epoch key derives the
 tags of its epoch. Each derivation comes with a proof that it was computed
-correctly. Each step must be one way in the right direction. An epoch key
+correctly. Each step must be one way, from the tracing key to epoch keys and from epoch
+keys to tags. An epoch key
 reveals neither the tracing key nor the keys of other epochs, and a tag reveals
 no key. \Cref{sec:txid-instantiation} comes back to why this is hard to achieve
 with short proofs.

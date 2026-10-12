@@ -256,9 +256,9 @@ forged by corrupt parties: whether corrupt users hold all disclosed values, or
 failing that, whether corrupt issuers could produce valid credentials for the
 remaining values. If either check succeeds, $\idfu{\AAC}$ defers to $\simu$ and
 returns its answer. Otherwise, it records the presentation as invalid and
-returns false. The first case gives completeness, since every honest
-presentation verifies. The last gives unforgeability, since a presentation that
-corrupt parties could not have produced is rejected.
+returns false. So every honest presentation
+verifies, which gives completeness, and a presentation that corrupt parties
+could not have produced is rejected, which gives unforgeability.
 
     \begin{framed}
 

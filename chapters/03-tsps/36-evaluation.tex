@@ -49,7 +49,7 @@ in $n$, and that the online phase stays below 2~ms up to sixteen parties.
 
 CKPSS23 and MMSST24 have no offline phase, and each signer sends one signature
 share of 96 or 384 bytes to the combiner. \Cref{fig:tsps-baselines} compares
-them with our schemes, which move the extra cost to before the message is known.
+them with our schemes, where the extra cost is in the offline phase.
 Threshold $\AGHO$ has signatures of three group elements instead of the seven of
 MMSST24, and verification needs $\ell+4$ pairings instead of $\ell+11$, but it
 is secure only in the GGM. Its verification takes 3.05~ms against 2.79~ms for

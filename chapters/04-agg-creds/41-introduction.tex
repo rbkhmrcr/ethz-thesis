@@ -32,8 +32,9 @@ Credential systems with distributed issuance still require the issuers to
 coordinate. With many issuers worldwide, each relevant to only some users, that
 coordination is impractical, and between issuers with no relationship to one
 another it may be impossible. Threshold issuance without an interactive setup
-removes it for issuers certifying the same credential~\cite{EPRINT:GGPR25}. We
-remove coordination for issuers certifying different attributes.
+avoids this coordination for issuers certifying the same
+credential~\cite{EPRINT:GGPR25}. Our scheme avoids it for issuers certifying
+different attributes.
 
 \paragraph{Contributions.} We give an aggregate anonymous credential scheme:
 credentials from independent, uncoordinated issuers combine into one compact
@@ -41,9 +42,9 @@ credential, provable in one proof. Users aggregate locally, without interaction
 between issuers. The scheme supports selective disclosure
 of attribute values.
 
-Our design starts from the observation that a credential rests on three links:
-users' secret keys must be linked to their public keys, public keys to a tag,
-and credentials to that tag. Each link can be established by a different party.
+In our scheme, users' secret keys are linked to their public keys, public keys
+to a tag, and credentials to that tag. A different party can establish each of
+these links.
 The registration authority assigns a tag to a public key only after the user
 proves knowledge of the secret key, and issuers sign attributes under a tag
 only after verifying the registration signature, so their signatures do not
@@ -54,18 +55,16 @@ To present attributes, users aggregate the relevant credentials and prove in
 zero knowledge that all three links hold: they know their secret key, their
 public key is certified with a tag, and they hold a valid aggregate credential
 under that tag for the disclosed values. The verifier learns neither the tag
-nor the public key. Binding credentials by tag means that different users'
-credentials cannot be pooled, and allows users to aggregate credentials from
-issuers that may never have communicated, without contacting any issuer again.
-Separating the requirements on the registration authority from those on the
-issuers allows us to construct a scheme with stateless issuers: as each user
-has one tag, issuers need not keep a list of all parties they have signed for.
+nor the public key. As credentials are bound to a tag, different users cannot pool
+their credentials, and users can aggregate credentials from issuers that may
+never have communicated, without contacting any issuer again. As the
+registration authority gives each user one tag, issuers need not keep a list of
+all parties they have signed for, so our issuers are stateless.
 
-The existence of the registration authority is not an additional assumption on
-the scheme.  Existing anonymous credential schemes assume that users' keys are
+The registration authority does not add an assumption to the scheme. Existing anonymous credential schemes assume that users' keys are
 certified so that credentials cannot be issued to arbitrary keys. Key
-certification is usually left implicit or enforced by all issuers. Here we
-simply separate out this role.
+certification is usually left implicit or enforced by all issuers. We make this
+role a separate party.
 
 \subsection*{Related work}
 

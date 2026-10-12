@@ -12,10 +12,10 @@ under the MPC protocol. Verification is $\SPSverify$ unchanged, since it uses no
 secret shares, and the distributions of signatures are the same in the threshold
 and non-threshold cases.
 
-\paragraph{Signing.} Evaluating $\SPSsign(\sk, \vec{\msg})$ under MPC, with the message as one more
-input, would put every interactive call after the message is known. We instead
-split signing into an offline phase, which makes every interactive call before
-the message is known, and an online phase, which is local. This depends on the
+\paragraph{Signing.} Evaluating $\SPSsign(\sk, \vec{\msg})$ under MPC with the message as an input
+needs interaction once the message is known. We split signing into an offline
+phase, run before the message is known, which contains all the interaction, and
+a local online phase. This depends on the
 form of the signing algorithm, which we define first.
 
 \paragraph{Decomposable signing.} A scheme $\SPS$ has decomposable signing if every
@@ -111,8 +111,8 @@ $\SPSverify(\pk, \vec{\msg}, \SPSsig)$.
 
 \paragraph{Offline signing.} Each state is used for one message only,
 so the signers keep their
-states in a queue and delete each one once it is used. The offline phase can be
-run repeatedly during quiet periods to build up states for busy ones.
+states in a queue and delete each one once it is used. Signers can run the
+offline phase in advance and store states for later.
 
 \paragraph{Online signing and combining.} No signer communicates with any other
 during online signing, and its cost is comparable to that of an ordinary

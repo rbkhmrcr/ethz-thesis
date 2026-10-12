@@ -8,8 +8,7 @@ We use version 0.21.0 of the library, and implement both $\AAC$ and $\ATS$.
 \paragraph{Setup.} The baseline is Idemix, which is built on
 BBS+~\cite{CCS:CamVan02,SCN:AuSusMu06,CDL16}. We run the upstream
 Idemix implementation on the same version of \texttt{gnark-crypto} and on the
-same machine as our scheme, so that the comparison is between the schemes and
-not their libraries. Idemix issues one credential on all $n$ attributes
+same machine as our scheme, so that both use the same library. Idemix issues one credential on all $n$ attributes
 from one issuer, and presents it with $k$ attributes disclosed. We take all measurements
 on a MacBook Air with an Apple M2 and 16\,GB of RAM, using all eight
 cores. Each time is the median of 100 repetitions.

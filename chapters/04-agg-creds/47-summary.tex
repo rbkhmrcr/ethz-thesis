@@ -9,8 +9,8 @@ with each other, nor with the registration authority or verifiers. Users
 communicate with each of their credential issuers once, and can then combine
 credentials from these independent issuers into a single aggregate credential
 and present that with one proof.  The registration authority binds each user's
-key to a tag. Binding credentials to the tag lets issuers stay uncoordinated,
-and since each user has one tag, issuers are stateless.
+key to a tag. As credentials are bound to the tag, issuers need not
+coordinate, and as each user has one tag, issuers are stateless.
 
 The instantiation combines the $\AGHO$ SPS scheme, our tag-based aggregate
 signature scheme $\ATS$, and proofs based on Sigma protocols. With $n = 128$

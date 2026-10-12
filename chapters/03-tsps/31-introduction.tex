@@ -3,16 +3,15 @@
 Structure-preserving signature (SPS) schemes are those in which messages,
 public keys and signatures are all group elements. As all operations in the verification are
 algebraic, SPS schemes allow for proofs of signatures that are more compact and efficient to produce than
-those of general digital signatures. This makes SPS schemes useful across a
-range of privacy-preserving applications, including blind signatures,
+those of general digital signatures. SPS schemes are used in many
+privacy-preserving applications, including blind signatures,
 delegatable anonymous credentials and group
 signatures~\cite{AFRICACRYPT:FucVer10,CCS:CamDriDub17,RSA:CriLys19,PoPETS:MSBM23,AC:Groth06,AC:Groth07,C:LibPetYun15}.
 
 In systems with entities that publicly certify state, such as ledger
-administrators or transparency log providers, threshold certification shares
-the role of signer between several parties. No single compromised or
-misbehaving party can then certify on its own, and the certifiers need not
-trust one another.
+administrators or transparency log providers, threshold certification lets several
+parties share the role of signer. A single compromised or misbehaving party
+cannot certify on its own, and the certifiers do not need to trust one another.
 
 In privacy-preserving transaction ledgers, users' tokens or accounts are
 generally represented as commitments. To spend a token or update an account,
@@ -42,8 +41,8 @@ assumption~\cite{C:KilPanWee15}.
 We start from a common construction which applies to any SPS scheme with a
 property we call decomposable signing. All message-independent computation runs
 in an offline phase, and once the message is known, signing
-needs no interaction. Signers can then certify as soon as a message arrives,
-without being online together, at about the cost of ordinary signing.
+needs no interaction. Signers do not need to be online at the same time,
+and signing a message costs about as much as ordinary signing.
 
 Computation on shared group elements has been implemented for two
 parties~\cite{NDSS:GPVRNC23,LC:ADEO21} and for many parties on curves without a

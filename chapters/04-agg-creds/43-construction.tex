@@ -15,8 +15,8 @@ short signature, so issuers' signatures must aggregate. Ordinary aggregate signa
 combine signatures by several signers on different messages into one, so they
 would let users pool their credentials. Multi-signatures require every
 signer to sign the same message, while issuers sign different attributes.
-Tag-based aggregation combines only signatures under one tag, without issuers
-coordinating. The proof system must be zero knowledge, so that presentations
+We use tag-based aggregation, which only combines signatures under the same tag
+and needs no coordination between issuers. The proof system must be zero knowledge, so that presentations
 reveal only the disclosed values. It must also be simulation extractable, since
 the security proof simulates honest users' presentations while extracting from
 the adversary's. Each presentation uses the verifier's message as its label, so
