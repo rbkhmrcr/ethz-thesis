@@ -29,9 +29,11 @@ processor, 16 physical cores and 117~GB of RAM. All parties run on it with one
 thread each, over authenticated channels on that machine, and the prior and
 centralised schemes run on the same server. Each timed call starts from empty
 preprocessing, so the offline and key generation times include making triples.
-We report the median of 100 repetitions after 10 warm-up calls, for party $p_1$.
-In the tables, the interquartile range is within 10\% of the median for all but
-eight measurements, and within 28\% for all.
+We report the median of 100 repetitions after 10 warm-up calls. A threshold
+signature is only ready once every party has finished, so each repetition counts
+the time until the last party finishes. Online signing involves no interaction,
+and is timed for party $p_1$. In the tables, the interquartile range is within
+20\% of the median for all but six measurements, and within 37\% for all.
 
 \paragraph{Results.} \Cref{tab:tsps-comp} compares our schemes with the
 threshold SPS schemes CKPSS23 and MMSST24. We implement these with a trusted
@@ -78,10 +80,10 @@ PS the interactive assumption of Pointcheval and Sanders~\cite{RSA:PoiSan16}.}
 \toprule
  & & Key gen. & Offline & Batched & Sign & Combine & Verify \\
 \midrule
-Threshold $\AGHO$ & ATLAS & 3.10 & 1.33 & 0.85 & 0.30 & 2.37 & 3.05 \\
- & MASCOT & 14.0 & 14.3 & 4.34 & 0.64 & 6.03 & 3.05 \\
-Threshold $\KPW$ & ATLAS & 8.41 & 11.1 & 12.2 & 0.73 & 4.19 & 4.39 \\
- & MASCOT & 38.3 & 40.8 & 30.2 & 1.51 & 11.8 & 4.39 \\
+Threshold $\AGHO$ & ATLAS & 4.25 & 1.36 & 0.85 & 0.30 & 3.48 & 3.05 \\
+ & MASCOT & 14.4 & 14.4 & 4.35 & 0.64 & 6.31 & 3.05 \\
+Threshold $\KPW$ & ATLAS & 11.7 & 13.1 & 12.3 & 0.73 & 6.19 & 4.39 \\
+ & MASCOT & 39.8 & 42.6 & 30.2 & 1.51 & 11.8 & 4.39 \\
 \midrule
 $\AGHO$ & & 0.46 & & & 0.86 & & 3.05 \\
 $\KPW$ & & 1.84 & & & 2.01 & & 4.39 \\
@@ -89,7 +91,8 @@ CKPSS23~\cite{AC:CKPSS23} & & 3.16 & & & 1.50 & 6.33--10.6 & 2.08 \\
 MMSST24~\cite{PKC:MMSST24} & & 4.67 & & & 1.17 & 0.45--0.89 & 2.79 \\
 \bottomrule
 \end{tabular}
-\caption[Threshold SPS schemes: time]{Time in ms for party $p_1$ at $n = 5$ and
+\caption[Threshold SPS schemes: time]{Time in ms until the last party
+finishes, and for party $p_1$ for online signing, at $n = 5$ and
 $\ell = 2$, with $t = 2$ for ATLAS and $t = 4$ for MASCOT. Batched is the
 offline time per state when 16 states are made together. For our schemes,
 signing is $\TSPSonsign$ and verification is that of the underlying SPS scheme.
@@ -121,8 +124,8 @@ which doubles their size.}
 
 \begin{figure}[htbp] \centering
 \includegraphics[width=\textwidth]{chapters/03-tsps/tsps-n-times-server.pdf}
-\caption[Threshold SPS schemes: time against $n$]{Time of party $p_1$ against the number of parties $n$, at $\ell = 2$,
-median. ATLAS runs at $n = 2t+1$ and MASCOT at $t = n-1$.}
+\caption[Threshold SPS schemes: time against $n$]{Time until the last party finishes, and of party $p_1$ for
+$\TSPSonsign$, against the number of parties $n$, at $\ell = 2$, median. ATLAS runs at $n = 2t+1$ and MASCOT at $t = n-1$.}
 \label{fig:tsps-n-times} \end{figure}
 
 \begin{figure}[htbp] \centering
