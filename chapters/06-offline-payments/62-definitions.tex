@@ -234,13 +234,14 @@ $\witness_{\algo{req}}$ for each $\algo{req} \in \mathcal{Q}$.
 with the disclosed messages of $\algo{req}$ and the hidden messages of
 $\witness_{\algo{req}}$. $\adv$ wins the experiment if the following hold:
   %
-  \begin{equation*}
+  \begin{multline*}
   %
-    \SCIverify(\pk, \msg^\star, \signature^\star) = 1 \ \wedge\ \forall
-\algo{req} \in \mathcal{Q} : \rel_{\algo{req}}((\pk, \algo{req}),
-\witness_{\algo{req}}) = 1 \ \wedge\ \msg^\star \neq \msg_{\algo{req}}.
+    \SCIverify(\pk, \msg^\star, \signature^\star) = 1 \\
+    \wedge\ \forall \algo{req} \in \mathcal{Q} : \rel_{\algo{req}}((\pk,
+\algo{req}), \witness_{\algo{req}}) = 1 \ \wedge\ \msg^\star \neq
+\msg_{\algo{req}}.
   %
-  \end{equation*}
+  \end{multline*}
 
 \end{experimentbox}
 

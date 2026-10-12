@@ -169,7 +169,7 @@ answer of $\idfu{\AAC}'$.
 
   \end{description}
 
-  $\simu$ never extracts, so it runs straight-line. In the last case,
+  Since $\simu$ does not extract, it does not rewind the adversary. In the last case,
 $\idfu{\AAC}'$ queries $\simu$ if there is a corrupt user $\user'$ such that,
 for every $i$ with $\atv{i} \neq \varnothing$, either $\atv{i} \in
 \creds[\user'][i]$ or issuer $\issuer{i}$ is dishonest. Then $\simu$ answers $1$,
@@ -366,8 +366,8 @@ most $q$ other tags signed under $\pk_j$ is, each independently with probability
 $1-\frac{1}{q+1}$, so together with probability at least
 $\frac{1}{q+1}\big(1-\frac{1}{q+1}\big)^q$.
   \end{itemize}
-The probability $\frac{1}{q+1}$ maximises $x(1-x)^q$ over $x \in [0, 1]$, which
-is why $\advB$ embeds with it.
+$\advB$ embeds with probability $\frac{1}{q+1}$ since this maximises
+$x(1-x)^q$ over $x \in [0, 1]$.
 Every signing query under $\pk_j$ then falls into one of the first two cases. A
 query on a message other than $\msg^*_j$ is not embedded, and a query on
 $\msg^*_j$ has a tag other than $\Tag^*$, since $(\pk_j, \Tag^*, \msg^*_j)$ was
@@ -564,13 +564,13 @@ distribution.
     \item Sample $\pi_1, \pi_2, c \sample \Zp$, and set the
 following:
 %
-      \begin{equation*}
+      \begin{gather*}
 %
 	f = \gen^{\pi_1}\cdot\bar{\gen}^{-c}, \quad h =
-v^{\pi_1}\cdot\bar{v}^{-c}, \quad y_i = \hashone(\atv{i})^{\pi_1}\cdot H_i^{-c},
+v^{\pi_1}\cdot\bar{v}^{-c}, \\ y_i = \hashone(\atv{i})^{\pi_1}\cdot H_i^{-c},
 \quad w = \bar{\gen}^{\pi_2}\cdot\pk'^{-c}.
 %
-      \end{equation*}
+      \end{gather*}
 
         \item Program random oracle $\hash$ so that $\hash(\gen, v, \inst_3, f, h,
 \{y_i\}_{i \in \ISSUERS}, w, \msg) = c$, where $\inst_3$ is the simulated
@@ -595,7 +595,7 @@ proof system to the presentation proof of $\AACpresent$ and $\AACverify$.
 
 \begin{proof}
 
-  \begin{description}
+  \begin{description}[style=unboxed]
 
         \item[$\DS$ is existentially unforgeable.] The $\AGHO$ SPS scheme is existentially
 unforgeable under chosen-message attack in the GGM~\cite{C:AGHO11}.
@@ -619,7 +619,7 @@ simulation of presentations under the DDH assumption in $\group{1}$. The
 simulator programs the random oracle to simulate honest users' presentations.
 It needs $\rask$, which the simulator of the construction's proof holds, since
 it plays the honest registration authority. The
-simulator of the construction's proof runs straight-line and the
+simulator of the construction's proof does not rewind, and the
 reductions for $a_1$, $a_2$ and $a_3$ extract, each once, at the first
 presentation where $E$ occurs. Each
 extraction loses a polynomial factor in the number of hash

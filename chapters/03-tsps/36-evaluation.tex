@@ -75,7 +75,7 @@ element in both source groups. ROM is the random oracle model, and
 PS the interactive assumption of Pointcheval and Sanders~\cite{RSA:PoiSan16}.}
 \label{tab:tsps-comp} \end{table}
 
-\begin{table}[htbp] \centering \small \setlength{\tabcolsep}{4pt}
+\begin{table}[htbp] \centering \small \setlength{\tabcolsep}{3pt}
 \begin{tabular}{l l r r r r r r}
 \toprule
  & & Key gen. & Offline & Batched & Sign & Combine & Verify \\
@@ -101,16 +101,18 @@ one signer's share, and combining is given for $t = 2$ and $t = 4$.}
 \label{tab:tsps-benchmarks} \end{table}
 
 \begin{table}[htbp] \centering \small \setlength{\tabcolsep}{4pt}
-\begin{tabular}{l l r r r r r r r r}
+\begin{tabular}{l r r r r r r r r}
 \toprule
- & & \multicolumn{3}{c}{Communication (kB)} & \multicolumn{5}{c}{Size (bytes)} \\
-\cmidrule(lr){3-5} \cmidrule(lr){6-10}
- & & Gen & Offline & Combine & $\pk$ & $\sk_i$ & $\state_i$ & $\SPSsig_i$ & $\SPSsig$ \\
+ & \multicolumn{3}{c}{Communication (kB)} & \multicolumn{5}{c}{Size (bytes)} \\
+\cmidrule(lr){2-4} \cmidrule(lr){5-9}
+ & Gen & Offline & Combine & $\pk$ & $\sk_i$ & $\state_i$ & $\SPSsig_i$ & $\SPSsig$ \\
 \midrule
-Threshold $\AGHO$ & ATLAS & 1.1 & 0.5 & 1.0 & 243 & 96 & 307 & 243 & 243 \\
- & MASCOT & 136 & 1288 & 2.2 & 243 & 192 & 614 & 486 & 243 \\
-Threshold $\KPW$ & ATLAS & 2.7 & 4.2 & 1.6 & 873 & 486 & 391 & 391 & 391 \\
- & MASCOT & 3752 & 2759 & 3.4 & 873 & 972 & 782 & 782 & 391 \\
+\multicolumn{9}{l}{Threshold $\AGHO$} \\
+\quad ATLAS & 1.1 & 0.5 & 1.0 & 243 & 96 & 307 & 243 & 243 \\
+\quad MASCOT & 136 & 1288 & 2.2 & 243 & 192 & 614 & 486 & 243 \\
+\multicolumn{9}{l}{Threshold $\KPW$} \\
+\quad ATLAS & 2.7 & 4.2 & 1.6 & 873 & 486 & 391 & 391 & 391 \\
+\quad MASCOT & 3752 & 2759 & 3.4 & 873 & 972 & 782 & 782 & 391 \\
 \bottomrule
 \end{tabular}
 \caption[Threshold SPS schemes: communication and sizes]{Kilobytes sent by party

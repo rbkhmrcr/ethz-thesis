@@ -240,12 +240,12 @@ instantiates each of them.
           (\ck, \pk_{\algo{cb}}, v_0, \com_0)$, $\witness = (\algo{uid}_0, s_0,
           \psi)$, and relation as follows:
           %
-          \begin{equation*}
+          \begin{gather*}
           %
             \SCIverify(\pk_{\algo{cb}}, (\algo{uid}_0, v_0, s_0), \psi) = 1
-            \;\wedge\; \com_0 = \ComCommit(\ck, \algo{uid}_0, s_0).
+            \;\wedge{} \\ \com_0 = \ComCommit(\ck, \algo{uid}_0, s_0).
           %
-          \end{equation*}
+          \end{gather*}
 
         \item Return $T_0 = (v_0, s_0, \com_0, \algo{hist}_0 = \Sigma)$.
 
@@ -274,23 +274,23 @@ instantiates each of them.
           \com_i, \ciph_i)$, $\witness = (\algo{uid}_i, s_i, \rho_i)$, and
           relation as follows:
           %
-          \begin{equation*}
+          \begin{gather*}
           %
-            \com_i = \ComCommit(\ck, \algo{uid}_i, s_i) \;\wedge\; \ciph_i =
+            \com_i = \ComCommit(\ck, \algo{uid}_i, s_i) \;\wedge{} \\ \ciph_i =
             \PKEencrypt(\pk_\auditor, \algo{uid}_i; \rho_i).
           %
-          \end{equation*}
+          \end{gather*}
 
         \item The payer's secure element and device jointly compute $\sigma_i$,
           a signature of knowledge on the message $m_i = (v, \com_i,
           \com_{i+1})$ for the relation as follows:
           %
-          \begin{equation*}
+          \begin{gather*}
           %
             \SCIverify(\rapk, (\algo{uid}_i, \sk_{\algo{usr}_i}), \varphi_i) =
-            1 \;\wedge\; \com_i = \ComCommit(\ck, \algo{uid}_i, s_i).
+            1 \;\wedge{} \\ \com_i = \ComCommit(\ck, \algo{uid}_i, s_i).
           %
-          \end{equation*}
+          \end{gather*}
           %
           This is a JPOK, in which the secure element runs $\JPOKprove_0$ and
           contributes knowledge of the payer's secret key, and the device runs

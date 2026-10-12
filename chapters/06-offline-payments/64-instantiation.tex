@@ -72,7 +72,7 @@ Lehmann~\cite{CDL16}. \Cref{prim:hss-joint-proof} gives their protocol, in
 which $\algo{Prove}_C$, $\algo{Prove}_H$ and $\algo{Verify}$ play the roles of
 $\JPOKprove_0$, $\JPOKprove_1$ and $\JPOKverify$.
 
-\begin{primitivebox}{The joint proof of knowledge of a BBS+ signature of Hesse, Singh and Sorniotti~\cite{USENIX:HesSinSor23}.}{hss-joint-proof}
+\begin{primitivebox}[breakable]{The joint proof of knowledge of a BBS+ signature of Hesse, Singh and Sorniotti~\cite{USENIX:HesSinSor23}.}{hss-joint-proof}
 
   The card and the holder share a PRF key $\key$, and $\varphi = (e, r, E)$ is a
 BBS+ signature on $(\msg_1, \ldots, \msg_n)$ under $\pk = (\gen_0, \ldots,
@@ -106,8 +106,8 @@ the following:
           %
           \begin{equation*}
           %
-            b = \gen_0 \gen_{n+1}^{r} Q \prod_{i=2}^{n} \gen_i^{\msg_i}, \quad
-E' = E^{\varrho_1}, \quad \bar{E} = E'^{-e} b^{\varrho_1}, \quad d =
+            b = \gen_0 \gen_{n+1}^{r} Q \prod_{i=2}^{n} \gen_i^{\msg_i}, \enskip
+E' = E^{\varrho_1}, \enskip \bar{E} = E'^{-e} b^{\varrho_1}, \enskip d =
 b^{\varrho_1} \gen_{n+1}^{-\varrho_2}.
           %
           \end{equation*}
@@ -264,7 +264,7 @@ computes the following:
           \begin{gather*}
           %
             a = u^{\alpha} w^{\beta}, \quad b = w^{\delta} \gen_1^{\gamma_1}
-\gen_3^{\gamma_3}, \quad d = \hgen_1^{\gamma_1} \hgen^{\gamma_s}, \quad a_1 =
+\gen_3^{\gamma_3}, \quad d = \hgen_1^{\gamma_1} \hgen^{\gamma_s}, \\ a_1 =
 \gen^{\gamma_\rho}, \quad a_2 = \gen^{\gamma_1} \pk_\auditor^{\gamma_\rho}, \\
           %
             \algo{chal}_1 = \hash_p(\inst, u, w, x, D, a_0, a, b, d, a_1, a_2),
@@ -292,12 +292,12 @@ following hold:
       %
       \begin{gather*}
       %
-        u \neq 1, \quad \pairing(u, \ggen_Z) \cdot \pairing(x, \ggen) = 1, \quad
+        u \neq 1, \quad \pairing(u, \ggen_Z) \cdot \pairing(x, \ggen) = 1, \\
 \gen_2^{\pi_2} \cdot \gen_3^{\zeta} = a_0 \cdot D^{\algo{chal}_0}, \\
       %
         u^{\eta} \cdot w^{\nu} = a \cdot x^{\algo{chal}_1}, \quad w^{\xi} \cdot
 \gen_1^{\pi_1} \cdot \gen_3^{\pi_3} = b \cdot (D \cdot
-\gen_0)^{-\algo{chal}_1}, \quad \hgen_1^{\pi_1} \cdot \hgen^{\pi_s} = d \cdot
+\gen_0)^{-\algo{chal}_1}, \\ \hgen_1^{\pi_1} \cdot \hgen^{\pi_s} = d \cdot
 \com^{\algo{chal}_1}, \\
       %
         \gen^{\pi_\rho} = a_1 \cdot c_1^{\algo{chal}_1}, \quad \gen^{\pi_1}
@@ -399,7 +399,7 @@ k^{\msg_j})$ for $j \in [1, \ell]$, and compute the following proof:
           \begin{multline*}
           %
             \pi_s \sample \NIZK\bigl\{(\mu, \msg, \openinfo, \rho_1, \ldots,
-\rho_\ell) : B = \gen^{\mu} \ \wedge\ C = \gen^{\openinfo} \prod_{j=1}^{\ell}
+\rho_\ell) : B = \gen^{\mu} \\ \wedge\ C = \gen^{\openinfo} \prod_{j=1}^{\ell}
 P_j^{\msg_j} \\
           %
             \wedge\ \hat{\ciph}_j = (\gen^{\rho_j}, B^{\rho_j} k^{\msg_j}) \
@@ -549,13 +549,13 @@ the following:
 
 	\item Compute the following:
           %
-          \begin{equation*}
+          \begin{gather*}
           %
             \pi_{\algo{uid}} = \alpha + \algo{chal}\, \algo{uid}, \quad \pi_s =
-\beta + \algo{chal}\, s, \quad \pi_\omega = \delta + \algo{chal}\, \omega,
+\beta + \algo{chal}\, s, \\ \pi_\omega = \delta + \algo{chal}\, \omega,
 \quad \pi_t = \gamma + \algo{chal}\, t.
           %
-          \end{equation*}
+          \end{gather*}
 
 	\item Output $\Sigma = (k^*, l^*, \tilde{c}, a, \tilde{a},
 \pi_{\algo{uid}}, \pi_s, \pi_\omega, \pi_t)$.

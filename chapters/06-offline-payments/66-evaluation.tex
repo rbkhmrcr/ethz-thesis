@@ -30,7 +30,7 @@ most operations, and at most $13\%$ on the phones and the card and $10\%$ on the
 server.
 
 \begin{figure}[htbp] \centering \small
-\begin{tikzpicture}[seq]
+\begin{tikzpicture}[seq, x=2.85cm, seqhead/.append style={text width=2.5cm}]
   \foreach \x/\n/\e in {0/Secure element/7.4, 1/Device/7.4, 2/Intermediary/7.4, 3/Central bank/6.4} {
     \node[seqhead] at (\x, 0) {\n};
     \draw[seqlife] (\x, 0.6) -- (\x, \e);
@@ -54,7 +54,7 @@ and the central bank. The device talks to the intermediary over HTTPS.}
 \label{fig:offline-withdraw-seq} \end{figure}
 
 \begin{figure}[htbp] \centering \small
-\begin{tikzpicture}[seq, y=-0.5cm]
+\begin{tikzpicture}[seq, x=2.85cm, y=-0.5cm, seqhead/.append style={text width=2.5cm}]
   \foreach \x/\n/\e in {0/Payer's\\secure element/9.9, 1/Payer's\\device/9.9, 2/Payee's\\device/9.3, 3/Payee's\\secure element/8.7} {
     \node[seqhead, anchor=south] at (\x, 0.5) {\n};
     \draw[seqlife] (\x, 0.6) -- (\x, \e);

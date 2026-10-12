@@ -44,10 +44,9 @@ $\vec{\msg}$ and $\SPSsig$, and outputs $0$ or $1$.
 
 \end{description}
 %
-Some schemes are rerandomisable: they also provide an algorithm
-$\SPSrandomise$, which, without the secret key, turns a signature $\SPSsig$
-into a new signature $\SPSsig'$ on the same message, distributed as a freshly
-generated one.
+Some schemes are rerandomisable: without the secret key, an additional
+algorithm $\SPSrandomise$ turns a signature $\SPSsig$ into a new signature
+$\SPSsig'$ on the same message, distributed as a freshly generated one.
 
 A rerandomisable scheme cannot be strongly unforgeable, since rerandomising a
 signature is itself a strong forgery.
@@ -84,7 +83,7 @@ signature share $\SPSsig_h$.
 signature shares from a set $Q$ of $t+1$ signers, outputs a signature
 $\SPSsig$, without interaction.
 
-  \item[$\{0,1\} \leftarrow \TSPSverify(\pk, \vec{\msg}, \SPSsig)$ :] Equal to
+  \item[$\{0,1\} \leftarrow \TSPSverify(\pk, \vec{\msg}, \SPSsig)$ :] Runs
 $\SPSverify(\pk, \vec{\msg}, \SPSsig)$.
 
 \end{description}
@@ -99,12 +98,13 @@ $\TSPSgen(\secparam, \ell, t, n)$ and $\shr{\state}$ output by a run of
 $\TSPSoffsign(\shr{\sk})$ that does not abort, every message $\vec{\msg} \in \group{1}^\ell$, and
 every set $Q \subseteq [1,n]$ of $t+1$ signers:
 %
-\begin{equation*}
+\begin{multline*}
 %
-  \SPSverify\left(\pk, \vec{\msg}, \TSPScombine\left(\left\{
-\TSPSonsign(\sk_h, \state_h, \vec{\msg}) \right\}_{h \in Q}\right)\right) = 1.
+  \SPSverify\Bigl(\pk, \vec{\msg}, \\
+  \TSPScombine\bigl(\bigl\{
+\TSPSonsign(\sk_h, \state_h, \vec{\msg}) \bigr\}_{h \in Q}\bigr)\Bigr) = 1.
 %
-\end{equation*}
+\end{multline*}
 
 \paragraph{Unforgeability.} Threshold signatures have a hierarchy of
 unforgeability notions, starting from TS-UF-0, which counts a forgery only if no

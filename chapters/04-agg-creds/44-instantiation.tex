@@ -380,11 +380,11 @@ from the verifier, do:
           %
 	    \inst_3 = (\bar{\gen}, \bar{v}, \pk', \{i, \atv{i}, H_i\}_{i\in\ISSUERS},
 \widetilde{r}', \widetilde{s}', \bar{z}, \signatureone', \bar{\signaturetwo},
-\bar{\tid}), \qquad \witness_3 = (\delta, \sk), \\
+\bar{\tid}), \\ \witness_3 = (\delta, \sk), \\
           %
-	    \rel_3 = \{\ \bar{\gen} = \gen^\delta \ \wedge\ \bar{v} = v^\delta \
-\wedge\ H_i = \hashone(\atv{i})^\delta\ \ \forall i \in \ISSUERS \ \wedge\ \pk'
-= \bar{\gen}^\sk\ \}.
+	    \rel_3 = \{\ \begin{aligned}[t] &\bar{\gen} = \gen^\delta \ \wedge\ \bar{v} = v^\delta \
+\wedge\ H_i = \hashone(\atv{i})^\delta\ \ \forall i \in \ISSUERS \\ &\wedge\ \pk'
+= \bar{\gen}^\sk\ \}.\end{aligned}
           %
 	\end{gathered}\end{equation*}
 

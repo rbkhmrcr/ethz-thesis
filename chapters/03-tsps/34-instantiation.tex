@@ -264,14 +264,16 @@ the following:
 \sample \Zp^*$ and return $\SPSsig = (\widetilde{q}, \vec{r}, \vec{s},
 \vec{z})$, computed as follows:
       %
-      \begin{equation*}
+      \begin{gather*}
       %
 	\widetilde{q} = \ggen^{\sigma}, \quad r_j = b_j^{\rho},
-\quad s_j = b_j^{\rho\sigma}, \quad z_j = \gen^{k_{1,j}}
-\prod_{i=1}^{\ell} \msg_i^{k_{i+1,j}} \cdot x_j^{\rho}\, y_j^{\rho\sigma}
-\text{ for } j \in \{1, 2\}.
+\quad s_j = b_j^{\rho\sigma}, \\
       %
-      \end{equation*}
+	z_j = \gen^{k_{1,j}}
+\prod_{i=1}^{\ell} \msg_i^{k_{i+1,j}} \cdot x_j^{\rho}\, y_j^{\rho\sigma}
+\quad \text{for } j \in \{1, 2\}.
+      %
+      \end{gather*}
 
     \item[$\{0,1\} \leftarrow \SPSverify(\pk, \vec{\msg}, \SPSsig)$ :] On input
 $\SPSsig = (\widetilde{q}, \vec{r}, \vec{s}, \vec{z})$, where $r_1$ and $s_1$
@@ -348,7 +350,9 @@ $\vec{\beta}$ are the public constant $1$.
 	  %
 	    \shr{\widetilde{u}_i} = \ggen^{\shr{\zeta_i}}, \quad
 \shr{\widetilde{v}_j} = \ggen^{\shr{\nu_j}}, \quad \shr{\widetilde{w}_j} =
-\ggen^{\shr{\omega_j}} \quad \text{for } i \in [1, \ell+1],\ j \in \{1, 2\}.
+\ggen^{\shr{\omega_j}} \\
+	  %
+	    \text{for } i \in [1, \ell+1],\ j \in \{1, 2\}.
 	  %
 	  \end{gather*}
 
@@ -377,8 +381,9 @@ following:
 \shr{s_j} \sample \algo{ExpGrp}_1(\shr{\rho\sigma}, \shr{b_j}), \\
 	  %
 	    \shr{x_j^{\rho}} \sample \algo{ExpGrp}_1(\shr{\rho}, \shr{x_j}), \quad
-\shr{y_j^{\rho\sigma}} \sample \algo{ExpGrp}_1(\shr{\rho\sigma}, \shr{y_j})
-\quad \text{for } j \in \{1, 2\}.
+\shr{y_j^{\rho\sigma}} \sample \algo{ExpGrp}_1(\shr{\rho\sigma}, \shr{y_j}) \\
+	  %
+	    \text{for } j \in \{1, 2\}.
 	  %
 	  \end{gather*}
 

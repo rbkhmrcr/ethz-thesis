@@ -502,11 +502,11 @@ $\gamma$ lies in $[0,\Max)$. It remains to show the tag equation. From the
 second and third equations of $\rel_7'$, and from the fourth and fifth, the
 following hold:
   %
-  \begin{equation*}
+  \begin{gather*}
     \Pi = \pairing(\HE(\epoch)^{s\cdot\utk'},\ggen_D) = \pairing(\ek,
-\ggen_D)^{s}, \qquad \Pi = \big(\Tag_\gamma^{s}\big)^{\utk''+\gamma} =
+\ggen_D)^{s}, \\ \Pi = \big(\Tag_\gamma^{s}\big)^{\utk''+\gamma} =
 \big(\Tag_\gamma^{\utk''+\gamma}\big)^{s}.
-  \end{equation*}
+  \end{gather*}
   %
   The verifier rejects $U = 1_{\group{1}}$, so $s \neq 0$, as $\HE(\epoch)$
 generates $\group{1}$ with overwhelming probability over the random oracle.
@@ -573,9 +573,9 @@ first message:
   %
   \begin{gather*}
     A = \gen_2^{\theta_1}\cdot\gen_3^{\theta_2}\cdot\gen_4^{\theta_h}\cdot
-\com^{-c}, \qquad B = \HE(\epoch)^{\theta_s}\cdot U^{-c}, \qquad M =
-\pairing(U,\ggen_D)^{\theta_1}\cdot \Pi^{-c}, \\
-    C = \Tag_\gamma^{\theta_s}\cdot X^{-c}, \qquad F =
+\com^{-c}, \qquad B = \HE(\epoch)^{\theta_s}\cdot U^{-c}, \\ M =
+\pairing(U,\ggen_D)^{\theta_1}\cdot \Pi^{-c}, \qquad
+    C = \Tag_\gamma^{\theta_s}\cdot X^{-c}, \\ F =
 X^{\theta_2+\theta_\gamma}\cdot\Pi^{-c}, \qquad A_\gamma =
 \gen_3^{\theta_\gamma}\cdot\gen_4^{\theta_r}\cdot \com_\gamma^{-c}.
   \end{gather*}

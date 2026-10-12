@@ -210,7 +210,8 @@ $\gen_0,\gen_1,\gen_2,\gen_3,\gen_4 \in \group{1}$ and $\ggen,\ggen_D \in
 2^{\ell}$.
 
 	\item Return $\crs \leftarrow (\group{1},\group{2},\group{T},\pairing,
-\mathsf{sd}, \gen_0,\ldots,\gen_4,\ggen,\ggen_D,\HE,\hash, \rapk,\ck,\Max)$ and
+\mathsf{sd}, \allowbreak \gen_0,\ldots,\gen_4,\ggen,\ggen_D, \allowbreak
+\HE,\hash, \rapk,\ck,\Max)$ and
 $\state \leftarrow \varnothing$.
 
       \end{enumerate}
@@ -347,7 +348,7 @@ The relation is the following:
 %
 \begin{equation*} \begin{gathered}
   \rel_5 = \{\ T = \gen_2^{\utk'}\cdot\gen_3^{\utk''} \ \wedge \ \ek =
-\HE(\epoch)^{\utk'} \ \wedge \ \forall\, \gamma \in [0,\Max): \
+\HE(\epoch)^{\utk'} \\ \wedge \ \forall\, \gamma \in [0,\Max): \
 W_\gamma^{\utk''} = \ggen_D \cdot W_\gamma^{-\gamma}\ \}.
 \end{gathered} \end{equation*}
 %
@@ -484,12 +485,12 @@ do:
 
 	\item Sample $s \sample \Zp$ and compute the following:
 	  %
-	  \begin{equation*}
+	  \begin{gather*}
 	    U \leftarrow \HE(\epoch)^s, \quad \Pi \leftarrow
-\pairing\big(\ek^{\,s},\, \ggen_D\big), \quad X \leftarrow
+\pairing\big(\ek^{\,s},\, \ggen_D\big), \\ X \leftarrow
 \Tag_\gamma^{\,s}, \quad \com_\gamma \leftarrow
 \gen_3^{\gamma}\cdot\gen_4^{r_\gamma}.
-	  \end{equation*}
+	  \end{gather*}
 
 	\item Set $\inst_7' \leftarrow (\inst_7, U, \Pi, X, \com_\gamma)$.
 
@@ -512,8 +513,9 @@ A_\gamma)$.
 value $x$, writing $\theta_1, \theta_2, \theta_h, \theta_s, \theta_\gamma,
 \theta_r$ in the order above.
 
-	\item Return $\algoproof_7' \leftarrow (U, \Pi, X, \com_\gamma, A, B, M,
-C, F, A_\gamma, \theta_1, \theta_2, \theta_h, \theta_s, \theta_\gamma,
+	\item Return $\algoproof_7' \leftarrow (U, \Pi, X, \com_\gamma, \allowbreak
+A, \allowbreak B, \allowbreak M, \allowbreak C, \allowbreak F, \allowbreak
+A_\gamma, \allowbreak \theta_1, \theta_2, \theta_h, \theta_s, \theta_\gamma,
 \theta_r)$.
 
       \end{enumerate}
@@ -524,8 +526,8 @@ Compute $c$ as above, and return $1$ if and only if the following hold:
       \begin{gather*} U \neq 1_{\group{1}}, \quad \Pi \neq 1_{\group{T}}, \\
 \gen_2^{\theta_1}\cdot\gen_3^{\theta_2}\cdot
 \gen_4^{\theta_h} = A \cdot \com^c, \quad \HE(\epoch)^{\theta_s}
-= B \cdot U^c, \quad \pairing(U,\ggen_D)^{\theta_1} = M
-\cdot \Pi^c, \\ \Tag_\gamma^{\theta_s} = C \cdot X^c, \quad
+= B \cdot U^c, \\ \pairing(U,\ggen_D)^{\theta_1} = M
+\cdot \Pi^c, \quad \Tag_\gamma^{\theta_s} = C \cdot X^c, \\
 X^{\theta_2 + \theta_\gamma} = F \cdot \Pi^c, \quad
 \gen_3^{\theta_\gamma}\cdot\gen_4^{\theta_r} = A_\gamma \cdot
 \com_\gamma^{c}.  \end{gather*}
@@ -549,11 +551,11 @@ The user writes $b$ for the base of the credential, randomises the signature
 with a fresh $r_1 \sample \Zp^*$, and blinds the base with a fresh $r_2 \sample
 \Zp$:
 %
-\begin{equation*}
+\begin{gather*}
   b = \gen_0\cdot\gen_1^{\sk}\cdot\gen_2^{\utk'}\cdot\gen_3^{\utk''}\cdot
-\gen_4^{r}, \qquad E' = E^{r_1}, \qquad d = b^{r_1}\cdot\gen_4^{-r_2}, \qquad
+\gen_4^{r}, \qquad E' = E^{r_1}, \\ d = b^{r_1}\cdot\gen_4^{-r_2}, \qquad
 \bar{E} = E'^{-e}\cdot d\cdot\gen_4^{r_2}.
-\end{equation*}
+\end{gather*}
 %
 For a valid signature $\bar{E} = E'^{z}$, which the verifier checks with the
 following pairing equation:

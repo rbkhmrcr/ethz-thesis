@@ -69,9 +69,9 @@ labelled proof system extends the syntax as follows:
   \item[$\algoproof \sample \NIZKprove(\crs, \inst, \witness, \lbl)$ :] The
 proving algorithm also takes a label $\lbl \in \{0,1\}^*$.
 
-  \item[$\{0, 1\} \leftarrow \NIZKverify(\crs, \inst, \algoproof, \lbl)$ :] The
-verification algorithm also takes the label $\lbl$, and accepts only
-proofs produced under that label.
+  \item[$\{0, 1\} \leftarrow \NIZKverify(\crs, \inst, \algoproof, \lbl)$ :]
+Verification also takes the label $\lbl$, and accepts only proofs produced
+under that label.
 
 \end{description}
 
@@ -164,12 +164,13 @@ stores $(\inst, \lbl)$ in the set $\Query$.
 
   $\adv$ wins the experiment if the following hold:
   %
-  \begin{equation*}
+  \begin{gather*}
   %
-    \NIZKverify(\crs, \inst^*, \algoproof^*, \lbl^*) = 1 \ \wedge\ (\inst^*,
-\lbl^*) \notin \Query \ \wedge\ \rel(\inst^*, \witness^*) \neq 1.
+    \NIZKverify(\crs, \inst^*, \algoproof^*, \lbl^*) = 1 \\
   %
-  \end{equation*}
+    \wedge\ (\inst^*, \lbl^*) \notin \Query \ \wedge\ \rel(\inst^*, \witness^*) \neq 1.
+  %
+  \end{gather*}
 
 \end{experimentbox}
 

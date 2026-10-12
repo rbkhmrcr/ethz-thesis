@@ -91,8 +91,10 @@ witness, and relation are as follows:
 %
   \inst_6 = (\G, \G', \rapk, \ck, \com), \qquad \witness_6 = (\signature, \sk,
 \utk, \openinfo), \\
-  \rel_6 = \{\ \DSverify(\rapk, \G(\sk) \| \G'(\utk), \signature) = 1 \ \wedge \
+  \begin{gathered}
+  \rel_6 = \{\ \DSverify(\rapk, \G(\sk) \| \G'(\utk), \signature) = 1 \\ \wedge \
 \com = \ComCommit(\ck, \utk, \openinfo)\ \}.
+  \end{gathered}
 %
 \end{gather*}
 %
@@ -237,7 +239,7 @@ $(\regcred,\ek,\algoproof_5,\algoproof_4)$ to the auditor.
 started and the following all hold, and exits otherwise:
 	  %
 	  \begin{gather*}
-	    \DSverify(\rapk,\PSK\|\PTK,\signature) = 1, \quad
+	    \DSverify(\rapk,\PSK\|\PTK,\signature) = 1, \\
 	    \NIZKverify(\crs_5,\inst_5,\algoproof_5,\rand) = 1, \\
 	    \NIZKverify(\crs_4,\inst_4,\algoproof_4,\algoproof_5\|\rand) = 1.
 	  \end{gather*}
@@ -278,8 +280,8 @@ transaction validators. Parse $\tx =
 following hold:
       %
       \begin{gather*}
-	\Tag_\gamma \notin \state, \\
-	\NIZKverify(\crs_7,\inst_7,\algoproof_7) = 1, \quad
+	\Tag_\gamma \notin \state, \quad
+	\NIZKverify(\crs_7,\inst_7,\algoproof_7) = 1, \\
 	\NIZKverify(\crs_6,\inst_6,\algoproof_6,\msg) = 1.
       \end{gather*}
       %
