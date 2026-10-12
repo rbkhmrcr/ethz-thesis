@@ -86,9 +86,9 @@ algorithm, on input the part $\tau_n$ of a token that the secure element stores
 and the token's history $\algo{hist}_n$, returns 1 if
 the token is redeemed for bank deposits and 0 otherwise.
 
-  \item[$\algo{DS} \leftarrow \OPidentify(d_n, d_{n'})$ :] The identification
+  \item[$\algo{spenders} \leftarrow \OPidentify(d_n, d_{n'})$ :] The identification
 algorithm, on input two conflicting deposit requests $d_n$ and $d_{n'}$ for the
-same original token, outputs the set $\algo{DS}$ of identifiers of the users who
+same original token, outputs the set $\algo{spenders}$ of identifiers of the users who
 double spent it.
 
 \end{description}
@@ -605,7 +605,7 @@ it, do:
 	      \item Fetch $\algo{deposited}[\algo{id}] \rightarrow \{\vec{\algo{id}}_1,
 \cdots, \vec{\algo{id}}_n\}$.
 
-	      \item Set $\algo{DS} \leftarrow \emptyset$.
+	      \item Set $\algo{spenders} \leftarrow \emptyset$.
 
 	      \item $\forall i\neq j$, do:
 
@@ -617,11 +617,11 @@ of $\vec{\algo{id}}_i$ and $\vec{\algo{id}}_j$.
 		  \item Fetch $\algo{tokens}[\vec{\algo{id}}_{ij}] \rightarrow
 \langle \algo{usr}_{ij}, v\rangle$.
 
-		  \item Set $\algo{DS} \gets \algo{DS} \cup \algo{usr}_{ij}$.
+		  \item Set $\algo{spenders} \gets \algo{spenders} \cup \algo{usr}_{ij}$.
 
 		\end{enumerate}
 
-	      \item Return $(\OPidentify, \algo{DS}, \OPidentifyend)$ to
+	      \item Return $(\OPidentify, \algo{spenders}, \OPidentifyend)$ to
 $\auditor$ and $\algo{cb}$.
 
 	    \end{enumerate}

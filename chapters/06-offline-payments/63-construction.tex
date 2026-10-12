@@ -350,7 +350,7 @@ instantiates each of them.
 
       \end{enumerate}
 
-    \item[$\algo{DS} \leftarrow \OPidentify(d_n, d_{n'})$ :] On input two
+    \item[$\algo{spenders} \leftarrow \OPidentify(d_n, d_{n'})$ :] On input two
       conflicting deposit requests $d_n$ and $d_{n'}$ involving the same
       original token, the auditor does:
 
@@ -372,7 +372,7 @@ instantiates each of them.
         \item Decrypt $\ciph_j$ using $\sk_\auditor$ to recover $\algo{uid}^*$,
           the identifier of the owner of $\tau_j = (v, \com_j)$.
 
-        \item Return $\algo{DS} = \{\algo{uid}^*\}$, extended by repeating the
+        \item Return $\algo{spenders} = \{\algo{uid}^*\}$, extended by repeating the
           above for each further pair of conflicting deposits of the same
           token.
 
