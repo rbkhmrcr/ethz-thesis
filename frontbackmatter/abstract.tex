@@ -23,7 +23,7 @@ interaction between signers moved to an offline phase. Second, we construct
 multi-issuer aggregate anonymous credentials, in which credentials from
 independent issuers are combined and presented in a single proof. A
 registration authority binds credentials to the same user without learning
-their attributes. Third, we give a transaction tracing mechanism in
+their attributes. Third, we give a transaction tracing protocol in
 which an auditor's capability is granted explicitly and scoped to one user and
 one period of time, and the auditor keeps no persistent per-user state. Fourth,
 we construct a transferable offline payment scheme for central bank digital currencies. A
@@ -33,9 +33,12 @@ secure element is broken, and payments by honest users remain unlinkable.
 Each protocol comes with a generic construction from standard primitives, an
 efficient instantiation, a security proof and an implementation. Auditing a period
 of a million transactions takes 37 ms, and a smart card acting as the secure
-element authorises an offline payment in under 400 ms. The alternative to
-auditable payments is not perfect privacy, but the status quo, where banks and
-payment providers see all transactions in the clear.
+element authorises an offline payment in under 400 ms. Our protocols balance
+users' privacy against the requirements of existing infrastructure, such as
+regulation, accountability and availability. Adding auditing to a
+privacy-preserving protocol can seem to defeat its purpose, but the alternative
+to auditable payments is not perfect privacy. It is the status quo, where banks
+and payment providers see all transactions in the clear.
 
 \endgroup
 
@@ -69,7 +72,7 @@ attestations anonymes agrégées à émetteurs multiples, dans lesquelles les
 attestations d'émetteurs indépendants sont combinées et présentées en une seule
 preuve. Une autorité d'enregistrement lie les attestations à un même
 utilisateur sans apprendre ses attributs. Troisièmement, nous proposons un
-mécanisme de traçage des transactions dans lequel la capacité d'un
+protocole de traçage des transactions dans lequel la capacité d'un
 auditeur est accordée explicitement et limitée à un utilisateur et à une
 période, et l'auditeur ne conserve aucun état persistant par utilisateur. Quatrièmement, nous
 construisons un schéma de paiement hors ligne transférable pour les monnaies
@@ -82,10 +85,13 @@ Chaque protocole s'accompagne d'une construction générique à partir de
 primitives standard, d'une instanciation efficace, d'une preuve de sécurité et
 d'une implémentation. L'audit d'une période d'un million de
 transactions prend 37~ms, et une carte à puce jouant le rôle d'élément sécurisé
-autorise un paiement hors ligne en moins de 400~ms. L'alternative aux
-paiements auditables n'est pas une confidentialité parfaite, mais le statu quo,
-où les banques et les prestataires de paiement voient toutes les transactions
-en clair.
+autorise un paiement hors ligne en moins de 400~ms. Nos protocoles concilient
+la vie privée des utilisateurs avec les exigences des infrastructures
+existantes, comme la réglementation, la responsabilité et la disponibilité.
+Ajouter un audit à un protocole respectueux de la vie privée peut sembler
+contraire à son objectif, mais l'alternative aux paiements auditables n'est pas
+une confidentialité parfaite. C'est le statu quo, où les banques et les
+prestataires de paiement voient toutes les transactions en clair.
 \end{otherlanguage}
 
 \endgroup
