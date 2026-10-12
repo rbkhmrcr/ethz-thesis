@@ -2,54 +2,57 @@
 
 The desire to conceal written information has been considered for at least the
 last four thousand years, from the obfuscated hieroglyphs found in the tomb of
-Khnumhotep II~\cite{Kahn96}. More recently, encryption schemes have let people communicate by
-exchanging messages that reveal nothing about their content to eavesdroppers. Parties with a shared key can send each other
-confidential messages, regardless of the content of those messages, and
-independently of the power of, language spoken by, or any other attributes of
-the communicating parties. Modern cryptography has enabled encrypted
-communication that even truly powerful entities cannot read.
+Khnumhotep II~\cite{Kahn96}. More recently, encryption schemes have let people
+communicate by exchanging messages that reveal nothing about their content to
+eavesdroppers. Parties with a shared key can send each other confidential
+messages, regardless of the content of those messages, and independently of the
+power of, language spoken by, or any other attributes of the communicating
+parties. Modern cryptography has enabled encrypted communication that even
+truly powerful entities cannot read.
 
-The communicating parties are not assumed to be as powerful as the
-entities trying to break the system -- encryption demands relatively little
+The communicating parties are not assumed to be as powerful as the entities
+trying to break the system -- encryption demands relatively little
 computational power of the users while keeping the adversary's computational
-task infeasible. This asymmetry of computational power between users
-and attacking entities is well noted, and is the foundation of modern
+task infeasible. This asymmetry of computational power between users and
+attacking entities is well noted, and is the foundation of modern
 cryptography~\cite{DifHel76}.
 
 However, protecting the content of a message says nothing about who is
-exchanging it, when, or how often. Once the contents of a communication are protected, a resourceful
-adversary may instead try to learn the identities of the communicating parties,
-their relationships, or patterns in their behaviour. Protecting each of these
-brings the next piece of observable information into focus.
+exchanging it, when, or how often. Once the contents of a communication are
+protected, a resourceful adversary may instead try to learn the identities of
+the communicating parties, their relationships, or patterns in their behaviour.
+Protecting each of these brings the next piece of observable information into
+focus.
 
 Cryptography today covers much more than private communication. Over the last
-fifty years, privacy-enhancing technologies have been developed
-to protect each new piece of information identified as valuable~\cite{Chaum81,USENIX:DinMatSyv04}. As the adoption
-of digital systems has grown, even of those with privacy protections, so has the
-number of entities capable of observing some part of a system. Service
-providers, issuers, validators, network operators and public authorities may all
-learn sensitive information while performing otherwise legitimate functions.
-This raises the question of how these participants should be incorporated into
-the system model, and what information they should be permitted to learn.
+fifty years, privacy-enhancing technologies have been developed to protect each
+new piece of information identified as
+valuable~\cite{Chaum81,USENIX:DinMatSyv04}. As the adoption of digital systems
+has grown, even of those with privacy protections, so has the number of
+entities capable of observing some part of a system. Service providers,
+issuers, validators, network operators and public authorities may all learn
+sensitive information while performing otherwise legitimate functions.  This
+raises the question of how these participants should be incorporated into the
+system model, and what information they should be permitted to learn.
 
-These entities are often modelled as adversaries.
-Protocol designers have understandably been active in designing systems that
-take power away from centralised entities. Anything that such an
-entity learns is considered a step away from the ideal world.
+These entities are often modelled as adversaries.  Protocol designers have
+understandably been active in designing systems that take power away from
+centralised entities. Anything that such an entity learns is considered a step
+away from the ideal world.
 
 \paragraph{Centralisation, responsibility and trust.} In attempting to remove
-trust from centralised institutions, protocols may instead transfer computation,
-storage and operational responsibility to individual users. But centralisation
-is not a single property, and decentralisation alone is not a complete
-description of protocols' designs.
+trust from centralised institutions, protocols may instead transfer
+computation, storage and operational responsibility to individual users. But
+centralisation is not a single property, and decentralisation alone is not a
+complete description of protocols' designs.
 
 Centralisation can refer to different abilities. One is the ability to
 participate in a system, which can itself mean either setting the policies that
-influence how its protocols are run, or providing computation for it. Another is
-the ability to see and to store the information in the system. A system can be
-centralised in one of these abilities and decentralised in another. Computation
-may be centralised in a party that is trusted with nothing private, as in
-private outsourced computation. An entirely transparent system may be
+influence how its protocols are run, or providing computation for it. Another
+is the ability to see and to store the information in the system. A system can
+be centralised in one of these abilities and decentralised in another.
+Computation may be centralised in a party that is trusted with nothing private,
+as in private outsourced computation. An entirely transparent system may be
 computationally completely distributed. The parties in control of executing
 verification need not be those who set the verification conditions. The
 distribution of these responsibilities does not by itself determine the trust
@@ -61,105 +64,108 @@ multiparty computation are two examples.
 In anonymous credential schemes, issuers issue credentials to users, attesting
 that users hold certain attribute values. Users present their credentials,
 proving they hold given attributes without revealing who they are or anything
-about their undisclosed attribute values~\cite{EC:Chaum85,EC:CamLys01}. Early anonymous credential schemes
-assumed a single issuer certifying all attributes, creating one powerful entity.
-Later schemes decentralised issuance, but the issuers as a whole remain
-responsible for all attributes, so that all issuers can now learn all users'
-attribute values~\cite{NDSS:SABMD19}. The power to certify and the knowledge that comes with that
-have both been shared across issuers, which leads to a worse privacy outcome for
-users.
+about their undisclosed attribute values~\cite{EC:Chaum85,EC:CamLys01}. Early
+anonymous credential schemes assumed a single issuer certifying all attributes,
+creating one powerful entity.  Later schemes decentralised issuance, but the
+issuers as a whole remain responsible for all attributes, so that all issuers
+can now learn all users' attribute values~\cite{NDSS:SABMD19}. The power to
+certify and the knowledge that comes with that have both been shared across
+issuers, which leads to a worse privacy outcome for users.
 
-Secure multiparty computation (MPC) allows a function to be computed by multiple mutually
-distrusting parties, each with a private input. The function is computed on all
-inputs while revealing nothing but the output~\cite{FOCS:Yao86,STOC:GolMicWig87}. This seems to be an instance
-where decentralisation of the protocol leads to a straightforward privacy gain
-for users. It can be applied to anonymous credential issuance to sidestep the
-issue stated above. The new problem it introduces, however, is in practicality.
+Secure multiparty computation (MPC) allows a function to be computed by
+multiple mutually distrusting parties, each with a private input. The function
+is computed on all inputs while revealing nothing but the
+output~\cite{FOCS:Yao86,STOC:GolMicWig87}. This seems to be an instance where
+decentralisation of the protocol leads to a straightforward privacy gain for
+users. It can be applied to anonymous credential issuance to sidestep the issue
+stated above. The new problem it introduces, however, is in practicality.
 Multiparty computation generally involves interaction from all participants,
 which becomes infeasible when, for example, a driving licence, a birth
 certificate and a passport are each issued by countries with no diplomatic
-relations with one another. These issuers have no incentive to participate in an
-expensive protocol to allow individuals to privately prove statements about
+relations with one another. These issuers have no incentive to participate in
+an expensive protocol to allow individuals to privately prove statements about
 themselves. And so practicality is also an aim in all of our constructions. By
 this, we mean minimising the interaction, coordination, communication and
 computational costs required by the protocols.
 
 Designing institutions out of systems is often not possible. Issuers,
 validators and auditors exist because systems need them, and removing them from
-protocols does not remove that need. Their functions are then either taken on by
-users, who bear the computational costs, or moved outside the protocols, where
-nothing limits what these parties learn. Privacy-focused systems are often
-discussed as if the choice is between decentralised privacy and centralised
-surveillance. Privacy does not automatically
-follow from decentralisation, nor does it automatically disappear when
-corporations or public institutions participate in a protocol. What matters is
-the information made available to each participant. Powerful institutions can
-perform useful protocol functions while cryptography limits both the information
-available to them and the capabilities they receive. Allowing institutions to
-perform this work may reduce the computation, storage, time and specialist
-knowledge required of individual users. Protocol models should reflect the roles
-that exist in practice.
+protocols does not remove that need. Their functions are then either taken on
+by users, who bear the computational costs, or moved outside the protocols,
+where nothing limits what these parties learn. Privacy-focused systems are
+often discussed as if the choice is between decentralised privacy and
+centralised surveillance. Privacy does not automatically follow from
+decentralisation, nor does it automatically disappear when corporations or
+public institutions participate in a protocol. What matters is the information
+made available to each participant. Powerful institutions can perform useful
+protocol functions while cryptography limits both the information available to
+them and the capabilities they receive. Allowing institutions to perform this
+work may reduce the computation, storage, time and specialist knowledge
+required of individual users. Protocol models should reflect the roles that
+exist in practice.
 
 Systems deployed today to protect user privacy already involve service
 providers, issuers, auditors, validators and other accountable entities with
-operational responsibilities. Privacy Pass, deployed by Cloudflare, lets users skip repeated checks such as
-CAPTCHAs with tokens a server cannot link to their issuance, and Apple's Private
-Relay routes traffic through two relays so that no single one sees both a user's
-address and the sites they visit. Both use institutional infrastructure while
-limiting the information available to the institutions involved~\cite{PoPETS:DGSTV18,privaterelay2021}.
-Modelling such roles explicitly can enable practical and efficient systems, and
-increase our understanding of the goals of private and decentralised systems.
+operational responsibilities. Privacy Pass, deployed by Cloudflare, lets users
+skip repeated checks such as CAPTCHAs with tokens a server cannot link to their
+issuance, and Apple's Private Relay routes traffic through two relays so that
+no single one sees both a user's address and the sites they visit. Both use
+institutional infrastructure while limiting the information available to the
+institutions involved~\cite{PoPETS:DGSTV18,privaterelay2021}.  Modelling such
+roles explicitly can enable practical and efficient systems, and increase our
+understanding of the goals of private and decentralised systems.
 
 Systems now being built have the same shape. Every member state of the European
 Union must offer its residents a European Digital Identity Wallet by the end of
 2026~\cite{eIDAS2024}. These wallets must support selective disclosure,
 unlinkability and pseudonymous authentication. Central banks are also designing
 payment networks that take a very similar shape~\cite{cbdctracker}. For the
-digital euro, requirements include privacy for users, payments without a network
-connection, limits on holdings, and compliance with anti-money-laundering rules
-through regulated intermediaries~\cite{digitaleuro2023}.
+digital euro, requirements include privacy for users, payments without a
+network connection, limits on holdings, and compliance with
+anti-money-laundering rules through regulated
+intermediaries~\cite{digitaleuro2023}.
 
-\paragraph{Financial privacy.} There are extremely strong arguments against
-governments being able to read the communications of their citizens, and
-companies the messages of their customers. A private communication system can
-aim to ensure that no party other than the intended recipient learns the
-contents of a message.
+\paragraph{Financial privacy.} There are strong arguments against governments
+being able to read the communications of their citizens, and companies the
+messages of their customers. A private communication system can aim to ensure
+that no party other than the intended recipient learns the contents of a
+message.
 
-In a financial system, the situation is different.
-Constructing digital financial systems with auditability may seem analogous to
-building backdoors in messaging systems, and there is the argument that once a
-capability exists, it will be used everywhere possible.
+In a financial system, the situation is different.  Constructing digital
+financial systems with auditability may seem analogous to building backdoors in
+messaging systems, and there is the argument that once a capability exists, it
+will be used everywhere possible.
 
 With respect to this, we raise three points. The first is that the two settings
 are technically different: well-designed auditing schemes do not involve an
 all-powerful entity with the ability to silently decrypt, and so the auditing
 protocols in this thesis cannot be repurposed to put backdoors in encryption
-schemes.
-The second is that the two settings are socially different: crimes can be
-organised using encrypted messaging, but what is at stake in a financial system
-extends to the collapse of the global financial system. Whether that outcome
-would be good or bad, it would be consequential. The third point is that the alternative to auditable payments is
-not perfect privacy, but the status quo, where banks and payment providers see
-all transactions in the clear.
+schemes.  The second is that the two settings are socially different: crimes
+can be organised using encrypted messaging, but what is at stake in a financial
+system extends to the collapse of the global financial system. Whether that
+outcome would be good or bad, it would be consequential. The third point is
+that the alternative to auditable payments is not perfect privacy, but the
+status quo, where banks and payment providers see all transactions in the
+clear.
 
 For both social and technical reasons, financial systems come with requirements
 that private communication does not. Payment providers are required to identify
 their customers and to report suspicious
-transactions~\cite{fatf2012recommendations}. The systems themselves must establish the validity of
-transactions, maintain a consistent shared state, control issuance, and prevent
-or detect double spending, where a user spends the same token
-twice~\cite{C:Chaum82,C:ChaFiaNao88}. They must remain
-efficient as the number of participants grows, ideally without cost per
-participant growing linearly with the size of the system. They must also
-continue to function for a user with no network
-connection~\cite{aboulaiz2024offline}. We will assume throughout this thesis
-that these extra parties and constraints are necessary. Their involvement makes
-systems that control tokens of value more complex than private communication.
+transactions~\cite{fatf2012recommendations}. The systems themselves must
+establish the validity of transactions, maintain a consistent shared state,
+control issuance, and prevent or detect double spending, where a user spends
+the same token twice~\cite{C:Chaum82,C:ChaFiaNao88}. They must remain efficient
+as the number of participants grows, ideally without cost per participant
+growing linearly with the size of the system. They must also continue to
+function for a user with no network connection~\cite{aboulaiz2024offline}. We
+will assume throughout this thesis that these extra parties and constraints are
+necessary. Their involvement makes systems that control tokens of value more
+complex than private communication.
 
-We take the existence of financial auditing requirements as a system
-constraint and asks how narrowly the corresponding capabilities can be defined.
-What information should an auditor be able to obtain? Should access be limited
-to a transaction, a user, a period of time, a single purpose, or be ongoing?
+We take the existence of financial auditing requirements as a system constraint
+and ask how narrowly the corresponding capabilities can be defined.  What
+information should an auditor be able to obtain? Should access be limited to a
+transaction, a user, a period of time, a single purpose, or be ongoing?
 
 We start with the presence of these operational roles and ask how the protocols
 can work with them. An institution need not be modelled in the same way for the
@@ -168,27 +174,28 @@ we assume that institutions perform their prescribed roles. For privacy, the
 same institution need not be trusted to keep information available to it
 confidential. It may retain and combine this information, share it with other
 participants, and attempt to learn anything it can. We assess privacy against
-the strongest information it can derive in this setting. Each chapter states which participants may deviate from the
-protocol, and for which property.
+the strongest information it can derive in this setting. Each chapter states
+which participants may deviate from the protocol, and for which property.
 
 \paragraph{The thesis.} This thesis argues that practical privacy is achieved
 not by assuming away existing infrastructure, but by modelling its participants
 and responsibilities accurately, and cryptographically constraining what each
 participant can learn and do. In particular, an institution may perform
-computation, maintain state, issue credentials, validate transactions or provide
-availability without being trusted with users' private information. Each of the
-protocols comes from considering the specific responsibilities of participants
-in each existing system.
+computation, maintain state, issue credentials, validate transactions or
+provide availability without being trusted with users' private information.
+Each of the protocols comes from considering the specific responsibilities of
+participants in each existing system.
 
-\paragraph{Contributions.} We first consider threshold certification, by which we
-mean the threshold signing of commitments. We achieve this by constructing a framework for creating
-threshold structure-preserving signature schemes. Structure-preserving signature
-schemes allow signers to sign commitments directly, and threshold versions allow
-us to distribute the signing responsibilities across several parties. We give a
-generic construction which splits signing into offline and online phases, in
-order to remove communication requirements between signers entirely in the
-online phase. We instantiate the construction with two signature schemes, and
-implement and evaluate both instantiations with two MPC protocols.
+\paragraph{Contributions.} We first consider threshold certification, by which
+we mean the threshold signing of commitments. We achieve this by constructing a
+framework for creating threshold structure-preserving signature schemes.
+Structure-preserving signature schemes allow signers to sign commitments
+directly, and threshold versions allow us to distribute the signing
+responsibilities across several parties. We give a generic construction which
+splits signing into offline and online phases, in order to remove communication
+requirements between signers entirely in the online phase. We instantiate the
+construction with two signature schemes, and implement and evaluate both
+instantiations with two MPC protocols.
 
 We then consider aggregate anonymous credentials. Existing credential models do
 not always reflect the way that authority is divided in practice. Users may
@@ -198,8 +205,8 @@ issuance. We construct an efficient multi-issuer aggregate anonymous credential
 scheme in which independently issued credentials can be combined and presented
 through a single proof. Anonymous credential schemes already implicitly include
 a registration authority. We use this existing role to bind credentials issued
-to the same user, preventing credentials belonging to different users from being
-aggregated without requiring expensive proofs during presentation.
+to the same user, preventing credentials belonging to different users from
+being aggregated without requiring expensive proofs during presentation.
 
 We next consider accountability in transaction systems that protect user
 privacy. Financial systems may require both the ability to investigate a
@@ -207,25 +214,27 @@ particular transaction and the ability to identify the transactions associated
 with a particular user. These capabilities are related but distinct, and
 granting one need not grant the other. We take the auditor's existence as given
 and ask whether its capability can be scoped like any other permission, to one
-user and one period, and only after an explicit grant. We
-develop a transaction identification mechanism that supports concurrent
-transaction creation without requiring the auditor to maintain persistent
-per-user state. Auditing is restricted to a specified epoch, a fixed period of time, limiting both the
+user and one period, and only after an explicit grant. We develop a transaction
+identification mechanism that supports concurrent transaction creation without
+requiring the auditor to maintain persistent per-user state. Auditing is
+restricted to a specified epoch, a fixed period of time, limiting both the
 scope and duration of the information disclosed to an auditor.
 
 Finally, we study privacy in offline payments. Offline operation improves
-availability and accessibility, but changes how double spending must be handled.
-We develop an offline payment scheme with two defences against double spending.
-The first is prevention: we divide computation between a mobile device and a
-secure element, a tamper-resistant chip such as those in bank cards, and the secure element does not allow the same value to be spent
-twice. The second is detection: if a secure element is broken and double
-spending occurs, information identifying the double spender can be recovered.
-Payments made by honest users remain unlinkable.
+availability and accessibility, but changes how double spending must be
+handled.  We develop an offline payment scheme with two defences against double
+spending.  The first is prevention: we divide computation between a mobile
+device and a secure element, a tamper-resistant chip such as those in bank
+cards, and the secure element does not allow the same value to be spent twice.
+The second is detection: if a secure element is broken and double spending
+occurs, information identifying the double spender can be recovered.  Payments
+made by honest users remain unlinkable.
 
-\paragraph{Layout.} The remainder of this thesis is organised as follows. Preliminary information
-is found in \Cref{chap:preliminaries}. \Cref{chap:tsps} presents our
-threshold structure-preserving signature schemes. \Cref{chap:agg-creds} presents
-the aggregate anonymous credential scheme, \Cref{chap:txid} presents the
-transaction identification protocol, and \Cref{chap:offline-payments} presents
-the offline payment protocol. \Cref{chap:conclusion} summarises the
-contributions and discusses open questions.
+\paragraph{Layout.} The remainder of this thesis is organised as follows.
+Preliminary information is found in \Cref{chap:preliminaries}. \Cref{chap:tsps}
+presents our threshold structure-preserving signature schemes.
+\Cref{chap:agg-creds} presents the aggregate anonymous credential scheme,
+\Cref{chap:txid} presents the transaction tracing protocol, and
+\Cref{chap:offline-payments} presents the offline payment protocol.
+\Cref{chap:conclusion} summarises the contributions and discusses open
+questions.

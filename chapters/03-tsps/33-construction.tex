@@ -49,7 +49,7 @@ scheme $\SPS$.
   \begin{description}
 
     \item[$(\shr{\sk}, \pk) \sample \TSPSgen(\secparam, \ell, t, n)$ :] The
-signers do the following:
+parties do the following:
 
       \begin{enumerate}
 
@@ -60,12 +60,12 @@ field elements it derives is a call to $\algo{Mul}$.
 	\item Compute the shares of the group elements of $\pk$ and $\sk$
 locally, by raising the generators to the shares of their discrete logarithms.
 
-	\item Open $\pk$: each signer broadcasts its share $\pk_h$, and every
+	\item Open $\pk$: each party broadcasts its share $\pk_h$, and every
 signer reconstructs $\pk$.
 
       \end{enumerate}
 
-    \item[$\shr{\state} \sample \TSPSoffsign(\shr{\sk})$ :] The signers do the
+    \item[$\shr{\state} \sample \TSPSoffsign(\shr{\sk})$ :] The parties do the
 following:
 
       \begin{enumerate}

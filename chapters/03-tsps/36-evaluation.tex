@@ -4,15 +4,15 @@
 MP-SPDZ~\cite{CCS:Keller20}. We benchmark the honest-majority setting, $t <
 n/2$, with ATLAS, and the dishonest-majority setting, $t < n$, with
 MASCOT~\cite{C:GLOPS21,CCS:KelOrsSch16}. ATLAS uses Shamir's secret sharing, where
-shares are points on a random polynomial of degree $t$ whose constant term is
+shares are evaluations of a random polynomial of degree $t$ whose constant term is
 the secret~\cite{Shamir79}. MASCOT makes its multiplication triples by
 oblivious transfer, in which a receiver learns one of two messages without the
-sender learning which~\cite{C:EveGolLem82}. Both are secure
-with abort against malicious parties, so neither is robust, and neither is
-proven secure against adaptive corruption. MASCOT meets the assumptions of our
-theorems. MP-SPDZ implements ATLAS only against honest but curious parties. The ATLAS
-rows are not covered by our theorems, and show the cost of an honest
-majority~\cite{CCS:Keller20}.
+sender learning which~\cite{C:EveGolLem82}. Both protocols are designed to be
+secure with abort against malicious parties, so neither is robust, and neither
+is proven secure against adaptive corruption. MASCOT meets the assumptions of
+our theorems. MP-SPDZ implements ATLAS only against honest but curious
+parties~\cite{CCS:Keller20}. The ATLAS rows are not covered by our theorems, and
+show the cost of an honest majority.
 
 \paragraph{Extending MP-SPDZ.} MP-SPDZ computes only on elements of $\Zp$. We
 add sharings of elements of $\group{1}$ and $\group{2}$, with their
@@ -41,7 +41,7 @@ dealer, in Go with the gnark-crypto
 library~\cite{AC:CKPSS23,PKC:MMSST24,gnark-crypto}. The centralised $\AGHO$ and
 $\KPW$ schemes are implemented in C++ with RELIC, as are our threshold schemes.
 \Cref{tab:tsps-benchmarks,tab:tsps-comms} give times, communication and sizes at
-$n = 5$. The online phase sends nothing, and its time is comparable to
+$n = 5$. The online phase sends nothing, and its time is below that of
 centralised signing. All interaction is in key generation and the offline
 phase, where MASCOT costs far more than ATLAS.
 \Cref{fig:tsps-n-times,fig:tsps-n-comm} show that communication grows linearly
@@ -107,9 +107,9 @@ one signer's share, and combining is given for $t = 2$ and $t = 4$.}
 \cmidrule(lr){3-5} \cmidrule(lr){6-10}
  & & Gen & Offline & Combine & $\pk$ & $\sk_i$ & $\state_i$ & $\SPSsig_i$ & $\SPSsig$ \\
 \midrule
-$\AGHO$ & ATLAS & 1.1 & 0.5 & 1.0 & 243 & 96 & 307 & 243 & 243 \\
+Threshold $\AGHO$ & ATLAS & 1.1 & 0.5 & 1.0 & 243 & 96 & 307 & 243 & 243 \\
  & MASCOT & 136 & 1288 & 2.2 & 243 & 192 & 614 & 486 & 243 \\
-$\KPW$ & ATLAS & 2.7 & 4.2 & 1.6 & 873 & 486 & 391 & 391 & 391 \\
+Threshold $\KPW$ & ATLAS & 2.7 & 4.2 & 1.6 & 873 & 486 & 391 & 391 & 391 \\
  & MASCOT & 3752 & 2759 & 3.4 & 873 & 972 & 782 & 782 & 391 \\
 \bottomrule
 \end{tabular}
@@ -132,7 +132,7 @@ $\TSPSonsign$, against the number of parties $n$, at $\ell = 2$, median. ATLAS r
 \includegraphics[width=\textwidth]{chapters/03-tsps/tsps-n-comm-server.pdf}
 \caption[Threshold SPS schemes: communication against $n$]{Kilobytes sent by party $p_1$ against the number of parties $n$, at $\ell =
 2$, one panel per phase, with ATLAS as solid and MASCOT as dashed lines. MASCOT
-sends about a thousand times more, so the ATLAS lines lie close to zero for key
+sends two to three orders of magnitude more, so the ATLAS lines lie close to zero for key
 generation and offline signing. $\TSPSonsign$ sends nothing and is not shown.} \label{fig:tsps-n-comm}
 \end{figure}
 

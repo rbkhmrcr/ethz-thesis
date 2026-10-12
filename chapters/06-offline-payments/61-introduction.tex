@@ -46,7 +46,7 @@ control, as long as the key never leaves the secure element.
 
 We give a syntax for offline payment schemes and an ideal functionality that
 captures unforgeability, theft prevention, double-spending identification,
-non-frameability, anonymity, unlinkability, and conservation of value at once.
+non-frameability, anonymity, unlinkability, and conservation of value.
 
 We then give a construction, splitting the cost of authorising a payment
 between a lightweight secure element and a more powerful mobile device. We
@@ -55,9 +55,9 @@ zero-knowledge proofs of knowledge. We use verifiable encryption to identify
 double spenders without compromising the privacy of honest users.
 
 We instantiate the system with the BBS+ and Pointcheval-Sanders signature
-schemes and show that this securely realises the ideal functionality. We
+schemes and show that it securely realises the ideal functionality. We
 implement the scheme on commodity hardware, integrated into a mobile wallet on
-iOS and Android and a Javacard applet on a smart card, and benchmark this.
+iOS and Android and a Javacard applet on a smart card, and benchmark it.
 
 \subsection*{Related work}
 
@@ -122,8 +122,8 @@ Intermittently offline systems settle offline in general, but require
 occasional synchronisation with the ledger, which might be triggered once the
 total value transferred crosses a risk threshold. Staged offline systems
 exchange value offline but do not settle it until the payee comes online. Our
-scheme is fully offline in this sense: a payee accepts a payment on the
-strength of the transcript alone, and needs no contact with any other party
+scheme is fully offline in this sense. A payee accepts a payment from the
+transcript alone, and needs no contact with any other party
 either to accept it or to pay it onward.
 
 China's e-CNY is the largest CBDC pilot, and its hardware wallets can pay each
@@ -182,7 +182,7 @@ divisibility, and what happens once a conflict is detected.
   \end{tabular}
 %
   \caption[Comparison with existing offline payment schemes]{Comparison with
-    existing offline payment schemes. The double spending column records what
+    existing offline payment schemes. The double-spending column records what
     happens once a conflict is detected at deposit. Detected means the conflict
     is observed but no party is named, all holders means every previous owner
 of the token is identified, spender only means the double spender alone is

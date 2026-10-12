@@ -14,7 +14,7 @@ are as follows.
 chapters share a credential layer.
 
   \item[Tokens.] The central bank's SCI scheme is the Pointcheval-Sanders
-signature scheme with the signing on committed inputs of Coconut.
+signature scheme with Coconut's signing on committed inputs.
 
   \item[Audit ciphertexts.] ElGamal encryptions in $\group{1}$. ElGamal encrypts
 group elements, so the payer encrypts $\gen^{\algo{uid}}$ rather than
@@ -80,7 +80,7 @@ BBS+ signature on $(\msg_1, \ldots, \msg_n)$ under $\pk = (\gen_0, \ldots,
 $Q = \gen_1^{\msg_1}$, the messages $(\msg_i)_{i=2}^{n}$ and $\varphi$. The
 verifier holds disclosed values $(v_i)_{i \in V}$ for a set $V \subseteq \{2,
 \ldots, n\}$, and $H = \{2, \ldots, n\} \setminus V$. We write
-$\SOK\{(\vec{\alpha}) : \ldots\}(n)$ for a signature of knowledge on $n$ of
+$\SOK\{(\vec{\alpha}) : \ldots\}(n)$ for a signature of knowledge on message $n$ of
 exponents $\vec{\alpha}$ that satisfy the given equations.
 
   \begin{description}
@@ -179,9 +179,9 @@ it may be malicious. The device receives only $D = \gen_2^{\sk}\gen_3^{t}$, $t$
 and a proof of knowledge of the opening, so it learns $\gen_2^{\sk}$ but, under
 the DL assumption, never $\sk$.
 
-  \item The device shows the credential with the rerandomisation of Tessaro and
-Zhu in place of the proof of Camenisch, Drijvers and
-Lehmann~\cite{EC:TesZhu23b}. With two fresh exponents, it turns $E$ into $u$,
+  \item In place of the proof of Camenisch, Drijvers and Lehmann, the device
+shows the credential with the rerandomisation of Tessaro and
+Zhu~\cite{EC:TesZhu23b}. With two fresh exponents, it turns $E$ into $u$,
 $w$ and $x$, and verification becomes one pairing equation on these public
 values and two discrete-logarithm equations, which the device proves with a
 Sigma protocol. The check $u \neq 1$ rules out the trivial solution of the
@@ -197,7 +197,9 @@ $\com$ commits to $\algo{uid}$ and that the audit ciphertext $\ciph$ encrypts
 $\gen^{\algo{uid}}$. Both share the device's response for $\algo{uid}$ with the
 credential equations, which ties the pseudonym and the ciphertext to the
 credential with one response for $\algo{uid}$ per hop. The audit proof
-$\Gamma_i$ of the construction is the part of $\Phi$ that concerns $\ciph$.
+$\Gamma_i$ of the construction is the part of $\Phi$ that concerns $\ciph$, so the
+instantiation merges the audit proof and the transfer signature, which the
+construction keeps separate.
 
 \end{enumerate}
 
@@ -358,7 +360,7 @@ its messages from $0$.
 Pointcheval and Sanders prove this variant existentially unforgeable under the
 $q$-MSDH assumption of \Cref{asm:qmsdh}~\cite{RSA:PoiSan18}.
 
-\begin{assumptionbox}{The $q$-Modified Strong Diffie-Hellman ($q$-MSDH) assumption~\cite{RSA:PoiSan18}.}{qmsdh}
+\begin{assumptionbox}{The $q$-modified strong Diffie-Hellman ($q$-MSDH) assumption~\cite{RSA:PoiSan18}.}{qmsdh}
 
   The $q$-MSDH assumption holds if, given $(\gen^{\chi^i},
 \ggen^{\chi^i})_{i=0}^{q}$ and $(\gen^{\varsigma}, \ggen^{\varsigma},
@@ -428,7 +430,7 @@ $\SCIunblind$.
 
 The central bank's SCI scheme, given in \Cref{prot:offline-sci}, follows
 \Cref{prim:coconut} with the following changes. It uses the variant of
-\Cref{prim:ps} with the extra element $\omega$: the signer samples a fresh
+\Cref{prim:ps} with the extra element $\omega$. The signer samples a fresh
 $\omega$, adds $\theta_\ell \omega$ to the exponent of $k$, and returns $\omega$
 with the signature. The recipient sends
 the messages with indices in $\algo{Disc}$ in the clear, and the signer adds
@@ -507,20 +509,20 @@ the identifier and randomness committed in its pseudonym. As Pointcheval and
 Sanders do~\cite{RSA:PoiSan16}, it rerandomises $(k, l)$ to $(k^*, l^*)$ and
 blinds the remaining equation with a fresh $\ggen^{t}$. Without the blinding,
 the central bank, which chose $\omega$, could link tokens of the same user
-through $\tilde{c}$. The challenge hashes the value, the pseudonym and $(k^*,
+through the element $\tilde{c}$ of \Cref{prot:ps-proof}. The challenge hashes the value, the pseudonym and $(k^*,
 l^*)$, so none of them can be swapped later. $\Sigma$ is the first entry of
 every token's history, and every payee verifies it.
 
 \begin{protocolbox}{The proof of withdrawal}{ps-proof}
 
-  Let $\pk_{\algo{PS}} = (\tilde{x}, \tilde{y}_0, \tilde{y}_1, \tilde{y}_2,
+  Let $\pk_{\PS} = (\tilde{x}, \tilde{y}_0, \tilde{y}_1, \tilde{y}_2,
 \tilde{z}, \vec{P})$ be the central bank's public key, and $\tau = (v, \com)$ a
 token with $\com = \hgen_1^{\algo{uid}} \hgen^{s}$ and $\psi = (\omega, k, l)$ a
 PS signature on $(\algo{uid}, v, s)$.
 
   \begin{description}
 
-    \item[$\Sigma \sample \algo{ProveWithdrawal}(\pk_{\algo{PS}}, \tau,
+    \item[$\Sigma \sample \algo{ProveWithdrawal}(\pk_{\PS}, \tau,
 \algo{uid}, s, \psi)$ :] Do the following:
 
       \begin{enumerate}
@@ -540,7 +542,7 @@ the following:
 \ggen^{\gamma} \tilde{y}_0^{\alpha} \tilde{y}_2^{\beta} \tilde{z}^{\delta},
 \\
           %
-            \algo{chal} = \hash_p(\pk_{\algo{PS}}, \ck, v, \com, k^*, l^*,
+            \algo{chal} = \hash_p(\pk_{\PS}, \ck, v, \com, k^*, l^*,
 \tilde{c}, a, \tilde{a}).
           %
           \end{gather*}
@@ -560,7 +562,7 @@ the following:
 
       \end{enumerate}
 
-    \item[$\{0,1\} \leftarrow \algo{VerifyWithdrawal}(\pk_{\algo{PS}}, \tau,
+    \item[$\{0,1\} \leftarrow \algo{VerifyWithdrawal}(\pk_{\PS}, \tau,
 \Sigma)$ :] Recompute $\algo{chal}$ as above, and return $1$ if and only if the
 following hold:
       %
@@ -593,8 +595,8 @@ $\OP$ and the assumptions it rests on.
 Primitive & Instantiation & Assumption \\
 \midrule
 $\Com$ & Pedersen in $\group{1}$ & DL in $\group{1}$ \\
-$\DS$ & BBS+ & $q$-SDH \\
-$\SCI$ & PS with Coconut & $q$-MSDH \\
+$\SCI$, registration authority & BBS+ & $q$-SDH \\
+$\SCI$, central bank & PS with Coconut & $q$-MSDH \\
 $\PKE$ & ElGamal in $\group{1}$ & DDH in $\group{1}$ \\
 $\JPOK$ & Joint proof of \Cref{prot:bbs-joint-proof} & $q$-SDH, ROM \\
 Proof of withdrawal & Sigma protocol of \Cref{prot:ps-proof} & DL in $\group{1}$, ROM \\

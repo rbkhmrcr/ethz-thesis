@@ -118,7 +118,7 @@ would then verify under both keys for any tag and message. Unrestricted
 aggregate signatures prevent this by hashing the index of the signer together
 with each message~\cite{ICALP:BelNamNev07}.
 
-  \begin{assumptionbox}{The Bilinear Computational Diffie-Hellman (BCDH) assumption~\cite{C:BonFra01}.}{bcdh}
+  \begin{assumptionbox}{The bilinear computational Diffie-Hellman (BCDH) assumption~\cite{C:BonFra01}.}{bcdh}
 
     The BCDH assumption holds if, given $(\gen, \gen^\gamma, \gen^\omega,
 \gen^\chi, \ggen, \ggen^\gamma, \ggen^\omega, \ggen^\chi)$ for uniformly
@@ -137,15 +137,14 @@ We prove \Cref{thm:agg-creds-thm-1} in \Cref{sec:agg-creds-proof-2}.
 
 \paragraph{Overview.} In this instantiation, each user has a pair of secret and
 public keys $(\sk, \pk = \gen^\sk)$, so the one-way function of the construction
-is exponentiation. The digital signature $\DS$ is instantiated using the $\AGHO$
-structure-preserving signature scheme of \Cref{prim:agho}~\cite{C:AGHO11}, and
-the tag-based aggregate signature $\ATS$ with our construction. Every user is
+is exponentiation. We instantiate $\ATS$ with our tag-based aggregate signature scheme, and $\DS$
+with the $\AGHO$ SPS scheme of \Cref{prim:agho}~\cite{C:AGHO11}. Every user is
 assigned a unique tag $\Tag \in \Zp$, and the registration authority signs the
 pair $(\pk, \tid)$, with $\tid = \hashtwo(\Tag)$. \Cref{prot:paac} gives the
 protocol instantiation in full.
 
 The registration authority's key pair is for the structure-preserving signature
-scheme, since messages and signatures consist of elements of the same group as
+scheme, since messages and signatures consist of elements of the same groups as
 everything else in the protocol. This lets users prove knowledge of a valid
 registration signature with an efficient Sigma protocol over discrete
 logarithms, without a general-purpose zero-knowledge proof.

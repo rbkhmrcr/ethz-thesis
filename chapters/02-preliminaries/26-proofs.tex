@@ -59,9 +59,9 @@ The constructions in this thesis need stronger notions than soundness. We define
 zero knowledge and simulation extractability below, and introduce any
 construction-specific requirements in the chapters that use them.
 
-\paragraph{Labelled proofs.} Certain constructions require proofs that are bound
-to a message to prevent proof replaying.  We can attach a label to each proof to
-prevent this.  A label is an arbitrary string that is fixed at proving time.  A
+\paragraph{Labelled proofs.} Certain constructions require proofs bound to a
+message, so that proofs cannot be replayed. We attach a label to each proof. A
+label is an arbitrary string that is fixed at proving time.  A
 labelled proof system extends the syntax as follows:
 
 \begin{description}
@@ -135,7 +135,7 @@ wins}] - \frac{1}{2} \right|.
 %
 \end{equation*}
 %
-We say the proof system satisfies the property of zero knowledge if this
+We say the proof system is zero knowledge if this
 advantage is negligible for every PPT adversary $\adv$.
 
 \paragraph{Simulation extractability.} Our security arguments need a
@@ -189,5 +189,5 @@ Simulation extractability is a strong form of
 non-malleability, which prevents an adversary from turning proofs it has seen
 into proofs of related statements~\cite{AC:Groth06}. The condition $(\inst^*, \lbl^*) \notin \Query$ still allows $\adv$ to modify a
 simulated proof into another proof for the same statement and label. As a
-witness can be extracted, simulation extractable proof systems are proofs of
+witness can be extracted, simulation-extractable proof systems are proofs of
 knowledge.

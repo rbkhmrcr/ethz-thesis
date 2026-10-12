@@ -106,7 +106,7 @@ keyed by the epoch key and not by $\utk''$:
 %
 Its security rests on \Cref{asm:qmdbdhi-txid}.
 
-\begin{assumptionbox}{The Decisional Bilinear Diffie-Hellman Inversion with
+\begin{assumptionbox}{The $q$-decisional bilinear Diffie-Hellman inversion with
 published elements ($q$-mDBDHI) assumption.}{qmdbdhi-txid}
 
   Let $(\group{1},\group{2},\group{T},\pairing)$ be a type III bilinear group of
@@ -168,8 +168,8 @@ in an interval, use Bulletproofs~\cite{SP:BBBPWM18}.
 BBS+ signs several values at once, can sign values the signer never sees, and
 has a Sigma protocol for proving knowledge of a signature. The variant that signs
 group elements is unforgeable only if every signed element comes with a proof of
-knowledge of its representation, so the registration proof is required and not
-optional~\cite{SCN:AuSusMu06,EC:TesZhu23b}. Pedersen commitments are group
+knowledge of its representation, so the registration proof is
+required~\cite{SCN:AuSusMu06,EC:TesZhu23b}. Pedersen commitments are group
 elements, so their openings can be proved in a Sigma protocol, and sharing the
 generators with BBS+ lets the same committed key appear in both. Bulletproofs
 need no trusted setup and their proofs grow logarithmically with the bit length

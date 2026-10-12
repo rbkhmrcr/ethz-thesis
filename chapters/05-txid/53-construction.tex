@@ -32,9 +32,8 @@ Tags come from a pseudorandom function. A tag must look random to anyone
 without the epoch key, so that one user's transactions cannot be linked, and
 must be recomputable by whoever holds the key, so that the auditor finds every
 transaction. A pseudorandom function gives both, and a one-way or hash function
-only the first. There are two pseudorandom functions and not one. Tags computed
-directly under the long-term key would mean that a grant for one epoch hands
-over every epoch, so a second pseudorandom function derives a fresh key for each
+only the first. We use two pseudorandom functions. With tags computed directly
+under the long-term key, a grant for one epoch would hand over every epoch, so a second pseudorandom function derives a fresh key for each
 epoch, and epochs are independent. The commitment ties a user's several proofs
 to one hidden tracing key. Binding stops users switching keys between proofs,
 and hiding means the commitment reveals nothing about the key. The one-way
@@ -118,7 +117,7 @@ the registration authority or any auditor. Users prove $\rel_4$ at
 registration, so that their keys are certified once, and $\rel_5$ at a grant,
 when an epoch key is handed to an auditor. Every transaction carries proofs for
 $\rel_6$ and $\rel_7$, which show that it comes from a registered user and that
-its tag is correct. So users, auditors and validators never wait on each other.
+its tag is correct.
 
 \paragraph{Registration.} At registration, users prove knowledge of their
 long-term signing and tracing keys, and the registration authority certifies the

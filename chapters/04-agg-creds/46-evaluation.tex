@@ -51,8 +51,8 @@ Idemix rows present one credential on $n = 128$ attributes.}
 
 \paragraph{Results.} Registration and issuance in \Cref{tab:agg-creds-times} depend on neither $n$
 nor $k$. In registration, the user sends 128 bytes and the registration authority
-352 bytes, in three messages in total. In issuance, the user sends 440 bytes and
-the issuer 224 bytes, in four messages in total.
+352 bytes, including a 32-byte nonce, in three messages in total. In issuance, the user sends 440 bytes and
+the issuer 224 bytes, also including a 32-byte nonce, in four messages in total.
 
 \begin{figure}[htbp] \centering
 \includegraphics[width=\textwidth]{chapters/04-agg-creds/aggcreds_times.pdf}

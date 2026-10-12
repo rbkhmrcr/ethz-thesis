@@ -33,8 +33,8 @@ knowledge.
   \paragraph{Game 0.} This is the execution of $\prot$.
 
   \paragraph{Game 1.} As Game 0, except $\simu$ executes $\prot$ on
-behalf of the honest parties: $\simu$ is provided with the inputs (including
-secrets) of the honest parties, and interacts with corrupt parties, through the
+behalf of the honest parties: $\simu$ is provided with the inputs of the
+honest parties, secrets included, and interacts with corrupt parties, through the
 adversary, in the real world, following $\prot$'s specifications, and returns the
 corresponding output. At setup, $\simu$ extracts the secret key of every corrupt
 issuer from the proof of knowledge published with its public key. Corruption is
@@ -87,7 +87,7 @@ $\simu$ receiving a signature $\signature_i$ with $\ATSverify(\ipk{i}, \Tag,
   \end{description}
 
   In both cases, $\idfu{\AAC}'$ follows $\simu$. An honest issuer accepts every
-request from a registered user, matching the first branch, and for a dishonest
+request from a registered user, matching the first branch, and for a corrupt
 issuer, $\idfu{\AAC}'$ accepts only when $\simu$ does, which is when the issuer
 produced a valid single $\ATS$ signature.  So $\idfu{\AAC}'$'s output matches
 $\prot$'s in both cases, and this game is indistinguishable from Game 3 as long as
@@ -123,19 +123,19 @@ the verification result received from $\idfu{\AAC}'$.
   \begin{description}
 
     \item[Register.] For each registration request $\pk$ that a corrupt user
-sends, in the real world, to the honest registration authority, $\simu$ (acting
-as the registration authority) executes the registration protocol. If it
+sends, in the real world, to the honest registration authority, $\simu$, acting
+as the registration authority, executes the registration protocol. If it
 succeeds, $\simu$ records entry $\langle\user, \Tag, \pk, \psi
-\rangle$, and then (acting as a user) transmits the corresponding registration
-request $register$ to $\idfu{\AAC}'$ which processes it in a similar fashion to
-$\idfu{\AAC}$.
+\rangle$, and then, acting as a user, transmits the corresponding registration
+request $register$ to $\idfu{\AAC}'$ which processes it as
+$\idfu{\AAC}$ does.
 
       The simulated registration authority and $\idfu{\AAC}'$ accept or reject
 the same requests by construction, so their outputs are indistinguishable.
 
     \item[Issue.] For each issuance request $(\Tag, \pk, \psi, \atv{i})$ that a
 corrupt user $\user$ sends, in the real world, to an honest issuer $\issuer{i}$
-(simulated by $\simu$), $\simu$ (acting as $\user$) sends $(\AACissue, \att{i},
+simulated by $\simu$, $\simu$ sends on behalf of $\user$ $(\AACissue, \att{i},
 \atv{i})$ to $\idfu{\AAC}'$, and stores entry $\langle \user, \Tag, \att{i},
 \atv{i}, \signature_i\rangle$ on success.  $\idfu{\AAC}'$ issues the credential
 exactly when $\user$ is registered, and the simulated $\issuer{i}$ returns $\signature_i \sample
@@ -144,13 +144,13 @@ are indistinguishable.
 
     \item[Verify.] For each presentation $(\vec{\atv{}}, \msg, \algoproof^\star)$,
 with $\vec{\atv{}} = (\atv{1}, \ldots, \atv{n})$, that a user $\user$ presents,
-in the real world, to an honest verifier $V$, $\simu$ (simulating $V$) calls
+in the real world, to an honest verifier $V$, $\simu$, simulating $V$, calls
 $b \leftarrow \NIZKverify(\crs, \inst_1, \algoproof^\star, \msg)$.
 
       If $b = 0$, $\simu$ sends $(\AACverify, \vec{\atv{}}, \msg,
 \algoproof^\star)$ to $\idfu{\AAC}'$ and outputs its answer. The strings of
 $\idfu{\AAC}'$ are random, so except with negligible probability the entry of
-$\proven$ for $\algoproof^\star$ is $\bot$. Either there is a dishonest user
+$\proven$ for $\algoproof^\star$ is $\bot$. Either there is a corrupt user
 $\user'$ such that, for every $i$ with $\atv{i} \neq \varnothing$, either
 $\atv{i} \in \creds[\user'][i]$ or issuer $\issuer{i}$ is dishonest. Then
 $\idfu{\AAC}'$ queries $\simu$, which answers $0$. Or there is no such user, and
@@ -170,7 +170,7 @@ answer of $\idfu{\AAC}'$.
   \end{description}
 
   $\simu$ never extracts, so it runs straight-line. In the last case,
-$\idfu{\AAC}'$ queries $\simu$ if there is a dishonest user $\user'$ such that,
+$\idfu{\AAC}'$ queries $\simu$ if there is a corrupt user $\user'$ such that,
 for every $i$ with $\atv{i} \neq \varnothing$, either $\atv{i} \in
 \creds[\user'][i]$ or issuer $\issuer{i}$ is dishonest. Then $\simu$ answers $1$,
 as $V$ does in the real world. If there is no such user, $\idfu{\AAC}'$ returns
@@ -185,7 +185,7 @@ verification at which $E$ occurs, and outputs that presentation. It verifies,
 and $\simu$ simulated no proof for its statement and label, so by (P3) the
 reduction extracts a witness $\witness_1 = (\Tag, \sk, \pk, \psi, \signature)$,
 except with negligible probability. This is the only place where the proof
-extracts, and each reduction extracts once. Since no dishonest user covers
+extracts, and each reduction extracts once. Since no corrupt user covers
 $\vec{\atv{}}$, one of the following events occurs:
 
   \begin{description}
@@ -198,7 +198,7 @@ the reduction answers every registration with its signing oracle, so this
 contradicts (P1).
 
     \item[$a_2$.] The recorded entry $\langle \user', \Tag, \pk, \star
-\rangle$ belongs to a dishonest user $\user'$. Since $\user'$ does not cover
+\rangle$ belongs to a corrupt user $\user'$. Since $\user'$ does not cover
 $\vec{\atv{}}$, there exists $j \in [1, n]$ such that $\atv{j} \neq
 \varnothing$, issuer $\issuer{j}$ is honest, and $\atv{j} \notin
 \creds[\user'][j]$. Each tag belongs to one user, so there is no recorded entry
@@ -504,8 +504,8 @@ without a witness.
 
   \begin{enumerate}
 
-    \item Randomly select $\theta, \omega, \varphi, \nu, \{\epsilon_i\}_{i\in
-\ISSUERS},  \iota \in \Zp^*$, and set the following:
+    \item Sample $\theta, \omega, \varphi, \nu, \{\epsilon_i\}_{i\in
+\ISSUERS},  \iota \sample \Zp^*$, and set the following:
 
 %
       \begin{equation*}
@@ -543,7 +543,7 @@ $\signatureone'$ is uniform after randomisation, and $\bar{\signaturetwo}$ is
 fixed by the verification equation below. Here $\bar{\signaturetwo}$ is uniform
 and $\signatureone'$ is fixed by the same equation, which gives the same
 distribution.
-      Now we have by construction that $(\bar{\gen}, \bar{v}, \widetilde{r}',
+      By construction, $(\bar{\gen}, \bar{v}, \widetilde{r}',
 \widetilde{s}', \bar{z}, \signatureone', \bar{\signaturetwo}, \bar{\tid}, \pk',
 \{\atv{i}, H_i\}_{i\in \ISSUERS})$ satisfies the following:
     %
@@ -561,7 +561,7 @@ distribution.
       \end{gather*}
     %
 
-    \item Pick $\pi_1$, $\pi_2$ and $c$ randomly in $\Zp$, and set the
+    \item Sample $\pi_1, \pi_2, c \sample \Zp$, and set the
 following:
 %
       \begin{equation*}
@@ -576,7 +576,7 @@ v^{\pi_1}\cdot\bar{v}^{-c}, \quad y_i = \hashone(\atv{i})^{\pi_1}\cdot H_i^{-c},
 \{y_i\}_{i \in \ISSUERS}, w, \msg) = c$, where $\inst_3$ is the simulated
 statement above.
 
-    \item Finally, set $\eta$ to tuple $(f, h, \{y_i\}_{i \in \ISSUERS}, w,
+    \item Finally, set $\eta$ to the tuple $(f, h, \{y_i\}_{i \in \ISSUERS}, w,
 \pi_1, \pi_2)$.
 
   \end{enumerate}

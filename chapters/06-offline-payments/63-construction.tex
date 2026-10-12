@@ -59,8 +59,8 @@ identifier. The device instead proves knowledge of it once, at withdrawal, and
 every later payee verifies this proof of withdrawal. This is why the central
 bank signs on committed inputs rather than with a blind signature scheme, as
 there is no later showing for blindness to protect. Nothing binds the committed
-identifier to the withdrawing user, and nothing needs to. Spending requires a
-credential on that identifier, so a user who commits to somebody else's
+identifier to the withdrawing user. This is not needed, since spending requires
+a credential on that identifier, so a user who commits to somebody else's
 identifier only destroys their own funds.
 
 \paragraph{Payment.} The payee's secure element generates a fresh pseudonym and
@@ -74,28 +74,28 @@ acknowledgement.
 Signing the payee's pseudonym fixes the destination, so nobody who sees the
 signature can redirect the token. The payee chooses that pseudonym so that two
 payments of the same token to the same payee still differ, and the point at
-which two histories diverge names the payer. A payee who deliberately reuses
-its randomness only moves the divergence one link along, and is identified
-itself.
+which two histories diverge names the payer. Payees who deliberately reuse
+their randomness only move the divergence one link along, and are identified
+themselves.
 
 The ciphertext is there because an offline payee cannot ask anyone who the
-payer is, so what the auditor needs must be sealed in the transcript. The device
+payer is, so the transcript must contain what the auditor needs. The device
 proves that the ciphertext matches the pseudonym it spends under. This stops a
-double spender sealing someone else's identity, and stops a malicious payer
+double spender encrypting someone else's identifier, and stops a malicious payer
 choosing the pseudonym for an honest payee, which would need the payee's
 identifier. The audit proof and the transfer signature prove knowledge of the
 same opening, but are kept separate, because the device produces the audit
 proof alone.
 
 The transfer signature is a JPOK, since the secret key must never leave the
-secure element and generic two-party computation is too much for it. The secure
+secure element and generic two-party computation is too expensive for it. The secure
 element contributes only knowledge of the key, and the device supplies the rest
 of the witness and of the proof, so the scheme runs on existing hardware. The
 payee verifies every link before accepting, so the transcript and its
 verification grow by one link per transfer. \Cref{sec:offline-evaluation}
 measures both.
 
-A payment that stops part way loses no value. Once the payer's secure element
+A payment that stops partway loses no value. Once the payer's secure element
 has signed, it is locked to that destination. Whether the payment or the
 acknowledgement was lost, a retry completes the payment, and the token cannot be
 spent elsewhere. A secure element that resets to escape the rule destroys the
@@ -131,8 +131,8 @@ double-spending tags. Some also cover transferable tokens, at a higher cost per
 payment~\cite{C:ChaFiaNao88,C:Brands93,EC:CamHohLys05,PKC:BCFK15}.
 
 \Cref{prot:offline} gives the complete protocol. It is stated generically with
-respect to the underlying commitment scheme, digital signature scheme, SCI
-scheme, public-key encryption scheme, and JPOK, and the next section
+respect to the underlying commitment scheme, SCI schemes, public-key encryption
+scheme and JPOK, and the next section
 instantiates each of them.
 
 \begin{protocolbox}{Offline payments}{offline}
@@ -415,19 +415,16 @@ wall-clock time, capping the length of a chain that will be accepted at
 deposit.
 
 A payee who has been offline since before a payer was revoked has no verified
-real-time information with which to reject that payer, so the guarantee is
-expressed as a bound on how long a credential remains usable rather than as an
-instruction delivered to payees.
+real-time information with which to reject that payer, so revocation is a
+bound on how long a credential remains usable.
 
 Epochs are disclosed, so they narrow the anonymity set of a withdrawal to the
 users who withdrew the same denomination in the same epoch, and a deployment
 should choose the epoch width with that in mind.
 
-\paragraph{Payment caps.} Capping the value of an individual payment extends the construction in the same
-direction and composes with epochs. Together the two bound the value a
-compromised wallet can move before its tokens expire, making double spending
-financially unattractive independently of whether the spender is subsequently
-identified. Both are payee-side checks and require no change to the protocol
+\paragraph{Payment caps.} Payees can also cap the value of a single payment. With epochs, this bounds
+the value a compromised wallet can move before its tokens expire, whether or
+not the spender is later identified. Both are payee-side checks and require no change to the protocol
 messages.
 
 \paragraph{Secure element hardware.} The secure element can be any hardware that protects the key and the single-use
@@ -435,14 +432,13 @@ logic together. Smart cards do. Mobile trusted execution environments are
 isolated parts of a phone's main processor, and they protect keys but not the
 logic that uses them~\cite{trustzone,secureenclave,javacard,mifare}.
 
-\paragraph{Recovery.} The requirement that $\sk_{\algo{usr}}$ never leave the secure element extends
-to a recovery mechanism at the credential layer. A user who loses their device
+\paragraph{Recovery.} Since $\sk_{\algo{usr}}$ never leaves the secure element, recovery works at the
+credential layer. A user who loses their device
 re-enrols with the registration authority under a fresh pair $(\algo{uid},
 \sk_{\algo{usr}})$, restoring their ability to transact without migrating any
 state. The unspent tokens held by the lost device are not recoverable, since no
 other party holds the commitment randomness needed to spend them. This matches
-the behaviour of cash, and of the deployed offline systems discussed in the
-introduction.
+the behaviour of cash.
 
 \paragraph{Pruning.} The central bank needs its list of deposited tokens to detect double spending,
 so it cannot simply discard it. Logical or wall-clock timestamps that bound a

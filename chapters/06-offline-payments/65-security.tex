@@ -5,8 +5,8 @@
 
 \subsection{Proof of \Cref{thm:offline-construction-security}: security of the construction}\label{sec:offline-proof-1}
 
-Let $\prot$ denote $\OP$. Let $\adv$ be a real world adversary and let $\simu$ be an
-ideal world simulator that interacts with system participants through ideal
+Let $\prot$ denote $\OP$. Let $\adv$ be a real-world adversary and let $\simu$ be an
+ideal-world simulator that interacts with system participants through ideal
 functionality $\idfu{\algo{op}}$. We show that
 $\textsc{Exec}_{\prot,\adv}(\secparam)$ is computationally
 indistinguishable from $\textsc{Exec}_{\idfu{\algo{op}},\simu}(\secparam)$, in
@@ -17,8 +17,8 @@ corrupt if both their device and secure element are compromised.
 
 Our proof does not cover the split setting, in which a user's device is corrupt
 and their secure element is honest. There the
-device learns a commitment to the secure element's key but not the key itself. The details are as for the joint proof of
-\Cref{prim:hss-joint-proof}~\cite{USENIX:HesSinSor23}.
+device learns a commitment to the secure element's key but not the key itself. Hesse, Singh and Sorniotti treat this case for their joint
+proof~\cite{USENIX:HesSinSor23}.
 
 We also simplify
 exposition by treating the identifiers $\algo{id}$ produced by $\idfu{\algo{op}}$
@@ -54,7 +54,7 @@ transcripts $\adv$ sees and state $\idfu{\algo{op}}$ holds.
 
 \begin{proof}
 
-\paragraph{Game 0.} The real world execution of $\prot$.
+\paragraph{Game 0.} The real-world execution of $\prot$.
 
 \paragraph{Game 1.} As Game 0, except $\simu$ runs $\prot$ internally on
 behalf of all honest parties, forwarding inputs and distributing outputs. This
@@ -141,8 +141,8 @@ and $\mathbb{C}[(\algo{id}, \algo{id}')] \gets (\com_0, \com_1)$.
 
 Case $i > 0$. $\simu$ recovers $(\com_0, \ldots, \com_i)$ from
 $\mathbb{C}[\vec{\algo{id}}]$, produces a simulated payment $p_i$ with simulated
-proofs and random ciphertexts (or $\ciph_i \leftarrow \PKEencrypt(\pk_\auditor,
-\algo{uid}_i; \rho_i)$ if $\algo{usr}'$ is corrupt), and updates the maps as
+proofs and random ciphertexts, or $\ciph_i \leftarrow \PKEencrypt(\pk_\auditor,
+\algo{uid}_i; \rho_i)$ if $\algo{usr}'$ is corrupt, and updates the maps as
 needed. By hiding of the commitment scheme (P1), IND-CPA security of the
 encryption scheme (P2) and zero knowledge of the proof system (P5), simulated payments are indistinguishable from real ones,
 so Game 8 is indistinguishable from Game 7. The reduction to IND-CPA security
@@ -226,7 +226,7 @@ forking loss, is then linear rather than exponential in the length of the
 chain~\cite{JC:PoiSte00}. The cases above still apply, replacing $p_0$ with $p_i$ and $\algo{id}$
 with $(\algo{id}_0, \ldots, \algo{id}_i)$.  Since the probability that an honest
 $\algo{usr}'$ accepts a payment that $\idfu{\algo{op}}$ rejects is negligible
-under (P1)-(P5), this game is indistinguishable from Game 8.
+under (P1)--(P5), this game is indistinguishable from Game 8.
 
 \paragraph{Game 10.} As Game 9, except $\idfu{\algo{op}}$ handles $\OPdeposit$
 queries from honest users. $\simu$ recovers $(\com_0,\allowbreak \ldots,\allowbreak \com_n)$ from
@@ -245,7 +245,7 @@ binds $(\algo{uid}_0, v, s_0)$. Two withdrawals yielding the same $\com_0$ would
 have to agree on $\algo{uid}_0$ and $s_0$, and $s_0$ is sampled uniformly by the
 secure element, so this occurs with negligible probability. A corrupt user
 cannot alter $\com_0$, so any two deposits sharing $\vec{\algo{id}}[0]$ are double
-spends and will be detected by $\idfu{\algo{op}}$, so Game 10 is
+spends that $\idfu{\algo{op}}$ detects, so Game 10 is
 indistinguishable from Game 9.
 
 \paragraph{Game 11.} As Game 10, except $\idfu{\algo{op}}$ also handles
@@ -414,7 +414,7 @@ element $l^*$ is fixed by the pairing equation. A simulator samples $r_1, r_2 \s
 %
 \end{equation*}
 %
-These have the same distribution, and it simulates the rest of $\Sigma$ by zero
+These have the same distribution, and the simulator simulates the rest of $\Sigma$ by zero
 knowledge.
 
 \paragraph{Model.} Because $\simu$ rewinds to extract, the argument holds in the

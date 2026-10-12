@@ -116,8 +116,8 @@ exist unless enough honest signers agreed to that message. Both notions are
 defined for non-interactive threshold signature schemes, with the adversary
 collecting the signature shares~\cite{C:BCKMTZ22}.
 
-\Cref{exp:ts-uf-1} gives the TS-UF-1 experiment of~\cite{C:BCKMTZ22} in the
-notation of this chapter, with $t+1$ signers needed to sign rather than $t$.
+\Cref{exp:ts-uf-1} gives the TS-UF-1 experiment in the notation of this
+chapter, with $t+1$ signers needed to sign rather than $t$.
 
 \begin{experimentbox}{Threshold signature schemes: TS-UF-1~\cite{C:BCKMTZ22}.}{ts-uf-1}
 
@@ -226,7 +226,7 @@ We prove that our construction is TS-UF-1 secure in
 We describe our schemes as sequences of calls to interfaces of a secure
 multiparty computation protocol. For a secret value $\alpha \in \Zp$ shared
 between $n$ parties, such that any $t+1$ of them can reconstruct it by a
-pre-defined linear combination, we write $\shr{\alpha}$ for the vector
+predefined linear combination, we write $\shr{\alpha}$ for the vector
 $(\alpha_1, \ldots, \alpha_n)$ in which $\alpha_h$ is the share held by party
 $h$. We use the same notation $\shr{a}$ for a sharing of a group element $a \in
 \group{}$, where $\group{}$ is either source group.

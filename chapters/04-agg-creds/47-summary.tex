@@ -5,8 +5,8 @@ is certified by its own issuer. This matches how attributes are certified in
 practice, for instance for the European Digital Identity Wallet, where passport
 agencies, licensing bodies and transport authorities each certify only their
 own attributes.  Issuers need not coordinate
-with each other, nor with the registration authority, nor verifiers. Users
-communicate with each of their credential issuers once, and then can combine
+with each other, nor with the registration authority or verifiers. Users
+communicate with each of their credential issuers once, and can then combine
 credentials from these independent issuers into a single aggregate credential
 and present that with one proof.  The registration authority binds each user's
 key to a tag. Binding credentials to the tag lets issuers stay uncoordinated,
@@ -22,8 +22,8 @@ $\delta$ in $\group{T}$ would make presentations constant-size, at the cost of
 one pairing per disclosed attribute for the user. The GGM is needed only for
 the registration signature, so a rerandomisable SPS scheme under standard
 assumptions would remove it, at the cost of larger registration signatures. A
-concrete security analysis of the scheme would give its security at the used
-parameters.
+concrete security analysis of the scheme would give its security at the parameters
+we use.
 
 Epoch-based revocation, one of the extensions of
 \Cref{sec:agg-creds-construction}, covers attributes with natural expiry dates.

@@ -6,12 +6,12 @@ This prevents users from registering others' public keys and pooling credentials
 across identities.  The registration authority assigns each user exactly one
 tag, and signs only messages of the prescribed form: public keys and tags. We assume that verifiers
 accept credentials only from the set of issuers with published public keys. This
-prevents a malicious user from being able to impersonate an issuer to an honest
+prevents malicious users from impersonating an issuer to an honest
 verifier.
 
 The registration authority only links a public key to a tag, so an existentially
-unforgeable signature scheme is enough. Presentations should show one short
-object, so issuers' signatures must aggregate. Ordinary aggregate signatures
+unforgeable signature scheme is enough. A presentation should contain one
+short signature, so issuers' signatures must aggregate. Ordinary aggregate signatures
 combine signatures by several signers on different messages into one, so they
 would let users pool their credentials. Multi-signatures require every
 signer to sign the same message, while issuers sign different attributes.
@@ -43,8 +43,8 @@ The user initialises their credential state as $(\Tag, \sk, \pk, \psi, \cred_1,
 $\regcred = (\Tag, \pk, \psi)$ is their registration credential.
 
 \paragraph{Issuance.} On input $(\Tag, \pk, \psi, \atv{i})$ from the user, the issuer checks that
-$\psi$ verifies, and rejects if it does not.  Otherwise, the user next proves
-knowledge of $\sk$.  If this succeeds and the user holds attribute value
+$\psi$ verifies, and rejects if it does not.  If it does, the user proves knowledge
+of $\sk$.  If this succeeds and the user holds attribute value
 $\atv{i}$, the issuer sends back $\signature_i \sample \ATSsign(\isk{i},
 \Tag, \atv{i})$. The user sets $\cred_i = (\atv{i}, \signature_i)$.
 
@@ -64,7 +64,7 @@ user first constructs the aggregate signature as follows:
 \end{equation*}
 %
 which, with the tag and the disclosed values, forms the aggregate credential
-$\aggcred$. They then construct a proof of knowledge, with label $\msg$, with the
+$\aggcred$. They then construct a proof of knowledge with label $\msg$ and the
 following parameters:
 %
 \begin{equation*}
@@ -115,17 +115,17 @@ verifier's identity and a fresh nonce. Aggregation is over $\ISSUERS$ only, so
 users can present any subset of their credentials by aggregating just that
 subset, with no further contact with the issuers or the registration authority.
 
-New issuers can join the system without impacting the construction. The
+New issuers can join the system without changes to the construction. The
 aggregation of credentials and their presentation is agnostic to the number of
 issuers.
 
 An issuer certifying multiple attribute types can hold a different key for each
 type. To support an issuer certifying multiple attribute types under one key,
-the issuer instead signs $(\Tag, \att{} \| \atv{})$ rather than $(\Tag,
+the issuer signs $(\Tag, \att{} \| \atv{})$ rather than $(\Tag,
 \atv{})$, with $\att{}$ the attribute type and $\atv{}$ the attribute value.
 
 The construction extends to epoch-based revocation. The registration authority
-signs triple $(\pk, \Tag, \epoch)$ rather than pair $(\pk, \Tag)$, where
+signs the triple $(\pk, \Tag, \epoch)$ rather than the pair $(\pk, \Tag)$, where
 $\epoch$ identifies the current epoch, and issuers sign $(\Tag, \epoch \|
 \atv{})$ rather than $(\Tag, \atv{})$, tying each attribute credential to that
 epoch. At presentation, users also prove that their registration

@@ -1,7 +1,7 @@
 \section{Introduction}
 
 Anonymous credential schemes allow users to prove that they hold certain
-attributes (such as age, nationality or current residence) without revealing
+attributes, such as age, nationality or current residence, without revealing
 who they are or anything about any undisclosed attribute values. Issuers give
 users credentials on their attribute values, and users present these to
 verifiers. The two main security properties of anonymous credential schemes are
@@ -37,8 +37,8 @@ remove coordination for issuers certifying different attributes.
 
 \paragraph{Contributions.} We give an aggregate anonymous credential scheme:
 credentials from independent, uncoordinated issuers combine into one compact
-credential, provable in one proof. Aggregation is performed locally by the user
-without interaction between issuers. The scheme supports selective disclosure
+credential, provable in one proof. Users aggregate locally, without interaction
+between issuers. The scheme supports selective disclosure
 of attribute values.
 
 Our design starts from the observation that a credential rests on three links:
@@ -81,7 +81,7 @@ Credentials built on the BBS+ signature scheme support selective disclosure in
 a single-issuer setting, with verification linear in the total number of
 attributes~\cite{EC:BonBoy04a,SCN:AuSusMu06}. They form the basis of the
 ongoing standardisation effort of the Crypto Forum Research Group of the
-Internet Research Task Force (IRTF)~\cite{bbsdraft}.
+Internet Research Task Force~\cite{bbsdraft}.
 
 Further improvements targeted efficiency. The Pointcheval-Sanders signature
 scheme introduces randomisable signatures with sequential aggregation, and
@@ -141,10 +141,9 @@ identity, with one proof per credential~\cite{anada2019decentralized}.
 Credentials can be derived from existing identity documents with zk-SNARKs,
 without new issuer infrastructure, at the cost of one general-purpose proof per
 credential~\cite{SP:RWGM23}. Issuer hiding is an orthogonal
-problem~\cite{CANS:BEKRS21,PoPETS:SanTra24}. We would like to address it in
-future work.
+problem~\cite{CANS:BEKRS21,PoPETS:SanTra24}. We leave it for future work.
 
-\paragraph{Comparison.} In ART-Sign, users' tags are their public keys, and
+\paragraph{Comparison.} In ART-Sign, users' tags are randomisable pseudonyms, and
 every presentation proves their validity again. In our scheme the tag is a
 separate value that the registration authority signs together with the key, so
 issuers keep no record.
@@ -172,7 +171,7 @@ registration signature.
                              & Yes & $O(1)$ & $O(K)$ & $O(k)$ & Per tag \\ Our
 scheme & BCDH, DDH, ROM, GGM & Yes & $O(1)$ & $O(k)$ & $O(k)$ & None \\
 \bottomrule \end{tabular} \caption[Comparison with existing anonymous
-credential schemes]{Comparison with existing single and multi-issuer anonymous
+credential schemes]{Comparison with existing single- and multi-issuer anonymous
   credential schemes. $n$ is the total number of attributes a scheme supports,
   $k$ the number of attributes disclosed in a presentation, $K$ the number of
   issuers in a presentation, $|$cred$|$ the size of the credentials needed for

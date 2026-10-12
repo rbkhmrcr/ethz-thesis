@@ -8,7 +8,7 @@ attributes. For simplicity we assume that each issuer is responsible for a
 single attribute type, and is the only issuer for that attribute. Users each
 register with the registration authority, obtain credentials from the relevant
 issuers for the attribute values they hold, and then use these credentials to
-make presentations. A presentation is a user provably disclosing the values of a
+make presentations. In a presentation, users provably disclose the values of a
 subset of their attributes. Verifiers check users' claims. We write $\att{i}$ for
 the attribute type certified by issuer $i$, and $\atv{i}$ for the value of that
 attribute held by a user. Issuer $i$ has key pair $(\isk{i}, \ipk{i})$, and the
@@ -116,7 +116,7 @@ every tag and message $\Tag, \msg$, the following holds:
 \end{equation*}
 %
 
-We also have correctness of aggregated signatures.  For set $\ISSUERS
+We also have correctness of aggregate signatures.  For set $\ISSUERS
 \subseteq [1, n]$, for $i \in \ISSUERS$, an aggregate signature is generated as
 follows:
 %
@@ -242,8 +242,8 @@ submits $(\vec{\atv{}}, \signature, \msg)$. Here
 $\signature$ aggregates the credentials for $\vec{\atv{}}$, and $\msg$ is a fresh
 message from the verifier to which the presentation is bound.
 $\idfu{\AAC}$ accepts if the user previously called aggregate on $\vec{\atv{}}$,
-or otherwise if the user actually holds $\vec{\atv{}}$. This means a corrupt
-user who skips aggregate can still succeed if they hold the credentials.
+or otherwise if the user actually holds $\vec{\atv{}}$. This means corrupt
+users who skip aggregate can still succeed if they hold the credentials.
 Unregistered users cannot present. On
 acceptance, $\idfu{\AAC}$ generates a random string $\algoproof$, so the
 presentation reveals nothing about the user beyond the disclosed values.
@@ -283,7 +283,7 @@ go-ahead. On receiving the go-ahead, continue.
 	\end{enumerate}
 
 	\fuinterface{\AACissue} On input $(\AACissue, \att{i},\atv{i})$ from the user,
-with $\atv{i}$ being value of attribute $\att{i}$, send $(\AACissue, \user,
+with $\atv{i}$ the value of attribute $\att{i}$, send $(\AACissue, \user,
 \atv{i})$ to issuer $\issuer{i}$ associated with $\att{i}$ and wait for its
 confirmation.  On confirmation, do:
 
@@ -403,8 +403,8 @@ return $(\AACverifyend, 0)$ to $\algo{V}$.
 
 	    \begin{enumerate}
 
-	      \item If there exists a dishonest user $\user'$ such that for every $i$ with $\atv{i} \neq \varnothing$, either $\atv{i} \in
-\creds[\user'][i]$ or issuer $\issuer{i}$ is dishonest, then query $\simu$ with
+	      \item If there exists a corrupt user $\user'$ such that for every $i$ with $\atv{i} \neq \varnothing$, either $\atv{i} \in
+\creds[\user'][i]$ or issuer $\issuer{i}$ is corrupt, then query $\simu$ with
 $(\AACverify, \vec{\atv{}}, \msg,\algoproof)$. On receiving the response
 $(\AACverifyend, b)$, do:
 

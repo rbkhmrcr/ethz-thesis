@@ -1,25 +1,40 @@
 \chapter{Conclusion}\label{chap:conclusion}
 
-This thesis argues that practical privacy comes from modelling the participants
-and responsibilities that systems already have, and constraining with
-cryptography what each one can learn and do, rather than from removing them.
+This thesis shows that institutions can play central roles in privacy-preserving
+protocols without being trusted with users' private information. Issuers,
+auditors, service providers and central banks provide availability and
+accountability, and are often constrained by legal frameworks. Rather than
+removing them from our protocols, we model the roles they already play and
+constrain with cryptography what each one can learn and do. The result is
+protocols that maintain or improve user privacy, while being cheaper for users
+to run and more likely to be adopted.
+
+Decentralisation is often treated as a proxy for privacy, so that any central
+party looks like a threat to it. The two are different properties. When
+credential issuance is distributed across many issuers, every issuer can learn
+every attribute. In \Cref{chap:agg-creds}, a single registration authority that
+learns nothing about attributes makes aggregation cheap and keeps issuers
+independent. \Cref{chap:offline-payments} makes the same point from the other
+direction. Offline payments need availability, and a secure element provides it
+with no server online at all. We should separate the properties we want, such as privacy, availability and accountability, from the architectures
+we often reach for to achieve them.
+
 Each chapter starts from a role that exists in practice: certifiers in
 \Cref{chap:tsps}, issuers and registration authorities in
-\Cref{chap:agg-creds}, auditors in \Cref{chap:txid}, and all entities in the
-transaction system in \Cref{chap:offline-payments}.
+\Cref{chap:agg-creds}, auditors in \Cref{chap:txid}, and the central bank,
+intermediaries and secure elements in \Cref{chap:offline-payments}. In each case the
+institution keeps its function without being trusted with more than that
+function requires. Threshold certifiers sign committed values, and no single
+one of them can certify alone. The registration authority binds a key to a tag
+and learns nothing else, while issuers stay independent and keep no state about
+users. The auditor of \Cref{chap:txid} computes tags for one user and one
+epoch, and learns nothing about anyone else.
 
-In each case institution keeps its function without being trusted with more
-than that specific function requires. Threshold certifiers sign committed
-values, and no single one of them can certify alone. The registration authority
-binds a key to a tag and learns nothing else, while issuers stay independent
-and keep no state about users. The auditor of \Cref{chap:txid} computes tags
-for one user and one epoch, and learns nothing about anyone else.
-
-The same pattern appears in the capabilities that the constructions grant.
-Capabilities are scoped by a given user and period. Practicality is a
-constraint throughout. The constructions avoid interaction wherever possible.
-Threshold signing moves all interaction to an offline phase, issuers of
-aggregate credentials never coordinate, users submit transactions for tracing
+The same pattern appears in the capabilities that the constructions grant,
+which are scoped as narrowly as each role allows. The constructions also avoid
+interaction wherever possible. Threshold
+signing moves all interaction to an offline phase, issuers of aggregate
+credentials never coordinate, users submit transactions for tracing
 concurrently without counters, and offline payments need no network at all.
 Every construction is implemented and measured, so these claims come with
 concrete costs.

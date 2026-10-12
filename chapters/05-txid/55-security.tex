@@ -2,8 +2,8 @@
 
 \subsection{Proof of \Cref{thm:txid-bb}: security of the construction}\label{sec:txid-bb-sec}
 
-We show that the view of a real world adversary $\adv$ during an execution of
-$\prot$ is indistinguishable from the view of an ideal world simulator $\simu$
+We show that the view of a real-world adversary $\adv$ during an execution of
+$\prot$ is indistinguishable from the view of an ideal-world simulator $\simu$
 that interacts with system participants through ideal functionality
 $\idfu{\algo{trace}}$. We define a sequence of indistinguishable games that
 start with Game 0 representing the real world, and end with Game 7 representing
@@ -230,8 +230,8 @@ entry in $\regsimu$ corresponds to a successful $\IDregister$ call to
 $\idfu{\algo{trace}}$.
 
     \item[$\user$ already submitted $\Max$ transactions in the current epoch.]
-By (P4) and the determinism of $\FT$, $\prot$ will not accept a transaction from
-$\user$ in this case as the tag will already appear in the ledger.
+By (P4) and the determinism of $\FT$, $\prot$ does not accept a transaction from
+$\user$ in this case, as the tag already appears in the ledger.
 
   \end{description}
 
@@ -344,7 +344,7 @@ and, as the $(r_i,t_i)$ are drawn independently, the pairs are mutually
 independent. The view of $\adv$ is that of a random function, except on the
 event $ab = \omega$, which has probability $1/p$.
 
-  The term $\gen^{t_i}$ is needed. Re-randomising with $r_i$ alone would give
+  The term $\gen^{t_i}$ is needed. Rerandomising with $r_i$ alone would give
 the response $\gen^{\omega r_i} = \HE(\epoch_i)^{\omega/a}$, which is again $\FE$, under
 key $\omega/a$ rather than $b$, so the two cases would be identically distributed.
 

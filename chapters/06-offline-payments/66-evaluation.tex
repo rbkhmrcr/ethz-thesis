@@ -120,7 +120,7 @@ auditing and by $688$ bytes without.
 \includegraphics[width=\textwidth]{chapters/06-offline-payments/offline-hops-times.pdf}
 \caption[Offline payments: time against the number of hops]{Time against the number of hops, with and without auditing: payee
 verification on Android, iOS and the server, verification by the central bank
-at deposit, and identification by the auditor. Medians; the phones share an
+at deposit, and identification by the auditor. Medians. The phones share an
 axis, as do the server payee and the central bank.}
 \label{fig:offline-hops-times} \end{figure}
 
@@ -186,4 +186,5 @@ $\OPdeposit$ & network & device, intermediary, central bank & 1352 (1128), 1353 
 & card & device, secure element & 57, 192 & 2 \\
 \bottomrule \end{tabular}} \caption[Offline payments: communication]{Bytes sent by each party and number of
 messages exchanged per protocol at one hop, with auditing, and without it in
-parentheses where it differs.} \label{tab:offline-comms} \end{table}
+parentheses where it differs. The registration authority sends a 32-byte nonce
+and its 112-byte response.} \label{tab:offline-comms} \end{table}

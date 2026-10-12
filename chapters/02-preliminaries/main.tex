@@ -3,7 +3,7 @@
 This chapter describes how we define and prove security.
 It defines the abstract primitives that later chapters build
 on: commitment schemes, pseudorandom functions, hash functions, signature
-schemes, public key encryption schemes and proof systems. These follow Katz
+schemes, public-key encryption schemes and proof systems. These follow Katz
 and Lindell wherever possible~\cite{KatLin14}. We then instantiate these
 primitives, first defining bilinear groups and the assumptions we rely on. We
 then give the Pedersen commitment scheme, the ElGamal encryption scheme, the
@@ -28,16 +28,15 @@ security of protocols and primitives, described below.
 
 Defining the security goals that we wish to achieve requires defining the
 capabilities of the adversary and its success probability. There are two main ways of doing this: the concrete approach and
-the asymptotic approach. The concrete approach assigns numbers to the amount of
+the asymptotic approach. The concrete approach assigns numbers to the number of
 operations that the adversary is able to execute and a fixed bound to the
 probability of success. The asymptotic approach instead treats security as a
 function parameterised by a security parameter. As this parameter grows, the
 resources needed to break a scheme grow faster than any fixed polynomial, and
 the probability of success of the adversary becomes vanishingly small.
 
-We have chosen to follow the asymptotic approach, as do most of the works we
-build on. This deserves some consideration, as we explicitly aim for concrete
-efficiency. We address efficiency through the instantiations, whose elements are
+We follow the asymptotic approach, as do most of the works we build on. This
+needs some justification, as we aim for concrete efficiency. We address efficiency through the instantiations, whose elements are
 chosen for their efficiency benefits, and their benchmarks. We keep these
 choices separate from the design and security proofs of the abstract
 constructions.
@@ -88,11 +87,10 @@ protocol~$\prot$ securely realises the ideal functionality~$\idfu{}$ if for ever
 PPT adversary~$\adv$, there exists a PPT simulator~$\simu$ where
 $\textsc{Exec}_{\prot,\adv}(\secparam)$ is computationally indistinguishable from
 $\textsc{Exec}_{\idfu{},\simu}(\secparam)$. As the ideal functionality achieves
-all security properties by design, this shows that the protocol achieves them
-too. This definition is in the standalone model: it considers a single
+all security properties by design, the protocol achieves them too. This definition is in the standalone model: it considers a single
 execution of the protocol, with no other protocols running alongside it.
 
-\paragraph{Corruption models.} Honest but curious participants follow the protocol, and the adversary sees
+\paragraph{Corruption models.} Honest-but-curious participants follow the protocol, and the adversary sees
 their views and combines them with the views of the other corrupted
 participants. Malicious participants deviate from the protocol arbitrarily.
 Under static corruption, the set of corrupted participants is fixed before the

@@ -261,7 +261,7 @@ the signer. A simulator $\SCIsimrequest$, on input public key $\pk$, disclosed
 messages $(\msg_i)_{i \in \algo{Disc}}$ and set $\algo{Disc}$, outputs a
 request without access to the other messages, and may program the random
 oracle. The definition is adapted from the blindness of the Coconut threshold
-credential scheme~\cite{NDSS:SABMD19}, with an honestly generated signer key.
+credential scheme, with an honestly generated signer key~\cite{NDSS:SABMD19}.
 
 \begin{experimentbox}{Signatures on committed inputs: request hiding}{sci-hiding}
 
@@ -374,12 +374,12 @@ Each informal goal corresponds to a check in $\idfu{\algo{op}}$. Unforgeability
 and theft prevention are the checks in $\OPexecute$ and $\OPdeposit$ that
 $\algo{tokens}[\vec{\algo{id}}]$ is defined and names the calling user.
 Double-spending detection is the test on
-$|\algo{deposited}[\vec{\algo{id}}[0]]|$, and identification returns an owner
-that was recorded rather than inferred, which gives non-frameability.
+$|\algo{deposited}[\vec{\algo{id}}[0]]|$, and identification returns the owner
+recorded in $\algo{tokens}$, which gives non-frameability.
 Conservation of value holds because the only changes to $\algo{accounts}$ and
 $\algo{reserves}$ are the matching debits in $\OPwithdraw$ and credits in
-$\OPdeposit$. Anonymity and unlinkability are what $\simu$ does not receive: on
-an honest withdrawal it learns the user and the value but not $\algo{id}$, and
+$\OPdeposit$. Anonymity and unlinkability hold because of what $\simu$ does not
+receive. On an honest withdrawal it learns the user and the value but not $\algo{id}$, and
 on the matching deposit it learns $\vec{\algo{id}}$ with no way to associate it
 with that withdrawal.
 
