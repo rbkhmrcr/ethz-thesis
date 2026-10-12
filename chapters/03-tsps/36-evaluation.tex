@@ -21,31 +21,37 @@ are those of BLS12-381, a pairing-friendly curve with around 128-bit security,
 implemented with the RELIC library~\cite{relictoolkit}.
 
 \paragraph{Setup.} All schemes sign vectors of $\ell = 2$ elements of
-$\group{1}$. ATLAS runs with $n = 2t+1$ and MASCOT with $t = n-1$. All parties
-run on one MacBook Air with an Apple M2 and 16~GB of RAM, one thread each, over
-authenticated channels on that machine. Each timed call starts from empty
+$\group{1}$. ATLAS runs with $n = 2t+1$ and MASCOT with $t = n-1$. The other
+chapters are evaluated on a laptop, but we run this chapter's benchmarks on a
+server, so that we can simulate up to 16 parties with a core each. The server
+is a Google Cloud c4-standard-32 instance with an Intel Xeon Platinum 8581C
+processor, 16 physical cores and 117~GB of RAM. All parties run on it with one
+thread each, over authenticated channels on that machine, and the prior and
+centralised schemes run on the same server. Each timed call starts from empty
 preprocessing, so the offline and key generation times include making triples.
 We report the median of 100 repetitions after 10 warm-up calls, for party $p_1$.
-In the tables, the interquartile range is within 5\% of the median for all but
-five measurements, and within 16\% for all.
+In the tables, the interquartile range is within 10\% of the median for all but
+eight measurements, and within 28\% for all.
 
 \paragraph{Results.} \Cref{tab:tsps-comp} compares our schemes with the
-threshold SPS schemes CKPSS23 and MMSST24. We implement these, with a trusted
-dealer, and the centralised $\AGHO$ and $\KPW$ schemes in Go with
-the gnark-crypto library~\cite{AC:CKPSS23,PKC:MMSST24,gnark-crypto}.
+threshold SPS schemes CKPSS23 and MMSST24. We implement these with a trusted
+dealer, in Go with the gnark-crypto
+library~\cite{AC:CKPSS23,PKC:MMSST24,gnark-crypto}. The centralised $\AGHO$ and
+$\KPW$ schemes are implemented in C++ with RELIC, as are our threshold schemes.
 \Cref{tab:tsps-benchmarks,tab:tsps-comms} give times, communication and sizes at
 $n = 5$. The online phase sends nothing, and its time is comparable to
 centralised signing. All interaction is in key generation and the offline
 phase, where MASCOT costs far more than ATLAS.
 \Cref{fig:tsps-n-times,fig:tsps-n-comm} show that communication grows linearly
-in $n$, and that the online phase stays below 3~ms up to eleven parties.
+in $n$, and that the online phase stays below 2~ms up to sixteen parties.
 
 CKPSS23 and MMSST24 have no offline phase, and each signer sends one signature
 share of 96 or 384 bytes to the combiner. \Cref{fig:tsps-baselines} compares
 them with our schemes, which move the extra cost to before the message is known.
 Threshold $\AGHO$ has signatures of three group elements instead of the seven of
-MMSST24, and verifies in 2.93~ms instead of 4.18~ms, but is secure only in the
-GGM. CKPSS23 has smaller signatures, but each signed element needs a counterpart
+MMSST24, and verification needs $\ell+4$ pairings instead of $\ell+11$, but it
+is secure only in the GGM. Its verification takes 3.05~ms against 2.79~ms for
+MMSST24, since the two implementations use different libraries. CKPSS23 has smaller signatures, but each signed element needs a counterpart
 in the second group, which on BLS12-381 triples the message size.
 
 \begin{table}[htbp] \centering \small \setlength{\tabcolsep}{3pt}
@@ -72,15 +78,15 @@ PS the interactive assumption of Pointcheval and Sanders~\cite{RSA:PoiSan16}.}
 \toprule
  & & Key gen. & Offline & Batched & Sign & Combine & Verify \\
 \midrule
-Threshold $\AGHO$ & ATLAS & 4.73 & 2.09 & 1.25 & 0.36 & 2.87 & 2.93 \\
- & MASCOT & 20.4 & 31.0 & 8.17 & 0.72 & 8.46 & 2.93 \\
-Threshold $\KPW$ & ATLAS & 11.3 & 14.8 & 17.2 & 0.87 & 6.48 & 4.29 \\
- & MASCOT & 67.2 & 80.0 & 46.2 & 1.84 & 16.8 & 4.29 \\
+Threshold $\AGHO$ & ATLAS & 3.10 & 1.33 & 0.85 & 0.30 & 2.37 & 3.05 \\
+ & MASCOT & 14.0 & 14.3 & 4.34 & 0.64 & 6.03 & 3.05 \\
+Threshold $\KPW$ & ATLAS & 8.41 & 11.1 & 12.2 & 0.73 & 4.19 & 4.39 \\
+ & MASCOT & 38.3 & 40.8 & 30.2 & 1.51 & 11.8 & 4.39 \\
 \midrule
-$\AGHO$ & & 0.52 & & & 0.84 & & 2.93 \\
-$\KPW$ & & 1.83 & & & 2.00 & & 4.29 \\
-CKPSS23~\cite{AC:CKPSS23} & & 4.09 & & & 2.14 & 9.51--15.9 & 3.18 \\
-MMSST24~\cite{PKC:MMSST24} & & 6.47 & & & 1.26 & 0.46--0.90 & 4.18 \\
+$\AGHO$ & & 0.46 & & & 0.86 & & 3.05 \\
+$\KPW$ & & 1.84 & & & 2.01 & & 4.39 \\
+CKPSS23~\cite{AC:CKPSS23} & & 3.16 & & & 1.50 & 6.33--10.6 & 2.08 \\
+MMSST24~\cite{PKC:MMSST24} & & 4.67 & & & 1.17 & 0.45--0.89 & 2.79 \\
 \bottomrule
 \end{tabular}
 \caption[Threshold SPS schemes: time]{Time in ms for party $p_1$ at $n = 5$ and
@@ -114,13 +120,13 @@ which doubles their size.}
 \label{tab:tsps-comms} \end{table}
 
 \begin{figure}[htbp] \centering
-\includegraphics[width=\textwidth]{chapters/03-tsps/tsps-n-times.pdf}
+\includegraphics[width=\textwidth]{chapters/03-tsps/tsps-n-times-server.pdf}
 \caption[Threshold SPS schemes: time against $n$]{Time of party $p_1$ against the number of parties $n$, at $\ell = 2$,
 median. ATLAS runs at $n = 2t+1$ and MASCOT at $t = n-1$.}
 \label{fig:tsps-n-times} \end{figure}
 
 \begin{figure}[htbp] \centering
-\includegraphics[width=\textwidth]{chapters/03-tsps/tsps-n-comm.pdf}
+\includegraphics[width=\textwidth]{chapters/03-tsps/tsps-n-comm-server.pdf}
 \caption[Threshold SPS schemes: communication against $n$]{Kilobytes sent by party $p_1$ against the number of parties $n$, at $\ell =
 2$, one panel per phase, with ATLAS as solid and MASCOT as dashed lines. MASCOT
 sends about a thousand times more, so the ATLAS lines lie close to zero for key
@@ -128,7 +134,7 @@ generation and offline signing. $\TSPSonsign$ sends nothing and is not shown.} \
 \end{figure}
 
 \begin{figure}[htbp] \centering
-\includegraphics[width=\textwidth]{chapters/03-tsps/tsps-baselines.pdf}
+\includegraphics[width=\textwidth]{chapters/03-tsps/tsps-baselines-server.pdf}
 \caption[Threshold SPS schemes against prior schemes]{Our schemes with MASCOT against the prior threshold schemes and the
 centralised schemes, against the number of parties $n$, at $\ell = 2$ and $t =
 n-1$, median.} \label{fig:tsps-baselines} \end{figure}

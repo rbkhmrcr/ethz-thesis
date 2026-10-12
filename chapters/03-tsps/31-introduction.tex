@@ -10,7 +10,9 @@ signatures~\cite{AFRICACRYPT:FucVer10,CCS:CamDriDub17,RSA:CriLys19,PoPETS:MSBM23
 
 In systems with entities that publicly certify state, such as ledger
 administrators or transparency log providers, threshold certification shares
-the role of signer between several parties.
+the role of signer between several parties. No single compromised or
+misbehaving party can then certify on its own, and the certifiers need not
+trust one another.
 
 In privacy-preserving transaction ledgers, users' tokens or accounts are
 generally represented as commitments. To spend a token or update an account,
@@ -40,7 +42,8 @@ assumption~\cite{C:KilPanWee15}.
 We start from a common construction which applies to any SPS scheme with a
 property we call decomposable signing. All message-independent computation runs
 in an offline (pre-processing) phase, and once the message is known, signing
-needs no interaction.
+needs no interaction. Signers can then certify as soon as a message arrives,
+without being online together, at about the cost of ordinary signing.
 
 Computation on shared group elements has been implemented for two
 parties~\cite{NDSS:GPVRNC23,LC:ADEO21} and for many parties on curves without a

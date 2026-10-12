@@ -12,9 +12,7 @@ $\textsc{Exec}_{\prot,\adv}(\secparam)$ is computationally
 indistinguishable from $\textsc{Exec}_{\idfu{\algo{op}},\simu}(\secparam)$, in
 the standalone sense. We define a sequence of
 indistinguishable games that start with Game 0 representing the real world, and
-end with Game 12 representing the ideal world. Each game changes one step of the
-previous one, and we argue that $\adv$'s view changes only negligibly between
-consecutive games. Throughout, we call a user
+end with Game 12 representing the ideal world. Throughout, we call a user
 corrupt if both their device and secure element are compromised.
 
 Our proof does not cover the split setting, in which a user's device is corrupt
@@ -48,19 +46,11 @@ model.
 
 \end{enumerate}
 
-Before giving the games we describe $\simu$ briefly. $\simu$ runs $\prot$
-internally on behalf of every honest party, and relays between $\adv$ and
-$\idfu{\algo{op}}$. It maintains two maps,
-$\mathbb{R}$ from sequences of pseudonyms to the token identifiers
-$\idfu{\algo{op}}$ uses, and $\mathbb{C}$ for the reverse direction, so that it
-can translate between transcripts $\adv$ sees and state $\idfu{\algo{op}}$
-holds. For honest parties $\simu$ never has a witness, so it simulates every
-proof and samples every commitment and audit ciphertext at random. This makes its transcripts
-independent of the identities and token identifiers it does not learn. For corrupt parties
-$\simu$ extracts witnesses from the proofs $\adv$ produces. It extracts from the SCI request at withdrawal to learn the randomness that fixes
-the token identifier and so continue the simulation, and from $\Sigma$,
-$\sigma_i$ and $\Gamma_i$ elsewhere to exhibit a forgery or a double
-opening and terminate.
+$\simu$ runs $\prot$ internally on behalf of every honest party, and relays
+between $\adv$ and $\idfu{\algo{op}}$. It maintains two maps, $\mathbb{R}$ from
+sequences of pseudonyms to the token identifiers $\idfu{\algo{op}}$ uses, and
+$\mathbb{C}$ for the reverse direction, so that it can translate between
+transcripts $\adv$ sees and state $\idfu{\algo{op}}$ holds.
 
 \begin{proof}
 
@@ -384,44 +374,32 @@ Compiling $\algoproof_{\algo{req}}$ with the Fischlin transform would give an
 extractor that does not rewind, and remove this gap~\cite{C:Fischlin05}.
 
 \paragraph{Simulation extractability.} The Sigma protocols of the instantiation
-prove equations over several bases. Their responses are quasi-unique under the
-DL assumption, so the Fiat-Shamir transform makes them simulation extractable in
-the random oracle model, as recalled in
-\Cref{sec:prelims-sigma}~\cite{INDOCRYPT:FKMV12}. Two equations use the prover's
-own bases $u$ and $w$, where two accepting responses give a relation between
-$u$, $w$ and the hashed generators. With the witness from special soundness,
-this reveals the registration authority's secret key or a relation between the
-hashed generators, contradicting the DL assumption. The JPOK is a
-conjunction of two such protocols under separate challenges, so the same
+have quasi-unique responses under the DL assumption, so with the Fiat-Shamir
+transform they are simulation extractable in the random oracle model, as
+recalled in \Cref{sec:prelims-sigma}~\cite{INDOCRYPT:FKMV12}. For the two
+equations over the prover's own bases $u$ and $w$, two accepting responses give
+a relation between $u$, $w$ and the hashed generators. With the witness from
+special soundness, this reveals the registration authority's secret key or a
+relation between the hashed generators, contradicting the DL assumption. The
+JPOK is a conjunction of two such protocols under separate challenges, so the
 argument applies to each of them and so to the whole.
 
-We rely on this rather than on the soundness proven for
-\Cref{prim:hss-joint-proof}, which is weaker~\cite{USENIX:HesSinSor23}.
-$\simu$ must extract from proofs produced by $\adv$ while itself producing
-simulated proofs for honest users, and plain soundness does not cover that. The
-resulting extractor yields the payer's identifier and credential from an
-accepted $\sigma_i$.
-
-\paragraph{Request hiding.} A request consists of the commitment $C$, the key $B$,
-the ciphertexts $\hat{\ciph}_i$ and the proof $\algoproof_{\algo{req}}$. At
-withdrawal the hidden messages include the uniform $s_0$, so $C$ is a uniformly
-random group element. The ciphertexts are under a key sampled afresh for the
-request, so by IND-CPA security of the ElGamal encryption scheme we can replace
-them with encryptions of zero, and by zero knowledge we can replace
-$\algoproof_{\algo{req}}$ with a simulated proof. The result depends only on the
-disclosed value, which gives the request-hiding simulator.
+\paragraph{Request hiding.} The request-hiding simulator outputs a request that
+depends only on the disclosed value. At withdrawal the hidden messages include
+the uniform $s_0$, so $C$ is a uniformly random group element. The ciphertexts
+$\hat{\ciph}_i$ are under the fresh key $B$, so by IND-CPA security of the
+ElGamal encryption scheme they can be replaced with encryptions of zero, and by
+zero knowledge $\algoproof_{\algo{req}}$ can be replaced with a simulated proof.
 
 \paragraph{Extraction.} The extractor for Fiat-Shamir proofs rewinds the
-prover~\cite{INDOCRYPT:FKMV12}. In Games 7, 9 and 11, $\simu$ extracts in order to
-continue the simulation, from requests and payments that a corrupt user chooses
-adaptively. These extractions are not nested. The central bank is honest, so
-$\simu$ holds its signing key, and in a rewound execution it answers any further
-request by running $\SCIissue$ itself, without extracting and without querying
-$\idfu{\algo{op}}$. A rewound execution only serves to obtain the witness and
-is then discarded, so each extraction costs one rewinding. In a rewound
-execution, $\simu$ produces honest parties' messages from what it has already
-received from $\idfu{\algo{op}}$, and we do not treat interactions there that
-would need new outputs of $\idfu{\algo{op}}$.
+prover~\cite{INDOCRYPT:FKMV12}. In Games 7, 9 and 11, $\simu$ extracts from
+requests and payments that a corrupt user chooses adaptively, and these
+extractions are not nested. A rewound execution is used only to obtain the
+witness and is then discarded, so each extraction costs one rewinding. In it,
+$\simu$ answers further requests by running $\SCIissue$ with the central bank's
+key, which it holds, and produces honest parties' messages from what it has
+already received from $\idfu{\algo{op}}$. We do not treat interactions in a
+rewound execution that would need new outputs of $\idfu{\algo{op}}$.
 
 \paragraph{Proof of withdrawal.} The values $(k^*, l^*, \tilde{c})$ in $\Sigma$
 are not hidden by zero knowledge, so we argue that they reveal nothing about the

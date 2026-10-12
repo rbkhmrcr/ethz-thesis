@@ -1,6 +1,6 @@
 \section{Summary}\label{sec:tsps-summary}
 
-This chapter gave threshold SPS schemes in which signing needs no interaction
+This chapter gives threshold SPS schemes in which signing needs no interaction
 once the message is known. We capture this concept through decomposable
 signing.  Any signature scheme with it, structure-preserving or not, can become
 a threshold scheme whose online phase is local and costs about as much as
@@ -12,7 +12,7 @@ larger signatures, of seven group elements versus the three of $\AGHO$
 signatures, and its security rests on the SXDH assumption.
 
 Our extension of MP-SPDZ provides implementations of the protocols for any
-number of parties. The online phase stays below 3~ms up to eleven parties, and
+number of parties. The online phase stays below 2~ms up to sixteen parties, and
 all interaction is in the offline phase.  For ledgers and transparency logs,
 this lets certification be split between several parties at little cost.
 

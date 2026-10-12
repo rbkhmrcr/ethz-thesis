@@ -1,10 +1,8 @@
 \section{Evaluation}\label{sec:offline-evaluation}
 \suppressfloats[t]
 
-We evaluate whether mobile phones and a secure element can run the protocol
-within their hardware and storage limitations, and measure every algorithm
-separately in a server-side implementation, for the intermediary, the central
-bank, the registration authority and the auditor. We benchmark two versions of
+We evaluate whether mobile phones and a secure element can run the protocol. We
+benchmark two versions of
 the protocol, with and without the verifiable encryption of the payer's
 identifier for the auditor, to show the overhead auditing imposes. The version
 without auditing has no audit ciphertext, so the statement of the joint proof
@@ -22,8 +20,10 @@ communication (NFC).
 \Cref{fig:offline-withdraw-seq,fig:offline-pay-seq} give the message sequences
 of a withdrawal and a payment.
 
-We wrote the server-side implementation in Go with gnark-crypto 0.21.0 over
-the BLS12-381 curve, and run it on a MacBook Air with an Apple M2 and 16\,GB of
+We measure every algorithm of the intermediary, the central bank, the
+registration authority and the auditor separately in a server-side
+implementation. It is written in Go with gnark-crypto 0.21.0 over the BLS12-381
+curve, and we run it on a MacBook Air with an Apple M2 and 16\,GB of
 RAM~\cite{gnark-crypto}. We report medians of $100$ runs, after $10$ warm-up
 calls on the server. The interquartile range is within $3\%$ of the median for
 most operations, and at most $13\%$ on the phones and the card and $10\%$ on the
@@ -76,9 +76,9 @@ and the central bank. The device talks to the intermediary over HTTPS.}
   \draw[seqmsg] (1, 9.5) -- node[seqlabel] {delete $\com_i$} (0, 9.5);
 \end{tikzpicture}
 \caption[Offline payments: payment]{Messages and local steps of a payment,
-between the payer's and the payee's devices and secure elements. The two devices
-talk over Bluetooth Low Energy, and each device talks to its secure element over
-NFC.} \label{fig:offline-pay-seq} \end{figure}
+between the payer's and the payee's devices and secure elements. The devices
+communicate via Bluetooth Low Energy, and each device communicates with its
+secure element over NFC.} \label{fig:offline-pay-seq} \end{figure}
 
 Withdrawal and the payer side of a payment both complete in under half a second,
 and the smart card authorises a payment in under $400\,\mathrm{ms}$.
@@ -92,16 +92,16 @@ of the payer's total.
 \multicolumn{2}{c|}{Android} & \multicolumn{2}{c}{iOS} \\
 Operation & no audit & audit & no audit & audit \\ \midrule
 Withdrawal, phone & 178 & 175 & 32 & 32 \\
-Withdrawal, smart card & 229 & 229 & 231 & 231 \\
+Withdrawal, smart card & \multicolumn{2}{c|}{229} & \multicolumn{2}{c}{231} \\
 Payment, payer phone & 37 & 46 & 11 & 13 \\
-Payment, payer smart card & 371 & 371 & 368 & 368 \\
+Payment, payer smart card & \multicolumn{2}{c|}{371} & \multicolumn{2}{c}{368} \\
 Payment, payee phone, 1 hop & 80 & 82 & 33 & 33 \\
-Payment, payee smart card & 229 & 229 & 231 & 231 \\
+Payment, payee smart card & \multicolumn{2}{c|}{229} & \multicolumn{2}{c}{231} \\
 \bottomrule \end{tabular} \caption[Offline payments: time on the phone and card]{Median time in milliseconds of each step of the
 wallet over $100$ runs, with and without the verifiable encryption of the payer's
 identifier. Smart card figures include the NFC round
-trip. The smart card does the same work with and without auditing, and both
-columns use the same card measurements.} \label{tab:offline-timings}
+trip. The smart card does the same work with and without auditing, so its times
+are given once.} \label{tab:offline-timings}
 \end{table}
 
 We count hops as the signatures of knowledge a verifier checks, so one hop is

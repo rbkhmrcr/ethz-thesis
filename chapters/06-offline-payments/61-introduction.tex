@@ -1,18 +1,18 @@
 \section{Introduction}\label{sec:offline-intro}
 
-An offline payment is made while both the payer and the payee are disconnected
-from the network. It is settled later, once the money that changed hands is
-deposited. Offline operation matters for availability and for accessibility. A
-payment instrument that stops working during a blackout, or in a place with
-poor network coverage, is not a replacement for cash.
+An offline payment is one made while both the payer and the payee are
+disconnected from the network. Offline operation matters for availability and
+accessibility. A payment instrument that stops working in a place with poor
+network coverage is not a replacement for cash.
 
-We work in the setting of central bank digital currency (CBDC). A CBDC is a
-form of central bank money on par with cash and central bank reserves,
+We work in the setting of central bank digital currency (CBDC), a form of
+central bank money on par with cash and central bank reserves,
 represented digitally as tokens. Each token encodes an owner and a value.
 Retail CBDC is the variant available to the general public rather than to
 financial institutions. It is the most demanding to realise. It must be
 resilient, scale to a national population, protect the privacy of its users,
-and support payments made offline~\cite{cbdctracker}.
+and support payments made
+offline~\cite{cbdctracker,digitaleuro2023,aboulaiz2024offline}.
 
 The difficulty is that the payee cannot check, at the time of the payment,
 whether the token they are receiving has already been spent. Without that,
@@ -30,12 +30,6 @@ before any deposit occurs.  Together, the secure element makes double spending
 expensive and impractical to mount at scale, and identification ensures that an
 attack that does succeed can be attributed to the party responsible and settled
 against them.
-
-In offline payment systems, a central bank issues and redeems tokens and
-controls the money supply. Intermediaries hold users' accounts, onboard them,
-and route their requests. A registration authority enrols users, and an auditor
-is empowered to attribute a fraudulent payment.  We keep these roles and
-constrain what is learnt by each party.
 
 \paragraph{Contributions.} We give a transferable offline payment scheme for
 this setting, in which a payee can pay a token onward without depositing it
@@ -103,7 +97,7 @@ owned~\cite{ACNS:CanGou08,PKC:BauFucQia21}. One such scheme achieves this
 through extensive use of zero-knowledge proofs together with a trusted party
 that tracks every token in the system and can identify double-spending
 attempts~\cite{AFRICACRYPT:BCFGST11}. While this captures the strongest level
-of privacy, we do not target coin transparency, owing to its computational
+of privacy, we do not target coin transparency, due to its computational
 overhead and to the fact that physical cash does not satisfy it either.
 
 The bounded anonymity model keeps transactions anonymous as long as each user

@@ -1,14 +1,25 @@
 \section{Summary}\label{sec:offline-summary}
 
-In this chapter, we gave a transferable offline payment scheme, whose payments are
-anonymous and whose withdrawals cannot be linked to deposits. We proved that
-$\OP$ securely realises $\idfu{\algo{op}}$ when its building blocks have the
-properties of \Cref{thm:offline-construction-security}, and that its
-instantiation does so under the DL, DDH, $q$-SDH and $q$-MSDH assumptions in the
-random oracle model. A smart card authorises a payment in under
-$400\,\mathrm{ms}$, the payer's phone needs under $50\,\mathrm{ms}$, and a payee
-verifies a chain of $32$ hops in under a second, with payments growing by $912$
-bytes per hop.
+This chapter gives $\OP$, a transferable offline payment scheme for CBDC whose
+payments are anonymous and whose withdrawals cannot be linked to deposits. A
+payee accepts a payment from the transcript alone and can pay the token onward
+without contacting anyone, so the scheme keeps working without a network.
 
-Divisibility remains future work, and revocation offline is limited to expiry by epochs.
-Replacing the auditor with a different scheme in an efficient way is also future work.
+Double spending is both prevented and deterred. A secure element enforces that
+each token is used once, and each payment carries an encryption of the payer's
+identifier under the auditor's key, so the auditor identifies a double spender
+and no one else. Because a secure element cannot run the cryptography alone, it
+holds only the secret key and produces its part of a joint proof of knowledge,
+and the user's phone does the rest.
+
+We prove that $\OP$ securely realises $\idfu{\algo{op}}$ when its building
+blocks have the properties of \Cref{thm:offline-construction-security}, and
+that its instantiation does so under the DL, DDH, $q$-SDH and $q$-MSDH
+assumptions in the random oracle model. A smart card authorises a payment in
+under $400\,\mathrm{ms}$, the payer's phone needs under $50\,\mathrm{ms}$, and a
+payee verifies a chain of $32$ hops in under a second, with payments growing by
+$912$ bytes per hop.
+
+Divisibility remains future work, and revocation offline is limited to expiry
+by epochs. Replacing the auditor with a different scheme in an efficient way is
+also future work.

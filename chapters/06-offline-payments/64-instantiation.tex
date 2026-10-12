@@ -1,63 +1,76 @@
 \section{Instantiation}\label{sec:offline-instantiation}
 
 Every statement proven in $\OP$ is a set of equations between group elements,
-so we instantiate every proof with a Sigma protocol. Pseudonyms are Pedersen
-commitments, which are perfectly hiding and binding under the DL assumption.
-Credentials are BBS+ signatures, as in \Cref{chap:txid}, so the two chapters
-share a credential layer. The central bank's SCI scheme is the
-Pointcheval-Sanders signature scheme with the signing on committed inputs of
-Coconut. The audit ciphertext is an ElGamal encryption in $\group{1}$. ElGamal
-encrypts group elements, so the payer encrypts $\gen^{\algo{uid}}$ rather than
+so every proof is instantiated with a Sigma protocol. The other building blocks
+are as follows.
+
+\begin{description}
+
+  \item[Pseudonyms.] Pedersen commitments with key $\ck = (\hgen_1, \hgen)
+\sample \ComGen(\secparam)$, so that a pseudonym is $\com = \hgen_1^{\algo{uid}}
+\hgen^{s}$. They are perfectly hiding, and binding under the DL assumption.
+
+  \item[Credentials.] BBS+ signatures, as in \Cref{chap:txid}, so the two
+chapters share a credential layer.
+
+  \item[Tokens.] The central bank's SCI scheme is the Pointcheval-Sanders
+signature scheme with the signing on committed inputs of Coconut.
+
+  \item[Audit ciphertexts.] ElGamal encryptions in $\group{1}$. ElGamal encrypts
+group elements, so the payer encrypts $\gen^{\algo{uid}}$ rather than
 $\algo{uid}$. The auditor, with secret key $\mu_\auditor$ and public key
-$\pk_\auditor = \gen^{\mu_\auditor}$, decrypts $\ciph = (c_1, c_2)$ as follows:
+$\pk_\auditor = \gen^{\mu_\auditor}$, decrypts $\ciph = (c_1, c_2)$ as follows,
+and looks the identifier up among those the registration authority assigned:
 %
 \begin{equation*}
   \gen^{\algo{uid}} = c_2 / c_1^{\mu_\auditor}.
 \end{equation*}
-%
-It then looks the identifier up among those the registration authority assigned.
 
-Throughout, we use hash functions $\hash_p$ into $\Zp$ and
-$\hash_{\group{1}}$ into $\group{1}$. The commitment scheme is the Pedersen
-commitment scheme, with key $\ck = (\hgen_1, \hgen) \sample
-\ComGen(\secparam)$, so that a pseudonym is $\com = \hgen_1^{\algo{uid}}
-\hgen^{s}$. The BBS+ generators $\gen_0, \ldots, \gen_3$ and the
-generators $P_0, \ldots, P_\ell$ of the central bank's signing on committed
-inputs are separate from $\ck$. Every generator is obtained as
+  \item[Hashes and generators.] Hash functions $\hash_p$ into $\Zp$ and
+$\hash_{\group{1}}$ into $\group{1}$. The BBS+ generators $\gen_0, \ldots,
+\gen_3$ and the generators $P_0, \ldots, P_\ell$ of the central bank's SCI
+scheme are separate from $\ck$. Every generator is obtained as
 $\hash_{\group{1}}$ of its own fixed string, so that no participant knows the
 discrete logarithm relations among them.
+
+\end{description}
 
 \subsection{Instantiating $\JPOK$ with BBS+}\label{sec:joint-proof}
 
 A user's credential is a BBS+ signature $\varphi = (e, r, E)$ of
 \Cref{prim:bbs} from the registration authority on the pair $(\algo{uid},
-\sk)$, with $E$ as follows:
+\sk)$. Here $z$ is the registration authority's secret key, $\ggen_Z =
+\ggen^{z}$ its public key, and $E$ is computed as follows:
 %
 \begin{equation*}
-  E = (\gen_0 \gen_1^{\algo{uid}} \gen_2^{\sk} \gen_3^{r})^{1/(z+e)},
+  E = (\gen_0 \gen_1^{\algo{uid}} \gen_2^{\sk} \gen_3^{r})^{1/(z+e)}.
 \end{equation*}
 %
-where $z$ is the
-registration authority's secret key and $\ggen_Z = \ggen^{z}$ its public key.
 The registration authority issues it on committed inputs, as Au, Susilo and Mu
 do~\cite{SCN:AuSusMu06}. The secure element sends $\algo{uid}$ and $M =
 \gen_2^{\sk} \gen_3^{r'}$ for a fresh $r'$, with a proof of knowledge of the
 opening of $M$. The registration authority samples $e, r'' \sample \Zp$ and
-returns $(e, r'', E)$ with $E$ as follows:
+returns $(e, r'', E)$, where $E$ is computed as follows:
 %
 \begin{equation*}
-  E = (\gen_0 \gen_1^{\algo{uid}} M \gen_3^{r''})^{1/(z+e)},
+  E = (\gen_0 \gen_1^{\algo{uid}} M \gen_3^{r''})^{1/(z+e)}.
 \end{equation*}
 %
-and the secure element sets $r = r' + r''$.
+The secure element sets $r = r' + r''$.
 Every payment and deposit proves knowledge of such a credential, together with
 the opening of the payer's pseudonym, without revealing either.
 
 Hesse, Singh and Sorniotti give a JPOK for BBS+
 signatures~\cite{USENIX:HesSinSor23}. They split a proof
 of knowledge of a BBS+ signature between two provers: a card, which holds one of the signed messages, and a
-holder, which holds the other messages and the signature. \Cref{prim:hss-joint-proof}
-gives their protocol.
+holder, which holds the other messages and the signature. The card proves
+knowledge of the opening of $D$, a commitment to its message under randomness
+$t$ that both provers derive from their shared PRF key. The holder proves
+knowledge of the rest of the signature with $D$ in place of $\gen_1^{\msg_1}$,
+using the proof of knowledge of a BBS+ signature of Camenisch, Drijvers and
+Lehmann~\cite{CDL16}. \Cref{prim:hss-joint-proof} gives their protocol, in
+which $\algo{Prove}_C$, $\algo{Prove}_H$ and $\algo{Verify}$ play the roles of
+$\JPOKprove_0$, $\JPOKprove_1$ and $\JPOKverify$.
 
 \begin{primitivebox}{The joint proof of knowledge of a BBS+ signature of Hesse, Singh and Sorniotti~\cite{USENIX:HesSinSor23}.}{hss-joint-proof}
 
@@ -74,15 +87,8 @@ exponents $\vec{\alpha}$ that satisfy the given equations.
 
     \item[$(D, \pi_C) \sample \algo{Prove}_C(\key, \msg_1, n_V, n)$ :] Run by
 the card. Compute $t \leftarrow \PRFeval(\pp, \key, n)$ and $D =
-\gen_1^{\msg_1} \gen_{n+1}^{t}$, and output $(D, \pi_C)$ with $\pi_C$ as
-follows:
-      %
-      \begin{equation*}
-      %
-        \pi_C \sample \SOK\{(\alpha, \beta) : \gen_1^{\alpha} \gen_{n+1}^{\beta}
-= D\}(n_V).
-      %
-      \end{equation*}
+\gen_1^{\msg_1} \gen_{n+1}^{t}$, and output $(D, \pi_C)$ with $\pi_C \sample
+\SOK\{(\alpha, \beta) : \gen_1^{\alpha} \gen_{n+1}^{\beta} = D\}(n_V)$.
 
     \item[$\Phi_H \sample \algo{Prove}_H(\key, Q, (\msg_i)_{i=2}^{n}, \varphi,
 (v_i)_{i \in V}, n, D, n_V)$ :] Run by the holder. Do the following:
@@ -147,68 +153,62 @@ to the verifier.
 
     \item[$\{0,1\} \leftarrow \algo{Verify}(\pk, (v_i)_{i \in V}, n_V, D,
 \pi_C, \Phi_H)$ :] Return $1$ if and only if $\Phi_H = (E', \bar{E}, d, \pi_H)
-\neq \perp$, the proofs $\pi_C$ and $\pi_H$ verify, and the following holds:
-      %
-      \begin{equation*}
-      %
-        \pairing(\bar{E}, \ggen) = \pairing(E', \ggen_Z).
-      %
-      \end{equation*}
+\neq \perp$, the proofs $\pi_C$ and $\pi_H$ verify, and $\pairing(\bar{E},
+\ggen) = \pairing(E', \ggen_Z)$.
 
   \end{description}
 
 \end{primitivebox}
 
-The card proves knowledge of the opening of $D$, a commitment to its message
-under randomness $t$ that both provers derive from their shared PRF key. The
-holder proves knowledge of the rest of the signature with $D$ in place of
-$\gen_1^{\msg_1}$, using the proof of knowledge of a BBS+ signature of
-Camenisch, Drijvers and Lehmann~\cite{CDL16}.
+The joint proof used in $\OP$ differs from \Cref{prim:hss-joint-proof} in five
+ways.
 
-The joint proof used in $\OP$ differs from
-\Cref{prim:hss-joint-proof} in five ways.
+\begin{enumerate}
 
-First, the secure element plays the card and the mobile device the holder. The
+  \item The secure element plays the card and the mobile device the holder. The
 card's message is the user's secret key $\sk$, under $\gen_2$, and the
 signature's randomness $r$ is under $\gen_3$.
 
-Second, the secure element and the device communicate directly, since
-registration pairs them. The secure element samples $t$ afresh and sends it to the
-device, in place of both deriving it from a shared PRF key. The payee takes no part in
-producing the proof. In \Cref{prim:hss-joint-proof} the verifier relays the
-messages between the provers, and zero knowledge holds only if it is honest but
-curious. Our payee
-relays nothing and receives only the finished proof, so it may be malicious.
+  \item The secure element and the device communicate directly, since
+registration pairs them. The secure element samples $t$ afresh and sends it to
+the device, in place of both deriving it from a shared PRF key. In
+\Cref{prim:hss-joint-proof} the verifier relays the messages between the
+provers, and zero knowledge holds only if it is honest but curious. Our payee
+takes no part in producing the proof and receives only the finished proof, so
+it may be malicious. The device receives only $D = \gen_2^{\sk}\gen_3^{t}$, $t$
+and a proof of knowledge of the opening, so it learns $\gen_2^{\sk}$ but, under
+the DL assumption, never $\sk$.
 
-All the device receives from the secure element is the commitment
-$D = \gen_2^{\sk}\gen_3^{t}$, its randomness $t$, and a proof of knowledge of the
-opening. So the device learns $\gen_2^{\sk}$ but never $\sk$, which rests on the DL
-assumption.
+  \item The device shows the credential with the rerandomisation of Tessaro and
+Zhu in place of the proof of Camenisch, Drijvers and
+Lehmann~\cite{EC:TesZhu23b}. With two fresh exponents, it turns $E$ into $u$,
+$w$ and $x$, and verification becomes one pairing equation on these public
+values and two discrete-logarithm equations, which the device proves with a
+Sigma protocol. The check $u \neq 1$ rules out the trivial solution of the
+pairing equation. Together these hold exactly when the device knows a BBS+
+signature on its identifier and the key committed in $D$.
 
-Third, the device shows the credential with the rerandomisation of Tessaro and
-Zhu in place of that proof~\cite{EC:TesZhu23b}. With two fresh exponents, it turns $E$ into $u$, $w$ and $x$. Verification
-becomes one pairing equation on these public values and two discrete-logarithm
-equations, and the device proves the latter with a Sigma protocol. The check $u \neq 1$ rules out the trivial
-solution of the pairing equation. Together these hold exactly when the device
-knows a BBS+ signature on its identifier and the key committed in $D$.
+  \item The proof is non-interactive and signs a message $m$, which both
+challenges hash in place of the nonces of the verifier, the card and the holder.
+The secure element sees $m$, and so the destination of every payment it signs.
 
-Fourth, the proof is non-interactive and signs a message $m$. Both challenges
-hash $m$ in place of the nonces of the verifier, the card and the holder.
+  \item Under its challenge, the device also proves that the payer's pseudonym
+$\com$ commits to $\algo{uid}$ and that the audit ciphertext $\ciph$ encrypts
+$\gen^{\algo{uid}}$. Both share the device's response for $\algo{uid}$ with the
+credential equations, which ties the pseudonym and the ciphertext to the
+credential with one response for $\algo{uid}$ per hop. The audit proof
+$\Gamma_i$ of the construction is the part of $\Phi$ that concerns $\ciph$.
 
-Fifth, the device proves two further statements under its challenge: that the
-payer's pseudonym $\com$ commits to $\algo{uid}$, and that the audit ciphertext
-$\ciph$ encrypts $\gen^{\algo{uid}}$. They share the device's response for
-$\algo{uid}$ with the credential equations. The shared response ties the pseudonym and the
-ciphertext to the credential, and proves both with one response for
-$\algo{uid}$ per hop. The secure element's challenge hashes the signed message,
-so the secure element sees the destination of every payment it signs.
+\end{enumerate}
 
 \Cref{prot:bbs-joint-proof} gives the joint proof used in $\OP$.
 
 \begin{protocolbox}{The joint proof used in $\OP$}{bbs-joint-proof}
 
   The public keys and the statement are as follows, with pseudonym $\com$,
-audit ciphertext $\ciph = (c_1, c_2)$ and signed message $m$:
+audit ciphertext $\ciph = (c_1, c_2)$ and signed message $m$, which is $m = (v,
+\com_i, \com_{i+1})$ for a payment and $m = (v, \com_n, \algo{dep})$ for a
+deposit:
   %
   \begin{gather*}
   %
@@ -307,10 +307,6 @@ following hold:
 
 \end{protocolbox}
 
-In $\OP$, the signed message is $m = (v, \com_i, \com_{i+1})$ for a payment and
-$m = (v, \com_n, \algo{dep})$ for a deposit. The audit proof $\Gamma_i$ of the
-construction is the part of $\Phi$ that concerns $\ciph$.
-
 \subsection{Instantiating $\SCI$ with Pointcheval-Sanders}\label{sec:offline-token-issuance}
 
 The central bank's SCI scheme combines the Pointcheval-Sanders (PS) signature scheme with the signing on committed inputs of the
@@ -394,17 +390,9 @@ $\pk = (\tilde{x}, \tilde{y}_1, \ldots, \tilde{y}_\ell)$, with $\tilde{x} =
 
     \item[$(\mu, \Lambda) \sample \algo{PrepareBlindSign}(\msg)$ :] Sample
 $\mu, \openinfo, \rho_1, \ldots, \rho_\ell \sample \Zp$, set $B = \gen^{\mu}$,
-and compute the following:
-          %
-          \begin{equation*}
-          %
-            C = \gen^{\openinfo} \prod_{j=1}^{\ell} P_j^{\msg_j}, \quad k =
-\hash_{\group{1}}(C), \quad \hat{\ciph}_j = (\gen^{\rho_j}, B^{\rho_j}
-k^{\msg_j}) \ \text{for } j \in [1, \ell].
-          %
-          \end{equation*}
-          %
-Compute the following proof:
+$C = \gen^{\openinfo} \prod_{j=1}^{\ell} P_j^{\msg_j}$, $k =
+\hash_{\group{1}}(C)$ and $\hat{\ciph}_j = (\gen^{\rho_j}, B^{\rho_j}
+k^{\msg_j})$ for $j \in [1, \ell]$, and compute the following proof:
           %
           \begin{multline*}
           %
@@ -422,14 +410,8 @@ Output $\mu$ and $\Lambda = (B, C, (\hat{\ciph}_j)_{j \in [1, \ell]}, \pi_s)$.
     \item[$\tilde{\psi} \leftarrow \algo{BlindSign}(\sk, \Lambda)$ :]
 Recompute $k = \hash_{\group{1}}(C)$, and output $\perp$ if $\pi_s$ does not
 verify. Otherwise parse $\hat{\ciph}_j = (f_{j,1}, f_{j,2})$, and output
-$\tilde{\psi} = (k, f_1, f_2)$ with $f_1$ and $f_2$ as follows:
-          %
-          \begin{equation*}
-          %
-            f_1 = \prod_{j=1}^{\ell} f_{j,1}^{\theta_j}, \quad f_2 = k^{\chi}
-\prod_{j=1}^{\ell} f_{j,2}^{\theta_j}.
-          %
-          \end{equation*}
+$\tilde{\psi} = (k, \prod_{j=1}^{\ell} f_{j,1}^{\theta_j}, k^{\chi}
+\prod_{j=1}^{\ell} f_{j,2}^{\theta_j})$.
 
     \item[$\psi \leftarrow \algo{Unblind}(\tilde{\psi}, \mu)$ :] Parse
 $\tilde{\psi} = (k, f_1, f_2)$, and output $\psi = (k, f_2 / f_1^{\mu})$.
@@ -440,12 +422,15 @@ $\tilde{\psi} = (k, f_1, f_2)$, and output $\psi = (k, f_2 / f_1^{\mu})$.
 
 Coconut also lets several signers each issue a share of the signature, and lets
 $\pi_s$ prove an application-specific statement about the messages. We use
-neither.
+neither. In our syntax, $\algo{PrepareBlindSign}$, $\algo{BlindSign}$ and
+$\algo{Unblind}$ play the roles of $\SCIrequest$, $\SCIissue$ and
+$\SCIunblind$.
 
 The central bank's SCI scheme, given in \Cref{prot:offline-sci}, follows
-\Cref{prim:coconut} with the following changes. It signs with the variant of
-\Cref{prim:ps}, so the signer adds $\theta_\ell \omega$ to the exponent of $k$
-for a fresh $\omega$ and returns $\omega$ with the signature. The recipient sends
+\Cref{prim:coconut} with the following changes. It uses the variant of
+\Cref{prim:ps} with the extra element $\omega$: the signer samples a fresh
+$\omega$, adds $\theta_\ell \omega$ to the exponent of $k$, and returns $\omega$
+with the signature. The recipient sends
 the messages with indices in $\algo{Disc}$ in the clear, and the signer adds
 them to the exponent of $k$ directly. In $\OP$ the disclosed message
 is the token value. The commitment randomness $\openinfo$ is under its own
@@ -455,7 +440,7 @@ $B = \gen^{\mu}$.
 
 The element $k$ is a hash of the commitment rather than sampled, so that both
 parties agree on it without the signer seeing the messages. The recipient's key
-$B$ is fresh for each request, so two requests cannot be linked by it.
+$B$ is fresh for each request, so it does not link two requests.
 
 \begin{protocolbox}{Signing on committed inputs in $\OP$}{offline-sci}
 
@@ -512,27 +497,19 @@ $\PSverify(\pk_{\PS}, \msg, \psi)$.
 
 \end{protocolbox}
 
-The proof of \Cref{thm:offline-instantiation-security} shows that this scheme
-is existentially unforgeable and request hiding.
-
 In the withdrawal step of \Cref{prot:offline}, the device runs $\SCIrequest$ on
-the messages $(\algo{uid}_0, v, s_0)$ with $\algo{Disc} = \{1\}$, so the central
-bank sees only the value. It runs $\SCIrequest$ with $\openinfo = 0$ in place of
-a sampled one, since the hidden message $s_0$ is uniform and already hides $C$.
-
-The device does not show $\psi$ to payees, for the reason given in
-\Cref{sec:offline-construction}. It instead proves once that it holds a valid signature
-on the token value and on the identifier and randomness committed in its
-pseudonym. It rerandomises $(k, l)$ to $(k^*, l^*)$ and blinds the remaining equation with a fresh $\ggen^{t}$, as Pointcheval and
-Sanders do~\cite{RSA:PoiSan16}. It proves this equation by a Sigma protocol
-whose challenge hashes the value, the pseudonym and $(k^*, l^*)$, so that none of
-them can be swapped later.
-The blinding matters because the central bank chose $\omega$. Without it, the
-central bank could combine the element $\tilde{c}$ of \Cref{prot:ps-proof} with
-the pseudonym to link tokens of the
-same user. The proof of
-withdrawal $\Sigma$ is the first entry of every token's history, and every
-payee verifies it. \Cref{prot:ps-proof} gives the proof of withdrawal.
+$(\algo{uid}_0, v, s_0)$ with $\algo{Disc} = \{1\}$, so the central bank sees
+only the value, and with $\openinfo = 0$, since the uniform $s_0$ already hides
+$C$. The device never shows $\psi$, for the reason given in
+\Cref{sec:offline-construction}. It proves once, in the proof of withdrawal
+$\Sigma$ of \Cref{prot:ps-proof}, that it holds a signature on the value and on
+the identifier and randomness committed in its pseudonym. As Pointcheval and
+Sanders do~\cite{RSA:PoiSan16}, it rerandomises $(k, l)$ to $(k^*, l^*)$ and
+blinds the remaining equation with a fresh $\ggen^{t}$. Without the blinding,
+the central bank, which chose $\omega$, could link tokens of the same user
+through $\tilde{c}$. The challenge hashes the value, the pseudonym and $(k^*,
+l^*)$, so none of them can be swapped later. $\Sigma$ is the first entry of
+every token's history, and every payee verifies it.
 
 \begin{protocolbox}{The proof of withdrawal}{ps-proof}
 
@@ -605,35 +582,30 @@ following hold:
 
 \subsection{Instantiating $\OP$}\label{sec:offline-full-inst}
 
-\Cref{tab:offline-instantiation} lists the instantiation of each generic
-component of $\OP$ and the assumptions it rests on.
+\Cref{tab:offline-instantiation} lists the instantiation of each primitive of
+$\OP$ and the assumptions it rests on.
 
 \begin{table}[htbp]
 \centering
 \small
 \begin{tabular}{l|l|l}
 \toprule
-Component & Instantiation & Assumption \\
+Primitive & Instantiation & Assumption \\
 \midrule
-Commitment scheme & Pedersen in $\group{1}$ & DL in $\group{1}$ \\
-Credential signature scheme & BBS+ & $q$-SDH \\
-SCI scheme & PS with Coconut & $q$-MSDH \\
-Public key encryption scheme & ElGamal in $\group{1}$ & DDH in $\group{1}$ \\
-JPOK & Joint proof of \Cref{prot:bbs-joint-proof} & $q$-SDH, ROM \\
+$\Com$ & Pedersen in $\group{1}$ & DL in $\group{1}$ \\
+$\DS$ & BBS+ & $q$-SDH \\
+$\SCI$ & PS with Coconut & $q$-MSDH \\
+$\PKE$ & ElGamal in $\group{1}$ & DDH in $\group{1}$ \\
+$\JPOK$ & Joint proof of \Cref{prot:bbs-joint-proof} & $q$-SDH, ROM \\
 Proof of withdrawal & Sigma protocol of \Cref{prot:ps-proof} & DL in $\group{1}$, ROM \\
 \bottomrule
 \end{tabular}
-\caption[Instantiation of each component of offline payments]{Instantiation of
-each generic component of $\OP$, with the assumptions it rests on: the discrete
+\caption[Instantiation of each primitive of offline payments]{Instantiation of
+each primitive of $\OP$, with the assumptions it rests on: the discrete
 logarithm (DL) assumption, DDH, $q$-SDH, $q$-MSDH, and the random oracle model
 (ROM).}
 \label{tab:offline-instantiation}
 \end{table}
-
-Every proof in the instantiation, including the JPOK and the proof of withdrawal,
-is a Sigma protocol
-compiled with the Fiat-Shamir transform~\cite{C:FiaSha86}. We obtain the
-following theorem.
 
 \begin{theorem}\label{thm:offline-instantiation-security}
 %

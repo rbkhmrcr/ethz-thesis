@@ -1,15 +1,16 @@
 \section{Summary}\label{sec:txid-summary}
 
-In this chapter we constructed a tracing protocol in which tags come from a
+This chapter constructs a tracing protocol in which tags come from a
 bounded, epoch-local index space instead of a counter, so users can create
 transactions concurrently and in any order. Users grant an auditor permission
 to trace them for one epoch, and a permission never exposes users who are not
-targeted. We formalised tracing as an ideal functionality, gave a generic
-construction, and instantiated it once with algebraic pseudorandom functions
+targeted. We formalise tracing as an ideal functionality, give a generic
+construction, and instantiate it once with algebraic pseudorandom functions
 and Sigma protocols, and once with MiMC and a zk-SNARK.
 
-We use an epoch-local index space, giving permissions boundaries in time and
-costs that do not grow with the total ledger size.
+Auditors get the oversight that regulation requires, but only for the users and
+epochs they have been granted, and tracing costs do not grow with the size of
+the ledger.
 
 Several directions remain for future work. Currently, grants must come before
 the epoch they cover. Retrospective grants work in the protocol but require a

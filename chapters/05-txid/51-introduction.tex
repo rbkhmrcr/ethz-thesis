@@ -54,7 +54,9 @@ PATRIOT) Act (2001)}.  In proposed digital fiat systems, users prove ownership
 of the money being moved while the transactions stay private, and regulators
 keep oversight under well-defined conditions~\cite{digitaleuro2023}.
 
-The mechanism we give is agnostic to how balance and theft prevention are
+Oversight need not mean access to every transaction. An auditor can be given
+the transactions of one user, for a period that user has agreed to, and nothing
+else. The mechanism we give is agnostic to how balance and theft prevention are
 achieved. It constrains only the tag attached to a transaction and not its
 contents, so it composes with any transaction system that already provides
 them. The confidential payload of a transaction in our scheme is just the
@@ -63,6 +65,42 @@ a way for a designated auditor to recover which of those payloads belong to a
 given user, only for the epochs that the user
 has agreed to.
 
+
+\paragraph{Contributions.} Two observations shaped the construction. The first
+is that counter-based tracing makes users create their transactions one after
+another~\cite{CCS:KiaKohSar22,CANS:SarKiaKoh24}, but an auditor never needs to
+know their order. It only needs to find every transaction of the user, and their
+number is bounded. The second is that an auditor can be limited by the key it
+is given, rather than trusted to limit itself. A key that derives the tags of one user for one epoch lets the auditor
+trace that user in that epoch and nowhere else. Both lead to one design, in
+which tags are computed from a bounded index space local to one epoch.
+
+This chapter introduces a tracing protocol, $\ID$, that needs neither
+encrypted user identifiers nor the monotonically increasing counters of prior
+tag-based schemes. Instead of an ordered counter, each
+transaction has an index drawn from a bounded, epoch-local space $[0,\Max)$,
+and the only constraint is that an index is not reused within an epoch. Order is
+irrelevant, so a user may partition the space among concurrent workers and
+submit transactions in parallel and in any order. Users decide who traces them
+and when through epoch-bound tracing permissions. A tracing permission covers one user for one epoch, and
+tracing the next epoch needs a fresh grant.
+Recovering that user's transactions for that epoch costs $\Max$ tag
+computations and $\Max$ lookups, where $\Max$ is the per-epoch transaction bound. It does not grow with the ledger, and it
+reveals nothing about the transactions of users other than the target. We
+formalise tracing as an ideal
+functionality capturing anonymity, non-repudiation, and permission expiration,
+give a generic construction from signatures, commitments, pseudorandom
+functions, one-way functions, and zero-knowledge proofs, and instantiate it
+concretely in two ways. The first works in pairing-based groups with algebraic
+pseudorandom functions and Sigma protocols made non-interactive by the
+Fiat-Shamir transform. Its setup is transparent, so no party samples any group
+generator. The BBS+ signature scheme lets the registration authority certify
+users' keys without ever learning their tracing keys. The second builds both
+pseudorandom functions from the MiMC block cipher, which is designed to be cheap
+to prove in zero knowledge. It proves the two corresponding relations with a
+general-purpose zero-knowledge succinct non-interactive argument of knowledge
+(zk-SNARK). This gives constant-size transaction proofs and faster verification,
+but a slower prover and a trusted setup.
 
 \subsection*{Related work}
 
@@ -110,42 +148,6 @@ cooperation, or linear-time analysis~\cite{ACNS:PBGP25}.
 enforcement of balance limits, but neither provides a mechanism for efficient
 per-user tracing across arbitrary
 transactions~\cite{CCS:WKDC22,EPRINT:ACDDET19}.
-
-\paragraph{Contributions.} Two observations shaped the construction. The first
-is that counter-based tracing makes users create their transactions one after
-another~\cite{CCS:KiaKohSar22,CANS:SarKiaKoh24}, but an auditor never needs to
-know their order. It only needs to find every transaction of the user, and their
-number is bounded. The second is that an auditor can be limited by the key it
-is given, rather than trusted to limit itself. A key that derives the tags of one user for one epoch lets the auditor
-trace that user in that epoch and nowhere else. Both lead to one design, in
-which tags are computed from a bounded index space local to one epoch.
-
-This chapter introduces a tracing protocol, $\ID$, that needs neither
-encrypted user identifiers nor the monotonically increasing counters of prior
-tag-based schemes. Instead of an ordered counter, each
-transaction has an index drawn from a bounded, epoch-local space $[0,\Max)$,
-and the only constraint is that an index is not reused within an epoch. Order is
-irrelevant, so a user may partition the space among concurrent workers and
-submit transactions in parallel and in any order. Users decide who traces them
-and when through epoch-bound tracing permissions. A tracing permission covers one user for one epoch, and
-tracing the next epoch needs a fresh grant.
-Recovering that user's transactions for that epoch costs $\Max$ tag
-computations and $\Max$ lookups, where $\Max$ is the per-epoch transaction bound. It does not grow with the ledger, and it
-reveals nothing about the transactions of users other than the target. We
-formalise tracing as an ideal
-functionality capturing anonymity, non-repudiation, and permission expiration,
-give a generic construction from signatures, commitments, pseudorandom
-functions, one-way functions, and zero-knowledge proofs, and instantiate it
-concretely in two ways. The first works in pairing-based groups with algebraic
-pseudorandom functions and Sigma protocols made non-interactive by the
-Fiat-Shamir transform. Its setup is transparent, so no party samples any group
-generator. The BBS+ signature scheme lets the registration authority certify
-users' keys without ever learning their tracing keys. The second builds both
-pseudorandom functions from the MiMC block cipher, which is designed to be cheap
-to prove in zero knowledge. It proves the two corresponding relations with a
-general-purpose zero-knowledge succinct non-interactive argument of knowledge
-(zk-SNARK). This gives constant-size transaction proofs and faster verification,
-but a slower prover and a trusted setup.
 
 \paragraph{Layout.} The rest of the chapter is organised as follows. \Cref{sec:txid-definitions} gives the syntax of a tracing
 protocol and formalises its security as an ideal functionality.
