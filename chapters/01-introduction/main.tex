@@ -235,5 +235,12 @@ presents our threshold structure-preserving signature schemes.
 \Cref{chap:agg-creds} presents the aggregate anonymous credential scheme,
 \Cref{chap:txid} presents the transaction tracing protocol, and
 \Cref{chap:offline-payments} presents the offline payment protocol.
+Each of \Crefrange{chap:tsps}{chap:offline-payments} follows the same structure
+after its introduction: definitions, construction, instantiation, security,
+evaluation, and a summary.
 \Cref{chap:conclusion} summarises the contributions and discusses open
-questions.
+questions. \Cref{chap:agg-creds} uses the $\AGHO$ signature scheme from
+\Cref{chap:tsps}, and \Cref{chap:txid,chap:offline-payments} share the
+registration authority and BBS+ credentials. The threshold techniques of
+\Cref{chap:tsps} could be used to split the authorities in the later chapters
+between several institutions.
