@@ -456,17 +456,18 @@ generators for committed inputs.
     \item[$(\algo{req}, \state) \sample \SCIrequest(\pk, \msg, \algo{Disc})$ :]
 On input $\msg \in \Zp^{\ell}$ and a set $\algo{Disc} \subseteq [0, \ell-1]$ of
 indices to disclose, let $H = [0, \ell-1] \setminus \algo{Disc}$. Sample $\openinfo,
-\mu \sample \Zp$, set $B = \gen^{\mu}$, and compute the following:
+\mu \sample \Zp$ and $\rho_i \sample \Zp$ for $i \in H$, set $B = \gen^{\mu}$, and
+compute the following, for $i \in H$:
           %
           \begin{equation*}
           %
             C = P_\ell^{\openinfo} \prod_{i \in H} P_i^{\msg_i}, \quad k =
 \hash_{\group{1}}(C), \quad \hat{\ciph}_i = (\gen^{\rho_i}, k^{\msg_i}
-B^{\rho_i}) \ \text{for } i \in H,
+B^{\rho_i}).
           %
           \end{equation*}
           %
-with $\rho_i \sample \Zp$. Compute $\algoproof_{\algo{req}}$, a non-interactive
+Compute $\algoproof_{\algo{req}}$, a non-interactive
 proof that $C = P_\ell^{\openinfo} \prod_{i \in H} P_i^{\msg_i}$ and
 $\hat{\ciph}_i = (\gen^{\rho_i}, k^{\msg_i} B^{\rho_i})$ for every $i \in H$, on
 witness $(\openinfo, (\msg_i, \rho_i)_{i \in H})$ and statement $(\algo{Disc},

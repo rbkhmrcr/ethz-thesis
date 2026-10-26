@@ -44,11 +44,12 @@ of the tracing key:
 %
 The public tracing key $\PTK$ contains a Pedersen commitment $T$ to the pair,
 and the vector of group elements that tag evaluation needs, for generators
-$\gen_2, \gen_3$ of $\group{1}$ and $\ggen_D$ of $\group{2}$:
+$\gen_2, \gen_3$ of $\group{1}$ and $\ggen_D$ of $\group{2}$, and for $\gamma \in
+[0,\Max)$:
 %
 \begin{equation*}
   T = \gen_2^{\utk'}\cdot\gen_3^{\utk''}, \qquad W_\gamma =
-\ggen_D^{1/(\utk''+\gamma)} \ \text{ for } \gamma \in [0,\Max).
+\ggen_D^{1/(\utk''+\gamma)}.
 \end{equation*}
 %
 These elements do not change with the epoch, so, as in

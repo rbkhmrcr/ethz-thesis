@@ -152,17 +152,16 @@ Randomisation also preserves validity, meaning that the following holds:
 \paragraph{Existential unforgeability under tag-based aggregation (EUF-TBA).}
 The advantage of a PPT
 adversary $\adv$ with access to corruption oracle $\corrupto$ and signing
-oracle $\signo$ is defined as follows:
+oracle $\signo$, in the experiment of \Cref{exp:ats-euf}, is defined as follows:
 %
 \begin{equation*}
 %
   \Adv_{\ATS, \adv}^{\mathsf{EUF\text{-}TBA}}(\secparam) = \Pr[\adv \text{
-wins}],
+wins}].
 %
 \end{equation*}
 %
-where the experiment and its oracles $\corrupto$ and $\signo$ are given in
-\Cref{exp:ats-euf}. An $\ATS$
+An $\ATS$
 scheme is existentially unforgeable under tag-based aggregation if this
 advantage is negligible for every PPT adversary $\adv$.
 

@@ -161,16 +161,14 @@ since every signer that issued a share on $\vec{\msg}^\star$ lies in $\mathcal{K
 Its output then wins the EUF-CMA experiment. The shares $\advB$ hands out are
 distributed identically whichever $\mathcal{K}$ it chose, so $\mathcal{K}$ is
 independent of $\adv$'s view, and is such a set with probability at least
-$\binom{n}{t}^{-1}$. So
+$\binom{n}{t}^{-1}$. This gives the following, which rearranges to the bound
+of \Cref{lem:tsps-adaptive}:
   %
   \begin{equation*}
   %
     \Adv^{\mathsf{euf\text{-}cma}}_{\SPS,\advB}(\secparam) \geq
 \binom{n}{t}^{-1} \left(\Adv^{\mathsf{adp\text{-}TS\text{-}UF\text{-}1}}_{\TSPS,\adv}(\secparam)
-- q \cdot \Adv^{\mathsf{mpc}}(\secparam)\right),
+- q \cdot \Adv^{\mathsf{mpc}}(\secparam)\right).
   %
   \end{equation*}
-  %
-  which rearranges to the bound of \Cref{lem:tsps-adaptive}.
-
 \end{proof}

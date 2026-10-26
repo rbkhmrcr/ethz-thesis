@@ -166,15 +166,16 @@ one. Each session is used for one message only, since reusing a state reuses the
 signing randomness. The challenger runs $\TSPSgen$, idealising key generation as
 in the existing definitions~\cite{C:BCKMTZ22,C:CriKomMal23}.
 
-The advantage of a PPT adversary $\adv$ is defined as follows:
+The advantage of a PPT adversary $\adv$ in the experiment of
+\Cref{exp:tsps-ts-uf-1} is defined as follows:
 %
 \begin{equation*}
 %
-  \Adv_{\TSPS, \adv}^{\mathsf{TS\text{-}UF\text{-}1}}(\secparam) = \Pr[\adv\text{ wins}],
+  \Adv_{\TSPS, \adv}^{\mathsf{TS\text{-}UF\text{-}1}}(\secparam) = \Pr[\adv\text{ wins}].
 %
 \end{equation*}
 %
-with the experiment in \Cref{exp:tsps-ts-uf-1}. A threshold SPS scheme is TS-UF-1
+A threshold SPS scheme is TS-UF-1
 secure if this advantage is negligible for every PPT adversary $\adv$.
 
 \begin{experimentbox}{Threshold SPS schemes: TS-UF-1}{tsps-ts-uf-1}

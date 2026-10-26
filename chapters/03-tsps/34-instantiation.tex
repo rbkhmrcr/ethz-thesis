@@ -31,11 +31,11 @@ They then compute the following locally:
 \begin{equation*}
 %
   \shr{b^{\alpha}} = \shr{f^{\eta}} \cdot \shr{f}^{\epsilon} \cdot
-\delta^{\shr{\eta}} \cdot \delta^{\epsilon},
+\delta^{\shr{\eta}} \cdot \delta^{\epsilon}.
 %
 \end{equation*}
 %
-where one designated party adds the public term $\delta^{\epsilon}$. The
+One designated party adds the public term $\delta^{\epsilon}$. The
 parties obtain a mixed triple from an ordinary triple over $\Zp$ by raising a
 generator to the shares of its second and third entries.
 
@@ -53,15 +53,14 @@ the decomposable form.
   \begin{description}
 
     \item[$(\sk, \pk) \sample \SPSgen(\secparam, \ell)$ :] Sample $\mu_1,
-\ldots, \mu_\ell, \tau \sample \Zp^*$, and return the following:
+\ldots, \mu_\ell, \tau \sample \Zp^*$, and return the following, for $i \in [1,\ell]$:
       %
       \begin{gather*}
       %
 	\sk = (\mu_1, \ldots, \mu_\ell, \tau), \quad \pk = (\widetilde{u}_1,
 \ldots, \widetilde{u}_\ell, v), \\
       %
-	\widetilde{u}_i = \ggen^{\mu_i} \ \text{ for } i \in [1,\ell], \quad v =
-\gen^{\tau}.
+	\widetilde{u}_i = \ggen^{\mu_i}, \quad v = \gen^{\tau}.
       %
       \end{gather*}
 
@@ -243,26 +242,25 @@ the following:
       %
       \end{gather*}
       %
-      Return the following:
+      Return the following, for $i \in [1, \ell+1]$ and $j \in \{1, 2\}$:
       %
       \begin{gather*}
       %
 	\sk = (\mat{K}, \vec{b}, \vec{x}, \vec{y}), \quad \pk =
 (\vec{\widetilde{a}}, \vec{\widetilde{u}}, \vec{\widetilde{v}},
-\vec{\widetilde{w}}), \quad \text{where} \\
+\vec{\widetilde{w}}), \\
       %
 	\vec{b} = (\gen, \gen^{\beta}), \quad x_j = \gen^{\xi_j}, \quad y_j =
 \gen^{\upsilon_j}, \quad \vec{\widetilde{a}} = (\ggen, \ggen^{\alpha}), \\
       %
 	\widetilde{u}_i = \ggen^{\zeta_i}, \quad \widetilde{v}_j =
-\ggen^{\nu_j}, \quad \widetilde{w}_j = \ggen^{\omega_j} \quad \text{for } i \in
-[1, \ell+1],\ j \in \{1, 2\}.
+\ggen^{\nu_j}, \quad \widetilde{w}_j = \ggen^{\omega_j}.
       %
       \end{gather*}
 
     \item[$\SPSsig \sample \SPSsign(\sk, \vec{\msg})$ :] Sample $\rho, \sigma
 \sample \Zp^*$ and return $\SPSsig = (\widetilde{q}, \vec{r}, \vec{s},
-\vec{z})$, computed as follows:
+\vec{z})$, computed as follows, for $j \in \{1, 2\}$:
       %
       \begin{gather*}
       %
@@ -270,8 +268,7 @@ the following:
 \quad s_j = b_j^{\rho\sigma}, \\
       %
 	z_j = \gen^{k_{1,j}}
-\prod_{i=1}^{\ell} \msg_i^{k_{i+1,j}} \cdot x_j^{\rho}\, y_j^{\rho\sigma}
-\quad \text{for } j \in \{1, 2\}.
+\prod_{i=1}^{\ell} \msg_i^{k_{i+1,j}} \cdot x_j^{\rho}\, y_j^{\rho\sigma}.
       %
       \end{gather*}
 
@@ -340,7 +337,8 @@ $\shr{\vec{\xi}}$ and $\shr{\vec{\upsilon}}$ with one call to $\algo{Mul}$ per
 entry, followed by a local addition, since the first entries of $\vec{\alpha}$ and
 $\vec{\beta}$ are the public constant $1$.
 
-	\item Each signer computes the following locally:
+	\item Each signer computes the following locally, for $i \in [1, \ell+1]$
+and $j \in \{1, 2\}$:
 	  %
 	  \begin{gather*}
 	  %
@@ -350,9 +348,7 @@ $\vec{\beta}$ are the public constant $1$.
 	  %
 	    \shr{\widetilde{u}_i} = \ggen^{\shr{\zeta_i}}, \quad
 \shr{\widetilde{v}_j} = \ggen^{\shr{\nu_j}}, \quad \shr{\widetilde{w}_j} =
-\ggen^{\shr{\omega_j}} \\
-	  %
-	    \text{for } i \in [1, \ell+1],\ j \in \{1, 2\}.
+\ggen^{\shr{\omega_j}}.
 	  %
 	  \end{gather*}
 
@@ -371,7 +367,7 @@ following:
 
 	\item Sample $\shr{\rho}, \shr{\sigma} \sample \algo{RandShare}()$.
 
-	\item Compute the following:
+	\item Compute the following, for $j \in \{1, 2\}$:
 	  %
 	  \begin{gather*}
 	  %
@@ -381,18 +377,16 @@ following:
 \shr{s_j} \sample \algo{ExpGrp}_1(\shr{\rho\sigma}, \shr{b_j}), \\
 	  %
 	    \shr{x_j^{\rho}} \sample \algo{ExpGrp}_1(\shr{\rho}, \shr{x_j}), \quad
-\shr{y_j^{\rho\sigma}} \sample \algo{ExpGrp}_1(\shr{\rho\sigma}, \shr{y_j}) \\
-	  %
-	    \text{for } j \in \{1, 2\}.
+\shr{y_j^{\rho\sigma}} \sample \algo{ExpGrp}_1(\shr{\rho\sigma}, \shr{y_j}).
 	  %
 	  \end{gather*}
 
-	\item Each signer computes the following locally:
+	\item Each signer computes the following locally, for $j \in \{1, 2\}$:
 	  %
 	  \begin{equation*}
 	  %
 	    \shr{\widetilde{q}} = \ggen^{\shr{\sigma}}, \quad \shr{z^*_j} =
-\shr{x_j^{\rho}} \cdot \shr{y_j^{\rho\sigma}} \quad \text{for } j \in \{1, 2\}.
+\shr{x_j^{\rho}} \cdot \shr{y_j^{\rho\sigma}}.
 	  %
 	  \end{equation*}
 
@@ -406,12 +400,12 @@ Each signer does the following:
 
       \begin{enumerate}
 
-	\item Compute the following:
+	\item Compute the following, for $j \in \{1, 2\}$:
 	  %
 	  \begin{equation*}
 	  %
 	    \shr{z_j} = \shr{z^*_j} \cdot \gen^{\shr{k_{1,j}}} \prod_{i=1}^{\ell}
-\msg_i^{\shr{k_{i+1,j}}} \ \text{ for } j \in \{1, 2\}.
+\msg_i^{\shr{k_{i+1,j}}}.
 	  %
 	  \end{equation*}
 

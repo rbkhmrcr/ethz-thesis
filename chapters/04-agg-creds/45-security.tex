@@ -260,16 +260,14 @@ other messages.
 
 \begin{proof}
 
-  We build a reduction $\advB$ that breaks BCDH. It receives a challenge
-defined as follows:
+  We build a reduction $\advB$ that breaks BCDH. It must output
+$\pairing(\gen, \ggen)^{\gamma\omega\chi}$ on a challenge defined as follows:
 %
 \begin{equation*}
   (\gen, X, Y, Z, \ggen, \widetilde{X}, \widetilde{Y}, \widetilde{Z}) = (\gen,
 \gen^\gamma, \gen^\omega, \gen^\chi, \ggen, \ggen^\gamma, \ggen^\omega,
-\ggen^\chi),
+\ggen^\chi).
 \end{equation*}
-%
-and must output $\pairing(\gen, \ggen)^{\gamma\omega\chi}$.
 
   \paragraph{Keys.} Without loss of generality, $\adv$ corrupts every key but
 one. $\advB$ guesses $j \sample [1,n]$ and sets $\pk_j = \widetilde{X}$. For every
@@ -327,13 +325,13 @@ $\hashtwo(\Tag^*)$, $\advB$ first queries them itself, so that each is embedded
 or plain as above. $\advB$ stops unless $\msg^*_j$ is embedded and
 $\Tag^*$ is plain, so that $\hashone(\msg^*_j) = Y^{\rho^*}$ and
 $\hashtwo(\Tag^*) = \gen^{\lambda^*}$. It removes the contributions of the other
-keys as follows:
+keys as follows, with $\xi_i$ replaced by $\xi'_i$ for the corrupted keys:
 %
 \begin{equation*}
-  d = \signaturetwo^* / \prod_{i \in \ISSUERS, i \neq j}\hashone(\msg^*_i)^{\xi_i},
+  d = \signaturetwo^* / \prod_{i \in \ISSUERS, i \neq j}\hashone(\msg^*_i)^{\xi_i}.
 \end{equation*}
 %
-with $\xi_i$ replaced by $\xi'_i$ for the corrupted keys. The verification
+The verification
 equation then becomes the following:
 %
 \begin{equation*}
