@@ -1,5 +1,13 @@
 \section{Introduction}
 
+\Cref{chap:tsps,chap:agg-creds} consider ways for entities to certify
+information while allowing users to keep its content private. Financial
+systems also require transaction auditing, and the entity in this chapter is an
+auditor. We design a system that restricts the capabilities of the auditor to
+be only as precise as auditing requirements need, so that the auditor can
+trace one user, for one epoch, and only after the user has granted it
+permission to do so.
+
 We use the term transaction system for all systems that involve
 moving value. We describe the systems as if they handle just one type of
 currency, but extensions to labelled assets are generally simple. Transaction
@@ -146,7 +154,7 @@ cooperation, or linear-time analysis~\cite{ACNS:PBGP25}.
 \paragraph{Policy enforcement.} Platypus and ZKAT incorporate regulatory policy enforcement, including
 enforcement of balance limits, but neither provides a mechanism for efficient
 per-user tracing across arbitrary
-transactions~\cite{CCS:WKDC22,EPRINT:ACDDET19}.
+transactions~\cite{CCS:WKDC22,androulaki2020auditable}.
 
 \paragraph{Layout.} The rest of the chapter is organised as follows. \Cref{sec:txid-definitions} gives the syntax of a tracing
 protocol and formalises its security as an ideal functionality.

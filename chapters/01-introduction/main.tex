@@ -185,16 +185,25 @@ provide availability without being trusted with users' private information.
 Each of the protocols comes from considering the specific responsibilities of
 participants in each existing system.
 
-\paragraph{Contributions.} We first consider threshold certification, by which
-we mean the threshold signing of commitments. We achieve this by constructing a
-framework for creating threshold structure-preserving signature schemes.
-Structure-preserving signature schemes allow signers to sign commitments
-directly, and threshold versions allow us to distribute the signing
-responsibilities across several parties. We give a generic construction which
-splits signing into offline and online phases, in order to remove communication
-requirements between signers entirely in the online phase. We instantiate the
-construction with two signature schemes, and implement and evaluate both
-instantiations with two MPC protocols.
+\paragraph{Contributions.} We first consider threshold certification. Each
+protocol in this thesis involves entities certifying information while
+allowing users to keep its content private, whether validators of a ledger endorsing commitments to tokens, a
+registration authority certifying the keys of users, or issuers certifying
+attributes of users. Structure-preserving signature schemes allow signers to
+sign commitments directly, with signatures that remain compatible with
+efficient zero-knowledge proofs. In ledgers proposed for central bank digital
+currencies, this signing is already decentralised, as several authorities each
+endorse a transaction before it is
+recorded~\cite{androulaki2020auditable}. We construct a framework for
+creating threshold structure-preserving signature schemes, in which the
+authorities sign together using MPC. Since MPC generally requires interaction
+between all participants, our generic construction splits signing into offline
+and online phases. All interaction between signers takes place in key
+generation and in the offline phase, before the message is known. Once the
+message is known, each authority signs locally, without communicating with the
+others, and the shares combine into a single signature that verifies as an
+ordinary one. We instantiate the construction with two signature schemes, and
+implement and evaluate both instantiations with two MPC protocols.
 
 We then consider aggregate anonymous credentials. Existing credential models do
 not always reflect the way that authority is divided in practice. Users may
@@ -235,6 +244,14 @@ presents our threshold structure-preserving signature schemes.
 \Cref{chap:agg-creds} presents the aggregate anonymous credential scheme,
 \Cref{chap:txid} presents the transaction tracing protocol, and
 \Cref{chap:offline-payments} presents the offline payment protocol.
+The chapters start by considering certification, then move to explore
+transaction auditing, and then finally we present a system that integrates the
+previously explored concepts and adds the ability to make offline payments.
+\Cref{chap:tsps,chap:agg-creds} both consider ways for institutions to certify
+items without learning them, first for commitments to transactions on a ledger,
+and then for attributes of users. \Cref{chap:txid} explores restrictions of
+transaction auditing, and \Cref{chap:offline-payments} introduces a design for
+payments without a network connection.
 Each of \Crefrange{chap:tsps}{chap:offline-payments} follows the same structure
 after its introduction: definitions, construction, instantiation, security,
 evaluation, and a summary.

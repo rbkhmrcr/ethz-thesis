@@ -13,9 +13,12 @@ signatures, and its security rests on the SXDH assumption.
 
 Our extension of MP-SPDZ provides implementations of the protocols for any
 number of parties. The online phase stays below 2~ms up to sixteen parties, and
-all interaction is in the offline phase.  Ledger administrators and
+all interaction is in key generation and the offline phase.  Ledger administrators and
 transparency log providers can then split certification between several parties
 at little cost.
+
+The same $\AGHO$ SPS scheme is used in \Cref{chap:agg-creds} for user
+registration in an aggregate anonymous credential system.
 
 Several questions remain open. We expect strong unforgeability to hold
 when the underlying scheme is strongly unforgeable, but do not prove this.

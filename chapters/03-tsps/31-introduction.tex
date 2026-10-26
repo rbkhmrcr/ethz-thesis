@@ -1,5 +1,19 @@
 \section{Introduction}\label{sec:tsps-introduction}
 
+We begin with the certification of commitments on a ledger. In ledgers
+proposed for central bank digital currencies, several authorities each endorse
+a transaction before it is recorded~\cite{androulaki2020auditable}. The
+presence of several endorsers is a requirement of these systems, and the
+endorsers are institutions with a working relationship that are able to
+communicate with one another. We want the endorsers to jointly compute a
+signature on each commitment. Multiparty computation is well suited to this
+setting. As discussed in \Cref{chap:introduction}, it requires interaction
+between all participants, but these participants can interact, and the
+interaction only becomes a problem when it delays signing once a transaction
+arrives. We move all of it into key generation and an offline phase that does
+not depend on the message, so that once the message is known, each authority
+signs locally and the shares combine into a single signature.
+
 Structure-preserving signature (SPS) schemes are those in which messages,
 public keys and signatures are all group elements. As all operations in the verification are
 algebraic, SPS schemes allow for proofs of signatures that are more compact and efficient to produce than
@@ -16,13 +30,9 @@ cannot certify on its own, and the certifiers do not need to trust one another.
 In privacy-preserving transaction ledgers, users' tokens or accounts are
 generally represented as commitments. To spend a token or update an account,
 users need a signature showing that its commitment is on the
-ledger~\cite{EPRINT:ACDDET19,EPRINT:TBAAGP22,CCS:KiaKohSar22,RSA:PoiSan18,NDSS:SABMD19}.
+ledger~\cite{androulaki2020auditable,CCS:KiaKohSar22,RSA:PoiSan18,NDSS:SABMD19}.
 With an SPS scheme, the administrator can sign the commitments directly and
 users can then prove statements about the committed values in zero knowledge.
-Proposed designs for central bank digital currencies use ledgers run by
-authorities who each endorse transactions before they are
-recorded~\cite{EPRINT:ACDDET19,EPRINT:TBAAGP22}. Threshold SPS schemes
-would enable the endorsing parties to collectively construct a single signature.
 
 Certificate transparency (CT) and key transparency (KT) logs are append-only
 and publicly verifiable records of certificates or keys signed by log providers.

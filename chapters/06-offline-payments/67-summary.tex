@@ -7,8 +7,8 @@ without contacting anyone, so the scheme keeps working without a network.
 
 Double spending is both prevented and deterred. A secure element enforces that
 each token is used once, and each payment carries an encryption of the payer's
-identifier under the auditor's key, so the auditor identifies a double spender
-and no one else. Because a secure element cannot run the cryptography alone, it
+identifier under the auditor's key, so the auditor revokes the anonymity of a
+double spender and no one else. Because a secure element cannot run the cryptography alone, it
 holds only the secret key and produces its part of a joint proof of knowledge,
 and the user's phone does the rest.
 
@@ -21,5 +21,5 @@ payee verifies a chain of $32$ hops in under a second, with payments growing by
 $912$ bytes per hop.
 
 Divisibility remains future work, and revocation offline is limited to expiry
-by epochs. Identifying double spenders efficiently without a trusted auditor is
-also future work.
+by epochs. Revoking the anonymity of double spenders efficiently without a
+trusted auditor is also future work.

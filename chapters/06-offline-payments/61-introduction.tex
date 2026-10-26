@@ -1,5 +1,12 @@
 \section{Introduction}\label{sec:offline-intro}
 
+This chapter combines concepts from the previous chapters into a payment
+system. To this, we add the ability for payments to be made without either
+sender or recipient having a network connection. As in \Cref{chap:agg-creds},
+users first register with a registration authority, and as in
+\Cref{chap:txid}, the system includes an auditor, here to revoke the anonymity of users that
+spend the same token twice.
+
 An offline payment is one made while both the payer and the payee are
 disconnected from the network. Offline operation matters for availability and
 accessibility. A payment instrument that stops working in a place with poor
@@ -51,8 +58,8 @@ non-frameability, anonymity, unlinkability, and conservation of value.
 We then give a construction, splitting the cost of authorising a payment
 between a lightweight secure element and a more powerful mobile device. We
 build from anonymous credentials, signatures on committed inputs, and
-zero-knowledge proofs of knowledge. We use verifiable encryption to identify
-double spenders without compromising the privacy of honest users.
+zero-knowledge proofs of knowledge. We use verifiable encryption to revoke the
+anonymity of double spenders without compromising the privacy of honest users.
 
 We instantiate the system with the BBS+ and Pointcheval-Sanders signature
 schemes and show that it securely realises the ideal functionality. We
@@ -87,9 +94,13 @@ number of transfers, but requires user interaction to identify double
 spenders~\cite{CANS:FucPoiVer09}. When double spending is detected, all
 previous owners of the token also become identifiable. There is also a scheme
 where token size grows linearly with the number of transfers, but which reveals
-only the double spender's identity~\cite{PKC:BCFK15}. Owing to the cost of this
-approach, we instead rely on a trusted auditor, which can be distributed, to
-deanonymise payments as needed.
+only the double spender's identity~\cite{PKC:BCFK15}. We design our system to
+be as modular as possible, while instantiating it as efficiently as possible,
+and so rely on a trusted auditor to revoke the anonymity of double spenders. The auditor holds
+a key that could decrypt the identifier in any payment, and is trusted to do so
+only once a double spend has been detected. As the system is modular, other
+trust assumptions for the auditor can be explored, and we leave this to future
+work.
 
 Some schemes introduce coin transparency, which ensures a payee cannot tell
 whether they are receiving a token they previously
