@@ -35,9 +35,9 @@ without that discrete logarithm being recovered. A pairing product equation is
 an equation of the form $\prod_j \pairing(a_j, \widetilde{b}_j) = t$ for $t \in
 \group{T}$.
 
-\begin{assumptionbox}{The discrete logarithm (DL) assumption~\cite{DifHel76}.}{dl}
+\begin{assumptionbox}{The DL assumption~\cite{DifHel76}.}{dl}
 
-  The DL assumption holds in a group of prime order $p$ with generator $\gen$
+  The discrete logarithm (DL) assumption holds in a group of prime order $p$ with generator $\gen$
 if, for $x \sample \Zp$, no PPT adversary given $\gen^x$ outputs $x$ with
 non-negligible probability.
 
@@ -45,9 +45,9 @@ non-negligible probability.
 
 Exponentiation $x \mapsto \gen^x$ is then a one-way function.
 
-\begin{assumptionbox}{The decisional Diffie-Hellman (DDH) assumption~\cite{Boneh98}.}{ddh}
+\begin{assumptionbox}{The DDH assumption~\cite{Boneh98}.}{ddh}
 
-  The DDH assumption holds in a group of prime order $p$ with generator $\gen$
+  The decisional Diffie-Hellman (DDH) assumption holds in a group of prime order $p$ with generator $\gen$
 if $(\gen^x, \gen^y, \gen^{xy})$ and $(\gen^x, \gen^y, \gen^z)$, for $x, y, z
 \sample \Zp$, are computationally indistinguishable.
 
@@ -206,9 +206,9 @@ The BBS+ signature scheme on field elements is existentially unforgeable under
 the $q$-strong Diffie-Hellman ($q$-SDH) assumption of \Cref{asm:qsdh-bbs}, a $q$-type
 assumption~\cite{EC:BonBoy04a}.
 
-\begin{assumptionbox}{The $q$-strong Diffie-Hellman ($q$-SDH) assumption~\cite{EC:BonBoy04a}.}{qsdh-bbs}
+\begin{assumptionbox}{The $q$-SDH assumption~\cite{EC:BonBoy04a}.}{qsdh-bbs}
 
-  The $q$-SDH assumption holds in the type III bilinear group
+  The $q$-strong Diffie-Hellman ($q$-SDH) assumption holds in the type III bilinear group
 $(\group{1},\group{2},\group{T},\pairing)$ if, given $(\gen, \gen^{\theta},
 \ldots, \gen^{\theta^{q}}, \ggen, \ggen^{\theta})$ for $\gen \in \group{1}$,
 $\ggen \in \group{2}$ and uniformly random $\theta \sample \Zp$, no PPT

@@ -1,6 +1,6 @@
 \section{Security}\label{sec:txid-security}
 
-\subsection{Proof of \Cref{thm:txid-bb}: security of the construction}\label{sec:txid-bb-sec}
+\subsection{Proof of \Cref{thm:txid-bb}}\label{sec:txid-bb-sec}
 
 We show that the view of a real-world adversary $\adv$ during an execution of
 $\prot$ is indistinguishable from the view of an ideal-world simulator $\simu$
@@ -283,7 +283,7 @@ indistinguishable from Game 6. This concludes the proof of~\Cref{thm:txid-bb}.
 
 \end{proof}
 
-\subsection{Proof of \Cref{lem:txid-fe-prf}: pseudorandomness of the epoch PRF}
+\subsection{Proof of \Cref{lem:txid-fe-prf}}
 
 Recall that the epoch PRF of the algebraic instantiation is the following, for
 a hash function $\HE : \{0,1\}^* \to \group{1}$ modelled as a random oracle:
@@ -374,7 +374,7 @@ fresh pair $(r_i, t_i)$ is drawn for each new epoch and reused from then on.
 
 \end{proof}
 
-\subsection{Proof of \Cref{lem:txid-ft-prf}: pseudorandomness of the tag PRF}
+\subsection{Proof of \Cref{lem:txid-ft-prf}}
 
 Recall that the tag PRF of the algebraic instantiation is the following, for
 public parameters $W_\gamma = \ggen_D^{1/(\utk''+\gamma)}$ and a uniform epoch
@@ -434,7 +434,7 @@ them from the public $\{W_\gamma\}$.
 
 \end{proof}
 
-\subsection{Proof of \Cref{lem:txid-rel7}: equivalence of $\rel_7$ and $\rel_7'$}\label{sec:rel7-equiv}
+\subsection{Proof of \Cref{lem:txid-rel7}}\label{sec:rel7-equiv}
 
 Recall the tag relation and its rewritten form:
 %
@@ -597,7 +597,7 @@ probability, since $A$ contains a fresh uniform group element.
 
 \end{proof}
 
-\subsection{Proof of \Cref{lem:txid-rel6}: equivalence of $\rel_6$ and $\rel_6'$}\label{sec:rel6-equiv}
+\subsection{Proof of \Cref{lem:txid-rel6}}\label{sec:rel6-equiv}
 
 Recall that a valid BBS+ signature $(e, r, E)$ on the user's values has $E =
 b^{1/(z+e)}$, for the base $b$ of the credential, and the rewritten relation:
@@ -687,7 +687,7 @@ equation for $t_1$, $t_2$, and $t_3$. It handles the Fiat-Shamir transform as in
 
 \end{proof}
 
-\subsection{Proof of \Cref{thm:inst}: security of the algebraic instantiation}\label{sec:txid-inst-sec}
+\subsection{Proof of \Cref{thm:inst}}\label{sec:txid-inst-sec}
 
 By \Cref{thm:txid-bb}, it suffices to show that the algebraic instantiation
 has (P1) to (P5).
@@ -737,7 +737,7 @@ Combining (P1) to (P5) with~\Cref{thm:txid-bb} gives~\Cref{thm:inst}.
 
 \end{proof}
 
-\subsection{Proof of \Cref{thm:hash-inst}: security of the hash-based instantiation}\label{sec:txid-hash-inst-sec}
+\subsection{Proof of \Cref{thm:hash-inst}}\label{sec:txid-hash-inst-sec}
 
 As for \Cref{thm:inst}, we show that each building block of the hash-based
 instantiation has the property \Cref{thm:txid-bb} needs.

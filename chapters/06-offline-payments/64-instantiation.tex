@@ -72,7 +72,7 @@ Lehmann~\cite{CDL16}. \Cref{prim:hss-joint-proof} gives their protocol, in
 which $\algo{Prove}_C$, $\algo{Prove}_H$ and $\algo{Verify}$ play the roles of
 $\JPOKprove_0$, $\JPOKprove_1$ and $\JPOKverify$.
 
-\begin{primitivebox}[breakable]{The joint proof of knowledge of a BBS+ signature of Hesse, Singh and Sorniotti~\cite{USENIX:HesSinSor23}.}{hss-joint-proof}
+\begin{primitivebox}[breakable]{The joint proof for BBS+ signatures~\cite{USENIX:HesSinSor23}.}{hss-joint-proof}
 
   The card and the holder share a PRF key $\key$, and $\varphi = (e, r, E)$ is a
 BBS+ signature on $(\msg_1, \ldots, \msg_n)$ under $\pk = (\gen_0, \ldots,
@@ -360,9 +360,9 @@ its messages from $0$.
 Pointcheval and Sanders prove this variant existentially unforgeable under the
 $q$-MSDH assumption of \Cref{asm:qmsdh}~\cite{RSA:PoiSan18}.
 
-\begin{assumptionbox}{The $q$-modified strong Diffie-Hellman ($q$-MSDH) assumption~\cite{RSA:PoiSan18}.}{qmsdh}
+\begin{assumptionbox}{The $q$-MSDH assumption~\cite{RSA:PoiSan18}.}{qmsdh}
 
-  The $q$-MSDH assumption holds if, given $(\gen^{\chi^i},
+  The $q$-modified strong Diffie-Hellman ($q$-MSDH) assumption holds if, given $(\gen^{\chi^i},
 \ggen^{\chi^i})_{i=0}^{q}$ and $(\gen^{\varsigma}, \ggen^{\varsigma},
 \ggen^{\chi\varsigma})$ for uniformly random $\chi, \varsigma \sample \Zp^*$, no
 PPT adversary can output a tuple $(c, \mathcal{P}, Q, Q^{1/(\chi+c)},

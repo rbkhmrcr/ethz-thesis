@@ -118,9 +118,9 @@ would then verify under both keys for any tag and message. Unrestricted
 aggregate signatures prevent this by hashing the index of the signer together
 with each message~\cite{ICALP:BelNamNev07}.
 
-  \begin{assumptionbox}{The bilinear computational Diffie-Hellman (BCDH) assumption~\cite{C:BonFra01}.}{bcdh}
+  \begin{assumptionbox}{The BCDH assumption~\cite{C:BonFra01}.}{bcdh}
 
-    The BCDH assumption holds if, given $(\gen, \gen^\gamma, \gen^\omega,
+    The bilinear computational Diffie-Hellman (BCDH) assumption holds if, given $(\gen, \gen^\gamma, \gen^\omega,
 \gen^\chi, \ggen, \ggen^\gamma, \ggen^\omega, \ggen^\chi)$ for uniformly
 random $\gamma, \omega, \chi \sample \Zp$, no PPT adversary can output
 $\pairing(\gen, \ggen)^{\gamma\omega\chi}$ with non-negligible probability.

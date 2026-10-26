@@ -106,12 +106,12 @@ keyed by the epoch key and not by $\utk''$:
 %
 Its security rests on \Cref{asm:qmdbdhi-txid}.
 
-\begin{assumptionbox}{The $q$-decisional bilinear Diffie-Hellman inversion with
-published elements ($q$-mDBDHI) assumption.}{qmdbdhi-txid}
+\begin{assumptionbox}{The $q$-mDBDHI assumption.}{qmdbdhi-txid}
 
   Let $(\group{1},\group{2},\group{T},\pairing)$ be a type III bilinear group of
 prime order $p$ with generators $\gen \in \group{1}$ and $\ggen_D \in
-\group{2}$. The $q$-mDBDHI assumption holds if, given $(\gen, \ggen_D,
+\group{2}$. The $q$-decisional bilinear Diffie-Hellman inversion with published
+elements ($q$-mDBDHI) assumption holds if, given $(\gen, \ggen_D,
 \{\ggen_D^{1/(k+\gamma)}\}_{\gamma\in[0,q)})$ for uniformly random $k \sample
 \Zp$ and $P \sample \group{1}$, no PPT adversary can distinguish
 $\{\pairing(P, \ggen_D^{1/(k+\gamma)})\}_{\gamma\in[0,q)}$ from
