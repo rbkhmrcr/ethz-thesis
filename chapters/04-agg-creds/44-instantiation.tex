@@ -220,8 +220,8 @@ efficient, with no zero-knowledge proof over pairing equations or elements of
 $\group{T}$, but a presentation grows with the number of disclosed attributes. Each disclosed attribute adds its blinded hash $H_i$ and
 one Sigma protocol commitment, two elements of $\group{1}$. Proving that every
 $H_i$ uses the same $\delta$ in $\group{T}$ instead would make the proof
-constant-size, apart from the disclosed values, at the cost of one pairing per
-disclosed attribute for the user.
+constant-size, apart from the disclosed values, but would need one more pairing
+per disclosed attribute for the user.
 
 \begin{lemma}\label{lem:agg-creds-sigma}
 

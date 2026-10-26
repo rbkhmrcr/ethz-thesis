@@ -115,7 +115,7 @@ setups take 95.3\,ms and 165\,ms.
 The hash-based instantiation gives up the transparent setup, and its prover is
 much slower. Which instantiation is preferable depends on whether a
 deployment can tolerate a trusted setup, and on whether proving or verification
-cost matters more.
+time matters more.
 
 Verification time hardly depends on $\ell$. In the hash-based instantiation it
 stays at $4.44\,\mathrm{ms}$ for every $\ell$ from $1$ to $12$. In the algebraic
@@ -156,7 +156,7 @@ uncompressed group elements.} \label{tab:txid-idemix}
     %
     \midrule
     %
-    Idemix, no oversight mechanism & 3.37 & 2.39 &
+    Idemix, no auditing mechanism & 3.37 & 2.39 &
 1\,099 \\
     %
     Idemix, with audit pseudonyms & 3.97 & 3.06 &

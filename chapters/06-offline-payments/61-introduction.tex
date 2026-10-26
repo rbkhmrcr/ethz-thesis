@@ -16,7 +16,7 @@ We work in the setting of central bank digital currency (CBDC), a form of
 central bank money on par with cash and central bank reserves,
 represented digitally as tokens. Each token encodes an owner and a value.
 Retail CBDC is the variant available to the general public rather than to
-financial institutions. It is the most demanding to realise. It must be
+financial institutions. It must be
 resilient, scale to a national population, protect the privacy of its users,
 and support payments made
 offline~\cite{cbdctracker,digitaleuro2023,aboulaiz2024offline}.
@@ -55,7 +55,7 @@ We give a syntax for offline payment schemes and an ideal functionality that
 captures unforgeability, theft prevention, double-spending identification,
 non-frameability, anonymity, unlinkability, and conservation of value.
 
-We then give a construction, splitting the cost of authorising a payment
+We then give a construction, splitting the computation of authorising a payment
 between a lightweight secure element and a more powerful mobile device. We
 build from anonymous credentials, signatures on committed inputs, and
 zero-knowledge proofs of knowledge. We use verifiable encryption to revoke the
@@ -78,7 +78,7 @@ nor theft prevention.
 
 \paragraph{Divisible ecash.} Divisible ecash allows a user to withdraw a token
 and split it among different recipients across multiple independent
-transactions~\cite{C:OkaOht91,C:Okamoto95}. This comes at the cost of higher
+transactions~\cite{C:OkaOht91,C:Okamoto95}. This comes with higher
 complexity for withdrawals, payments, and deposits, which scale with the token
 value. This is partially addressed by work that achieves constant computation
 and communication complexity for withdrawal and payment, though deposits still
@@ -87,7 +87,7 @@ costs~\cite{PKC:CPST15,ACNS:CPST15}. We leave divisibility as future work and
 focus on transferability.
 
 \paragraph{Transferable ecash.} Some schemes present ecash that is both
-transferable and divisible, at the cost of high computational
+transferable and divisible, but with high computational
 complexity~\cite{C:OkaOht91,EC:ChaPed92}. We focus on efficiency and
 scalability.  Another system maintains a constant token size regardless of the
 number of transfers, but requires user interaction to identify double
@@ -95,8 +95,8 @@ spenders~\cite{CANS:FucPoiVer09}. When double spending is detected, all
 previous owners of the token also become identifiable. There is also a scheme
 where token size grows linearly with the number of transfers, but which reveals
 only the double spender's identity~\cite{PKC:BCFK15}. We design our system to
-be as modular as possible, while instantiating it as efficiently as possible,
-and so rely on a trusted auditor to revoke the anonymity of double spenders. The auditor holds
+be modular, and our instantiation relies on a trusted auditor to revoke the
+anonymity of double spenders. The auditor holds
 a key that could decrypt the identifier in any payment, and is trusted to do so
 only once a double spend has been detected. As the system is modular, other
 trust assumptions for the auditor can be explored, and we leave this to future

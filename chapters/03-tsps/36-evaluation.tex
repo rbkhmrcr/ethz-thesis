@@ -12,7 +12,7 @@ secure with abort against malicious parties, so neither is robust, and neither
 is proven secure against adaptive corruption. MASCOT meets the assumptions of
 our theorems. MP-SPDZ implements ATLAS only against honest but curious
 parties~\cite{CCS:Keller20}. The ATLAS rows are not covered by our theorems, and
-show the cost of an honest majority.
+show the times with an honest majority.
 
 \paragraph{Extending MP-SPDZ.} MP-SPDZ computes only on elements of $\Zp$. We
 add sharings of elements of $\group{1}$ and $\group{2}$, with their
@@ -43,13 +43,13 @@ $\KPW$ schemes are implemented in C++ with RELIC, as are our threshold schemes.
 \Cref{tab:tsps-benchmarks,tab:tsps-comms} give times, communication and sizes at
 $n = 5$. The online phase sends nothing, and its time is below that of
 centralised signing. All interaction is in key generation and the offline
-phase, where MASCOT costs far more than ATLAS.
+phase, where MASCOT takes far longer than ATLAS.
 \Cref{fig:tsps-n-times,fig:tsps-n-comm} show that communication grows linearly
 in $n$, and that the online phase stays below 2~ms up to sixteen parties.
 
 CKPSS23 and MMSST24 have no offline phase, and each signer sends one signature
 share of 96 or 384 bytes to the combiner. \Cref{fig:tsps-baselines} compares
-them with our schemes, where the extra cost is in the offline phase.
+them with our schemes, where the extra time is in the offline phase.
 Threshold $\AGHO$ has signatures of three group elements instead of the seven of
 MMSST24, and verification needs $\ell+4$ pairings instead of $\ell+11$, but it
 is secure only in the GGM. Its verification takes 3.05~ms against 2.79~ms for

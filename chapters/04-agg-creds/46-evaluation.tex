@@ -11,7 +11,8 @@ Idemix implementation on the same version of \texttt{gnark-crypto} and on the
 same machine as our scheme, so that both use the same library. Idemix issues one credential on all $n$ attributes
 from one issuer, and presents it with $k$ attributes disclosed. We take all measurements
 on a MacBook Air with an Apple M2 and 16\,GB of RAM, using all eight
-cores. Each time is the median of 100 repetitions.
+cores. Each time is the median of 100 repetitions, and the interquartile range
+is within 6\% of the median for every operation.
 
 \begin{table}[htbp] \centering \small \setlength{\tabcolsep}{3.5pt}
   \begin{tabular}{@{}l r l r@{}}
@@ -77,10 +78,10 @@ the bottom two vary the number of disclosed attributes $k$ with $n = 128$.}
 \label{fig:agg-creds-idemix} \end{figure}
 
 \paragraph{Comparison.} \Cref{fig:agg-creds-idemix} compares our scheme with Idemix. Idemix proves
-knowledge of a signature on all $n$ attributes, so its cost grows with the
+knowledge of a signature on all $n$ attributes, so its times grow with the
 attributes held, while ours grows with the attributes disclosed. Idemix proves
 knowledge of the $n - k$ hidden attributes, so at fixed $n$ its presentation
-cost falls as $k$ grows. At $n = 128$
+time falls as $k$ grows. At $n = 128$
 and $k = 1$, presentation takes 1.82\,ms against 31.9\,ms for Idemix, and
 verification 4.05\,ms against 11.8\,ms. At $n = 128$, Idemix verifies faster
 once more than about 20 attributes are disclosed, and presents faster once more
@@ -92,4 +93,4 @@ their indices, our presentations are smaller for up to 45 disclosed
 attributes.
 
 With $k = 64$ disclosed attributes, every operation of the user takes at most
-20.1\,ms, so even a phone several times slower stays well below a second.
+20.1\,ms.

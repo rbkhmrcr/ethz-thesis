@@ -3,7 +3,7 @@
 This chapter gives threshold SPS schemes in which signing needs no interaction
 once the message is known. We call the property that allows this decomposable
 signing.  Our construction applies to any signature scheme with this property,
-structure-preserving or not, and its online phase is local and costs about as
+structure-preserving or not, and its online phase is local and takes about as
 much as ordinary signing.
 
 Threshold $\AGHO$ has the smallest possible signatures of any threshold SPS
@@ -15,7 +15,7 @@ Our extension of MP-SPDZ provides implementations of the protocols for any
 number of parties. The online phase stays below 2~ms up to sixteen parties, and
 all interaction is in key generation and the offline phase.  Ledger administrators and
 transparency log providers can then split certification between several parties
-at little cost.
+at little computational cost.
 
 The same $\AGHO$ SPS scheme is used in \Cref{chap:agg-creds} for user
 registration in an aggregate anonymous credential system.

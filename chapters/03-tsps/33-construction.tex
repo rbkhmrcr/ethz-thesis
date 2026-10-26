@@ -115,7 +115,7 @@ states in a queue and delete each one once it is used. Signers can run the
 offline phase in advance and store states for later.
 
 \paragraph{Online signing and combining.} No signer communicates with any other
-during online signing, and its cost is comparable to that of an ordinary
+during online signing, and its computation is comparable to that of an ordinary
 invocation of $\SPSsign$. Combining is performed by whichever party is to hold the signature, and needs no
 participation from the signers beyond their having published their shares. The
 holder checks the result with $\TSPSverify$, so a malformed share

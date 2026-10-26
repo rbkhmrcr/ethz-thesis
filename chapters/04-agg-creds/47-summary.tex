@@ -18,10 +18,10 @@ issuers and $k = 64$ disclosed attributes, a presentation takes 20.1\,ms to
 produce and 31.1\,ms to verify.
 
 Several directions remain open. Proving that every blinded hash uses the same
-$\delta$ in $\group{T}$ would make presentations constant-size, at the cost of
-one pairing per disclosed attribute for the user. The GGM is needed only for
+$\delta$ in $\group{T}$ would make presentations constant-size, but would need
+one more pairing per disclosed attribute for the user. The GGM is needed only for
 the registration signature, so a rerandomisable SPS scheme under standard
-assumptions would remove it, at the cost of larger registration signatures. A
+assumptions would remove it, but with larger registration signatures. A
 concrete security analysis of the scheme would give its security at the parameters
 we use.
 

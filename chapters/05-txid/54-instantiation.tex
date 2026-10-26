@@ -732,7 +732,7 @@ so that part of the assumption is ours.
 
 Circuits cannot take $\PTK$ or $\com$ as input. Statements of the zk-SNARK are
 over $\Zp$, and the coordinates of these group elements lie in a different
-field. Checking them in the circuit costs hundreds of thousands of constraints,
+field. Checking them in the circuit needs hundreds of thousands of constraints,
 and listing them as public inputs does not bind them to the witness.
 So each zk-SNARK proof comes with a commitment and a linking proof, in the
 commit-and-prove style of LegoSNARK~\cite{CCS:CamFioQue19}. The circuit commits

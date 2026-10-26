@@ -52,15 +52,15 @@ We start from a common construction which applies to any SPS scheme with a
 property we call decomposable signing. All message-independent computation runs
 in an offline phase, and once the message is known, signing
 needs no interaction. Signers do not need to be online at the same time,
-and signing a message costs about as much as ordinary signing.
+and signing a message takes about as much computation as ordinary signing.
 
 Computation on shared group elements has been implemented for two
 parties~\cite{NDSS:GPVRNC23,LC:ADEO21} and for many parties on curves without a
 pairing~\cite{ESORICS:DOKSS20}.  We extend the MP-SPDZ library to share group
 elements and perform group operations in pairing-friendly groups, including raising
 shared group elements to shared exponents, for any number
-of parties~\cite{CCS:Keller20}. To our knowledge, this is the first
-multiparty implementation of computation on elements of pairing-friendly groups.
+of parties~\cite{CCS:Keller20}. To our knowledge, earlier implementations
+support either two parties or groups without a pairing.
 
 \subsection*{Related work}
 
