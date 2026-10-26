@@ -191,9 +191,11 @@
 % SI units
 \usepackage{siunitx}
 \sisetup{
-  separate-uncertainty,
-  repeatunits=false,
-  detect-family,
+  uncertainty-mode=separate,
+  product-units=single,
+  range-units=single,
+  reset-text-family=false,
+  text-family-to-math=true,
   unit-mode=text,
 }
 \DeclareSIUnit\au{a.u.}
