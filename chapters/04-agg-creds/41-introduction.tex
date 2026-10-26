@@ -173,17 +173,11 @@ registration signature.
                              & Yes & $O(1)$ & $O(K)$ & $O(k)$ & Per tag \\ Our
 scheme & \parbox[t]{2.3cm}{\centering BCDH, DDH, ROM, GGM} & Yes & $O(1)$ & $O(k)$ & $O(k)$ & None \\
 \bottomrule \end{tabular} \caption[Comparison with anonymous credential
-schemes]{Comparison with existing single- and multi-issuer anonymous
-  credential schemes. $n$ is the total number of attributes a scheme supports,
-  $k$ the number of attributes disclosed in a presentation, $K$ the number of
-  issuers in a presentation, $|$cred$|$ the size of the credentials needed for
-  a presentation, and $|$pres$|$ the size of a presentation, not counting the
-  disclosed values. The assumptions of the other schemes are those of the cited
-  papers. BCDH is the bilinear computational Diffie-Hellman assumption of
-  \Cref{sec:agg-creds-instantiation}.  Issuer state is what an issuer has to
-  remember about each user. For HP22 this is which tags it has signed for, and
-  for MBGLS23 either the same or the attributes and issuer keys fixed in
-advance.} \label{tab:agg-creds-related} \end{table}
+schemes]{Comparison with single- and multi-issuer anonymous credential
+  schemes, for $n$ attributes supported, $k$ disclosed and $K$ issuers in a
+  presentation. Sizes leave out the disclosed values, BCDH is defined in
+  \Cref{sec:agg-creds-instantiation}, and issuer state is what an issuer
+  remembers about each user.} \label{tab:agg-creds-related} \end{table}
 
 \paragraph{Layout.} The rest of the chapter is organised as follows.
 \Cref{sec:agg-creds-definitions} states the problem and formalises it as an

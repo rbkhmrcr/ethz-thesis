@@ -99,9 +99,8 @@ Payment, payee phone, 1 hop & 80 & 82 & 33 & 33 \\
 Payment, payee smart card & \multicolumn{2}{c|}{229} & \multicolumn{2}{c}{231} \\
 \bottomrule \end{tabular} \caption[Offline payments: time on the phone and card]{Median time in milliseconds of each step of the
 wallet over $100$ runs, with and without the verifiable encryption of the payer's
-identifier. Smart card figures include the NFC round
-trip. The smart card does the same work with and without auditing, so its times
-are given once.} \label{tab:offline-timings}
+identifier. Smart card times include the NFC round trip and are the same with
+and without auditing.} \label{tab:offline-timings}
 \end{table}
 
 We count hops as the signatures of knowledge a verifier checks, so one hop is
@@ -118,10 +117,10 @@ auditing and by $688$ bytes without.
 
 \begin{figure}[htbp] \centering
 \includegraphics[width=\textwidth]{chapters/06-offline-payments/offline-hops-times.pdf}
-\caption[Offline payments: time against the number of hops]{Time against the number of hops, with and without auditing: payee
+\caption[Offline payments: time against the number of hops]{Median time against the number of hops, with and without auditing, of payee
 verification on Android, iOS and the server, verification by the central bank
-at deposit, and identification by the auditor. Medians. The phones share an
-axis, as do the server payee and the central bank.}
+at deposit, and identification by the auditor. The phones share an axis, as do
+the server payee and the central bank.}
 \label{fig:offline-hops-times} \end{figure}
 
 \begin{figure}[htbp] \centering
@@ -140,10 +139,10 @@ direction.
 
 \begin{table}[htbp] \centering \small
 \caption[Offline payments: server-side time and size]{Median server-side time
-of each algorithm at one hop, in milliseconds, and size of the key, message or
-proof it produces, in bytes, with auditing, and without it in parentheses where
-it differs. Group elements are compressed, at $48$ bytes in $\group{1}$ and
-$96$ bytes in $\group{2}$. The times do not include the secure element's part.}
+of each algorithm at one hop, in milliseconds, and size of its output in bytes,
+with auditing, and without it in parentheses where it differs. Times leave out
+the secure element's part, and group elements are compressed, at $48$ bytes in
+$\group{1}$ and $96$ bytes in $\group{2}$.}
 \label{tab:offline-server}
   %
   \begin{tabular}{l r r} \toprule
@@ -173,18 +172,28 @@ $96$ bytes in $\group{2}$. The times do not include the secure element's part.}
 %
 \end{table}
 
-\begin{table}[htbp] \centering \small \resizebox{\textwidth}{!}{\begin{tabular}{lllrr} \toprule Protocol &
-Channel & Party & Bytes sent & Messages \\ \midrule
-$\OPregister$ & network & secure element, registration authority & 192, 144 & 3 \\
-& card & secure element & 144 & 1 \\
-$\OPwithdraw$ & network & device, intermediary, central bank & 664, 792, 128 & 4 \\
-& card & device, secure element & 8, 80 & 2 \\
-$\OPexecute$ & network & payer device, payee device & 1400 (1176), 48 & 3 \\
-& payer card & device, secure element & 105, 192 & 3 \\
-& payee card & device, secure element & 8, 80 & 2 \\
-$\OPdeposit$ & network & device, intermediary, central bank & 1352 (1128), 1353 (1129), 1 & 4 \\
-& card & device, secure element & 57, 192 & 2 \\
-\bottomrule \end{tabular}} \caption[Offline payments: communication]{Bytes sent by each party and number of
+\begin{table}[htbp] \centering \small \begin{tabular}{lllrr} \toprule
+Protocol & Channel & Party & Bytes sent & Messages \\ \midrule
+$\OPregister$ & network & secure element & 192 & 3 \\
+& & registration authority & 144 & \\
+& card & secure element & 144 & 1 \\ \addlinespace
+$\OPwithdraw$ & network & device & 664 & 4 \\
+& & intermediary & 792 & \\
+& & central bank & 128 & \\
+& card & device & 8 & 2 \\
+& & secure element & 80 & \\ \addlinespace
+$\OPexecute$ & network & payer device & 1400 (1176) & 3 \\
+& & payee device & 48 & \\
+& payer card & device & 105 & 3 \\
+& & secure element & 192 & \\
+& payee card & device & 8 & 2 \\
+& & secure element & 80 & \\ \addlinespace
+$\OPdeposit$ & network & device & 1352 (1128) & 4 \\
+& & intermediary & 1353 (1129) & \\
+& & central bank & 1 & \\
+& card & device & 57 & 2 \\
+& & secure element & 192 & \\
+\bottomrule \end{tabular} \caption[Offline payments: communication]{Bytes sent by each party and number of
 messages exchanged per protocol at one hop, with auditing, and without it in
 parentheses where it differs. The registration authority sends a 32-byte nonce
 and its 112-byte response.} \label{tab:offline-comms} \end{table}

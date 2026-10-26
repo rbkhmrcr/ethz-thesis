@@ -41,7 +41,9 @@ dealer, in Go with the gnark-crypto
 library~\cite{AC:CKPSS23,PKC:MMSST24,gnark-crypto}. The centralised $\AGHO$ and
 $\KPW$ schemes are implemented in C++ with RELIC, as are our threshold schemes.
 \Cref{tab:tsps-benchmarks,tab:tsps-comms} give times, communication and sizes at
-$n = 5$. The online phase sends nothing, and its time is below that of
+$n = 5$. For CKPSS23 and MMSST24, signing computes one signer's share, and
+combining is given for $t = 2$ and $t = 4$. In our schemes, every party opens
+the signature when combining, so it sends its share to all others. The online phase sends nothing, and its time is below that of
 centralised signing. All interaction is in key generation and the offline
 phase, where MASCOT takes far longer than ATLAS.
 \Cref{fig:tsps-n-times,fig:tsps-n-comm} show that communication grows linearly
@@ -67,12 +69,10 @@ Threshold $\AGHO$ & GGM & $|\group{1}| + \ell\,|\group{2}|$ & $|\group{1}| + 2|\
 Threshold $\KPW$ & SXDH & $(\ell+7)|\group{2}|$ & $6|\group{1}| + |\group{2}|$ & $\ell+9$ \\
 \bottomrule
 \end{tabular}
-\caption[Comparison of threshold SPS schemes]{Threshold structure-preserving
-signature schemes: the assumption each is proven under, the sizes of a public key
-and a signature, and the number of pairings in verification. Our schemes and MMSST24
-sign vectors of $\ell$ elements of $\group{1}$, and CKPSS23 needs each message
-element in both source groups. ROM is the random oracle model, and
-PS the interactive assumption of Pointcheval and Sanders~\cite{RSA:PoiSan16}.}
+\caption[Comparison of threshold SPS schemes]{Threshold SPS schemes: the
+assumption each is proven under, the sizes of a public key and a signature, and
+the number of pairings in verification. ROM is the random oracle model, and PS
+the interactive assumption of Pointcheval and Sanders~\cite{RSA:PoiSan16}.}
 \label{tab:tsps-comp} \end{table}
 
 \begin{table}[htbp] \centering \small \setlength{\tabcolsep}{3pt}
@@ -92,12 +92,9 @@ MMSST24~\cite{PKC:MMSST24} & & 4.67 & & & 1.17 & 0.45--0.89 & 2.79 \\
 \bottomrule
 \end{tabular}
 \caption[Threshold SPS schemes: time]{Time in ms until the last party
-finishes, and for party $p_1$ for online signing, at $n = 5$ and
-$\ell = 2$, with $t = 2$ for ATLAS and $t = 4$ for MASCOT. Batched is the
-offline time per state when 16 states are made together. For our schemes,
-signing is $\TSPSonsign$ and verification is that of the underlying SPS scheme.
-For CKPSS23 and MMSST24, key generation is by a trusted dealer, signing computes
-one signer's share, and combining is given for $t = 2$ and $t = 4$.}
+finishes, and for party $p_1$ for online signing, at $n = 5$ and $\ell = 2$,
+with $t = 2$ for ATLAS and $t = 4$ for MASCOT. Batched is the offline time per
+state when 16 states are made together.}
 \label{tab:tsps-benchmarks} \end{table}
 
 \begin{table}[htbp] \centering \small \setlength{\tabcolsep}{4pt}
@@ -116,12 +113,9 @@ one signer's share, and combining is given for $t = 2$ and $t = 4$.}
 \bottomrule
 \end{tabular}
 \caption[Threshold SPS schemes: communication and sizes]{Kilobytes sent by party
-$p_1$ of threshold $\AGHO$ and threshold $\KPW$ in each phase at $n = 5$, and sizes in bytes of the public key, one
-signer's key share, state share and signature share, and the signature, both at
-$\ell = 2$. The online phase sends nothing. Every party opens the signature when
-combining, so it sends its share to all others. MASCOT shares carry a share of a
-message authentication code (MAC),
-which doubles their size.}
+$p_1$ in each phase, and sizes in bytes of the public key, one signer's shares
+and the signature, at $n = 5$ and $\ell = 2$. MASCOT shares carry a share of a
+message authentication code (MAC), which doubles their size.}
 \label{tab:tsps-comms} \end{table}
 
 \begin{figure}[htbp] \centering
@@ -133,9 +127,8 @@ $\TSPSonsign$, against the number of parties $n$, at $\ell = 2$, median. ATLAS r
 \begin{figure}[htbp] \centering
 \includegraphics[width=\textwidth]{chapters/03-tsps/tsps-n-comm-server.pdf}
 \caption[Threshold SPS schemes: communication against $n$]{Kilobytes sent by party $p_1$ against the number of parties $n$, at $\ell =
-2$, one panel per phase, with ATLAS as solid and MASCOT as dashed lines. MASCOT
-sends two to three orders of magnitude more, so the ATLAS lines lie close to zero for key
-generation and offline signing. $\TSPSonsign$ sends nothing and is not shown.} \label{fig:tsps-n-comm}
+2$, with ATLAS as solid and MASCOT as dashed lines. $\TSPSonsign$ sends nothing
+and is not shown.} \label{fig:tsps-n-comm}
 \end{figure}
 
 \begin{figure}[htbp] \centering

@@ -20,15 +20,17 @@ transactions per epoch. \Cref{tab:txid-protocol} gives the time of every
 algorithm and the size of the message it sends, and \Cref{tab:txid-relations}
 the time of every proof. \Cref{fig:txid-ell-times,fig:txid-ell-sizes} show how
 times and sizes grow with $\ell$.
+In the algebraic instantiation, a first grant carries $\{W_\gamma\}$ and also
+proves that it is well formed, and $\rel_7$ is proven by a Sigma protocol for
+$\rel_7'$ and a range proof for $0 \leq \gamma < \Max$. In the hash-based
+instantiation every grant is the same. Registration is three rounds and a grant
+two, each starting with a 32-byte nonce from the registration authority or the
+auditor, and a transaction includes a 32-byte payload and its 8-byte length.
 
 \begin{table}[htbp] \centering \small
 \caption[Tracing: time and message size of every algorithm]{Time of each
 algorithm at $\ell = 8$, in milliseconds, and size of the message it sends, in
-bytes. A first grant is the first grant of a user to a given auditor, and
-carries $\{W_\gamma\}$ in the algebraic instantiation. In the hash-based
-instantiation every grant is the same. Registration is three rounds and a grant
-two, in each case starting with a 32-byte nonce from the registration authority
-or the auditor. A transaction includes a 32-byte payload and its 8-byte length.}
+bytes. A first grant is a user's first grant to a given auditor.}
 \label{tab:txid-protocol}
   %
   \begin{tabular}{l r r r r} \toprule
@@ -66,13 +68,7 @@ or the auditor. A transaction includes a 32-byte payload and its 8-byte length.}
 
 \begin{table}[htbp] \centering \small
 \caption[Tracing: time of every proof]{Time to prove and verify each relation
-at $\ell = 8$, in milliseconds. Every grant proves $\rel_4$ and $\rel_5$, and
-every transaction $\rel_6$ and $\rel_7$. In the algebraic instantiation, the
-first grant to an auditor also proves that $\{W_\gamma\}$ is well formed, and
-$\rel_7$ is proven by a Sigma protocol for $\rel_7'$, timed in the $\rel_7$ row,
-and a range proof for $0 \leq \gamma < \Max$. In the hash-based instantiation, $\rel_5$ and $\rel_7$
-are proven by the zk-SNARK, the same for every grant, and the times leave out
-the linking proof.} \label{tab:txid-relations}
+at $\ell = 8$, in milliseconds. Hash-based times leave out the linking proof.} \label{tab:txid-relations}
   %
   \begin{tabular}{l l r r r r} \toprule
     %

@@ -40,12 +40,7 @@ is within 6\% of the median for every operation.
   \end{tabular}
   \caption[Aggregate credentials: times and sizes]{Time of each algorithm and
 size of its output, for $n = 128$ issuers and $k = 64$ disclosed attributes.
-$\AACregister$ and $\AACissue$ are split into the computation of each
-party. The
-$\ATS$ rows sign single messages under one tag, with $\ATSverifyagg$ over
-$k = 64$ signatures. $\ATSaggregate$ takes the time of $\AACaggregate$, and an
-aggregate $\ATS$ signature has the size of a single one. The
-Idemix rows present one credential on $n = 128$ attributes.}
+The Idemix rows present one credential on $n = 128$ attributes.}
   \label{tab:agg-creds-times}
 \end{table}
 
@@ -53,6 +48,9 @@ Idemix rows present one credential on $n = 128$ attributes.}
 nor $k$. In registration, the user sends 128 bytes and the registration authority
 352 bytes, including a 32-byte nonce, in three messages in total. In issuance, the user sends 440 bytes and
 the issuer 224 bytes, also including a 32-byte nonce, in four messages in total.
+The $\ATS$ rows sign single messages under one tag, and $\ATSverifyagg$ checks
+$k = 64$ signatures. $\ATSaggregate$ takes the time of $\AACaggregate$, and an
+aggregate $\ATS$ signature has the size of a single one.
 
 \begin{figure}[htbp] \centering
 \includegraphics[width=\textwidth]{chapters/04-agg-creds/aggcreds_times.pdf}
