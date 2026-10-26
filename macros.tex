@@ -44,6 +44,17 @@
 \renewcommand{\topfraction}{0.85}
 \renewcommand{\textfraction}{0.1}
 \renewcommand{\floatpagefraction}{0.5}
+% \FloatBarrier, to keep figures and tables before a section that follows them
+\usepackage{placeins}
+
+% no paragraph ends with one or two words on a line of their own
+% set again at every chapter, since the contents lists reset it
+\AddToHook{cmd/chapter/before}{\setlength{\parfillskip}{0pt plus 0.5\textwidth}}
+% and in lists, theorems and proofs, which also reset it
+\makeatletter
+\AddToHook{cmd/@trivlist/after}{\setlength{\parfillskip}{0pt plus 0.5\linewidth}}
+\makeatother
+\setlength{\emergencystretch}{1.5em}
 
 % hyperref is not loaded, so only the first argument is used
 \providecommand{\texorpdfstring}[2]{#1}
