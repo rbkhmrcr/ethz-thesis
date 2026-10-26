@@ -32,8 +32,7 @@ preprocessing, so the offline and key generation times include making triples.
 We report the median of 100 repetitions after 10 warm-up calls. A threshold
 signature is only ready once every party has finished, so each repetition counts
 the time until the last party finishes. Online signing involves no interaction,
-and is timed for party $p_1$. In the tables, the interquartile range is within
-20\% of the median for all but six measurements, and within 37\% for all.
+and is timed for party $p_1$.
 
 \paragraph{Results.} \Cref{tab:tsps-comp} compares our schemes with the
 threshold SPS schemes CKPSS23 and MMSST24. We implement these with a trusted
@@ -59,7 +58,7 @@ MMSST24, since the two implementations use different libraries. CKPSS23 has smal
 in the second group, which on BLS12-381 triples the message size.
 
 \begin{table}[htbp] \centering \small \setlength{\tabcolsep}{3pt}
-\begin{tabular}{l l l l l}
+\begin{tabular}{l l c c c}
 \toprule
  & Assumption & $|\pk|$ & $|\SPSsig|$ & Pairings \\
 \midrule
@@ -78,11 +77,14 @@ the interactive assumption of Pointcheval and Sanders~\cite{RSA:PoiSan16}.}
 \begin{table}[htbp] \centering \small \setlength{\tabcolsep}{3pt}
 \begin{tabular}{l l r r r r r r}
 \toprule
+ & & \multicolumn{6}{c}{Time (ms)} \\
+\cmidrule(lr){3-8}
  & & Key gen. & Offline & Batched & Sign & Combine & Verify \\
 \midrule
-Threshold $\AGHO$ & ATLAS & 4.25 & 1.36 & 0.85 & 0.30 & 3.48 & 3.05 \\
+\multirow{2}{*}{\begin{tabular}{@{}l@{}}Threshold\\ $\AGHO$\end{tabular}} & ATLAS & 4.25 & 1.36 & 0.85 & 0.30 & 3.48 & 3.05 \\
  & MASCOT & 14.4 & 14.4 & 4.35 & 0.64 & 6.31 & 3.05 \\
-Threshold $\KPW$ & ATLAS & 11.7 & 13.1 & 12.3 & 0.73 & 6.19 & 4.39 \\
+\addlinespace
+\multirow{2}{*}{\begin{tabular}{@{}l@{}}Threshold\\ $\KPW$\end{tabular}} & ATLAS & 11.7 & 13.1 & 12.3 & 0.73 & 6.19 & 4.39 \\
  & MASCOT & 39.8 & 42.6 & 30.2 & 1.51 & 11.8 & 4.39 \\
 \midrule
 $\AGHO$ & & 0.46 & & & 0.86 & & 3.05 \\
@@ -91,28 +93,27 @@ CKPSS23~\cite{AC:CKPSS23} & & 3.16 & & & 1.50 & 6.33--10.6 & 2.08 \\
 MMSST24~\cite{PKC:MMSST24} & & 4.67 & & & 1.17 & 0.45--0.89 & 2.79 \\
 \bottomrule
 \end{tabular}
-\caption[Threshold SPS schemes: time]{Time in ms until the last party
+\caption[Threshold SPS schemes: time]{Time until the last party
 finishes, and for party $p_1$ for online signing, at $n = 5$ and $\ell = 2$,
 with $t = 2$ for ATLAS and $t = 4$ for MASCOT. Batched is the offline time per
 state when 16 states are made together.}
 \label{tab:tsps-benchmarks} \end{table}
 
-\begin{table}[htbp] \centering \small \setlength{\tabcolsep}{4pt}
-\begin{tabular}{l r r r r r r r r}
+\begin{table}[htbp] \centering \small \setlength{\tabcolsep}{3pt}
+\begin{tabular}{l l r r r@{\hspace{9pt}}r r r r r}
 \toprule
- & \multicolumn{3}{c}{Communication (kB)} & \multicolumn{5}{c}{Size (bytes)} \\
-\cmidrule(lr){2-4} \cmidrule(lr){5-9}
- & Gen & Offline & Combine & $\pk$ & $\sk_i$ & $\state_i$ & $\SPSsig_i$ & $\SPSsig$ \\
+ & & \multicolumn{3}{c}{Communication (kB)} & \multicolumn{5}{c}{Size (bytes)} \\
+\cmidrule(lr){3-5} \cmidrule(lr){6-10}
+ & & \begin{tabular}[b]{@{}c@{}}Key\\gen.\end{tabular} & Offline & Combine & $\pk$ & $\sk_i$ & $\state_i$ & $\SPSsig_i$ & $\SPSsig$ \\
 \midrule
-\multicolumn{9}{l}{Threshold $\AGHO$} \\
-\quad ATLAS & 1.1 & 0.5 & 1.0 & 243 & 96 & 307 & 243 & 243 \\
-\quad MASCOT & 136 & 1288 & 2.2 & 243 & 192 & 614 & 486 & 243 \\
-\multicolumn{9}{l}{Threshold $\KPW$} \\
-\quad ATLAS & 2.7 & 4.2 & 1.6 & 873 & 486 & 391 & 391 & 391 \\
-\quad MASCOT & 3752 & 2759 & 3.4 & 873 & 972 & 782 & 782 & 391 \\
+\multirow{2}{*}{\begin{tabular}{@{}l@{}}Threshold\\ $\AGHO$\end{tabular}} & ATLAS & 1.1 & 0.5 & 1.0 & 243 & 96 & 307 & 243 & 243 \\
+ & MASCOT & 136 & 1288 & 2.2 & 243 & 192 & 614 & 486 & 243 \\
+\addlinespace
+\multirow{2}{*}{\begin{tabular}{@{}l@{}}Threshold\\ $\KPW$\end{tabular}} & ATLAS & 2.7 & 4.2 & 1.6 & 873 & 486 & 391 & 391 & 391 \\
+ & MASCOT & 3752 & 2759 & 3.4 & 873 & 972 & 782 & 782 & 391 \\
 \bottomrule
 \end{tabular}
-\caption[Threshold SPS schemes: communication and sizes]{Kilobytes sent by party
+\caption[Threshold SPS schemes: communication and sizes]{Communication sent by party
 $p_1$ in each phase, and sizes in bytes of the public key, one signer's shares
 and the signature, at $n = 5$ and $\ell = 2$. MASCOT shares carry a share of a
 message authentication code (MAC), which doubles their size.}

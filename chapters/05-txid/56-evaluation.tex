@@ -4,10 +4,7 @@ We implement both instantiations in Go over the BLS12-381 curve. They use
 gnark-crypto v0.21.0 for the groups and the pairing, and gnark v0.16.3 for the
 zk-SNARK circuits~\cite{gnark-crypto}. We take all measurements on a MacBook
 Air with an Apple M2 and 16\,GB of RAM. Each measurement is 10 warm-up calls
-followed by 100 timed repetitions, and we report the median. The interquartile
-range is typically within 2\% of the median and at most 8\%, except for
-hash-based tracing at small $\ell$, which takes well under a millisecond and
-varies by up to 20\%.
+followed by 100 timed repetitions, and we report the median.
 
 We implement the algebraic instantiation as \Cref{prot:txid}. The
 hash-based instantiation uses MiMC over the scalar field of BLS12-381, and

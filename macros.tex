@@ -49,10 +49,10 @@
 
 % no paragraph ends with one or two words on a line of their own
 % set again at every chapter, since the contents lists reset it
-\AddToHook{cmd/chapter/before}{\setlength{\parfillskip}{0pt plus 0.5\textwidth}}
+\AddToHook{cmd/chapter/before}{\setlength{\parfillskip}{0pt plus \dimexpr\textwidth-5em\relax}}
 % and in lists, theorems and proofs, which also reset it
 \makeatletter
-\AddToHook{cmd/@trivlist/after}{\setlength{\parfillskip}{0pt plus 0.5\linewidth}}
+\AddToHook{cmd/@trivlist/after}{\setlength{\parfillskip}{0pt plus \dimexpr\linewidth-5em\relax}}
 \makeatother
 \setlength{\emergencystretch}{1.5em}
 

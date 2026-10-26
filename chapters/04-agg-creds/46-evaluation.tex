@@ -11,31 +11,30 @@ Idemix implementation on the same version of \texttt{gnark-crypto} and on the
 same machine as our scheme, so that both use the same library. Idemix issues one credential on all $n$ attributes
 from one issuer, and presents it with $k$ attributes disclosed. We take all measurements
 on a MacBook Air with an Apple M2 and 16\,GB of RAM, using all eight
-cores. Each time is the median of 100 repetitions, and the interquartile range
-is within 6\% of the median for every operation.
+cores. Each time is the median of 100 repetitions.
 
 \begin{table}[htbp] \centering \small \setlength{\tabcolsep}{3.5pt}
-  \begin{tabular}{@{}l r l r@{}}
+  \begin{tabular}{@{}l r r@{}}
     \toprule
-    Algorithm & Time (ms) & Output & Size (bytes) \\
+    Algorithm & Time (ms) & Size (bytes) \\
     \midrule
-    $\AACgen$ & 22.5 & $\crs$ & 28912 \\
-    $\AACregister$, user & 0.149 & registration request & 128 \\
-    $\AACregister$, registration authority & 0.807 & $\regcred$ & 320 \\
-    $\AACissue$, user & 0.0756 & issuance request & 440 \\
-    $\AACissue$, issuer & 2.94 & $\cred$ & 192 \\
-    $\AACaggregate$ & 0.543 & $\aggcred$ & 3224 \\
-    $\AACpresent$ & 20.1 & $\algoproof$ & 10008 \\
-    $\AACverify$ & 31.1 & & \\
+    $\AACgen$ & 22.5 & 28912 \\
+    $\AACregister$, user & 0.149 & 128 \\
+    $\AACregister$, registration authority & 0.807 & 320 \\
+    $\AACissue$, user & 0.0756 & 440 \\
+    $\AACissue$, issuer & 2.94 & 192 \\
+    $\AACaggregate$ & 0.543 & 3224 \\
+    $\AACpresent$ & 20.1 & 10008 \\
+    $\AACverify$ & 31.1 & \\
     \midrule
-    $\ATSgen$ & 0.176 & public key & 96 \\
-    $\ATSsign$ & 0.482 & signature & 144 \\
-    $\ATSrandomise$ & 0.333 & & \\
-    $\ATSverify$ & 1.27 & & \\
-    $\ATSverifyagg$ & 18.9 & & \\
+    $\ATSgen$ & 0.176 & 96 \\
+    $\ATSsign$ & 0.482 & 144 \\
+    $\ATSrandomise$ & 0.333 & \\
+    $\ATSverify$ & 1.27 & \\
+    $\ATSverifyagg$ & 18.9 & \\
     \midrule
-    Idemix present & 27.0 & presentation & 3034 \\
-    Idemix verify & 11.9 & & \\
+    Idemix present & 27.0 & 3034 \\
+    Idemix verify & 11.9 & \\
     \bottomrule
   \end{tabular}
   \caption[Aggregate credentials: times and sizes]{Time of each algorithm and
