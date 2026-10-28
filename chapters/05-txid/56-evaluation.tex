@@ -25,10 +25,6 @@ two, each starting with a 32-byte nonce from the registration authority or the
 auditor, and a transaction includes a 32-byte payload and its 8-byte length.
 
 \begin{table}[htbp] \centering \small
-\caption[Tracing: time and message size of every algorithm]{Time of each
-algorithm at $\ell = 8$, in milliseconds, and size of the message it sends, in
-bytes. A first grant is a user's first grant to a given auditor.}
-\label{tab:txid-protocol}
   %
   \begin{tabular}{l r r r r} \toprule
     %
@@ -45,7 +41,7 @@ bytes. A first grant is a user's first grant to a given auditor.}
     %
     $\IDregister$, registration authority & 0.552 & 112 & 0.475 & 112 \\
     %
-    $\IDgrant$, first, user & 4.22 & 25\,280 & 17.3 & 852 \\
+    $\IDgrant$, first, user & 4.22 & 25280 & 17.3 & 852 \\
     %
     $\IDgrant$, first, auditor & 9.07 & -- & 4.16 & -- \\
     %
@@ -53,19 +49,21 @@ bytes. A first grant is a user's first grant to a given auditor.}
     %
     $\IDgrant$, later, auditor & 2.04 & -- & 4.16 & -- \\
     %
-    $\IDsubmit$ & 11.3 & 5\,160 & 28.3 & 1\,116 \\
+    $\IDsubmit$ & 11.3 & 5160 & 28.3 & 1116 \\
     %
     $\algo{Verify}$ & 6.70 & -- & 4.44 & -- \\
     %
     $\IDidentify$, one epoch & 36.9 & -- & 1.10 & -- \\
     %
   \bottomrule \end{tabular}
+\caption[Tracing: time and message size of every algorithm]{Time of each
+algorithm at $\ell = 8$, in milliseconds, and size of the message it sends, in
+bytes. A first grant is a user's first grant to a given auditor.}
+\label{tab:txid-protocol}
 %
 \end{table}
 
 \begin{table}[htbp] \centering \small
-\caption[Tracing: time of every proof]{Time to prove and verify each relation
-at $\ell = 8$, in milliseconds. Hash-based times leave out the linking proof.} \label{tab:txid-relations}
   %
   \begin{tabular}{l l r r r r} \toprule
     %
@@ -89,14 +87,16 @@ at $\ell = 8$, in milliseconds. Hash-based times leave out the linking proof.} \
     $\rel_7$, range proof & $\IDsubmit$ & 4.82 & 0.809 & -- & -- \\
     %
   \bottomrule \end{tabular}
+\caption[Tracing: time of every proof]{Time to prove and verify each relation
+at $\ell = 8$, in milliseconds. Hash-based times leave out the linking proof.} \label{tab:txid-relations}
 %
 \end{table}
 
-Of the 5\,160 bytes of an algebraic transaction, the tag takes 576, the
-commitment 48, the proof of $\rel_6'$ 544, the proof of $\rel_7'$ 3\,312, the
-largest part, and the range proof 640. Of the 1\,116 bytes of a hash-based transaction, the tag takes
+Of the 5160 bytes of an algebraic transaction, the tag takes 576, the
+commitment 48, the proof of $\rel_6'$ 544, the proof of $\rel_7'$ 3312, the
+largest part, and the range proof 640. Of the 1116 bytes of a hash-based transaction, the tag takes
 32, the commitment 48, the proof of $\rel_6$ 512, and the proof of $\rel_7$
-with its linking proof 292 and 192. The public tracing key is 24\,624 bytes in
+with its linking proof 292 and 192. The public tracing key is 24624 bytes in
 the algebraic instantiation and 48 in the hash-based one.
 
 A proof of the zk-SNARK of Groth with its commitment takes 292 bytes, rather
@@ -140,8 +140,6 @@ without audit pseudonyms. Audit pseudonyms are commitments to users' enrolment
 identities and revocation handles that an auditor can check.
 
 \begin{table}[htbp] \centering \small
-\caption[Tracing against Idemix]{Per-transaction time in milliseconds and size in bytes, against Hyperledger Idemix, at $\ell = 8$. Idemix sizes are its own serialisation, with
-uncompressed group elements.} \label{tab:txid-idemix}
   %
   \begin{tabular}{l r r r} \toprule
     %
@@ -149,19 +147,19 @@ uncompressed group elements.} \label{tab:txid-idemix}
     %
     \midrule
     %
-    Idemix, no auditing mechanism & 3.37 & 2.39 &
-1\,099 \\
+    Idemix, no auditing mechanism & 3.37 & 2.39 & 1099 \\
     %
-    Idemix, with audit pseudonyms & 3.97 & 3.06 &
-1\,535 \\
+    Idemix, with audit pseudonyms & 3.97 & 3.06 & 1535 \\
     %
     \midrule
     %
-    This chapter, algebraic & 11.3 & 6.70 & 5\,160 \\
+    This chapter, algebraic & 11.3 & 6.70 & 5160 \\
     %
-    This chapter, hash-based & 28.3 & 4.44 & 1\,116 \\
+    This chapter, hash-based & 28.3 & 4.44 & 1116 \\
     %
   \bottomrule \end{tabular}
+\caption[Tracing against Idemix]{Per-transaction time in milliseconds and size in bytes, against Hyperledger Idemix, at $\ell = 8$. Idemix sizes are its own serialisation, with
+uncompressed group elements.} \label{tab:txid-idemix}
 %
 \end{table}
 

@@ -155,29 +155,29 @@ from non-interactive assumptions by a large class of
 reductions~\cite{AC:AbeGroOhk11}. In ours the GGM enters only through the
 registration signature.
 
-\begin{table}[htbp] \centering \small \setlength{\tabcolsep}{2.5pt}
-  \begin{tabular}{l|c|c|c|c|c|c} \toprule Scheme & Assumptions &
+\begin{table}[htbp] \centering \small \setlength{\tabcolsep}{3pt}
+  \begin{tabular}{l c c c c c c} \toprule
+    Scheme & Assumptions &
     \begin{tabular}[b]{@{}c@{}}Multi-\\issuer\end{tabular} &
     $|$cred$|$ & $|$pres$|$ & Prover &
     \begin{tabular}[b]{@{}c@{}}Issuer\\state\end{tabular} \\ \midrule
     CL02~\cite{SCN:CamLys02} & sRSA & No & $O(1)$ & $O(n)$ & $O(n)$ & -- \\
     CL04~\cite{C:CamLys04} & LRSW & No & $O(n)$ & $O(n)$ & $O(n)$ & -- \\
     BBS+~\cite{EC:BonBoy04a,SCN:AuSusMu06} & $q$-SDH & No & $O(1)$ & $O(n)$ &
-    $O(n)$ & -- \\ CL11~\cite{canard2011anonymous} & \parbox[t]{2.3cm}{\centering $q$-ADHSDH,
-    DDH, ROM} & Yes
-           & $O(1)$ & $O(1)$ & $O(k)$ & None \\ CDHK15~\cite{AC:CDHK15} &
-    \parbox[t]{2.3cm}{\centering SXDH, $J$-RootDH, $n$-BSDH, $q$-SDH, XDLIN,
-  co-CDH, DBP} & Yes & $O(K)$ & $O(K)$ & $O(K)$ & None \\
-  HP22~\cite{SCN:HebPoi22} & GGM & Yes & $O(1)$ & $O(1)$ & $O(k)$ & Per tag \\
-  MBGLS23~\cite{CCS:MBGLS23} & \parbox[t]{1.8cm}{\centering Interactive or GGM}
-                             & Yes & $O(1)$ & $O(K)$ & $O(k)$ & Per tag \\ Our
-scheme & \parbox[t]{2.3cm}{\centering BCDH, DDH, ROM, GGM} & Yes & $O(1)$ & $O(k)$ & $O(k)$ & None \\
+    $O(n)$ & -- \\
+    CL11~\cite{canard2011anonymous} & $q$-ADHSDH, DDH, ROM & Yes & $O(1)$ &
+    $O(1)$ & $O(k)$ & None \\
+    CDHK15~\cite{AC:CDHK15} & Several$^*$ & Yes & $O(K)$ & $O(K)$ & $O(K)$ & None \\
+    HP22~\cite{SCN:HebPoi22} & GGM & Yes & $O(1)$ & $O(1)$ & $O(k)$ & Per tag \\
+    MBGLS23~\cite{CCS:MBGLS23} & Interactive or GGM & Yes & $O(1)$ & $O(K)$ &
+    $O(k)$ & Per tag \\
+    Our scheme & GGM, ROM & Yes & $O(1)$ & $O(k)$ & $O(k)$ & None \\
 \bottomrule \end{tabular} \caption[Comparison with anonymous credential
 schemes]{Comparison with single- and multi-issuer anonymous credential
   schemes, for $n$ attributes supported, $k$ disclosed and $K$ issuers in a
-  presentation. Sizes leave out the disclosed values, BCDH is defined in
-  \Cref{sec:agg-creds-instantiation}, and issuer state is what an issuer
-  remembers about each user.} \label{tab:agg-creds-related} \end{table}
+  presentation. Sizes leave out the disclosed values, and issuer state is what an issuer
+  remembers about each user. $^*$SXDH, \mbox{$J$-RootDH}, \mbox{$n$-BSDH}, \mbox{$q$-SDH}, XDLIN,
+  \mbox{co-CDH} and DBP.} \label{tab:agg-creds-related} \end{table}
 
 \paragraph{Layout.} The rest of the chapter is organised as follows.
 \Cref{sec:agg-creds-definitions} states the problem and formalises it as an

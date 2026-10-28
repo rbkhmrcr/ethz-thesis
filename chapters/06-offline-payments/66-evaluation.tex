@@ -86,15 +86,16 @@ step on the phones and the card. The card takes most of the time. Auditing adds 
 Android and $2\,\mathrm{ms}$ on iOS to the payer's phone, which is under $3\%$
 of the payer's total.
 
-\begin{table}[htbp] \centering \small \begin{tabular}{l|rr|rr} \toprule &
-\multicolumn{2}{c|}{Android} & \multicolumn{2}{c}{iOS} \\
+\begin{table}[htbp] \centering \small \begin{tabular}{lrrrr} \toprule &
+\multicolumn{2}{c}{Android} & \multicolumn{2}{c}{iOS} \\
+\cmidrule(lr){2-3} \cmidrule(lr){4-5}
 Operation & no audit & audit & no audit & audit \\ \midrule
 Withdrawal, phone & 178 & 175 & 32 & 32 \\
-Withdrawal, smart card & \multicolumn{2}{c|}{229} & \multicolumn{2}{c}{231} \\
+Withdrawal, smart card & 229 & 229 & 231 & 231 \\
 Payment, payer phone & 37 & 46 & 11 & 13 \\
-Payment, payer smart card & \multicolumn{2}{c|}{371} & \multicolumn{2}{c}{368} \\
+Payment, payer smart card & 371 & 371 & 368 & 368 \\
 Payment, payee phone, 1 hop & 80 & 82 & 33 & 33 \\
-Payment, payee smart card & \multicolumn{2}{c|}{229} & \multicolumn{2}{c}{231} \\
+Payment, payee smart card & 229 & 229 & 231 & 231 \\
 \bottomrule \end{tabular} \caption[Offline payments: time on the phone and card]{Median time in milliseconds of each step of the
 wallet over $100$ runs, with and without the verifiable encryption of the payer's
 identifier. Smart card times include the NFC round trip and are the same with
@@ -165,29 +166,22 @@ server-side time of each algorithm at one hop without auditing. Times leave out
 the secure element's part.} \label{tab:offline-server}
 \end{table}
 
-\begin{table}[htbp] \centering \small
-\begin{tabular}{lllrc} \toprule
-Protocol & Channel & Party & Bytes & Messages \\ \midrule
-\multirow{3}{*}{$\OPregister$} & \multirow{2}{*}{network} & secure element & 192 & \multirow{2}{*}{3} \\
-& & registration authority & 144 & \\
-& card & secure element & 144 & 1 \\ \midrule
-\multirow{5}{*}{$\OPwithdraw$} & \multirow{3}{*}{network} & device & 664 & \multirow{3}{*}{4} \\
-& & intermediary & 792 & \\
-& & central bank & 128 & \\
-& \multirow{2}{*}{card} & device & 8 & \multirow{2}{*}{2} \\
-& & secure element & 80 & \\ \midrule
-\multirow{6}{*}{$\OPexecute$} & \multirow{2}{*}{network} & payer device & 1176 & \multirow{2}{*}{3} \\
-& & payee device & 48 & \\
-& \multirow{2}{*}{payer card} & device & 105 & \multirow{2}{*}{3} \\
-& & secure element & 192 & \\
-& \multirow{2}{*}{payee card} & device & 8 & \multirow{2}{*}{2} \\
-& & secure element & 80 & \\ \midrule
-\multirow{5}{*}{$\OPdeposit$} & \multirow{3}{*}{network} & device & 1128 & \multirow{3}{*}{4} \\
-& & intermediary & 1129 & \\
-& & central bank & 1 & \\
-& \multirow{2}{*}{card} & device & 57 & \multirow{2}{*}{2} \\
-& & secure element & 192 & \\
+\begin{table}[htbp] \centering \small \setlength{\tabcolsep}{5pt}
+\begin{tabular}{llrcrrc} \toprule
+& \multicolumn{3}{c}{Network} & \multicolumn{3}{c}{Card} \\
+\cmidrule(lr){2-4} \cmidrule(lr){5-7}
+Protocol & Party & Bytes & Msgs. & Device & SE & Msgs. \\ \midrule
+\multirow{2}{*}{$\OPregister$} & secure element & 192 & \multirow{2}{*}{3} & 0 & 144 & 1 \\
+& registration authority & 144 & & & & \\ \midrule
+\multirow{3}{*}{$\OPwithdraw$} & device & 664 & \multirow{3}{*}{4} & 8 & 80 & 2 \\
+& intermediary & 792 & & & & \\
+& central bank & 128 & & & & \\ \midrule
+\multirow{2}{*}{$\OPexecute$} & payer device & 1176 & \multirow{2}{*}{3} & 105 & 192 & 3 \\
+& payee device & 48 & & 8 & 80 & 2 \\ \midrule
+\multirow{3}{*}{$\OPdeposit$} & device & 1128 & \multirow{3}{*}{4} & 57 & 192 & 2 \\
+& intermediary & 1129 & & & & \\
+& central bank & 1 & & & & \\
 \bottomrule \end{tabular} \caption[Offline payments: communication]{Bytes sent
 by each party and number of messages in each protocol at one hop without
-auditing. The registration authority sends a 32-byte nonce and its 112-byte
-response.} \label{tab:offline-comms} \end{table}
+auditing, with SE for the secure element. The registration authority sends a
+32-byte nonce and its 112-byte response.} \label{tab:offline-comms} \end{table}
