@@ -3,24 +3,25 @@
 The systems we want to make private already have issuers, auditors,
 registration authorities and central banks in them, and these entities exist
 because the systems need them. In this thesis, we take their roles, and the
-auditing and certification requirements that come with them, as given, and
-ask how narrowly each capability can be defined. In each of our protocols,
-these entities keep the functions they already have, such as providing
-availability, maintaining state, certifying information or investigating
-transactions, while cryptography limits what each of them can learn and do.
-Users keep their privacy, and in some cases gain privacy compared with existing
-designs, without taking on the work of these entities themselves.
+auditing and certification requirements that come with them, as given, and ask
+how narrowly each capability can be defined. In each of our protocols, these
+entities keep the functions they already have, such as providing availability,
+maintaining state, certifying information or investigating transactions, while
+cryptography limits what each of them can learn and do.  Users keep their
+privacy, and in some cases gain privacy compared with existing designs, without
+taking on the work of these entities themselves.
 
 Each chapter gives a role only the capability it needs. In \Cref{chap:tsps},
 certification is split between several signers, and only a number of signers
 above the threshold can sign together. In \Cref{chap:agg-creds}, the
-registration authority binds each user's key to a tag and sees no attribute values, and each issuer learns only
-the attributes it certifies. In \Cref{chap:txid}, auditors trace only the users
-and epochs they have been granted, and a grant never exposes users who are not
-targeted. In \Cref{chap:offline-payments}, withdrawals cannot be linked to
-deposits, the secure element holds only the secret key and produces its part of
-a joint proof, and the auditor revokes the anonymity of a double spender and no
-one else.
+registration authority binds each user's key to a tag and sees no attribute
+values, and each issuer learns only the attributes it certifies. In
+\Cref{chap:txid}, auditors trace only the users and epochs they have been
+granted, and a grant never exposes users who are not targeted. In
+\Cref{chap:offline-payments}, withdrawals cannot be linked to deposits, the
+secure element holds only the secret key and produces its part of a joint
+proof, and the auditor revokes the anonymity of a double spender and no one
+else.
 
 Our constructions also avoid interaction and per-user state wherever possible.
 As discussed in \Cref{chap:introduction}, issuers in different countries have
@@ -34,13 +35,13 @@ payments need no network at all, since payees accept a payment from the
 transcript alone and can pay the token onward.
 
 Every chapter also gives a generic construction from standard primitives, and
-then an efficient instantiation, which we implement and benchmark. Most instantiations
-use Sigma protocols and pairing product equations, and the tracing protocol is
-also instantiated with MiMC and a zk-SNARK. The online phase of threshold
-signing stays below 2~ms up to sixteen parties. With 128 issuers and 64
-disclosed attributes, an aggregate credential presentation takes 20.1~ms to
-produce and 31.1~ms to verify. A smart card authorises an offline payment in
-under 400~ms.
+then an efficient instantiation, which we implement and benchmark. Most
+instantiations use Sigma protocols and pairing product equations, and the
+tracing protocol is also instantiated with MiMC and a zk-SNARK. The online
+phase of threshold signing stays below 2~ms up to sixteen parties. With 128
+issuers and 64 disclosed attributes, an aggregate credential presentation takes
+20.1~ms to produce and 31.1~ms to verify. A smart card authorises an offline
+payment in under 400~ms.
 
 Decentralisation and privacy can feel so aligned that the involvement of any
 central party in a protocol can seem like a threat to users' privacy. But a
@@ -61,34 +62,34 @@ assumptions than the generic constructions: the GGM for $\AGHO$ in
 Dodis-Yampolskiy PRF in \Cref{chap:txid}, and the DL, DDH, $q$-SDH and $q$-MSDH
 assumptions in the random oracle model in \Cref{chap:offline-payments}.
 Threshold $\KPW$ avoids the GGM and rests on the SXDH assumption, with
-signatures of seven group elements instead of three. Our security proofs are
-in the standalone model, since extraction rewinds, and composable guarantees
-would need different proof techniques. The chapters share a credential layer, a
+signatures of seven group elements instead of three. Our security proofs are in
+the standalone model, since extraction rewinds, and composable guarantees would
+need different proof techniques. The chapters share a credential layer, a
 registration authority with BBS+ or SPS credentials, but we give no joint
 analysis of credentials, tracing and payments run together. Offline payments
 also rely on a trusted auditor to identify double spenders.
 
 Several problems remain open. The first is weaker assumptions. A rerandomisable
 SPS scheme under standard assumptions would remove the GGM from aggregate
-credentials, but with larger registration signatures, and it is open
-whether tracing can be built from a primitive that avoids $q$-type assumptions.
-The second is stronger security models. For threshold SPS schemes, our
-reduction under adaptive corruption loses a factor exponential in the number of
-signers and assumes erasures, and strong unforgeability and real key generation
-remain to be proven. A concrete security analysis would give the security of
-aggregate credentials at the parameters we use, and composable security is
-open throughout. The third is spreading trust further. The threshold techniques
-of \Cref{chap:tsps} could split the auditor of \Cref{chap:txid} between several
+credentials, but with larger registration signatures, and it is open whether
+tracing can be built from a primitive that avoids $q$-type assumptions.  The
+second is stronger security models. For threshold SPS schemes, our reduction
+under adaptive corruption loses a factor exponential in the number of signers
+and assumes erasures, and strong unforgeability and real key generation remain
+to be proven. A concrete security analysis would give the security of aggregate
+credentials at the parameters we use, and composable security is open
+throughout. The third is spreading trust further. The threshold techniques of
+\Cref{chap:tsps} could split the auditor of \Cref{chap:txid} between several
 entities, and revoking the anonymity of double spenders without a trusted
-auditor is open. Revocation, of credentials and of offline payments, is
-limited to expiry by epochs. Finally, constant-size presentations, issuer
-hiding, retrospective grants and divisible tokens would each extend one of our
+auditor is open. Revocation, of credentials and of offline payments, is limited
+to expiry by epochs. Finally, constant-size presentations, issuer hiding,
+retrospective grants and divisible tokens would each extend one of our
 protocols.
 
 We return to the argument of the introduction. The alternative to auditable
 payments is not perfect privacy, but the status quo, where banks and payment
 providers see all transactions in the clear. Auditing and certification that
 are defined narrowly, to one user, one epoch or one double spender, and
-enforced by cryptography, are not a hole punched in a private system. They are
-how privacy can improve on what exists today, in systems that keep the entities
+enforced by cryptography, are not backdoors into a private system. They are how
+privacy can improve on what exists today, in systems that keep the entities
 they already rely on.

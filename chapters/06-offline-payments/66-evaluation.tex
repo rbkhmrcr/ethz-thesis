@@ -128,7 +128,15 @@ the deposit request $d_n$ against the number of hops, with and without
 auditing.} \label{fig:offline-hops-sizes} \end{figure}
 
 \Cref{tab:offline-server} gives the server-side time of each algorithm at one
-hop, and \Cref{tab:offline-comms} the bytes each party sends in each protocol.
+hop, and \Cref{tab:offline-comms} the bytes each party sends in each protocol,
+both without auditing. Auditing only changes payments and deposits. With
+auditing, the payer takes $1.65\,\mathrm{ms}$, the payee $4.32\,\mathrm{ms}$,
+the deposit request $1.65\,\mathrm{ms}$ and the central bank
+$4.28\,\mathrm{ms}$ at one hop, and \Cref{fig:offline-hops-times} shows these
+times for longer chains. The payer device then sends $1400$ bytes instead of
+$1176$, and at deposit the device and the intermediary send $1352$ and $1353$
+bytes instead of $1128$ and $1129$. \Cref{fig:offline-hops-sizes} shows how
+these sizes grow with the number of hops.
 Every server-side operation takes under $5\,\mathrm{ms}$, and identification
 under $0.1\,\mathrm{ms}$. The card channel never carries more than $192$ bytes
 in one direction. The public keys of the central bank, the registration
@@ -136,50 +144,50 @@ authority and the auditor take $480$, $96$ and $48$ bytes, and all public keys
 and generators together $1056$ bytes, or $1008$ without auditing. The proof
 made after unblinding at withdrawal takes $432$ bytes.
 
-\begin{table}[htbp] \centering \small \begin{tabular}{l|rr} \toprule
-Algorithm & no audit & audit \\ \midrule
-$\OPgen$, central bank key & \multicolumn{2}{c}{0.875} \\
-$\OPgen$, registration authority key & \multicolumn{2}{c}{0.175} \\
-$\OPgen$, auditor key & \multicolumn{2}{c}{0.0740} \\
-$\OPgen$, commitment key & \multicolumn{2}{c}{0.626} \\
-$\OPregister$, registration authority & \multicolumn{2}{c}{0.526} \\
-$\OPwithdraw$, request & \multicolumn{2}{c}{1.53} \\
-$\OPwithdraw$, intermediary & \multicolumn{2}{c}{1.15} \\
-$\OPwithdraw$, response & \multicolumn{2}{c}{1.61} \\
-$\OPwithdraw$, unblind and proof & \multicolumn{2}{c}{2.83} \\
-$\OPexecute$, payer & 1.14 & 1.65 \\
-$\OPexecute$, payee, 1 hop & 3.75 & 4.32 \\
-$\OPdeposit$, request & 1.16 & 1.65 \\
-$\OPdeposit$, central bank, 1 hop & 3.83 & 4.28 \\
-$\OPidentify$ & \multicolumn{2}{c}{0.0778} \\
+\begin{table}[htbp] \centering \small \begin{tabular}{lr} \toprule
+Algorithm & Time (ms) \\ \midrule
+$\OPgen$, central bank key & 0.875 \\
+$\OPgen$, registration authority key & 0.175 \\
+$\OPgen$, auditor key & 0.0740 \\
+$\OPgen$, commitment key & 0.626 \\
+$\OPregister$, registration authority & 0.526 \\
+$\OPwithdraw$, request & 1.53 \\
+$\OPwithdraw$, intermediary & 1.15 \\
+$\OPwithdraw$, response & 1.61 \\
+$\OPwithdraw$, unblind and proof & 2.83 \\
+$\OPexecute$, payer & 1.14 \\
+$\OPexecute$, payee, 1 hop & 3.75 \\
+$\OPdeposit$, request & 1.16 \\
+$\OPdeposit$, central bank, 1 hop & 3.83 \\
+$\OPidentify$ & 0.0778 \\
 \bottomrule \end{tabular} \caption[Offline payments: server-side time]{Median
-server-side time in milliseconds of each algorithm at one hop, with and without
-auditing. Times leave out the secure element's part.} \label{tab:offline-server}
+server-side time of each algorithm at one hop without auditing. Times leave out
+the secure element's part.} \label{tab:offline-server}
 \end{table}
 
-\begin{table}[htbp] \centering \small \setlength{\tabcolsep}{4pt}
-\begin{tabular}{lll|rr|c} \toprule
-Protocol & Channel & Party & no audit & audit & Messages \\ \midrule
-\multirow{3}{*}{$\OPregister$} & \multirow{2}{*}{network} & secure element & \multicolumn{2}{c|}{192} & \multirow{2}{*}{3} \\
-& & registration authority & \multicolumn{2}{c|}{144} & \\
-& card & secure element & \multicolumn{2}{c|}{144} & 1 \\ \midrule
-\multirow{5}{*}{$\OPwithdraw$} & \multirow{3}{*}{network} & device & \multicolumn{2}{c|}{664} & \multirow{3}{*}{4} \\
-& & intermediary & \multicolumn{2}{c|}{792} & \\
-& & central bank & \multicolumn{2}{c|}{128} & \\
-& \multirow{2}{*}{card} & device & \multicolumn{2}{c|}{8} & \multirow{2}{*}{2} \\
-& & secure element & \multicolumn{2}{c|}{80} & \\ \midrule
-\multirow{6}{*}{$\OPexecute$} & \multirow{2}{*}{network} & payer device & 1176 & 1400 & \multirow{2}{*}{3} \\
-& & payee device & \multicolumn{2}{c|}{48} & \\
-& \multirow{2}{*}{payer card} & device & \multicolumn{2}{c|}{105} & \multirow{2}{*}{3} \\
-& & secure element & \multicolumn{2}{c|}{192} & \\
-& \multirow{2}{*}{payee card} & device & \multicolumn{2}{c|}{8} & \multirow{2}{*}{2} \\
-& & secure element & \multicolumn{2}{c|}{80} & \\ \midrule
-\multirow{5}{*}{$\OPdeposit$} & \multirow{3}{*}{network} & device & 1128 & 1352 & \multirow{3}{*}{4} \\
-& & intermediary & 1129 & 1353 & \\
-& & central bank & \multicolumn{2}{c|}{1} & \\
-& \multirow{2}{*}{card} & device & \multicolumn{2}{c|}{57} & \multirow{2}{*}{2} \\
-& & secure element & \multicolumn{2}{c|}{192} & \\
+\begin{table}[htbp] \centering \small
+\begin{tabular}{lllrc} \toprule
+Protocol & Channel & Party & Bytes & Messages \\ \midrule
+\multirow{3}{*}{$\OPregister$} & \multirow{2}{*}{network} & secure element & 192 & \multirow{2}{*}{3} \\
+& & registration authority & 144 & \\
+& card & secure element & 144 & 1 \\ \midrule
+\multirow{5}{*}{$\OPwithdraw$} & \multirow{3}{*}{network} & device & 664 & \multirow{3}{*}{4} \\
+& & intermediary & 792 & \\
+& & central bank & 128 & \\
+& \multirow{2}{*}{card} & device & 8 & \multirow{2}{*}{2} \\
+& & secure element & 80 & \\ \midrule
+\multirow{6}{*}{$\OPexecute$} & \multirow{2}{*}{network} & payer device & 1176 & \multirow{2}{*}{3} \\
+& & payee device & 48 & \\
+& \multirow{2}{*}{payer card} & device & 105 & \multirow{2}{*}{3} \\
+& & secure element & 192 & \\
+& \multirow{2}{*}{payee card} & device & 8 & \multirow{2}{*}{2} \\
+& & secure element & 80 & \\ \midrule
+\multirow{5}{*}{$\OPdeposit$} & \multirow{3}{*}{network} & device & 1128 & \multirow{3}{*}{4} \\
+& & intermediary & 1129 & \\
+& & central bank & 1 & \\
+& \multirow{2}{*}{card} & device & 57 & \multirow{2}{*}{2} \\
+& & secure element & 192 & \\
 \bottomrule \end{tabular} \caption[Offline payments: communication]{Bytes sent
-by each party and number of messages in each protocol at one hop, with and
-without auditing. The registration authority sends a 32-byte nonce and its
-112-byte response.} \label{tab:offline-comms} \end{table}
+by each party and number of messages in each protocol at one hop without
+auditing. The registration authority sends a 32-byte nonce and its 112-byte
+response.} \label{tab:offline-comms} \end{table}
