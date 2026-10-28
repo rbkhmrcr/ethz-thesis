@@ -152,8 +152,11 @@ multi-issuer credential systems. The efficient schemes in the table, ours
 included, rely on $q$-type assumptions, interactive assumptions or the GGM. SPS
 schemes with signatures as short as those of $\AGHO$ cannot be proven secure
 from non-interactive assumptions by a large class of
-reductions~\cite{AC:AbeGroOhk11}. In ours the GGM enters only through the
-registration signature.
+reductions~\cite{AC:AbeGroOhk11}. HP22 and our scheme both use the GGM for one
+component only, and the table lists it as the strongest assumption. In ours it
+is needed only for the $\AGHO$ signatures of the registration authority, and the
+rest of the scheme is secure under BCDH and DDH in the random oracle model
+(\Cref{thm:agg-creds-thm-2}).
 
 \begin{table}[htbp] \centering \small \setlength{\tabcolsep}{3pt}
   \begin{tabular}{l c c c c c c} \toprule
