@@ -24,7 +24,7 @@ We measure every algorithm of the intermediary, the central bank, the
 registration authority and the auditor separately in a server-side
 implementation. It is written in Go with gnark-crypto 0.21.0 over the BLS12-381
 curve, and we run it on a MacBook Air with an Apple M2 and 16\,GB of
-RAM~\cite{gnark-crypto}. We report medians of $100$ runs, after $10$ warm-up
+RAM~\cite{gnark-crypto}. We report medians of 100 runs, after 10 warm-up
 calls on the server.
 
 \begin{figure}[htbp] \centering \small
@@ -79,11 +79,11 @@ communicate via Bluetooth Low Energy, and each device communicates with its
 secure element over NFC.} \label{fig:offline-pay-seq} \end{figure}
 
 Withdrawal and the payer side of a payment both complete in under half a second,
-and the smart card authorises a payment in under $400\,\mathrm{ms}$.
+and the smart card authorises a payment in under 400\,ms.
 
 \Cref{tab:offline-timings} gives the time of each wallet
-step on the phones and the card. The card takes most of the time. Auditing adds $9\,\mathrm{ms}$ on
-Android and $2\,\mathrm{ms}$ on iOS to the payer's phone, which is under $3\%$
+step on the phones and the card. The card takes most of the time. Auditing adds 9\,ms on
+Android and 2\,ms on iOS to the payer's phone, which is under 3\%
 of the payer's total.
 
 \begin{table}[htbp] \centering \small \begin{tabular}{lrrrr} \toprule &
@@ -97,7 +97,7 @@ Payment, payer smart card & 371 & 371 & 368 & 368 \\
 Payment, payee phone, 1 hop & 80 & 82 & 33 & 33 \\
 Payment, payee smart card & 229 & 229 & 231 & 231 \\
 \bottomrule \end{tabular} \caption[Offline payments: time on the phone and card]{Median time in milliseconds of each step of the
-wallet over $100$ runs, with and without the verifiable encryption of the payer's
+wallet over 100 runs, with and without the verifiable encryption of the payer's
 identifier. Smart card times include the NFC round trip and are the same with
 and without auditing.} \label{tab:offline-timings}
 \end{table}
@@ -109,10 +109,10 @@ each hop contributes one joint proof to check, which includes the audit
 equations when auditing.
 
 \Cref{fig:offline-hops-times,fig:offline-hops-sizes} show how time and size
-grow with the length of the chain. With auditing, the payee verifies $32$ hops in
-$883\,\mathrm{ms}$ on Android and $577\,\mathrm{ms}$ on iOS. The auditing
-overhead of 10 to 20\% holds from four hops on. Payments grow by $912$ bytes per hop with
-auditing and by $688$ bytes without.
+grow with the length of the chain. With auditing, the payee verifies 32 hops in
+883\,ms on Android and 577\,ms on iOS. The auditing
+overhead of 10 to 20\% holds from four hops on. Payments grow by 912 bytes per hop with
+auditing and by 688 bytes without.
 
 \begin{figure}[htbp] \centering
 \includegraphics[width=\textwidth]{chapters/06-offline-payments/offline-hops-times.pdf}
@@ -131,19 +131,19 @@ auditing.} \label{fig:offline-hops-sizes} \end{figure}
 \Cref{tab:offline-server} gives the server-side time of each algorithm at one
 hop, and \Cref{tab:offline-comms} the bytes each party sends in each protocol,
 both without auditing. Auditing only changes payments and deposits. With
-auditing, the payer takes $1.65\,\mathrm{ms}$, the payee $4.32\,\mathrm{ms}$,
-the deposit request $1.65\,\mathrm{ms}$ and the central bank
-$4.28\,\mathrm{ms}$ at one hop, and \Cref{fig:offline-hops-times} shows these
-times for longer chains. The payer device then sends $1400$ bytes instead of
-$1176$, and at deposit the device and the intermediary send $1352$ and $1353$
-bytes instead of $1128$ and $1129$. \Cref{fig:offline-hops-sizes} shows how
+auditing, the payer takes 1.65\,ms, the payee 4.32\,ms,
+the deposit request 1.65\,ms and the central bank
+4.28\,ms at one hop, and \Cref{fig:offline-hops-times} shows these
+times for longer chains. The payer device then sends 1400 bytes instead of
+1176, and at deposit the device and the intermediary send 1352 and 1353
+bytes instead of 1128 and 1129. \Cref{fig:offline-hops-sizes} shows how
 these sizes grow with the number of hops.
-Every server-side operation takes under $5\,\mathrm{ms}$, and identification
-under $0.1\,\mathrm{ms}$. The card channel never carries more than $192$ bytes
+Every server-side operation takes under 5\,ms, and identification
+under 0.1\,ms. The card channel never carries more than 192 bytes
 in one direction. The public keys of the central bank, the registration
-authority and the auditor take $480$, $96$ and $48$ bytes, and all public keys
-and generators together $1056$ bytes, or $1008$ without auditing. The proof
-made after unblinding at withdrawal takes $432$ bytes.
+authority and the auditor take 480, 96 and 48 bytes, and all public keys
+and generators together 1056 bytes, or 1008 without auditing. The proof
+made after unblinding at withdrawal takes 432 bytes.
 
 \begin{table}[htbp] \centering \small \begin{tabular}{lr} \toprule
 Algorithm & Time (ms) \\ \midrule

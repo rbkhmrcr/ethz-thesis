@@ -111,8 +111,8 @@ deployment can tolerate a trusted setup, and on whether proving or verification
 time matters more.
 
 Verification time hardly depends on $\ell$. In the hash-based instantiation it
-stays at $4.44\,\mathrm{ms}$ for every $\ell$ from $1$ to $12$. In the algebraic
-one it grows from $6.55\,\mathrm{ms}$ at $\ell = 1$ to $6.76\,\mathrm{ms}$ at
+stays at 4.44\,ms for every $\ell$ from $1$ to $12$. In the algebraic
+one it grows from 6.55\,ms at $\ell = 1$ to 6.76\,ms at
 $\ell = 12$, since the Bulletproofs verifier is linear in $\ell$. The hash-based transaction has
 constant size, and the algebraic one grows only with the logarithmic size of the
 range proof. Algebraic
@@ -163,8 +163,8 @@ uncompressed group elements.} \label{tab:txid-idemix}
 %
 \end{table}
 
-Idemix audits by testing one ledger entry at a time, at $0.189\,\mathrm{ms}$ per
+Idemix audits by testing one ledger entry at a time, at 0.189\,ms per
 entry on one core. Our tracing breaks even with Idemix at
 about 200 entries per epoch in the algebraic instantiation and 6 in the
 hash-based one. At $10^6$ entries the algebraic instantiation takes
-$36.9\,\mathrm{ms}$ against $189\,\mathrm{s}$ for Idemix.
+36.9\,ms against 189\,s for Idemix.

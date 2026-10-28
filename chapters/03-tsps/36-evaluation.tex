@@ -25,7 +25,7 @@ $\group{1}$. ATLAS runs with $n = 2t+1$ and MASCOT with $t = n-1$. The other
 chapters are evaluated on a laptop, but we run this chapter's benchmarks on a
 server, so that we can simulate up to 16 parties with a core each. The server
 is a Google Cloud c4-standard-32 instance with an Intel Xeon Platinum 8581C
-processor, 16 physical cores and 117~GB of RAM. All parties run on it with one
+processor, 16 physical cores and 117\,GB of RAM. All parties run on it with one
 thread each, over authenticated channels on that machine, and the prior and
 centralised schemes run on the same server. Each timed call starts from empty
 preprocessing, so the offline and key generation times include making triples.
@@ -46,14 +46,14 @@ the signature when combining, so it sends its share to all others. The online ph
 centralised signing. All interaction is in key generation and the offline
 phase, where MASCOT takes far longer than ATLAS.
 \Cref{fig:tsps-n-times,fig:tsps-n-comm} show that communication grows linearly
-in $n$, and that the online phase stays below 2~ms up to sixteen parties.
+in $n$, and that the online phase stays below 2\,ms up to sixteen parties.
 
 CKPSS23 and MMSST24 have no offline phase, and each signer sends one signature
 share of 96 or 384 bytes to the combiner. \Cref{fig:tsps-baselines} compares
 them with our schemes, where the extra time is in the offline phase.
 Threshold $\AGHO$ has signatures of three group elements instead of the seven of
 MMSST24, and verification needs $\ell+4$ pairings instead of $\ell+11$, but it
-is secure only in the GGM. Its verification takes 3.05~ms against 2.79~ms for
+is secure only in the GGM. Its verification takes 3.05\,ms against 2.79\,ms for
 MMSST24, since the two implementations use different libraries. CKPSS23 has smaller signatures, but each signed element needs a counterpart
 in the second group, which on BLS12-381 triples the message size.
 
@@ -100,7 +100,7 @@ state when 16 states are made together.}
 \label{tab:tsps-benchmarks} \end{table}
 
 \begin{table}[htbp] \centering \small \setlength{\tabcolsep}{3pt}
-\begin{tabular}{l l r r r@{\hspace{9pt}}r r r r r}
+\begin{tabular}{l l r r r@{\hspace{5pt}}r r r r r}
 \toprule
  & & \multicolumn{3}{c}{Communication (kB)} & \multicolumn{5}{c}{Size (bytes)} \\
 \cmidrule(lr){3-5} \cmidrule(lr){6-10}
