@@ -337,15 +337,11 @@ on $\epoch_i$ are the following pair:
     (\gen^{a r_i + t_i}, \ \gen^{\omega r_i + b t_i}).
   \end{equation*}
   %
-  Its exponents are the image of the uniform vector $(r_i,t_i)$ under the
-matrix $\left(\begin{smallmatrix} a & 1 \\ \omega & b\end{smallmatrix}\right)$, which
-is invertible whenever $ab \neq \omega$. So each pair is uniform in $\group{1}^2$,
+Each pair is uniform in $\group{1}^2$,
 and, as the $(r_i,t_i)$ are drawn independently, the pairs are mutually
 independent. The view of $\adv$ is that of a random function, except on the
-event $ab = \omega$, which has probability $1/p$.
-
-  The term $\gen^{t_i}$ is needed. Rerandomising with $r_i$ alone would give
-the response $\gen^{\omega r_i} = \HE(\epoch_i)^{\omega/a}$, which is again $\FE$, under
+event $ab = \omega$, which has probability $1/p$. $\gen^{t_i}$ is needed as rerandomising with $r_i$ alone would give
+$\gen^{\omega r_i} = \HE(\epoch_i)^{\omega/a}$, which is $\FE$ under
 key $\omega/a$ rather than $b$, so the two cases would be identically distributed.
 
   It remains to give $\adv$ the public tracing key. $\advB$ draws $\utk''$
@@ -358,8 +354,8 @@ computes the first component as follows:
   \end{equation*}
   %
   So $T$ matches the key $b$ in both cases of the challenge. As $\advB$ also
-plays the registration authority, it chooses the remaining BBS+ generators and the issuing key, and
-produces every other public value of the protocol.
+plays the registration authority, it chooses the BBS+ generators and the issuing key and
+produces every public value of the protocol.
 
   So $\advB$ wins the DDH experiment whenever $\adv$ wins, up to the event $ab =
 \omega$, which gives the following bound:
@@ -370,13 +366,13 @@ produces every other public value of the protocol.
   \end{equation*}
   %
   The bound does not depend on the number of random oracle queries, since a
-fresh pair $(r_i, t_i)$ is drawn for each new epoch and reused from then on.
+fresh pair $(r_i, t_i)$ is drawn for each new epoch.
 
 \end{proof}
 
 \subsection{Proof of \Cref{lem:txid-ft-prf}}
 
-Recall that the tag PRF of the algebraic instantiation is the following, for
+Recall that the tag PRF of the algebraic instantiation is defined as follows, for
 public parameters $W_\gamma = \ggen_D^{1/(\utk''+\gamma)}$ and a uniform epoch
 key $\ek \in \group{1}$:
 %

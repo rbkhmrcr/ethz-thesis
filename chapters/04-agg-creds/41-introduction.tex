@@ -17,8 +17,10 @@ attributes. This issuer is responsible for all issuance and can learn all
 attribute values of every user. Later schemes distribute issuance across
 multiple authorities or delegate it to
 sub-issuers~\cite{NDSS:SABMD19,SP:DKLsT23,CCS:KRBKKL24}. The issuer is then
-decentralised, but remains conceptually responsible for all attributes.  This
-reduces trust in any one party, but does not reflect real-world scenarios,
+decentralised, but remains conceptually responsible for all attributes, so that
+all issuers can learn all users' attribute values. The power to certify and the
+knowledge that comes with it are both shared across issuers, which leads to a
+worse privacy outcome for users. Distribution reduces trust in any one party, but does not reflect real-world scenarios,
 where distinct entities independently certify one or a small subset of
 attributes.
 
@@ -31,7 +33,10 @@ transport authorities, each certifying only its own attributes.
 Credential systems with distributed issuance still require the issuers to
 coordinate. With many issuers worldwide, each relevant to only some users, that
 coordination is impractical, and between issuers with no relationship to one
-another it may be impossible. Threshold issuance without an interactive setup
+another it may be impossible. A driving licence, a birth certificate and a
+passport may each be issued by countries with no diplomatic relations with one
+another, and these issuers have no incentive to take part in an expensive
+protocol so that individuals can privately prove statements about themselves. Threshold issuance without an interactive setup
 avoids this coordination for issuers certifying the same
 credential~\cite{EPRINT:GGPR25}. Our scheme avoids it for issuers certifying
 different attributes.

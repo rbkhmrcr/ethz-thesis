@@ -1,13 +1,19 @@
 \section{Introduction}\label{sec:tsps-introduction}
 
-We begin with the certification of commitments on a ledger. In ledgers
+Each protocol in this thesis involves entities certifying information while
+allowing users to keep their content private, whether validators of a ledger
+endorsing commitments to tokens, a registration authority certifying the keys
+of users, or issuers certifying attributes of users. We begin with the
+certification of commitments on a ledger. In ledgers
 proposed for central bank digital currencies, several authorities each endorse
 a transaction before it is recorded~\cite{androulaki2020auditable}. The
 presence of several endorsers is a requirement of these systems, and the
 endorsers are institutions with a working relationship that are able to
 communicate with one another. We want the endorsers to jointly compute a
 signature on each commitment. Multiparty computation is well suited to this
-setting. As discussed in \Cref{chap:introduction}, it requires interaction
+setting. It allows a function to be computed by multiple mutually distrusting
+parties, each with a private input, while revealing nothing but the
+output~\cite{FOCS:Yao86,STOC:GolMicWig87}. It generally requires interaction
 between all participants, but these participants can interact, and the
 interaction only becomes a problem when it delays signing once a transaction
 arrives. We move all of it into key generation and an offline phase that does
@@ -46,7 +52,8 @@ techniques~\cite{C:AGHO11,C:KilPanWee15,C:DPSZ12,CCS:KelOrsSch16,C:GLOPS21}.
 One instantiation has signatures of three group elements, the smallest possible
 for SPS in type III groups, and is secure in the GGM~\cite{C:AGHO11}. The other
 has larger signatures and relies only on the SXDH
-assumption~\cite{C:KilPanWee15}.
+assumption~\cite{C:KilPanWee15}. We implement and evaluate both instantiations
+with two MPC protocols.
 
 We start from a common construction which applies to any SPS scheme with a
 property we call decomposable signing. All message-independent computation runs

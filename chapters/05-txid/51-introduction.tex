@@ -3,7 +3,11 @@
 \Cref{chap:tsps,chap:agg-creds} consider ways for entities to certify
 information while allowing users to keep their content private. Financial
 systems also require transaction auditing, and the entity in this chapter is an
-auditor. We design a system that restricts the capabilities of the auditor to
+auditor. Financial systems may require both the ability to investigate a
+particular transaction and the ability to identify the transactions associated
+with a particular user. These capabilities are related but distinct, and
+granting one need not grant the other. We take the auditor's existence as given
+and ask whether its capability can be scoped like any other permission. We design a system that restricts the capabilities of the auditor to
 be only as precise as auditing requirements need, so that the auditor can
 trace one user, for one epoch, and only after the user has granted it
 permission to do so.
@@ -83,7 +87,8 @@ computed from a bounded index space local to one epoch.
 
 This chapter introduces a tracing protocol, $\ID$, that needs neither
 encrypted user identifiers nor the monotonically increasing counters of prior
-tag-based schemes. Instead of an ordered counter, each
+tag-based schemes. It supports concurrent transaction creation, and the auditor
+does not need to maintain persistent per-user state. Instead of an ordered counter, each
 transaction has an index drawn from a bounded, epoch-local space $[0,\Max)$,
 and the only constraint is that an index is not reused within an epoch. Order is
 irrelevant, so a user may partition the space among concurrent workers and

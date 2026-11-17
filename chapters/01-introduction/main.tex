@@ -1,24 +1,8 @@
 \chapter{Introduction}\label{chap:introduction}
 
-The desire to conceal written information has been considered for at least the
-last four thousand years, from the obfuscated hieroglyphs found in the tomb of
-Khnumhotep II~\cite{Kahn96}. More recently, encryption schemes have let people
-communicate by exchanging messages that reveal nothing about their content to
-eavesdroppers. Parties with a shared key can send each other confidential
-messages, regardless of the content of those messages, and independently of the
-power of, language spoken by, or any other attributes of the communicating
-parties. Modern cryptography has enabled encrypted communication that even
-truly powerful entities cannot read.
-
-The communicating parties are not assumed to be as powerful as the entities
-trying to break the system -- encryption demands relatively little
-computational power of the users while keeping the adversary's computational
-task infeasible. This asymmetry of computational power between users and
-attacking entities is well noted, and is the foundation of modern
-cryptography~\cite{DifHel76}.
-
-However, protecting the content of a message says nothing about who is
-exchanging it, when, or how often. Once the contents of a communication are
+Encryption schemes let people communicate by exchanging messages that reveal
+nothing about their content to eavesdroppers, however powerful. But protecting the content of a message says
+nothing about who is exchanging it, when, or how often. Once the contents of a communication are
 protected, a resourceful adversary may instead try to learn the identities of
 the communicating parties, their relationships, or patterns in their behaviour.
 Protecting each of these brings the next piece of observable information into
@@ -40,6 +24,28 @@ understandably been active in designing systems that take power away from
 centralised entities. Anything that such an entity learns is considered a step
 away from the ideal world.
 
+\paragraph{Blockchains and cryptocurrencies.} The most prominent result of this
+effort is the blockchain. A distributed ledger is a record of transactions that
+is replicated across many participants, who agree on its contents through a
+consensus protocol, so that no single party controls it or has to be trusted to
+keep it correct. A blockchain is a distributed ledger in which transactions are
+grouped into blocks chained together by hashes. Cryptocurrencies use such a
+ledger to record the ownership and transfer of value, replacing the issuer and
+the bank with validators who follow the protocol for economic rather than
+institutional reasons~\cite{bitcoin,ethereum}. Anyone can read and verify the
+ledger, which makes the system available and open to all, but the same
+transparency is the main cost to privacy.
+
+The privacy that cryptocurrencies offer is of a particular kind. In Bitcoin and
+Ethereum, users appear on the ledger as keys rather than names, but every
+transaction, its amount and its links to other transactions are public, so
+users are pseudonymous rather than anonymous. Privacy-focused cryptocurrencies
+hide more. Monero hides the sender of a transaction among a set of other users
+with ring signatures, and Zcash uses zero-knowledge proofs to hide the sender,
+the recipient and the value~\cite{EPRINT:Noether15,SP:BCGGMT14}. In each case,
+users prove that their transaction is valid, and that they belong to a set of
+users or hold a valid token on the ledger, without revealing which.
+
 \paragraph{Centralisation, responsibility and trust.} In attempting to remove
 trust from centralised institutions, protocols may instead transfer
 computation, storage and operational responsibility to individual users. But
@@ -58,34 +64,12 @@ distribution of these responsibilities does not by itself determine the trust
 assumptions of the system. An institution may be relied upon to provide
 availability, maintain state or execute a prescribed computation without ever
 having access to users' private information. Anonymous credentials and
-multiparty computation are two examples.
+multiparty computation are two examples, introduced in
+\Cref{chap:agg-creds,chap:tsps}.
 
-In anonymous credential schemes, issuers issue credentials to users, attesting
-that users hold certain attribute values. Users present their credentials,
-proving they hold given attributes without revealing who they are or anything
-about their undisclosed attribute values~\cite{EC:Chaum85,EC:CamLys01}. Early
-anonymous credential schemes assumed a single issuer certifying all attributes,
-creating one powerful entity.  Later schemes decentralised issuance, but the
-issuers as a whole remain responsible for all attributes, so that all issuers
-can now learn all users' attribute values~\cite{NDSS:SABMD19}. The power to
-certify and the knowledge that comes with that have both been shared across
-issuers, which leads to a worse privacy outcome for users.
-
-Secure multiparty computation allows a function to be computed by multiple
-mutually distrusting parties, each with a private input. The function is
-computed on all inputs while revealing nothing but the
-output~\cite{FOCS:Yao86,STOC:GolMicWig87}. This seems to be an instance where
-decentralisation of the protocol leads to a straightforward privacy gain for
-users. It can be applied to anonymous credential issuance to sidestep the issue
-stated above. The new problem it introduces, however, is in practicality.
-Multiparty computation generally involves interaction from all participants,
-which becomes infeasible when, for example, a driving licence, a birth
-certificate and a passport are each issued by countries with no diplomatic
-relations with one another. These issuers have no incentive to participate in
-an expensive protocol to allow individuals to privately prove statements about
-themselves. And so practicality is also an aim in all of our constructions. By
-this, we mean minimising the interaction, coordination, communication and
-computational costs required by the protocols.
+Practicality is also an aim in all of our constructions. By this, we mean
+minimising the interaction, coordination, communication and computational costs
+required by the protocols.
 
 Designing institutions out of systems is often not possible. Issuers,
 validators and auditors exist because systems need them, and removing them from
@@ -124,6 +108,17 @@ for users, payments without a network connection, limits on holdings, and
 compliance with anti-money-laundering rules through regulated
 intermediaries~\cite{digitaleuro2023}.
 
+Most of these payment networks are built on distributed ledgers. Central banks
+and payment providers have largely settled on ledger-based designs for their
+payment infrastructure, because a ledger replicated across several institutions
+stays available when any one of them fails~\cite{brown2016corda,soderberg2019krona,cbdctracker}.
+They then add to the ledger what a financial system needs and a cryptocurrency
+lacks: registered users, endorsement by known institutions, auditing, and
+limits on holdings. Offline payments are different. Two devices with no network
+connection cannot consult a ledger, so the design for offline payments sits
+apart from the ledger-based one. But cash works with or without a connection, so
+replacing its features takes both components.
+
 \paragraph{Financial privacy.} There are strong arguments against governments
 being able to read the communications of their citizens, and companies the
 messages of their customers. A private communication system can aim to ensure
@@ -160,6 +155,24 @@ continue to function for a user with no network
 connection~\cite{aboulaiz2024offline}. We will assume throughout this thesis
 that these extra parties and constraints are necessary. Their involvement makes
 systems that control tokens of value more complex than private communication.
+
+\paragraph{Registration and privacy.} Registration and privacy appear to be in
+conflict: a bank must know who its customers are, but a payment should not
+reveal who made it. They can be reconciled if users register once and later
+prove, with each payment, that they are registered, without saying who they are.
+One way is a one-out-of-many proof, or a ring signature, over the keys of all
+registered users, in which the user proves that they know the secret key for one
+of the public keys in the set without revealing which. This hides the user among
+all the others, but the size or cost of the proof grows with the number of
+users, and the set of all keys must be published and kept up to date, which
+needs infrastructure. The alternative is for a registration authority to sign
+each user's key once, and for the user to prove in zero knowledge that they
+hold a valid signature on their key. This is a private membership proof, and it
+is what anonymous credentials already provide~\cite{EC:Chaum85,EC:CamLys01}, so
+we use them for registration rather than inventing a new concept. Doing so
+requires signatures on committed inputs, so that the authority can certify a key
+it never sees, with verification that is compatible with efficient
+zero-knowledge proofs.
 
 These requirements also apply to humanitarian aid, where cash transfers are a
 lifeline for people in crisis. Physical cash can be lost or stolen. Many aid
@@ -203,59 +216,36 @@ provide availability without being trusted with users' private information.
 Each of the protocols comes from considering the specific responsibilities of
 participants in each existing system.
 
-\paragraph{Contributions.} We first consider threshold certification. Each
-protocol in this thesis involves entities certifying information while allowing
-users to keep their content private, whether validators of a ledger endorsing
-commitments to tokens, a registration authority certifying the keys of users,
-or issuers certifying attributes of users. Structure-preserving signature
-schemes allow signers to sign commitments directly, with signatures that remain
-compatible with efficient zero-knowledge proofs. In ledgers proposed for
-central bank digital currencies, this signing is already decentralised, as
-several authorities each endorse a transaction before it is
-recorded~\cite{androulaki2020auditable}. We construct a framework for creating
-threshold structure-preserving signature schemes, in which the authorities sign
-together using multiparty computation. Since multiparty computation generally
-requires interaction between all participants, our generic construction splits
-signing into offline and online phases. All interaction between signers takes
-place in key generation and in the offline phase, before the message is known.
-Once the message is known, each authority signs locally, without communicating
-with the others, and the shares combine into a single signature that verifies
-as an ordinary one. We instantiate the construction with two signature schemes,
-and implement and evaluate both instantiations with two multiparty computation
-protocols.
+\paragraph{Contributions.} Each chapter of this thesis takes one role that a
+financial system needs, and asks how it can be performed without learning more
+than it must. The solutions are described in the introduction of the chapter
+that presents them.
 
-We then consider aggregate anonymous credentials. Existing credential models do
-not always reflect the way that authority is divided in practice. Users may
-receive attributes from several independent issuers and later need to
-demonstrate statements about subsets of them. We focus on decentralisation of
-issuance. We construct an efficient multi-issuer aggregate anonymous credential
-scheme in which independently issued credentials can be combined and presented
-through a single proof. Anonymous credential schemes already implicitly include
-a registration authority. We use this existing role to bind credentials issued
-to the same user, preventing credentials belonging to different users from
-being aggregated without requiring expensive proofs during presentation.
+\Cref{chap:tsps} addresses the endorsement of transactions on a ledger. In
+ledgers proposed for central bank digital currencies, several authorities each
+endorse a transaction before it is recorded, while users' tokens are hidden in
+commitments. The problem is how the authorities can certify a commitment
+jointly, so that no single one can do so alone, without interaction slowing
+down signing once a transaction arrives, and in a form that users can prove
+statements about in zero knowledge.
 
-We next consider accountability in transaction systems that protect user
-privacy. Financial systems may require both the ability to investigate a
-particular transaction and the ability to identify the transactions associated
-with a particular user. These capabilities are related but distinct, and
-granting one need not grant the other. We take the auditor's existence as given
-and ask whether its capability can be scoped like any other permission, to one
-user and one period, and only after an explicit grant. We develop a transaction
-identification mechanism that supports concurrent transaction creation without
-requiring the auditor to maintain persistent per-user state. Auditing is
-restricted to a specified epoch, a fixed period of time, limiting both the
-scope and duration of the information disclosed to an auditor.
+\Cref{chap:agg-creds} addresses the certification of users' attributes. In
+practice, different institutions each certify a few attributes and do not
+coordinate with one another. The problem is how a user can present attributes
+from independent issuers together, without any issuer learning the attributes
+of others, and with credentials that cannot be pooled between users.
 
-Finally, we study privacy in offline payments. Offline operation improves
-availability and accessibility, but changes how double spending must be
-handled.  We develop an offline payment scheme with two defences against double
-spending.  The first is prevention: we divide computation between a mobile
-device and a secure element, a tamper-resistant chip such as those in bank
-cards, and the secure element does not allow the same value to be spent twice.
-The second is detection: if a secure element is broken and double spending
-occurs, information identifying the double spender can be recovered.  Payments
-made by honest users remain unlinkable.
+\Cref{chap:txid} addresses auditing. Regulators need to investigate
+transactions, but an auditor with a general ability to trace users defeats the
+privacy of everyone else. The problem is how to limit an auditor to one user and
+one period of time, only after the user has granted permission, without forcing
+users to create their transactions one after another.
+
+\Cref{chap:offline-payments} addresses payments without a network connection.
+A payee who is offline cannot check whether a token has already been spent. The
+problem is how to prevent double spending, and to identify the double spender
+when prevention fails, while the payments of honest users remain private and
+the computation required stays within what a secure element can do.
 
 \paragraph{Layout.} The remainder of this thesis is organised as follows.
 Preliminary information is found in \Cref{chap:preliminaries}. \Cref{chap:tsps}
@@ -265,16 +255,11 @@ presents our threshold structure-preserving signature schemes.
 \Cref{chap:offline-payments} presents the offline payment protocol.  The
 chapters start by considering certification, then move to explore transaction
 auditing, and then finally we present a system that integrates the previously
-explored concepts and adds the ability to make offline payments.
-\Cref{chap:tsps,chap:agg-creds} both consider ways for entities to certify
-information while allowing users to keep their content private, first for
-commitments to transactions on a ledger, and then for attributes of users.
-\Cref{chap:txid} explores restrictions of transaction auditing, and
-\Cref{chap:offline-payments} introduces a design for payments without a network
-connection.  Each of \Crefrange{chap:tsps}{chap:offline-payments} follows the
-same structure after its introduction: definitions, construction,
-instantiation, security, evaluation, and a summary.  \Cref{chap:conclusion}
-summarises the contributions and discusses open questions.
+explored concepts and adds the ability to make offline payments. Each of
+\Crefrange{chap:tsps}{chap:offline-payments} follows the same structure after
+its introduction: definitions, construction, instantiation, security,
+evaluation, and a summary.  \Cref{chap:conclusion} summarises the contributions
+and discusses open questions.
 \Cref{chap:agg-creds} uses the $\AGHO$ SPS scheme from \Cref{chap:tsps}, and
 \Cref{chap:txid,chap:offline-payments} share the registration authority and
 BBS+ credentials. The threshold techniques of \Cref{chap:tsps} could be used to
