@@ -20,15 +20,16 @@ sub-issuers~\cite{NDSS:SABMD19,SP:DKLsT23,CCS:KRBKKL24}. The issuer is then
 decentralised, but remains conceptually responsible for all attributes, so that
 all issuers can learn all users' attribute values. The power to certify and the
 knowledge that comes with it are both shared across issuers, which leads to a
-worse privacy outcome for users. Distribution reduces trust in any one party, but does not reflect real-world scenarios,
-where distinct entities independently certify one or a small subset of
-attributes.
+worse privacy outcome for users. Distribution reduces trust in any one party,
+but does not reflect real-world scenarios, where distinct entities
+independently certify one or a small subset of attributes.
 
 The eIDAS regulation requires all member states of the European Union to offer
 a European Digital Identity Wallet with selective disclosure, unlinkability and
-pseudonymous authentication by the end of 2026~\cite{eIDAS2024}. The attributes these wallets are expected
-to hold come from issuers such as passport agencies, licensing bodies and
-transport authorities, each certifying only its own attributes.
+pseudonymous authentication by the end of 2026~\cite{eIDAS2024}. The attributes
+these wallets are expected to hold come from issuers such as passport agencies,
+licensing bodies and transport authorities, each certifying only its own
+attributes.
 
 Credential systems with distributed issuance still require the issuers to
 coordinate. With many issuers worldwide, each relevant to only some users, that
@@ -36,42 +37,41 @@ coordination is impractical, and between issuers with no relationship to one
 another it may be impossible. A driving licence, a birth certificate and a
 passport may each be issued by countries with no diplomatic relations with one
 another, and these issuers have no incentive to take part in an expensive
-protocol so that individuals can privately prove statements about themselves. Threshold issuance without an interactive setup
-avoids this coordination for issuers certifying the same
-credential~\cite{EPRINT:GGPR25}. Our scheme avoids it for issuers certifying
-different attributes.
+protocol so that individuals can privately prove statements about themselves.
+Threshold issuance without an interactive setup avoids this coordination for
+issuers certifying the same credential~\cite{EPRINT:GGPR25}. Our scheme avoids
+it for issuers certifying different attributes.
 
 \paragraph{Contributions.} We give an aggregate anonymous credential scheme:
 credentials from independent, uncoordinated issuers combine into one compact
-credential, provable in one proof. The motivation for aggregation is efficiency: presenting
-and verifying one aggregate credential is more efficient than presenting and verifying
-each credential alone. Users aggregate locally, without interaction
-between issuers. The scheme supports selective disclosure
-of attribute values.
+credential, provable in one proof. Presenting and verifying one aggregate
+credential is more efficient than presenting and verifying each credential
+alone, which is the motivation for aggregation.  Users aggregate locally with
+no interaction required between issuers. The scheme supports selective
+disclosure of attribute values.
 
 In our scheme, users' secret keys are linked to their public keys, public keys
 to a tag, and credentials to that tag. A different party can establish each of
-these links.
-The registration authority assigns a tag to a public key only after the user
-proves knowledge of the secret key, and issuers sign attributes under a tag
-only after verifying the registration signature, so their signatures do not
-involve the key. The registration authority sees no attribute values and is not
-involved after registration.
+these links.  The registration authority assigns a tag to a public key only
+after the user proves knowledge of the secret key, and issuers sign attributes
+under a tag only after verifying the registration signature, so their
+signatures do not involve the key. The registration authority sees no attribute
+values and is not involved after registration.
 
 To present attributes, users aggregate the relevant credentials and prove in
 zero knowledge that all three links hold: they know their secret key, their
 public key is certified with a tag, and they hold a valid aggregate credential
 under that tag for the disclosed values. The verifier learns neither the tag
-nor the public key. As credentials are bound to a tag, different users cannot pool
-their credentials, and users can aggregate credentials from issuers that may
-never have communicated, without contacting any issuer again. As the
+nor the public key. As credentials are bound to a tag, different users cannot
+pool their credentials, and users can aggregate credentials from issuers that
+may never have communicated, without contacting any issuer again. As the
 registration authority gives each user one tag, issuers need not keep a list of
 all parties they have signed for, so our issuers are stateless.
 
-The registration authority does not add an assumption to the scheme. Existing anonymous credential schemes assume that users' keys are
-certified so that credentials cannot be issued to arbitrary keys. Key
-certification is usually left implicit or enforced by all issuers. We make this
-role a separate party.
+The registration authority does not add an assumption to the scheme. Existing
+anonymous credential schemes assume that users' keys are certified so that
+credentials cannot be issued to arbitrary keys. Key certification is usually
+left implicit or enforced by all issuers. We make this role a separate party.
 
 \subsection*{Related work}
 
@@ -142,15 +142,16 @@ stateless, dynamic setting as an open question.
 \paragraph{Other multi-authority credentials.} Other multi-authority
 credentials are in different settings. The threshold issuance scheme above
 gives a constant-size presentation, but for one credential that the issuers
-certify jointly~\cite{EPRINT:GGPR25}. Independent authorities can also each sign a user's global
-identity, with one proof per credential~\cite{anada2019decentralized}.
-Credentials can be derived from existing identity documents with zk-SNARKs,
-without new issuer infrastructure, but with one general-purpose proof per
-credential~\cite{SP:RWGM23}. Issuer hiding is an orthogonal
-problem~\cite{CANS:BEKRS21,PoPETS:SanTra24}. We leave it for future work.
+certify jointly~\cite{EPRINT:GGPR25}. Independent authorities can also each
+sign a user's global identity, with one proof per
+credential~\cite{anada2019decentralized}.  Credentials can be derived from
+existing identity documents with zk-SNARKs, without new issuer infrastructure,
+but with one general-purpose proof per credential~\cite{SP:RWGM23}. Issuer
+hiding is an orthogonal problem~\cite{CANS:BEKRS21,PoPETS:SanTra24}. We leave
+it for future work.
 
-\paragraph{Comparison.} In ART-Sign, users' tags are randomisable pseudonyms, and
-every presentation proves their validity again. In our scheme the tag is a
+\paragraph{Comparison.} In ART-Sign, users' tags are randomisable pseudonyms,
+and every presentation proves their validity again. In our scheme the tag is a
 separate value that the registration authority signs together with the key, so
 issuers keep no record.
 
@@ -161,39 +162,42 @@ schemes with signatures as short as those of $\AGHO$ cannot be proven secure
 from non-interactive assumptions by a large class of
 reductions~\cite{AC:AbeGroOhk11}. HP22 and our scheme both use the GGM for one
 component only, and the table lists it as the strongest assumption. In ours it
-is needed only for the $\AGHO$ signatures of the registration authority, and the
-rest of the scheme is secure under BCDH and DDH in the random oracle model
+is needed only for the $\AGHO$ signatures of the registration authority, and
+the rest of the scheme is secure under BCDH and DDH in the random oracle model
 (\Cref{thm:agg-creds-thm-2}).
 
 \begin{table}[htbp] \centering \small \setlength{\tabcolsep}{3pt}
-  \begin{tabular}{l c c c c c c} \toprule
-    Scheme & Assumptions &
-    \begin{tabular}[b]{@{}c@{}}Multi-\\issuer\end{tabular} &
-    $|$cred$|$ & $|$pres$|$ & Prover &
-    \begin{tabular}[b]{@{}c@{}}Issuer\\state\end{tabular} \\ \midrule
-    CL02~\cite{SCN:CamLys02} & sRSA & No & $O(1)$ & $O(n)$ & $O(n)$ & -- \\
-    CL04~\cite{C:CamLys04} & LRSW & No & $O(n)$ & $O(n)$ & $O(n)$ & -- \\
-    BBS+~\cite{EC:BonBoy04a,SCN:AuSusMu06} & $q$-SDH & No & $O(1)$ & $O(n)$ &
-    $O(n)$ & -- \\
+  \begin{tabular}{l c c c c c c} \toprule Scheme & Assumptions &
+    \begin{tabular}[b]{@{}c@{}}Multi-\\issuer\end{tabular} & $|$cred$|$ &
+    $|$pres$|$ & Prover & \begin{tabular}[b]{@{}c@{}}Issuer\\state\end{tabular}
+    \\ \midrule CL02~\cite{SCN:CamLys02} & sRSA & No & $O(1)$ & $O(n)$ & $O(n)$
+                                         & -- \\ CL04~\cite{C:CamLys04} & LRSW
+                                         & No & $O(n)$ & $O(n)$ & $O(n)$ & --
+    \\ BBS+~\cite{EC:BonBoy04a,SCN:AuSusMu06} & $q$-SDH & No & $O(1)$ & $O(n)$
+                                              & $O(n)$ & -- \\
     CL11~\cite{canard2011anonymous} & $q$-ADHSDH, DDH, ROM & Yes & $O(1)$ &
-    $O(1)$ & $O(k)$ & None \\
-    CDHK15~\cite{AC:CDHK15} & Several$^*$ & Yes & $O(K)$ & $O(K)$ & $O(K)$ & None \\
-    HP22~\cite{SCN:HebPoi22} & GGM & Yes & $O(1)$ & $O(1)$ & $O(k)$ & Per tag \\
-    MBGLS23~\cite{CCS:MBGLS23} & Interactive or GGM & Yes & $O(1)$ & $O(K)$ &
-    $O(k)$ & Per tag \\
-    Our scheme & GGM, ROM & Yes & $O(1)$ & $O(k)$ & $O(k)$ & None \\
-\bottomrule \end{tabular} \caption[Comparison with anonymous credential
-schemes]{Comparison with single- and multi-issuer anonymous credential
-  schemes, for $n$ attributes supported, $k$ disclosed and $K$ issuers in a
-  presentation. Sizes leave out the disclosed values, and issuer state is what an issuer
-  remembers about each user. $^*$SXDH, \mbox{$J$-RootDH}, \mbox{$n$-BSDH}, \mbox{$q$-SDH}, XDLIN,
-  \mbox{co-CDH} and DBP.} \label{tab:agg-creds-related} \end{table}
+    $O(1)$ & $O(k)$ & None \\ CDHK15~\cite{AC:CDHK15} & Several$^*$ & Yes &
+    $O(K)$ & $O(K)$ & $O(K)$ & None \\ HP22~\cite{SCN:HebPoi22} & GGM & Yes &
+    $O(1)$ & $O(1)$ & $O(k)$ & Per tag \\ MBGLS23~\cite{CCS:MBGLS23} &
+    Interactive or GGM & Yes & $O(1)$ & $O(K)$ & $O(k)$ & Per tag \\ Our scheme
+                       & GGM, ROM & Yes & $O(1)$ & $O(k)$ & $O(k)$ & None \\
+                     \bottomrule \end{tabular} \caption[Comparison with
+                     anonymous credential schemes]{Comparison with single- and
+                       multi-issuer anonymous credential schemes, for $n$
+                       attributes supported, $k$ disclosed and $K$ issuers in a
+                       presentation. Sizes leave out the disclosed values, and
+                       issuer state is what an issuer remembers about each
+                       user. $^*$SXDH, \mbox{$J$-RootDH}, \mbox{$n$-BSDH},
+                       \mbox{$q$-SDH}, XDLIN, \mbox{co-CDH} and DBP.}
+                     \label{tab:agg-creds-related} \end{table}
 
-\paragraph{Layout.} The rest of the chapter is organised as follows.
-\Cref{sec:agg-creds-definitions} states the problem and formalises it as an
-ideal functionality.  \Cref{sec:agg-creds-construction} gives an abstract
-construction from generic primitives.  \Cref{sec:agg-creds-instantiation} gives
-a concrete instantiation, including our tag-based aggregate signature scheme,
-which \Cref{sec:agg-creds-security} proves secure.
-\Cref{sec:agg-creds-evaluation} evaluates performance, and
-\Cref{sec:agg-creds-summary} summarises the chapter.
+                     \paragraph{Layout.} The rest of the chapter is organised
+                     as follows.  \Cref{sec:agg-creds-definitions} states the
+                     problem and formalises it as an ideal functionality.
+                     \Cref{sec:agg-creds-construction} gives an abstract
+                     construction from generic primitives.
+                     \Cref{sec:agg-creds-instantiation} gives a concrete
+                     instantiation, including our tag-based aggregate signature
+                     scheme, which \Cref{sec:agg-creds-security} proves secure.
+                     \Cref{sec:agg-creds-evaluation} evaluates performance, and
+                     \Cref{sec:agg-creds-summary} summarises the chapter.
