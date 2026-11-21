@@ -1,18 +1,21 @@
 \chapter{Introduction}\label{chap:introduction}
 
-Encryption schemes let people communicate by exchanging messages that reveal
-nothing about their content to eavesdroppers, however powerful. But protecting the content of a message says
-nothing about who is exchanging it, when, or how often. Once the contents of a communication are
+The desire to conceal written information has been considered for at least the
+last four thousand years, from the obfuscated hieroglyphs found in the tomb of
+Khnumhotep II. More recently, encryption schemes allow people to communicate by
+exchanging messages that reveal nothing about their content to eavesdroppers.
+Modern cryptography has enabled encrypted communication that even truly
+powerful entities cannot read, while demanding relatively little computational
+power of the users~\cite{DifHel76}.
+
+However, encrypting the content of a message does not hide who is exchanging
+it, when, or how often. Once the contents of a communication are
 protected, a resourceful adversary may instead try to learn the identities of
 the communicating parties, their relationships, or patterns in their behaviour.
 Protecting each of these brings the next piece of observable information into
 focus.
 
-Cryptography today covers much more than private communication. Over the last
-fifty years, privacy-enhancing technologies have been developed to protect each
-new piece of information identified as
-valuable~\cite{Chaum81,USENIX:DinMatSyv04}. As the adoption of digital systems
-has grown, even of those with privacy protections, so has the number of
+As the adoption of digital systems has grown, so has the number of
 entities capable of observing some part of a system. Service providers,
 issuers, validators, network operators and public authorities may all learn
 sensitive information while performing otherwise legitimate functions.  This
@@ -24,8 +27,7 @@ understandably been active in designing systems that take power away from
 centralised entities. Anything that such an entity learns is considered a step
 away from the ideal world.
 
-\paragraph{Blockchains and cryptocurrencies.} The most prominent result of this
-effort is the blockchain. A distributed ledger is a record of transactions that
+\paragraph{Blockchains and cryptocurrencies.} A distributed ledger is a record of transactions that
 is replicated across many participants, who agree on its contents through a
 consensus protocol, so that no single party controls it or has to be trusted to
 keep it correct. A blockchain is a distributed ledger in which transactions are
@@ -36,7 +38,7 @@ institutional reasons~\cite{bitcoin,ethereum}. Anyone can read and verify the
 ledger, which makes the system available and open to all, but the same
 transparency is the main cost to privacy.
 
-The privacy that cryptocurrencies offer is of a particular kind. In Bitcoin and
+In Bitcoin and
 Ethereum, users appear on the ledger as keys rather than names, but every
 transaction, its amount and its links to other transactions are public, so
 users are pseudonymous rather than anonymous. Privacy-focused cryptocurrencies
@@ -63,11 +65,9 @@ verification need not be those who set the verification conditions. The
 distribution of these responsibilities does not by itself determine the trust
 assumptions of the system. An institution may be relied upon to provide
 availability, maintain state or execute a prescribed computation without ever
-having access to users' private information. Anonymous credentials and
-multiparty computation are two examples, introduced in
-\Cref{chap:agg-creds,chap:tsps}.
+having access to users' private information.
 
-Practicality is also an aim in all of our constructions. By this, we mean
+Practicality is an aim in all of our constructions. By this, we mean
 minimising the interaction, coordination, communication and computational costs
 required by the protocols.
 
@@ -108,11 +108,12 @@ for users, payments without a network connection, limits on holdings, and
 compliance with anti-money-laundering rules through regulated
 intermediaries~\cite{digitaleuro2023}.
 
-Most of these payment networks are built on distributed ledgers. Central banks
-and payment providers have largely settled on ledger-based designs for their
-payment infrastructure, because a ledger replicated across several institutions
-stays available when any one of them fails~\cite{brown2016corda,soderberg2019krona,cbdctracker}.
-They then add to the ledger what a financial system needs and a cryptocurrency
+Most of these payment networks are built on distributed ledgers. Proofs of concept
+for central bank digital currencies tend to be based on distributed ledger
+technology rather than conventional infrastructure~\cite{auer2020rise}, as in
+the e-krona pilot~\cite{soderberg2019krona}. A ledger replicated
+across several institutions stays available when any one of them fails.
+Institutions then add to the ledger what a financial system needs and a cryptocurrency
 lacks: registered users, endorsement by known institutions, auditing, and
 limits on holdings. Offline payments are different. Two devices with no network
 connection cannot consult a ledger, so the design for offline payments sits
@@ -156,10 +157,11 @@ connection~\cite{aboulaiz2024offline}. We will assume throughout this thesis
 that these extra parties and constraints are necessary. Their involvement makes
 systems that control tokens of value more complex than private communication.
 
-\paragraph{Registration and privacy.} Registration and privacy appear to be in
-conflict: a bank must know who its customers are, but a payment should not
-reveal who made it. They can be reconciled if users register once and later
-prove, with each payment, that they are registered, without saying who they are.
+\paragraph{Registration and privacy.} Users who participate in the
+financial system must be registered, but this registration must not affect the
+privacy of their transactions. This can be achieved if users register once and
+later prove, with each payment, that they are registered, without saying who
+they are.
 One way is a one-out-of-many proof, or a ring signature, over the keys of all
 registered users, in which the user proves that they know the secret key for one
 of the public keys in the set without revealing which. This hides the user among
@@ -169,13 +171,19 @@ needs infrastructure. The alternative is for a registration authority to sign
 each user's key once, and for the user to prove in zero knowledge that they
 hold a valid signature on their key. This is a private membership proof, and it
 is what anonymous credentials already provide~\cite{EC:Chaum85,EC:CamLys01}, so
-we use them for registration rather than inventing a new concept. Doing so
-requires signatures on committed inputs, so that the authority can certify a key
-it never sees, with verification that is compatible with efficient
-zero-knowledge proofs.
+we use them for registration rather than inventing a new concept. One
+construction of such a proof would use randomisable signatures that are then
+proven valid in zero knowledge, such as through use of the Pointcheval-Sanders
+signature scheme~\cite{RSA:PoiSan16}. This would be interactive, however, and a
+proof that requires interaction with the verifier is not publicly verifiable,
+and interaction can leak certain information about the users' use of the
+system. Signatures on committed values avoid this: the registration authority
+signs a commitment to the user's key, which enables the membership proof to be
+non-interactive. Such signatures also let the authority certify a key it never
+sees, and their verification is compatible with efficient zero-knowledge
+proofs.
 
-These requirements also apply to humanitarian aid, where cash transfers are a
-lifeline for people in crisis. Physical cash can be lost or stolen. Many aid
+These requirements also apply to humanitarian aid. Physical cash can be lost or stolen. Many aid
 recipients have no bank account, and the systems used to reach them are slow
 and expensive~\cite{unicef2026aidlink}. When aid is paid through banks,
 anti-money-laundering rules require the banks to check account holders against
@@ -231,13 +239,15 @@ statements about in zero knowledge.
 
 \Cref{chap:agg-creds} addresses the certification of users' attributes. In
 practice, different institutions each certify a few attributes and do not
-coordinate with one another. The problem is how a user can present attributes
-from independent issuers together, without any issuer learning the attributes
+coordinate with one another. Aggregating their credentials is motivated by
+efficiency: presenting and verifying them together is more efficient than
+presenting each credential alone. The problem is how a user can present
+attributes from independent issuers together, without any issuer learning the attributes
 of others, and with credentials that cannot be pooled between users.
 
 \Cref{chap:txid} addresses auditing. Regulators need to investigate
-transactions, but an auditor with a general ability to trace users defeats the
-privacy of everyone else. The problem is how to limit an auditor to one user and
+transactions, but an auditor with a general ability to trace users learns the
+transactions of every user. The problem is how to limit an auditor to one user and
 one period of time, only after the user has granted permission, without forcing
 users to create their transactions one after another.
 

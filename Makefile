@@ -1,4 +1,4 @@
-TEXFLAGS = -bibtex -pdf -interaction=nonstopmode -use-make
+TEXFLAGS = -bibtex -pdf -interaction=nonstopmode
 BUILD_DIR = build
 
 .PHONY: all clean $(BUILD_DIR)/thesis.pdf
@@ -6,10 +6,11 @@ BUILD_DIR = build
 all: $(BUILD_DIR)/thesis.pdf
 
 $(BUILD_DIR)/thesis.pdf: thesis.tex $(BUILD_DIR)
-	latexmk $(TEXFLAGS) -jobname=$(@:.pdf=) -f $<
+	latexmk $(TEXFLAGS) -jobname=$(@:.pdf=) $<
 
 $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
 
 clean:
-	latexmk $(TEXFLAGS) -jobname=$(BUILD_DIR)/ -C thesis.tex
+	rm -rf $(BUILD_DIR)
+
